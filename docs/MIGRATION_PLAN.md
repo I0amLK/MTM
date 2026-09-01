@@ -23,6 +23,12 @@ Migrate bounded capture, process groups, command IDs, TTY, timeout/kill provenan
 toolchain exposure, Bubblewrap helper, and Quick Tunnel child ownership. Preserve the
 separate isolation-process bridge. Require target-machine evidence.
 
+Implemented and accepted on the current Linux target with exact/semantic
+Python–Rust differential checks, real Bubblewrap attestation, generic explicit
+toolchain execution, read-only mounts, SageMath, Magma, isolated TTY, timeout,
+explicit process-group kill and owned Quick Tunnel cleanup. Other targets remain
+future release evidence rather than inferred parity.
+
 ## MTM-004 — persistence and capability authority
 
 Migrate SQLite schema/migrations, run/project/claim state, optimistic promotion,

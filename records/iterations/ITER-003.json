@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0.0",
+  "iteration_id": "ITER-003",
+  "milestone_id": "MTM-003",
+  "title": "Native process lifecycle and isolation plane",
+  "started_at": "2026-09-01T01:44:27-07:00",
+  "completed_at": "2026-09-01T02:17:11-07:00",
+  "source_baseline": {
+    "project": "Re-CTM",
+    "version": "0.3.0",
+    "commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
+    "authority": "python",
+    "reference_file_count": 11
+  },
+  "previous_iteration_review": {
+    "commit": "207b49f4315b1d0f8f248db5f7eb47b2c95566cc",
+    "subject": "feat(core): establish typed pure policy authority [MTM-002]",
+    "working_tree_before_start": "clean before the generated local-validation timestamp update",
+    "commands": [
+      "python3 scripts/run_checks.py",
+      "python3 scripts/run_mtm002_conformance.py",
+      "git status --short",
+      "git log -2"
+    ],
+    "exit_code": 0,
+    "result": "The committed MTM-002 gate, 135-case differential corpus, frozen hash, source-reference cleanliness, resource ceiling and commit record all passed before MTM-003 entered in_progress."
+  },
+  "authority": {
+    "component_scope": "MTM-reboot Native process, helper, isolation, toolchain, and owned tunnel component",
+    "before": "python",
+    "after": "rust",
+    "source_product_production_authority": "python",
+    "rust_production_request_components": 0,
+    "interpretation": "Rust is the accepted implementation for the new project's Native component. Re-CTM's deployed Python runtime remains the operator-facing production and rollback authority until later composition and cutover milestones."
+  },
+  "implemented": [
+    "Bounded head-plus-rolling-tail capture with exact byte accounting",
+    "CommandManager with command ids, active/retained limits, paging, cursor omission accounting, TTY input, timeout watchdog, process-group TERM/KILL, parent shutdown and termination provenance",
+    "Generic system/PATH/symlink/explicit-root toolchain exposure policy with protected-domain rejection, ancestor collapse, sandbox PATH construction and content-minimized fingerprints",
+    "Separate re-ctm-native-helper-v1 Rust helper executable with bounded request/response, environment clearing, Bubblewrap namespace construction, attestation and synchronous execution",
+    "Real sandbox probe for workspace writability, private-path invisibility, parent-environment clearing, NoNewPrivs and read-only toolchain roots",
+    "Owned Quick Tunnel child lifecycle with credential stripping, strict TryCloudflare parsing, process-group cleanup and idempotent close",
+    "Persistent Rust shadow driver for exact and semantic Native differential testing"
+  ],
+  "conformance": {
+    "source_reference_files_clean": true,
+    "exact_case_count": 4,
+    "process_case_count": 5,
+    "differential_mismatches_final": 0,
+    "reference_sha256": "5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69",
+    "shadow_side_effect_free": true,
+    "python_reference": {
+      "elapsed_ms": 420.956,
+      "max_rss_kib": 22680,
+      "request_count": 14
+    },
+    "rust_shadow": {
+      "elapsed_ms": 613.12,
+      "max_rss_kib": 7720,
+      "request_count": 14
+    },
+    "interpretation": "A5 absolute and relative resource ceilings passed. Rust used substantially less resident memory but was slower in this small debug-build cold-process scenario, so no A6 speed claim is made."
+  },
+  "target_validation": {
+    "report": "mtm003-target-validation.json",
+    "implementation_sha256": "77c52b9fd6de366d80f045b7adb091ef0e4095147dee0c515173fe1ab1766a13",
+    "environment": {
+      "platform": "Linux",
+      "release": "7.1.2-070102-generic",
+      "machine": "x86_64"
+    },
+    "required_checks": 14,
+    "passed": true,
+    "covered": [
+      "Real Bubblewrap 0.9.0 attestation",
+      "Safe workspace read and network namespace",
+      "Private-vault canary denial and parent-secret clearing",
+      "Generic explicit non-product-named toolchain execution",
+      "Read-only toolchain mutation denial",
+      "Host PATH/symlink discovery for target CAS roots",
+      "SageMath returned 5",
+      "Magma returned 5",
+      "Helper timeout provenance",
+      "Python/Rust helper protocol parity for attest, execute and timeout",
+      "Isolated TTY round trip",
+      "Isolated process-group TERM",
+      "Real Quick Tunnel creation and owned-child cleanup"
+    ]
+  },
+  "failures_retained": [
+    {
+      "stage": "first Rust compile/lint gate",
+      "result": "failed",
+      "cause": "The first draft had one unused import, test-only expect_err calls, a Bubblewrap builder with too many parameters, a const method incompatible with the declared MSRV, and a manually implemented Default.",
+      "resolution": "Removed the unused import and panic-style tests, introduced BubblewrapCommandSpec, made the offset method non-const, and derived Default."
+    },
+    {
+      "stage": "first full Native unit-test run",
+      "result": "hung and was terminated",
+      "cause": "read_output held the selected stream mutex and attempted to lock the same stream again while constructing dropped-byte fields.",
+      "resolution": "Copied the selected stream metadata, dropped the guard, then acquired only the other stream lock; lifecycle and TTY tests subsequently completed."
+    },
+    {
+      "stage": "first MTM-003 golden replay",
+      "result": "failed despite zero behavioral mismatches",
+      "cause": "The reference hash included the random temporary fixture directory, so identical behavior produced a different hash on each run.",
+      "resolution": "Normalized fixture paths to <FIXTURE_ROOT> before hashing and reproduced the same hash in consecutive runs."
+    },
+    {
+      "stage": "first real Quick Tunnel close audit",
+      "result": "functional cleanup passed but event audit found duplicate terminal events",
+      "cause": "Explicit close emitted closed, then Drop called close again and emitted a second closed event.",
+      "resolution": "Made close idempotent, added a Rust regression test and required exactly one closed event in target acceptance."
+    },
+    {
+      "stage": "first integrated MTM-003 full gate",
+      "result": "failed",
+      "cause": "The governance test still expected the three-crate MTM-002 workspace and did not include mtm-native.",
+      "resolution": "Updated the authoritative member expectation and added a freshness check for the hash-bound target evidence."
+    },
+    {
+      "stage": "completed-state full gate",
+      "result": "failed",
+      "cause": "The target-evidence validator worked as a standalone script but used a same-directory import that failed when the governance test imported it as scripts.validate_mtm003_target_evidence.",
+      "resolution": "Added an explicit package-first import with a standalone-script fallback; the final completed-state gate passed."
+    },
+    {
+      "stage": "source policy audit",
+      "result": "corrected before final acceptance",
+      "cause": "The first Rust unsafe-root list added /lost+found, which was not part of the frozen source policy; Bubblewrap hostname and HOME labels also used MTM-specific strings rather than the source wire values.",
+      "resolution": "Removed the extra denial and restored the exact re-ctm-native hostname and /home/re-ctm sandbox HOME values."
+    }
+  ],
+  "acceptance": {
+    "A0": "passed: Rust format, Clippy -D warnings, workspace tests, governance tests, graph validators, conformance and Git checks",
+    "A1": "passed: exact toolchain/Bubblewrap construction, helper protocol parity and immutable Native reference SHA-256",
+    "A2": "passed: semantic command lifecycle parity for sync output, poll/read/kill, TTY, timeout and 600 KB retention with zero mismatches and no Git-visible shadow side effects",
+    "A3": "passed: bounded request/output, protected-root rejection, private-path denial, credential stripping, read-only roots, process ownership, timeout and kill negative paths",
+    "A4": "passed on the current Linux target: 14 hash-bound real boundary checks including Bubblewrap, SageMath, Magma and Quick Tunnel",
+    "A5": "passed: bounded elapsed time, RSS, active/retained process state and owned-child cleanup; no material unexplained regression",
+    "A6": "not claimed"
+  },
+  "dependencies": {
+    "direct": [
+      "base64",
+      "nix",
+      "serde",
+      "serde_json",
+      "sha2",
+      "shell-words",
+      "tempfile (tests only)"
+    ],
+    "review": "nix is limited to Unix process groups and signals; no unsafe code is allowed in project crates. The external Bubblewrap and script(1) process boundaries are explicit, tested, and retained rather than hidden behind FFI."
+  },
+  "rollback": "Keep Re-CTM's Python CommandManager, toolchain policy, Bubblewrap helper and QuickTunnel as the deployed authority. Reverting MTM-003 deletes or bypasses mtm-native and its shadow/target harness; no SQLite, OAuth, workflow or artifact migration is involved.",
+  "manual_pending": [
+    "Equivalent Native isolation and proprietary toolchain-layout acceptance on other target operating systems or machines",
+    "MTM-004 copied-database migration, rollback and capability authority",
+    "MTM-005 real OAuth/MCP/browser gateway",
+    "MTM-006 workflow, verifier, repair and finalizer",
+    "MTM-007 remaining adapters, LaTeX, TUI, tunnel presentation and packaging",
+    "MTM-008 full cutover, rollback drill, soak, A6 and Python retirement"
+  ],
+  "decision": "accepted"
+}

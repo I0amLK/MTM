@@ -13,10 +13,10 @@ The governing order is:
 
 - Source baseline: Re-CTM 0.3.0.
 - Current production authority: Re-CTM's Python implementation.
-- MTM-reboot Rust authority: typed side-effect-free contracts and pure policy only;
-  no production request, persistence, process, network, workflow, or finalizer path has moved.
-- Completed milestones: `MTM-001`, `MTM-002`.
-- Next approved milestone: `MTM-003` Native process lifecycle and isolation.
+- MTM-reboot Rust authority: typed pure contracts/policies and the independent Native
+  process/isolation component. No deployed Re-CTM request path has moved.
+- Completed milestones: `MTM-001`, `MTM-002`, and `MTM-003`.
+- Next approved milestone: `MTM-004` persistence, project state, and capability authority.
 
 ## Eight milestones
 
@@ -35,15 +35,19 @@ The authoritative milestone graph is [`migration-graph.json`](migration-graph.js
 
 ```bash
 python3 scripts/run_checks.py
+python3 scripts/run_mtm003_conformance.py
+python3 scripts/validate_mtm003_target_evidence.py
 cargo run -q -p mtm-cli -- contract
 cargo run -q -p mtm-cli -- status
 python3 scripts/run_mtm002_conformance.py
 ```
 
-`MTM-002` compares 135 valid, invalid, boundary, and adversarial cases against the
-frozen Re-CTM Python source. Rust is authoritative only for the new project's pure
-core; the old runtime remains the production and rollback implementation until later
-milestones are independently accepted.
+`MTM-002` compares 135 pure valid, invalid, boundary, and adversarial cases against
+the frozen Re-CTM Python source. `MTM-003` adds exact/semantic Native differential
+checks plus hash-bound real target evidence for Bubblewrap, TTY, SageMath, Magma,
+read-only toolchains, private-root denial, timeout/kill provenance, and Quick Tunnel
+ownership. The old runtime remains the deployed production and rollback
+implementation until later milestones are independently accepted.
 
 The project does not claim parity, safety, or performance merely because a Rust
 binary builds. See [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) and

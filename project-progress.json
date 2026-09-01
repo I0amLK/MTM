@@ -2,26 +2,31 @@
   "schema_version": "1.0.0",
   "project": "MTM-reboot",
   "version": "0.1.0-alpha.1",
-  "status": "MTM-002-completed-MTM-003-approved",
-  "updated_at": "2026-09-01T01:31:08-07:00",
+  "status": "MTM-003-completed-MTM-004-approved",
+  "updated_at": "2026-09-01T02:17:11-07:00",
   "source_baseline": "source-baseline.json",
   "current_production_authority": "python",
   "rust_production_components": 0,
   "rust_authoritative_pure_components": 1,
+  "rust_authoritative_native_components": 1,
   "milestone_count": 8,
-  "current_milestone": "MTM-003",
-  "completed_milestones": ["MTM-001", "MTM-002"],
-  "next_milestone": "MTM-003",
+  "current_milestone": "MTM-004",
+  "completed_milestones": ["MTM-001", "MTM-002", "MTM-003"],
+  "next_milestone": "MTM-004",
   "claims": [
     "MTM-001 foundation and governance is completed with an accepted append-only receipt.",
     "Rust 1.98.0 is pinned and the minimal workspace passes format, Clippy, tests, and golden contract checks.",
     "MTM-002 is completed with Rust authoritative only for MTM-reboot's typed side-effect-free contract and policy core.",
     "The frozen 135-case Python-Rust corpus has zero final mismatches and reference SHA-256 1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d.",
-    "MTM-003 is approved but has not started; its first action must be a complete MTM-002 recheck.",
+    "MTM-003 is completed with Rust authoritative for MTM-reboot's independent Native process/isolation component while Re-CTM remains the deployed production runtime.",
+    "The normalized Native differential hash is 5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69 with zero final exact or lifecycle mismatches.",
+    "The current Linux target passed 14 implementation-hash-bound checks covering Bubblewrap, private-root denial, read-only toolchains, SageMath, Magma, helper parity, TTY, timeout/kill, and Quick Tunnel cleanup.",
+    "MTM-004 is approved but not started; its first action must be a complete MTM-003 recheck plus copied-database migration and rollback baselines.",
     "Re-CTM remains the sole production authority.",
     "No performance improvement is claimed."
   ],
   "manual_pending": [
-    "All source-product browser, target isolation, CAS, LaTeX, migration, rollback, and full-workflow acceptance remains pending for later milestones."
+    "Other operating systems and site-local toolchain layouts remain target-specific Native evidence.",
+    "SQLite migration/rollback, OAuth/MCP/browser, workflow/finalizer, LaTeX, packaging, full cutover, soak, A6, and Python retirement remain pending for MTM-004 through MTM-008."
   ]
 }

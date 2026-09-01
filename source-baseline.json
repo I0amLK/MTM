@@ -14,6 +14,9 @@
     "src/re_ctm/oauth.py",
     "src/re_ctm/quick_tunnel.py",
     "src/re_ctm/native.py",
+    "src/re_ctm/processes.py",
+    "src/re_ctm/toolchains.py",
+    "src/re_ctm/native_helper_bwrap.py",
     "src/re_ctm/tools.py"
   ],
   "contract": {

@@ -117,6 +117,18 @@ def main() -> int:
                     capture_json=True,
                 ),
                 run(
+                    "mtm003_conformance",
+                    [sys.executable, "scripts/run_mtm003_conformance.py"],
+                    env=environment,
+                    capture_json=True,
+                ),
+                run(
+                    "mtm003_target_evidence",
+                    [sys.executable, "scripts/validate_mtm003_target_evidence.py"],
+                    env=environment,
+                    capture_json=True,
+                ),
+                run(
                     "bootstrap_contract",
                     [cargo, "run", "-q", "-p", "mtm-cli", "--", "contract"],
                     env=environment,
@@ -161,15 +173,17 @@ def main() -> int:
         "schema_version": "1.0.0",
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "project": "MTM-reboot",
-        "milestone": "MTM-002",
+        "milestone": "MTM-003",
         "production_authority": "python",
         "passed": all(item["passed"] for item in checks),
         "checks": checks,
         "local_claim": (
-            "MTM-001 governance plus MTM-002 pure Rust contracts/policies were validated "
-            "against the frozen Re-CTM Python reference by golden and differential checks. "
-            "No database, process, network, workflow, finalizer, target/browser, CAS, LaTeX, "
-            "or performance authority is claimed."
+            "MTM-001 governance, MTM-002 pure Rust contracts/policies, and MTM-003 Native "
+            "process/isolation code were validated by Rust tests plus frozen Python-Rust "
+            "differential checks. This gate verifies the freshness and completeness of the "
+            "separately executed MTM-003 target report but does not itself re-run Bubblewrap, "
+            "Sage, Magma, or Quick Tunnel. No SQLite, OAuth/MCP, workflow, finalizer, packaging, "
+            "A6 performance, or Python-retirement authority is claimed."
         ),
     }
     temporary = REPORT.with_name(REPORT.name + ".tmp")

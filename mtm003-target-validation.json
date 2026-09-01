@@ -1,0 +1,533 @@
+{
+  "schema_version": "1.0.0",
+  "project": "MTM-reboot",
+  "milestone": "MTM-003",
+  "implementation_sha256": "77c52b9fd6de366d80f045b7adb091ef0e4095147dee0c515173fe1ab1766a13",
+  "environment": {
+    "platform": "Linux",
+    "release": "7.1.2-070102-generic",
+    "machine": "x86_64",
+    "bwrap": "/usr/bin/bwrap",
+    "sage": "/home/lk/miniconda3/bin/sage",
+    "magma": "/home/lk/.local/bin/magma",
+    "cloudflared": "/home/lk/.local/bin/cloudflared"
+  },
+  "passed": true,
+  "check_count": 14,
+  "checks": [
+    {
+      "name": "bubblewrap_attestation",
+      "passed": true,
+      "exit_code": 0,
+      "elapsed_ms": 22.231,
+      "response": {
+        "protocol": "re-ctm-native-helper-v1",
+        "operation": "attest",
+        "request_id": "target-attest-001",
+        "ok": true,
+        "attestation": {
+          "backend": "bubblewrap",
+          "backend_version": "bubblewrap 0.9.0",
+          "capabilities_dropped": true,
+          "forbidden_paths_hidden": true,
+          "hard_isolation": true,
+          "ipc_namespace": true,
+          "mount_namespace": true,
+          "nested_user_namespaces_disabled": true,
+          "network_isolated": true,
+          "no_privilege_escalation": true,
+          "parent_environment_cleared": true,
+          "pid_namespace": true,
+          "private_vault_mounted": false,
+          "toolchain_read_only_root_count": 1,
+          "toolchain_roots_validated": true,
+          "user_namespace": true,
+          "uts_namespace": true,
+          "workspace_mount": "/workspace",
+          "workspace_mounted": true
+        },
+        "probe": {
+          "forbidden_path_count": 2,
+          "parent_environment_cleared": true,
+          "toolchain_root_count": 1,
+          "toolchain_roots_read_only": true,
+          "workspace_writable": true
+        }
+      },
+      "stderr_tail": ""
+    },
+    {
+      "name": "safe_workspace_read",
+      "passed": true,
+      "exit_code": 0,
+      "elapsed_ms": 22.074,
+      "response": {
+        "protocol": "re-ctm-native-helper-v1",
+        "operation": "execute",
+        "request_id": "target-safe-cat-001",
+        "ok": true,
+        "attestation": {
+          "backend": "bubblewrap",
+          "backend_version": "bubblewrap 0.9.0",
+          "capabilities_dropped": true,
+          "forbidden_paths_hidden": true,
+          "hard_isolation": true,
+          "ipc_namespace": true,
+          "mount_namespace": true,
+          "nested_user_namespaces_disabled": true,
+          "network_isolated": true,
+          "no_privilege_escalation": true,
+          "parent_environment_cleared": true,
+          "pid_namespace": true,
+          "private_vault_mounted": false,
+          "toolchain_read_only_root_count": 1,
+          "toolchain_roots_validated": true,
+          "user_namespace": true,
+          "uts_namespace": true,
+          "workspace_mount": "/workspace",
+          "workspace_mounted": true
+        },
+        "elapsed_ms": 20,
+        "exit_code": 0,
+        "signal": null,
+        "status": "exited",
+        "stderr": "",
+        "stderr_meta": {
+          "dropped_bytes": 0,
+          "retained_bytes": 0,
+          "total_bytes": 0,
+          "truncated": false
+        },
+        "stdout": "workspace-ok\n",
+        "stdout_meta": {
+          "dropped_bytes": 0,
+          "retained_bytes": 13,
+          "total_bytes": 13,
+          "truncated": false
+        },
+        "timed_out": false
+      },
+      "stderr_tail": ""
+    },
+    {
+      "name": "private_vault_and_parent_env_denial",
+      "passed": true,
+      "exit_code": 0,
+      "elapsed_ms": 22.087,
+      "response": {
+        "protocol": "re-ctm-native-helper-v1",
+        "operation": "execute",
+        "request_id": "target-private-denial-001",
+        "ok": true,
+        "attestation": {
+          "backend": "bubblewrap",
+          "backend_version": "bubblewrap 0.9.0",
+          "capabilities_dropped": true,
+          "forbidden_paths_hidden": true,
+          "hard_isolation": true,
+          "ipc_namespace": true,
+          "mount_namespace": true,
+          "nested_user_namespaces_disabled": true,
+          "network_isolated": false,
+          "no_privilege_escalation": true,
+          "parent_environment_cleared": true,
+          "pid_namespace": true,
+          "private_vault_mounted": false,
+          "toolchain_read_only_root_count": 1,
+          "toolchain_roots_validated": true,
+          "user_namespace": true,
+          "uts_namespace": true,
+          "workspace_mount": "/workspace",
+          "workspace_mounted": true
+        },
+        "elapsed_ms": 20,
+        "exit_code": 0,
+        "signal": null,
+        "status": "exited",
+        "stderr": "",
+        "stderr_meta": {
+          "dropped_bytes": 0,
+          "retained_bytes": 0,
+          "total_bytes": 0,
+          "truncated": false
+        },
+        "stdout": "False\nmissing\n",
+        "stdout_meta": {
+          "dropped_bytes": 0,
+          "retained_bytes": 14,
+          "total_bytes": 14,
+          "truncated": false
+        },
+        "timed_out": false
+      },
+      "stderr_tail": ""
+    },
+    {
+      "name": "explicit_generic_toolchain_execution",
+      "passed": true,
+      "exit_code": 0,
+      "elapsed_ms": 22.05,
+      "response": {
+        "protocol": "re-ctm-native-helper-v1",
+        "operation": "execute",
+        "request_id": "target-explicit-tool-001",
+        "ok": true,
+        "attestation": {
+          "backend": "bubblewrap",
+          "backend_version": "bubblewrap 0.9.0",
+          "capabilities_dropped": true,
+          "forbidden_paths_hidden": true,
+          "hard_isolation": true,
+          "ipc_namespace": true,
+          "mount_namespace": true,
+          "nested_user_namespaces_disabled": true,
+          "network_isolated": true,
+          "no_privilege_escalation": true,
+          "parent_environment_cleared": true,
+          "pid_namespace": true,
+          "private_vault_mounted": false,
+          "toolchain_read_only_root_count": 1,
+          "toolchain_roots_validated": true,
+          "user_namespace": true,
+          "uts_namespace": true,
+          "workspace_mount": "/workspace",
+          "workspace_mounted": true
+        },
+        "elapsed_ms": 20,
+        "exit_code": 0,
+        "signal": null,
+        "status": "exited",
+        "stderr": "",
+        "stderr_meta": {
+          "dropped_bytes": 0,
+          "retained_bytes": 0,
+          "total_bytes": 0,
+          "truncated": false
+        },
+        "stdout": "generic-ok\n",
+        "stdout_meta": {
+          "dropped_bytes": 0,
+          "retained_bytes": 11,
+          "total_bytes": 11,
+          "truncated": false
+        },
+        "timed_out": false
+      },
+      "stderr_tail": ""
+    },
+    {
+      "name": "toolchain_mount_read_only",
+      "passed": true,
+      "exit_code": 0,
+      "elapsed_ms": 22.081,
+      "response": {
+        "protocol": "re-ctm-native-helper-v1",
+        "operation": "execute",
+        "request_id": "target-read-only-001",
+        "ok": true,
+        "attestation": {
+          "backend": "bubblewrap",
+          "backend_version": "bubblewrap 0.9.0",
+          "capabilities_dropped": true,
+          "forbidden_paths_hidden": true,
+          "hard_isolation": true,
+          "ipc_namespace": true,
+          "mount_namespace": true,
+          "nested_user_namespaces_disabled": true,
+          "network_isolated": false,
+          "no_privilege_escalation": true,
+          "parent_environment_cleared": true,
+          "pid_namespace": true,
+          "private_vault_mounted": false,
+          "toolchain_read_only_root_count": 1,
+          "toolchain_roots_validated": true,
+          "user_namespace": true,
+          "uts_namespace": true,
+          "workspace_mount": "/workspace",
+          "workspace_mounted": true
+        },
+        "elapsed_ms": 20,
+        "exit_code": 2,
+        "signal": null,
+        "status": "exited",
+        "stderr": "/bin/sh: 1: cannot create /tmp/coding-tools-mcp/22f4588e2aced8a8/thS2s3XLegZW7h4-/tmp/mtm003-target-gb9q3j3n/explicit-toolchain/must-remain-read-only: Read-only file system\n",
+        "stderr_meta": {
+          "dropped_bytes": 0,
+          "retained_bytes": 173,
+          "total_bytes": 173,
+          "truncated": false
+        },
+        "stdout": "",
+        "stdout_meta": {
+          "dropped_bytes": 0,
+          "retained_bytes": 0,
+          "total_bytes": 0,
+          "truncated": false
+        },
+        "timed_out": false
+      },
+      "stderr_tail": ""
+    },
+    {
+      "name": "toolchain_plan_discovers_target_cas",
+      "passed": true,
+      "exit_code": 0,
+      "read_only_root_count": 6,
+      "root_fingerprints_only": [
+        "c99a4fa49a2f03e1",
+        "5de3da610d6fd958",
+        "fc54966ce73683a1",
+        "b392ae9e62cc6ec0",
+        "5391f686ba53178c",
+        "f2631fa7ef5ffcea"
+      ]
+    },
+    {
+      "name": "dangerous_plan_attestation",
+      "passed": true,
+      "exit_code": 0,
+      "elapsed_ms": 22.298,
+      "response": {
+        "protocol": "re-ctm-native-helper-v1",
+        "operation": "attest",
+        "request_id": "target-dangerous-plan-attest-001",
+        "ok": true,
+        "attestation": {
+          "backend": "bubblewrap",
+          "backend_version": "bubblewrap 0.9.0",
+          "capabilities_dropped": true,
+          "forbidden_paths_hidden": true,
+          "hard_isolation": true,
+          "ipc_namespace": true,
+          "mount_namespace": true,
+          "nested_user_namespaces_disabled": true,
+          "network_isolated": true,
+          "no_privilege_escalation": true,
+          "parent_environment_cleared": true,
+          "pid_namespace": true,
+          "private_vault_mounted": false,
+          "toolchain_read_only_root_count": 6,
+          "toolchain_roots_validated": true,
+          "user_namespace": true,
+          "uts_namespace": true,
+          "workspace_mount": "/workspace",
+          "workspace_mounted": true
+        },
+        "probe": {
+          "forbidden_path_count": 2,
+          "parent_environment_cleared": true,
+          "toolchain_root_count": 6,
+          "toolchain_roots_read_only": true,
+          "workspace_writable": true
+        }
+      },
+      "stderr_tail": ""
+    },
+    {
+      "name": "sagemath_execution",
+      "passed": true,
+      "exit_code": 0,
+      "elapsed_ms": 746.067,
+      "response": {
+        "protocol": "re-ctm-native-helper-v1",
+        "operation": "execute",
+        "request_id": "target-sage-001",
+        "ok": true,
+        "attestation": {
+          "backend": "bubblewrap",
+          "backend_version": "bubblewrap 0.9.0",
+          "capabilities_dropped": true,
+          "forbidden_paths_hidden": true,
+          "hard_isolation": true,
+          "ipc_namespace": true,
+          "mount_namespace": true,
+          "nested_user_namespaces_disabled": true,
+          "network_isolated": false,
+          "no_privilege_escalation": true,
+          "parent_environment_cleared": true,
+          "pid_namespace": true,
+          "private_vault_mounted": false,
+          "toolchain_read_only_root_count": 6,
+          "toolchain_roots_validated": true,
+          "user_namespace": true,
+          "uts_namespace": true,
+          "workspace_mount": "/workspace",
+          "workspace_mounted": true
+        },
+        "elapsed_ms": 744,
+        "exit_code": 0,
+        "signal": null,
+        "status": "exited",
+        "stderr": "",
+        "stderr_meta": {
+          "dropped_bytes": 0,
+          "retained_bytes": 0,
+          "total_bytes": 0,
+          "truncated": false
+        },
+        "stdout": "5\n",
+        "stdout_meta": {
+          "dropped_bytes": 0,
+          "retained_bytes": 2,
+          "total_bytes": 2,
+          "truncated": false
+        },
+        "timed_out": false
+      },
+      "stderr_tail": ""
+    },
+    {
+      "name": "magma_execution",
+      "passed": true,
+      "exit_code": 0,
+      "elapsed_ms": 22.156,
+      "response": {
+        "protocol": "re-ctm-native-helper-v1",
+        "operation": "execute",
+        "request_id": "target-magma-001",
+        "ok": true,
+        "attestation": {
+          "backend": "bubblewrap",
+          "backend_version": "bubblewrap 0.9.0",
+          "capabilities_dropped": true,
+          "forbidden_paths_hidden": true,
+          "hard_isolation": true,
+          "ipc_namespace": true,
+          "mount_namespace": true,
+          "nested_user_namespaces_disabled": true,
+          "network_isolated": false,
+          "no_privilege_escalation": true,
+          "parent_environment_cleared": true,
+          "pid_namespace": true,
+          "private_vault_mounted": false,
+          "toolchain_read_only_root_count": 6,
+          "toolchain_roots_validated": true,
+          "user_namespace": true,
+          "uts_namespace": true,
+          "workspace_mount": "/workspace",
+          "workspace_mounted": true
+        },
+        "elapsed_ms": 20,
+        "exit_code": 0,
+        "signal": null,
+        "status": "exited",
+        "stderr": "",
+        "stderr_meta": {
+          "dropped_bytes": 0,
+          "retained_bytes": 0,
+          "total_bytes": 0,
+          "truncated": false
+        },
+        "stdout": "5\n",
+        "stdout_meta": {
+          "dropped_bytes": 0,
+          "retained_bytes": 2,
+          "total_bytes": 2,
+          "truncated": false
+        },
+        "timed_out": false
+      },
+      "stderr_tail": ""
+    },
+    {
+      "name": "helper_timeout_provenance",
+      "passed": true,
+      "exit_code": 0,
+      "elapsed_ms": 142.876,
+      "response": {
+        "protocol": "re-ctm-native-helper-v1",
+        "operation": "execute",
+        "request_id": "target-timeout-001",
+        "ok": true,
+        "attestation": {
+          "backend": "bubblewrap",
+          "backend_version": "bubblewrap 0.9.0",
+          "capabilities_dropped": true,
+          "forbidden_paths_hidden": true,
+          "hard_isolation": true,
+          "ipc_namespace": true,
+          "mount_namespace": true,
+          "nested_user_namespaces_disabled": true,
+          "network_isolated": false,
+          "no_privilege_escalation": true,
+          "parent_environment_cleared": true,
+          "pid_namespace": true,
+          "private_vault_mounted": false,
+          "toolchain_read_only_root_count": 6,
+          "toolchain_roots_validated": true,
+          "user_namespace": true,
+          "uts_namespace": true,
+          "workspace_mount": "/workspace",
+          "workspace_mounted": true
+        },
+        "elapsed_ms": 141,
+        "exit_code": null,
+        "signal": "SIGTERM",
+        "status": "timeout",
+        "stderr": "",
+        "stderr_meta": {
+          "dropped_bytes": 0,
+          "retained_bytes": 0,
+          "total_bytes": 0,
+          "truncated": false
+        },
+        "stdout": "",
+        "stdout_meta": {
+          "dropped_bytes": 0,
+          "retained_bytes": 0,
+          "total_bytes": 0,
+          "truncated": false
+        },
+        "timed_out": true
+      },
+      "stderr_tail": ""
+    },
+    {
+      "name": "python_rust_helper_protocol_parity",
+      "passed": true,
+      "exit_code": 0,
+      "case_count": 3,
+      "mismatch_count": 0,
+      "mismatches": []
+    },
+    {
+      "name": "isolated_tty_round_trip",
+      "passed": true,
+      "exit_code": 0,
+      "status": "exited",
+      "output_tail": "ready\nhello-isolated-tty\ngot:hello-isolated-tty\n"
+    },
+    {
+      "name": "isolated_process_group_kill",
+      "passed": true,
+      "exit_code": -15,
+      "signal": "SIGTERM",
+      "termination": {
+        "elapsed_ms": 131,
+        "kill_sent_by_re_ctm": false,
+        "observed_signal": "SIGTERM",
+        "requested_timeout_ms": 30000,
+        "source": "explicit_kill",
+        "term_sent_by_re_ctm": true
+      }
+    },
+    {
+      "name": "real_quick_tunnel_lifecycle",
+      "passed": true,
+      "exit_code": 0,
+      "public_url_fingerprint": "edfc40b16349fad4",
+      "event_states": [
+        "starting",
+        "connected"
+      ],
+      "owned_process_count_before_close": 1,
+      "owned_process_count_after_close": 0,
+      "close_event_states": [
+        "starting",
+        "connected",
+        "closed"
+      ]
+    }
+  ],
+  "claim": "This report covers the current Linux target's real Rust Bubblewrap/helper, process/TTY/timeout/kill, SageMath, Magma, read-only toolchain, private-root, and owned Quick Tunnel boundaries. It does not validate OAuth/MCP, SQLite, workflow, verifier/finalizer, packaging, or Python retirement."
+}

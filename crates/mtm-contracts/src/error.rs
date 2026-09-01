@@ -3,6 +3,25 @@ use std::fmt;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
+pub trait IntoDetailsMap {
+    fn into_details_map(self) -> Map<String, Value>;
+}
+
+impl IntoDetailsMap for Map<String, Value> {
+    fn into_details_map(self) -> Map<String, Value> {
+        self
+    }
+}
+
+impl IntoDetailsMap for Value {
+    fn into_details_map(self) -> Map<String, Value> {
+        match self {
+            Value::Object(map) => map,
+            value => Map::from_iter([("value".to_owned(), value)]),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ErrorCategory {
@@ -64,8 +83,8 @@ impl ReCtmError {
     }
 
     #[must_use]
-    pub fn with_details(mut self, details: Map<String, Value>) -> Self {
-        self.details = details;
+    pub fn with_details(mut self, details: impl IntoDetailsMap) -> Self {
+        self.details = details.into_details_map();
         self
     }
 

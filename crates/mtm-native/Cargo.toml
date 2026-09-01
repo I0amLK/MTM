@@ -1,0 +1,30 @@
+[package]
+name = "mtm-native"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+base64.workspace = true
+mtm-contracts = { path = "../mtm-contracts" }
+mtm-core = { path = "../mtm-core" }
+nix.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+shell-words.workspace = true
+
+[dev-dependencies]
+tempfile = "3.23"
+
+[[bin]]
+name = "mtm-native-helper"
+path = "src/bin/helper.rs"
+
+[[bin]]
+name = "mtm-native-shadow"
+path = "src/bin/shadow.rs"
+
+[lints]
+workspace = true

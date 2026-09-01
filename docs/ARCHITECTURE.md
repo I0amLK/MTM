@@ -43,6 +43,31 @@ OAuth + MCP gateway
 
 The machine-audited target graph is [`engineering-graph.json`](../engineering-graph.json).
 
+## Implemented through MTM-003
+
+The current Rust graph now has three implemented lower-level components:
+
+```text
+mtm-contracts
+      ▲
+      │
+   mtm-core
+      ▲
+      │
+  mtm-native
+```
+
+`mtm-native` keeps two intentionally separate runtime choke points:
+
+```text
+command manager ── bounded helper-v1 request ──► Bubblewrap helper process
+```
+
+The command manager owns command ids, TTY, output paging and termination provenance.
+The helper owns namespace construction, environment clearing, read-only toolchain
+mount validation and attestation. Neither component can read or write workflow state,
+authenticate a client, or publish a verified artifact.
+
 ## Implemented slice after MTM-002
 
 `mtm-contracts` and `mtm-core` now form the implemented bottom of the dependency DAG:

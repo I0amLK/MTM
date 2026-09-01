@@ -91,7 +91,7 @@
     {
       "id": "MTM-003",
       "title": "Native process lifecycle and isolation plane",
-      "status": "approved",
+      "status": "completed",
       "priority": "P0",
       "production_authority_before": "python",
       "production_authority_after": "rust",
@@ -109,14 +109,22 @@
         "No application-specific CAS allowlist"
       ],
       "acceptance_levels": ["A0", "A1", "A2", "A3", "A4", "A5"],
-      "validation_commands": [],
+      "validation_commands": [
+        "python3 scripts/run_mtm003_conformance.py",
+        "python3 scripts/run_mtm003_target_validation.py",
+        "python3 scripts/validate_mtm003_target_evidence.py",
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets -- -D warnings",
+        "cargo test --workspace",
+        "python3 scripts/run_checks.py"
+      ],
       "rollback": "Switch the helper/process adapter back to Python while preserving command-state compatibility; Rust has no database authority.",
       "dependencies": ["MTM-002"]
     },
     {
       "id": "MTM-004",
       "title": "Persistence, project state, and capability authority",
-      "status": "proposed",
+      "status": "approved",
       "priority": "P0",
       "production_authority_before": "python",
       "production_authority_after": "rust",
@@ -250,7 +258,7 @@
     {"source": "MTM-007", "target": "MTM-006"},
     {"source": "MTM-008", "target": "MTM-007"}
   ],
-  "todo": ["MTM-003"],
+  "todo": ["MTM-004"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -323,6 +331,46 @@
       "status_before": "proposed",
       "status_after": "approved",
       "summary": "Approved Native process lifecycle and isolation as the only next milestone; implementation must begin with an MTM-002 recheck and retain Python production authority until target evidence permits cutover."
+    },
+    {
+      "event_id": "MEVT-010",
+      "milestone_id": "MTM-003",
+      "at": "2026-09-01T01:44:27-07:00",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Re-ran the committed MTM-002 full gate and 135-case differential corpus, confirmed the frozen hash and clean source-reference files, and began the Native process/isolation milestone without moving production authority."
+    },
+    {
+      "event_id": "MEVT-011",
+      "milestone_id": "MTM-003",
+      "at": "2026-09-01T02:05:00-07:00",
+      "status_before": "in_progress",
+      "status_after": "shadow",
+      "summary": "The Rust Native shadow matched the frozen Python implementation for exact toolchain/Bubblewrap construction and semantic command lifecycle scenarios, with zero mismatches and no Git-visible side effects."
+    },
+    {
+      "event_id": "MEVT-012",
+      "milestone_id": "MTM-003",
+      "at": "2026-09-01T02:16:00-07:00",
+      "status_before": "shadow",
+      "status_after": "authoritative",
+      "summary": "Accepted mtm-native as the authoritative Native implementation inside MTM-reboot after hash-bound real Bubblewrap, private-root, SageMath, Magma, TTY, timeout, kill, helper-protocol and Quick Tunnel evidence passed. Re-CTM remains the deployed Python production authority."
+    },
+    {
+      "event_id": "MEVT-013",
+      "milestone_id": "MTM-003",
+      "at": "2026-09-01T02:17:11-07:00",
+      "status_before": "authoritative",
+      "status_after": "completed",
+      "summary": "Completed MTM-003 with A0-A5 evidence, accepted iteration/receipt records, implementation-bound target validation and no SQLite, OAuth/MCP, workflow or finalizer migration."
+    },
+    {
+      "event_id": "MEVT-014",
+      "milestone_id": "MTM-004",
+      "at": "2026-09-01T02:17:11-07:00",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "Approved persistence, project state and capability authority as the only next milestone; it must begin with a complete MTM-003 recheck and copied-database rollback baseline."
     }
   ],
   "receipt_contract": {
@@ -570,6 +618,159 @@
       "rollback": "Revert MTM-002 or bypass mtm-core and use the frozen Python reference. No persistent data, process, token, workflow, or artifact migration is involved.",
       "manual_pending": [
         "Native/Bubblewrap, persistence, OAuth/MCP/browser, workflow/finalizer, CAS, LaTeX, packaging, rollback drill, soak, A6, and Python retirement remain assigned to MTM-003 through MTM-008."
+      ],
+      "decision": "accepted"
+    },
+    {
+      "receipt_id": "MREC-003",
+      "milestone_id": "MTM-003",
+      "started_at": "2026-09-01T01:44:27-07:00",
+      "completed_at": "2026-09-01T02:17:11-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "python",
+      "authority_after": "rust",
+      "commit_subject": "feat(native): establish process and isolation plane [MTM-003]",
+      "files_changed": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "source-baseline.json",
+        "crates/mtm-contracts/src/error.rs",
+        "crates/mtm-native/Cargo.toml",
+        "crates/mtm-native/src/lib.rs",
+        "crates/mtm-native/src/capture.rs",
+        "crates/mtm-native/src/process.rs",
+        "crates/mtm-native/src/toolchain.rs",
+        "crates/mtm-native/src/bubblewrap.rs",
+        "crates/mtm-native/src/quick_tunnel.rs",
+        "crates/mtm-native/src/bin/helper.rs",
+        "crates/mtm-native/src/bin/shadow.rs",
+        "crates/mtm-cli/src/main.rs",
+        "conformance/python_native_shadow.py",
+        "conformance/golden/mtm003-reference.sha256",
+        "scripts/run_mtm003_conformance.py",
+        "scripts/run_mtm003_target_validation.py",
+        "scripts/validate_mtm003_target_evidence.py",
+        "scripts/run_checks.py",
+        "mtm003-target-validation.json",
+        "tests/test_governance.py",
+        "docs/adr/0003-native-process-and-isolation-plane.md",
+        "docs/ARCHITECTURE.md",
+        "docs/MIGRATION_PLAN.md",
+        "README.md",
+        "engineering-graph.json",
+        "migration-graph.json",
+        "project-progress.json",
+        "records/iterations/ITER-003.json",
+        "local-validation.json"
+      ],
+      "commands": [
+        {
+          "command": "python3 scripts/run_checks.py && python3 scripts/run_mtm002_conformance.py before MTM-003 implementation",
+          "exit_code": 0,
+          "result": "The committed MTM-002 gate, frozen 135-case hash, source-reference cleanliness and resource evidence passed before MTM-003 began."
+        },
+        {
+          "command": "cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace",
+          "exit_code": 101,
+          "result": "The first Native compile/lint gate rejected an unused import, panic-style test assertions, an over-wide builder signature, one const/MSRV mismatch and a hand-written Default."
+        },
+        {
+          "command": "cargo test --workspace followed by termination of the stalled test process",
+          "exit_code": 143,
+          "result": "The first lifecycle run exposed a real self-deadlock in read_output while reacquiring the selected stream mutex; the test command was terminated and the lock ordering was corrected."
+        },
+        {
+          "command": "cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace",
+          "exit_code": 0,
+          "result": "All contract, core and Native Rust tests passed after the compile and lock-order repairs."
+        },
+        {
+          "command": "python3 scripts/run_mtm003_conformance.py --print-golden",
+          "exit_code": 1,
+          "result": "Behavioral parity was already exact, but the first reference hash included a random temporary fixture path and was therefore unstable."
+        },
+        {
+          "command": "python3 scripts/run_mtm003_conformance.py",
+          "exit_code": 0,
+          "result": "Four exact static contracts and five semantic lifecycle scenarios matched with zero differences; the normalized hash, no-side-effect check and A5 ceilings passed."
+        },
+        {
+          "command": "python3 scripts/run_mtm003_target_validation.py",
+          "exit_code": 0,
+          "result": "Fourteen real target checks passed: Bubblewrap, private-root denial, parent-env clearing, generic/read-only toolchains, SageMath, Magma, helper parity, timeout, TTY, process-group kill and Quick Tunnel cleanup."
+        },
+        {
+          "command": "python3 scripts/validate_mtm003_target_evidence.py",
+          "exit_code": 0,
+          "result": "The complete target report is bound to implementation SHA-256 77c52b9fd6de366d80f045b7adb091ef0e4095147dee0c515173fe1ab1766a13 and contains every required passing check."
+        },
+        {
+          "command": "python3 scripts/run_checks.py after recording completed MTM-003 state",
+          "exit_code": 1,
+          "result": "The governance test imported the target-evidence validator as a package and exposed a same-directory-only import; no Native implementation or target evidence failed."
+        },
+        {
+          "command": "python3 scripts/run_checks.py",
+          "exit_code": 0,
+          "result": "The completed-MTM-003/approved-MTM-004 full local gate passed formatting, Clippy, Rust tests, governance, graphs, MTM-002/003 conformance, fresh target evidence, bootstrap contracts and Git checks."
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "evidence": [
+            "Formatting and Clippy with warnings denied passed.",
+            "Contract, core and Native Rust tests plus governance tests passed.",
+            "Migration and architecture validators passed."
+          ]
+        },
+        "A1": {
+          "passed": true,
+          "evidence": [
+            "Exact toolchain plan and Bubblewrap command construction matched the frozen Python source.",
+            "Python and Rust helper responses matched for attest, normal execute and timeout.",
+            "The normalized Native reference hash is 5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69."
+          ]
+        },
+        "A2": {
+          "passed": true,
+          "evidence": [
+            "Sync output, poll/read/kill, TTY, timeout and 600 KB retained-output semantics matched.",
+            "The Rust shadow produced no Git-visible side effect."
+          ]
+        },
+        "A3": {
+          "passed": true,
+          "evidence": [
+            "Process ownership, protected-root rejection, credential stripping, private-path denial, read-only roots and TERM/KILL negative paths passed.",
+            "Command and helper inputs/outputs are bounded and structured."
+          ]
+        },
+        "A4": {
+          "passed": true,
+          "evidence": [
+            "The current Linux target passed 14 hash-bound real checks.",
+            "SageMath and Magma each returned 5 inside the Rust-built Bubblewrap boundary.",
+            "The real Quick Tunnel child was present before close and absent afterward."
+          ]
+        },
+        "A5": {
+          "passed": true,
+          "evidence": [
+            "Python lifecycle scenario used about 421 ms and 22,680 KiB RSS.",
+            "Rust debug shadow used about 613 ms and 7,720 KiB RSS.",
+            "Absolute and relative ceilings passed; no A6 speed claim is made."
+          ]
+        }
+      },
+      "behavior_before": "MTM-reboot had no Rust process ownership, helper protocol, hard-isolation implementation, target CAS execution, TTY lifecycle or tunnel child authority.",
+      "behavior_after": "MTM-reboot has one accepted Rust Native component preserving the separate command-manager and helper security boundaries, with exact/semantic source parity and real current-target evidence. The deployed Re-CTM Python runtime remains unchanged and authoritative for operator traffic.",
+      "risk_review": "The new crate has no SQLite, OAuth, MCP, workflow, vault or finalizer access. It forbids project unsafe code, retains an external Bubblewrap process boundary, validates read-only roots twice, clears helper/tunnel environments, and records target-specific rather than universal claims. Debug-build timing is slower than Python in the small lifecycle harness, so no performance optimization claim is made.",
+      "rollback": "Revert MTM-003 or omit mtm-native from later composition. Re-CTM's Python CommandManager, toolchain policy, helper and QuickTunnel remain the deployed rollback implementation; no persistent data or protocol migration is required.",
+      "manual_pending": [
+        "Other operating systems and proprietary/site-local toolchain layouts require their own target evidence.",
+        "Persistence, OAuth/MCP/browser, workflow/finalizer, packaging, full cutover, rollback drill, soak, A6 and Python retirement remain MTM-004 through MTM-008."
       ],
       "decision": "accepted"
     }
