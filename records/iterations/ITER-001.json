@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "iteration_id": "ITER-001",
+  "milestone_id": "MTM-001",
+  "title": "Foundation, governance, source baseline, and conformance bootstrap",
+  "started_at": "2026-09-01T00:45:00-07:00",
+  "completed_at": "2026-09-01T00:55:10-07:00",
+  "result": "accepted",
+  "authority": {
+    "before": "python",
+    "after": "python",
+    "rust_production_components": 0
+  },
+  "summary": "Created the independent MTM-reboot project, pinned Rust 1.98.0, established eight reversible milestones, froze Re-CTM 0.3.0 source facts, implemented machine-enforced governance/architecture/commit gates, and built a minimal Rust contract/CLI bootstrap without moving production authority.",
+  "failures_preserved": [
+    {
+      "stage": "first complete Rust gate",
+      "result": "failed",
+      "cause": "The status JSON literal was passed directly as a Rust format string.",
+      "correction": "Separated the literal into a constant and printed it through a fixed format placeholder."
+    },
+    {
+      "stage": "second complete Rust gate",
+      "result": "failed",
+      "cause": "rustfmt rejected one trailing blank line in the contract library.",
+      "correction": "Removed the formatting-only difference and reran the whole gate."
+    },
+    {
+      "stage": "post-completion governance gate",
+      "result": "failed",
+      "cause": "A receipt-enforcement unit test still mutated the now-completed MTM-001 lifecycle and incorrectly emptied the actionable MTM-002 TODO.",
+      "correction": "Replaced the lifecycle-coupled fixture with a synthetic MTM-003 proposed-to-completed event chain while preserving the real project graph."
+    }
+  ],
+  "validation": {
+    "final_command": "python3 scripts/run_checks.py",
+    "exit_code": 0,
+    "rust": {
+      "rustc": "1.98.0",
+      "cargo": "1.98.0",
+      "fmt": "passed",
+      "clippy": "passed with -D warnings",
+      "workspace_tests": 2
+    },
+    "governance_tests": 6,
+    "golden_contract": "exact match",
+    "report": "local-validation.json"
+  },
+  "commit": {
+    "subject": "docs(governance): establish project foundation [MTM-001]",
+    "required_trailers": {
+      "Milestone": "MTM-001",
+      "Authority-Before": "python",
+      "Authority-After": "python",
+      "Acceptance": "A0",
+      "Receipt": "records/iterations/ITER-001.json",
+      "Rollback": "delete MTM-reboot; Re-CTM remains authoritative",
+      "Manual-Pending": "all later target/browser/CAS/LaTeX and migration acceptance"
+    }
+  },
+  "next": {
+    "approved_milestone": "MTM-002",
+    "restriction": "Only typed, side-effect-free contract and policy work may start; no storage, process, gateway, workflow, or finalizer authority may move."
+  }
+}

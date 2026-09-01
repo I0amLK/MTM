@@ -1,0 +1,13 @@
+MTM-reboot
+Copyright 2026 MTM-reboot Contributors
+
+MTM-reboot is a new incremental Rust implementation based on the public
+behavior, architecture, compatibility contracts, and migration evidence of
+Re-CTM, an Apache-2.0 project.
+
+Re-CTM includes modified material derived from Coding Tools MCP and Rethlas.
+Their respective copyright and attribution notices remain applicable to any
+material later migrated or adapted into MTM-reboot.
+
+The upstream projects are not responsible for MTM-reboot's modifications,
+security claims, migration decisions, or releases.

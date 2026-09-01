@@ -1,0 +1,9 @@
+<type>(<scope>): <imperative summary> [MTM-NNN]
+
+Milestone: MTM-NNN
+Authority-Before: none|python|rust-shadow|rust|retired
+Authority-After: none|python|rust-shadow|rust|retired
+Acceptance: A0
+Receipt: records/iterations/ITER-NNN.json
+Rollback: describe the exact rollback action
+Manual-Pending: describe pending target/browser/CAS/LaTeX work or none

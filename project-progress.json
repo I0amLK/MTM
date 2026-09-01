@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0.0",
+  "project": "MTM-reboot",
+  "version": "0.1.0-alpha.1",
+  "status": "MTM-001-completed-MTM-002-approved",
+  "updated_at": "2026-09-01T00:55:10-07:00",
+  "source_baseline": "source-baseline.json",
+  "current_production_authority": "python",
+  "rust_production_components": 0,
+  "milestone_count": 8,
+  "current_milestone": "MTM-002",
+  "completed_milestones": ["MTM-001"],
+  "next_milestone": "MTM-002",
+  "claims": [
+    "MTM-001 foundation and governance is completed with an accepted append-only receipt.",
+    "Rust 1.98.0 is pinned and the minimal workspace passes format, Clippy, tests, and golden contract checks.",
+    "Only bootstrap contracts and governance exist in Rust; MTM-002 is approved but not started.",
+    "Re-CTM remains the sole production authority.",
+    "No performance improvement is claimed."
+  ],
+  "manual_pending": [
+    "All source-product browser, target isolation, CAS, LaTeX, migration, rollback, and full-workflow acceptance remains pending for later milestones."
+  ]
+}

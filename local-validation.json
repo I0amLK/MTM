@@ -1,0 +1,186 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-09-01T08:04:07.827003Z",
+  "project": "MTM-reboot",
+  "milestone": "MTM-001",
+  "production_authority": "python",
+  "passed": true,
+  "checks": [
+    {
+      "name": "migration_graph",
+      "command": [
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
+        "scripts/validate_migration_graph.py"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"milestone_count\": 8,\n    \"edge_count\": 11,\n    \"todo_count\": 1,\n    \"event_count\": 4,\n    \"receipt_count\": 1,\n    \"status_counts\": {\n      \"approved\": 1,\n      \"completed\": 1,\n      \"proposed\": 6\n    }\n  }\n}\n"
+    },
+    {
+      "name": "engineering_graph",
+      "command": [
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
+        "scripts/validate_engineering_graph.py"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"crate_vertices\": 8,\n    \"crate_edges\": 17,\n    \"crate_graph_acyclic\": true,\n    \"cargo_members\": [\n      \"mtm-cli\",\n      \"mtm-contracts\"\n    ],\n    \"crate_statuses\": {\n      \"bootstrap\": 2,\n      \"planned\": 6\n    },\n    \"runtime_vertices\": 10,\n    \"runtime_edges\": 12,\n    \"invariants\": 8\n  }\n}\n"
+    },
+    {
+      "name": "python_governance_tests",
+      "command": [
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": "test_commit_message_contract (test_governance.GovernanceTestCase.test_commit_message_contract) ... ok\ntest_completed_milestone_requires_receipt (test_governance.GovernanceTestCase.test_completed_milestone_requires_receipt) ... ok\ntest_dependency_cycle_is_rejected (test_governance.GovernanceTestCase.test_dependency_cycle_is_rejected) ... ok\ntest_perf_commit_requires_a6 (test_governance.GovernanceTestCase.test_perf_commit_requires_a6) ... ok\ntest_repository_migration_graph_is_valid (test_governance.GovernanceTestCase.test_repository_migration_graph_is_valid) ... ok\ntest_target_crate_graph_is_acyclic (test_governance.GovernanceTestCase.test_target_crate_graph_is_acyclic) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 0.002s\n\nOK\n"
+    },
+    {
+      "name": "rustc_version",
+      "command": [
+        "/home/lk/桌面/tempcoding/MTM-reboot/.toolchain/cargo/bin/rustc",
+        "--version"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": "rustc 1.98.0 (88d9e12ae 2026-08-18)\n"
+    },
+    {
+      "name": "cargo_version",
+      "command": [
+        "/home/lk/桌面/tempcoding/MTM-reboot/.toolchain/cargo/bin/cargo",
+        "--version"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": "cargo 1.98.0 (797e8a9bc 2026-08-05)\n"
+    },
+    {
+      "name": "cargo_fmt",
+      "command": [
+        "/home/lk/桌面/tempcoding/MTM-reboot/.toolchain/cargo/bin/cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": ""
+    },
+    {
+      "name": "cargo_clippy",
+      "command": [
+        "/home/lk/桌面/tempcoding/MTM-reboot/.toolchain/cargo/bin/cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s\n"
+    },
+    {
+      "name": "cargo_test",
+      "command": [
+        "/home/lk/桌面/tempcoding/MTM-reboot/.toolchain/cargo/bin/cargo",
+        "test",
+        "--workspace"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s\n     Running unittests src/main.rs (target/debug/deps/mtm_reboot-2f08b724d05d90b4)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_contracts-0ad9c2f723a87b5d)\n\nrunning 2 tests\ntest tests::bootstrap_json_is_deterministic ... ok\ntest tests::source_contract_is_frozen ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_contracts\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+    },
+    {
+      "name": "bootstrap_contract",
+      "command": [
+        "/home/lk/桌面/tempcoding/MTM-reboot/.toolchain/cargo/bin/cargo",
+        "run",
+        "-q",
+        "-p",
+        "mtm-cli",
+        "--",
+        "contract"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": "{\"schema_version\":\"1.0.0\",\"native_tools\":18,\"rethlas_tools\":6,\"public_tools\":24,\"hidden_aliases\":11,\"state_schema\":2,\"workflow_protocol\":2,\"authority\":\"python\"}\n",
+      "json": {
+        "schema_version": "1.0.0",
+        "native_tools": 18,
+        "rethlas_tools": 6,
+        "public_tools": 24,
+        "hidden_aliases": 11,
+        "state_schema": 2,
+        "workflow_protocol": 2,
+        "authority": "python"
+      }
+    },
+    {
+      "name": "bootstrap_status",
+      "command": [
+        "/home/lk/桌面/tempcoding/MTM-reboot/.toolchain/cargo/bin/cargo",
+        "run",
+        "-q",
+        "-p",
+        "mtm-cli",
+        "--",
+        "status"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": "{\"project\":\"MTM-reboot\",\"milestone\":\"MTM-002\",\"production_authority\":\"python\",\"rust_production_components\":0,\"completed_milestones\":1}\n",
+      "json": {
+        "project": "MTM-reboot",
+        "milestone": "MTM-002",
+        "production_authority": "python",
+        "rust_production_components": 0,
+        "completed_milestones": 1
+      }
+    },
+    {
+      "name": "golden_contract_match",
+      "command": [
+        "compare",
+        "bootstrap_contract",
+        "source-contract-v1.json"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": "{\"actual\": {\"authority\": \"python\", \"hidden_aliases\": 11, \"native_tools\": 18, \"public_tools\": 24, \"rethlas_tools\": 6, \"schema_version\": \"1.0.0\", \"state_schema\": 2, \"workflow_protocol\": 2}, \"expected\": {\"authority\": \"python\", \"hidden_aliases\": 11, \"native_tools\": 18, \"public_tools\": 24, \"rethlas_tools\": 6, \"schema_version\": \"1.0.0\", \"state_schema\": 2, \"workflow_protocol\": 2}}"
+    },
+    {
+      "name": "git_diff_check",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": ""
+    },
+    {
+      "name": "git_staged_diff_check",
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": ""
+    }
+  ],
+  "local_claim": "Only the MTM-001 governance, target architecture, minimal Cargo workspace, and bootstrap source-contract snapshot were validated. No Re-CTM production authority, target isolation, browser OAuth, CAS, LaTeX, persistence, workflow, or performance claim is included."
+}

@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0.0",
+  "graph_id": "mtm-reboot-target-architecture",
+  "updated_at": "2026-09-01T00:45:00-07:00",
+  "principles": [
+    "Functional authority is preserved before structural optimization.",
+    "The crate dependency graph is acyclic.",
+    "Security choke points may be intentional and must not be removed to improve a graph metric.",
+    "One runtime composition root owns wiring; leaf crates do not import upward.",
+    "Workflow transition and finalization remain single logical authorities."
+  ],
+  "crate_dependency_graph": {
+    "vertices": [
+      {"id": "mtm-contracts", "status": "bootstrap", "responsibility": "Stable wire contracts, error facts, enums, schemas, and source compatibility constants."},
+      {"id": "mtm-core", "status": "planned", "responsibility": "Pure domain types, policy, validation, and authority-neutral transition data."},
+      {"id": "mtm-storage", "status": "planned", "responsibility": "SQLite schema, migrations, repositories, and transaction mechanics."},
+      {"id": "mtm-native", "status": "planned", "responsibility": "Process lifecycle, TTY, toolchains, isolation, and owned child processes."},
+      {"id": "mtm-gateway", "status": "planned", "responsibility": "OAuth, MCP, HTTP, public catalog, and request boundary."},
+      {"id": "mtm-workflow", "status": "planned", "responsibility": "Deterministic workflow transition planning, verifier/finalizer gates, and project semantics."},
+      {"id": "mtm-runtime", "status": "planned", "responsibility": "Single composition root and effect orchestration."},
+      {"id": "mtm-cli", "status": "bootstrap", "responsibility": "Operator commands and presentation; never an authority source."}
+    ],
+    "edges": [
+      {"source": "mtm-core", "target": "mtm-contracts"},
+      {"source": "mtm-storage", "target": "mtm-contracts"},
+      {"source": "mtm-storage", "target": "mtm-core"},
+      {"source": "mtm-native", "target": "mtm-contracts"},
+      {"source": "mtm-native", "target": "mtm-core"},
+      {"source": "mtm-gateway", "target": "mtm-contracts"},
+      {"source": "mtm-gateway", "target": "mtm-core"},
+      {"source": "mtm-workflow", "target": "mtm-contracts"},
+      {"source": "mtm-workflow", "target": "mtm-core"},
+      {"source": "mtm-runtime", "target": "mtm-contracts"},
+      {"source": "mtm-runtime", "target": "mtm-core"},
+      {"source": "mtm-runtime", "target": "mtm-storage"},
+      {"source": "mtm-runtime", "target": "mtm-native"},
+      {"source": "mtm-runtime", "target": "mtm-gateway"},
+      {"source": "mtm-runtime", "target": "mtm-workflow"},
+      {"source": "mtm-cli", "target": "mtm-contracts"},
+      {"source": "mtm-cli", "target": "mtm-runtime"}
+    ]
+  },
+  "runtime_authority_graph": {
+    "vertices": [
+      {"id": "client", "kind": "external"},
+      {"id": "gateway", "kind": "boundary"},
+      {"id": "native_authority", "kind": "authority"},
+      {"id": "isolated_worker", "kind": "security_boundary"},
+      {"id": "workflow_authority", "kind": "authority"},
+      {"id": "state_store", "kind": "persistent_resource"},
+      {"id": "private_vault", "kind": "persistent_resource"},
+      {"id": "finalizer", "kind": "mechanical_authority"},
+      {"id": "integrations", "kind": "bounded_adapter"},
+      {"id": "observer", "kind": "presentation_only"}
+    ],
+    "edges": [
+      {"source": "client", "target": "gateway", "guard": "OAuth and MCP validation"},
+      {"source": "gateway", "target": "native_authority", "guard": "L0 plus L1 Native authorization"},
+      {"source": "native_authority", "target": "isolated_worker", "guard": "Attested isolation and bounded request"},
+      {"source": "gateway", "target": "workflow_authority", "guard": "L0 plus owner/capability/role/state authorization"},
+      {"source": "workflow_authority", "target": "state_store", "guard": "Single transactional transition"},
+      {"source": "workflow_authority", "target": "private_vault", "guard": "Role-scoped logical resource"},
+      {"source": "workflow_authority", "target": "integrations", "guard": "Bounded fixed-provider or isolated execution adapter"},
+      {"source": "workflow_authority", "target": "finalizer", "guard": "LaTeX and verifier gates passed"},
+      {"source": "finalizer", "target": "state_store", "guard": "Idempotent finalization and promotion"},
+      {"source": "finalizer", "target": "private_vault", "guard": "Atomic verified artifact publication"},
+      {"source": "gateway", "target": "observer", "guard": "Redacted non-authoritative events"},
+      {"source": "workflow_authority", "target": "observer", "guard": "Redacted non-authoritative events"}
+    ]
+  },
+  "invariants": [
+    {"id": "INV-001", "statement": "Exactly one production authority exists per component."},
+    {"id": "INV-002", "statement": "Rust shadow execution is read-only and side-effect-free."},
+    {"id": "INV-003", "statement": "The crate dependency graph is a directed acyclic graph."},
+    {"id": "INV-004", "statement": "Native arbitrary execution crosses the isolated-worker boundary and cannot reach the private vault."},
+    {"id": "INV-005", "statement": "Workflow transition planning has one logical authority."},
+    {"id": "INV-006", "statement": "Only the mechanical finalizer publishes verified artifacts or verified claim revisions."},
+    {"id": "INV-007", "statement": "The observer can display redacted facts but cannot authorize, persist, or transition state."},
+    {"id": "INV-008", "statement": "Graph metrics never override functional or security boundaries."}
+  ]
+}

@@ -1,0 +1,25 @@
+[workspace]
+members = [
+  "crates/mtm-contracts",
+  "crates/mtm-cli",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0-alpha.1"
+edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0"
+authors = ["MTM-reboot Contributors"]
+repository = "https://github.com/I0amLK/MTM-reboot"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+dbg_macro = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+unwrap_used = "deny"

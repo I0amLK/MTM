@@ -1,0 +1,408 @@
+{
+  "schema_version": "1.0.0",
+  "project_id": "mtm-reboot",
+  "title": "MTM-reboot eight-milestone migration graph",
+  "updated_at": "2026-09-01T00:45:00-07:00",
+  "priority_order": [
+    "functionality_compatibility_security",
+    "recorded_tested_reversible_implementation",
+    "measured_performance_and_structure"
+  ],
+  "authority_values": [
+    "none",
+    "python",
+    "rust-shadow",
+    "rust",
+    "retired"
+  ],
+  "statuses": [
+    "proposed",
+    "approved",
+    "in_progress",
+    "shadow",
+    "authoritative",
+    "blocked",
+    "completed",
+    "rejected",
+    "superseded"
+  ],
+  "milestones": [
+    {
+      "id": "MTM-001",
+      "title": "Foundation, governance, source baseline, and conformance bootstrap",
+      "status": "completed",
+      "priority": "P0",
+      "production_authority_before": "python",
+      "production_authority_after": "python",
+      "functional_goal": "Create a buildable Rust workspace and machine-enforced migration process without moving any Re-CTM production behavior.",
+      "scope": [
+        "Repository and minimal Cargo workspace",
+        "Code, commit, acceptance, architecture, and migration standards",
+        "Frozen source contract and graph baseline",
+        "Migration and architecture validators",
+        "Bootstrap golden contract and local gate"
+      ],
+      "non_goals": [
+        "No production request handler",
+        "No database writer",
+        "No OAuth, MCP, Native, workflow, or finalizer cutover",
+        "No performance claim"
+      ],
+      "acceptance_levels": ["A0"],
+      "validation_commands": [
+        "python3 scripts/run_checks.py",
+        "cargo run -q -p mtm-cli -- contract",
+        "cargo run -q -p mtm-cli -- status"
+      ],
+      "rollback": "Delete the new MTM-reboot repository; Re-CTM remains unchanged and authoritative.",
+      "dependencies": []
+    },
+    {
+      "id": "MTM-002",
+      "title": "Typed contract and pure policy core",
+      "status": "approved",
+      "priority": "P0",
+      "production_authority_before": "python",
+      "production_authority_after": "rust",
+      "functional_goal": "Move stable side-effect-free contracts and policies to typed Rust while preserving exact source behavior.",
+      "scope": [
+        "Errors and enums",
+        "JSON/schema validation",
+        "Redaction and fingerprints",
+        "URL/path/command policy",
+        "Patch and other pure parsers"
+      ],
+      "non_goals": [
+        "No production persistence",
+        "No process ownership",
+        "No workflow or network authority"
+      ],
+      "acceptance_levels": ["A0", "A1", "A2", "A5"],
+      "validation_commands": [],
+      "rollback": "Return pure calls to the Python reference implementation; no state migration is involved.",
+      "dependencies": ["MTM-001"]
+    },
+    {
+      "id": "MTM-003",
+      "title": "Native process lifecycle and isolation plane",
+      "status": "proposed",
+      "priority": "P0",
+      "production_authority_before": "python",
+      "production_authority_after": "rust",
+      "functional_goal": "Move process ownership, command lifecycle, toolchain policy, Bubblewrap helper, and tunnel child lifecycle without weakening isolation.",
+      "scope": [
+        "Bounded output capture",
+        "Command IDs, polling, paging, TTY, timeout, kill, and shutdown",
+        "Toolchain exposure policy",
+        "Bubblewrap helper protocol and attestation",
+        "Owned Quick Tunnel child lifecycle"
+      ],
+      "non_goals": [
+        "No workflow capability authority",
+        "No private-vault exposure",
+        "No application-specific CAS allowlist"
+      ],
+      "acceptance_levels": ["A0", "A1", "A2", "A3", "A4", "A5"],
+      "validation_commands": [],
+      "rollback": "Switch the helper/process adapter back to Python while preserving command-state compatibility; Rust has no database authority.",
+      "dependencies": ["MTM-002"]
+    },
+    {
+      "id": "MTM-004",
+      "title": "Persistence, project state, and capability authority",
+      "status": "proposed",
+      "priority": "P0",
+      "production_authority_before": "python",
+      "production_authority_after": "rust",
+      "functional_goal": "Move SQLite migrations, transactional state, project records, and capability authority with one production writer and copied-state differential testing.",
+      "scope": [
+        "Schema history and migrations",
+        "Run, domain, branch, steering, project, claim, revision, and reference state",
+        "Promotion idempotency and optimistic conflicts",
+        "Capability issue, validation, registry cross-check, and revocation"
+      ],
+      "non_goals": [
+        "No dual production writes",
+        "No workflow transition redesign",
+        "No schema version change without a separate record"
+      ],
+      "acceptance_levels": ["A0", "A1", "A2", "A3", "A4", "A5"],
+      "validation_commands": [],
+      "rollback": "Restore Python authority against a verified compatible database backup; cutover is blocked unless rollback is proven on copied data.",
+      "dependencies": ["MTM-002"]
+    },
+    {
+      "id": "MTM-005",
+      "title": "OAuth, MCP, HTTP gateway, and public tool dispatch",
+      "status": "proposed",
+      "priority": "P0",
+      "production_authority_before": "python",
+      "production_authority_after": "rust",
+      "functional_goal": "Move the public network boundary while retaining exact OAuth, MCP, catalog, origin, and error behavior.",
+      "scope": [
+        "OAuth DCR, PKCE, codes, tokens, fixed and dynamic origins",
+        "HTTP route and Origin policy",
+        "Legacy and modern MCP JSON-RPC",
+        "Exact 18 Native plus 6 Rethlas public catalog and hidden aliases",
+        "Tool dispatch boundary"
+      ],
+      "non_goals": [
+        "No workflow semantic change",
+        "No tool-catalog redesign",
+        "No auth weakening for compatibility"
+      ],
+      "acceptance_levels": ["A0", "A1", "A2", "A3", "A4", "A5"],
+      "validation_commands": [],
+      "rollback": "Route traffic back to the Python gateway without changing persistent state or client-visible endpoints.",
+      "dependencies": ["MTM-002", "MTM-004"]
+    },
+    {
+      "id": "MTM-006",
+      "title": "Workflow, vault, verifier, finalizer, and project semantics",
+      "status": "proposed",
+      "priority": "P0",
+      "production_authority_before": "python",
+      "production_authority_after": "rust",
+      "functional_goal": "Move the mathematical state machine and its sole finalization authority using historical trace replay and verifier-isolation tests.",
+      "scope": [
+        "Task envelopes and deterministic transition plans",
+        "Full and compact workflows, branches, join, repair, and escalation",
+        "Private vault and memory visibility",
+        "Proof manifests and reference audits",
+        "Mechanical verdict, final artifact, and project promotion"
+      ],
+      "non_goals": [
+        "No second transition authority",
+        "No second finalizer",
+        "No model-controlled verified label"
+      ],
+      "acceptance_levels": ["A0", "A1", "A2", "A3", "A4", "A5"],
+      "validation_commands": [],
+      "rollback": "Return workflow requests to Python before deleting any Python authority; database and artifact compatibility must already be proven.",
+      "dependencies": ["MTM-004", "MTM-005"]
+    },
+    {
+      "id": "MTM-007",
+      "title": "Remaining tools, integrations, operator UI, and packaging",
+      "status": "proposed",
+      "priority": "P1",
+      "production_authority_before": "python",
+      "production_authority_after": "rust",
+      "functional_goal": "Complete the operational binary and distribution without changing migrated authority semantics.",
+      "scope": [
+        "File, Git, search, image, diagnostics, research, and LaTeX adapters",
+        "Configuration and environment policy",
+        "CLI, TUI, Quick Tunnel presentation, and shutdown",
+        "Install, upgrade, package, and release artifacts"
+      ],
+      "non_goals": [
+        "No new public tools",
+        "No UI authority over security or workflow",
+        "No provider trust expansion"
+      ],
+      "acceptance_levels": ["A0", "A1", "A2", "A3", "A4", "A5"],
+      "validation_commands": [],
+      "rollback": "Use the prior packaged Python distribution while Rust state and protocols remain compatible.",
+      "dependencies": ["MTM-003", "MTM-005", "MTM-006"]
+    },
+    {
+      "id": "MTM-008",
+      "title": "Full cutover, performance evidence, and Python retirement",
+      "status": "proposed",
+      "priority": "P0",
+      "production_authority_before": "rust",
+      "production_authority_after": "retired",
+      "functional_goal": "Prove the complete Rust runtime on real targets, exercise rollback, record measured gains, and remove Python production dependencies in a separate final step.",
+      "scope": [
+        "Complete target/browser/CAS/LaTeX acceptance",
+        "Upgrade, rollback, soak, resource, and performance tests",
+        "All-authority inventory",
+        "Python worker and interpreter retirement",
+        "Final release qualification"
+      ],
+      "non_goals": [
+        "No retirement before rollback evidence",
+        "No performance promise before A6",
+        "No deletion of historical fixtures or receipts"
+      ],
+      "acceptance_levels": ["A0", "A1", "A2", "A3", "A4", "A5", "A6"],
+      "validation_commands": [],
+      "rollback": "Reinstall the last accepted compatible Python release from immutable artifacts and restore the tested database backup.",
+      "dependencies": ["MTM-007"]
+    }
+  ],
+  "edges": [
+    {"source": "MTM-002", "target": "MTM-001"},
+    {"source": "MTM-003", "target": "MTM-002"},
+    {"source": "MTM-004", "target": "MTM-002"},
+    {"source": "MTM-005", "target": "MTM-002"},
+    {"source": "MTM-005", "target": "MTM-004"},
+    {"source": "MTM-006", "target": "MTM-004"},
+    {"source": "MTM-006", "target": "MTM-005"},
+    {"source": "MTM-007", "target": "MTM-003"},
+    {"source": "MTM-007", "target": "MTM-005"},
+    {"source": "MTM-007", "target": "MTM-006"},
+    {"source": "MTM-008", "target": "MTM-007"}
+  ],
+  "todo": ["MTM-002"],
+  "events": [
+    {
+      "event_id": "MEVT-001",
+      "milestone_id": "MTM-001",
+      "at": "2026-09-01T00:45:00-07:00",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "User approved a new MTM-reboot project with six to eight incremental delivery rounds."
+    },
+    {
+      "event_id": "MEVT-002",
+      "milestone_id": "MTM-001",
+      "at": "2026-09-01T00:46:00-07:00",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Created the new project and began the foundation/governance milestone without moving production authority."
+    },
+    {
+      "event_id": "MEVT-003",
+      "milestone_id": "MTM-001",
+      "at": "2026-09-01T00:55:10-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "summary": "Pinned Rust 1.98.0, passed governance, architecture, formatting, Clippy, Rust tests, golden contract, and local record gates, and retained Python as sole production authority."
+    },
+    {
+      "event_id": "MEVT-004",
+      "milestone_id": "MTM-002",
+      "at": "2026-09-01T00:55:10-07:00",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "Approved typed contract and pure policy work as the only next actionable migration milestone."
+    }
+  ],
+  "receipt_contract": {
+    "append_only": true,
+    "required_for_statuses": ["authoritative", "completed", "rejected", "superseded"],
+    "required_fields": [
+      "receipt_id",
+      "milestone_id",
+      "started_at",
+      "completed_at",
+      "status_before",
+      "status_after",
+      "authority_before",
+      "authority_after",
+      "commit_subject",
+      "files_changed",
+      "commands",
+      "acceptance",
+      "behavior_before",
+      "behavior_after",
+      "risk_review",
+      "rollback",
+      "manual_pending",
+      "decision"
+    ]
+  },
+  "receipts": [
+    {
+      "receipt_id": "MREC-001",
+      "milestone_id": "MTM-001",
+      "started_at": "2026-09-01T00:45:00-07:00",
+      "completed_at": "2026-09-01T00:55:10-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "python",
+      "authority_after": "python",
+      "commit_subject": "docs(governance): establish project foundation [MTM-001]",
+      "files_changed": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "rust-toolchain.toml",
+        "LICENSE",
+        "NOTICE",
+        "README.md",
+        "AGENTS.md",
+        ".gitignore",
+        ".gitmessage",
+        ".githooks/commit-msg",
+        "docs/CODE_STANDARD.md",
+        "docs/COMMIT_STANDARD.md",
+        "docs/ACCEPTANCE.md",
+        "docs/MIGRATION_PLAN.md",
+        "docs/ARCHITECTURE.md",
+        "docs/adr/0001-function-first-incremental-rust.md",
+        "engineering-graph.json",
+        "migration-graph.json",
+        "source-baseline.json",
+        "project-progress.json",
+        "conformance/golden/source-contract-v1.json",
+        "crates/mtm-contracts/src/lib.rs",
+        "crates/mtm-cli/src/main.rs",
+        "scripts/validate_migration_graph.py",
+        "scripts/validate_engineering_graph.py",
+        "scripts/validate_commit_message.py",
+        "scripts/run_checks.py",
+        "tests/test_governance.py",
+        "records/iterations/ITER-001.json"
+      ],
+      "commands": [
+        {
+          "command": "python3 scripts/validate_migration_graph.py && python3 scripts/validate_engineering_graph.py && python3 -m unittest discover -s tests -v",
+          "exit_code": 0,
+          "result": "Migration DAG, target crate DAG, authority invariants, receipt requirements, dependency cycles, and commit format tests passed."
+        },
+        {
+          "command": "project-local rustup install and pin Rust 1.98.0 with clippy and rustfmt",
+          "exit_code": 0,
+          "result": "rustc 1.98.0 and cargo 1.98.0 were installed under ignored .toolchain state and rust-toolchain.toml was pinned exactly."
+        },
+        {
+          "command": "python3 scripts/run_checks.py",
+          "exit_code": 1,
+          "result": "First Rust gate exposed a status JSON format-string bug; no authority or external state was affected."
+        },
+        {
+          "command": "python3 scripts/run_checks.py",
+          "exit_code": 1,
+          "result": "Second gate passed Clippy/tests/golden output and exposed only one rustfmt trailing-blank-line difference."
+        },
+        {
+          "command": "python3 scripts/run_checks.py",
+          "exit_code": 0,
+          "result": "All migration/architecture/Python governance, Rust format, Clippy, workspace tests, bootstrap CLI, and golden contract checks passed."
+        },
+        {
+          "command": "python3 scripts/run_checks.py",
+          "exit_code": 1,
+          "result": "After marking MTM-001 completed, a governance fixture exposed lifecycle coupling by assuming MTM-001 was still in progress and by clearing the real MTM-002 TODO."
+        },
+        {
+          "command": "python3 scripts/run_checks.py",
+          "exit_code": 0,
+          "result": "After replacing the fixture with a synthetic future milestone chain, every governance, Rust, golden, and Git diff gate passed in the completed-MTM-001 state."
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "evidence": [
+            "Rust 1.98.0 toolchain is pinned.",
+            "cargo fmt --check passed.",
+            "cargo clippy --workspace --all-targets -- -D warnings passed.",
+            "cargo test --workspace passed with two Rust contract tests.",
+            "Six Python governance tests passed.",
+            "Rust bootstrap contract exactly matched the source golden JSON."
+          ]
+        }
+      },
+      "behavior_before": "No independent MTM-reboot repository, Rust workspace, milestone ledger, authority record, or reproducible migration gate existed.",
+      "behavior_after": "An independent buildable Rust bootstrap exists with eight milestone boundaries, one approved next step, frozen source facts, machine-enforced records, and no production authority change.",
+      "risk_review": "The only executable Rust code reports bootstrap contracts/status. It cannot receive production requests, write source databases, authorize actions, run native commands, or finalize proofs.",
+      "rollback": "Delete MTM-reboot. Re-CTM 0.3.0 remains untouched and authoritative; no data or protocol migration is required.",
+      "manual_pending": [
+        "All real browser, OAuth, target isolation, CAS, LaTeX, database migration, workflow, rollback, and performance acceptance belongs to later milestones."
+      ],
+      "decision": "accepted"
+    }
+  ]
+}

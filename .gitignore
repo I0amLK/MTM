@@ -1,0 +1,11 @@
+/target/
+/.toolchain/
+/.cargo-home/
+/.rustup-home/
+/.venv/
+/dist/
+__pycache__/
+*.py[cod]
+*.tmp
+*.swp
+.DS_Store

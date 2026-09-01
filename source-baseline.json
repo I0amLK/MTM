@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "captured_at": "2026-09-01T00:45:00-07:00",
+  "source_project": "Re-CTM",
+  "source_path": "../Re-CTM",
+  "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
+  "source_version": "0.3.0",
+  "production_authority": "python",
+  "contract": {
+    "native_tools": 18,
+    "rethlas_tools": 6,
+    "public_tools": 24,
+    "hidden_aliases": 11,
+    "state_schema": 2,
+    "workflow_protocol": 2
+  },
+  "module_graph": {
+    "python_modules": 29,
+    "production_source_lines": 15635,
+    "directed_import_edges": 92,
+    "connected_components": 1,
+    "cycle_rank_undirected_projection": 64,
+    "nontrivial_strongly_connected_components": 0,
+    "articulation_points": [
+      "re_ctm.cli",
+      "re_ctm.native",
+      "re_ctm.storage"
+    ],
+    "highest_fan_in": [
+      ["re_ctm.errors", 18],
+      ["re_ctm.debug", 11],
+      ["re_ctm.enums", 8]
+    ],
+    "highest_fan_out": [
+      ["re_ctm.app", 13],
+      ["re_ctm.cli", 11],
+      ["re_ctm.server", 9],
+      ["re_ctm.tools", 9],
+      ["re_ctm.workflow", 9]
+    ]
+  },
+  "interpretation": [
+    "The source import graph has no nontrivial strongly connected component, so incremental extraction need not begin with cycle breaking.",
+    "High-fan-in errors/debug/enums are contract surfaces and must be frozen before migration.",
+    "CLI/app are composition hubs and should migrate late rather than define early FFI boundaries.",
+    "Native isolation and storage schema bridges are intentional boundaries, not optimization targets."
+  ]
+}
