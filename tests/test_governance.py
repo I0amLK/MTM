@@ -13,6 +13,7 @@ from scripts.validate_mtm003_target_evidence import validate as validate_mtm003_
 from scripts.validate_mtm004_target_evidence import validate as validate_mtm004_target
 from scripts.validate_mtm005_target_evidence import validate as validate_mtm005_target
 from scripts.validate_mtm006_target_evidence import validate as validate_mtm006_target
+from scripts.validate_mtm007_target_evidence import validate as validate_mtm007_target
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -82,10 +83,15 @@ class GovernanceTestCase(unittest.TestCase):
                 "mtm-core",
                 "mtm-gateway",
                 "mtm-native",
+                "mtm-runtime",
                 "mtm-storage",
                 "mtm-workflow",
             ],
         )
+        self.assertTrue(summary["mtm_runtime_single_composition_root"])
+        self.assertTrue(summary["mtm_cli_presentation_boundary"])
+        self.assertTrue(summary["oauth_principal_unforgeable_by_public_construction"])
+        self.assertTrue(summary["operator_observer_presentation_only"])
 
     def test_current_mtm003_target_evidence_is_fresh(self) -> None:
         summary = validate_mtm003_target()
@@ -102,6 +108,10 @@ class GovernanceTestCase(unittest.TestCase):
     def test_current_mtm006_target_evidence_is_fresh_and_redacted(self) -> None:
         summary = validate_mtm006_target()
         self.assertEqual(summary["required_check_count"], 8)
+
+    def test_current_mtm007_target_evidence_is_fresh_and_redacted(self) -> None:
+        summary = validate_mtm007_target()
+        self.assertEqual(summary["required_check_count"], 12)
 
     def test_commit_message_contract(self) -> None:
         message = """docs(governance): establish project foundation [MTM-001]

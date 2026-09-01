@@ -55,6 +55,7 @@ struct Context {
     database: PathBuf,
     oauth: Arc<OAuthService>,
     dispatcher: MCPDispatcher,
+    catalog: Arc<ToolCatalog>,
     events: Arc<Mutex<Vec<Value>>>,
     calls: Arc<Mutex<Vec<Value>>>,
     last_token: Option<String>,
@@ -178,13 +179,15 @@ fn evaluate(context: &mut Option<Context>, line: &str) -> Result<Value, ReCtmErr
         }
         "oauth_snapshot" => oauth_snapshot(&current.database),
         "mcp_dispatch" => {
-            let principal: OAuthPrincipal = serde_json::from_value(
-                payload
-                    .get("principal")
-                    .cloned()
-                    .ok_or_else(|| validation("principal is required"))?,
-            )
-            .map_err(json_error)?;
+            let principal_data = payload
+                .get("principal")
+                .and_then(Value::as_object)
+                .ok_or_else(|| validation("principal is required"))?;
+            let principal = OAuthPrincipal::shadow_fixture(
+                text(principal_data, "client_id")?.to_owned(),
+                text(principal_data, "subject")?.to_owned(),
+                text(principal_data, "scope")?.to_owned(),
+            );
             current
                 .dispatcher
                 .dispatch(
@@ -229,34 +232,7 @@ fn evaluate(context: &mut Option<Context>, line: &str) -> Result<Value, ReCtmErr
 
 impl Context {
     fn dispatcher_catalog(&self) -> Vec<Value> {
-        // Catalog is intentionally observable only through tools/list. This helper
-        // uses one valid modern dispatch rather than exposing an extra authority API.
-        let request = serde_json::json!({
-            "jsonrpc": "2.0",
-            "id": "catalog",
-            "method": "tools/list",
-            "params": {
-                "_meta": {
-                    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
-                    "io.modelcontextprotocol/clientCapabilities": {},
-                }
-            },
-        });
-        self.dispatcher
-            .dispatch(
-                &request,
-                &OAuthPrincipal {
-                    client_id: "catalog-client".to_owned(),
-                    subject: "catalog-client".to_owned(),
-                    scope: "mcp".to_owned(),
-                },
-                Some("catalog-trace"),
-                Some("2026-07-28"),
-            )
-            .ok()
-            .flatten()
-            .and_then(|value| value.get("result")?.get("tools")?.as_array().cloned())
-            .unwrap_or_default()
+        self.catalog.list_public()
     }
 }
 
@@ -301,11 +277,12 @@ fn initialize(payload: &Map<String, Value>) -> Result<Context, ReCtmError> {
     let backend = Arc::new(EchoBackend {
         calls: Arc::clone(&calls),
     });
-    let dispatcher = MCPDispatcher::new(catalog, backend, runtime);
+    let dispatcher = MCPDispatcher::new(Arc::clone(&catalog), backend, runtime);
     Ok(Context {
         database,
         oauth,
         dispatcher,
+        catalog,
         events,
         calls,
         last_token: None,

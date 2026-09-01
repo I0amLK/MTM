@@ -72,7 +72,17 @@ def cargo_environment() -> dict[str, str]:
 
 def build_binary() -> None:
     subprocess.run(
-        [str(CARGO_HOME / "bin" / "cargo"), "build", "-q", "-p", "mtm-gateway", "--bin", "mtm-gateway-shadow"],
+        [
+            str(CARGO_HOME / "bin" / "cargo"),
+            "build",
+            "-q",
+            "-p",
+            "mtm-gateway",
+            "--features",
+            "shadow-fixture",
+            "--bin",
+            "mtm-gateway-shadow",
+        ],
         cwd=ROOT,
         env=cargo_environment(),
         check=True,

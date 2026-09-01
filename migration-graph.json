@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM-reboot eight-milestone migration graph",
-  "updated_at": "2026-09-01T01:31:08-07:00",
+  "updated_at": "2026-09-01T09:24:00-07:00",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -222,7 +222,7 @@
     {
       "id": "MTM-007",
       "title": "Remaining tools, integrations, operator UI, and packaging",
-      "status": "approved",
+      "status": "completed",
       "priority": "P1",
       "production_authority_before": "python",
       "production_authority_after": "rust",
@@ -239,14 +239,22 @@
         "No provider trust expansion"
       ],
       "acceptance_levels": ["A0", "A1", "A2", "A3", "A4", "A5"],
-      "validation_commands": [],
+      "validation_commands": [
+        "python3 scripts/run_mtm007_conformance.py",
+        "python3 scripts/run_mtm007_target_validation.py",
+        "python3 scripts/validate_mtm007_target_evidence.py",
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets -- -D warnings",
+        "cargo test --workspace",
+        "python3 scripts/run_checks.py"
+      ],
       "rollback": "Use the prior packaged Python distribution while Rust state and protocols remain compatible.",
       "dependencies": ["MTM-003", "MTM-005", "MTM-006"]
     },
     {
       "id": "MTM-008",
       "title": "Full cutover, performance evidence, and Python retirement",
-      "status": "proposed",
+      "status": "approved",
       "priority": "P0",
       "production_authority_before": "rust",
       "production_authority_after": "retired",
@@ -282,7 +290,7 @@
     {"source": "MTM-007", "target": "MTM-006"},
     {"source": "MTM-008", "target": "MTM-007"}
   ],
-  "todo": ["MTM-007"],
+  "todo": ["MTM-008"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -515,6 +523,46 @@
       "status_before": "proposed",
       "status_after": "approved",
       "summary": "Approved remaining adapters, runtime composition, operator UI, Quick Tunnel composition and packaging as the only next milestone; it must begin by revalidating the completed MTM-006 differential and target evidence and may not redesign migrated authority semantics."
+    },
+    {
+      "event_id": "MEVT-030",
+      "milestone_id": "MTM-007",
+      "at": "2026-09-01T06:53:57-07:00",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Revalidated the completed MTM-006 post-commit workspace, 82-checkpoint workflow hash, all lower target evidence and a clean Git tree, then began only the remaining adapters, one runtime composition root, operator UI/Quick Tunnel composition and packaging without changing migrated authority semantics."
+    },
+    {
+      "event_id": "MEVT-031",
+      "milestone_id": "MTM-007",
+      "at": "2026-09-01T09:18:00-07:00",
+      "status_before": "in_progress",
+      "status_after": "shadow",
+      "summary": "Entered full-composition shadow only after the static catalog/methodology assets, runtime composition root, real RuntimeToolBackend, CLI/TUI, bounded research/LaTeX adapters and release binary passed strict Rust gates and an 18-checkpoint Python-Rust HTTP/OAuth/MCP/tool differential reached zero mismatches with stable SHA-256 6aa4f5699df7099d29c12859788430bd6b1c66a8295828598b6cae62a964d830."
+    },
+    {
+      "event_id": "MEVT-032",
+      "milestone_id": "MTM-007",
+      "at": "2026-09-01T09:21:30-07:00",
+      "status_before": "shadow",
+      "status_after": "authoritative",
+      "summary": "Accepted mtm-runtime and mtm-cli as the authoritative operational composition inside MTM-reboot after the implementation-hash-bound release target passed real Bubblewrap Native execution, HTTPS research, real LaTeX/finalization, TUI redaction, graceful shutdown, Quick Tunnel public metadata/owned cleanup, cargo-install distribution and A5 resource non-regression. Re-CTM Python remains the deployed production traffic authority."
+    },
+    {
+      "event_id": "MEVT-033",
+      "milestone_id": "MTM-007",
+      "at": "2026-09-01T09:23:30-07:00",
+      "status_before": "authoritative",
+      "status_after": "completed",
+      "summary": "Completed MTM-007 after all lower target evidence was rerun against the final shared lockfile, the architecture validator mechanically enforced the unique runtime composition root and presentation-only observer, and the complete in-progress local gate passed with A0-A5 evidence."
+    },
+    {
+      "event_id": "MEVT-034",
+      "milestone_id": "MTM-008",
+      "at": "2026-09-01T09:24:00-07:00",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "Approved full deployed cutover, soak, rollback drill, A6 performance qualification and Python retirement as the only remaining milestone; no MTM-008 implementation or production traffic cutover begins in the MTM-007 completion commit."
     }
   ],
   "receipt_contract": {
@@ -1373,6 +1421,196 @@
         "Operational file/Git/image/research/LaTeX adapters, runtime composition, TUI/Quick Tunnel and packaging remain MTM-007.",
         "Full deployed Rust cutover, soak, rollback drill, A6 performance evidence and Python retirement remain MTM-008.",
         "Other operating systems and target-specific LaTeX/CAS layouts require separate release evidence."
+      ],
+      "decision": "accepted"
+    },
+    {
+      "receipt_id": "MREC-007",
+      "milestone_id": "MTM-007",
+      "started_at": "2026-09-01T06:53:57-07:00",
+      "completed_at": "2026-09-01T09:23:30-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "python",
+      "authority_after": "rust",
+      "commit_subject": "feat(runtime): complete Rust operational composition [MTM-007]",
+      "files_changed": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/mtm-cli/Cargo.toml",
+        "crates/mtm-cli/src/main.rs",
+        "crates/mtm-cli/assets/tool-catalog-v1.b64",
+        "crates/mtm-cli/assets/methodology-v2.json",
+        "crates/mtm-core/Cargo.toml",
+        "crates/mtm-gateway/Cargo.toml",
+        "crates/mtm-gateway/src/oauth.rs",
+        "crates/mtm-gateway/src/bin/shadow.rs",
+        "crates/mtm-native/Cargo.toml",
+        "crates/mtm-native/src/lib.rs",
+        "crates/mtm-runtime/Cargo.toml",
+        "crates/mtm-runtime/src/application.rs",
+        "crates/mtm-runtime/src/config.rs",
+        "crates/mtm-runtime/src/helper.rs",
+        "crates/mtm-runtime/src/latex.rs",
+        "crates/mtm-runtime/src/lib.rs",
+        "crates/mtm-runtime/src/native_tools.rs",
+        "crates/mtm-runtime/src/operator.rs",
+        "crates/mtm-runtime/src/research.rs",
+        "crates/mtm-runtime/src/server.rs",
+        "crates/mtm-runtime/src/tool_backend.rs",
+        "crates/mtm-runtime/src/workspace.rs",
+        "crates/mtm-storage/Cargo.toml",
+        "crates/mtm-workflow/Cargo.toml",
+        "crates/mtm-workflow/src/engine.rs",
+        "crates/mtm-workflow/src/lib.rs",
+        "crates/mtm-workflow/src/research.rs",
+        "conformance/golden/mtm007-reference.sha256",
+        "scripts/run_mtm005_conformance.py",
+        "scripts/run_mtm007_conformance.py",
+        "scripts/run_mtm007_http_smoke.py",
+        "scripts/run_mtm007_target_validation.py",
+        "scripts/validate_mtm007_target_evidence.py",
+        "scripts/run_checks.py",
+        "scripts/validate_engineering_graph.py",
+        "tests/test_governance.py",
+        "engineering-graph.json",
+        "migration-graph.json",
+        "project-progress.json",
+        "local-validation.json",
+        "mtm003-target-validation.json",
+        "mtm004-target-validation.json",
+        "mtm005-target-validation.json",
+        "mtm006-target-validation.json",
+        "mtm007-target-validation.json",
+        "records/iterations/ITER-007.json"
+      ],
+      "commands": [
+        {
+          "command": "python3 scripts/run_checks.py before MTM-007 implementation",
+          "exit_code": 0,
+          "result": "The completed MTM-006 commit, 82-checkpoint workflow corpus, all lower target evidence and clean committed baseline were revalidated before runtime composition began."
+        },
+        {
+          "command": "cargo fmt/clippy/test while introducing mtm-runtime and RuntimeToolBackend",
+          "exit_code": 0,
+          "result": "The remaining adapters and 24-public-plus-11-hidden backend dispatch compiled under warnings-denied gates before transport composition was accepted."
+        },
+        {
+          "command": "python3 scripts/run_mtm005_conformance.py after OAuthPrincipal hardening",
+          "exit_code": 0,
+          "result": "The production OAuthPrincipal became non-deserializable and non-publicly constructible while the feature-gated shadow fixture preserved the original 44-record MTM-005 golden hash with zero mismatches."
+        },
+        {
+          "command": "python3 scripts/run_mtm007_conformance.py initial full composition differential",
+          "exit_code": 1,
+          "result": "The first 18-checkpoint HTTP/OAuth/MCP/tool differential exposed three real outer-contract drifts: incomplete server_info, disabled-backend warning wording and git_blame field/type parity."
+        },
+        {
+          "command": "python3 scripts/run_mtm007_conformance.py after parity repairs",
+          "exit_code": 0,
+          "result": "All eighteen full-composition checkpoints matched the frozen Python runtime exactly after dynamic run/capability/path/time normalization, and consecutive runs stabilized at SHA-256 6aa4f5699df7099d29c12859788430bd6b1c66a8295828598b6cae62a964d830."
+        },
+        {
+          "command": "cargo package -p mtm-cli --allow-dirty --no-verify",
+          "exit_code": 101,
+          "result": "Packaging first exposed missing internal dependency versions; after exact version metadata was added, cargo package correctly stopped because private mtm-* crates are not published to crates.io. MTM-007 distribution therefore remains the accepted single-binary cargo-install/path flow rather than pretending a public-crate release exists."
+        },
+        {
+          "command": "cargo install --path crates/mtm-cli --root <temporary> --locked --force",
+          "exit_code": 0,
+          "result": "A clean release install produced mtm-reboot 0.1.0-alpha.1; its dynamic dependencies contain no Python or libpython and the installed binary loads the embedded 24-tool catalog/methodology without the source repository."
+        },
+        {
+          "command": "python3 scripts/run_mtm007_target_validation.py during first real LaTeX integration",
+          "exit_code": 1,
+          "result": "Real A4 found that RuntimeLatexGate received only helper attestation because run_fixed_helper_in_workspace discarded execution fields. The production adapter was repaired to validate attestation and retain bounded exit/stdout/stderr/timing fields, with a regression test."
+        },
+        {
+          "command": "real latexmk fixture validation after helper repair",
+          "exit_code": 1,
+          "result": "The real compiler then correctly exposed a fixture-only theorem-environment error; adding an explicit newtheorem declaration made the target document valid without changing workflow semantics."
+        },
+        {
+          "command": "python3 scripts/run_mtm007_target_validation.py final A4/A5 run",
+          "exit_code": 0,
+          "result": "Twelve implementation-hash-bound release checks passed: no Python runtime linkage, cargo-install distribution, Bubblewrap attestation, Native public execution, real HTTPS research, real LaTeX/finalization and artifact delivery, TUI redaction, graceful SIGINT, Quick Tunnel public metadata and owned cleanup, plus predefined A5 non-regression."
+        },
+        {
+          "command": "python3 scripts/run_mtm003_target_validation.py through run_mtm006_target_validation.py with validators",
+          "exit_code": 0,
+          "result": "All lower implementation-bound Native/CAS/tunnel, copied-database/rollback, Firefox OAuth/MCP and pdflatex workflow target evidence was rerun against the final shared lockfile instead of changing hashes manually."
+        },
+        {
+          "command": "python3 scripts/run_checks.py in MTM-007 in-progress state",
+          "exit_code": 0,
+          "result": "The unified local gate passed before completion events were written, including strict Rust gates, all MTM-002 through MTM-007 differential checks, fresh target validators, architecture/governance and Git diff checks."
+        },
+        {
+          "command": "python3 scripts/run_checks.py in MTM-007 completed / MTM-008 approved state",
+          "exit_code": 0,
+          "result": "The same unified local gate passed again after events, MREC-007, project status, architecture status and MTM-008 approval were synchronized; production_authority remains Python and MTM-008 has not started."
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "evidence": [
+            "The full eight-crate workspace passes rustfmt, Clippy with warnings denied and all Rust tests under pinned Rust 1.98.0.",
+            "Eleven governance tests plus migration and engineering graph validators pass before completion.",
+            "The architecture validator mechanically enforces the unique runtime composition root, CLI presentation boundary, opaque OAuth principal, presentation-only observer and embedded asset hashes."
+          ]
+        },
+        "A1": {
+          "passed": true,
+          "evidence": [
+            "The embedded 35-tool catalog decodes to frozen raw SHA-256 46deeeb246f77056c75392c2d14a3d707521c043fbead29b76bb5a44c6915dc3 and is revalidated by the existing public/all-definition hashes.",
+            "The embedded methodology asset exactly matches SHA-256 0403ba1f6caeabfef563e3b2b22bf1472a84c470a76ddbcb5bafce1d5f18a4e8.",
+            "The MTM-007 end-to-end differential golden hash is 6aa4f5699df7099d29c12859788430bd6b1c66a8295828598b6cae62a964d830."
+          ]
+        },
+        "A2": {
+          "passed": true,
+          "evidence": [
+            "Eighteen OAuth/MCP/catalog/file/search/Git/image/permission/patch/Rethlas composition checkpoints match the frozen Re-CTM runtime with zero mismatches.",
+            "Python and Rust run against independent temporary workspaces, SQLite roots, OAuth stores and private state; no production database is dual-written.",
+            "Dynamic run, capability, trace, path and file-time facts are explicitly normalized while ordinary protocol/result fields remain exact."
+          ]
+        },
+        "A3": {
+          "passed": true,
+          "evidence": [
+            "Runtime is the only broad composition crate; gateway and workflow retain their earlier authority boundaries.",
+            "OAuthPrincipal has private validated state and no external Deserialize constructor; the conformance-only constructor is behind a default-off shadow-fixture feature.",
+            "OperatorSession observes only redacted RuntimeEvent/TunnelEvent facts and owns no store, capability, vault or workflow authority."
+          ]
+        },
+        "A4": {
+          "passed": true,
+          "evidence": [
+            "Release HTTP/OAuth/MCP calls reach the real RuntimeToolBackend, Bubblewrap Native execution, fixed HTTPS research provider and workflow authority.",
+            "A real latexmk/pdflatex compile reaches verifier/finalizer and publishes the verified workspace artifact through the controlled bridge.",
+            "Real Quick Tunnel external metadata reports the public issuer and the session removes only its owned cloudflared child on clean SIGINT shutdown.",
+            "A cargo-install --path release binary works without Python/libpython runtime linkage."
+          ]
+        },
+        "A5": {
+          "passed": true,
+          "evidence": [
+            "Seven equivalent Python samples recorded median/p95 160.101/160.888 ms and median/max RSS 29,992/30,084 KiB.",
+            "Seven Rust release samples recorded median/p95 56.918/80.358 ms and median/max RSS 13,140/13,480 KiB.",
+            "The predefined elapsed and RSS non-regression ratios passed; these measurements are A5 acceptance evidence only and are not promoted to an A6 production-performance claim."
+          ]
+        }
+      },
+      "behavior_before": "MTM-reboot had accepted Rust authorities for contracts, Native, persistence/capabilities, gateway and workflow, but no single production-like Rust composition wired the fixed catalog to real file/Git/image/research/LaTeX adapters, operator commands, TUI/Quick Tunnel or an installable release executable.",
+      "behavior_after": "MTM-reboot now has one accepted all-Rust operational composition and installable release executable covering the fixed 24-tool public surface and 11 hidden aliases, bounded adapters, operator presentation and owned tunnel lifecycle. Re-CTM Python still receives deployed production traffic until MTM-008.",
+      "risk_review": "MTM-007 did not create a new authority layer: runtime only composes already accepted authorities, CLI and TUI remain presentation/control entry points, arbitrary Native execution still crosses the Bubblewrap boundary, workflow has no network/process authority, provider hosts stay fixed, embedded catalog/methodology bytes are hash-bound, and reports contain no OAuth keys, tokens, capabilities or proof text.",
+      "rollback": "Do not route deployed traffic to MTM-reboot yet. The existing Re-CTM Python package remains the production distribution and state authority; MTM-007 used disposable/shadow state for parity and target checks, so rollback requires no production data rewrite.",
+      "manual_pending": [
+        "MTM-008 must perform the actual deployed traffic/state cutover, soak and tested rollback drill before Python production authority is removed.",
+        "A6 release-mode performance qualification remains MTM-008; MTM-007 resource samples are non-regression evidence only.",
+        "Publishing the internal mtm-* crates to a public registry is not required for the accepted single-binary distribution and remains a separate release decision.",
+        "Additional operating systems, reverse proxies and target-specific CAS/LaTeX layouts require separate release qualification."
       ],
       "decision": "accepted"
     }

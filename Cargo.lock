@@ -554,7 +554,7 @@ name = "mtm-cli"
 version = "0.1.0-alpha.1"
 dependencies = [
  "mtm-contracts",
- "mtm-core",
+ "mtm-runtime",
  "serde_json",
 ]
 
@@ -615,6 +615,28 @@ dependencies = [
  "sha2",
  "shell-words",
  "tempfile",
+]
+
+[[package]]
+name = "mtm-runtime"
+version = "0.1.0-alpha.1"
+dependencies = [
+ "axum",
+ "base64",
+ "getrandom",
+ "mtm-contracts",
+ "mtm-core",
+ "mtm-gateway",
+ "mtm-native",
+ "mtm-storage",
+ "mtm-workflow",
+ "regex",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
+ "tokio",
+ "url",
 ]
 
 [[package]]

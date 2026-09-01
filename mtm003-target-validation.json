@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project": "MTM-reboot",
   "milestone": "MTM-003",
-  "implementation_sha256": "5fa1e16069e92d06b0e98a87777a15ed5f733be07ab6caec18cd0e175d54f9aa",
+  "implementation_sha256": "8e55b75e89806d8505f9847b72e87fa25d5aae10a509ba4e5e7492650872347b",
   "environment": {
     "platform": "Linux",
     "release": "7.1.2-070102-generic",
@@ -19,7 +19,7 @@
       "name": "bubblewrap_attestation",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.026,
+      "elapsed_ms": 22.092,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "attest",
@@ -60,7 +60,7 @@
       "name": "safe_workspace_read",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 21.933,
+      "elapsed_ms": 22.017,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -113,7 +113,7 @@
       "name": "private_vault_and_parent_env_denial",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.026,
+      "elapsed_ms": 21.99,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -166,7 +166,7 @@
       "name": "explicit_generic_toolchain_execution",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.031,
+      "elapsed_ms": 22.074,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -219,7 +219,7 @@
       "name": "toolchain_mount_read_only",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 21.979,
+      "elapsed_ms": 21.988,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -250,7 +250,7 @@
         "exit_code": 2,
         "signal": null,
         "status": "exited",
-        "stderr": "/bin/sh: 1: cannot create /tmp/coding-tools-mcp/22f4588e2aced8a8/thS2s3XLegZW7h4-/tmp/mtm003-target-ohdlmr9r/explicit-toolchain/must-remain-read-only: Read-only file system\n",
+        "stderr": "/bin/sh: 1: cannot create /tmp/coding-tools-mcp/22f4588e2aced8a8/thS2s3XLegZW7h4-/tmp/mtm003-target-xjcceuu8/explicit-toolchain/must-remain-read-only: Read-only file system\n",
         "stderr_meta": {
           "dropped_bytes": 0,
           "retained_bytes": 173,
@@ -285,7 +285,7 @@
       "name": "dangerous_plan_attestation",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.1,
+      "elapsed_ms": 22.124,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "attest",
@@ -326,7 +326,7 @@
       "name": "sagemath_execution",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 745.661,
+      "elapsed_ms": 746.354,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -353,7 +353,7 @@
           "workspace_mount": "/workspace",
           "workspace_mounted": true
         },
-        "elapsed_ms": 743,
+        "elapsed_ms": 744,
         "exit_code": 0,
         "signal": null,
         "status": "exited",
@@ -379,7 +379,7 @@
       "name": "magma_execution",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.205,
+      "elapsed_ms": 22.162,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -432,7 +432,7 @@
       "name": "helper_timeout_provenance",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 142.797,
+      "elapsed_ms": 143.022,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -459,7 +459,7 @@
           "workspace_mount": "/workspace",
           "workspace_mounted": true
         },
-        "elapsed_ms": 140,
+        "elapsed_ms": 141,
         "exit_code": null,
         "signal": "SIGTERM",
         "status": "timeout",
@@ -502,7 +502,7 @@
       "exit_code": -15,
       "signal": "SIGTERM",
       "termination": {
-        "elapsed_ms": 130,
+        "elapsed_ms": 131,
         "kill_sent_by_re_ctm": false,
         "observed_signal": "SIGTERM",
         "requested_timeout_ms": 30000,
@@ -514,7 +514,7 @@
       "name": "real_quick_tunnel_lifecycle",
       "passed": true,
       "exit_code": 0,
-      "public_url_fingerprint": "98e5c81276476caa",
+      "public_url_fingerprint": "aa9606a45a95a426",
       "event_states": [
         "starting",
         "connected"

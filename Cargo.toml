@@ -6,6 +6,7 @@ members = [
   "crates/mtm-storage",
   "crates/mtm-workflow",
   "crates/mtm-gateway",
+  "crates/mtm-runtime",
   "crates/mtm-cli",
 ]
 resolver = "2"

@@ -181,6 +181,18 @@ def main() -> int:
                     capture_json=True,
                 ),
                 run(
+                    "mtm007_conformance",
+                    [sys.executable, "scripts/run_mtm007_conformance.py"],
+                    env=environment,
+                    capture_json=True,
+                ),
+                run(
+                    "mtm007_target_evidence",
+                    [sys.executable, "scripts/validate_mtm007_target_evidence.py"],
+                    env=environment,
+                    capture_json=True,
+                ),
+                run(
                     "bootstrap_contract",
                     [cargo, "run", "-q", "-p", "mtm-cli", "--", "contract"],
                     env=environment,
@@ -225,20 +237,22 @@ def main() -> int:
         "schema_version": "1.0.0",
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "project": "MTM-reboot",
-        "milestone": "MTM-006",
+        "milestone": "MTM-007",
         "production_authority": "python",
         "passed": all(item["passed"] for item in checks),
         "checks": checks,
         "local_claim": (
             "MTM-001 governance, MTM-002 pure contracts/policies, MTM-003 Native isolation, "
             "MTM-004 copied-database persistence/capability behavior, MTM-005 OAuth/MCP/HTTP "
-            "gateway behavior, and MTM-006 workflow/vault/verifier/finalizer behavior were "
-            "validated by Rust tests and frozen Python-Rust differential "
+            "gateway behavior, MTM-006 workflow/vault/verifier/finalizer behavior, and MTM-007 "
+            "full runtime/CLI/tool-backend composition were validated by Rust tests and frozen "
+            "Python-Rust differential "
             "checks. This gate verifies the freshness and completeness of separately executed "
-            "MTM-003 through MTM-006 target reports but does not re-run real Bubblewrap/CAS, "
-            "private-state backup, Firefox OAuth, or pdflatex target flows. Re-CTM Python remains "
-            "the deployed traffic and state authority. No packaging/cutover, A6 performance, or "
-            "Python-retirement authority is claimed."
+            "MTM-003 through MTM-007 target reports but does not re-run real Bubblewrap/CAS, "
+            "private-state backup, Firefox OAuth, pdflatex, research-provider, or Quick Tunnel "
+            "target flows. Re-CTM Python remains the deployed traffic and state authority. "
+            "MTM-007 validates release/install packaging and A5 non-regression but makes no A6 "
+            "performance claim, deployed cutover claim, or Python-retirement claim."
         ),
     }
     temporary = REPORT.with_name(REPORT.name + ".tmp")

@@ -95,10 +95,10 @@ definition hashes match Re-CTM 0.3.0 exactly. The gateway calls a `ToolBackend` 
 it cannot implement Native/workflow semantics, write workflow state, access the
 private vault, or publish verified artifacts.
 
-During migration, conformance and target tooling generate the catalog snapshot from
-the frozen source files and Rust verifies the immutable hashes before startup. The
-production package will bundle that verified asset in the distribution milestone;
-the deployed gateway will not invoke Python to build its catalog.
+During migration, conformance tooling still regenerates the catalog independently
+from the frozen source files. The MTM-007 release binary now embeds the separately
+verified catalog and methodology assets; Rust validates the immutable catalog hashes
+at startup and never invokes Python to build its production catalog.
 
 `mtm-workflow` owns one deterministic transition authority, the logical private
 vault, verifier computation, repair/escalation, and the mechanical finalizer. It
@@ -110,24 +110,32 @@ re-hashes the current proof before publishing `proof_verified.tex`, so verifier
 approval cannot be replayed after draft mutation.
 
 The workflow library has no network, async-runtime, Native-process, or gateway
-dependency. Real `pdflatex` execution exists only in the target-validation binary in
-MTM-006; the operational LaTeX adapter remains MTM-007. This intentionally keeps the
-authority graph stronger even though it adds the explicit `workflow -> storage`
-dependency edge.
+dependency. MTM-007 keeps production `latexmk`/`pdflatex` and fixed-provider HTTPS
+research in `mtm-runtime` behind the `LatexGate` and `ResearchProvider` traits; the
+workflow crate therefore gains functionality without acquiring process or network
+authority. This intentionally keeps the authority graph stronger even though it adds
+explicit composition edges in `mtm-runtime`.
 
-## Implemented slice after MTM-002
+## Implemented slice after MTM-007
 
-`mtm-contracts` and `mtm-core` now form the implemented bottom of the dependency DAG:
+Seven of the eight workspace crates are now implemented, while `mtm-contracts`
+remains the stable bootstrap contract floor:
 
 ```text
 mtm-contracts
-      ▲
-      │
-  mtm-core
+      ↑
+   mtm-core
+   ├── mtm-storage
+   ├── mtm-native
+   ├── mtm-gateway
+   └── mtm-workflow
+          ↑
+      mtm-runtime
+          ↑
+        mtm-cli
 ```
 
-They own only stable wire facts and pure bounded policy. They have no database,
-process, network, workflow-transition, vault, or finalizer authority. The standalone
-CLI evaluator exists solely for golden and differential testing against the frozen
-Python source. This keeps the first Rust authority boundary coherent without making
-the CLI or conformance harness a production composition root.
+`mtm-runtime` is the only allowed broad composition root. `mtm-cli` depends only on
+contracts/runtime plus serialization and therefore cannot become a second authority
+source. `OperatorSession` receives redacted events and owns no store, capability,
+vault, or workflow object. Deployed Re-CTM traffic remains Python until MTM-008.

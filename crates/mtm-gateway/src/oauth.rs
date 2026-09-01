@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 use std::fs;
+use std::ops::Deref;
 use std::path::Path;
 use std::sync::{Arc, Mutex, MutexGuard};
 
@@ -9,7 +10,7 @@ use hmac::{Hmac, Mac};
 use mtm_contracts::{ErrorCategory, ReCtmError, invalid_argument};
 use mtm_core::{token_fingerprint, validate_oauth_server_url, validate_redirect_uris};
 use rusqlite::{Connection, OptionalExtension, TransactionBehavior, params};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
 use url::form_urlencoded;
@@ -21,11 +22,51 @@ pub const ACCESS_TOKEN_TTL_SECONDS: i64 = 24 * 60 * 60;
 pub const MAX_CLIENTS: i64 = 1024;
 pub const SUPPORTED_AUTH_METHODS: [&str; 3] = ["client_secret_basic", "client_secret_post", "none"];
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub struct OAuthPrincipal {
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub struct OAuthPrincipalView {
     pub client_id: String,
     pub subject: String,
     pub scope: String,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct OAuthPrincipal {
+    view: OAuthPrincipalView,
+}
+
+impl OAuthPrincipal {
+    fn authenticated(client_id: String, subject: String, scope: String) -> Self {
+        Self {
+            view: OAuthPrincipalView {
+                client_id,
+                subject,
+                scope,
+            },
+        }
+    }
+
+    #[cfg(feature = "shadow-fixture")]
+    #[doc(hidden)]
+    pub fn shadow_fixture(client_id: String, subject: String, scope: String) -> Self {
+        Self::authenticated(client_id, subject, scope)
+    }
+}
+
+impl Deref for OAuthPrincipal {
+    type Target = OAuthPrincipalView;
+
+    fn deref(&self) -> &Self::Target {
+        &self.view
+    }
+}
+
+impl Serialize for OAuthPrincipal {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.view.serialize(serializer)
+    }
 }
 
 pub struct OAuthStore {
@@ -629,11 +670,11 @@ impl OAuthService {
                     "OAuth access token is invalid or expired.",
                 ));
             }
-            Ok(OAuthPrincipal {
-                client_id: client_id.to_owned(),
-                subject: text(&payload, "sub").unwrap_or(client_id).to_owned(),
-                scope: text(&payload, "scope").unwrap_or_default().to_owned(),
-            })
+            Ok(OAuthPrincipal::authenticated(
+                client_id.to_owned(),
+                text(&payload, "sub").unwrap_or(client_id).to_owned(),
+                text(&payload, "scope").unwrap_or_default().to_owned(),
+            ))
         });
         match payload {
             Ok(principal) => {

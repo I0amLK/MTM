@@ -9,6 +9,7 @@ pub mod toolchain;
 pub use bubblewrap::{
     BubblewrapCommandSpec, MAX_REQUEST_BYTES, NATIVE_HELPER_PROTOCOL, NativeHelperRequest,
     NativeHelperResponse, build_bubblewrap_command, invoke_helper_request,
+    validate_helper_response,
 };
 pub use capture::{BoundedCapture, CapturePayload};
 pub use process::{CommandManager, CommandManagerConfig, CommandRequest, KillRequest, PollRequest};

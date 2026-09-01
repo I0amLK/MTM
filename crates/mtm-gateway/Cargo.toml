@@ -7,14 +7,18 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
+[features]
+default = []
+shadow-fixture = []
+
 [dependencies]
 axum.workspace = true
 base64.workspace = true
 getrandom.workspace = true
 hmac.workspace = true
 http.workspace = true
-mtm-contracts = { path = "../mtm-contracts" }
-mtm-core = { path = "../mtm-core" }
+mtm-contracts = { version = "=0.1.0-alpha.1", path = "../mtm-contracts" }
+mtm-core = { version = "=0.1.0-alpha.1", path = "../mtm-core" }
 rusqlite.workspace = true
 serde.workspace = true
 serde_json.workspace = true
@@ -34,6 +38,7 @@ workspace = true
 [[bin]]
 name = "mtm-gateway-shadow"
 path = "src/bin/shadow.rs"
+required-features = ["shadow-fixture"]
 
 [[bin]]
 name = "mtm-gateway-server"

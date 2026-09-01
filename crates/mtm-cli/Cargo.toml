@@ -10,8 +10,8 @@ name = "mtm-reboot"
 path = "src/main.rs"
 
 [dependencies]
-mtm-contracts = { path = "../mtm-contracts" }
-mtm-core = { path = "../mtm-core" }
+mtm-contracts = { version = "=0.1.0-alpha.1", path = "../mtm-contracts" }
+mtm-runtime = { version = "=0.1.0-alpha.1", path = "../mtm-runtime" }
 serde_json.workspace = true
 
 [lints]

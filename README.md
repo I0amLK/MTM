@@ -15,11 +15,12 @@ The governing order is:
 - Current production authority: Re-CTM's Python implementation.
 - MTM-reboot Rust authority: typed pure contracts/policies, Native process/isolation,
   copied-state persistence/capabilities, the OAuth/MCP/HTTP gateway, and the
-  workflow/private-vault/verifier/finalizer component. No deployed Re-CTM request
-  path or production database writer has moved.
-- Completed milestones: `MTM-001` through `MTM-006`.
-- Next approved milestone: `MTM-007` remaining adapters, runtime composition, operator
-  UI, Quick Tunnel composition, and packaging.
+  workflow/private-vault/verifier/finalizer component, plus the single Rust runtime
+  composition, remaining adapters, CLI/TUI, Quick Tunnel session, and installable
+  release binary. No deployed Re-CTM request path or production database writer has moved.
+- Completed milestones: `MTM-001` through `MTM-007`.
+- Next approved milestone: `MTM-008` deployed cutover, soak/rollback, A6 performance
+  qualification, and Python production-runtime retirement.
 
 ## Eight milestones
 
@@ -46,6 +47,8 @@ python3 scripts/run_mtm005_conformance.py
 python3 scripts/validate_mtm005_target_evidence.py
 python3 scripts/run_mtm006_conformance.py
 python3 scripts/validate_mtm006_target_evidence.py
+python3 scripts/run_mtm007_conformance.py
+python3 scripts/validate_mtm007_target_evidence.py
 cargo run -q -p mtm-cli -- contract
 cargo run -q -p mtm-cli -- status
 python3 scripts/run_mtm002_conformance.py
@@ -69,7 +72,13 @@ exact workflow/vault/database checkpoints with zero Python-Rust mismatches plus 
 `pdflatex` evidence for mechanical finalization, VERIFIED project promotion,
 post-verifier proof-tamper denial, and server-derived reference-audit gaps. L2
 capability claims and the finalization permit are non-public-construction Rust
-authority types rather than caller-supplied role/state booleans.
+authority types rather than caller-supplied role/state booleans. `MTM-007` adds an
+18-checkpoint full HTTP/OAuth/MCP/tool composition differential with frozen SHA-256
+`6aa4f5699df7099d29c12859788430bd6b1c66a8295828598b6cae62a964d830`, static
+hash-bound catalog/methodology assets, real release Bubblewrap/research/LaTeX/TUI/
+Quick-Tunnel acceptance, and `cargo install --path` single-binary distribution without
+Python/libpython linkage. Its A5 resource samples are non-regression evidence only;
+A6 performance conclusions remain `MTM-008` work.
 
 The project does not claim parity, safety, or performance merely because a Rust
 binary builds. See [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) and

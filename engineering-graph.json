@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "graph_id": "mtm-reboot-target-architecture",
-  "updated_at": "2026-09-01T04:30:00-07:00",
+  "updated_at": "2026-09-01T09:15:00-07:00",
   "principles": [
     "Functional authority is preserved before structural optimization.",
     "The crate dependency graph is acyclic.",
@@ -17,8 +17,8 @@
       {"id": "mtm-native", "status": "implemented", "responsibility": "Process lifecycle, TTY, toolchains, isolation, and owned child processes."},
       {"id": "mtm-gateway", "status": "implemented", "responsibility": "OAuth, MCP, HTTP, public catalog, and request boundary."},
       {"id": "mtm-workflow", "status": "implemented", "responsibility": "Deterministic workflow transition planning, private vault, verifier/finalizer gates, typed L2 capability use, and project semantics."},
-      {"id": "mtm-runtime", "status": "planned", "responsibility": "Single composition root and effect orchestration."},
-      {"id": "mtm-cli", "status": "bootstrap", "responsibility": "Operator commands and presentation; never an authority source."}
+      {"id": "mtm-runtime", "status": "implemented", "responsibility": "Single composition root, remaining bounded adapters, tool backend wiring, operator session, and distribution composition."},
+      {"id": "mtm-cli", "status": "implemented", "responsibility": "Operator commands and presentation; never an authority source."}
     ],
     "edges": [
       {"source": "mtm-core", "target": "mtm-contracts"},

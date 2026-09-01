@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import base64
+import hashlib
 import json
 import re
 import sys
@@ -245,6 +247,111 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
     if "pub use verifier::FinalizationPermit" in workflow_lib or "pub use kernel::FinalizationPermit" in workflow_lib:
         raise ValueError("FinalizationPermit must not be re-exported from mtm-workflow")
 
+    runtime_manifest = tomllib.loads(
+        (ROOT / "crates" / "mtm-runtime" / "Cargo.toml").read_text(encoding="utf-8")
+    )
+    runtime_dependencies = set(runtime_manifest.get("dependencies", {}))
+    expected_runtime_dependencies = {
+        "axum",
+        "base64",
+        "getrandom",
+        "mtm-contracts",
+        "mtm-core",
+        "mtm-gateway",
+        "mtm-native",
+        "mtm-storage",
+        "mtm-workflow",
+        "regex",
+        "serde",
+        "serde_json",
+        "sha2",
+        "tokio",
+        "url",
+    }
+    if runtime_dependencies != expected_runtime_dependencies:
+        raise ValueError(
+            "mtm-runtime dependency boundary drift: "
+            f"expected {sorted(expected_runtime_dependencies)}, got {sorted(runtime_dependencies)}"
+        )
+    if graph["mtm-runtime"] != {
+        "mtm-contracts",
+        "mtm-core",
+        "mtm-gateway",
+        "mtm-native",
+        "mtm-storage",
+        "mtm-workflow",
+    }:
+        raise ValueError("mtm-runtime must remain the single wide composition root")
+
+    cli_manifest = tomllib.loads(
+        (ROOT / "crates" / "mtm-cli" / "Cargo.toml").read_text(encoding="utf-8")
+    )
+    cli_dependencies = set(cli_manifest.get("dependencies", {}))
+    expected_cli_dependencies = {"mtm-contracts", "mtm-runtime", "serde_json"}
+    if cli_dependencies != expected_cli_dependencies:
+        raise ValueError(
+            "mtm-cli dependency boundary drift: "
+            f"expected {sorted(expected_cli_dependencies)}, got {sorted(cli_dependencies)}"
+        )
+    if graph["mtm-cli"] != {"mtm-contracts", "mtm-runtime"}:
+        raise ValueError("mtm-cli must remain presentation over contracts/runtime only")
+
+    oauth_source = (ROOT / "crates" / "mtm-gateway" / "src" / "oauth.rs").read_text(
+        encoding="utf-8"
+    )
+    principal_match = re.search(
+        r"pub struct OAuthPrincipal\s*\{(?P<body>.*?)\n\}",
+        oauth_source,
+        flags=re.DOTALL,
+    )
+    if principal_match is None:
+        raise ValueError("OAuthPrincipal definition is missing")
+    if re.search(
+        r"^\s*pub\s+[A-Za-z_][A-Za-z0-9_]*\s*:",
+        principal_match.group("body"),
+        re.MULTILINE,
+    ):
+        raise ValueError("OAuthPrincipal fields must remain non-public")
+    principal_prefix = oauth_source[: principal_match.start()].rsplit("#[derive", 1)[-1]
+    if "Deserialize" in principal_prefix:
+        raise ValueError("OAuthPrincipal must not regain external Deserialize construction")
+    shadow_fixture_match = re.search(
+        r'#\[cfg\(feature = "shadow-fixture"\)\]\s*#\[doc\(hidden\)\]\s*pub fn shadow_fixture',
+        oauth_source,
+    )
+    if shadow_fixture_match is None:
+        raise ValueError("OAuthPrincipal test constructor must remain shadow-fixture gated")
+    gateway_features = gateway_manifest.get("features", {})
+    if gateway_features.get("default") != [] or "shadow-fixture" not in gateway_features:
+        raise ValueError("shadow-fixture must remain disabled by default")
+
+    operator_source = (ROOT / "crates" / "mtm-runtime" / "src" / "operator.rs").read_text(
+        encoding="utf-8"
+    )
+    for forbidden in ("StateStore", "CapabilityAuthority", "PrivateVault", "WorkflowEngine"):
+        if forbidden in operator_source:
+            raise ValueError(f"operator observer acquired authority-bearing type: {forbidden}")
+
+    catalog_b64 = (ROOT / "crates" / "mtm-cli" / "assets" / "tool-catalog-v1.b64").read_text(
+        encoding="utf-8"
+    )
+    try:
+        catalog_bytes = base64.b64decode("".join(catalog_b64.split()), validate=True)
+        json.loads(catalog_bytes)
+    except (ValueError, json.JSONDecodeError) as exc:
+        raise ValueError("embedded tool catalog is not valid base64 JSON") from exc
+    catalog_raw_sha256 = hashlib.sha256(catalog_bytes).hexdigest()
+    if catalog_raw_sha256 != "46deeeb246f77056c75392c2d14a3d707521c043fbead29b76bb5a44c6915dc3":
+        raise ValueError("embedded tool catalog raw bytes drifted from the frozen source snapshot")
+    methodology_bytes = (ROOT / "crates" / "mtm-cli" / "assets" / "methodology-v2.json").read_bytes()
+    try:
+        json.loads(methodology_bytes)
+    except json.JSONDecodeError as exc:
+        raise ValueError("embedded methodology asset is invalid JSON") from exc
+    methodology_sha256 = hashlib.sha256(methodology_bytes).hexdigest()
+    if methodology_sha256 != "0403ba1f6caeabfef563e3b2b22bf1472a84c470a76ddbcb5bafce1d5f18a4e8":
+        raise ValueError("embedded methodology bytes drifted from the frozen source snapshot")
+
     runtime_graph = payload.get("runtime_authority_graph")
     if not isinstance(runtime_graph, dict):
         raise ValueError("missing runtime_authority_graph")
@@ -283,6 +390,14 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
         "mtm_workflow_authority_boundary": True,
         "capability_claims_unforgeable_by_public_construction": True,
         "finalization_permit_verifier_private": True,
+        "mtm_runtime_dependency_count": len(runtime_dependencies),
+        "mtm_runtime_single_composition_root": True,
+        "mtm_cli_dependency_count": len(cli_dependencies),
+        "mtm_cli_presentation_boundary": True,
+        "oauth_principal_unforgeable_by_public_construction": True,
+        "operator_observer_presentation_only": True,
+        "embedded_tool_catalog_sha256": catalog_raw_sha256,
+        "embedded_methodology_sha256": methodology_sha256,
         "runtime_vertices": len(runtime_ids),
         "runtime_edges": len(runtime_edges),
         "invariants": len(invariants),

@@ -81,6 +81,15 @@ TUI, Quick Tunnel presentation, configuration, CLI, installer, and release artif
 The binary becomes operationally complete but Python remains a tested rollback until
 MTM-008.
 
+Implemented and accepted. The full HTTP/OAuth/MCP/tool composition matches the
+frozen Python source at eighteen deterministic checkpoints with zero mismatches and
+golden SHA-256 `6aa4f5699df7099d29c12859788430bd6b1c66a8295828598b6cae62a964d830`.
+The release target passes real Bubblewrap Native execution, fixed-provider HTTPS
+research, real LaTeX/finalization, verified artifact delivery, TUI redaction,
+graceful SIGINT, public Quick Tunnel metadata/owned cleanup, and `cargo install
+--path` distribution without Python linkage. A5 release resource non-regression
+passes; A6 remains explicitly deferred to MTM-008.
+
 ## MTM-008 — cutover and Python retirement
 
 Run complete local, target, browser, CAS, LaTeX, upgrade, rollback, soak, resource,

@@ -14,6 +14,7 @@ use sha2::{Digest, Sha256};
 
 use crate::kernel::{TransitionDecision, TransitionRequest};
 use crate::methodology::{TaskCatalog, state_name};
+use crate::research::{DisabledResearchProvider, ResearchProvider, ResearchRequest};
 use crate::vault::{BRANCH_CHANNELS, GENERATION_CHANNELS, PrivateVault, VERIFIER_CHANNELS};
 use crate::verifier::{
     FinalizationPermit, VerificationDecision, VerificationFinding, VerificationVerdict,
@@ -69,6 +70,7 @@ pub struct WorkflowEngine {
     capabilities: Arc<CapabilityAuthority>,
     methodology: Arc<TaskCatalog>,
     latex_gate: Arc<dyn LatexGate>,
+    research: Arc<dyn ResearchProvider>,
     observer: Option<WorkflowObserver>,
 }
 
@@ -82,12 +84,34 @@ impl WorkflowEngine {
         latex_gate: Arc<dyn LatexGate>,
         observer: Option<WorkflowObserver>,
     ) -> Self {
+        Self::new_with_research(
+            store,
+            vault,
+            capabilities,
+            methodology,
+            latex_gate,
+            Arc::new(DisabledResearchProvider),
+            observer,
+        )
+    }
+
+    #[must_use]
+    pub fn new_with_research(
+        store: Arc<StateStore>,
+        vault: Arc<PrivateVault>,
+        capabilities: Arc<CapabilityAuthority>,
+        methodology: Arc<TaskCatalog>,
+        latex_gate: Arc<dyn LatexGate>,
+        research: Arc<dyn ResearchProvider>,
+        observer: Option<WorkflowObserver>,
+    ) -> Self {
         Self {
             store,
             vault,
             capabilities,
             methodology,
             latex_gate,
+            research,
             observer,
         }
     }
@@ -408,6 +432,268 @@ impl WorkflowEngine {
             "ok":true,"run_id":claims.run_id(),"resource":resource,"query":query,
             "results":self.vault.search_records(&records, query, limit),"trace_id":trace
         }))
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn retrieve(
+        &self,
+        owner_id: &str,
+        capability: &str,
+        query: &str,
+        operation: &str,
+        author: &str,
+        title: &str,
+        keywords: &str,
+        search_intent: &str,
+        num_results: usize,
+        trace_id: Option<&str>,
+    ) -> Result<Value, ReCtmError> {
+        if !matches!(
+            operation,
+            "theorem_search" | "paper_search" | "paper_lookup" | "theorem_context"
+        ) {
+            return Err(invalid_details(
+                "unsupported retrieval operation",
+                serde_json::json!({"operation": operation}),
+            ));
+        }
+        let trace = self.trace(trace_id)?;
+        let resource = if operation == "theorem_search" {
+            "external:theorems"
+        } else {
+            "external:research"
+        };
+        let claims = self
+            .capabilities
+            .validate(capability, owner_id, "retrieve", resource, &trace, None)?;
+
+        if operation == "theorem_context" {
+            let reference_id = query.trim();
+            let reference = self.store.get_reference(reference_id)?;
+            if reference.get("run_id").and_then(Value::as_str) != Some(claims.run_id()) {
+                return Err(ReCtmError::new(
+                    "REFERENCE_RUN_MISMATCH",
+                    "The requested theorem context is outside the active run.",
+                )
+                .with_category(ErrorCategory::Permission));
+            }
+            let metadata = reference
+                .get("metadata")
+                .and_then(Value::as_object)
+                .cloned()
+                .unwrap_or_default();
+            return Ok(serde_json::json!({
+                "ok":true,
+                "run_id":claims.run_id(),
+                "operation":operation,
+                "reference":reference,
+                "content":metadata.get("retrieved_theorem").and_then(Value::as_str).unwrap_or_default(),
+                "source_trust":reference.get("source_state").and_then(Value::as_str).unwrap_or("candidate"),
+                "usage_rule":"This is stored discovery context, not proof that the source statement was checked in the original paper.",
+                "trace_id":trace,
+            }));
+        }
+
+        let request = ResearchRequest {
+            operation: operation.to_owned(),
+            query: query.to_owned(),
+            author: author.to_owned(),
+            title: title.to_owned(),
+            keywords: keywords.to_owned(),
+            search_intent: search_intent.to_owned(),
+            num_results,
+        };
+        let mut result = self.research.retrieve(&request)?;
+        let result_object = result.as_object_mut().ok_or_else(|| {
+            ReCtmError::new(
+                "RESEARCH_SERVICE_PROTOCOL_ERROR",
+                "Research provider result must be a JSON object.",
+            )
+            .with_category(ErrorCategory::Runtime)
+        })?;
+        let raw_results = result_object
+            .remove("results")
+            .and_then(|value| value.as_array().cloned())
+            .ok_or_else(|| {
+                ReCtmError::new(
+                    "RESEARCH_SERVICE_PROTOCOL_ERROR",
+                    "Research provider result must contain a results array.",
+                )
+                .with_category(ErrorCategory::Runtime)
+            })?;
+        let project_run = self
+            .store
+            .get_project_run(claims.run_id(), Some(owner_id))?;
+        let project_id = project_run
+            .as_ref()
+            .and_then(|value| value.get("project_id"))
+            .and_then(Value::as_str);
+        let endpoint = result_object
+            .get("endpoint")
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .to_owned();
+        let result_query = result_object
+            .get("query")
+            .and_then(Value::as_str)
+            .unwrap_or(query)
+            .to_owned();
+        let mut registered = Vec::new();
+        for item in raw_results {
+            let Some(object) = item.as_object() else {
+                continue;
+            };
+            let identity_material = ["paper_id", "arxiv_id", "theorem_id", "title", "theorem"]
+                .iter()
+                .map(|key| object.get(*key).and_then(Value::as_str).unwrap_or_default())
+                .collect::<Vec<_>>()
+                .join("|");
+            let identity_key = format!("{operation}:{}", sha256_text(&identity_material));
+            let metadata = serde_json::json!({
+                "retrieved_theorem":object.get("theorem").and_then(Value::as_str).unwrap_or_default(),
+                "authors":object.get("authors").cloned().unwrap_or_else(|| serde_json::json!([])),
+                "publication_year":object.get("publication_year").cloned().unwrap_or(Value::Null),
+                "open_access_url":object.get("open_access_url").and_then(Value::as_str).unwrap_or_default(),
+            });
+            let source_uri = object
+                .get("source_uri")
+                .or_else(|| object.get("landing_page_url"))
+                .and_then(Value::as_str)
+                .unwrap_or_default();
+            let reference = self.store.register_reference(
+                claims.run_id(),
+                project_id,
+                operation,
+                &identity_key,
+                object
+                    .get("title")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default(),
+                object
+                    .get("paper_id")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default(),
+                object
+                    .get("arxiv_id")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default(),
+                object
+                    .get("doi")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default(),
+                object
+                    .get("theorem_id")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default(),
+                source_uri,
+                "candidate",
+                "",
+                "",
+                &metadata,
+            )?;
+            let snapshot_metadata = serde_json::Map::from_iter([
+                ("operation".to_owned(), Value::String(operation.to_owned())),
+                ("query".to_owned(), Value::String(result_query.clone())),
+            ]);
+            let snapshot = self.store.create_source_snapshot(
+                text(&reference, "reference_id")?,
+                operation,
+                if source_uri.is_empty() {
+                    &endpoint
+                } else {
+                    source_uri
+                },
+                &serde_json::to_string(&item).map_err(|error| {
+                    ReCtmError::new("RESEARCH_JSON_ERROR", error.to_string())
+                        .with_category(ErrorCategory::Internal)
+                })?,
+                "application/json",
+                &snapshot_metadata,
+            )?;
+            let mut enriched = object.clone();
+            enriched.insert("reference_id".to_owned(), reference["reference_id"].clone());
+            enriched.insert(
+                "source_snapshot_id".to_owned(),
+                snapshot["source_snapshot_id"].clone(),
+            );
+            enriched.insert(
+                "source_snapshot_sha256".to_owned(),
+                snapshot["content_sha256"].clone(),
+            );
+            registered.push(Value::Object(enriched));
+        }
+        result_object.insert("results".to_owned(), Value::Array(registered.clone()));
+        result_object.insert(
+            "count".to_owned(),
+            Value::from(u64::try_from(registered.len()).unwrap_or(u64::MAX)),
+        );
+        let source_trust = result_object
+            .get("source_trust")
+            .and_then(Value::as_str)
+            .unwrap_or("external_unverified")
+            .to_owned();
+        let usage_rule = result_object
+            .get("usage_rule")
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .to_owned();
+        let record = serde_json::json!({
+            "event_type":format!("external_{operation}"),
+            "query":result_query,
+            "operation":operation,
+            "search_intent":search_intent,
+            "result_count":registered.len(),
+            "results":registered,
+            "source_trust":source_trust,
+            "usage_rule":usage_rule,
+            "created_at":self.store.runtime().clock.now_iso()?,
+        });
+        match claims.role() {
+            WorkflowRole::Generator | WorkflowRole::Repair => {
+                self.vault
+                    .append_generation_memory(claims.run_id(), "events", &record)?;
+            }
+            WorkflowRole::Branch => {
+                let branch_id = self.branch_id_for_domain(claims.domain_id())?;
+                self.vault
+                    .append_branch_memory(claims.run_id(), &branch_id, "events", &record)?;
+            }
+            WorkflowRole::Verifier => {
+                self.vault
+                    .append_verifier_memory(claims.run_id(), "events", &record)?;
+            }
+            _ => {
+                return Err(ReCtmError::new(
+                    "ROLE_ACCESS_DENIED",
+                    "The active workflow role cannot perform external theorem retrieval.",
+                )
+                .with_category(ErrorCategory::Permission));
+            }
+        }
+        self.emit(WorkflowEvent {
+            event_type: "research.retrieval_completed".to_owned(),
+            trace_id: trace.clone(),
+            run_id: Some(claims.run_id().to_owned()),
+            actor_role: Some(role_name(claims.role()).to_owned()),
+            domain_id: Some(claims.domain_id().to_owned()),
+            before_state: None,
+            after_state: None,
+            decision: "allow".to_owned(),
+            reason: "research_capability_passed".to_owned(),
+            details: serde_json::json!({
+                "operation":operation,"search_intent":search_intent,
+                "query_sha256":sha256_text(query),"result_count":result_object["count"]
+            }),
+        });
+        let mut response = serde_json::Map::new();
+        response.insert("ok".to_owned(), Value::Bool(true));
+        response.insert(
+            "run_id".to_owned(),
+            Value::String(claims.run_id().to_owned()),
+        );
+        response.extend(result_object.clone());
+        response.insert("trace_id".to_owned(), Value::String(trace));
+        Ok(Value::Object(response))
     }
 
     pub fn commit(

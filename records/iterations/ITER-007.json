@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0.0",
+  "iteration_id": "ITER-007",
+  "milestone_id": "MTM-007",
+  "started_at": "2026-09-01T06:53:57-07:00",
+  "completed_at": "2026-09-01T09:23:30-07:00",
+  "authority_before": "python",
+  "authority_after": "rust",
+  "production_authority_changed": false,
+  "functional_goal": "Complete MTM-reboot's all-Rust operational composition, remaining bounded adapters, public tool backend, operator UI/Quick Tunnel, and installable single-binary distribution without redesigning the already accepted Native, storage, OAuth/MCP, workflow, verifier, or finalizer authorities.",
+  "implementation": {
+    "composition_crate": "mtm-runtime",
+    "components": [
+      "validated RuntimeSettings and owner-only secret materialization",
+      "workspace file/search/Git/image adapters",
+      "Bubblewrap-backed NativeToolRuntime",
+      "isolated real latexmk/pdflatex RuntimeLatexGate",
+      "bounded fixed-HTTPS CurlResearchProvider",
+      "RuntimeToolBackend for 24 public tools and 11 hidden aliases",
+      "single RuntimeApplication composition root",
+      "presentation-only OperatorSession and owned Quick Tunnel session",
+      "serve/tui/check-config/attest-native CLI",
+      "static hash-bound tool catalog and methodology assets",
+      "release cargo-install path distribution without Python linkage"
+    ],
+    "authority_boundaries": {
+      "OAuthPrincipal": "private validated state, no production Deserialize/public constructor; conformance fixture is feature-gated off by default",
+      "OperatorSession": "presentation-only event/tunnel sink with no store, capability, vault, or workflow authority",
+      "runtime": "only wide composition crate; leaf crates retain their prior authority restrictions",
+      "isolation": "Rust policy and process ownership continue to actuate the already-validated Bubblewrap OS sandbox"
+    }
+  },
+  "recorded_failures_and_repairs": [
+    {
+      "stage": "MTM-006 preflight",
+      "failure": "Post-commit revalidation found the supposedly completed MTM-006 target binary could not pass all-target Clippy because it depended on a dev-only tempfile crate, and its LaTeX fixture/evidence-hash binding were also incomplete.",
+      "repair": "Paused MTM-007, repaired and recommitted MTM-006 as 3c695ecdbe4351142105148d688c9e07879e6eeb, reran its differential/real target gates, then began MTM-007."
+    },
+    {
+      "stage": "authenticated principal type",
+      "failure": "OAuthPrincipal was a public-field Deserialize DTO, allowing in-process callers to manufacture an authenticated value even though the HTTP path still validated bearer tokens.",
+      "repair": "Made OAuthPrincipal non-publicly constructible/deserializable and retained only a default-off shadow-fixture constructor so the frozen MTM-005 corpus still matches exactly."
+    },
+    {
+      "stage": "MTM-005 regression preservation",
+      "failure": "Changing the shadow harness to use full OAuth validation initially changed the frozen event sequence even though Python-Rust differential values still matched.",
+      "repair": "Kept production principal hardening while using the explicitly feature-gated shadow fixture; the original 44-record golden SHA remained unchanged with zero mismatches."
+    },
+    {
+      "stage": "static tool catalog asset",
+      "failure": "A direct hand-copied 50 KiB catalog asset was judged too error-prone for byte fidelity.",
+      "repair": "Discarded that attempt and mechanically encoded the frozen source catalog as base64 in four verified chunks; all 570 lines and decoded raw SHA-256 were checked exactly before use."
+    },
+    {
+      "stage": "first full composition differential",
+      "failure": "The initial eighteen end-to-end Python-Rust checkpoints reported three mismatches: server_info omitted source fields, disabled Native warning text drifted, and git_blame names/types differed.",
+      "repair": "Restored source server_info facts, exact warning wording, and blame commit/original_line/line/author/email/time/summary/content structure rather than hiding differences with normalization."
+    },
+    {
+      "stage": "differential determinism",
+      "failure": "The first zero-mismatch full-composition runs still produced different corpus hashes because file modified timestamps changed between fixture runs.",
+      "repair": "Fixed Git author/committer time and explicitly classified only modified/time/run/capability/trace/path facts as dynamic; two consecutive runs then produced stable SHA-256 6aa4f5699df7099d29c12859788430bd6b1c66a8295828598b6cae62a964d830."
+    },
+    {
+      "stage": "Cargo distribution metadata",
+      "failure": "cargo package first rejected internal path dependencies without version requirements.",
+      "repair": "Added exact =0.1.0-alpha.1 version metadata to all internal path dependencies. A later cargo package correctly stops because private mtm-* crates are not published to crates.io; MTM-007 accepts single-binary cargo-install/path distribution instead of claiming public-crate publication."
+    },
+    {
+      "stage": "production LaTeX adapter",
+      "failure": "Real A4 showed RuntimeLatexGate saw compile_available/attempted but no real exit/stdout/stderr because run_fixed_helper_in_workspace returned only the validated helper attestation object.",
+      "repair": "Added validated_execution_response: it first validates the complete helper attestation, then requires and preserves bounded execution fields. A Rust unit regression verifies exit/output survival."
+    },
+    {
+      "stage": "real LaTeX fixture",
+      "failure": "After the execution-response fix, latexmk returned real exit code 12 because the target fixture used the theorem environment without an explicit newtheorem declaration.",
+      "repair": "Confirmed the same failure outside Bubblewrap, fixed only the target document fixture, and reran the complete public-tool workflow to real finalization."
+    },
+    {
+      "stage": "Quick Tunnel edge readiness",
+      "failure": "The first public metadata fetch occasionally hit TLS EOF immediately after cloudflared announced its random URL.",
+      "repair": "Kept the exact public metadata requirement but added a bounded 30-second retry window for edge propagation; owned child cleanup remained mandatory."
+    },
+    {
+      "stage": "shared implementation evidence freshness",
+      "failure": "MTM-007 source and Cargo.lock changes correctly made every MTM-003/004/005/006 implementation-bound target report stale.",
+      "repair": "Reran real Native/CAS/QuickTunnel, copied-database/rollback, Firefox OAuth/MCP, and pdflatex workflow target suites and their validators; no report hash was manually edited."
+    },
+    {
+      "stage": "governance graph",
+      "failure": "The first unified run_checks after adding mtm-runtime failed because a governance test still hard-coded the old seven-member Cargo workspace.",
+      "repair": "Updated the graph/test facts and strengthened the engineering validator to enforce the unique runtime root, CLI presentation boundary, opaque OAuthPrincipal, presentation-only observer, and embedded asset hashes."
+    }
+  ],
+  "acceptance": {
+    "A0": {
+      "passed": true,
+      "evidence": [
+        "Pinned Rust 1.98.0 workspace rustfmt, Clippy -D warnings and all Rust tests pass",
+        "migration and engineering graph validators pass",
+        "eleven governance tests pass before completion state is recorded"
+      ]
+    },
+    "A1": {
+      "passed": true,
+      "evidence": [
+        "static tool catalog raw SHA-256 46deeeb246f77056c75392c2d14a3d707521c043fbead29b76bb5a44c6915dc3",
+        "static methodology SHA-256 0403ba1f6caeabfef563e3b2b22bf1472a84c470a76ddbcb5bafce1d5f18a4e8",
+        "full-composition golden SHA-256 6aa4f5699df7099d29c12859788430bd6b1c66a8295828598b6cae62a964d830"
+      ]
+    },
+    "A2": {
+      "passed": true,
+      "evidence": [
+        "eighteen public HTTP/OAuth/MCP/tool checkpoints match Re-CTM with zero mismatches",
+        "comparison uses independent disposable state and does not dual-write production data",
+        "dynamic facts are explicitly normalized rather than broad result fields being ignored"
+      ]
+    },
+    "A3": {
+      "passed": true,
+      "evidence": [
+        "mtm-runtime is the only broad dependency root",
+        "mtm-cli depends only on contracts/runtime plus serialization",
+        "OAuthPrincipal and workflow/finalization authority types remain non-forgeable through public production APIs",
+        "operator observer owns no state-transition authority"
+      ]
+    },
+    "A4": {
+      "passed": true,
+      "evidence": [
+        "release binary has no Python/libpython dynamic dependency",
+        "cargo install --path produces a working binary with the embedded 24-tool catalog",
+        "real Bubblewrap Native execution and fixed HTTPS research pass through the public tool surface",
+        "real latexmk/pdflatex reaches verifier/finalizer and verified workspace artifact publication",
+        "TUI redaction, graceful SIGINT and real Quick Tunnel public metadata plus owned cleanup pass"
+      ]
+    },
+    "A5": {
+      "passed": true,
+      "evidence": [
+        "seven Python release-equivalent samples: median/p95 160.101/160.888 ms, median/max RSS 29,992/30,084 KiB",
+        "seven Rust release samples: median/p95 56.918/80.358 ms, median/max RSS 13,140/13,480 KiB",
+        "predefined p95/RSS non-regression ratios pass; no A6 performance claim is made"
+      ]
+    }
+  },
+  "manual_pending": [
+    "Actual deployed traffic/state cutover, soak and rollback drill remain MTM-008.",
+    "A6 release performance qualification remains MTM-008.",
+    "Public registry publication of private mtm-* crates is not required for the accepted single-binary distribution and remains a separate decision.",
+    "Other operating systems, reverse proxies and site-local CAS/LaTeX layouts need their own release qualification."
+  ],
+  "rollback": "Keep deployed production traffic on Re-CTM Python. MTM-007 parity and target tests use disposable state; the accepted Rust operational binary can be removed without rewriting production databases or artifacts.",
+  "decision": "accepted"
+}

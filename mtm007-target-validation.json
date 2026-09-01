@@ -1,0 +1,107 @@
+{
+  "project": "MTM-reboot",
+  "milestone": "MTM-007",
+  "passed": true,
+  "implementation_sha256": "eb7c4e4dcb3ada085dfaef45a6e91786f75c0851d3d87b9c41cca50b47ba2805",
+  "check_count": 12,
+  "checks": [
+    {
+      "name": "release_binary_has_no_python_runtime",
+      "passed": true
+    },
+    {
+      "name": "cargo_install_path_distribution",
+      "passed": true
+    },
+    {
+      "name": "bubblewrap_runtime_attestation",
+      "passed": true
+    },
+    {
+      "name": "native_command_through_public_tool",
+      "passed": true
+    },
+    {
+      "name": "real_research_provider",
+      "passed": true
+    },
+    {
+      "name": "real_latex_finalization_through_public_tools",
+      "passed": true
+    },
+    {
+      "name": "verified_workspace_artifact_delivery",
+      "passed": true
+    },
+    {
+      "name": "tui_observer_non_authoritative_and_redacted",
+      "passed": true
+    },
+    {
+      "name": "graceful_sigint_shutdown",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "name": "quick_tunnel_public_metadata",
+      "passed": true
+    },
+    {
+      "name": "quick_tunnel_owned_shutdown",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "name": "resource_non_regression",
+      "passed": true,
+      "resources": {
+        "samples": 7,
+        "python": {
+          "elapsed_ms_median": 160.101,
+          "elapsed_ms_p95": 160.888,
+          "rss_kib_median": 29992,
+          "rss_kib_max": 30084
+        },
+        "rust_release": {
+          "elapsed_ms_median": 56.918,
+          "elapsed_ms_p95": 80.358,
+          "rss_kib_median": 13140,
+          "rss_kib_max": 13480
+        },
+        "elapsed_p95_ratio": 0.499,
+        "rss_median_ratio": 0.438,
+        "limits": {
+          "rust_elapsed_p95_ratio_max": 1.25,
+          "rust_rss_median_ratio_max": 1.1,
+          "rust_absolute_rss_kib_max": 262144
+        },
+        "passed": true
+      }
+    }
+  ],
+  "environment": {
+    "platform": "Linux",
+    "release": "7.1.2-070102-generic",
+    "machine": "x86_64",
+    "bwrap": "/usr/bin/bwrap",
+    "latexmk": "/usr/bin/latexmk",
+    "pdflatex": "/usr/bin/pdflatex",
+    "cloudflared": "/home/lk/.local/bin/cloudflared",
+    "curl": "/home/lk/miniconda3/bin/curl"
+  },
+  "required_check_names": [
+    "bubblewrap_runtime_attestation",
+    "cargo_install_path_distribution",
+    "graceful_sigint_shutdown",
+    "native_command_through_public_tool",
+    "quick_tunnel_owned_shutdown",
+    "quick_tunnel_public_metadata",
+    "real_latex_finalization_through_public_tools",
+    "real_research_provider",
+    "release_binary_has_no_python_runtime",
+    "resource_non_regression",
+    "tui_observer_non_authoritative_and_redacted",
+    "verified_workspace_artifact_delivery"
+  ],
+  "sensitive_content_recorded": false
+}
