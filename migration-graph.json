@@ -156,7 +156,7 @@
     {
       "id": "MTM-005",
       "title": "OAuth, MCP, HTTP gateway, and public tool dispatch",
-      "status": "approved",
+      "status": "completed",
       "priority": "P0",
       "production_authority_before": "python",
       "production_authority_after": "rust",
@@ -174,14 +174,22 @@
         "No auth weakening for compatibility"
       ],
       "acceptance_levels": ["A0", "A1", "A2", "A3", "A4", "A5"],
-      "validation_commands": [],
+      "validation_commands": [
+        "python3 scripts/run_mtm005_conformance.py",
+        "python3 scripts/run_mtm005_target_validation.py",
+        "python3 scripts/validate_mtm005_target_evidence.py",
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets -- -D warnings",
+        "cargo test --workspace",
+        "python3 scripts/run_checks.py"
+      ],
       "rollback": "Route traffic back to the Python gateway without changing persistent state or client-visible endpoints.",
       "dependencies": ["MTM-002", "MTM-004"]
     },
     {
       "id": "MTM-006",
       "title": "Workflow, vault, verifier, finalizer, and project semantics",
-      "status": "proposed",
+      "status": "approved",
       "priority": "P0",
       "production_authority_before": "python",
       "production_authority_after": "rust",
@@ -266,7 +274,7 @@
     {"source": "MTM-007", "target": "MTM-006"},
     {"source": "MTM-008", "target": "MTM-007"}
   ],
-  "todo": ["MTM-005"],
+  "todo": ["MTM-006"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -419,6 +427,46 @@
       "status_before": "proposed",
       "status_after": "approved",
       "summary": "Approved OAuth, MCP, HTTP and public tool dispatch as the only next milestone; it must begin with a complete MTM-004 recheck and preserve the exact 24-tool catalog, OAuth security and one-writer state boundary."
+    },
+    {
+      "event_id": "MEVT-020",
+      "milestone_id": "MTM-005",
+      "at": "2026-09-01T03:56:39-07:00",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Re-ran the committed MTM-004 full gate, frozen storage/capability corpus, migration rollback checks and implementation-bound target evidence, confirmed a clean repository before generated-report refresh, and began OAuth/MCP/HTTP work without moving deployed traffic or database writer authority."
+    },
+    {
+      "event_id": "MEVT-021",
+      "milestone_id": "MTM-005",
+      "at": "2026-09-01T04:20:00-07:00",
+      "status_before": "in_progress",
+      "status_after": "shadow",
+      "summary": "Entered OAuth/MCP gateway shadow after the Rust crate passed formatting, Clippy, unit tests, exact 24/11 catalog hashes and deterministic source-driven OAuth/MCP execution without receiving deployed traffic."
+    },
+    {
+      "event_id": "MEVT-022",
+      "milestone_id": "MTM-005",
+      "at": "2026-09-01T04:30:00-07:00",
+      "status_before": "shadow",
+      "status_after": "authoritative",
+      "summary": "Accepted mtm-gateway as the authoritative OAuth/MCP/HTTP implementation inside MTM-reboot after 44 zero-difference records and hash-bound Firefox, PKCE, Origin/CORS, legacy/modern MCP and hidden-alias target evidence passed. Re-CTM Python remains the deployed traffic authority."
+    },
+    {
+      "event_id": "MEVT-023",
+      "milestone_id": "MTM-005",
+      "at": "2026-09-01T04:32:11-07:00",
+      "status_before": "authoritative",
+      "status_after": "completed",
+      "summary": "Completed MTM-005 with A0-A5 evidence, accepted source and target contracts, redacted browser evidence, exact tool catalog checks and no workflow/finalizer or deployed request cutover."
+    },
+    {
+      "event_id": "MEVT-024",
+      "milestone_id": "MTM-006",
+      "at": "2026-09-01T04:32:11-07:00",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "Approved workflow, vault, verifier, finalizer and project semantics as the only next milestone; it must begin by rechecking all completed gateway and lower-level evidence and preserve one transition and one finalization authority."
     }
   ],
   "receipt_contract": {
@@ -979,6 +1027,165 @@
       "manual_pending": [
         "OAuth/MCP/browser gateway, workflow/finalizer, integrations/LaTeX/TUI/package, complete cutover, soak, A6 and Python retirement remain MTM-005 through MTM-008.",
         "Other operating systems and SQLite distributions require separate release evidence."
+      ],
+      "decision": "accepted"
+    },
+    {
+      "receipt_id": "MREC-005",
+      "milestone_id": "MTM-005",
+      "started_at": "2026-09-01T03:56:39-07:00",
+      "completed_at": "2026-09-01T04:32:11-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "python",
+      "authority_after": "rust",
+      "commit_subject": "feat(gateway): establish OAuth and MCP gateway authority [MTM-005]",
+      "files_changed": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "source-baseline.json",
+        "crates/mtm-gateway/Cargo.toml",
+        "crates/mtm-gateway/src/lib.rs",
+        "crates/mtm-gateway/src/runtime.rs",
+        "crates/mtm-gateway/src/catalog.rs",
+        "crates/mtm-gateway/src/oauth.rs",
+        "crates/mtm-gateway/src/mcp.rs",
+        "crates/mtm-gateway/src/http.rs",
+        "crates/mtm-gateway/src/bin/shadow.rs",
+        "crates/mtm-gateway/src/bin/server.rs",
+        "conformance/python_gateway_shadow.py",
+        "conformance/golden/mtm005-reference.sha256",
+        "scripts/run_mtm005_conformance.py",
+        "scripts/run_mtm005_target_validation.py",
+        "scripts/validate_mtm005_target_evidence.py",
+        "mtm005-target-validation.json",
+        "scripts/run_checks.py",
+        "scripts/validate_engineering_graph.py",
+        "tests/test_governance.py",
+        "docs/adr/0005-oauth-mcp-http-gateway.md",
+        "docs/ARCHITECTURE.md",
+        "docs/MIGRATION_PLAN.md",
+        "README.md",
+        "crates/mtm-cli/src/main.rs",
+        "engineering-graph.json",
+        "migration-graph.json",
+        "project-progress.json",
+        "records/iterations/ITER-005.json",
+        "local-validation.json",
+        "mtm003-target-validation.json",
+        "mtm004-target-validation.json"
+      ],
+      "commands": [
+        {
+          "command": "python3 scripts/run_checks.py && python3 scripts/run_mtm004_conformance.py && python3 scripts/validate_mtm003_target_evidence.py && python3 scripts/validate_mtm004_target_evidence.py before MTM-005 implementation",
+          "exit_code": 0,
+          "result": "The committed MTM-004 gate, 52-operation state/capability corpus, migration rollback evidence, real copied-database report and clean pre-check worktree passed before gateway work began."
+        },
+        {
+          "command": "cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace during first mtm-gateway integration",
+          "exit_code": 101,
+          "result": "The initial typed gateway build rejected Axum extractor mismatches, fingerprint byte/string mismatches, an invalid guarded match, unused imports and an unconstrained JSON-RPC result type."
+        },
+        {
+          "command": "cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace after typed-boundary repairs",
+          "exit_code": 0,
+          "result": "All existing components and the first gateway implementation compiled and passed without lint suppression or security-rule relaxation."
+        },
+        {
+          "command": "python3 scripts/run_mtm005_conformance.py --print-golden",
+          "exit_code": 1,
+          "result": "The first 44-record differential found one physical OAuth redirect_uris_json whitespace mismatch caused by an incorrect Rust formatting assumption."
+        },
+        {
+          "command": "python3 scripts/run_mtm005_conformance.py",
+          "exit_code": 0,
+          "result": "All 44 deterministic OAuth, token, event, database-row, legacy/modern MCP, public/hidden dispatch and mirror-header records matched the frozen Python source; both catalog hashes and A5 ceilings passed."
+        },
+        {
+          "command": "PYTHONPATH=src python3 -m unittest tests.test_oauth tests.test_mcp tests.test_http -v in Re-CTM",
+          "exit_code": 0,
+          "result": "All nineteen source OAuth/MCP/HTTP tests passed, preserving the original boundary as an independent reference."
+        },
+        {
+          "command": "python3 scripts/run_mtm005_target_validation.py && python3 scripts/validate_mtm005_target_evidence.py",
+          "exit_code": 0,
+          "result": "Fifteen redacted real-target checks passed using the Rust HTTP server and installed Firefox, including browser form submission, DCR/PKCE, single-use codes, exact catalog, hidden aliases, CORS/origin, mirror headers, fixed/dynamic issuers and shutdown."
+        },
+        {
+          "command": "python3 scripts/validate_engineering_graph.py && python3 -m unittest discover -s tests -v after gateway integration",
+          "exit_code": 1,
+          "result": "The gate exposed one documentation-string authority-scan false positive and correctly stale MTM-003/004 target reports after the shared Cargo.lock changed."
+        },
+        {
+          "command": "python3 scripts/run_mtm003_target_validation.py && python3 scripts/run_mtm004_target_validation.py with their validators",
+          "exit_code": 0,
+          "result": "All real Native/CAS/tunnel and copied-production-database/rollback evidence was rerun and rebound to the current shared lockfile instead of manually changing hashes."
+        },
+        {
+          "command": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && python3 scripts/run_mtm005_conformance.py && python3 scripts/run_checks.py && git diff --check",
+          "exit_code": 0,
+          "result": "The completed-MTM-005/approved-MTM-006 candidate passed 42 Rust tests, nine governance tests, graph gates, all frozen corpora, three fresh target reports, bootstrap contracts, redaction checks and Git diff checks."
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "evidence": [
+            "Formatting and Clippy with warnings denied passed.",
+            "Forty-two Rust tests and nine governance tests passed.",
+            "Migration, architecture, target-evidence, bootstrap and Git gates passed."
+          ]
+        },
+        "A1": {
+          "passed": true,
+          "evidence": [
+            "All 44 deterministic OAuth/MCP/API/event/database records matched the frozen Python source.",
+            "The immutable MTM-005 response hash is 787e659b8787fab7765e2ae2bdb7ce774f2484467933fc87624097a9af65e849.",
+            "The ordered public catalog hash is 86c8ee7d53a0678d0aaaba47ce2f2f72f5c03747fcb443d78011e005dedaa343 and all 35 definitions hash to e89c5d2f8bec198fb4a90e7166aadb04b757e4b3ff0c8f459e5fdd468c59f87e."
+          ]
+        },
+        "A2": {
+          "passed": true,
+          "evidence": [
+            "Public, client_secret_basic and client_secret_post OAuth flows matched with deterministic IDs and clocks.",
+            "Legacy and modern MCP, hidden aliases, mirror headers and full error payloads matched with zero differences.",
+            "The shadow produced no Git-visible side effect and received no deployed traffic."
+          ]
+        },
+        "A3": {
+          "passed": true,
+          "evidence": [
+            "Wrong password, code reuse, malformed/tampered token, invalid arguments, unknown tool/method, duplicate/mismatched headers and disallowed Origin paths failed closed.",
+            "Dynamic issuer is loopback-only, fixed issuer ignores forwarded attacker data, and OAuth registration is not incorrectly subjected to the MCP Origin gate.",
+            "The gateway library has no Native, workflow-state, vault or finalizer dependency."
+          ]
+        },
+        "A4": {
+          "passed": true,
+          "evidence": [
+            "The current Linux target passed fifteen implementation-hash-bound real HTTP checks.",
+            "Installed Firefox rendered the authorization page, submitted the real form, preserved state and delivered a code that completed PKCE exchange.",
+            "The Rust server listed exactly 24 public tools, dispatched a hidden alias without listing it, enforced CORS/mirror rules and shut down cleanly."
+          ]
+        },
+        "A5": {
+          "passed": true,
+          "evidence": [
+            "Seven Python samples had median/p95 108.794/111.021 ms and maximum RSS 28,516 KiB.",
+            "Seven Rust debug samples had median/p95 60.667/64.148 ms and maximum RSS 12,104 KiB.",
+            "Absolute and relative ceilings passed; no A6 production-speed claim is made."
+          ]
+        }
+      },
+      "behavior_before": "MTM-reboot had no Rust OAuth registration, PKCE/code/token authority, HTTP server, legacy/modern MCP dispatcher, immutable public catalog or network-boundary Origin/CORS enforcement.",
+      "behavior_after": "MTM-reboot has one accepted Rust OAuth/MCP/HTTP gateway with exact source parity, a fail-closed catalog and real Firefox/HTTP evidence. Re-CTM Python remains the only deployed traffic, workflow and production-state authority.",
+      "risk_review": "The gateway owns authentication, protocol validation and routing only. It cannot implement a tool, write workflow state, access the private vault, execute Native commands or finalize artifacts. The standalone echo backend is target-validation-only, the catalog is accepted only after immutable hash checks, reports omit all secrets and deployed endpoints were not changed.",
+      "rollback": "Keep deployed routing on the Python gateway, or route it back exclusively before any future cutover. OAuth wire/database formats remain source compatible, no workflow database or artifact format changed, and this milestone received no production traffic.",
+      "manual_pending": [
+        "Workflow, vault, verifier, repair, project promotion and finalizer trace replay remain MTM-006.",
+        "Production composition, verified catalog asset bundling, integrations, LaTeX, TUI and packaging remain MTM-007.",
+        "Complete traffic cutover, rollback drill, soak, A6 and Python retirement remain MTM-008.",
+        "Additional browsers, operating systems and reverse-proxy deployments require separate release evidence."
       ],
       "decision": "accepted"
     }

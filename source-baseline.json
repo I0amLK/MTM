@@ -20,7 +20,12 @@
     "src/re_ctm/storage_schema.py",
     "src/re_ctm/storage.py",
     "src/re_ctm/capabilities.py",
-    "src/re_ctm/tools.py"
+    "src/re_ctm/tools.py",
+    "src/re_ctm/rethlas_contracts.py",
+    "src/re_ctm/mcp.py",
+    "src/re_ctm/server.py",
+    "src/re_ctm/config.py",
+    "src/re_ctm/__init__.py"
   ],
   "contract": {
     "native_tools": 18,

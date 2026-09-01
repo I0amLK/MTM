@@ -11,6 +11,7 @@ from scripts.validate_engineering_graph import validate_graph as validate_engine
 from scripts.validate_migration_graph import load_graph, validate_graph as validate_migration
 from scripts.validate_mtm003_target_evidence import validate as validate_mtm003_target
 from scripts.validate_mtm004_target_evidence import validate as validate_mtm004_target
+from scripts.validate_mtm005_target_evidence import validate as validate_mtm005_target
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,7 +75,14 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(summary["crate_graph_acyclic"])
         self.assertEqual(
             summary["cargo_members"],
-            ["mtm-cli", "mtm-contracts", "mtm-core", "mtm-native", "mtm-storage"],
+            [
+                "mtm-cli",
+                "mtm-contracts",
+                "mtm-core",
+                "mtm-gateway",
+                "mtm-native",
+                "mtm-storage",
+            ],
         )
 
     def test_current_mtm003_target_evidence_is_fresh(self) -> None:
@@ -84,6 +92,10 @@ class GovernanceTestCase(unittest.TestCase):
     def test_current_mtm004_target_evidence_is_fresh_and_redacted(self) -> None:
         summary = validate_mtm004_target()
         self.assertEqual(summary["required_check_count"], 10)
+
+    def test_current_mtm005_target_evidence_is_fresh_and_redacted(self) -> None:
+        summary = validate_mtm005_target()
+        self.assertEqual(summary["required_check_count"], 15)
 
     def test_commit_message_contract(self) -> None:
         message = """docs(governance): establish project foundation [MTM-001]

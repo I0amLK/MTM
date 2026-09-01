@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0.0",
+  "iteration_id": "ITER-005",
+  "milestone_id": "MTM-005",
+  "title": "OAuth, MCP, HTTP gateway, and public tool dispatch",
+  "started_at": "2026-09-01T03:56:39-07:00",
+  "completed_at": "2026-09-01T04:32:11-07:00",
+  "source_baseline": {
+    "project": "Re-CTM",
+    "version": "0.3.0",
+    "commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
+    "authority": "python"
+  },
+  "previous_iteration_review": {
+    "commit": "68a9c4904850400696d8973220f5cfdd4afbf1fd",
+    "subject": "feat(storage): establish persistence and capability authority [MTM-004]",
+    "working_tree_before_start": "clean",
+    "commands": [
+      "python3 scripts/run_checks.py",
+      "python3 scripts/run_mtm004_conformance.py",
+      "python3 scripts/validate_mtm003_target_evidence.py",
+      "python3 scripts/validate_mtm004_target_evidence.py"
+    ],
+    "exit_code": 0,
+    "result": "The committed MTM-004 gate, 52-operation storage/capability hash, historical migration rollback and implementation-bound real database-copy evidence passed before MTM-005 began."
+  },
+  "authority": {
+    "component_scope": "MTM-reboot OAuth, MCP, HTTP and public tool dispatch boundary",
+    "before": "python",
+    "after": "rust",
+    "deployed_source_product_traffic_authority": "python",
+    "rust_deployed_request_components": 0
+  },
+  "implemented": [
+    "OAuth dynamic client registration with exact redirect, grant, response and token-auth-method validation",
+    "Authorization Code plus PKCE S256 with single-use transactional codes and fixed expiration bounds",
+    "HMAC-SHA256 bearer tokens with fixed or loopback-derived issuer/audience binding",
+    "Legacy MCP 2025-11-25 and 2025-06-18 plus modern MCP 2026-07-28 request/response shaping",
+    "Modern protocol, method and tool-name mirror-header validation including base64 sentinel handling",
+    "HTTP request-size/content-type checks, OAuth challenge metadata, Origin/CORS policy and modern HTTP error mapping",
+    "Fail-closed catalog verifier for 24 ordered public tools, 11 hidden aliases, and all 35 exact definitions",
+    "ToolBackend dispatch boundary that cannot implement Native or workflow behavior",
+    "Real standalone Rust gateway server used only for target validation, with an echo backend clearly marked non-production"
+  ],
+  "conformance": {
+    "record_count": 44,
+    "differential_mismatches_final": 0,
+    "public_tool_count": 24,
+    "hidden_tool_count": 11,
+    "public_catalog_sha256": "86c8ee7d53a0678d0aaaba47ce2f2f72f5c03747fcb443d78011e005dedaa343",
+    "all_tool_definitions_sha256": "e89c5d2f8bec198fb4a90e7166aadb04b757e4b3ff0c8f459e5fdd468c59f87e",
+    "reference_sha256": "787e659b8787fab7765e2ae2bdb7ce774f2484467933fc87624097a9af65e849",
+    "source_reference_file_count": 19,
+    "shadow_side_effect_free": true,
+    "python_reference": {
+      "samples": 7,
+      "elapsed_ms_median": 108.794,
+      "elapsed_ms_p95": 111.021,
+      "max_rss_kib": 28516
+    },
+    "rust_shadow": {
+      "samples": 7,
+      "elapsed_ms_median": 60.667,
+      "elapsed_ms_p95": 64.148,
+      "max_rss_kib": 12104
+    },
+    "interpretation": "A5 resource non-regression passed on a deterministic debug-build shadow workload. No A6 production performance claim is made."
+  },
+  "target_validation": {
+    "report": "mtm005-target-validation.json",
+    "implementation_sha256": "0c8888fab850afde593333b408d85feaeaee8c860103371b514b5696a82f5b38",
+    "environment": {
+      "platform": "Linux",
+      "release": "7.1.2-070102-generic",
+      "machine": "x86_64",
+      "browser": "firefox"
+    },
+    "required_check_count": 15,
+    "sensitive_content_omitted": true,
+    "coverage": [
+      "Real Firefox authorization-page rendering and automatic browser form submission",
+      "DCR, PKCE, code exchange and code-reuse denial",
+      "OAuth challenge and protected-resource metadata",
+      "Exact 24-tool listing and hidden alias dispatch",
+      "Legacy and modern MCP with mirror headers and HTTP status rules",
+      "MCP Origin rejection and allowed-origin CORS",
+      "Loopback reverse-proxy origin and fixed-origin precedence",
+      "Owned Rust gateway process shutdown"
+    ]
+  },
+  "failures_retained": [
+    {
+      "stage": "first gateway compile and lint gate",
+      "result": "failed",
+      "cause": "Initial code had Axum extractor type mismatches, token-fingerprint byte/string mismatches, a guarded matches pattern, unused imports and an unconstrained JSON-RPC result type.",
+      "resolution": "Corrected typed boundaries and handler extractors without suppressing Clippy or weakening validation."
+    },
+    {
+      "stage": "first OAuth physical-state differential",
+      "result": "failed with one mismatch",
+      "cause": "Rust initially stored redirect_uris_json using comma-space formatting based on an incorrect assumption; the frozen Python source stores compact JSON.",
+      "resolution": "Restored compact source-compatible JSON; all 44 API, token, event and OAuth-row records then matched exactly."
+    },
+    {
+      "stage": "architecture boundary gate",
+      "result": "failed",
+      "cause": "The first source scan treated the literal proof_verified.tex inside user instructions as artifact-publication authority.",
+      "resolution": "Restricted the mechanical authority scan to implementation dependencies and executable authority tokens rather than documentation strings."
+    },
+    {
+      "stage": "lower-milestone evidence freshness",
+      "result": "correctly blocked",
+      "cause": "Gateway dependencies changed the shared Cargo.lock, invalidating MTM-003 and MTM-004 implementation hashes.",
+      "resolution": "Re-ran all real Native/CAS/tunnel and real copied-database/rollback target checks; new hash-bound reports passed."
+    },
+    {
+      "stage": "Firefox target diagnostics",
+      "result": "non-failing diagnostic",
+      "cause": "Firefox headless emitted platform diagnostics while loading and submitting the real form.",
+      "resolution": "Stored no diagnostic text or secrets; acceptance depends on browser exit, screenshot creation, callback receipt, state binding and subsequent PKCE exchange."
+    }
+  ],
+  "acceptance": {
+    "A0": "passed: formatting, Clippy -D warnings, 42 Rust tests, nine governance tests, graph and Git checks",
+    "A1": "passed: exact 24/11 catalog facts, 35 definition hash, three OAuth auth methods, PKCE/token and legacy/modern MCP golden contract",
+    "A2": "passed: 44 deterministic source/Rust records with zero differences and no Git-visible shadow side effect",
+    "A3": "passed: malformed token, code reuse, mirror mismatch, duplicate header, wrong Origin, fixed/dynamic issuer, hidden-list boundary and catalog tamper tests",
+    "A4": "passed: 15 implementation-hash-bound real Rust HTTP/Firefox checks plus 19 source OAuth/MCP/HTTP tests",
+    "A5": "passed: seven-sample elapsed/RSS non-regression ceilings",
+    "A6": "not claimed"
+  },
+  "dependencies": {
+    "direct": [
+      "axum",
+      "base64",
+      "getrandom",
+      "hmac",
+      "http",
+      "mtm-contracts",
+      "mtm-core",
+      "rusqlite",
+      "serde",
+      "serde_json",
+      "serde_urlencoded",
+      "sha2",
+      "time",
+      "tokio",
+      "url"
+    ],
+    "review": "Dependencies are lockfile-pinned. Gateway library code has no mtm-storage, mtm-native, workflow, vault or finalizer dependency; the server validation binary uses only the ToolBackend boundary."
+  },
+  "rollback": "Do not route deployed traffic to mtm-gateway, or route it back exclusively to the Python gateway before any future cutover. OAuth and workflow state formats remain source compatible, and this milestone changed no production endpoint or database writer.",
+  "manual_pending": [
+    "MTM-006 workflow, vault, verifier, repair, project promotion and finalizer trace replay",
+    "MTM-007 production composition, verified catalog asset bundling, integrations, LaTeX, TUI and packaging",
+    "MTM-008 full traffic cutover, rollback drill, soak, A6 and Python retirement",
+    "Additional browser versions, operating systems and reverse-proxy deployments require separate release evidence"
+  ],
+  "decision": "accepted"
+}

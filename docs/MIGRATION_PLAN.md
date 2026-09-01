@@ -49,6 +49,15 @@ Migrate DCR, PKCE, token binding, fixed/dynamic origins, route Origin policy, JS
 modern/legacy MCP shaping, the exact 24-tool catalog, hidden aliases, and gateway error
 semantics. Require a real browser/client acceptance path before cutover.
 
+Implemented and accepted with 44 deterministic Python–Rust records covering all three
+OAuth client-authentication methods, single-use PKCE codes, token tampering, legacy and
+modern MCP, public and hidden dispatch, mirror headers, and exact tool-definition
+hashes. The current Linux target additionally passed a real Firefox-rendered
+authorization page and browser form submission, full HTTP DCR/PKCE exchange, fixed and
+dynamic issuer checks, Origin/CORS rejection, modern HTTP error status mapping, and
+clean server shutdown. The gateway is internally authoritative in MTM-reboot but does
+not receive deployed Re-CTM traffic until later composition/cutover stages.
+
 ## MTM-006 — workflow, vault, verifier, and finalizer
 
 Migrate the deterministic workflow transition kernel, role/capability resource rules,

@@ -43,18 +43,18 @@ OAuth + MCP gateway
 
 The machine-audited target graph is [`engineering-graph.json`](../engineering-graph.json).
 
-## Implemented through MTM-004
+## Implemented through MTM-005
 
-The current Rust graph now has four implemented lower-level components:
+The current Rust graph now has five implemented lower-level components:
 
 ```text
-             mtm-contracts
-              ▲         ▲
-              │         │
-           mtm-core  mtm-storage
-              ▲
-              │
-         mtm-native
+              mtm-contracts
+            ▲       ▲       ▲
+            │       │       │
+       mtm-core  mtm-storage │
+         ▲                   │
+         │                   │
+    mtm-native          mtm-gateway
 ```
 
 `mtm-native` keeps two intentionally separate runtime choke points:
@@ -86,6 +86,18 @@ Python and Rust are compared only on independent copies. The current Re-CTM Pyth
 runtime remains the deployed writer; `mtm-storage` is authoritative only inside the
 new project until the gateway and workflow composition milestones make a separately
 accepted cutover possible.
+
+`mtm-gateway` owns OAuth DCR/PKCE/code/token behavior, HTTP routing and Origin/CORS
+policy, legacy/modern MCP envelopes, mirror-header checks, and tool dispatch. It
+accepts a tool catalog only when the public order, hidden aliases, and both frozen
+definition hashes match Re-CTM 0.3.0 exactly. The gateway calls a `ToolBackend` trait;
+it cannot implement Native/workflow semantics, write workflow state, access the
+private vault, or publish verified artifacts.
+
+During migration, conformance and target tooling generate the catalog snapshot from
+the frozen source files and Rust verifies the immutable hashes before startup. The
+production package will bundle that verified asset in the distribution milestone;
+the deployed gateway will not invoke Python to build its catalog.
 
 ## Implemented slice after MTM-002
 

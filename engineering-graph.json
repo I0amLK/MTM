@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "graph_id": "mtm-reboot-target-architecture",
-  "updated_at": "2026-09-01T01:10:19-07:00",
+  "updated_at": "2026-09-01T04:30:00-07:00",
   "principles": [
     "Functional authority is preserved before structural optimization.",
     "The crate dependency graph is acyclic.",
@@ -15,7 +15,7 @@
       {"id": "mtm-core", "status": "implemented", "responsibility": "Pure domain types, schema validation, redaction, fingerprints, URL/path/command policy, patch parsing, and authority-neutral evaluation."},
       {"id": "mtm-storage", "status": "implemented", "responsibility": "SQLite schema, migrations, repositories, capability registry/signing, copied-state differential tooling, and transaction mechanics."},
       {"id": "mtm-native", "status": "implemented", "responsibility": "Process lifecycle, TTY, toolchains, isolation, and owned child processes."},
-      {"id": "mtm-gateway", "status": "planned", "responsibility": "OAuth, MCP, HTTP, public catalog, and request boundary."},
+      {"id": "mtm-gateway", "status": "implemented", "responsibility": "OAuth, MCP, HTTP, public catalog, and request boundary."},
       {"id": "mtm-workflow", "status": "planned", "responsibility": "Deterministic workflow transition planning, verifier/finalizer gates, and project semantics."},
       {"id": "mtm-runtime", "status": "planned", "responsibility": "Single composition root and effect orchestration."},
       {"id": "mtm-cli", "status": "bootstrap", "responsibility": "Operator commands and presentation; never an authority source."}

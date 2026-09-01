@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0.0",
+  "project": "MTM-reboot",
+  "milestone": "MTM-005",
+  "implementation_sha256": "0c8888fab850afde593333b408d85feaeaee8c860103371b514b5696a82f5b38",
+  "environment": {
+    "platform": "Linux",
+    "release": "7.1.2-070102-generic",
+    "machine": "x86_64",
+    "browser": "firefox"
+  },
+  "passed": true,
+  "check_count": 15,
+  "checks": [
+    {
+      "name": "dynamic_loopback_metadata",
+      "passed": true,
+      "status": 200
+    },
+    {
+      "name": "trusted_loopback_forwarded_origin",
+      "passed": true,
+      "status": 200
+    },
+    {
+      "name": "oauth_registration_not_blocked_by_mcp_origin_gate",
+      "passed": true,
+      "status": 201
+    },
+    {
+      "name": "real_firefox_authorization_page_and_form",
+      "passed": true,
+      "auth_page_loaded": true,
+      "browser_submit_received": true,
+      "browser_exit_code": 0,
+      "state": "browser-state",
+      "diagnostic_empty": false
+    },
+    {
+      "name": "browser_code_pkce_exchange",
+      "passed": true,
+      "status": 200
+    },
+    {
+      "name": "authorization_code_single_use",
+      "passed": true,
+      "status": 403
+    },
+    {
+      "name": "mcp_requires_bearer_and_advertises_resource_metadata",
+      "passed": true,
+      "status": 401
+    },
+    {
+      "name": "legacy_exact_public_catalog",
+      "passed": true,
+      "status": 200,
+      "tool_count": 24
+    },
+    {
+      "name": "modern_mcp_shape_and_mirror_headers",
+      "passed": true,
+      "status": 200
+    },
+    {
+      "name": "public_and_hidden_dispatch_boundary",
+      "passed": true
+    },
+    {
+      "name": "mcp_origin_gate_and_cors",
+      "passed": true
+    },
+    {
+      "name": "modern_http_error_statuses_and_duplicate_headers",
+      "passed": true
+    },
+    {
+      "name": "gateway_owned_process_shutdown",
+      "passed": true,
+      "exit_code": -15
+    },
+    {
+      "name": "fixed_origin_ignores_forwarded_attacker",
+      "passed": true,
+      "status": 200
+    },
+    {
+      "name": "fixed_gateway_shutdown",
+      "passed": true,
+      "exit_code": -15
+    }
+  ],
+  "sensitive_content_omitted": true,
+  "claim": "This report validates the current Linux target's real Rust HTTP gateway, Firefox-rendered authorization page and browser form submission, DCR/PKCE/code exchange, single-use codes, OAuth challenge metadata, exact 24-tool catalog, hidden alias dispatch, legacy/modern MCP, mirror headers, CORS/origin gates, dynamic/fixed issuer behavior and owned-process shutdown. It omits passwords, client identifiers, client secrets, authorization codes, access tokens, tool arguments/results and OAuth database rows. Workflow and finalizer semantics remain MTM-006."
+}

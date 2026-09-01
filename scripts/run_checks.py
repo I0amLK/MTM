@@ -141,6 +141,18 @@ def main() -> int:
                     capture_json=True,
                 ),
                 run(
+                    "mtm005_conformance",
+                    [sys.executable, "scripts/run_mtm005_conformance.py"],
+                    env=environment,
+                    capture_json=True,
+                ),
+                run(
+                    "mtm005_target_evidence",
+                    [sys.executable, "scripts/validate_mtm005_target_evidence.py"],
+                    env=environment,
+                    capture_json=True,
+                ),
+                run(
                     "bootstrap_contract",
                     [cargo, "run", "-q", "-p", "mtm-cli", "--", "contract"],
                     env=environment,
@@ -185,18 +197,19 @@ def main() -> int:
         "schema_version": "1.0.0",
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "project": "MTM-reboot",
-        "milestone": "MTM-004",
+        "milestone": "MTM-005",
         "production_authority": "python",
         "passed": all(item["passed"] for item in checks),
         "checks": checks,
         "local_claim": (
             "MTM-001 governance, MTM-002 pure contracts/policies, MTM-003 Native isolation, "
-            "and MTM-004 copied-database persistence/capability behavior were validated by "
-            "Rust tests and frozen Python-Rust differential checks. This gate verifies the "
-            "freshness and completeness of the separately executed MTM-003 and MTM-004 target "
-            "reports but does not re-run real Bubblewrap/CAS/tunnel or the private-state backup. "
-            "Re-CTM Python remains the deployed production writer. No OAuth/MCP, workflow, "
-            "finalizer, packaging, A6 performance, or Python-retirement authority is claimed."
+            "MTM-004 copied-database persistence/capability behavior, and MTM-005 OAuth/MCP/HTTP "
+            "gateway behavior were validated by Rust tests and frozen Python-Rust differential "
+            "checks. This gate verifies the freshness and completeness of separately executed "
+            "MTM-003, MTM-004, and MTM-005 target reports but does not re-run real Bubblewrap/CAS, "
+            "private-state backup, or Firefox OAuth flow. Re-CTM Python remains the deployed "
+            "traffic and state authority. No workflow/finalizer, packaging, A6 performance, or "
+            "Python-retirement authority is claimed."
         ),
     }
     temporary = REPORT.with_name(REPORT.name + ".tmp")

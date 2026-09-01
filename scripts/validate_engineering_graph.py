@@ -129,6 +129,56 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
         if token in storage_source:
             raise ValueError(f"mtm-storage acquired forbidden {boundary}: {token}")
 
+    gateway_manifest = tomllib.loads(
+        (ROOT / "crates" / "mtm-gateway" / "Cargo.toml").read_text(encoding="utf-8")
+    )
+    gateway_dependencies = set(gateway_manifest.get("dependencies", {}))
+    expected_gateway_dependencies = {
+        "axum",
+        "base64",
+        "getrandom",
+        "hmac",
+        "http",
+        "mtm-contracts",
+        "mtm-core",
+        "rusqlite",
+        "serde",
+        "serde_json",
+        "serde_urlencoded",
+        "sha2",
+        "time",
+        "tokio",
+        "url",
+    }
+    if gateway_dependencies != expected_gateway_dependencies:
+        raise ValueError(
+            "mtm-gateway dependency boundary drift: "
+            f"expected {sorted(expected_gateway_dependencies)}, got {sorted(gateway_dependencies)}"
+        )
+    gateway_library_source = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted((ROOT / "crates" / "mtm-gateway" / "src").glob("*.rs"))
+    )
+    forbidden_gateway_tokens = {
+        "std::process": "child-process authority",
+        "mtm_native": "Native execution authority",
+        "mtm_storage": "workflow-state writer authority",
+        "WorkflowEngine": "workflow transition authority",
+        "PrivateVault": "private-vault authority",
+    }
+    for token, boundary in forbidden_gateway_tokens.items():
+        if token in gateway_library_source:
+            raise ValueError(f"mtm-gateway acquired forbidden {boundary}: {token}")
+    catalog_source = (ROOT / "crates" / "mtm-gateway" / "src" / "catalog.rs").read_text(
+        encoding="utf-8"
+    )
+    for required_hash in (
+        "86c8ee7d53a0678d0aaaba47ce2f2f72f5c03747fcb443d78011e005dedaa343",
+        "e89c5d2f8bec198fb4a90e7166aadb04b757e4b3ff0c8f459e5fdd468c59f87e",
+    ):
+        if required_hash not in catalog_source:
+            raise ValueError("mtm-gateway lost a frozen tool-catalog hash")
+
     runtime_graph = payload.get("runtime_authority_graph")
     if not isinstance(runtime_graph, dict):
         raise ValueError("missing runtime_authority_graph")
@@ -161,6 +211,8 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
         "mtm_core_pure_boundary": True,
         "mtm_storage_dependency_count": len(storage_dependencies),
         "mtm_storage_single_writer_boundary": True,
+        "mtm_gateway_dependency_count": len(gateway_dependencies),
+        "mtm_gateway_transport_only_boundary": True,
         "runtime_vertices": len(runtime_ids),
         "runtime_edges": len(runtime_edges),
         "invariants": len(invariants),
