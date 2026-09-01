@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0.0",
+  "iteration_id": "ITER-008",
+  "milestone_id": "MTM-008",
+  "started_at": "2026-09-01T09:40:00-07:00",
+  "completed_at": null,
+  "authority_before": "python",
+  "authority_after": "rust-shadow",
+  "production_authority_changed": false,
+  "functional_goal": "Qualify, deploy, roll back, soak, measure, and finally retire the Python Re-CTM production runtime without dual authority, data loss, or an unbounded performance claim.",
+  "phases": {
+    "candidate": {
+      "status": "accepted",
+      "release_version": "0.3.0",
+      "production_authority": "python",
+      "candidate_evidence": "mtm008-candidate-validation.json",
+      "performance_evidence": "mtm008-performance.json",
+      "soak_evidence": "mtm008-soak.json"
+    },
+    "live_cutover": {"status": "pending"},
+    "python_retirement": {"status": "pending"}
+  },
+  "recorded_failures_and_repairs": [
+    {
+      "stage": "project-local formatter invocation",
+      "failure": "Invoking the pinned cargo executable without the pinned toolchain bin on PATH could not find the cargo-fmt subcommand.",
+      "repair": "Used the existing exact project rustup toolchain environment rather than weakening formatting or lint gates."
+    },
+    {
+      "stage": "first A6 resource sampling",
+      "failure": "The initial process sampler split /proc/*/stat on spaces; process names containing spaces caused the whole resource sample to be discarded and RSS was falsely recorded as zero.",
+      "repair": "Rejected the evidence, replaced child discovery with /proc/<pid>/task/<pid>/children, added real RSS/thread/fd sampling, and reran all seven Python and Rust repetitions."
+    },
+    {
+      "stage": "soak leak criterion",
+      "failure": "The first short soak mixed normal allocator warm-up with steady-state memory growth, making the whole-run RSS slope too close to the threshold to support a leak conclusion.",
+      "repair": "Extended the soak to sixty seconds, measured a tail window after fifteen seconds, added absolute RSS/tail-growth/fd/thread/child limits, and reran it."
+    },
+    {
+      "stage": "candidate wheel evidence lifetime",
+      "failure": "The first candidate report attempted to hash a temporary rollback wheel after its temporary directory had already been removed.",
+      "repair": "Captured wheel SHA-256 and size while the artifact existed and retained only non-sensitive immutable facts in the candidate report."
+    },
+    {
+      "stage": "Quick Tunnel edge readiness",
+      "failure": "Two full MTM-007 target reruns observed a public tunnel URL but the external metadata endpoint was transiently unavailable while all local and owned-child checks passed.",
+      "repair": "Kept the same acceptance condition, confirmed the exact standalone public-metadata path, and reran the complete target suite until the real edge metadata and owned cleanup both passed."
+    }
+  ],
+  "acceptance": {
+    "A0": {
+      "passed": true,
+      "evidence": [
+        "Rust 0.3.0 workspace formatting, Clippy with warnings denied, Rust tests, governance tests, and graph validators pass.",
+        "The deployment manager has atomic-selector, rollback, recutover, mode, and fail-closed identity tests."
+      ]
+    },
+    "A1": {
+      "passed": true,
+      "evidence": [
+        "All MTM-002 through MTM-007 frozen differentials remain exact.",
+        "The release-info contract identifies re-ctm 0.3.0, Rust implementation, no Python runtime, 24 public tools, 11 hidden aliases, state schema 2 and workflow protocol 2."
+      ]
+    },
+    "A2": {
+      "passed": true,
+      "evidence": [
+        "The existing eighteen-checkpoint full-composition Python-Rust differential still has zero mismatches.",
+        "Candidate cutover tests use disposable command links, state roots, databases and workspaces."
+      ]
+    },
+    "A3": {
+      "passed": true,
+      "evidence": [
+        "The command link selects exactly one release atomically and manifests are owner-only.",
+        "Retirement fails unless Rust is active, the rollback wheel hash matches, and no Python-tool-root process remains."
+      ]
+    },
+    "A4": {
+      "passed": true,
+      "evidence": [
+        "All MTM-003 through MTM-007 real target reports are fresh after the Rust 0.3.0 release changes.",
+        "A real Re-CTM 0.3.0 wheel was built, restored with uv, executed, and used in a temporary live rollback drill."
+      ]
+    },
+    "A5": {
+      "passed": true,
+      "evidence": [
+        "The sixty-second Rust soak completed 167122 requests with zero errors and 29 stateful start/cancel cycles.",
+        "Tail RSS growth was 860 KiB, fd/thread growth was zero, no child process remained, and shutdown was graceful."
+      ]
+    },
+    "A6": {
+      "passed": true,
+      "evidence": [
+        "Seven repetitions per runtime and 5600 measured requests per runtime used the same authenticated local OAuth/MCP workload with eight clients.",
+        "Observed Rust/Python median throughput ratio was 2.275978; p95 latency ratio 0.526035; peak RSS ratio 0.668591.",
+        "Conservative bootstrap ratios were 2.14589 throughput, 0.54653 p95 latency, and 0.67161 RSS, all beyond predefined thresholds."
+      ],
+      "claim_scope": "Authenticated loopback OAuth/MCP ping, tools/list, server_info, read_file, and check_exec_environment under eight concurrent clients only."
+    }
+  },
+  "manual_pending": [
+    "Switch the actual /home/lk/.local/bin/re-ctm command to the hash-verified Rust release and perform live rollback/recutover.",
+    "Stop residual Python Re-CTM processes and retire /home/lk/.local/share/uv/tools/re-ctm only after live Rust authority passes.",
+    "Other operating systems and deployment users require their own release evidence."
+  ],
+  "rollback": "Until live cutover, leave /home/lk/.local/bin/re-ctm unchanged. After cutover, run scripts/mtm008_deployment.py rollback against the recorded deployment manifest or restore the recorded Python wheel.",
+  "decision": "candidate_accepted"
+}

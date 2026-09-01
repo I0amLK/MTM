@@ -366,11 +366,42 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
         if not str(edge.get("guard") or "").strip():
             raise ValueError("runtime edge requires a guard")
 
+    deployment_graph = payload.get("deployment_authority_graph")
+    if not isinstance(deployment_graph, dict):
+        raise ValueError("missing deployment_authority_graph")
+    deployment_vertices = deployment_graph.get("vertices", [])
+    deployment_edges = deployment_graph.get("edges", [])
+    deployment_ids = {
+        item.get("id") for item in deployment_vertices if isinstance(item, dict)
+    }
+    required_deployment_ids = {
+        "python_release",
+        "rollback_wheel",
+        "rust_release",
+        "command_link",
+        "production_sessions",
+        "historical_source",
+    }
+    if deployment_ids != required_deployment_ids:
+        raise ValueError("deployment authority vertices are incomplete or duplicated")
+    for edge in deployment_edges:
+        if edge.get("source") not in deployment_ids or edge.get("target") not in deployment_ids:
+            raise ValueError("deployment edge references unknown vertex")
+        if not str(edge.get("guard") or "").strip():
+            raise ValueError("deployment edge requires a guard")
+    command_targets = {
+        edge.get("source")
+        for edge in deployment_edges
+        if edge.get("target") == "command_link"
+    }
+    if command_targets != {"python_release", "rust_release"}:
+        raise ValueError("command_link must select only Python rollback or Rust release")
+
     invariants = payload.get("invariants")
     if not isinstance(invariants, list):
         raise ValueError("invariants must be an array")
     invariant_ids = {item.get("id") for item in invariants if isinstance(item, dict)}
-    required = {f"INV-{index:03d}" for index in range(1, 9)}
+    required = {f"INV-{index:03d}" for index in range(1, 11)}
     if invariant_ids != required:
         raise ValueError("architecture invariants are incomplete or duplicated")
 
@@ -400,6 +431,9 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
         "embedded_methodology_sha256": methodology_sha256,
         "runtime_vertices": len(runtime_ids),
         "runtime_edges": len(runtime_edges),
+        "deployment_vertices": len(deployment_ids),
+        "deployment_edges": len(deployment_edges),
+        "deployment_atomic_selector_boundary": True,
         "invariants": len(invariants),
     }
 

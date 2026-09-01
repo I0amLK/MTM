@@ -367,7 +367,7 @@ def release_link_check() -> dict[str, Any]:
             text=True,
             check=True,
         ).stdout.strip()
-        == "mtm-reboot 0.1.0-alpha.1",
+        == "re-ctm 0.3.0",
         "python_linked": "python" in completed.stdout.lower(),
     }
 
@@ -407,7 +407,7 @@ def install_check(root: Path, workspace: Path, data_root: Path) -> dict[str, Any
         ["ldd", str(binary)], stdout=subprocess.PIPE, text=True, check=True
     ).stdout
     return {
-        "version_ok": version == "mtm-reboot 0.1.0-alpha.1",
+        "version_ok": version == "re-ctm 0.3.0",
         "tool_count": parsed.get("tool_count"),
         "python_linked": "python" in dynamic.lower(),
     }

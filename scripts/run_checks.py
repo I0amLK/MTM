@@ -193,6 +193,12 @@ def main() -> int:
                     capture_json=True,
                 ),
                 run(
+                    "mtm008_candidate_evidence",
+                    [sys.executable, "scripts/validate_mtm008_candidate_evidence.py"],
+                    env=environment,
+                    capture_json=True,
+                ),
+                run(
                     "bootstrap_contract",
                     [cargo, "run", "-q", "-p", "mtm-cli", "--", "contract"],
                     env=environment,
@@ -201,6 +207,12 @@ def main() -> int:
                 run(
                     "bootstrap_status",
                     [cargo, "run", "-q", "-p", "mtm-cli", "--", "status"],
+                    env=environment,
+                    capture_json=True,
+                ),
+                run(
+                    "release_info",
+                    [cargo, "run", "-q", "-p", "mtm-cli", "--", "release-info"],
                     env=environment,
                     capture_json=True,
                 ),
@@ -233,26 +245,25 @@ def main() -> int:
             run("git_staged_diff_check", ["git", "diff", "--cached", "--check"], env=environment)
         )
 
+    progress = json.loads((ROOT / "project-progress.json").read_text(encoding="utf-8"))
     payload = {
         "schema_version": "1.0.0",
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "project": "MTM-reboot",
-        "milestone": "MTM-007",
-        "production_authority": "python",
+        "milestone": progress.get("current_milestone", "MTM-008"),
+        "production_authority": progress.get("current_production_authority", "python"),
         "passed": all(item["passed"] for item in checks),
         "checks": checks,
         "local_claim": (
             "MTM-001 governance, MTM-002 pure contracts/policies, MTM-003 Native isolation, "
             "MTM-004 copied-database persistence/capability behavior, MTM-005 OAuth/MCP/HTTP "
-            "gateway behavior, MTM-006 workflow/vault/verifier/finalizer behavior, and MTM-007 "
-            "full runtime/CLI/tool-backend composition were validated by Rust tests and frozen "
-            "Python-Rust differential "
-            "checks. This gate verifies the freshness and completeness of separately executed "
-            "MTM-003 through MTM-007 target reports but does not re-run real Bubblewrap/CAS, "
-            "private-state backup, Firefox OAuth, pdflatex, research-provider, or Quick Tunnel "
-            "target flows. Re-CTM Python remains the deployed traffic and state authority. "
-            "MTM-007 validates release/install packaging and A5 non-regression but makes no A6 "
-            "performance claim, deployed cutover claim, or Python-retirement claim."
+            "gateway behavior, MTM-006 workflow/vault/verifier/finalizer behavior, MTM-007 "
+            "full runtime/CLI/tool-backend composition, and the current MTM-008 candidate "
+            "qualification were validated by strict Rust, governance, frozen differential, "
+            "target-evidence, rollback-drill, soak, and bounded A6 gates. This unified local gate "
+            "verifies report freshness but does not silently perform a live command cutover or "
+            "remove the Python rollback runtime; those authority changes require their own "
+            "recorded MTM-008 commits."
         ),
     }
     temporary = REPORT.with_name(REPORT.name + ".tmp")

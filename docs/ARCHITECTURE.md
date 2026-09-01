@@ -138,4 +138,12 @@ mtm-contracts
 `mtm-runtime` is the only allowed broad composition root. `mtm-cli` depends only on
 contracts/runtime plus serialization and therefore cannot become a second authority
 source. `OperatorSession` receives redacted events and owns no store, capability,
-vault, or workflow object. Deployed Re-CTM traffic remains Python until MTM-008.
+vault, or workflow object. Deployed Re-CTM traffic remains Python until the dedicated
+MTM-008 authority-transfer commit.
+
+MTM-008 adds a separate deployment authority graph. A user-visible `re-ctm` symlink
+is an atomic selector whose only accepted sources are a hash-verified Rust release or
+the recorded Python rollback release. Python production retirement is forbidden until
+wheel restoration, command rollback, Rust recutover, soak, and A6 qualification have
+all passed. Historical Python source remains a non-production reference after
+retirement.

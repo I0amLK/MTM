@@ -96,6 +96,13 @@ Run complete local, target, browser, CAS, LaTeX, upgrade, rollback, soak, resour
 and performance acceptance. Switch all remaining authority to Rust, prove rollback,
 then remove Python production code and interpreter dependency in a separate commit.
 
+Candidate qualification is accepted in `shadow`: the Rust `re-ctm 0.3.0` release has
+no Python linkage, all prior target evidence is fresh, an immutable Python 0.3.0 wheel
+restores successfully, temporary cutover/rollback/recutover passes, a sixty-second
+soak passes, and the exact local authenticated MCP A6 workload exceeds its predefined
+conservative thresholds. The actual user command and installed Python runtime remain
+unchanged until the dedicated authority-transfer commits.
+
 ## Stop rules
 
 Stop a milestone rather than widening it when:

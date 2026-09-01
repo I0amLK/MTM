@@ -30,10 +30,27 @@ fn main() {
     }
     match command {
         Some("--version" | "-V") => {
-            println!("mtm-reboot {}", env!("CARGO_PKG_VERSION"));
+            println!("re-ctm {}", env!("CARGO_PKG_VERSION"));
         }
         Some("contract") => {
             println!("{}", ContractSnapshot::source_baseline().to_json());
+        }
+        Some("release-info") => {
+            println!(
+                "{}",
+                serde_json::json!({
+                    "name": "re-ctm",
+                    "version": env!("CARGO_PKG_VERSION"),
+                    "implementation": "rust",
+                    "python_runtime_required": false,
+                    "public_tool_count": 24,
+                    "hidden_alias_count": 11,
+                    "state_schema_version": 2,
+                    "workflow_protocol_version": 2,
+                    "target_os": env::consts::OS,
+                    "target_arch": env::consts::ARCH,
+                })
+            );
         }
         Some("status") => {
             const STATUS_JSON: &str = concat!(
@@ -68,17 +85,18 @@ fn main() {
 
 fn print_help() {
     const HELP: &str = concat!(
-        "MTM-reboot bootstrap\n\n",
+        "Re-CTM Rust runtime\n\n",
         "Usage:\n",
-        "  mtm-reboot --version\n",
-        "  mtm-reboot contract\n",
-        "  mtm-reboot status\n",
-        "  mtm-reboot check-config [--workspace PATH] [--native-mode MODE]\n",
-        "  mtm-reboot attest-native [--workspace PATH] [--native-mode MODE]\n",
-        "  mtm-reboot serve [--host HOST] [--port PORT] [--workspace PATH] [--native-mode MODE]\n",
-        "  mtm-reboot tui [--quick-tunnel] [--host HOST] [--port PORT] [--workspace PATH] [--native-mode MODE]\n",
-        "  printf '%s' '<json>' | mtm-reboot evaluate\n",
-        "  printf '%s' '<json-array>' | mtm-reboot evaluate-batch\n"
+        "  re-ctm --version\n",
+        "  re-ctm release-info\n",
+        "  re-ctm contract\n",
+        "  re-ctm status\n",
+        "  re-ctm check-config [--workspace PATH] [--native-mode MODE]\n",
+        "  re-ctm attest-native [--workspace PATH] [--native-mode MODE]\n",
+        "  re-ctm serve [--host HOST] [--port PORT] [--workspace PATH] [--native-mode MODE]\n",
+        "  re-ctm tui [--quick-tunnel] [--host HOST] [--port PORT] [--workspace PATH] [--native-mode MODE]\n",
+        "  printf '%s' '<json>' | re-ctm evaluate\n",
+        "  printf '%s' '<json-array>' | re-ctm evaluate-batch\n"
     );
     println!("{HELP}");
 }
@@ -248,7 +266,7 @@ fn serve(arguments: &[String], tui: bool) -> Result<(), ReCtmError> {
         false,
         observer,
     )?);
-    eprintln!("MTM-reboot {}", env!("CARGO_PKG_VERSION"));
+    eprintln!("Re-CTM {} (Rust)", env!("CARGO_PKG_VERSION"));
     eprintln!("local MCP: http://{host}:{}/mcp", bound.port());
     eprintln!("mode: {}", settings.native_mode.as_str());
     if generated_password {

@@ -254,7 +254,7 @@
     {
       "id": "MTM-008",
       "title": "Full cutover, performance evidence, and Python retirement",
-      "status": "approved",
+      "status": "shadow",
       "priority": "P0",
       "production_authority_before": "rust",
       "production_authority_after": "retired",
@@ -272,7 +272,16 @@
         "No deletion of historical fixtures or receipts"
       ],
       "acceptance_levels": ["A0", "A1", "A2", "A3", "A4", "A5", "A6"],
-      "validation_commands": [],
+      "validation_commands": [
+        "python3 scripts/run_mtm008_performance.py",
+        "python3 scripts/run_mtm008_soak.py",
+        "python3 scripts/run_mtm008_candidate_validation.py",
+        "python3 scripts/validate_mtm008_candidate_evidence.py",
+        "python3 scripts/run_checks.py",
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets -- -D warnings",
+        "cargo test --workspace"
+      ],
       "rollback": "Reinstall the last accepted compatible Python release from immutable artifacts and restore the tested database backup.",
       "dependencies": ["MTM-007"]
     }
@@ -563,6 +572,22 @@
       "status_before": "proposed",
       "status_after": "approved",
       "summary": "Approved full deployed cutover, soak, rollback drill, A6 performance qualification and Python retirement as the only remaining milestone; no MTM-008 implementation or production traffic cutover begins in the MTM-007 completion commit."
+    },
+    {
+      "event_id": "MEVT-035",
+      "milestone_id": "MTM-008",
+      "at": "2026-09-01T09:40:00-07:00",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Revalidated commit 5c7aa283977bc705f425efe23f6fcb0ac7a9359b, the frozen eighteen-checkpoint MTM-007 differential, all five implementation-bound target reports, the complete local gate and a clean worktree before beginning only release qualification, deployed cutover, rollback, soak, A6 and Python retirement."
+    },
+    {
+      "event_id": "MEVT-036",
+      "milestone_id": "MTM-008",
+      "at": "2026-09-01T10:25:00-07:00",
+      "status_before": "in_progress",
+      "status_after": "shadow",
+      "summary": "Accepted the Rust 0.3.0 release as a cutover candidate only after exact release identity/no-Python-linkage checks, immutable Python-wheel restore, temporary atomic cutover/rollback/recutover, all lower target evidence, a sixty-second soak, and bounded A6 qualification passed; the live user command and Python production runtime remain unchanged in this phase."
     }
   ],
   "receipt_contract": {

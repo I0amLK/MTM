@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "graph_id": "mtm-reboot-target-architecture",
-  "updated_at": "2026-09-01T09:15:00-07:00",
+  "updated_at": "2026-09-01T10:20:00-07:00",
   "principles": [
     "Functional authority is preserved before structural optimization.",
     "The crate dependency graph is acyclic.",
@@ -69,6 +69,24 @@
       {"source": "workflow_authority", "target": "observer", "guard": "Redacted non-authoritative events"}
     ]
   },
+  "deployment_authority_graph": {
+    "vertices": [
+      {"id": "python_release", "kind": "bounded_rollback"},
+      {"id": "rollback_wheel", "kind": "immutable_artifact"},
+      {"id": "rust_release", "kind": "hash_verified_release"},
+      {"id": "command_link", "kind": "atomic_selector"},
+      {"id": "production_sessions", "kind": "runtime_authority"},
+      {"id": "historical_source", "kind": "non_production_reference"}
+    ],
+    "edges": [
+      {"source": "python_release", "target": "rollback_wheel", "guard": "Wheel built and SHA-256 recorded before retirement"},
+      {"source": "python_release", "target": "command_link", "guard": "Rollback drill only; one active selector"},
+      {"source": "rust_release", "target": "command_link", "guard": "Release identity, executable hash, and no-Python linkage verified"},
+      {"source": "command_link", "target": "production_sessions", "guard": "Atomic symlink selects exactly one runtime"},
+      {"source": "rollback_wheel", "target": "python_release", "guard": "Offline/local restore drill succeeds"},
+      {"source": "historical_source", "target": "rollback_wheel", "guard": "Frozen Re-CTM 0.3.0 runtime files and source commit recorded"}
+    ]
+  },
   "invariants": [
     {"id": "INV-001", "statement": "Exactly one production authority exists per component."},
     {"id": "INV-002", "statement": "Rust shadow execution is read-only and side-effect-free."},
@@ -77,6 +95,8 @@
     {"id": "INV-005", "statement": "Workflow transition planning has one logical authority."},
     {"id": "INV-006", "statement": "Only the mechanical finalizer publishes verified artifacts or verified claim revisions."},
     {"id": "INV-007", "statement": "The observer can display redacted facts but cannot authorize, persist, or transition state."},
-    {"id": "INV-008", "statement": "Graph metrics never override functional or security boundaries."}
+    {"id": "INV-008", "statement": "Graph metrics never override functional or security boundaries."},
+    {"id": "INV-009", "statement": "The deployed re-ctm command is an atomic selector for exactly one hash-verified runtime release."},
+    {"id": "INV-010", "statement": "Python production retirement is forbidden until rollback-wheel restore, live rollback, Rust recutover, soak, and A6 qualification have passed."}
   ]
 }
