@@ -3,9 +3,9 @@
   "iteration_id": "ITER-008",
   "milestone_id": "MTM-008",
   "started_at": "2026-09-01T09:40:00-07:00",
-  "completed_at": null,
+  "completed_at": "2026-09-01T11:01:20-07:00",
   "authority_before": "python",
-  "authority_after": "rust",
+  "authority_after": "retired",
   "production_authority_changed": true,
   "functional_goal": "Qualify, deploy, roll back, soak, measure, and finally retire the Python Re-CTM production runtime without dual authority, data loss, or an unbounded performance claim.",
   "phases": {
@@ -32,7 +32,19 @@
       "candidate_implementation_sha256": "7230fd8e487a51f83fbd80fbbae0b3777485f86dcc9d94d53f4bccbd78a3fc48",
       "reason": "Synchronize final production-authority and completed-milestone status without making the binary claim knowledge of host Python-installation state."
     },
-    "python_retirement": {"status": "pending"}
+    "python_retirement": {
+      "status": "accepted",
+      "evidence": "mtm008-retirement.json",
+      "authority_inventory": "authority-inventory.json",
+      "qualification_commit": "b1601149d3dd555278bcd26ecda02f39a0600860",
+      "release_sha256": "7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728",
+      "retirement_implementation_sha256": "6029dc39e07ee27793667c724cd2e0eae29ba779def81b1482b1f9beea269e56",
+      "rollback_wheel_sha256": "7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b",
+      "production_authority": "rust",
+      "python_production_runtime_retired": true,
+      "live_session_count": 4,
+      "check_count": 17
+    }
   },
   "recorded_failures_and_repairs": [
     {
@@ -64,6 +76,16 @@
       "stage": "background operator-key logging",
       "failure": "The first live restart inherited no operator password for three sessions, so the generated OAuth key was written into owner-only background logs even though public evidence remained redacted.",
       "repair": "Rejected the first live evidence, atomically rolled back to Python, rebuilt equivalent Python sessions, removed the first deployment root, generated replacement keys into dedicated mode-0600 files, restarted every session with RE_CTM_OAUTH_PASSWORD set, and reran the complete live cutover/rollback/recutover. The final logs contain only the configured-externally marker."
+    },
+    {
+      "stage": "post-retirement rollback-wheel probe exit status",
+      "failure": "The first retirement run installed the immutable wheel and served valid OAuth metadata, but the harness incorrectly required exit code zero after deliberately terminating the restored Python server with SIGTERM; the evidence was therefore rejected.",
+      "repair": "Kept the successful metadata requirement, accepted only bounded normal shutdown results (zero, SIGTERM, or SIGINT), continued to reject forced kills, and reran the idempotent retirement flow."
+    },
+    {
+      "stage": "standalone retirement-validator import path",
+      "failure": "The retirement report passed all seventeen checks, but direct execution of the independent validator could not import the scripts package from its script-directory sys.path.",
+      "repair": "Added the same script/module import fallback used by the earlier target validators, changed no acceptance condition, invalidated the evidence hash, and reran both retirement and independent validation successfully."
     }
   ],
   "acceptance": {
@@ -71,7 +93,8 @@
       "passed": true,
       "evidence": [
         "Rust 0.3.0 workspace formatting, Clippy with warnings denied, Rust tests, governance tests, and graph validators pass.",
-        "The deployment manager has atomic-selector, rollback, recutover, mode, and fail-closed identity tests."
+        "The deployment manager has atomic-selector, rollback, recutover, mode, and fail-closed identity tests.",
+        "The final local gate includes the independent seventeen-check retirement validator and authority inventory."
       ]
     },
     "A1": {
@@ -92,7 +115,9 @@
       "passed": true,
       "evidence": [
         "The command link selects exactly one release atomically and manifests are owner-only.",
-        "Retirement fails unless Rust is active, the rollback wheel hash matches, and no Python-tool-root process remains."
+        "Retirement fails unless Rust is active, the rollback wheel hash matches, and no Python-tool-root process remains.",
+        "The retired Python selector kind is converted to a wheel record so legacy symlink rollback fails closed rather than creating a broken production command.",
+        "The obsolete re-ctm-native-helper symlink was removed only after proving it resolved inside the retired Python tool root."
       ]
     },
     "A4": {
@@ -101,7 +126,9 @@
         "All MTM-003 through MTM-007 real target reports are fresh after the Rust 0.3.0 release changes.",
         "A real Re-CTM 0.3.0 wheel was built, restored with uv, executed, and used in both temporary and live rollback drills.",
         "Four live Python serve/TUI sessions and their owned descendants stopped cleanly, the user command selected Rust, live rollback selected Python, recutover selected Rust, and all four sessions restarted on the exact recorded Rust release.",
-        "Generated operator keys are owner-only secret files and no raw key is present in the final background logs or evidence."
+        "Generated operator keys are owner-only secret files and no raw key is present in the final background logs or evidence.",
+        "After deleting the installed Python tool root, the hash-recorded wheel was restored into an isolated uv tool root, reported re-ctm 0.3.0, served real OAuth metadata, and shut down with a bounded signal.",
+        "All four live sessions were upgraded to the final release SHA-256 7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728."
       ]
     },
     "A5": {
@@ -122,9 +149,9 @@
     }
   },
   "manual_pending": [
-    "Retire /home/lk/.local/share/uv/tools/re-ctm only after the live Rust authority commit is recorded and the immutable rollback wheel remains restorable.",
-    "Other operating systems and deployment users require their own release evidence."
+    "Other operating systems, deployment users, reverse proxies, and site-local CAS/LaTeX layouts require their own release evidence.",
+    "Publishing the internal mtm-* crates to a public registry is optional and is not required by the accepted single-binary deployment."
   ],
-  "rollback": "Before Python retirement, run scripts/mtm008_deployment.py rollback against /home/lk/.local/share/re-ctm-rust/deployment/deployment-v1.json. After retirement, reinstall the hash-recorded wheel and atomically select that restored command.",
-  "decision": "live_cutover_accepted"
+  "rollback": "Verify SHA-256 7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b for /home/lk/.local/share/re-ctm-rust/rollback/re_ctm-0.3.0-py3-none-any.whl, reinstall it with uv into an owner-controlled tool root, probe re-ctm 0.3.0 and OAuth metadata, then atomically select the restored command. State schema 2 and workflow protocol 2 remain compatible; no database rewrite is required.",
+  "decision": "accepted"
 }

@@ -1,0 +1,155 @@
+{
+  "authority_inventory": "/home/lk/\u684c\u9762/tempcoding/MTM-reboot/authority-inventory.json",
+  "checks": [
+    {
+      "name": "qualification_commit_exact",
+      "passed": true
+    },
+    {
+      "name": "candidate_evidence_fresh",
+      "passed": true
+    },
+    {
+      "name": "live_cutover_evidence_fresh",
+      "passed": true
+    },
+    {
+      "name": "final_release_matches_qualified_candidate",
+      "passed": true
+    },
+    {
+      "name": "live_sessions_stopped_for_upgrade",
+      "passed": true
+    },
+    {
+      "name": "live_sessions_restarted_exact_release",
+      "passed": true
+    },
+    {
+      "name": "final_status_reports_rust_authority",
+      "passed": true
+    },
+    {
+      "name": "rollback_wheel_restored_after_retirement",
+      "passed": true
+    },
+    {
+      "name": "python_tool_root_removed",
+      "passed": true
+    },
+    {
+      "name": "legacy_python_helper_link_removed",
+      "passed": true
+    },
+    {
+      "name": "no_python_re_ctm_process",
+      "passed": true
+    },
+    {
+      "name": "deployment_manifest_retired",
+      "passed": true
+    },
+    {
+      "name": "rollback_wheel_retained",
+      "passed": true
+    },
+    {
+      "name": "release_has_no_python_linkage",
+      "passed": true
+    },
+    {
+      "name": "historical_source_preserved",
+      "passed": true
+    },
+    {
+      "name": "session_logs_secret_free",
+      "passed": true
+    },
+    {
+      "name": "legacy_selector_rollback_fails_closed",
+      "passed": true
+    }
+  ],
+  "deployment": {
+    "command_link": "/home/lk/.local/bin/re-ctm",
+    "history_actions": [
+      "cutover",
+      "rollback",
+      "recutover",
+      "upgrade_release",
+      "retire_python",
+      "upgrade_release",
+      "retire_python",
+      "upgrade_release",
+      "retire_python"
+    ],
+    "previous_kind": "retired_python_wheel",
+    "previous_version": "re-ctm 0.3.0",
+    "python_runtime_retired": {
+      "at": "2026-09-01T18:01:15.279810Z",
+      "removed": true,
+      "rollback_wheel_sha256": "7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b",
+      "tool_root": "/home/lk/.local/share/uv/tools/re-ctm"
+    },
+    "release": {
+      "installed_at": "2026-09-01T18:01:15.062960Z",
+      "path": "/home/lk/.local/share/re-ctm-rust/releases/0.3.0/re-ctm",
+      "sha256": "7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728",
+      "size_bytes": 11154928,
+      "version": "0.3.0"
+    },
+    "rollback_wheel": {
+      "path": "/home/lk/.local/share/re-ctm-rust/rollback/re_ctm-0.3.0-py3-none-any.whl",
+      "sha256": "7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b",
+      "size_bytes": 161993
+    },
+    "schema": "re-ctm-deployment-v1",
+    "state": "rust_active_python_retired"
+  },
+  "environment": {
+    "machine": "x86_64",
+    "platform": "Linux",
+    "release": "7.1.2-070102-generic"
+  },
+  "helper_retirement": {
+    "previously_absent": true,
+    "removed": true
+  },
+  "implementation_sha256": "6029dc39e07ee27793667c724cd2e0eae29ba779def81b1482b1f9beea269e56",
+  "milestone": "MTM-008",
+  "passed": true,
+  "phase": "python_retirement",
+  "production_authority": "rust",
+  "project": "MTM-reboot",
+  "python_production_runtime_retired": true,
+  "qualification_commit": "b1601149d3dd555278bcd26ecda02f39a0600860",
+  "release": {
+    "installed_at": "2026-09-01T18:01:15.062960Z",
+    "path": "/home/lk/.local/share/re-ctm-rust/releases/0.3.0/re-ctm",
+    "sha256": "7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728",
+    "size_bytes": 11154928,
+    "version": "0.3.0"
+  },
+  "schema_version": "1.0.0",
+  "sensitive_content_recorded": false,
+  "session_upgrade": {
+    "captured_count": 4,
+    "exact_release": true,
+    "logs_secret_free": true,
+    "restarted_count": 4,
+    "shutdown": {
+      "owned_process_count": 5,
+      "remaining_count": 0,
+      "required_sigkill_count": 0,
+      "required_sigterm_count": 0,
+      "session_count": 4
+    }
+  },
+  "wheel_restore": {
+    "command_exists": true,
+    "install_exit_code": 0,
+    "server_exit_code": -15,
+    "server_probe_passed": true,
+    "version": "re-ctm 0.3.0"
+  }
+}

@@ -2,8 +2,7 @@
 
 ## Status
 
-Accepted through the live authority-transfer phase. Python retirement remains a
-separate commit.
+Accepted and completed.
 
 ## Decision
 
@@ -32,6 +31,15 @@ binary. Generated operator keys are written only to owner-mode `0600` secret fil
 background session logs contain the fixed `configured externally` marker rather than
 raw keys.
 
+The final retirement upgraded all four sessions to release SHA-256
+`7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728`,
+removed `/home/lk/.local/share/uv/tools/re-ctm` and the legacy
+`re-ctm-native-helper` entry, and confirmed that no Python Re-CTM process remained.
+After deletion, rollback wheel SHA-256
+`7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b`
+was installed in an isolated uv tool root and served real OAuth metadata. Historical
+source remains preserved but has no production authority.
+
 ## Performance claim boundary
 
 A6 applies only to the report's authenticated local OAuth/MCP mixed request path:
@@ -42,7 +50,7 @@ the same factor.
 
 ## Rollback
 
-Before retirement, atomically select the recorded previous Python command. After
-retirement, restore the immutable wheel into an isolated tool root, verify
-`re-ctm 0.3.0`, and atomically select it. Database and private-vault formats remain
-schema-compatible and are never dual-written during the drill.
+After retirement, verify the immutable wheel hash, restore it into an owner-controlled
+tool root, verify `re-ctm 0.3.0` and OAuth metadata, stop the Rust sessions, and
+atomically select the restored command. Database and private-vault formats remain
+schema-compatible and were never dual-written during the drill.

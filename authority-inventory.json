@@ -1,0 +1,112 @@
+{
+  "a6_claim": {
+    "observed": {
+      "conservative_p95_ratio": 0.514259,
+      "conservative_rss_ratio": 0.674808,
+      "conservative_throughput_ratio": 2.27984,
+      "p95_latency_ratio_rust_over_python": 0.499841,
+      "p99_latency_ratio_rust_over_python": 0.537199,
+      "rss_ratio_rust_over_python": 0.670145,
+      "startup_ratio_rust_over_python": 0.202607,
+      "throughput_median_ratio_rust_over_python": 2.345509
+    },
+    "passed": true,
+    "path": "authenticated local OAuth/MCP mixed request path",
+    "scope": "ping, tools/list, server_info, read_file, and check_exec_environment under eight concurrent clients",
+    "statement": "The Rust release materially improves throughput, p95 latency, and peak RSS on the exact authenticated local MCP workload described in this report.",
+    "thresholds": {
+      "conservative_p95_ratio_max": 0.9,
+      "conservative_rss_ratio_max": 0.75,
+      "conservative_throughput_ratio_min": 1.15,
+      "errors_required": 0
+    }
+  },
+  "live_sessions": {
+    "count": 4,
+    "exact_release": true,
+    "logs_secret_free": true
+  },
+  "milestone": "MTM-008",
+  "production_authority": "rust",
+  "production_command": "/home/lk/.local/bin/re-ctm",
+  "production_command_target": "/home/lk/.local/share/re-ctm-rust/releases/0.3.0/re-ctm",
+  "project": "MTM-reboot",
+  "python_production_runtime": {
+    "active_process_count": 0,
+    "historical_source_preserved": true,
+    "legacy_helper_link_removed": true,
+    "retired": true,
+    "tool_root": "/home/lk/.local/share/uv/tools/re-ctm"
+  },
+  "release": {
+    "installed_at": "2026-09-01T18:01:15.062960Z",
+    "path": "/home/lk/.local/share/re-ctm-rust/releases/0.3.0/re-ctm",
+    "sha256": "7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728",
+    "size_bytes": 11154928,
+    "version": "0.3.0"
+  },
+  "release_info": {
+    "hidden_alias_count": 11,
+    "implementation": "rust",
+    "name": "re-ctm",
+    "production_authority": "rust",
+    "public_tool_count": 24,
+    "python_runtime_required": false,
+    "state_schema_version": 2,
+    "target_arch": "x86_64",
+    "target_os": "linux",
+    "version": "0.3.0",
+    "workflow_protocol_version": 2
+  },
+  "rollback": {
+    "isolated_restore_verified": {
+      "command_exists": true,
+      "install_exit_code": 0,
+      "server_exit_code": -15,
+      "server_probe_passed": true,
+      "version": "re-ctm 0.3.0"
+    },
+    "legacy_selector_rollback_fails_closed": true,
+    "pre_retirement_rust_release": {
+      "path": "/home/lk/.local/share/re-ctm-rust/rollback/re-ctm-rust-authoritative-before-retirement",
+      "sha256": "7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728",
+      "size_bytes": 11154928,
+      "version": "re-ctm 0.3.0"
+    },
+    "wheel": {
+      "path": "/home/lk/.local/share/re-ctm-rust/rollback/re_ctm-0.3.0-py3-none-any.whl",
+      "sha256": "7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b",
+      "size_bytes": 161993
+    }
+  },
+  "runtime_authorities": {
+    "contracts_policy": "rust",
+    "native_process_isolation": "rust_plus_bubblewrap",
+    "oauth_mcp_http": "rust",
+    "runtime_adapters_operator_ui": "rust",
+    "storage_capability": "rust",
+    "workflow_vault_verifier_finalizer": "rust"
+  },
+  "schema_version": "1.0.0",
+  "soak": {
+    "duration_seconds": 60.017,
+    "request_count": 169508,
+    "request_errors": 0,
+    "resources": {
+      "child_processes_max": 0,
+      "file_descriptor_growth": 0,
+      "file_descriptors_final": 16,
+      "file_descriptors_initial": 16,
+      "rss_kib_final": 24420,
+      "rss_kib_initial": 12016,
+      "rss_kib_max": 24420,
+      "rss_slope_kib_per_second": 32.385698,
+      "rss_tail_growth_kib": 880,
+      "rss_tail_slope_kib_per_second": 16.850099,
+      "sample_count": 1100,
+      "thread_growth": 0,
+      "threads_final": 9,
+      "threads_initial": 9
+    }
+  }
+}

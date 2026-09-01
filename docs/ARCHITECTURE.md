@@ -83,10 +83,10 @@ no network, child process, model, LaTeX, or vault I/O inside transactions
 one deployed production writer
 ```
 
-Python and Rust are compared only on independent copies. The current Re-CTM Python
-runtime remains the deployed writer; `mtm-storage` is authoritative only inside the
-new project until the gateway and workflow composition milestones make a separately
-accepted cutover possible.
+Python and Rust were compared only on independent copies. The final deployed writer
+is Rust; the Python production tool environment has been retired. The immutable
+Python wheel and historical source are rollback/reference artifacts and have no
+active authority.
 
 `mtm-gateway` owns OAuth DCR/PKCE/code/token behavior, HTTP routing and Origin/CORS
 policy, legacy/modern MCP envelopes, mirror-header checks, and tool dispatch. It
@@ -116,7 +116,7 @@ workflow crate therefore gains functionality without acquiring process or networ
 authority. This intentionally keeps the authority graph stronger even though it adds
 explicit composition edges in `mtm-runtime`.
 
-## Implemented slice after MTM-007
+## Final implemented architecture after MTM-008
 
 Seven of the eight workspace crates are now implemented, while `mtm-contracts`
 remains the stable bootstrap contract floor:
@@ -138,12 +138,13 @@ mtm-contracts
 `mtm-runtime` is the only allowed broad composition root. `mtm-cli` depends only on
 contracts/runtime plus serialization and therefore cannot become a second authority
 source. `OperatorSession` receives redacted events and owns no store, capability,
-vault, or workflow object. Deployed Re-CTM traffic remains Python until the dedicated
-MTM-008 authority-transfer commit.
+vault, or workflow object. The production command atomically selects the hash-recorded
+Rust release, and all four transferred live sessions execute that exact file.
 
-MTM-008 adds a separate deployment authority graph. A user-visible `re-ctm` symlink
-is an atomic selector whose only accepted sources are a hash-verified Rust release or
-the recorded Python rollback release. Python production retirement is forbidden until
-wheel restoration, command rollback, Rust recutover, soak, and A6 qualification have
-all passed. Historical Python source remains a non-production reference after
-retirement.
+MTM-008 adds a separate deployment authority graph. The user-visible `re-ctm` symlink
+is an atomic selector for the hash-verified Rust release. The old selector form was
+converted to a wheel rollback record at retirement, so it fails closed rather than
+creating a broken Python symlink. Recovery restores the hash-recorded wheel, probes it,
+and then atomically selects it. Historical Python source remains a non-production
+reference. Bubblewrap remains the Native Linux isolation actuator; Rust owns the
+policy, process lifecycle, attestation interpretation, and all application authority.

@@ -254,7 +254,7 @@
     {
       "id": "MTM-008",
       "title": "Full cutover, performance evidence, and Python retirement",
-      "status": "authoritative",
+      "status": "completed",
       "priority": "P0",
       "production_authority_before": "rust",
       "production_authority_after": "retired",
@@ -279,6 +279,7 @@
         "python3 scripts/validate_mtm008_candidate_evidence.py",
         "python3 scripts/run_mtm008_live_cutover.py",
         "python3 scripts/validate_mtm008_live_evidence.py",
+        "python3 scripts/validate_mtm008_retirement_evidence.py",
         "python3 scripts/run_checks.py",
         "cargo fmt --all -- --check",
         "cargo clippy --workspace --all-targets -- -D warnings",
@@ -301,7 +302,7 @@
     {"source": "MTM-007", "target": "MTM-006"},
     {"source": "MTM-008", "target": "MTM-007"}
   ],
-  "todo": ["MTM-008"],
+  "todo": [],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -598,6 +599,14 @@
       "status_before": "shadow",
       "status_after": "authoritative",
       "summary": "Transferred the live /home/lk/.local/bin/re-ctm selector and four active serve/TUI sessions to the hash-recorded Rust 0.3.0 release only after stopping every Python session descendant, proving a real rollback to the recorded Python command, recutting to Rust, restarting all sessions on Rust, and rerunning after generated operator keys were removed from background logs. The Python tool root remains installed solely for the separately committed retirement step."
+    },
+    {
+      "event_id": "MEVT-038",
+      "milestone_id": "MTM-008",
+      "at": "2026-09-01T11:01:20-07:00",
+      "status_before": "authoritative",
+      "status_after": "completed",
+      "summary": "Completed MTM-008 after upgrading all four live sessions to the final qualified Rust release, removing the verified Python production tool root and legacy helper entry, restoring the immutable Python wheel in an isolated tool root after deletion, confirming zero Python Re-CTM processes, preserving historical source, recording the complete authority inventory, and passing seventeen independent retirement checks."
     }
   ],
   "receipt_contract": {
@@ -1757,6 +1766,118 @@
         "Other operating systems and deployment users require their own release evidence."
       ],
       "decision": "accepted_live_cutover"
+    },
+    {
+      "receipt_id": "MREC-008B",
+      "milestone_id": "MTM-008",
+      "started_at": "2026-09-01T10:34:00-07:00",
+      "completed_at": "2026-09-01T11:01:20-07:00",
+      "status_before": "authoritative",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "retired",
+      "commit_subject": "chore(retirement): retire Python production runtime [MTM-008]",
+      "files_changed": [
+        "README.md",
+        "authority-inventory.json",
+        "docs/ARCHITECTURE.md",
+        "docs/MIGRATION_PLAN.md",
+        "docs/adr/0008-release-cutover-and-python-retirement.md",
+        "engineering-graph.json",
+        "local-validation.json",
+        "migration-graph.json",
+        "mtm008-retirement.json",
+        "project-progress.json",
+        "records/iterations/ITER-008.json",
+        "scripts/run_checks.py",
+        "scripts/run_mtm008_python_retirement.py",
+        "scripts/validate_mtm008_retirement_evidence.py",
+        "tests/test_governance.py"
+      ],
+      "commands": [
+        {
+          "command": "python3 scripts/run_mtm008_python_retirement.py first retirement run",
+          "exit_code": 1,
+          "result": "The final Rust release upgrade, four-session restart, Python tool-root deletion, helper-link deletion and wheel installation all passed, but the harness incorrectly rejected the deliberately SIGTERM-stopped restored Python server. The evidence remained failed."
+        },
+        {
+          "command": "python3 scripts/run_mtm008_python_retirement.py after bounded-shutdown repair",
+          "exit_code": 0,
+          "result": "All seventeen retirement conditions passed, including post-deletion wheel restoration and real OAuth metadata, but the separately executed validator then exposed a script-directory import-path defect."
+        },
+        {
+          "command": "python3 scripts/run_mtm008_python_retirement.py && python3 scripts/validate_mtm008_retirement_evidence.py final idempotent rerun",
+          "exit_code": 0,
+          "result": "The final report and independent validator passed with release SHA-256 7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728, rollback-wheel SHA-256 7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b, four exact Rust sessions, no Python process/tool root/helper entry, and secret-free logs."
+        },
+        {
+          "command": "python3 scripts/run_checks.py in completed MTM-008 state",
+          "exit_code": 0,
+          "result": "The complete local gate passed with every historical differential and target validator, candidate/live/retirement evidence, strict Rust formatting/Clippy/tests, governance, architecture, authority inventory, and Git diff checks."
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "evidence": [
+            "The complete Rust workspace, seventeen governance/deployment tests, migration graph, architecture graph, and all evidence validators pass.",
+            "The retirement runner and validator are implementation-hash-bound, and their initial failures remain recorded."
+          ]
+        },
+        "A1": {
+          "passed": true,
+          "evidence": [
+            "The production command reports re-ctm 0.3.0 and typed release-info identifies Rust, no Python runtime dependency, 24 public tools, 11 hidden aliases, state schema 2 and workflow protocol 2.",
+            "The exact production release SHA-256 is 7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728."
+          ]
+        },
+        "A2": {
+          "passed": true,
+          "evidence": [
+            "All MTM-002 through MTM-007 frozen differentials remain exact, including the eighteen-checkpoint full-composition golden.",
+            "No Python and Rust production writer overlapped during release upgrade or retirement."
+          ]
+        },
+        "A3": {
+          "passed": true,
+          "evidence": [
+            "The atomic command selector resolves only to the hash-recorded Rust release, and all four live sessions execute that exact file.",
+            "The Python tool root and legacy helper entry are absent, no Python Re-CTM process exists, and legacy selector rollback now fails closed instead of creating a broken symlink.",
+            "Generated operator keys remain owner-only and all final background logs are secret-free."
+          ]
+        },
+        "A4": {
+          "passed": true,
+          "evidence": [
+            "All four live sessions were stopped with SIGINT only, upgraded to the final release and restarted on their original command/workspace configuration.",
+            "After deleting the installed Python runtime, the immutable wheel restored into an isolated uv tool root, reported re-ctm 0.3.0, served OAuth metadata and shut down with bounded SIGTERM.",
+            "Historical Re-CTM source remains preserved as a non-production reference."
+          ]
+        },
+        "A5": {
+          "passed": true,
+          "evidence": [
+            "The final sixty-second Rust soak completed 169508 requests with zero errors and 29 stateful start/cancel cycles.",
+            "File-descriptor and thread growth were zero, no child process remained, tail RSS growth was 880 KiB, and shutdown was graceful."
+          ]
+        },
+        "A6": {
+          "passed": true,
+          "evidence": [
+            "The claim is restricted to the authenticated loopback OAuth/MCP mix under eight clients.",
+            "Observed Rust/Python ratios were 2.345509 median throughput, 0.499841 p95 latency and 0.670145 peak RSS; conservative bootstrap ratios also exceeded every predefined threshold."
+          ]
+        }
+      },
+      "behavior_before": "Rust was the live authoritative runtime, but the installed Python tool environment and legacy helper entry remained as the immediate rollback implementation and MTM-008 was not complete.",
+      "behavior_after": "The hash-recorded Rust 0.3.0 release is the sole production runtime, four live sessions execute it, the installed Python tool root/helper entry and Python Re-CTM processes are absent, an immutable wheel is the tested rollback artifact, and all eight milestones are complete.",
+      "risk_review": "Retirement occurred only after real rollback and recutover, final release requalification, wheel hash verification, zero active Python-root process, exact live-session inventory and a pre-retirement Rust backup. The restored wheel was tested after deletion, historical source was preserved, state formats were unchanged, and no secret content entered evidence.",
+      "rollback": "Verify SHA-256 7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b for /home/lk/.local/share/re-ctm-rust/rollback/re_ctm-0.3.0-py3-none-any.whl; install it with uv into an owner-controlled tool root, probe version and OAuth metadata, stop the Rust sessions, then atomically select the restored Python command. State schema 2 and workflow protocol 2 require no migration.",
+      "manual_pending": [
+        "Other operating systems, deployment users, reverse proxies, and site-local CAS/LaTeX layouts require independent release qualification.",
+        "Publishing internal mtm-* crates to a public registry remains optional and outside the accepted single-binary release."
+      ],
+      "decision": "accepted"
     }
   ]
 }

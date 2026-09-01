@@ -16,6 +16,7 @@ from scripts.validate_mtm006_target_evidence import validate as validate_mtm006_
 from scripts.validate_mtm007_target_evidence import validate as validate_mtm007_target
 from scripts.validate_mtm008_candidate_evidence import validate as validate_mtm008_candidate
 from scripts.validate_mtm008_live_evidence import validate as validate_mtm008_live
+from scripts.validate_mtm008_retirement_evidence import validate as validate_mtm008_retirement
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,7 +26,7 @@ class GovernanceTestCase(unittest.TestCase):
     def test_repository_migration_graph_is_valid(self) -> None:
         summary = validate_migration(load_graph())
         self.assertEqual(summary["milestone_count"], 8)
-        self.assertEqual(summary["todo_count"], 1)
+        self.assertEqual(summary["todo_count"], 0)
 
     def test_dependency_cycle_is_rejected(self) -> None:
         payload = copy.deepcopy(load_graph())
@@ -122,6 +123,10 @@ class GovernanceTestCase(unittest.TestCase):
     def test_current_mtm008_live_evidence_is_fresh_and_redacted(self) -> None:
         summary = validate_mtm008_live()
         self.assertEqual(summary["required_check_count"], 10)
+
+    def test_current_mtm008_retirement_evidence_is_fresh_and_redacted(self) -> None:
+        summary = validate_mtm008_retirement()
+        self.assertEqual(summary["required_check_count"], 17)
 
     def test_commit_message_contract(self) -> None:
         message = """docs(governance): establish project foundation [MTM-001]

@@ -205,6 +205,12 @@ def main() -> int:
                     capture_json=True,
                 ),
                 run(
+                    "mtm008_retirement_evidence",
+                    [sys.executable, "scripts/validate_mtm008_retirement_evidence.py"],
+                    env=environment,
+                    capture_json=True,
+                ),
+                run(
                     "bootstrap_contract",
                     [cargo, "run", "-q", "-p", "mtm-cli", "--", "contract"],
                     env=environment,
@@ -256,7 +262,7 @@ def main() -> int:
         "schema_version": "1.0.0",
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "project": "MTM-reboot",
-        "milestone": progress.get("current_milestone", "MTM-008"),
+        "milestone": progress.get("current_milestone") or "MTM-008",
         "production_authority": progress.get("current_production_authority", "python"),
         "passed": all(item["passed"] for item in checks),
         "checks": checks,
@@ -264,12 +270,12 @@ def main() -> int:
             "MTM-001 governance, MTM-002 pure contracts/policies, MTM-003 Native isolation, "
             "MTM-004 copied-database persistence/capability behavior, MTM-005 OAuth/MCP/HTTP "
             "gateway behavior, MTM-006 workflow/vault/verifier/finalizer behavior, MTM-007 "
-            "full runtime/CLI/tool-backend composition, and the current MTM-008 candidate "
-            "qualification were validated by strict Rust, governance, frozen differential, "
-            "target-evidence, rollback-drill, soak, and bounded A6 gates. This unified local gate "
-            "verifies report freshness but does not silently perform a live command cutover or "
-            "remove the Python rollback runtime; those authority changes require their own "
-            "recorded MTM-008 commits."
+            "full runtime/CLI/tool-backend composition, and completed MTM-008 candidate, live "
+            "cutover, retirement, authority-inventory, rollback-wheel, soak, and bounded A6 "
+            "evidence were validated by strict Rust, governance, frozen differential, and "
+            "target-evidence gates. The installed Python production tool root is retired; the "
+            "historical source and immutable wheel remain non-production rollback/reference "
+            "artifacts."
         ),
     }
     temporary = REPORT.with_name(REPORT.name + ".tmp")
