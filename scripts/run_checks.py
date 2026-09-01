@@ -111,6 +111,12 @@ def main() -> int:
                 ),
                 run("cargo_test", [cargo, "test", "--workspace"], env=environment),
                 run(
+                    "mtm002_conformance",
+                    [sys.executable, "scripts/run_mtm002_conformance.py"],
+                    env=environment,
+                    capture_json=True,
+                ),
+                run(
                     "bootstrap_contract",
                     [cargo, "run", "-q", "-p", "mtm-cli", "--", "contract"],
                     env=environment,
@@ -155,15 +161,15 @@ def main() -> int:
         "schema_version": "1.0.0",
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "project": "MTM-reboot",
-        "milestone": "MTM-001",
+        "milestone": "MTM-002",
         "production_authority": "python",
         "passed": all(item["passed"] for item in checks),
         "checks": checks,
         "local_claim": (
-            "Only the MTM-001 governance, target architecture, minimal Cargo workspace, "
-            "and bootstrap source-contract snapshot were validated. No Re-CTM production "
-            "authority, target isolation, browser OAuth, CAS, LaTeX, persistence, workflow, "
-            "or performance claim is included."
+            "MTM-001 governance plus MTM-002 pure Rust contracts/policies were validated "
+            "against the frozen Re-CTM Python reference by golden and differential checks. "
+            "No database, process, network, workflow, finalizer, target/browser, CAS, LaTeX, "
+            "or performance authority is claimed."
         ),
     }
     temporary = REPORT.with_name(REPORT.name + ".tmp")

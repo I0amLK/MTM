@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0.0",
+  "iteration_id": "ITER-002",
+  "milestone_id": "MTM-002",
+  "title": "Typed contract and pure policy core",
+  "started_at": "2026-09-01T01:10:19-07:00",
+  "completed_at": "2026-09-01T01:31:08-07:00",
+  "source_baseline": {
+    "project": "Re-CTM",
+    "version": "0.3.0",
+    "commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
+    "authority": "python"
+  },
+  "previous_iteration_review": {
+    "commit": "512e1bd04781e37fc5116615e4617a0d81c5ef18",
+    "subject": "docs(governance): establish project foundation [MTM-001]",
+    "working_tree_before_start": "clean",
+    "command": "python3 scripts/run_checks.py",
+    "exit_code": 0,
+    "result": "MTM-001 governance, graphs, toolchain, Rust bootstrap, golden source contract, and Git checks passed before MTM-002 began."
+  },
+  "authority": {
+    "component_scope": "MTM-reboot typed pure contract and policy core",
+    "before": "python",
+    "after": "rust",
+    "source_product_production_authority": "python",
+    "rust_production_request_components": 0
+  },
+  "implemented": [
+    "Stable error categories, payload shape, and Native/workflow/domain/LaTeX enum wire values",
+    "JSON-schema subset used by Re-CTM tools including const, oneOf, anyOf, type, lengths, pattern, enum, numeric bounds, arrays, required fields, and additionalProperties",
+    "Secret-key/value redaction, SHA-256 token fingerprints, and byte summaries",
+    "OAuth origin, redirect URI, strict TryCloudflare origin, and workspace-path policy",
+    "Native command permission ordering, sensitive environment detection, and inline interpreter recognition",
+    "Patch envelope parsing and deterministic update-hunk application",
+    "Bounded single and batch JSON conformance entry points with no stateful side effects"
+  ],
+  "conformance": {
+    "case_count": 135,
+    "operation_count": 14,
+    "differential_mismatches_final": 0,
+    "reference_sha256": "1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d",
+    "shadow_side_effect_free": true,
+    "python_reference": {
+      "samples": 7,
+      "elapsed_ms_median": 79.928,
+      "elapsed_ms_p95": 81.781,
+      "max_rss_kib": 27004
+    },
+    "rust_shadow": {
+      "samples": 7,
+      "elapsed_ms_median": 88.923,
+      "elapsed_ms_p95": 90.521,
+      "max_rss_kib": 7900
+    },
+    "interpretation": "A5 resource non-regression passed. No A6 speed claim is made because Rust cold-process elapsed time was slightly higher in this bootstrap harness."
+  },
+  "failures_retained": [
+    {
+      "stage": "first Rust lint gate",
+      "result": "failed",
+      "cause": "A test-only BTreeSet import was in production scope and two tests used the prohibited expect_err helper.",
+      "resolution": "Moved the import into the test module and rewrote assertions without panic-style helpers."
+    },
+    {
+      "stage": "source semantic review",
+      "result": "corrected before conformance",
+      "cause": "The first Rust risky-environment list included GIT_SSH_COMMAND, which was not present in the frozen Re-CTM source contract.",
+      "resolution": "Removed the extra policy instead of silently broadening behavior."
+    },
+    {
+      "stage": "first Python-Rust differential run",
+      "result": "failed with one mismatch",
+      "cause": "The Rust URL parser exposed IPv6 loopback host as [::1], while Python urlsplit().hostname exposes ::1.",
+      "resolution": "Normalized URL-library representation before applying the existing loopback policy; all 135 cases then matched."
+    },
+    {
+      "stage": "first integrated full gate",
+      "result": "failed",
+      "cause": "rustfmt required only presentation changes in url_policy.rs.",
+      "resolution": "Applied cargo fmt and reran the full gate successfully."
+    },
+    {
+      "stage": "completed-state full gate",
+      "result": "failed",
+      "cause": "The missing-receipt governance test reused the now-approved real MTM-003 node and therefore triggered TODO inconsistency before the intended receipt assertion.",
+      "resolution": "Replaced the lifecycle-coupled fixture with a synthetic MTM-900 milestone; the completed-state full gate then passed."
+    }
+  ],
+  "acceptance": {
+    "A0": "passed: format, Clippy -D warnings, 19 Rust tests, six governance tests, migration/architecture validators, bootstrap and Git checks",
+    "A1": "passed: 135-case source corpus and immutable reference SHA-256",
+    "A2": "passed: exact normalized result and full error-payload parity with no Git-visible shadow side effect",
+    "A5": "passed: seven-sample bounded Python/Rust comparison within absolute and non-regression ceilings",
+    "A3": "not applicable to the side-effect-free milestone",
+    "A4": "not applicable to the side-effect-free milestone",
+    "A6": "not claimed"
+  },
+  "dependencies": {
+    "direct": [
+      "serde",
+      "serde_json",
+      "regex",
+      "sha2",
+      "shell-words",
+      "url"
+    ],
+    "review": "Dependencies are locked. url's Unicode/IDNA transitive footprint is accepted to avoid unsafe hand-written URL authority parsing; none performs runtime network access."
+  },
+  "rollback": "Revert MTM-002 or bypass mtm-core and run the frozen Python pure reference. No persistent state, child process, OAuth token, workflow transition, or artifact migration exists.",
+  "manual_pending": [
+    "MTM-003 Native/Bubblewrap and command lifecycle",
+    "MTM-004 persistence and capability authority",
+    "MTM-005 real OAuth/MCP/browser gateway",
+    "MTM-006 workflow, verifier, repair, and finalizer",
+    "MTM-007 integrations, LaTeX, TUI, tunnel, and packaging",
+    "MTM-008 complete cutover, rollback drill, soak, A6, and Python retirement"
+  ],
+  "decision": "accepted"
+}

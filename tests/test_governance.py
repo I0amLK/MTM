@@ -29,13 +29,17 @@ class GovernanceTestCase(unittest.TestCase):
 
     def test_completed_milestone_requires_receipt(self) -> None:
         payload = copy.deepcopy(load_graph())
-        target = next(item for item in payload["milestones"] if item["id"] == "MTM-003")
-        target["status"] = "completed"
+        template = copy.deepcopy(payload["milestones"][-1])
+        template["id"] = "MTM-900"
+        template["title"] = "Synthetic receipt fixture"
+        template["status"] = "completed"
+        template["dependencies"] = []
+        payload["milestones"].append(template)
         payload["events"].extend(
             [
                 {
                     "event_id": "TEST-EVENT-1",
-                    "milestone_id": "MTM-003",
+                    "milestone_id": "MTM-900",
                     "at": "2026-09-01T01:00:00-07:00",
                     "status_before": "proposed",
                     "status_after": "approved",
@@ -43,7 +47,7 @@ class GovernanceTestCase(unittest.TestCase):
                 },
                 {
                     "event_id": "TEST-EVENT-2",
-                    "milestone_id": "MTM-003",
+                    "milestone_id": "MTM-900",
                     "at": "2026-09-01T01:01:00-07:00",
                     "status_before": "approved",
                     "status_after": "in_progress",
@@ -51,7 +55,7 @@ class GovernanceTestCase(unittest.TestCase):
                 },
                 {
                     "event_id": "TEST-EVENT-3",
-                    "milestone_id": "MTM-003",
+                    "milestone_id": "MTM-900",
                     "at": "2026-09-01T01:02:00-07:00",
                     "status_before": "in_progress",
                     "status_after": "completed",
@@ -66,7 +70,7 @@ class GovernanceTestCase(unittest.TestCase):
         payload = json.loads((ROOT / "engineering-graph.json").read_text(encoding="utf-8"))
         summary = validate_engineering(payload)
         self.assertTrue(summary["crate_graph_acyclic"])
-        self.assertEqual(summary["cargo_members"], ["mtm-cli", "mtm-contracts"])
+        self.assertEqual(summary["cargo_members"], ["mtm-cli", "mtm-contracts", "mtm-core"])
 
     def test_commit_message_contract(self) -> None:
         message = """docs(governance): establish project foundation [MTM-001]

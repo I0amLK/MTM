@@ -60,6 +60,40 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
         if vertex.get("status") not in {"bootstrap", "implemented"}:
             raise ValueError(f"Cargo member {member} is not marked bootstrap/implemented")
 
+    core_manifest = tomllib.loads(
+        (ROOT / "crates" / "mtm-core" / "Cargo.toml").read_text(encoding="utf-8")
+    )
+    core_dependencies = set(core_manifest.get("dependencies", {}))
+    expected_core_dependencies = {
+        "mtm-contracts",
+        "regex",
+        "serde",
+        "serde_json",
+        "sha2",
+        "shell-words",
+        "url",
+    }
+    if core_dependencies != expected_core_dependencies:
+        raise ValueError(
+            "mtm-core dependency boundary drift: "
+            f"expected {sorted(expected_core_dependencies)}, got {sorted(core_dependencies)}"
+        )
+    forbidden_core_tokens = {
+        "std::fs": "filesystem authority",
+        "std::net": "network authority",
+        "std::process": "process authority",
+        "rusqlite": "database authority",
+        "tokio": "async runtime authority",
+        "reqwest": "network client authority",
+    }
+    core_source = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted((ROOT / "crates" / "mtm-core" / "src").glob("*.rs"))
+    )
+    for token, boundary in forbidden_core_tokens.items():
+        if token in core_source:
+            raise ValueError(f"mtm-core acquired forbidden {boundary}: {token}")
+
     runtime_graph = payload.get("runtime_authority_graph")
     if not isinstance(runtime_graph, dict):
         raise ValueError("missing runtime_authority_graph")
@@ -88,6 +122,8 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
         "crate_graph_acyclic": True,
         "cargo_members": sorted(member_crates),
         "crate_statuses": dict(sorted(statuses.items())),
+        "mtm_core_dependency_count": len(core_dependencies),
+        "mtm_core_pure_boundary": True,
         "runtime_vertices": len(runtime_ids),
         "runtime_edges": len(runtime_edges),
         "invariants": len(invariants),

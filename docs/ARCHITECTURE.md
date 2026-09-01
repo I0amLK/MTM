@@ -42,3 +42,20 @@ OAuth + MCP gateway
 - Observability receives redacted events and cannot authorize or mutate behavior.
 
 The machine-audited target graph is [`engineering-graph.json`](../engineering-graph.json).
+
+## Implemented slice after MTM-002
+
+`mtm-contracts` and `mtm-core` now form the implemented bottom of the dependency DAG:
+
+```text
+mtm-contracts
+      ▲
+      │
+  mtm-core
+```
+
+They own only stable wire facts and pure bounded policy. They have no database,
+process, network, workflow-transition, vault, or finalizer authority. The standalone
+CLI evaluator exists solely for golden and differential testing against the frozen
+Python source. This keeps the first Rust authority boundary coherent without making
+the CLI or conformance harness a production composition root.

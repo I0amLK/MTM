@@ -1,5 +1,13 @@
 #![forbid(unsafe_code)]
 
+mod enums;
+mod error;
+
+use serde::{Deserialize, Serialize};
+
+pub use enums::{DomainStatus, LatexPolicy, NativeMode, WorkflowRole, WorkflowState};
+pub use error::{ErrorCategory, ReCtmError, invalid_argument, permission_denied};
+
 /// Number of public CTM-compatible native tools in the source contract.
 pub const NATIVE_TOOL_COUNT: u16 = 18;
 
@@ -19,7 +27,8 @@ pub const WORKFLOW_PROTOCOL_VERSION: u16 = 2;
 pub const PUBLIC_TOOL_COUNT: u16 = NATIVE_TOOL_COUNT + RETHLAS_TOOL_COUNT;
 
 /// Which implementation is allowed to perform production side effects.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum RuntimeAuthority {
     /// Re-CTM's Python runtime remains authoritative.
     Python,

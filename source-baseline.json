@@ -6,6 +6,16 @@
   "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
   "source_version": "0.3.0",
   "production_authority": "python",
+  "reference_files": [
+    "src/re_ctm/errors.py",
+    "src/re_ctm/enums.py",
+    "src/re_ctm/debug.py",
+    "src/re_ctm/ctm_compat.py",
+    "src/re_ctm/oauth.py",
+    "src/re_ctm/quick_tunnel.py",
+    "src/re_ctm/native.py",
+    "src/re_ctm/tools.py"
+  ],
   "contract": {
     "native_tools": 18,
     "rethlas_tools": 6,

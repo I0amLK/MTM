@@ -12,6 +12,11 @@ Migrate stable errors, enums, schema validation, redaction, URL/path validation,
 command policy, patch parsing, and other side-effect-free logic. Rust begins in
 read-only shadow mode and cuts over only after golden/differential parity.
 
+Completion evidence is recorded in `records/iterations/ITER-002.json`. The source
+corpus contains 135 cases with an immutable response hash, and the Rust implementation
+is authoritative only for the pure MTM-reboot core. Re-CTM remains the production
+runtime while all stateful milestones are still pending.
+
 ## MTM-003 — native process and isolation plane
 
 Migrate bounded capture, process groups, command IDs, TTY, timeout/kill provenance,

@@ -13,8 +13,10 @@ The governing order is:
 
 - Source baseline: Re-CTM 0.3.0.
 - Current production authority: Re-CTM's Python implementation.
-- MTM-reboot authority: bootstrap contracts only; no production request path has moved.
-- Active milestone: `MTM-001` foundation, governance, and conformance bootstrap.
+- MTM-reboot Rust authority: typed side-effect-free contracts and pure policy only;
+  no production request, persistence, process, network, workflow, or finalizer path has moved.
+- Completed milestones: `MTM-001`, `MTM-002`.
+- Next approved milestone: `MTM-003` Native process lifecycle and isolation.
 
 ## Eight milestones
 
@@ -35,7 +37,13 @@ The authoritative milestone graph is [`migration-graph.json`](migration-graph.js
 python3 scripts/run_checks.py
 cargo run -q -p mtm-cli -- contract
 cargo run -q -p mtm-cli -- status
+python3 scripts/run_mtm002_conformance.py
 ```
+
+`MTM-002` compares 135 valid, invalid, boundary, and adversarial cases against the
+frozen Re-CTM Python source. Rust is authoritative only for the new project's pure
+core; the old runtime remains the production and rollback implementation until later
+milestones are independently accepted.
 
 The project does not claim parity, safety, or performance merely because a Rust
 binary builds. See [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) and

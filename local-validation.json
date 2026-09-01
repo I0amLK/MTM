@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-09-01T08:04:07.827003Z",
+  "generated_at": "2026-09-01T08:37:28.933572Z",
   "project": "MTM-reboot",
-  "milestone": "MTM-001",
+  "milestone": "MTM-002",
   "production_authority": "python",
   "passed": true,
   "checks": [
@@ -14,7 +14,7 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"milestone_count\": 8,\n    \"edge_count\": 11,\n    \"todo_count\": 1,\n    \"event_count\": 4,\n    \"receipt_count\": 1,\n    \"status_counts\": {\n      \"approved\": 1,\n      \"completed\": 1,\n      \"proposed\": 6\n    }\n  }\n}\n"
+      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"milestone_count\": 8,\n    \"edge_count\": 11,\n    \"todo_count\": 1,\n    \"event_count\": 9,\n    \"receipt_count\": 2,\n    \"status_counts\": {\n      \"approved\": 1,\n      \"completed\": 2,\n      \"proposed\": 5\n    }\n  }\n}\n"
     },
     {
       "name": "engineering_graph",
@@ -24,7 +24,7 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"crate_vertices\": 8,\n    \"crate_edges\": 17,\n    \"crate_graph_acyclic\": true,\n    \"cargo_members\": [\n      \"mtm-cli\",\n      \"mtm-contracts\"\n    ],\n    \"crate_statuses\": {\n      \"bootstrap\": 2,\n      \"planned\": 6\n    },\n    \"runtime_vertices\": 10,\n    \"runtime_edges\": 12,\n    \"invariants\": 8\n  }\n}\n"
+      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"crate_vertices\": 8,\n    \"crate_edges\": 17,\n    \"crate_graph_acyclic\": true,\n    \"cargo_members\": [\n      \"mtm-cli\",\n      \"mtm-contracts\",\n      \"mtm-core\"\n    ],\n    \"crate_statuses\": {\n      \"bootstrap\": 2,\n      \"implemented\": 1,\n      \"planned\": 5\n    },\n    \"mtm_core_dependency_count\": 7,\n    \"mtm_core_pure_boundary\": true,\n    \"runtime_vertices\": 10,\n    \"runtime_edges\": 12,\n    \"invariants\": 8\n  }\n}\n"
     },
     {
       "name": "python_governance_tests",
@@ -87,7 +87,7 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s\n"
+      "output_tail": "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s\n"
     },
     {
       "name": "cargo_test",
@@ -98,7 +98,86 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s\n     Running unittests src/main.rs (target/debug/deps/mtm_reboot-2f08b724d05d90b4)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_contracts-0ad9c2f723a87b5d)\n\nrunning 2 tests\ntest tests::bootstrap_json_is_deterministic ... ok\ntest tests::source_contract_is_frozen ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_contracts\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      "output_tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s\n     Running unittests src/main.rs (target/debug/deps/mtm_reboot-0ad8b850a1cd584d)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_contracts-317de9647acb1dee)\n\nrunning 5 tests\ntest enums::tests::workflow_terminal_states_match_source ... ok\ntest enums::tests::enum_wire_values_match_source ... ok\ntest error::tests::payload_matches_source_shape ... ok\ntest tests::bootstrap_json_is_deterministic ... ok\ntest tests::source_contract_is_frozen ... ok\n\ntest result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_core-c64c566cb5c5ba7e)\n\nrunning 14 tests\ntest evaluator::tests::evaluator_wraps_pure_operations ... ok\ntest patch::tests::applies_unique_hunk_and_preserves_crlf ... ok\ntest path_policy::tests::normalizes_safe_relative_paths ... ok\ntest command_policy::tests::identifies_source_inline_interpreters ... ok\ntest patch::tests::parses_add_delete_update_and_move ... ok\ntest path_policy::tests::rejects_absolute_and_parent_paths ... ok\ntest redaction::tests::fingerprints_match_sha256_prefix ... ok\ntest schema::tests::one_of_requires_exactly_one_match ... ok\ntest schema::tests::validates_nested_object_and_rejects_extra_field ... ok\ntest url_policy::tests::oauth_origin_policy_matches_source_rules ... ok\ntest url_policy::tests::quick_tunnel_parser_is_strict ... ok\ntest redaction::tests::redacts_keys_and_embedded_values ... ok\ntest command_policy::tests::safe_policy_preserves_permission_order ... ok\ntest command_policy::tests::filtered_environment_matches_source_facts ... ok\n\ntest result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s\n\n   Doc-tests mtm_contracts\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_core\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+    },
+    {
+      "name": "mtm002_conformance",
+      "command": [
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
+        "scripts/run_mtm002_conformance.py"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 8,\n  \"source_reference_files_clean\": true,\n  \"case_count\": 135,\n  \"operation_counts\": {\n    \"apply_hunks\": 7,\n    \"command_policy\": 11,\n    \"filtered_env\": 8,\n    \"fingerprint\": 2,\n    \"inline_script\": 12,\n    \"oauth_server_url\": 15,\n    \"parse_patch\": 7,\n    \"quick_tunnel_origin\": 12,\n    \"redact\": 4,\n    \"redact_bytes\": 1,\n    \"redirect_uris\": 14,\n    \"schema_validate\": 27,\n    \"workflow_terminal\": 5,\n    \"workspace_path\": 10\n  },\n  \"reference_sha256\": \"1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d\",\n  \"recorded_sha256\": \"1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d\",\n  \"golden_match\": true,\n  \"differential_mismatch_count\": 0,\n  \"mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"request_bytes\": 13719,\n      \"response_bytes\": 12956,\n      \"samples\": 7,\n      \"elapsed_ms_median\": 79.038,\n      \"elapsed_ms_p95\": 81.337,\n      \"max_rss_kib\": 26992,\n      \"limits\": {\n        \"request_bytes\": 1048576,\n        \"response_bytes\": 1048576,\n        \"elapsed_seconds\": 10.0,\n        \"max_rss_kib\": 131072\n      }\n    },\n    \"rust_shadow\": {\n      \"request_bytes\": 13719,\n      \"response_bytes\": 12956,\n      \"samples\": 7,\n      \"elapsed_ms_median\": 89.427,\n      \"elapsed_ms_p95\": 90.463,\n      \"max_rss_kib\": 7800,\n      \"limits\": {\n        \"request_bytes\": 1048576,\n        \"response_bytes\": 1048576,\n        \"elapsed_seconds\": 10.0,\n        \"max_rss_kib\": 131072\n      }\n    },\n    \"rust_non_regression_limits\": {\n      \"elapsed_ms\": 2000.0,\n      \"max_rss_kib\": 65536\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"read_only_shadow\",\n    \"production_authority\": \"python\"\n  }\n}\n",
+      "json": {
+        "ok": true,
+        "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
+        "source_reference_file_count": 8,
+        "source_reference_files_clean": true,
+        "case_count": 135,
+        "operation_counts": {
+          "apply_hunks": 7,
+          "command_policy": 11,
+          "filtered_env": 8,
+          "fingerprint": 2,
+          "inline_script": 12,
+          "oauth_server_url": 15,
+          "parse_patch": 7,
+          "quick_tunnel_origin": 12,
+          "redact": 4,
+          "redact_bytes": 1,
+          "redirect_uris": 14,
+          "schema_validate": 27,
+          "workflow_terminal": 5,
+          "workspace_path": 10
+        },
+        "reference_sha256": "1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d",
+        "recorded_sha256": "1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d",
+        "golden_match": true,
+        "differential_mismatch_count": 0,
+        "mismatches": [],
+        "resources": {
+          "python_reference": {
+            "request_bytes": 13719,
+            "response_bytes": 12956,
+            "samples": 7,
+            "elapsed_ms_median": 79.038,
+            "elapsed_ms_p95": 81.337,
+            "max_rss_kib": 26992,
+            "limits": {
+              "request_bytes": 1048576,
+              "response_bytes": 1048576,
+              "elapsed_seconds": 10.0,
+              "max_rss_kib": 131072
+            }
+          },
+          "rust_shadow": {
+            "request_bytes": 13719,
+            "response_bytes": 12956,
+            "samples": 7,
+            "elapsed_ms_median": 89.427,
+            "elapsed_ms_p95": 90.463,
+            "max_rss_kib": 7800,
+            "limits": {
+              "request_bytes": 1048576,
+              "response_bytes": 1048576,
+              "elapsed_seconds": 10.0,
+              "max_rss_kib": 131072
+            }
+          },
+          "rust_non_regression_limits": {
+            "elapsed_ms": 2000.0,
+            "max_rss_kib": 65536
+          }
+        },
+        "resource_gate_passed": true,
+        "shadow_side_effect_free": true,
+        "authority": {
+          "source_reference": "python",
+          "rust_mode": "read_only_shadow",
+          "production_authority": "python"
+        }
+      }
     },
     {
       "name": "bootstrap_contract",
@@ -138,13 +217,14 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\"project\":\"MTM-reboot\",\"milestone\":\"MTM-002\",\"production_authority\":\"python\",\"rust_production_components\":0,\"completed_milestones\":1}\n",
+      "output_tail": "{\"project\":\"MTM-reboot\",\"milestone\":\"MTM-003\",\"production_authority\":\"python\",\"rust_production_components\":0,\"rust_authoritative_pure_components\":1,\"completed_milestones\":2}\n",
       "json": {
         "project": "MTM-reboot",
-        "milestone": "MTM-002",
+        "milestone": "MTM-003",
         "production_authority": "python",
         "rust_production_components": 0,
-        "completed_milestones": 1
+        "rust_authoritative_pure_components": 1,
+        "completed_milestones": 2
       }
     },
     {
@@ -182,5 +262,5 @@
       "output_tail": ""
     }
   ],
-  "local_claim": "Only the MTM-001 governance, target architecture, minimal Cargo workspace, and bootstrap source-contract snapshot were validated. No Re-CTM production authority, target isolation, browser OAuth, CAS, LaTeX, persistence, workflow, or performance claim is included."
+  "local_claim": "MTM-001 governance plus MTM-002 pure Rust contracts/policies were validated against the frozen Re-CTM Python reference by golden and differential checks. No database, process, network, workflow, finalizer, target/browser, CAS, LaTeX, or performance authority is claimed."
 }

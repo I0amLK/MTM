@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM-reboot eight-milestone migration graph",
-  "updated_at": "2026-09-01T00:45:00-07:00",
+  "updated_at": "2026-09-01T01:31:08-07:00",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -60,7 +60,7 @@
     {
       "id": "MTM-002",
       "title": "Typed contract and pure policy core",
-      "status": "approved",
+      "status": "completed",
       "priority": "P0",
       "production_authority_before": "python",
       "production_authority_after": "rust",
@@ -78,14 +78,20 @@
         "No workflow or network authority"
       ],
       "acceptance_levels": ["A0", "A1", "A2", "A5"],
-      "validation_commands": [],
+      "validation_commands": [
+        "python3 scripts/run_mtm002_conformance.py",
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets -- -D warnings",
+        "cargo test --workspace",
+        "python3 scripts/run_checks.py"
+      ],
       "rollback": "Return pure calls to the Python reference implementation; no state migration is involved.",
       "dependencies": ["MTM-001"]
     },
     {
       "id": "MTM-003",
       "title": "Native process lifecycle and isolation plane",
-      "status": "proposed",
+      "status": "approved",
       "priority": "P0",
       "production_authority_before": "python",
       "production_authority_after": "rust",
@@ -244,7 +250,7 @@
     {"source": "MTM-007", "target": "MTM-006"},
     {"source": "MTM-008", "target": "MTM-007"}
   ],
-  "todo": ["MTM-002"],
+  "todo": ["MTM-003"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -277,6 +283,46 @@
       "status_before": "proposed",
       "status_after": "approved",
       "summary": "Approved typed contract and pure policy work as the only next actionable migration milestone."
+    },
+    {
+      "event_id": "MEVT-005",
+      "milestone_id": "MTM-002",
+      "at": "2026-09-01T01:10:19-07:00",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Re-ran the completed MTM-001 gate, confirmed a clean committed baseline, and began typed Rust contract/policy implementation with Python retained as the frozen differential reference."
+    },
+    {
+      "event_id": "MEVT-006",
+      "milestone_id": "MTM-002",
+      "at": "2026-09-01T01:27:00-07:00",
+      "status_before": "in_progress",
+      "status_after": "shadow",
+      "summary": "Entered read-only Rust shadow after typed contracts and policies passed Rust tests and the bounded differential harness was available."
+    },
+    {
+      "event_id": "MEVT-007",
+      "milestone_id": "MTM-002",
+      "at": "2026-09-01T01:30:30-07:00",
+      "status_before": "shadow",
+      "status_after": "authoritative",
+      "summary": "Made Rust authoritative for the MTM-reboot pure contract/policy core after 135 exact Python-Rust comparisons, frozen golden hash, side-effect check, and A5 resource non-regression passed."
+    },
+    {
+      "event_id": "MEVT-008",
+      "milestone_id": "MTM-002",
+      "at": "2026-09-01T01:31:08-07:00",
+      "status_before": "authoritative",
+      "status_after": "completed",
+      "summary": "Completed MTM-002 with Rust authority limited to side-effect-free MTM-reboot contracts/policies; Re-CTM Python remains the production runtime for every stateful and external component."
+    },
+    {
+      "event_id": "MEVT-009",
+      "milestone_id": "MTM-003",
+      "at": "2026-09-01T01:31:08-07:00",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "Approved Native process lifecycle and isolation as the only next milestone; implementation must begin with an MTM-002 recheck and retain Python production authority until target evidence permits cutover."
     }
   ],
   "receipt_contract": {
@@ -401,6 +447,129 @@
       "rollback": "Delete MTM-reboot. Re-CTM 0.3.0 remains untouched and authoritative; no data or protocol migration is required.",
       "manual_pending": [
         "All real browser, OAuth, target isolation, CAS, LaTeX, database migration, workflow, rollback, and performance acceptance belongs to later milestones."
+      ],
+      "decision": "accepted"
+    },
+    {
+      "receipt_id": "MREC-002",
+      "milestone_id": "MTM-002",
+      "started_at": "2026-09-01T01:10:19-07:00",
+      "completed_at": "2026-09-01T01:31:08-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "python",
+      "authority_after": "rust",
+      "commit_subject": "feat(core): establish typed pure policy authority [MTM-002]",
+      "files_changed": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/mtm-contracts/",
+        "crates/mtm-core/",
+        "crates/mtm-cli/",
+        "conformance/mtm002_cases.py",
+        "conformance/python_reference.py",
+        "conformance/python_batch_cli.py",
+        "conformance/golden/mtm002-reference.sha256",
+        "scripts/run_mtm002_conformance.py",
+        "scripts/run_checks.py",
+        "tests/test_governance.py",
+        "docs/adr/0002-typed-pure-policy-core.md",
+        "docs/ARCHITECTURE.md",
+        "docs/MIGRATION_PLAN.md",
+        "README.md",
+        "engineering-graph.json",
+        "migration-graph.json",
+        "project-progress.json",
+        "records/iterations/ITER-002.json",
+        "local-validation.json"
+      ],
+      "commands": [
+        {
+          "command": "python3 scripts/run_checks.py before MTM-002 implementation",
+          "exit_code": 0,
+          "result": "The clean committed MTM-001 baseline passed before implementation began."
+        },
+        {
+          "command": "cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace",
+          "exit_code": 101,
+          "result": "The first Rust gate rejected a test-only unused import and two prohibited expect_err calls; the milestone had no stateful side effects."
+        },
+        {
+          "command": "cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace",
+          "exit_code": 0,
+          "result": "After correcting test code and removing one extra non-source environment rule, all 19 Rust tests and lint gates passed."
+        },
+        {
+          "command": "python3 scripts/run_mtm002_conformance.py --print-golden",
+          "exit_code": 1,
+          "result": "The first 135-case differential found one IPv6 hostname representation mismatch and no other semantic difference."
+        },
+        {
+          "command": "python3 scripts/run_mtm002_conformance.py",
+          "exit_code": 0,
+          "result": "All 135 cases matched exactly; the golden hash, seven-sample resource comparison, and no-side-effect shadow check passed."
+        },
+        {
+          "command": "python3 scripts/run_checks.py",
+          "exit_code": 1,
+          "result": "The first integrated gate exposed only pending rustfmt changes in url_policy.rs."
+        },
+        {
+          "command": "cargo fmt --all && python3 scripts/run_checks.py",
+          "exit_code": 0,
+          "result": "The complete candidate gate passed graphs, governance, formatting, Clippy, 19 Rust tests, 135-case differential conformance, bootstrap contracts, and Git diff checks."
+        },
+        {
+          "command": "python3 scripts/run_checks.py after marking MTM-002 completed",
+          "exit_code": 1,
+          "result": "A missing-receipt governance fixture reused the newly approved real MTM-003 node and hit TODO inconsistency before its intended assertion."
+        },
+        {
+          "command": "cargo fmt --all && python3 scripts/run_checks.py after synthetic fixture repair",
+          "exit_code": 0,
+          "result": "The final completed-MTM-002/approved-MTM-003 graph, receipt ledger, Rust core, differential corpus, resource gate, bootstrap contracts, and Git checks all passed."
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "evidence": [
+            "Formatting and Clippy with warnings denied passed.",
+            "Nineteen Rust tests and six governance tests passed.",
+            "Migration and architecture validators passed."
+          ]
+        },
+        "A1": {
+          "passed": true,
+          "evidence": [
+            "The corpus is tied to source commit 50d08eb89e3ecc46317fd49709fa4ebcda135b5a.",
+            "All eight imported Python reference files were clean relative to that commit.",
+            "The canonical Python response hash is 1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d."
+          ]
+        },
+        "A2": {
+          "passed": true,
+          "evidence": [
+            "All 135 values and full error payloads matched.",
+            "The Rust shadow produced no Git-visible side effect."
+          ]
+        },
+        "A5": {
+          "passed": true,
+          "evidence": [
+            "Seven cold-process samples were recorded for Python and Rust.",
+            "Python median/p95 was 79.928/81.781 ms with maximum RSS 27,004 KiB.",
+            "Rust median/p95 was 88.923/90.521 ms with maximum RSS 7,900 KiB.",
+            "Both passed absolute and non-regression ceilings; no A6 speed claim is made."
+          ]
+        }
+      },
+      "behavior_before": "Only bootstrap constants existed in Rust; all pure policy and parsing semantics lived in the Python source implementation.",
+      "behavior_after": "MTM-reboot has one typed Rust authority for side-effect-free contract and policy behavior, while Re-CTM Python remains authoritative for every production request and stateful component.",
+      "risk_review": "The evaluator is bounded stdin-only test infrastructure. It cannot access production databases, spawn processes, call networks, authorize requests, transition workflows, or finalize artifacts. Direct dependencies are locked and documented; no source repository file changed.",
+      "rollback": "Revert MTM-002 or bypass mtm-core and use the frozen Python reference. No persistent data, process, token, workflow, or artifact migration is involved.",
+      "manual_pending": [
+        "Native/Bubblewrap, persistence, OAuth/MCP/browser, workflow/finalizer, CAS, LaTeX, packaging, rollback drill, soak, A6, and Python retirement remain assigned to MTM-003 through MTM-008."
       ],
       "decision": "accepted"
     }
