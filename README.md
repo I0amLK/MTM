@@ -12,18 +12,19 @@ The governing order is:
 ## Current status
 
 - Source baseline: Re-CTM 0.3.0.
-- Current production authority: Re-CTM's Python implementation. The Rust 0.3.0
-  release is cutover-candidate qualified but has not yet replaced the live command.
+- Current production authority: the hash-recorded Rust 0.3.0 release selected by
+  `/home/lk/.local/bin/re-ctm`. The live Python command was exercised as a rollback
+  target and Rust was selected again atomically.
 - MTM-reboot Rust authority: typed pure contracts/policies, Native process/isolation,
   copied-state persistence/capabilities, the OAuth/MCP/HTTP gateway, and the
   workflow/private-vault/verifier/finalizer component, plus the single Rust runtime
   composition, remaining adapters, CLI/TUI, Quick Tunnel session, and installable
-  release binary. No deployed Re-CTM request path or production database writer has moved.
+  release binary. All transferred live Re-CTM sessions now execute that Rust release.
 - Completed milestones: `MTM-001` through `MTM-007`.
-- `MTM-008` status: `shadow`. Candidate qualification, immutable Python-wheel
-  restore, temporary cutover/rollback/recutover, 60-second soak, and bounded A6
-  acceptance pass. Live cutover and Python production retirement remain separate
-  commits.
+- `MTM-008` status: `authoritative`. Candidate qualification, immutable Python-wheel
+  restore, live cutover/rollback/recutover, 60-second soak, bounded A6 acceptance,
+  session transfer, and secret-free operator logging pass. The installed Python tool
+  root remains only for the separately committed retirement step.
 
 ## Eight milestones
 

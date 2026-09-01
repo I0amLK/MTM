@@ -2,8 +2,8 @@
 
 ## Status
 
-Accepted for MTM-008 candidate qualification. Live authority transfer and Python
-retirement remain separate commits.
+Accepted through the live authority-transfer phase. Python retirement remains a
+separate commit.
 
 ## Decision
 
@@ -24,6 +24,13 @@ Python and Rust never write the production state simultaneously. A retirement ac
 fails closed unless the command points to the recorded Rust release, the rollback
 wheel exists with its recorded hash, and no process still executes from the Python
 tool root.
+
+The live transfer stopped four Python sessions and their owned descendants with
+SIGINT only, selected the Rust release, exercised a real rollback to the recorded
+Python command, selected Rust again, and restarted all four sessions from the Rust
+binary. Generated operator keys are written only to owner-mode `0600` secret files;
+background session logs contain the fixed `configured externally` marker rather than
+raw keys.
 
 ## Performance claim boundary
 

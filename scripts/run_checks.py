@@ -199,6 +199,12 @@ def main() -> int:
                     capture_json=True,
                 ),
                 run(
+                    "mtm008_live_evidence",
+                    [sys.executable, "scripts/validate_mtm008_live_evidence.py"],
+                    env=environment,
+                    capture_json=True,
+                ),
+                run(
                     "bootstrap_contract",
                     [cargo, "run", "-q", "-p", "mtm-cli", "--", "contract"],
                     env=environment,

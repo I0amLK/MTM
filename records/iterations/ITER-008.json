@@ -5,8 +5,8 @@
   "started_at": "2026-09-01T09:40:00-07:00",
   "completed_at": null,
   "authority_before": "python",
-  "authority_after": "rust-shadow",
-  "production_authority_changed": false,
+  "authority_after": "rust",
+  "production_authority_changed": true,
   "functional_goal": "Qualify, deploy, roll back, soak, measure, and finally retire the Python Re-CTM production runtime without dual authority, data loss, or an unbounded performance claim.",
   "phases": {
     "candidate": {
@@ -17,7 +17,14 @@
       "performance_evidence": "mtm008-performance.json",
       "soak_evidence": "mtm008-soak.json"
     },
-    "live_cutover": {"status": "pending"},
+    "live_cutover": {
+      "status": "accepted",
+      "evidence": "mtm008-live-cutover.json",
+      "candidate_commit": "4117734941970e8068cfe49291ff6f13a3123792",
+      "production_authority": "rust",
+      "rollback_wheel_retained": true,
+      "transferred_session_count": 4
+    },
     "python_retirement": {"status": "pending"}
   },
   "recorded_failures_and_repairs": [
@@ -45,6 +52,11 @@
       "stage": "Quick Tunnel edge readiness",
       "failure": "Two full MTM-007 target reruns observed a public tunnel URL but the external metadata endpoint was transiently unavailable while all local and owned-child checks passed.",
       "repair": "Kept the same acceptance condition, confirmed the exact standalone public-metadata path, and reran the complete target suite until the real edge metadata and owned cleanup both passed."
+    },
+    {
+      "stage": "background operator-key logging",
+      "failure": "The first live restart inherited no operator password for three sessions, so the generated OAuth key was written into owner-only background logs even though public evidence remained redacted.",
+      "repair": "Rejected the first live evidence, atomically rolled back to Python, rebuilt equivalent Python sessions, removed the first deployment root, generated replacement keys into dedicated mode-0600 files, restarted every session with RE_CTM_OAUTH_PASSWORD set, and reran the complete live cutover/rollback/recutover. The final logs contain only the configured-externally marker."
     }
   ],
   "acceptance": {
@@ -80,7 +92,9 @@
       "passed": true,
       "evidence": [
         "All MTM-003 through MTM-007 real target reports are fresh after the Rust 0.3.0 release changes.",
-        "A real Re-CTM 0.3.0 wheel was built, restored with uv, executed, and used in a temporary live rollback drill."
+        "A real Re-CTM 0.3.0 wheel was built, restored with uv, executed, and used in both temporary and live rollback drills.",
+        "Four live Python serve/TUI sessions and their owned descendants stopped cleanly, the user command selected Rust, live rollback selected Python, recutover selected Rust, and all four sessions restarted on the exact recorded Rust release.",
+        "Generated operator keys are owner-only secret files and no raw key is present in the final background logs or evidence."
       ]
     },
     "A5": {
@@ -101,10 +115,9 @@
     }
   },
   "manual_pending": [
-    "Switch the actual /home/lk/.local/bin/re-ctm command to the hash-verified Rust release and perform live rollback/recutover.",
-    "Stop residual Python Re-CTM processes and retire /home/lk/.local/share/uv/tools/re-ctm only after live Rust authority passes.",
+    "Retire /home/lk/.local/share/uv/tools/re-ctm only after the live Rust authority commit is recorded and the immutable rollback wheel remains restorable.",
     "Other operating systems and deployment users require their own release evidence."
   ],
-  "rollback": "Until live cutover, leave /home/lk/.local/bin/re-ctm unchanged. After cutover, run scripts/mtm008_deployment.py rollback against the recorded deployment manifest or restore the recorded Python wheel.",
-  "decision": "candidate_accepted"
+  "rollback": "Before Python retirement, run scripts/mtm008_deployment.py rollback against /home/lk/.local/share/re-ctm-rust/deployment/deployment-v1.json. After retirement, reinstall the hash-recorded wheel and atomically select that restored command.",
+  "decision": "live_cutover_accepted"
 }

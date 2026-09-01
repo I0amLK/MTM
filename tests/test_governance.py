@@ -15,6 +15,7 @@ from scripts.validate_mtm005_target_evidence import validate as validate_mtm005_
 from scripts.validate_mtm006_target_evidence import validate as validate_mtm006_target
 from scripts.validate_mtm007_target_evidence import validate as validate_mtm007_target
 from scripts.validate_mtm008_candidate_evidence import validate as validate_mtm008_candidate
+from scripts.validate_mtm008_live_evidence import validate as validate_mtm008_live
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -116,6 +117,10 @@ class GovernanceTestCase(unittest.TestCase):
 
     def test_current_mtm008_candidate_evidence_is_fresh_and_redacted(self) -> None:
         summary = validate_mtm008_candidate()
+        self.assertEqual(summary["required_check_count"], 10)
+
+    def test_current_mtm008_live_evidence_is_fresh_and_redacted(self) -> None:
+        summary = validate_mtm008_live()
         self.assertEqual(summary["required_check_count"], 10)
 
     def test_commit_message_contract(self) -> None:

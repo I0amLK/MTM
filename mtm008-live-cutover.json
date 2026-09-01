@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0.0",
+  "project": "MTM-reboot",
+  "milestone": "MTM-008",
+  "phase": "live_cutover",
+  "passed": true,
+  "implementation_sha256": "379c41c8724a6c68c009eefdb7473c9d38831d864aa9effa9bd2d3c3aa42be11",
+  "candidate_commit": "4117734941970e8068cfe49291ff6f13a3123792",
+  "checks": [
+    {
+      "name": "candidate_commit_clean",
+      "passed": true
+    },
+    {
+      "name": "rollback_wheel_persisted",
+      "passed": true
+    },
+    {
+      "name": "python_sessions_stopped",
+      "passed": true
+    },
+    {
+      "name": "live_rust_cutover",
+      "passed": true
+    },
+    {
+      "name": "live_python_rollback",
+      "passed": true
+    },
+    {
+      "name": "live_rust_recutover",
+      "passed": true
+    },
+    {
+      "name": "sessions_restarted_on_rust",
+      "passed": true
+    },
+    {
+      "name": "session_logs_secret_free",
+      "passed": true
+    },
+    {
+      "name": "no_python_re_ctm_process",
+      "passed": true
+    },
+    {
+      "name": "live_command_release_identity",
+      "passed": true
+    }
+  ],
+  "release": {
+    "installed_at": "2026-09-01T17:32:29.289762Z",
+    "path": "/home/lk/.local/share/re-ctm-rust/releases/0.3.0/re-ctm",
+    "sha256": "35b09841f85eb83a98e43ee632a455b9d86c0926b4a3d91613ebe6077fa6784a",
+    "size_bytes": 11154616,
+    "version": "0.3.0"
+  },
+  "rollback_wheel": {
+    "path": "/home/lk/.local/share/re-ctm-rust/rollback/re_ctm-0.3.0-py3-none-any.whl",
+    "sha256": "7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b",
+    "size_bytes": 161993
+  },
+  "deployment": {
+    "schema": "re-ctm-deployment-v1",
+    "state": "rust_active",
+    "command_link": "/home/lk/.local/bin/re-ctm",
+    "release": {
+      "installed_at": "2026-09-01T17:32:29.289762Z",
+      "path": "/home/lk/.local/share/re-ctm-rust/releases/0.3.0/re-ctm",
+      "sha256": "35b09841f85eb83a98e43ee632a455b9d86c0926b4a3d91613ebe6077fa6784a",
+      "size_bytes": 11154616,
+      "version": "0.3.0"
+    },
+    "previous_kind": "symlink",
+    "previous_version": "re-ctm 0.3.0",
+    "rollback_wheel": {
+      "path": "/home/lk/.local/share/re-ctm-rust/rollback/re_ctm-0.3.0-py3-none-any.whl",
+      "sha256": "7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b",
+      "size_bytes": 161993
+    },
+    "python_runtime_retired": null,
+    "history_actions": [
+      "cutover",
+      "rollback",
+      "recutover"
+    ]
+  },
+  "transferred_sessions": [
+    {
+      "mode": "tui",
+      "port": null,
+      "cwd": "/home/lk/桌面/re-test",
+      "environment_key_count": 2
+    },
+    {
+      "mode": "serve",
+      "port": 48991,
+      "cwd": "/home/lk/桌面/tempcoding/Re-CTM",
+      "environment_key_count": 6
+    },
+    {
+      "mode": "serve",
+      "port": 44567,
+      "cwd": "/home/lk/桌面/re-test",
+      "environment_key_count": 7
+    },
+    {
+      "mode": "serve",
+      "port": 34569,
+      "cwd": "/home/lk/桌面/re-test",
+      "environment_key_count": 7
+    }
+  ],
+  "shutdown": {
+    "session_count": 4,
+    "owned_process_count": 5,
+    "required_sigterm_count": 0,
+    "required_sigkill_count": 0,
+    "remaining_count": 0
+  },
+  "restarted_sessions": [
+    {
+      "pid": 790492,
+      "mode": "tui",
+      "port": null,
+      "cwd": "/home/lk/桌面/re-test",
+      "log_path": "/home/lk/.local/share/re-ctm-rust/sessions/session-1.log",
+      "executable": "/home/lk/.local/share/re-ctm-rust/releases/0.3.0/re-ctm",
+      "operator_key_source": "generated_owner_only_file",
+      "operator_key_file": "/home/lk/.local/share/re-ctm-rust/sessions/session-1.operator-key",
+      "log_secret_free": true
+    },
+    {
+      "pid": 790526,
+      "mode": "serve",
+      "port": 48991,
+      "cwd": "/home/lk/桌面/tempcoding/Re-CTM",
+      "log_path": "/home/lk/.local/share/re-ctm-rust/sessions/session-2.log",
+      "executable": "/home/lk/.local/share/re-ctm-rust/releases/0.3.0/re-ctm",
+      "operator_key_source": "preserved_environment",
+      "operator_key_file": null,
+      "log_secret_free": true
+    },
+    {
+      "pid": 790533,
+      "mode": "serve",
+      "port": 44567,
+      "cwd": "/home/lk/桌面/re-test",
+      "log_path": "/home/lk/.local/share/re-ctm-rust/sessions/session-3.log",
+      "executable": "/home/lk/.local/share/re-ctm-rust/releases/0.3.0/re-ctm",
+      "operator_key_source": "generated_owner_only_file",
+      "operator_key_file": "/home/lk/.local/share/re-ctm-rust/sessions/session-3.operator-key",
+      "log_secret_free": true
+    },
+    {
+      "pid": 790549,
+      "mode": "serve",
+      "port": 34569,
+      "cwd": "/home/lk/桌面/re-test",
+      "log_path": "/home/lk/.local/share/re-ctm-rust/sessions/session-4.log",
+      "executable": "/home/lk/.local/share/re-ctm-rust/releases/0.3.0/re-ctm",
+      "operator_key_source": "generated_owner_only_file",
+      "operator_key_file": "/home/lk/.local/share/re-ctm-rust/sessions/session-4.operator-key",
+      "log_secret_free": true
+    }
+  ],
+  "production_authority_changed": true,
+  "production_authority": "rust",
+  "python_tool_root_retained": true,
+  "environment": {
+    "platform": "Linux",
+    "release": "7.1.2-070102-generic",
+    "machine": "x86_64"
+  },
+  "sensitive_content_recorded": false
+}
