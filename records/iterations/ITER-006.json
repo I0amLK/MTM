@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0.0",
+  "iteration_id": "ITER-006",
+  "milestone_id": "MTM-006",
+  "started_at": "2026-09-01T04:50:30-07:00",
+  "completed_at": "2026-09-01T05:45:00-07:00",
+  "authority_before": "python",
+  "authority_after": "rust",
+  "production_authority_changed": false,
+  "functional_goal": "Migrate the mathematical workflow, private vault, verifier, repair/finalization gates and project promotion to Rust without weakening L2 capability authority, verifier isolation, branch barriers, reference auditing, or the single mechanical finalizer.",
+  "implementation": {
+    "crate": "mtm-workflow",
+    "components": [
+      "deterministic workflow engine and transition validation",
+      "role- and branch-separated private vault",
+      "proof manifest and structured reference-audit enforcement",
+      "server-computed verifier verdict and compact/full repair escalation",
+      "branch snapshot/barrier/join mechanics",
+      "private FinalizationPermit bound to verifier, LaTeX, proof and manifest facts",
+      "crate-private verified artifact publication",
+      "idempotent verified project promotion",
+      "Python and Rust workflow shadow drivers",
+      "real pdflatex target-validation driver"
+    ],
+    "authority_types": {
+      "CapabilityClaims": "private fields, no external Deserialize, parser private to CapabilityAuthority",
+      "FinalizationPermit": "private fields, crate-private issue path, consumed only by crate-private vault finalizer"
+    }
+  },
+  "recorded_failures_and_repairs": [
+    {
+      "stage": "initial typed engine compile",
+      "failure": "The first workflow skeleton exposed roughly fifty interface/unfinished-state compile errors.",
+      "repair": "Separated interface-shape fixes from real state-machine gaps, restored compilation first, then implemented branch/verifier/finalizer mechanics under strict Clippy instead of relaxing lints."
+    },
+    {
+      "stage": "contract fidelity",
+      "failure": "The first Rust LatexGateResult used cleaner field names than Re-CTM, which would have redesigned the migration contract.",
+      "repair": "Restored the exact Re-CTM fields: policy, static_valid, compile_attempted, compile_available, compile_passed, gate_passed, errors, warnings and compiler_output."
+    },
+    {
+      "stage": "deterministic capability differential",
+      "failure": "The first start/next comparison produced different capability nonces even though the public task was otherwise identical.",
+      "repair": "Found eager Option::unwrap_or evaluation consuming token_urlsafe IDs even when trace_id was supplied; replaced it with explicit lazy matches and locked the behavior into conformance."
+    },
+    {
+      "stage": "first full workflow differential",
+      "failure": "The first 82-checkpoint corpus reported 24 differences.",
+      "repair": "Removed Rust-only public fields, restored protocol-2 commit/screening/reference-audit task overlays, matched owner-denial wording, finalizer transition evidence, manual manifest ordering and Python JSONL byte formatting."
+    },
+    {
+      "stage": "second workflow differential",
+      "failure": "Eight residual differences remained, all contract/byte-fidelity issues rather than transition semantics.",
+      "repair": "Matched screening_contract, reference-audit example, Python JSONL spacing and exact source strings; the final corpus reached zero mismatches."
+    },
+    {
+      "stage": "shadow protocol MSRV",
+      "failure": "Clippy/build caught use of usize::is_multiple_of, which exceeds the declared Rust 1.85 MSRV.",
+      "repair": "Replaced it with modulo arithmetic and retained the project MSRV."
+    },
+    {
+      "stage": "source regression invocation",
+      "failure": "An initial unittest command used filesystem paths where unittest expected module names.",
+      "repair": "Reran from the Re-CTM repository with PYTHONPATH=src and module names tests.test_workflow/tests.test_v020; all 32 source tests passed."
+    },
+    {
+      "stage": "shared lockfile evidence freshness",
+      "failure": "Adding the workflow workspace package changed Cargo.lock and correctly made MTM-003/004/005 implementation-bound target reports stale.",
+      "repair": "Reran all three real Native/database/Firefox target suites and rebound their reports to the current implementation rather than editing evidence hashes."
+    },
+    {
+      "stage": "full local gate",
+      "failure": "The first full run_checks invocation failed only cargo fmt --check after the last workflow edits.",
+      "repair": "Ran cargo fmt --all and repeated the entire gate; no formatting exception or lint waiver was introduced."
+    }
+  ],
+  "acceptance": {
+    "A0": {
+      "passed": true,
+      "evidence": [
+        "cargo fmt --check, workspace Clippy -D warnings and all Rust tests pass",
+        "governance, migration-graph and engineering-graph validators pass",
+        "source Re-CTM workflow/v0.2 compatibility tests pass"
+      ]
+    },
+    "A1": {
+      "passed": true,
+      "evidence": [
+        "Four frozen workflow scenarios contain 82 exact checkpoints with zero Python-Rust mismatches",
+        "golden SHA-256 def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0",
+        "public task envelopes, capabilities, errors, state snapshots and vault file digests are compared"
+      ]
+    },
+    "A2": {
+      "passed": true,
+      "evidence": [
+        "Python and Rust run against independent SQLite databases and independent private-vault roots",
+        "fixed clock, ID streams, capability secret and LaTeX outcomes make differences reproducible",
+        "no shared or dual-written production state is used"
+      ]
+    },
+    "A3": {
+      "passed": true,
+      "evidence": [
+        "branch barrier and cross-branch/stale-capability denials pass",
+        "second compact verifier failure escalates to full exploration",
+        "model-supplied verdict cannot override server findings",
+        "post-verifier proof mutation cannot satisfy finalization permit"
+      ]
+    },
+    "A4": {
+      "passed": true,
+      "evidence": [
+        "real pdflatex compiles the target proof before finalization",
+        "mechanical finalization and read-only proof_verified.tex publication pass",
+        "VERIFIED project promotion passes on temporary target state",
+        "proof tampering after verifier approval is denied without final publication",
+        "missing material reference audit is converted to a server gap and repair state"
+      ]
+    },
+    "A5": {
+      "passed": true,
+      "evidence": [
+        "All four shadow scenarios remain far below the 30-second absolute ceiling",
+        "Python peak RSS was about 28.4 MiB and Rust debug peak RSS about 6.8 MiB in the recorded scenarios",
+        "Rust debug process elapsed time is currently higher than Python in these tiny cold-process scenarios, so no A6 speed claim is made"
+      ]
+    }
+  },
+  "manual_pending": [
+    "Operational LaTeX/research/file/Git/image adapters and full CLI/TUI/Quick Tunnel composition remain MTM-007.",
+    "End-to-end deployed Rust runtime cutover, soak, rollback drill, A6 performance evidence and Python retirement remain MTM-008.",
+    "Other operating systems and target-specific LaTeX/CAS layouts require their own release evidence."
+  ],
+  "rollback": "Do not compose mtm-workflow into deployed traffic; continue routing every production Rethlas workflow through Re-CTM Python. The Rust workflow has used only independent temporary/shadow state, so rollback requires no data migration.",
+  "decision": "accepted"
+}

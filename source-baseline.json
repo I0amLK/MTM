@@ -25,7 +25,12 @@
     "src/re_ctm/mcp.py",
     "src/re_ctm/server.py",
     "src/re_ctm/config.py",
-    "src/re_ctm/__init__.py"
+    "src/re_ctm/__init__.py",
+    "src/re_ctm/workflow.py",
+    "src/re_ctm/vault.py",
+    "src/re_ctm/methodology.py",
+    "src/re_ctm/resources/methodology.json",
+    "src/re_ctm/latex.py"
   ],
   "contract": {
     "native_tools": 18,

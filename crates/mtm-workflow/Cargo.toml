@@ -1,0 +1,23 @@
+[package]
+name = "mtm-workflow"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+mtm-contracts = { path = "../mtm-contracts" }
+mtm-core = { path = "../mtm-core" }
+mtm-storage = { path = "../mtm-storage" }
+regex.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

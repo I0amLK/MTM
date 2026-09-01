@@ -14,21 +14,71 @@ use crate::store::{Clock, IdSource, StateStore};
 const CAPABILITY_TOKEN_MIN_LENGTH: usize = 80;
 const CAPABILITY_TOKEN_MAX_LENGTH: usize = 8192;
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CapabilityClaims {
-    pub nonce: String,
-    pub run_id: String,
-    pub owner_id: String,
-    pub domain_id: String,
-    pub role: WorkflowRole,
-    pub epoch: i64,
-    pub issued_state: WorkflowState,
-    pub permissions: Vec<String>,
-    pub issued_at: i64,
-    pub expires_at: i64,
+    nonce: String,
+    run_id: String,
+    owner_id: String,
+    domain_id: String,
+    role: WorkflowRole,
+    epoch: i64,
+    issued_state: WorkflowState,
+    permissions: Vec<String>,
+    issued_at: i64,
+    expires_at: i64,
 }
 
 impl CapabilityClaims {
+    #[must_use]
+    pub fn nonce(&self) -> &str {
+        &self.nonce
+    }
+
+    #[must_use]
+    pub fn run_id(&self) -> &str {
+        &self.run_id
+    }
+
+    #[must_use]
+    pub fn owner_id(&self) -> &str {
+        &self.owner_id
+    }
+
+    #[must_use]
+    pub fn domain_id(&self) -> &str {
+        &self.domain_id
+    }
+
+    #[must_use]
+    pub const fn role(&self) -> WorkflowRole {
+        self.role
+    }
+
+    #[must_use]
+    pub const fn epoch(&self) -> i64 {
+        self.epoch
+    }
+
+    #[must_use]
+    pub const fn issued_state(&self) -> WorkflowState {
+        self.issued_state
+    }
+
+    #[must_use]
+    pub fn permissions(&self) -> &[String] {
+        &self.permissions
+    }
+
+    #[must_use]
+    pub const fn issued_at(&self) -> i64 {
+        self.issued_at
+    }
+
+    #[must_use]
+    pub const fn expires_at(&self) -> i64 {
+        self.expires_at
+    }
+
     #[must_use]
     pub fn to_payload(&self) -> Value {
         serde_json::json!({
@@ -596,7 +646,7 @@ pub fn authorize_role_resource(
     Ok(())
 }
 
-pub fn claims_from_payload(payload: &Value) -> Result<CapabilityClaims, ReCtmError> {
+fn claims_from_payload(payload: &Value) -> Result<CapabilityClaims, ReCtmError> {
     let object = payload.as_object().ok_or_else(incomplete_capability)?;
     let required = BTreeSet::from([
         "v",

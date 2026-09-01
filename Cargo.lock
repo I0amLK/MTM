@@ -634,6 +634,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "mtm-workflow"
+version = "0.1.0-alpha.1"
+dependencies = [
+ "mtm-contracts",
+ "mtm-core",
+ "mtm-storage",
+ "regex",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
+]
+
+[[package]]
 name = "nix"
 version = "0.30.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

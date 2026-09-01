@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-09-01T11:38:12.004895Z",
+  "generated_at": "2026-09-01T12:37:17.907663Z",
   "project": "MTM-reboot",
   "milestone": "MTM-005",
   "production_authority": "python",
-  "passed": true,
+  "passed": false,
   "checks": [
     {
       "name": "migration_graph",
@@ -14,7 +14,7 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"milestone_count\": 8,\n    \"edge_count\": 11,\n    \"todo_count\": 1,\n    \"event_count\": 24,\n    \"receipt_count\": 5,\n    \"status_counts\": {\n      \"approved\": 1,\n      \"completed\": 5,\n      \"proposed\": 2\n    }\n  }\n}\n"
+      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"milestone_count\": 8,\n    \"edge_count\": 11,\n    \"todo_count\": 1,\n    \"event_count\": 25,\n    \"receipt_count\": 5,\n    \"status_counts\": {\n      \"completed\": 5,\n      \"in_progress\": 1,\n      \"proposed\": 2\n    }\n  }\n}\n"
     },
     {
       "name": "engineering_graph",
@@ -24,7 +24,7 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"crate_vertices\": 8,\n    \"crate_edges\": 17,\n    \"crate_graph_acyclic\": true,\n    \"cargo_members\": [\n      \"mtm-cli\",\n      \"mtm-contracts\",\n      \"mtm-core\",\n      \"mtm-gateway\",\n      \"mtm-native\",\n      \"mtm-storage\"\n    ],\n    \"crate_statuses\": {\n      \"bootstrap\": 2,\n      \"implemented\": 4,\n      \"planned\": 2\n    },\n    \"mtm_core_dependency_count\": 7,\n    \"mtm_core_pure_boundary\": true,\n    \"mtm_storage_dependency_count\": 9,\n    \"mtm_storage_single_writer_boundary\": true,\n    \"mtm_gateway_dependency_count\": 15,\n    \"mtm_gateway_transport_only_boundary\": true,\n    \"runtime_vertices\": 10,\n    \"runtime_edges\": 12,\n    \"invariants\": 8\n  }\n}\n"
+      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"crate_vertices\": 8,\n    \"crate_edges\": 18,\n    \"crate_graph_acyclic\": true,\n    \"cargo_members\": [\n      \"mtm-cli\",\n      \"mtm-contracts\",\n      \"mtm-core\",\n      \"mtm-gateway\",\n      \"mtm-native\",\n      \"mtm-storage\",\n      \"mtm-workflow\"\n    ],\n    \"crate_statuses\": {\n      \"bootstrap\": 3,\n      \"implemented\": 4,\n      \"planned\": 1\n    },\n    \"mtm_core_dependency_count\": 7,\n    \"mtm_core_pure_boundary\": true,\n    \"mtm_storage_dependency_count\": 9,\n    \"mtm_storage_single_writer_boundary\": true,\n    \"mtm_gateway_dependency_count\": 15,\n    \"mtm_gateway_transport_only_boundary\": true,\n    \"runtime_vertices\": 10,\n    \"runtime_edges\": 12,\n    \"invariants\": 8\n  }\n}\n"
     },
     {
       "name": "python_governance_tests",
@@ -37,9 +37,9 @@
         "tests",
         "-v"
       ],
-      "passed": true,
-      "exit_code": 0,
-      "output_tail": "test_commit_message_contract (test_governance.GovernanceTestCase.test_commit_message_contract) ... ok\ntest_completed_milestone_requires_receipt (test_governance.GovernanceTestCase.test_completed_milestone_requires_receipt) ... ok\ntest_current_mtm003_target_evidence_is_fresh (test_governance.GovernanceTestCase.test_current_mtm003_target_evidence_is_fresh) ... ok\ntest_current_mtm004_target_evidence_is_fresh_and_redacted (test_governance.GovernanceTestCase.test_current_mtm004_target_evidence_is_fresh_and_redacted) ... ok\ntest_current_mtm005_target_evidence_is_fresh_and_redacted (test_governance.GovernanceTestCase.test_current_mtm005_target_evidence_is_fresh_and_redacted) ... ok\ntest_dependency_cycle_is_rejected (test_governance.GovernanceTestCase.test_dependency_cycle_is_rejected) ... ok\ntest_perf_commit_requires_a6 (test_governance.GovernanceTestCase.test_perf_commit_requires_a6) ... ok\ntest_repository_migration_graph_is_valid (test_governance.GovernanceTestCase.test_repository_migration_graph_is_valid) ... ok\ntest_target_crate_graph_is_acyclic (test_governance.GovernanceTestCase.test_target_crate_graph_is_acyclic) ... ok\n\n----------------------------------------------------------------------\nRan 9 tests in 0.009s\n\nOK\n"
+      "passed": false,
+      "exit_code": 1,
+      "output_tail": "test_commit_message_contract (test_governance.GovernanceTestCase.test_commit_message_contract) ... ok\ntest_completed_milestone_requires_receipt (test_governance.GovernanceTestCase.test_completed_milestone_requires_receipt) ... ok\ntest_current_mtm003_target_evidence_is_fresh (test_governance.GovernanceTestCase.test_current_mtm003_target_evidence_is_fresh) ... ok\ntest_current_mtm004_target_evidence_is_fresh_and_redacted (test_governance.GovernanceTestCase.test_current_mtm004_target_evidence_is_fresh_and_redacted) ... ok\ntest_current_mtm005_target_evidence_is_fresh_and_redacted (test_governance.GovernanceTestCase.test_current_mtm005_target_evidence_is_fresh_and_redacted) ... ok\ntest_dependency_cycle_is_rejected (test_governance.GovernanceTestCase.test_dependency_cycle_is_rejected) ... ok\ntest_perf_commit_requires_a6 (test_governance.GovernanceTestCase.test_perf_commit_requires_a6) ... ok\ntest_repository_migration_graph_is_valid (test_governance.GovernanceTestCase.test_repository_migration_graph_is_valid) ... ok\ntest_target_crate_graph_is_acyclic (test_governance.GovernanceTestCase.test_target_crate_graph_is_acyclic) ... FAIL\n\n======================================================================\nFAIL: test_target_crate_graph_is_acyclic (test_governance.GovernanceTestCase.test_target_crate_graph_is_acyclic)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/lk/桌面/tempcoding/MTM-reboot/tests/test_governance.py\", line 76, in test_target_crate_graph_is_acyclic\n    self.assertEqual(\n    ~~~~~~~~~~~~~~~~^\n        summary[\"cargo_members\"],\n        ^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<7 lines>...\n        ],\n        ^^\n    )\n    ^\nAssertionError: Lists differ: ['mtm[32 chars]e', 'mtm-gateway', 'mtm-native', 'mtm-storage', 'mtm-workflow'] != ['mtm[32 chars]e', 'mtm-gateway', 'mtm-native', 'mtm-storage']\n\nFirst list contains 1 additional elements.\nFirst extra element 6:\n'mtm-workflow'\n\n  ['mtm-cli',\n   'mtm-contracts',\n   'mtm-core',\n   'mtm-gateway',\n   'mtm-native',\n-  'mtm-storage',\n?               ^\n\n+  'mtm-storage']\n?               ^\n\n-  'mtm-workflow']\n\n----------------------------------------------------------------------\nRan 9 tests in 0.009s\n\nFAILED (failures=1)\n"
     },
     {
       "name": "rustc_version",
@@ -85,9 +85,9 @@
         "-D",
         "warnings"
       ],
-      "passed": true,
-      "exit_code": 0,
-      "output_tail": "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.08s\n"
+      "passed": false,
+      "exit_code": 101,
+      "output_tail": "    Checking mtm-workflow v0.1.0-alpha.1 (/home/lk/桌面/tempcoding/MTM-reboot/crates/mtm-workflow)\nerror: unused import: `Map`\n  --> crates/mtm-workflow/src/bin/target_validation.rs:13:18\n   |\n13 | use serde_json::{Map, Value};\n   |                  ^^^\n   |\n   = note: `-D unused-imports` implied by `-D warnings`\n   = help: to override `-D warnings` add `#[allow(unused_imports)]`\n\nerror[E0433]: cannot find module or crate `tempfile` in this scope\n   --> crates/mtm-workflow/src/bin/target_validation.rs:144:16\n    |\n144 |     let root = tempfile::tempdir().map_err(io_error)?;\n    |                ^^^^^^^^ use of unresolved module or unlinked crate `tempfile`\n    |\n    = help: if you wanted to use a crate named `tempfile`, use `cargo add tempfile` to add it to your `Cargo.toml`\n\nerror: unneeded `return` statement\n   --> crates/mtm-workflow/src/bin/target_validation.rs:536:9\n    |\n536 |         return Ok(fs::metadata(path).map_err(io_error)?.permissions().mode() & 0o222 == 0);\n    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    |\n    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_return\n    = note: `-D clippy::needless-return` implied by `-D warnings`\n    = help: to override `-D warnings` add `#[allow(clippy::needless_return)]`\nhelp: remove `return`\n    |\n536 -         return Ok(fs::metadata(path).map_err(io_error)?.permissions().mode() & 0o222 == 0);\n536 +         Ok(fs::metadata(path).map_err(io_error)?.permissions().mode() & 0o222 == 0)\n    |\n\nerror[E0433]: cannot find module or crate `tempfile` in this scope\n  --> crates/mtm-workflow/src/bin/target_validation.rs:63:11\n   |\n63 |     root: tempfile::TempDir,\n   |           ^^^^^^^^ use of unresolved module or unlinked crate `tempfile`\n   |\n   = help: if you wanted to use a crate named `tempfile`, use `cargo add tempfile` to add it to your `Cargo.toml`\n\nFor more information about this error, try `rustc --explain E0433`.\nerror: could not compile `mtm-workflow` (bin \"target_validation\" test) due to 2 previous errors\nwarning: build failed, waiting for other jobs to finish...\nerror: could not compile `mtm-workflow` (bin \"target_validation\") due to 3 previous errors\n"
     },
     {
       "name": "cargo_test",
@@ -96,9 +96,9 @@
         "test",
         "--workspace"
       ],
-      "passed": true,
-      "exit_code": 0,
-      "output_tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s\n     Running unittests src/main.rs (target/debug/deps/mtm_reboot-db6db9be52882975)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_contracts-ed17f88cc97d8862)\n\nrunning 5 tests\ntest enums::tests::workflow_terminal_states_match_source ... ok\ntest enums::tests::enum_wire_values_match_source ... ok\ntest tests::bootstrap_json_is_deterministic ... ok\ntest tests::source_contract_is_frozen ... ok\ntest error::tests::payload_matches_source_shape ... ok\n\ntest result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_core-b7428cabaafb030f)\n\nrunning 14 tests\ntest command_policy::tests::identifies_source_inline_interpreters ... ok\ntest evaluator::tests::evaluator_wraps_pure_operations ... ok\ntest patch::tests::applies_unique_hunk_and_preserves_crlf ... ok\ntest patch::tests::parses_add_delete_update_and_move ... ok\ntest path_policy::tests::normalizes_safe_relative_paths ... ok\ntest path_policy::tests::rejects_absolute_and_parent_paths ... ok\ntest schema::tests::validates_nested_object_and_rejects_extra_field ... ok\ntest schema::tests::one_of_requires_exactly_one_match ... ok\ntest redaction::tests::fingerprints_match_sha256_prefix ... ok\ntest url_policy::tests::oauth_origin_policy_matches_source_rules ... ok\ntest url_policy::tests::quick_tunnel_parser_is_strict ... ok\ntest redaction::tests::redacts_keys_and_embedded_values ... ok\ntest command_policy::tests::safe_policy_preserves_permission_order ... ok\ntest command_policy::tests::filtered_environment_matches_source_facts ... ok\n\ntest result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_gateway-13fbdfb24933ac0e)\n\nrunning 8 tests\ntest http::tests::dynamic_issuer_requires_loopback_bind ... ok\ntest catalog::tests::incomplete_catalog_is_rejected ... ok\ntest http::tests::external_host_parser_rejects_userinfo_and_paths ... ok\ntest mcp::tests::envelope_and_modern_mirror_rules_are_fail_closed ... ok\ntest mcp::tests::modern_status_and_base64_mirror_match_contract ... ok\ntest http::tests::origin_policy_allows_loopback_and_rejects_attacker ... ok\ntest oauth::tests::secret_methods_and_pkce_shape_fail_closed ... ok\ntest oauth::tests::public_pkce_code_is_single_use ... ok\n\ntest result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s\n\n     Running unittests src/bin/server.rs (target/debug/deps/mtm_gateway_server-66f56fcd0841ed9d)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/bin/shadow.rs (target/debug/deps/mtm_gateway_shadow-c7615bd0290fbe7e)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_native-704256541036a5af)\n\nrunning 7 tests\ntest capture::tests::retains_head_and_rolling_tail ... ok\ntest quick_tunnel::tests::child_environment_strips_all_known_credentials ... ok\ntest bubblewrap::tests::command_rejects_protected_root_overlap ... ok\ntest quick_tunnel::tests::close_is_idempotent_and_emits_one_closed_event ... ok\ntest toolchain::tests::generic_discovery_and_explicit_roots_match_source_policy ... ok\ntest process::tests::tty_round_trip_uses_owned_terminal_process ... ok\ntest process::tests::command_lifecycle_poll_read_and_kill ... ok\n\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s\n\n     Running unittests src/bin/helper.rs (target/debug/deps/mtm_native_helper-3a7ebe699352cfcf)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/bin/shadow.rs (target/debug/deps/mtm_native_shadow-f35ba00d1eed654a)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_storage-b9c4e031b3a1724c)\n\nrunning 2 tests\ntest capability::tests::permission_matrix_matches_source ... ok\ntest capability::tests::verifier_and_branch_firewalls_are_preserved ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/bin/shadow.rs (target/debug/deps/mtm_storage_shadow-8391288e352a1791)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running tests/storage.rs (target/debug/deps/storage-77082fbad2b2756c)\n\nrunning 6 tests\ntest failed_v2_migration_rolls_back_schema_and_version ... ok\ntest database_snapshot_is_deterministic ... ok\ntest capability_registry_epoch_owner_and_revocation_are_enforced ... ok\ntest promotion_failure_rolls_back_and_repeated_success_is_idempotent ... ok\ntest rollback_copy_remains_a_version_one_database ... ok\ntest historical_v1_migration_preserves_rows_and_rejects_newer_schema ... ok\n\ntest result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s\n\n   Doc-tests mtm_contracts\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_core\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_gateway\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_native\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_storage\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      "passed": false,
+      "exit_code": 101,
+      "output_tail": "warning: unused import: `Map`\n  --> crates/mtm-workflow/src/bin/target_validation.rs:13:18\n   |\n13 | use serde_json::{Map, Value};\n   |                  ^^^\n   |\n   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default\n\n   Compiling mtm-workflow v0.1.0-alpha.1 (/home/lk/桌面/tempcoding/MTM-reboot/crates/mtm-workflow)\nwarning: `mtm-workflow` (bin \"target_validation\" test) generated 1 warning (run `cargo fix --bin \"target_validation\" -p mtm-workflow --tests` to apply 1 suggestion)\nerror[E0433]: cannot find module or crate `tempfile` in this scope\n   --> crates/mtm-workflow/src/bin/target_validation.rs:144:16\n    |\n144 |     let root = tempfile::tempdir().map_err(io_error)?;\n    |                ^^^^^^^^ use of unresolved module or unlinked crate `tempfile`\n    |\n    = help: if you wanted to use a crate named `tempfile`, use `cargo add tempfile` to add it to your `Cargo.toml`\n\nerror[E0433]: cannot find module or crate `tempfile` in this scope\n  --> crates/mtm-workflow/src/bin/target_validation.rs:63:11\n   |\n63 |     root: tempfile::TempDir,\n   |           ^^^^^^^^ use of unresolved module or unlinked crate `tempfile`\n   |\n   = help: if you wanted to use a crate named `tempfile`, use `cargo add tempfile` to add it to your `Cargo.toml`\n\nFor more information about this error, try `rustc --explain E0433`.\nwarning: `mtm-workflow` (bin \"target_validation\") generated 1 warning (1 duplicate)\nerror: could not compile `mtm-workflow` (bin \"target_validation\") due to 2 previous errors; 1 warning emitted\n"
     },
     {
       "name": "mtm002_conformance",
@@ -108,11 +108,11 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 19,\n  \"source_reference_files_clean\": true,\n  \"case_count\": 135,\n  \"operation_counts\": {\n    \"apply_hunks\": 7,\n    \"command_policy\": 11,\n    \"filtered_env\": 8,\n    \"fingerprint\": 2,\n    \"inline_script\": 12,\n    \"oauth_server_url\": 15,\n    \"parse_patch\": 7,\n    \"quick_tunnel_origin\": 12,\n    \"redact\": 4,\n    \"redact_bytes\": 1,\n    \"redirect_uris\": 14,\n    \"schema_validate\": 27,\n    \"workflow_terminal\": 5,\n    \"workspace_path\": 10\n  },\n  \"reference_sha256\": \"1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d\",\n  \"recorded_sha256\": \"1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d\",\n  \"golden_match\": true,\n  \"differential_mismatch_count\": 0,\n  \"mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"request_bytes\": 13719,\n      \"response_bytes\": 12956,\n      \"samples\": 7,\n      \"elapsed_ms_median\": 79.569,\n      \"elapsed_ms_p95\": 80.669,\n      \"max_rss_kib\": 26580,\n      \"limits\": {\n        \"request_bytes\": 1048576,\n        \"response_bytes\": 1048576,\n        \"elapsed_seconds\": 10.0,\n        \"max_rss_kib\": 131072\n      }\n    },\n    \"rust_shadow\": {\n      \"request_bytes\": 13719,\n      \"response_bytes\": 12956,\n      \"samples\": 7,\n      \"elapsed_ms_median\": 88.435,\n      \"elapsed_ms_p95\": 90.411,\n      \"max_rss_kib\": 7940,\n      \"limits\": {\n        \"request_bytes\": 1048576,\n        \"response_bytes\": 1048576,\n        \"elapsed_seconds\": 10.0,\n        \"max_rss_kib\": 131072\n      }\n    },\n    \"rust_non_regression_limits\": {\n      \"elapsed_ms\": 2000.0,\n      \"max_rss_kib\": 65536\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"read_only_shadow\",\n    \"production_authority\": \"python\"\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 24,\n  \"source_reference_files_clean\": true,\n  \"case_count\": 135,\n  \"operation_counts\": {\n    \"apply_hunks\": 7,\n    \"command_policy\": 11,\n    \"filtered_env\": 8,\n    \"fingerprint\": 2,\n    \"inline_script\": 12,\n    \"oauth_server_url\": 15,\n    \"parse_patch\": 7,\n    \"quick_tunnel_origin\": 12,\n    \"redact\": 4,\n    \"redact_bytes\": 1,\n    \"redirect_uris\": 14,\n    \"schema_validate\": 27,\n    \"workflow_terminal\": 5,\n    \"workspace_path\": 10\n  },\n  \"reference_sha256\": \"1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d\",\n  \"recorded_sha256\": \"1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d\",\n  \"golden_match\": true,\n  \"differential_mismatch_count\": 0,\n  \"mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"request_bytes\": 13719,\n      \"response_bytes\": 12956,\n      \"samples\": 7,\n      \"elapsed_ms_median\": 78.418,\n      \"elapsed_ms_p95\": 80.812,\n      \"max_rss_kib\": 26532,\n      \"limits\": {\n        \"request_bytes\": 1048576,\n        \"response_bytes\": 1048576,\n        \"elapsed_seconds\": 10.0,\n        \"max_rss_kib\": 131072\n      }\n    },\n    \"rust_shadow\": {\n      \"request_bytes\": 13719,\n      \"response_bytes\": 12956,\n      \"samples\": 7,\n      \"elapsed_ms_median\": 88.406,\n      \"elapsed_ms_p95\": 90.324,\n      \"max_rss_kib\": 7904,\n      \"limits\": {\n        \"request_bytes\": 1048576,\n        \"response_bytes\": 1048576,\n        \"elapsed_seconds\": 10.0,\n        \"max_rss_kib\": 131072\n      }\n    },\n    \"rust_non_regression_limits\": {\n      \"elapsed_ms\": 2000.0,\n      \"max_rss_kib\": 65536\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"read_only_shadow\",\n    \"production_authority\": \"python\"\n  }\n}\n",
       "json": {
         "ok": true,
         "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
-        "source_reference_file_count": 19,
+        "source_reference_file_count": 24,
         "source_reference_files_clean": true,
         "case_count": 135,
         "operation_counts": {
@@ -141,9 +141,9 @@
             "request_bytes": 13719,
             "response_bytes": 12956,
             "samples": 7,
-            "elapsed_ms_median": 79.569,
-            "elapsed_ms_p95": 80.669,
-            "max_rss_kib": 26580,
+            "elapsed_ms_median": 78.418,
+            "elapsed_ms_p95": 80.812,
+            "max_rss_kib": 26532,
             "limits": {
               "request_bytes": 1048576,
               "response_bytes": 1048576,
@@ -155,9 +155,9 @@
             "request_bytes": 13719,
             "response_bytes": 12956,
             "samples": 7,
-            "elapsed_ms_median": 88.435,
-            "elapsed_ms_p95": 90.411,
-            "max_rss_kib": 7940,
+            "elapsed_ms_median": 88.406,
+            "elapsed_ms_p95": 90.324,
+            "max_rss_kib": 7904,
             "limits": {
               "request_bytes": 1048576,
               "response_bytes": 1048576,
@@ -187,11 +187,11 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 19,\n  \"source_reference_files_clean\": true,\n  \"exact_case_count\": 4,\n  \"process_case_count\": 5,\n  \"reference_sha256\": \"5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69\",\n  \"recorded_sha256\": \"5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69\",\n  \"golden_match\": true,\n  \"exact_mismatches\": [],\n  \"process_mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"elapsed_ms\": 422.935,\n      \"max_rss_kib\": 22844,\n      \"request_count\": 14,\n      \"exit_code\": 0,\n      \"stderr_tail\": \"\"\n    },\n    \"rust_shadow\": {\n      \"elapsed_ms\": 612.495,\n      \"max_rss_kib\": 7748,\n      \"request_count\": 14,\n      \"exit_code\": 0,\n      \"stderr_tail\": \"\"\n    },\n    \"limits\": {\n      \"elapsed_seconds\": 30.0,\n      \"max_rss_kib\": 131072\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"read_only_shadow\",\n    \"production_authority\": \"python\"\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 24,\n  \"source_reference_files_clean\": true,\n  \"exact_case_count\": 4,\n  \"process_case_count\": 5,\n  \"reference_sha256\": \"5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69\",\n  \"recorded_sha256\": \"5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69\",\n  \"golden_match\": true,\n  \"exact_mismatches\": [],\n  \"process_mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"elapsed_ms\": 441.574,\n      \"max_rss_kib\": 23048,\n      \"request_count\": 14,\n      \"exit_code\": 0,\n      \"stderr_tail\": \"\"\n    },\n    \"rust_shadow\": {\n      \"elapsed_ms\": 612.585,\n      \"max_rss_kib\": 7844,\n      \"request_count\": 14,\n      \"exit_code\": 0,\n      \"stderr_tail\": \"\"\n    },\n    \"limits\": {\n      \"elapsed_seconds\": 30.0,\n      \"max_rss_kib\": 131072\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"read_only_shadow\",\n    \"production_authority\": \"python\"\n  }\n}\n",
       "json": {
         "ok": true,
         "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
-        "source_reference_file_count": 19,
+        "source_reference_file_count": 24,
         "source_reference_files_clean": true,
         "exact_case_count": 4,
         "process_case_count": 5,
@@ -202,15 +202,15 @@
         "process_mismatches": [],
         "resources": {
           "python_reference": {
-            "elapsed_ms": 422.935,
-            "max_rss_kib": 22844,
+            "elapsed_ms": 441.574,
+            "max_rss_kib": 23048,
             "request_count": 14,
             "exit_code": 0,
             "stderr_tail": ""
           },
           "rust_shadow": {
-            "elapsed_ms": 612.495,
-            "max_rss_kib": 7748,
+            "elapsed_ms": 612.585,
+            "max_rss_kib": 7844,
             "request_count": 14,
             "exit_code": 0,
             "stderr_tail": ""
@@ -237,11 +237,11 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"implementation_sha256\": \"f6c30f3c0939f8a3f43e9f65c1d3fdf0301c0182b4a8eb01cb4ca685d2704790\",\n    \"required_check_count\": 14,\n    \"environment\": {\n      \"platform\": \"Linux\",\n      \"release\": \"7.1.2-070102-generic\",\n      \"machine\": \"x86_64\"\n    }\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"implementation_sha256\": \"5fa1e16069e92d06b0e98a87777a15ed5f733be07ab6caec18cd0e175d54f9aa\",\n    \"required_check_count\": 14,\n    \"environment\": {\n      \"platform\": \"Linux\",\n      \"release\": \"7.1.2-070102-generic\",\n      \"machine\": \"x86_64\"\n    }\n  }\n}\n",
       "json": {
         "ok": true,
         "summary": {
-          "implementation_sha256": "f6c30f3c0939f8a3f43e9f65c1d3fdf0301c0182b4a8eb01cb4ca685d2704790",
+          "implementation_sha256": "5fa1e16069e92d06b0e98a87777a15ed5f733be07ab6caec18cd0e175d54f9aa",
           "required_check_count": 14,
           "environment": {
             "platform": "Linux",
@@ -259,11 +259,11 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 19,\n  \"source_reference_files_clean\": true,\n  \"operation_count\": 52,\n  \"main_exact_match\": true,\n  \"migration_cases_passed\": true,\n  \"migration_summary\": {\n    \"v0_match\": true,\n    \"v1_match\": true,\n    \"v2_match\": true,\n    \"newer_schema_fail_closed\": true,\n    \"failed_v2_rollback\": true,\n    \"rollback_copy_resumed_by_source\": true\n  },\n  \"reference_sha256\": \"bf0ecab52a25d2edc7fe47c95579a311dc7f14a2f1c4d2fd3e40b7f0d37d94f6\",\n  \"recorded_sha256\": \"bf0ecab52a25d2edc7fe47c95579a311dc7f14a2f1c4d2fd3e40b7f0d37d94f6\",\n  \"golden_match\": true,\n  \"resources\": {\n    \"python_reference\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 121.742,\n      \"elapsed_ms_p95\": 126.936,\n      \"max_rss_kib\": 28544,\n      \"request_bytes\": 9716,\n      \"response_bytes\": 52662\n    },\n    \"rust_shadow\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 64.7,\n      \"elapsed_ms_p95\": 82.915,\n      \"max_rss_kib\": 6524,\n      \"request_bytes\": 9714,\n      \"response_bytes\": 52662\n    },\n    \"rust_non_regression_limits\": {\n      \"elapsed_ms_p95\": 3000.0,\n      \"max_rss_kib\": 65536\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"copied_database_shadow\",\n    \"production_writer\": \"python\"\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 24,\n  \"source_reference_files_clean\": true,\n  \"operation_count\": 52,\n  \"main_exact_match\": true,\n  \"migration_cases_passed\": true,\n  \"migration_summary\": {\n    \"v0_match\": true,\n    \"v1_match\": true,\n    \"v2_match\": true,\n    \"newer_schema_fail_closed\": true,\n    \"failed_v2_rollback\": true,\n    \"rollback_copy_resumed_by_source\": true\n  },\n  \"reference_sha256\": \"bf0ecab52a25d2edc7fe47c95579a311dc7f14a2f1c4d2fd3e40b7f0d37d94f6\",\n  \"recorded_sha256\": \"bf0ecab52a25d2edc7fe47c95579a311dc7f14a2f1c4d2fd3e40b7f0d37d94f6\",\n  \"golden_match\": true,\n  \"resources\": {\n    \"python_reference\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 161.63,\n      \"elapsed_ms_p95\": 181.607,\n      \"max_rss_kib\": 28484,\n      \"request_bytes\": 9716,\n      \"response_bytes\": 52662\n    },\n    \"rust_shadow\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 98.87,\n      \"elapsed_ms_p95\": 105.585,\n      \"max_rss_kib\": 6548,\n      \"request_bytes\": 9714,\n      \"response_bytes\": 52662\n    },\n    \"rust_non_regression_limits\": {\n      \"elapsed_ms_p95\": 3000.0,\n      \"max_rss_kib\": 65536\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"copied_database_shadow\",\n    \"production_writer\": \"python\"\n  }\n}\n",
       "json": {
         "ok": true,
         "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
-        "source_reference_file_count": 19,
+        "source_reference_file_count": 24,
         "source_reference_files_clean": true,
         "operation_count": 52,
         "main_exact_match": true,
@@ -282,17 +282,17 @@
         "resources": {
           "python_reference": {
             "samples": 7,
-            "elapsed_ms_median": 121.742,
-            "elapsed_ms_p95": 126.936,
-            "max_rss_kib": 28544,
+            "elapsed_ms_median": 161.63,
+            "elapsed_ms_p95": 181.607,
+            "max_rss_kib": 28484,
             "request_bytes": 9716,
             "response_bytes": 52662
           },
           "rust_shadow": {
             "samples": 7,
-            "elapsed_ms_median": 64.7,
-            "elapsed_ms_p95": 82.915,
-            "max_rss_kib": 6524,
+            "elapsed_ms_median": 98.87,
+            "elapsed_ms_p95": 105.585,
+            "max_rss_kib": 6548,
             "request_bytes": 9714,
             "response_bytes": 52662
           },
@@ -318,11 +318,11 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"implementation_sha256\": \"4980dfccdb81d1ed5601dd4dfcf7bae45df9fcb13eddd503a92b0ee3fb947f0c\",\n    \"required_check_count\": 10,\n    \"environment\": {\n      \"platform\": \"Linux\",\n      \"release\": \"7.1.2-070102-generic\",\n      \"machine\": \"x86_64\",\n      \"sqlite_version\": \"3.53.3\"\n    }\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"implementation_sha256\": \"eb7b9f310d14968f70e6d0a9ac825dd9b7f3221b6f377f79c6221dbebeab1846\",\n    \"required_check_count\": 10,\n    \"environment\": {\n      \"platform\": \"Linux\",\n      \"release\": \"7.1.2-070102-generic\",\n      \"machine\": \"x86_64\",\n      \"sqlite_version\": \"3.53.3\"\n    }\n  }\n}\n",
       "json": {
         "ok": true,
         "summary": {
-          "implementation_sha256": "4980dfccdb81d1ed5601dd4dfcf7bae45df9fcb13eddd503a92b0ee3fb947f0c",
+          "implementation_sha256": "eb7b9f310d14968f70e6d0a9ac825dd9b7f3221b6f377f79c6221dbebeab1846",
           "required_check_count": 10,
           "environment": {
             "platform": "Linux",
@@ -341,11 +341,11 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 19,\n  \"source_reference_files_clean\": true,\n  \"record_count\": 44,\n  \"public_tool_count\": 24,\n  \"hidden_tool_count\": 11,\n  \"public_catalog_sha256\": \"86c8ee7d53a0678d0aaaba47ce2f2f72f5c03747fcb443d78011e005dedaa343\",\n  \"all_tool_definitions_sha256\": \"e89c5d2f8bec198fb4a90e7166aadb04b757e4b3ff0c8f459e5fdd468c59f87e\",\n  \"reference_sha256\": \"787e659b8787fab7765e2ae2bdb7ce774f2484467933fc87624097a9af65e849\",\n  \"recorded_sha256\": \"787e659b8787fab7765e2ae2bdb7ce774f2484467933fc87624097a9af65e849\",\n  \"golden_match\": true,\n  \"differential_mismatch_count\": 0,\n  \"mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 120.491,\n      \"elapsed_ms_p95\": 131.219,\n      \"max_rss_kib\": 28564,\n      \"record_count\": 44,\n      \"response_bytes\": 133512\n    },\n    \"rust_shadow\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 82.417,\n      \"elapsed_ms_p95\": 84.773,\n      \"max_rss_kib\": 12164,\n      \"record_count\": 44,\n      \"response_bytes\": 133512\n    },\n    \"limits\": {\n      \"elapsed_seconds\": 30.0,\n      \"max_rss_kib\": 131072\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"oauth_mcp_gateway_shadow\",\n    \"deployed_traffic_authority\": \"python\"\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 24,\n  \"source_reference_files_clean\": true,\n  \"record_count\": 44,\n  \"public_tool_count\": 24,\n  \"hidden_tool_count\": 11,\n  \"public_catalog_sha256\": \"86c8ee7d53a0678d0aaaba47ce2f2f72f5c03747fcb443d78011e005dedaa343\",\n  \"all_tool_definitions_sha256\": \"e89c5d2f8bec198fb4a90e7166aadb04b757e4b3ff0c8f459e5fdd468c59f87e\",\n  \"reference_sha256\": \"787e659b8787fab7765e2ae2bdb7ce774f2484467933fc87624097a9af65e849\",\n  \"recorded_sha256\": \"787e659b8787fab7765e2ae2bdb7ce774f2484467933fc87624097a9af65e849\",\n  \"golden_match\": true,\n  \"differential_mismatch_count\": 0,\n  \"mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 107.077,\n      \"elapsed_ms_p95\": 111.703,\n      \"max_rss_kib\": 28536,\n      \"record_count\": 44,\n      \"response_bytes\": 133512\n    },\n    \"rust_shadow\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 59.682,\n      \"elapsed_ms_p95\": 67.021,\n      \"max_rss_kib\": 12168,\n      \"record_count\": 44,\n      \"response_bytes\": 133512\n    },\n    \"limits\": {\n      \"elapsed_seconds\": 30.0,\n      \"max_rss_kib\": 131072\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"oauth_mcp_gateway_shadow\",\n    \"deployed_traffic_authority\": \"python\"\n  }\n}\n",
       "json": {
         "ok": true,
         "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
-        "source_reference_file_count": 19,
+        "source_reference_file_count": 24,
         "source_reference_files_clean": true,
         "record_count": 44,
         "public_tool_count": 24,
@@ -360,17 +360,17 @@
         "resources": {
           "python_reference": {
             "samples": 7,
-            "elapsed_ms_median": 120.491,
-            "elapsed_ms_p95": 131.219,
-            "max_rss_kib": 28564,
+            "elapsed_ms_median": 107.077,
+            "elapsed_ms_p95": 111.703,
+            "max_rss_kib": 28536,
             "record_count": 44,
             "response_bytes": 133512
           },
           "rust_shadow": {
             "samples": 7,
-            "elapsed_ms_median": 82.417,
-            "elapsed_ms_p95": 84.773,
-            "max_rss_kib": 12164,
+            "elapsed_ms_median": 59.682,
+            "elapsed_ms_p95": 67.021,
+            "max_rss_kib": 12168,
             "record_count": 44,
             "response_bytes": 133512
           },
@@ -396,11 +396,11 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"implementation_sha256\": \"0c8888fab850afde593333b408d85feaeaee8c860103371b514b5696a82f5b38\",\n    \"required_check_count\": 15,\n    \"environment\": {\n      \"platform\": \"Linux\",\n      \"release\": \"7.1.2-070102-generic\",\n      \"machine\": \"x86_64\",\n      \"browser\": \"firefox\"\n    }\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"implementation_sha256\": \"34144703147efc94409e9b0019e1a7ad5f9c7ae48b1797918df2161b977ebc7f\",\n    \"required_check_count\": 15,\n    \"environment\": {\n      \"platform\": \"Linux\",\n      \"release\": \"7.1.2-070102-generic\",\n      \"machine\": \"x86_64\",\n      \"browser\": \"firefox\"\n    }\n  }\n}\n",
       "json": {
         "ok": true,
         "summary": {
-          "implementation_sha256": "0c8888fab850afde593333b408d85feaeaee8c860103371b514b5696a82f5b38",
+          "implementation_sha256": "34144703147efc94409e9b0019e1a7ad5f9c7ae48b1797918df2161b977ebc7f",
           "required_check_count": 15,
           "environment": {
             "platform": "Linux",

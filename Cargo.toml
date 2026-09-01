@@ -4,6 +4,7 @@ members = [
   "crates/mtm-core",
   "crates/mtm-native",
   "crates/mtm-storage",
+  "crates/mtm-workflow",
   "crates/mtm-gateway",
   "crates/mtm-cli",
 ]
@@ -30,6 +31,7 @@ getrandom = "0.4"
 nix = { version = "0.30", features = ["fs", "process", "signal", "term"] }
 rusqlite = { version = "0.37", features = ["bundled"] }
 time = { version = "0.3", features = ["formatting", "macros"] }
+tempfile = "3.27"
 axum = "0.8"
 http = "1.3"
 serde_urlencoded = "0.7"

@@ -189,7 +189,7 @@
     {
       "id": "MTM-006",
       "title": "Workflow, vault, verifier, finalizer, and project semantics",
-      "status": "approved",
+      "status": "in_progress",
       "priority": "P0",
       "production_authority_before": "python",
       "production_authority_after": "rust",
@@ -467,6 +467,14 @@
       "status_before": "proposed",
       "status_after": "approved",
       "summary": "Approved workflow, vault, verifier, finalizer and project semantics as the only next milestone; it must begin by rechecking all completed gateway and lower-level evidence and preserve one transition and one finalization authority."
+    },
+    {
+      "event_id": "MEVT-025",
+      "milestone_id": "MTM-006",
+      "at": "2026-09-01T04:50:30-07:00",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Revalidated the committed MTM-005 full gate, 44-record OAuth/MCP differential hash, all implementation-bound Native/storage/gateway target reports and a clean pre-check repository, then began workflow migration with validated authority types and one transition/finalizer authority as explicit implementation constraints."
     }
   ],
   "receipt_contract": {

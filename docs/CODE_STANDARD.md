@@ -122,6 +122,32 @@ move downward only when they are stable contracts rather than implementation det
   environment values never enter logs, receipts, or public artifacts.
 - Security check order is behavior. Reordering requires negative tests.
 
+### 7.1 Validated authority types
+
+For authentication, workflow capabilities, verifier results, and finalization gates,
+successful validation should produce a named type that downstream code requires.
+
+```text
+untrusted bytes / JSON / bearer token
+        ↓ validation
+validated named type with private fields
+        ↓
+authority-bearing operation
+```
+
+- Authority-bearing types keep fields private and expose no public constructor that
+  bypasses validation.
+- Secret or authority-bearing types do not derive `Deserialize` merely for fixture
+  convenience when that would allow callers to forge a validated value.
+- Raw string roles, states, capabilities, principals, verdicts, and finalization
+  permissions stop at compatibility boundaries and become enums or newtypes.
+- A backend requiring authenticated or capability-authorized input accepts the
+  validated type rather than a raw token plus a validation boolean.
+- Final artifact publication requires an unforgeable mechanical permit produced only
+  after the LaTeX, verifier, manifest, and reference-audit gates have passed.
+- Tests may use private or test-only constructors inside the defining crate; public
+  production APIs do not gain authority-bypass constructors for test convenience.
+
 ## 8. Testing
 
 - Fixes add regression tests with the implementation.

@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "project": "MTM-reboot",
+  "milestone": "MTM-006",
+  "implementation_sha256": "6b940bfe4c6e4f1679c166225e674afc51f4d31e6920783278bcf60714af4d19",
+  "environment": {
+    "platform": "Linux",
+    "release": "7.1.2-070102-generic",
+    "machine": "x86_64",
+    "pdflatex": "pdflatex",
+    "pdflatex_version": "pdfTeX 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian)"
+  },
+  "passed": false,
+  "check_count": 0,
+  "checks": [],
+  "sensitive_content_omitted": true,
+  "claim": "This report validates the current Linux target's real pdflatex workflow gate, mechanical finalization, read-only verified artifact, project promotion, server-owned verdict, post-verifier proof-tamper denial, and server-derived missing-reference gap. It uses temporary state/private roots and records no capabilities, proofs, project/run identifiers, private-vault contents, or source database rows."
+}

@@ -16,7 +16,7 @@
       {"id": "mtm-storage", "status": "implemented", "responsibility": "SQLite schema, migrations, repositories, capability registry/signing, copied-state differential tooling, and transaction mechanics."},
       {"id": "mtm-native", "status": "implemented", "responsibility": "Process lifecycle, TTY, toolchains, isolation, and owned child processes."},
       {"id": "mtm-gateway", "status": "implemented", "responsibility": "OAuth, MCP, HTTP, public catalog, and request boundary."},
-      {"id": "mtm-workflow", "status": "planned", "responsibility": "Deterministic workflow transition planning, verifier/finalizer gates, and project semantics."},
+      {"id": "mtm-workflow", "status": "bootstrap", "responsibility": "Deterministic workflow transition planning, private vault, verifier/finalizer gates, typed L2 capability use, and project semantics."},
       {"id": "mtm-runtime", "status": "planned", "responsibility": "Single composition root and effect orchestration."},
       {"id": "mtm-cli", "status": "bootstrap", "responsibility": "Operator commands and presentation; never an authority source."}
     ],
@@ -30,6 +30,7 @@
       {"source": "mtm-gateway", "target": "mtm-core"},
       {"source": "mtm-workflow", "target": "mtm-contracts"},
       {"source": "mtm-workflow", "target": "mtm-core"},
+      {"source": "mtm-workflow", "target": "mtm-storage"},
       {"source": "mtm-runtime", "target": "mtm-contracts"},
       {"source": "mtm-runtime", "target": "mtm-core"},
       {"source": "mtm-runtime", "target": "mtm-storage"},
