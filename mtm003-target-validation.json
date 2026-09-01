@@ -19,7 +19,7 @@
       "name": "bubblewrap_attestation",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.248,
+      "elapsed_ms": 22.261,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "attest",
@@ -60,7 +60,7 @@
       "name": "safe_workspace_read",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.199,
+      "elapsed_ms": 22.36,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -113,7 +113,7 @@
       "name": "private_vault_and_parent_env_denial",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.023,
+      "elapsed_ms": 22.365,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -166,7 +166,7 @@
       "name": "explicit_generic_toolchain_execution",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.252,
+      "elapsed_ms": 22.229,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -219,7 +219,7 @@
       "name": "toolchain_mount_read_only",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.575,
+      "elapsed_ms": 22.353,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -250,7 +250,7 @@
         "exit_code": 2,
         "signal": null,
         "status": "exited",
-        "stderr": "/bin/sh: 1: cannot create /tmp/coding-tools-mcp/22f4588e2aced8a8/thS2s3XLegZW7h4-/tmp/mtm003-target-12qp6ipu/explicit-toolchain/must-remain-read-only: Read-only file system\n",
+        "stderr": "/bin/sh: 1: cannot create /tmp/coding-tools-mcp/22f4588e2aced8a8/thS2s3XLegZW7h4-/tmp/mtm003-target-fzulasnf/explicit-toolchain/must-remain-read-only: Read-only file system\n",
         "stderr_meta": {
           "dropped_bytes": 0,
           "retained_bytes": 173,
@@ -285,7 +285,7 @@
       "name": "dangerous_plan_attestation",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.636,
+      "elapsed_ms": 22.367,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "attest",
@@ -326,7 +326,7 @@
       "name": "sagemath_execution",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 766.434,
+      "elapsed_ms": 846.733,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -353,7 +353,7 @@
           "workspace_mount": "/workspace",
           "workspace_mounted": true
         },
-        "elapsed_ms": 764,
+        "elapsed_ms": 844,
         "exit_code": 0,
         "signal": null,
         "status": "exited",
@@ -379,7 +379,7 @@
       "name": "magma_execution",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.441,
+      "elapsed_ms": 22.319,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -432,7 +432,7 @@
       "name": "helper_timeout_provenance",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 143.316,
+      "elapsed_ms": 142.889,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -459,7 +459,7 @@
           "workspace_mount": "/workspace",
           "workspace_mounted": true
         },
-        "elapsed_ms": 141,
+        "elapsed_ms": 140,
         "exit_code": null,
         "signal": "SIGTERM",
         "status": "timeout",
@@ -514,7 +514,7 @@
       "name": "real_quick_tunnel_lifecycle",
       "passed": true,
       "exit_code": 0,
-      "public_url_fingerprint": "07ce9825405d6d75",
+      "public_url_fingerprint": "deb36e601e2beff8",
       "event_states": [
         "starting",
         "connected"

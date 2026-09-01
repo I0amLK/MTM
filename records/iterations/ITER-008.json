@@ -25,6 +25,13 @@
       "rollback_wheel_retained": true,
       "transferred_session_count": 4
     },
+    "final_release_requalification": {
+      "status": "accepted",
+      "candidate_evidence": "mtm008-candidate-validation.json",
+      "release_sha256": "7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728",
+      "candidate_implementation_sha256": "7230fd8e487a51f83fbd80fbbae0b3777485f86dcc9d94d53f4bccbd78a3fc48",
+      "reason": "Synchronize final production-authority and completed-milestone status without making the binary claim knowledge of host Python-installation state."
+    },
     "python_retirement": {"status": "pending"}
   },
   "recorded_failures_and_repairs": [
@@ -100,16 +107,16 @@
     "A5": {
       "passed": true,
       "evidence": [
-        "The sixty-second Rust soak completed 167122 requests with zero errors and 29 stateful start/cancel cycles.",
-        "Tail RSS growth was 860 KiB, fd/thread growth was zero, no child process remained, and shutdown was graceful."
+        "The final sixty-second Rust soak completed 169508 requests with zero errors and 29 stateful start/cancel cycles.",
+        "Tail RSS growth was 880 KiB, fd/thread growth was zero, no child process remained, and shutdown was graceful."
       ]
     },
     "A6": {
       "passed": true,
       "evidence": [
         "Seven repetitions per runtime and 5600 measured requests per runtime used the same authenticated local OAuth/MCP workload with eight clients.",
-        "Observed Rust/Python median throughput ratio was 2.275978; p95 latency ratio 0.526035; peak RSS ratio 0.668591.",
-        "Conservative bootstrap ratios were 2.14589 throughput, 0.54653 p95 latency, and 0.67161 RSS, all beyond predefined thresholds."
+        "Observed Rust/Python median throughput ratio was 2.345509; p95 latency ratio 0.499841; peak RSS ratio 0.670145.",
+        "Conservative bootstrap ratios were 2.27984 throughput, 0.514259 p95 latency, and 0.674808 RSS, all beyond predefined thresholds."
       ],
       "claim_scope": "Authenticated loopback OAuth/MCP ping, tools/list, server_info, read_file, and check_exec_environment under eight concurrent clients only."
     }

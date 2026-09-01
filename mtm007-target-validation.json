@@ -2,7 +2,7 @@
   "project": "MTM-reboot",
   "milestone": "MTM-007",
   "passed": true,
-  "implementation_sha256": "bd3492ae81c7ea9ea895f83658cb87585e64ec98b28961d6777e463d12f74fd9",
+  "implementation_sha256": "4d659ad1b538985ed50d0756aa5e59f0e07cadb6600fbc308c38a65b7cb7ab94",
   "check_count": 12,
   "checks": [
     {
@@ -57,19 +57,19 @@
       "resources": {
         "samples": 7,
         "python": {
-          "elapsed_ms_median": 110.079,
-          "elapsed_ms_p95": 160.554,
-          "rss_kib_median": 30060,
-          "rss_kib_max": 30132
+          "elapsed_ms_median": 110.264,
+          "elapsed_ms_p95": 110.373,
+          "rss_kib_median": 29992,
+          "rss_kib_max": 30172
         },
         "rust_release": {
-          "elapsed_ms_median": 57.369,
-          "elapsed_ms_p95": 58.291,
-          "rss_kib_median": 13116,
-          "rss_kib_max": 13220
+          "elapsed_ms_median": 57.178,
+          "elapsed_ms_p95": 57.622,
+          "rss_kib_median": 13212,
+          "rss_kib_max": 13268
         },
-        "elapsed_p95_ratio": 0.363,
-        "rss_median_ratio": 0.436,
+        "elapsed_p95_ratio": 0.522,
+        "rss_median_ratio": 0.441,
         "limits": {
           "rust_elapsed_p95_ratio_max": 1.25,
           "rust_rss_median_ratio_max": 1.1,

@@ -4,11 +4,11 @@
   "milestone": "MTM-008",
   "phase": "candidate",
   "passed": true,
-  "implementation_sha256": "4fbddc21e42df22e3fd3452d29b9893fd4a492704debd5e9e4e10b337a169364",
+  "implementation_sha256": "7230fd8e487a51f83fbd80fbbae0b3777485f86dcc9d94d53f4bccbd78a3fc48",
   "release_binary": {
     "version": "re-ctm 0.3.0",
-    "sha256": "35b09841f85eb83a98e43ee632a455b9d86c0926b4a3d91613ebe6077fa6784a",
-    "size_bytes": 11154616
+    "sha256": "7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728",
+    "size_bytes": 11154928
   },
   "checks": [
     {
@@ -33,7 +33,7 @@
     {
       "name": "immutable_python_rollback_wheel",
       "passed": true,
-      "sha256": "d1b17de447a5d0f42dd8a3ebd4a0e0d7f1206dec1d5df7e2ad5458596227e8c9",
+      "sha256": "c76a8cfc6599bc83737283d764c86d354450439c86ea1d9fc136948d9b922842",
       "size_bytes": 161993
     },
     {
@@ -66,14 +66,14 @@
     "path": "authenticated local OAuth/MCP mixed request path",
     "scope": "ping, tools/list, server_info, read_file, and check_exec_environment under eight concurrent clients",
     "observed": {
-      "throughput_median_ratio_rust_over_python": 2.275978,
-      "p95_latency_ratio_rust_over_python": 0.526035,
-      "p99_latency_ratio_rust_over_python": 0.569086,
-      "rss_ratio_rust_over_python": 0.668591,
-      "startup_ratio_rust_over_python": 0.202475,
-      "conservative_throughput_ratio": 2.14589,
-      "conservative_p95_ratio": 0.54653,
-      "conservative_rss_ratio": 0.67161
+      "throughput_median_ratio_rust_over_python": 2.345509,
+      "p95_latency_ratio_rust_over_python": 0.499841,
+      "p99_latency_ratio_rust_over_python": 0.537199,
+      "rss_ratio_rust_over_python": 0.670145,
+      "startup_ratio_rust_over_python": 0.202607,
+      "conservative_throughput_ratio": 2.27984,
+      "conservative_p95_ratio": 0.514259,
+      "conservative_rss_ratio": 0.674808
     },
     "thresholds": {
       "conservative_throughput_ratio_min": 1.15,
@@ -84,18 +84,18 @@
     "statement": "The Rust release materially improves throughput, p95 latency, and peak RSS on the exact authenticated local MCP workload described in this report."
   },
   "soak_summary": {
-    "duration_seconds": 60.01,
-    "request_count": 167122,
+    "duration_seconds": 60.017,
+    "request_count": 169508,
     "request_errors": 0,
     "stateful_start_cancel_cycles": 29,
     "resources": {
-      "sample_count": 1097,
-      "rss_kib_initial": 11836,
-      "rss_kib_final": 24496,
-      "rss_kib_max": 24496,
-      "rss_slope_kib_per_second": 32.999524,
-      "rss_tail_slope_kib_per_second": 17.677745,
-      "rss_tail_growth_kib": 860,
+      "sample_count": 1100,
+      "rss_kib_initial": 12016,
+      "rss_kib_final": 24420,
+      "rss_kib_max": 24420,
+      "rss_slope_kib_per_second": 32.385698,
+      "rss_tail_slope_kib_per_second": 16.850099,
+      "rss_tail_growth_kib": 880,
       "file_descriptors_initial": 16,
       "file_descriptors_final": 16,
       "file_descriptor_growth": 0,
@@ -108,19 +108,19 @@
   "deployment_summary": {
     "schema": "re-ctm-deployment-v1",
     "state": "rust_active",
-    "command_link": "/tmp/coding-tools-mcp/22f4588e2aced8a8/thS2s3XLegZW7h4-/tmp/mtm008-candidate-4t4kintz/live-bin/re-ctm",
+    "command_link": "/tmp/coding-tools-mcp/22f4588e2aced8a8/thS2s3XLegZW7h4-/tmp/mtm008-candidate-3f1yw_yu/live-bin/re-ctm",
     "release": {
-      "installed_at": "2026-09-01T17:12:37.871436Z",
-      "path": "/tmp/coding-tools-mcp/22f4588e2aced8a8/thS2s3XLegZW7h4-/tmp/mtm008-candidate-4t4kintz/deployment/releases/0.3.0/re-ctm",
-      "sha256": "35b09841f85eb83a98e43ee632a455b9d86c0926b4a3d91613ebe6077fa6784a",
-      "size_bytes": 11154616,
+      "installed_at": "2026-09-01T17:50:48.037940Z",
+      "path": "/tmp/coding-tools-mcp/22f4588e2aced8a8/thS2s3XLegZW7h4-/tmp/mtm008-candidate-3f1yw_yu/deployment/releases/0.3.0/re-ctm",
+      "sha256": "7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728",
+      "size_bytes": 11154928,
       "version": "0.3.0"
     },
     "previous_kind": "symlink",
     "previous_version": "re-ctm 0.3.0",
     "rollback_wheel": {
-      "path": "/tmp/coding-tools-mcp/22f4588e2aced8a8/thS2s3XLegZW7h4-/tmp/mtm008-candidate-4t4kintz/rollback-wheel/re_ctm-0.3.0-py3-none-any.whl",
-      "sha256": "d1b17de447a5d0f42dd8a3ebd4a0e0d7f1206dec1d5df7e2ad5458596227e8c9",
+      "path": "/tmp/coding-tools-mcp/22f4588e2aced8a8/thS2s3XLegZW7h4-/tmp/mtm008-candidate-3f1yw_yu/rollback-wheel/re_ctm-0.3.0-py3-none-any.whl",
+      "sha256": "c76a8cfc6599bc83737283d764c86d354450439c86ea1d9fc136948d9b922842",
       "size_bytes": 161993
     },
     "python_runtime_retired": null,

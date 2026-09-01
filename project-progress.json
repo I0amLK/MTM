@@ -45,11 +45,12 @@
     "OAuthPrincipal is no longer publicly constructible/deserializable in production; the legacy shadow constructor is feature-gated off by default, and OperatorSession owns no storage/capability/vault/workflow authority.",
     "MTM-008 began only after commit 5c7aa283977bc705f425efe23f6fcb0ac7a9359b, the MTM-007 golden, all lower target evidence and the complete local gate were revalidated.",
     "The MTM-008 Rust 0.3.0 candidate is shadow-qualified: release identity and no-Python linkage, immutable Python-wheel restore, temporary atomic cutover/rollback/recutover, all prior target evidence, a sixty-second soak and bounded A6 qualification pass.",
-    "On the exact authenticated local OAuth/MCP mixed workload with eight clients, the latest accepted A6 run observed a 2.276x median throughput ratio, a 0.526 p95-latency ratio and a 0.669 peak-RSS ratio for Rust versus Python; this claim is limited to that recorded workload.",
-    "The current sixty-second Rust soak completed 167,122 requests with zero errors and 29 stateful start/cancel cycles, no file-descriptor or thread growth, no child process, and graceful shutdown.",
+    "On the exact authenticated local OAuth/MCP mixed workload with eight clients, the final qualified release observed a 2.346x median throughput ratio, a 0.500 p95-latency ratio and a 0.670 peak-RSS ratio for Rust versus Python; this claim is limited to that recorded workload.",
+    "The final sixty-second Rust soak completed 169,508 requests with zero errors and 29 stateful start/cancel cycles, no file-descriptor or thread growth, no child process, and graceful shutdown.",
     "The live /home/lk/.local/bin/re-ctm selector now points to the hash-recorded Rust 0.3.0 release after a real Python rollback and Rust recutover; four transferred serve/TUI sessions now execute that release and no Python Re-CTM process remains.",
     "The first live restart was rejected because generated operator keys entered owner-only logs; the final rerun stores generated keys only in mode-0600 secret files and all background logs contain only the configured-externally marker.",
-    "A6 claims only the recorded authenticated loopback OAuth/MCP mixed workload: Rust achieved a 2.276x median throughput ratio, 0.526 p95-latency ratio and 0.669 peak-RSS ratio versus Python under eight clients."
+    "A6 claims only the recorded authenticated loopback OAuth/MCP mixed workload: Rust achieved a 2.346x median throughput ratio, 0.500 p95-latency ratio and 0.670 peak-RSS ratio versus Python under eight clients.",
+    "The final status-synchronized release SHA-256 is 7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728; the binary reports Rust production authority and an authoritative MTM-008 phase while host Python-retirement proof remains in the deployment manifest."
   ],
   "manual_pending": [
     "Other operating systems and site-local toolchain layouts remain target-specific Native evidence.",

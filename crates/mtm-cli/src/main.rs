@@ -47,6 +47,7 @@ fn main() {
                     "hidden_alias_count": 11,
                     "state_schema_version": 2,
                     "workflow_protocol_version": 2,
+                    "production_authority": "rust",
                     "target_os": env::consts::OS,
                     "target_arch": env::consts::ARCH,
                 })
@@ -56,14 +57,15 @@ fn main() {
             const STATUS_JSON: &str = concat!(
                 "{\"project\":\"MTM-reboot\",",
                 "\"milestone\":\"MTM-008\",",
-                "\"production_authority\":\"python\",",
-                "\"rust_production_components\":0,",
+                "\"production_authority\":\"rust\",",
+                "\"rust_production_components\":7,",
                 "\"rust_authoritative_pure_components\":1,",
                 "\"rust_authoritative_native_components\":1,",
                 "\"rust_authoritative_storage_components\":1,",
                 "\"rust_authoritative_gateway_components\":1,",
                 "\"rust_authoritative_workflow_components\":1,",
                 "\"rust_authoritative_runtime_components\":1,",
+                "\"milestone_state\":\"authoritative\",",
                 "\"completed_milestones\":7}"
             );
             println!("{STATUS_JSON}");
