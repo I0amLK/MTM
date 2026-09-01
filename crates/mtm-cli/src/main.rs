@@ -21,12 +21,13 @@ fn main() {
         Some("status") => {
             const STATUS_JSON: &str = concat!(
                 "{\"project\":\"MTM-reboot\",",
-                "\"milestone\":\"MTM-004\",",
+                "\"milestone\":\"MTM-005\",",
                 "\"production_authority\":\"python\",",
                 "\"rust_production_components\":0,",
                 "\"rust_authoritative_pure_components\":1,",
                 "\"rust_authoritative_native_components\":1,",
-                "\"completed_milestones\":3}"
+                "\"rust_authoritative_storage_components\":1,",
+                "\"completed_milestones\":4}"
             );
             println!("{STATUS_JSON}");
         }

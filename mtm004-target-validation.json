@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0.0",
+  "project": "MTM-reboot",
+  "milestone": "MTM-004",
+  "implementation_sha256": "167f6ede075878a5f383ea8f3105f1788c166794ff4474e2785495bd1be6739b",
+  "environment": {
+    "platform": "Linux",
+    "release": "7.1.2-070102-generic",
+    "machine": "x86_64",
+    "sqlite_version": "3.53.3",
+    "source_database": "configured_private_state",
+    "source_database_path_fingerprint": "3deed863e42ad804"
+  },
+  "passed": true,
+  "check_count": 10,
+  "checks": [
+    {
+      "name": "production_database_read_only_backup",
+      "passed": true,
+      "open_mode": "sqlite_uri_mode_ro",
+      "integrity_check": "ok"
+    },
+    {
+      "name": "production_copy_python_rust_digest_match",
+      "passed": true,
+      "schema_version": 2,
+      "table_count": 17,
+      "schema_count": 17,
+      "private_content_omitted": true
+    },
+    {
+      "name": "production_copy_mutate_and_exact_rollback",
+      "passed": true,
+      "restored_to_source_digest": true,
+      "restored_integrity_check": "ok",
+      "probe_identifiers_omitted": true
+    },
+    {
+      "name": "python_token_validated_by_rust",
+      "passed": true
+    },
+    {
+      "name": "rust_token_validated_by_python",
+      "passed": true
+    },
+    {
+      "name": "registry_tamper_denied_by_rust",
+      "passed": true
+    },
+    {
+      "name": "capability_secrets_not_recorded",
+      "passed": true
+    },
+    {
+      "name": "begin_immediate_serializes_writers",
+      "passed": true,
+      "writer_count": 2,
+      "waited_for_existing_begin_immediate": true
+    },
+    {
+      "name": "storage_atomicity_and_capability_unit_suite",
+      "passed": true
+    },
+    {
+      "name": "mtm004_golden_and_migration_conformance",
+      "passed": true,
+      "operation_count": 52,
+      "migration_cases_passed": true,
+      "golden_match": true
+    }
+  ],
+  "sensitive_content_omitted": true,
+  "claim": "This report validates the current Linux target's read-only SQLite backup of the configured Re-CTM state database, Python/Rust copied-database equality, exact rollback, cross-runtime capability signatures and registry enforcement, serialized BEGIN IMMEDIATE writers, migration conformance and transactional unit tests. It does not publish database rows, run/project identifiers, tokens, proofs, source contents, or any production write. OAuth/MCP and workflow/finalizer acceptance remain later milestones."
+}

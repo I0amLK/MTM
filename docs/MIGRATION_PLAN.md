@@ -35,6 +35,14 @@ Migrate SQLite schema/migrations, run/project/claim state, optimistic promotion,
 capability signing/validation/revocation, and transactional invariants. Use copied
 databases for shadow comparison; never dual-write production state.
 
+Implemented and accepted with exact 52-operation Python–Rust state/capability parity,
+v0/v1/v2 migration parity, future-schema fail-closed behavior, failed-migration
+rollback, promotion rollback/idempotency, and cross-runtime capability signatures.
+The current Linux target additionally validated a read-only SQLite backup of the
+configured Re-CTM state database, exact Python/Rust copy digests, temporary-copy
+mutation and restoration, registry tamper denial, and serialized `BEGIN IMMEDIATE`
+writers. Re-CTM Python remains the only deployed production database writer.
+
 ## MTM-005 — OAuth, MCP, HTTP, and tool dispatch
 
 Migrate DCR, PKCE, token binding, fixed/dynamic origins, route Origin policy, JSON-RPC,

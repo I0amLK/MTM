@@ -13,7 +13,7 @@
     "vertices": [
       {"id": "mtm-contracts", "status": "bootstrap", "responsibility": "Stable wire contracts, error facts, enums, schemas, and source compatibility constants."},
       {"id": "mtm-core", "status": "implemented", "responsibility": "Pure domain types, schema validation, redaction, fingerprints, URL/path/command policy, patch parsing, and authority-neutral evaluation."},
-      {"id": "mtm-storage", "status": "planned", "responsibility": "SQLite schema, migrations, repositories, and transaction mechanics."},
+      {"id": "mtm-storage", "status": "implemented", "responsibility": "SQLite schema, migrations, repositories, capability registry/signing, copied-state differential tooling, and transaction mechanics."},
       {"id": "mtm-native", "status": "implemented", "responsibility": "Process lifecycle, TTY, toolchains, isolation, and owned child processes."},
       {"id": "mtm-gateway", "status": "planned", "responsibility": "OAuth, MCP, HTTP, public catalog, and request boundary."},
       {"id": "mtm-workflow", "status": "planned", "responsibility": "Deterministic workflow transition planning, verifier/finalizer gates, and project semantics."},

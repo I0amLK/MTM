@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-09-01T09:23:34.983814Z",
+  "generated_at": "2026-09-01T10:08:13.568651Z",
   "project": "MTM-reboot",
-  "milestone": "MTM-003",
+  "milestone": "MTM-004",
   "production_authority": "python",
   "passed": true,
   "checks": [
@@ -14,7 +14,7 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"milestone_count\": 8,\n    \"edge_count\": 11,\n    \"todo_count\": 1,\n    \"event_count\": 14,\n    \"receipt_count\": 3,\n    \"status_counts\": {\n      \"approved\": 1,\n      \"completed\": 3,\n      \"proposed\": 4\n    }\n  }\n}\n"
+      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"milestone_count\": 8,\n    \"edge_count\": 11,\n    \"todo_count\": 1,\n    \"event_count\": 19,\n    \"receipt_count\": 4,\n    \"status_counts\": {\n      \"approved\": 1,\n      \"completed\": 4,\n      \"proposed\": 3\n    }\n  }\n}\n"
     },
     {
       "name": "engineering_graph",
@@ -24,7 +24,7 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"crate_vertices\": 8,\n    \"crate_edges\": 17,\n    \"crate_graph_acyclic\": true,\n    \"cargo_members\": [\n      \"mtm-cli\",\n      \"mtm-contracts\",\n      \"mtm-core\",\n      \"mtm-native\"\n    ],\n    \"crate_statuses\": {\n      \"bootstrap\": 2,\n      \"implemented\": 2,\n      \"planned\": 4\n    },\n    \"mtm_core_dependency_count\": 7,\n    \"mtm_core_pure_boundary\": true,\n    \"runtime_vertices\": 10,\n    \"runtime_edges\": 12,\n    \"invariants\": 8\n  }\n}\n"
+      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"crate_vertices\": 8,\n    \"crate_edges\": 17,\n    \"crate_graph_acyclic\": true,\n    \"cargo_members\": [\n      \"mtm-cli\",\n      \"mtm-contracts\",\n      \"mtm-core\",\n      \"mtm-native\",\n      \"mtm-storage\"\n    ],\n    \"crate_statuses\": {\n      \"bootstrap\": 2,\n      \"implemented\": 3,\n      \"planned\": 3\n    },\n    \"mtm_core_dependency_count\": 7,\n    \"mtm_core_pure_boundary\": true,\n    \"mtm_storage_dependency_count\": 9,\n    \"mtm_storage_single_writer_boundary\": true,\n    \"runtime_vertices\": 10,\n    \"runtime_edges\": 12,\n    \"invariants\": 8\n  }\n}\n"
     },
     {
       "name": "python_governance_tests",
@@ -39,7 +39,7 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "test_commit_message_contract (test_governance.GovernanceTestCase.test_commit_message_contract) ... ok\ntest_completed_milestone_requires_receipt (test_governance.GovernanceTestCase.test_completed_milestone_requires_receipt) ... ok\ntest_current_mtm003_target_evidence_is_fresh (test_governance.GovernanceTestCase.test_current_mtm003_target_evidence_is_fresh) ... ok\ntest_dependency_cycle_is_rejected (test_governance.GovernanceTestCase.test_dependency_cycle_is_rejected) ... ok\ntest_perf_commit_requires_a6 (test_governance.GovernanceTestCase.test_perf_commit_requires_a6) ... ok\ntest_repository_migration_graph_is_valid (test_governance.GovernanceTestCase.test_repository_migration_graph_is_valid) ... ok\ntest_target_crate_graph_is_acyclic (test_governance.GovernanceTestCase.test_target_crate_graph_is_acyclic) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 0.005s\n\nOK\n"
+      "output_tail": "test_commit_message_contract (test_governance.GovernanceTestCase.test_commit_message_contract) ... ok\ntest_completed_milestone_requires_receipt (test_governance.GovernanceTestCase.test_completed_milestone_requires_receipt) ... ok\ntest_current_mtm003_target_evidence_is_fresh (test_governance.GovernanceTestCase.test_current_mtm003_target_evidence_is_fresh) ... ok\ntest_current_mtm004_target_evidence_is_fresh_and_redacted (test_governance.GovernanceTestCase.test_current_mtm004_target_evidence_is_fresh_and_redacted) ... ok\ntest_dependency_cycle_is_rejected (test_governance.GovernanceTestCase.test_dependency_cycle_is_rejected) ... ok\ntest_perf_commit_requires_a6 (test_governance.GovernanceTestCase.test_perf_commit_requires_a6) ... ok\ntest_repository_migration_graph_is_valid (test_governance.GovernanceTestCase.test_repository_migration_graph_is_valid) ... ok\ntest_target_crate_graph_is_acyclic (test_governance.GovernanceTestCase.test_target_crate_graph_is_acyclic) ... ok\n\n----------------------------------------------------------------------\nRan 8 tests in 0.006s\n\nOK\n"
     },
     {
       "name": "rustc_version",
@@ -87,7 +87,7 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s\n"
+      "output_tail": "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s\n"
     },
     {
       "name": "cargo_test",
@@ -98,7 +98,7 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.05s\n     Running unittests src/main.rs (target/debug/deps/mtm_reboot-0ad8b850a1cd584d)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_contracts-317de9647acb1dee)\n\nrunning 5 tests\ntest enums::tests::enum_wire_values_match_source ... ok\ntest enums::tests::workflow_terminal_states_match_source ... ok\ntest tests::bootstrap_json_is_deterministic ... ok\ntest error::tests::payload_matches_source_shape ... ok\ntest tests::source_contract_is_frozen ... ok\n\ntest result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_core-c64c566cb5c5ba7e)\n\nrunning 14 tests\ntest command_policy::tests::identifies_source_inline_interpreters ... ok\ntest evaluator::tests::evaluator_wraps_pure_operations ... ok\ntest patch::tests::applies_unique_hunk_and_preserves_crlf ... ok\ntest path_policy::tests::rejects_absolute_and_parent_paths ... ok\ntest redaction::tests::fingerprints_match_sha256_prefix ... ok\ntest path_policy::tests::normalizes_safe_relative_paths ... ok\ntest schema::tests::one_of_requires_exactly_one_match ... ok\ntest schema::tests::validates_nested_object_and_rejects_extra_field ... ok\ntest url_policy::tests::oauth_origin_policy_matches_source_rules ... ok\ntest patch::tests::parses_add_delete_update_and_move ... ok\ntest url_policy::tests::quick_tunnel_parser_is_strict ... ok\ntest redaction::tests::redacts_keys_and_embedded_values ... ok\ntest command_policy::tests::safe_policy_preserves_permission_order ... ok\ntest command_policy::tests::filtered_environment_matches_source_facts ... ok\n\ntest result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_native-7f6c46209dc9d061)\n\nrunning 7 tests\ntest capture::tests::retains_head_and_rolling_tail ... ok\ntest quick_tunnel::tests::child_environment_strips_all_known_credentials ... ok\ntest bubblewrap::tests::command_rejects_protected_root_overlap ... ok\ntest quick_tunnel::tests::close_is_idempotent_and_emits_one_closed_event ... ok\ntest toolchain::tests::generic_discovery_and_explicit_roots_match_source_policy ... ok\ntest process::tests::tty_round_trip_uses_owned_terminal_process ... ok\ntest process::tests::command_lifecycle_poll_read_and_kill ... ok\n\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s\n\n     Running unittests src/bin/helper.rs (target/debug/deps/mtm_native_helper-c27f3d1d7c3e76c4)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/bin/shadow.rs (target/debug/deps/mtm_native_shadow-bcaaa66f1cfbeb05)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_contracts\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_core\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_native\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      "output_tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s\n     Running unittests src/main.rs (target/debug/deps/mtm_reboot-960dd2e9e98259d6)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_contracts-317de9647acb1dee)\n\nrunning 5 tests\ntest enums::tests::enum_wire_values_match_source ... ok\ntest enums::tests::workflow_terminal_states_match_source ... ok\ntest error::tests::payload_matches_source_shape ... ok\ntest tests::source_contract_is_frozen ... ok\ntest tests::bootstrap_json_is_deterministic ... ok\n\ntest result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_core-893c603e957abbd4)\n\nrunning 14 tests\ntest command_policy::tests::identifies_source_inline_interpreters ... ok\ntest evaluator::tests::evaluator_wraps_pure_operations ... ok\ntest patch::tests::applies_unique_hunk_and_preserves_crlf ... ok\ntest patch::tests::parses_add_delete_update_and_move ... ok\ntest path_policy::tests::normalizes_safe_relative_paths ... ok\ntest path_policy::tests::rejects_absolute_and_parent_paths ... ok\ntest redaction::tests::fingerprints_match_sha256_prefix ... ok\ntest schema::tests::validates_nested_object_and_rejects_extra_field ... ok\ntest url_policy::tests::oauth_origin_policy_matches_source_rules ... ok\ntest schema::tests::one_of_requires_exactly_one_match ... ok\ntest url_policy::tests::quick_tunnel_parser_is_strict ... ok\ntest redaction::tests::redacts_keys_and_embedded_values ... ok\ntest command_policy::tests::safe_policy_preserves_permission_order ... ok\ntest command_policy::tests::filtered_environment_matches_source_facts ... ok\n\ntest result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_native-b57e96ae75a64a47)\n\nrunning 7 tests\ntest capture::tests::retains_head_and_rolling_tail ... ok\ntest quick_tunnel::tests::child_environment_strips_all_known_credentials ... ok\ntest bubblewrap::tests::command_rejects_protected_root_overlap ... ok\ntest quick_tunnel::tests::close_is_idempotent_and_emits_one_closed_event ... ok\ntest toolchain::tests::generic_discovery_and_explicit_roots_match_source_policy ... ok\ntest process::tests::tty_round_trip_uses_owned_terminal_process ... ok\ntest process::tests::command_lifecycle_poll_read_and_kill ... ok\n\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s\n\n     Running unittests src/bin/helper.rs (target/debug/deps/mtm_native_helper-8c95077cfecbb647)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/bin/shadow.rs (target/debug/deps/mtm_native_shadow-369c7ccbe352690a)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_storage-5b5fb1c8607d56aa)\n\nrunning 2 tests\ntest capability::tests::permission_matrix_matches_source ... ok\ntest capability::tests::verifier_and_branch_firewalls_are_preserved ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/bin/shadow.rs (target/debug/deps/mtm_storage_shadow-c715ea8aa14a4407)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running tests/storage.rs (target/debug/deps/storage-13d43bc54bcfb259)\n\nrunning 6 tests\ntest failed_v2_migration_rolls_back_schema_and_version ... ok\ntest database_snapshot_is_deterministic ... ok\ntest promotion_failure_rolls_back_and_repeated_success_is_idempotent ... ok\ntest capability_registry_epoch_owner_and_revocation_are_enforced ... ok\ntest rollback_copy_remains_a_version_one_database ... ok\ntest historical_v1_migration_preserves_rows_and_rejects_newer_schema ... ok\n\ntest result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s\n\n   Doc-tests mtm_contracts\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_core\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_native\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_storage\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
     },
     {
       "name": "mtm002_conformance",
@@ -108,11 +108,11 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 11,\n  \"source_reference_files_clean\": true,\n  \"case_count\": 135,\n  \"operation_counts\": {\n    \"apply_hunks\": 7,\n    \"command_policy\": 11,\n    \"filtered_env\": 8,\n    \"fingerprint\": 2,\n    \"inline_script\": 12,\n    \"oauth_server_url\": 15,\n    \"parse_patch\": 7,\n    \"quick_tunnel_origin\": 12,\n    \"redact\": 4,\n    \"redact_bytes\": 1,\n    \"redirect_uris\": 14,\n    \"schema_validate\": 27,\n    \"workflow_terminal\": 5,\n    \"workspace_path\": 10\n  },\n  \"reference_sha256\": \"1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d\",\n  \"recorded_sha256\": \"1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d\",\n  \"golden_match\": true,\n  \"differential_mismatch_count\": 0,\n  \"mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"request_bytes\": 13719,\n      \"response_bytes\": 12956,\n      \"samples\": 7,\n      \"elapsed_ms_median\": 78.843,\n      \"elapsed_ms_p95\": 80.94,\n      \"max_rss_kib\": 26308,\n      \"limits\": {\n        \"request_bytes\": 1048576,\n        \"response_bytes\": 1048576,\n        \"elapsed_seconds\": 10.0,\n        \"max_rss_kib\": 131072\n      }\n    },\n    \"rust_shadow\": {\n      \"request_bytes\": 13719,\n      \"response_bytes\": 12956,\n      \"samples\": 7,\n      \"elapsed_ms_median\": 88.578,\n      \"elapsed_ms_p95\": 90.268,\n      \"max_rss_kib\": 7944,\n      \"limits\": {\n        \"request_bytes\": 1048576,\n        \"response_bytes\": 1048576,\n        \"elapsed_seconds\": 10.0,\n        \"max_rss_kib\": 131072\n      }\n    },\n    \"rust_non_regression_limits\": {\n      \"elapsed_ms\": 2000.0,\n      \"max_rss_kib\": 65536\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"read_only_shadow\",\n    \"production_authority\": \"python\"\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 14,\n  \"source_reference_files_clean\": true,\n  \"case_count\": 135,\n  \"operation_counts\": {\n    \"apply_hunks\": 7,\n    \"command_policy\": 11,\n    \"filtered_env\": 8,\n    \"fingerprint\": 2,\n    \"inline_script\": 12,\n    \"oauth_server_url\": 15,\n    \"parse_patch\": 7,\n    \"quick_tunnel_origin\": 12,\n    \"redact\": 4,\n    \"redact_bytes\": 1,\n    \"redirect_uris\": 14,\n    \"schema_validate\": 27,\n    \"workflow_terminal\": 5,\n    \"workspace_path\": 10\n  },\n  \"reference_sha256\": \"1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d\",\n  \"recorded_sha256\": \"1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d\",\n  \"golden_match\": true,\n  \"differential_mismatch_count\": 0,\n  \"mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"request_bytes\": 13719,\n      \"response_bytes\": 12956,\n      \"samples\": 7,\n      \"elapsed_ms_median\": 77.832,\n      \"elapsed_ms_p95\": 82.108,\n      \"max_rss_kib\": 26344,\n      \"limits\": {\n        \"request_bytes\": 1048576,\n        \"response_bytes\": 1048576,\n        \"elapsed_seconds\": 10.0,\n        \"max_rss_kib\": 131072\n      }\n    },\n    \"rust_shadow\": {\n      \"request_bytes\": 13719,\n      \"response_bytes\": 12956,\n      \"samples\": 7,\n      \"elapsed_ms_median\": 88.406,\n      \"elapsed_ms_p95\": 91.896,\n      \"max_rss_kib\": 7824,\n      \"limits\": {\n        \"request_bytes\": 1048576,\n        \"response_bytes\": 1048576,\n        \"elapsed_seconds\": 10.0,\n        \"max_rss_kib\": 131072\n      }\n    },\n    \"rust_non_regression_limits\": {\n      \"elapsed_ms\": 2000.0,\n      \"max_rss_kib\": 65536\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"read_only_shadow\",\n    \"production_authority\": \"python\"\n  }\n}\n",
       "json": {
         "ok": true,
         "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
-        "source_reference_file_count": 11,
+        "source_reference_file_count": 14,
         "source_reference_files_clean": true,
         "case_count": 135,
         "operation_counts": {
@@ -141,9 +141,9 @@
             "request_bytes": 13719,
             "response_bytes": 12956,
             "samples": 7,
-            "elapsed_ms_median": 78.843,
-            "elapsed_ms_p95": 80.94,
-            "max_rss_kib": 26308,
+            "elapsed_ms_median": 77.832,
+            "elapsed_ms_p95": 82.108,
+            "max_rss_kib": 26344,
             "limits": {
               "request_bytes": 1048576,
               "response_bytes": 1048576,
@@ -155,9 +155,9 @@
             "request_bytes": 13719,
             "response_bytes": 12956,
             "samples": 7,
-            "elapsed_ms_median": 88.578,
-            "elapsed_ms_p95": 90.268,
-            "max_rss_kib": 7944,
+            "elapsed_ms_median": 88.406,
+            "elapsed_ms_p95": 91.896,
+            "max_rss_kib": 7824,
             "limits": {
               "request_bytes": 1048576,
               "response_bytes": 1048576,
@@ -187,11 +187,11 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 11,\n  \"source_reference_files_clean\": true,\n  \"exact_case_count\": 4,\n  \"process_case_count\": 5,\n  \"reference_sha256\": \"5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69\",\n  \"recorded_sha256\": \"5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69\",\n  \"golden_match\": true,\n  \"exact_mismatches\": [],\n  \"process_mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"elapsed_ms\": 430.125,\n      \"max_rss_kib\": 22736,\n      \"request_count\": 14,\n      \"exit_code\": 0,\n      \"stderr_tail\": \"\"\n    },\n    \"rust_shadow\": {\n      \"elapsed_ms\": 613.443,\n      \"max_rss_kib\": 7816,\n      \"request_count\": 14,\n      \"exit_code\": 0,\n      \"stderr_tail\": \"\"\n    },\n    \"limits\": {\n      \"elapsed_seconds\": 30.0,\n      \"max_rss_kib\": 131072\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"read_only_shadow\",\n    \"production_authority\": \"python\"\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 14,\n  \"source_reference_files_clean\": true,\n  \"exact_case_count\": 4,\n  \"process_case_count\": 5,\n  \"reference_sha256\": \"5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69\",\n  \"recorded_sha256\": \"5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69\",\n  \"golden_match\": true,\n  \"exact_mismatches\": [],\n  \"process_mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"elapsed_ms\": 441.504,\n      \"max_rss_kib\": 22776,\n      \"request_count\": 14,\n      \"exit_code\": 0,\n      \"stderr_tail\": \"\"\n    },\n    \"rust_shadow\": {\n      \"elapsed_ms\": 613.466,\n      \"max_rss_kib\": 7908,\n      \"request_count\": 14,\n      \"exit_code\": 0,\n      \"stderr_tail\": \"\"\n    },\n    \"limits\": {\n      \"elapsed_seconds\": 30.0,\n      \"max_rss_kib\": 131072\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"read_only_shadow\",\n    \"production_authority\": \"python\"\n  }\n}\n",
       "json": {
         "ok": true,
         "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
-        "source_reference_file_count": 11,
+        "source_reference_file_count": 14,
         "source_reference_files_clean": true,
         "exact_case_count": 4,
         "process_case_count": 5,
@@ -202,15 +202,15 @@
         "process_mismatches": [],
         "resources": {
           "python_reference": {
-            "elapsed_ms": 430.125,
-            "max_rss_kib": 22736,
+            "elapsed_ms": 441.504,
+            "max_rss_kib": 22776,
             "request_count": 14,
             "exit_code": 0,
             "stderr_tail": ""
           },
           "rust_shadow": {
-            "elapsed_ms": 613.443,
-            "max_rss_kib": 7816,
+            "elapsed_ms": 613.466,
+            "max_rss_kib": 7908,
             "request_count": 14,
             "exit_code": 0,
             "stderr_tail": ""
@@ -237,16 +237,98 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"implementation_sha256\": \"77c52b9fd6de366d80f045b7adb091ef0e4095147dee0c515173fe1ab1766a13\",\n    \"required_check_count\": 14,\n    \"environment\": {\n      \"platform\": \"Linux\",\n      \"release\": \"7.1.2-070102-generic\",\n      \"machine\": \"x86_64\"\n    }\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"implementation_sha256\": \"0f8987dd0ed81390614b1f192fc5daa6050ec1d200081c4a95824c6e39043b75\",\n    \"required_check_count\": 14,\n    \"environment\": {\n      \"platform\": \"Linux\",\n      \"release\": \"7.1.2-070102-generic\",\n      \"machine\": \"x86_64\"\n    }\n  }\n}\n",
       "json": {
         "ok": true,
         "summary": {
-          "implementation_sha256": "77c52b9fd6de366d80f045b7adb091ef0e4095147dee0c515173fe1ab1766a13",
+          "implementation_sha256": "0f8987dd0ed81390614b1f192fc5daa6050ec1d200081c4a95824c6e39043b75",
           "required_check_count": 14,
           "environment": {
             "platform": "Linux",
             "release": "7.1.2-070102-generic",
             "machine": "x86_64"
+          }
+        }
+      }
+    },
+    {
+      "name": "mtm004_conformance",
+      "command": [
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
+        "scripts/run_mtm004_conformance.py"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 14,\n  \"source_reference_files_clean\": true,\n  \"operation_count\": 52,\n  \"main_exact_match\": true,\n  \"migration_cases_passed\": true,\n  \"migration_summary\": {\n    \"v0_match\": true,\n    \"v1_match\": true,\n    \"v2_match\": true,\n    \"newer_schema_fail_closed\": true,\n    \"failed_v2_rollback\": true,\n    \"rollback_copy_resumed_by_source\": true\n  },\n  \"reference_sha256\": \"bf0ecab52a25d2edc7fe47c95579a311dc7f14a2f1c4d2fd3e40b7f0d37d94f6\",\n  \"recorded_sha256\": \"bf0ecab52a25d2edc7fe47c95579a311dc7f14a2f1c4d2fd3e40b7f0d37d94f6\",\n  \"golden_match\": true,\n  \"resources\": {\n    \"python_reference\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 122.537,\n      \"elapsed_ms_p95\": 165.069,\n      \"max_rss_kib\": 28284,\n      \"request_bytes\": 9716,\n      \"response_bytes\": 52662\n    },\n    \"rust_shadow\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 69.795,\n      \"elapsed_ms_p95\": 95.403,\n      \"max_rss_kib\": 6540,\n      \"request_bytes\": 9714,\n      \"response_bytes\": 52662\n    },\n    \"rust_non_regression_limits\": {\n      \"elapsed_ms_p95\": 3000.0,\n      \"max_rss_kib\": 65536\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"copied_database_shadow\",\n    \"production_writer\": \"python\"\n  }\n}\n",
+      "json": {
+        "ok": true,
+        "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
+        "source_reference_file_count": 14,
+        "source_reference_files_clean": true,
+        "operation_count": 52,
+        "main_exact_match": true,
+        "migration_cases_passed": true,
+        "migration_summary": {
+          "v0_match": true,
+          "v1_match": true,
+          "v2_match": true,
+          "newer_schema_fail_closed": true,
+          "failed_v2_rollback": true,
+          "rollback_copy_resumed_by_source": true
+        },
+        "reference_sha256": "bf0ecab52a25d2edc7fe47c95579a311dc7f14a2f1c4d2fd3e40b7f0d37d94f6",
+        "recorded_sha256": "bf0ecab52a25d2edc7fe47c95579a311dc7f14a2f1c4d2fd3e40b7f0d37d94f6",
+        "golden_match": true,
+        "resources": {
+          "python_reference": {
+            "samples": 7,
+            "elapsed_ms_median": 122.537,
+            "elapsed_ms_p95": 165.069,
+            "max_rss_kib": 28284,
+            "request_bytes": 9716,
+            "response_bytes": 52662
+          },
+          "rust_shadow": {
+            "samples": 7,
+            "elapsed_ms_median": 69.795,
+            "elapsed_ms_p95": 95.403,
+            "max_rss_kib": 6540,
+            "request_bytes": 9714,
+            "response_bytes": 52662
+          },
+          "rust_non_regression_limits": {
+            "elapsed_ms_p95": 3000.0,
+            "max_rss_kib": 65536
+          }
+        },
+        "resource_gate_passed": true,
+        "shadow_side_effect_free": true,
+        "authority": {
+          "source_reference": "python",
+          "rust_mode": "copied_database_shadow",
+          "production_writer": "python"
+        }
+      }
+    },
+    {
+      "name": "mtm004_target_evidence",
+      "command": [
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
+        "scripts/validate_mtm004_target_evidence.py"
+      ],
+      "passed": true,
+      "exit_code": 0,
+      "output_tail": "{\n  \"ok\": true,\n  \"summary\": {\n    \"implementation_sha256\": \"167f6ede075878a5f383ea8f3105f1788c166794ff4474e2785495bd1be6739b\",\n    \"required_check_count\": 10,\n    \"environment\": {\n      \"platform\": \"Linux\",\n      \"release\": \"7.1.2-070102-generic\",\n      \"machine\": \"x86_64\",\n      \"sqlite_version\": \"3.53.3\"\n    }\n  }\n}\n",
+      "json": {
+        "ok": true,
+        "summary": {
+          "implementation_sha256": "167f6ede075878a5f383ea8f3105f1788c166794ff4474e2785495bd1be6739b",
+          "required_check_count": 10,
+          "environment": {
+            "platform": "Linux",
+            "release": "7.1.2-070102-generic",
+            "machine": "x86_64",
+            "sqlite_version": "3.53.3"
           }
         }
       }
@@ -289,15 +371,16 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\"project\":\"MTM-reboot\",\"milestone\":\"MTM-004\",\"production_authority\":\"python\",\"rust_production_components\":0,\"rust_authoritative_pure_components\":1,\"rust_authoritative_native_components\":1,\"completed_milestones\":3}\n",
+      "output_tail": "{\"project\":\"MTM-reboot\",\"milestone\":\"MTM-005\",\"production_authority\":\"python\",\"rust_production_components\":0,\"rust_authoritative_pure_components\":1,\"rust_authoritative_native_components\":1,\"rust_authoritative_storage_components\":1,\"completed_milestones\":4}\n",
       "json": {
         "project": "MTM-reboot",
-        "milestone": "MTM-004",
+        "milestone": "MTM-005",
         "production_authority": "python",
         "rust_production_components": 0,
         "rust_authoritative_pure_components": 1,
         "rust_authoritative_native_components": 1,
-        "completed_milestones": 3
+        "rust_authoritative_storage_components": 1,
+        "completed_milestones": 4
       }
     },
     {
@@ -335,5 +418,5 @@
       "output_tail": ""
     }
   ],
-  "local_claim": "MTM-001 governance, MTM-002 pure Rust contracts/policies, and MTM-003 Native process/isolation code were validated by Rust tests plus frozen Python-Rust differential checks. This gate verifies the freshness and completeness of the separately executed MTM-003 target report but does not itself re-run Bubblewrap, Sage, Magma, or Quick Tunnel. No SQLite, OAuth/MCP, workflow, finalizer, packaging, A6 performance, or Python-retirement authority is claimed."
+  "local_claim": "MTM-001 governance, MTM-002 pure contracts/policies, MTM-003 Native isolation, and MTM-004 copied-database persistence/capability behavior were validated by Rust tests and frozen Python-Rust differential checks. This gate verifies the freshness and completeness of the separately executed MTM-003 and MTM-004 target reports but does not re-run real Bubblewrap/CAS/tunnel or the private-state backup. Re-CTM Python remains the deployed production writer. No OAuth/MCP, workflow, finalizer, packaging, A6 performance, or Python-retirement authority is claimed."
 }

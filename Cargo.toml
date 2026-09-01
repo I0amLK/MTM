@@ -3,6 +3,7 @@ members = [
   "crates/mtm-contracts",
   "crates/mtm-core",
   "crates/mtm-native",
+  "crates/mtm-storage",
   "crates/mtm-cli",
 ]
 resolver = "2"
@@ -23,7 +24,11 @@ sha2 = "0.10"
 shell-words = "1.1"
 url = "2.5"
 base64 = "0.22"
+hmac = "0.12"
+getrandom = "0.4"
 nix = { version = "0.30", features = ["fs", "process", "signal", "term"] }
+rusqlite = { version = "0.37", features = ["bundled"] }
+time = { version = "0.3", features = ["formatting", "macros"] }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project": "MTM-reboot",
   "milestone": "MTM-003",
-  "implementation_sha256": "77c52b9fd6de366d80f045b7adb091ef0e4095147dee0c515173fe1ab1766a13",
+  "implementation_sha256": "0f8987dd0ed81390614b1f192fc5daa6050ec1d200081c4a95824c6e39043b75",
   "environment": {
     "platform": "Linux",
     "release": "7.1.2-070102-generic",
@@ -19,7 +19,7 @@
       "name": "bubblewrap_attestation",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.231,
+      "elapsed_ms": 22.18,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "attest",
@@ -60,7 +60,7 @@
       "name": "safe_workspace_read",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.074,
+      "elapsed_ms": 21.87,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -113,7 +113,7 @@
       "name": "private_vault_and_parent_env_denial",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.087,
+      "elapsed_ms": 22.057,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -166,7 +166,7 @@
       "name": "explicit_generic_toolchain_execution",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.05,
+      "elapsed_ms": 22.031,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -219,7 +219,7 @@
       "name": "toolchain_mount_read_only",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.081,
+      "elapsed_ms": 21.832,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -250,7 +250,7 @@
         "exit_code": 2,
         "signal": null,
         "status": "exited",
-        "stderr": "/bin/sh: 1: cannot create /tmp/coding-tools-mcp/22f4588e2aced8a8/thS2s3XLegZW7h4-/tmp/mtm003-target-gb9q3j3n/explicit-toolchain/must-remain-read-only: Read-only file system\n",
+        "stderr": "/bin/sh: 1: cannot create /tmp/coding-tools-mcp/22f4588e2aced8a8/thS2s3XLegZW7h4-/tmp/mtm003-target-1tr7mlbg/explicit-toolchain/must-remain-read-only: Read-only file system\n",
         "stderr_meta": {
           "dropped_bytes": 0,
           "retained_bytes": 173,
@@ -286,7 +286,7 @@
       "name": "dangerous_plan_attestation",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.298,
+      "elapsed_ms": 22.169,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "attest",
@@ -327,7 +327,7 @@
       "name": "sagemath_execution",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 746.067,
+      "elapsed_ms": 745.262,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -354,7 +354,7 @@
           "workspace_mount": "/workspace",
           "workspace_mounted": true
         },
-        "elapsed_ms": 744,
+        "elapsed_ms": 743,
         "exit_code": 0,
         "signal": null,
         "status": "exited",
@@ -380,7 +380,7 @@
       "name": "magma_execution",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 22.156,
+      "elapsed_ms": 22.383,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -433,7 +433,7 @@
       "name": "helper_timeout_provenance",
       "passed": true,
       "exit_code": 0,
-      "elapsed_ms": 142.876,
+      "elapsed_ms": 142.921,
       "response": {
         "protocol": "re-ctm-native-helper-v1",
         "operation": "execute",
@@ -515,7 +515,7 @@
       "name": "real_quick_tunnel_lifecycle",
       "passed": true,
       "exit_code": 0,
-      "public_url_fingerprint": "edfc40b16349fad4",
+      "public_url_fingerprint": "37b9af941546f6ae",
       "event_states": [
         "starting",
         "connected"

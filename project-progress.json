@@ -2,17 +2,18 @@
   "schema_version": "1.0.0",
   "project": "MTM-reboot",
   "version": "0.1.0-alpha.1",
-  "status": "MTM-003-completed-MTM-004-approved",
-  "updated_at": "2026-09-01T02:17:11-07:00",
+  "status": "MTM-004-completed-MTM-005-approved",
+  "updated_at": "2026-09-01T03:02:17-07:00",
   "source_baseline": "source-baseline.json",
   "current_production_authority": "python",
   "rust_production_components": 0,
   "rust_authoritative_pure_components": 1,
   "rust_authoritative_native_components": 1,
+  "rust_authoritative_storage_components": 1,
   "milestone_count": 8,
-  "current_milestone": "MTM-004",
-  "completed_milestones": ["MTM-001", "MTM-002", "MTM-003"],
-  "next_milestone": "MTM-004",
+  "current_milestone": "MTM-005",
+  "completed_milestones": ["MTM-001", "MTM-002", "MTM-003", "MTM-004"],
+  "next_milestone": "MTM-005",
   "claims": [
     "MTM-001 foundation and governance is completed with an accepted append-only receipt.",
     "Rust 1.98.0 is pinned and the minimal workspace passes format, Clippy, tests, and golden contract checks.",
@@ -21,12 +22,16 @@
     "MTM-003 is completed with Rust authoritative for MTM-reboot's independent Native process/isolation component while Re-CTM remains the deployed production runtime.",
     "The normalized Native differential hash is 5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69 with zero final exact or lifecycle mismatches.",
     "The current Linux target passed 14 implementation-hash-bound checks covering Bubblewrap, private-root denial, read-only toolchains, SageMath, Magma, helper parity, TTY, timeout/kill, and Quick Tunnel cleanup.",
-    "MTM-004 is approved but not started; its first action must be a complete MTM-003 recheck plus copied-database migration and rollback baselines.",
+    "MTM-004 is completed with Rust authoritative inside MTM-reboot for schema-2 SQLite persistence, project/reference state, atomic promotion and capability signing plus registry validation.",
+    "The 52-operation Python-Rust state/capability corpus, physical database snapshots, v0/v1/v2 migrations, failure rollback and backup restoration all match reference SHA-256 bf0ecab52a25d2edc7fe47c95579a311dc7f14a2f1c4d2fd3e40b7f0d37d94f6.",
+    "The current Linux target passed ten redacted implementation-bound checks using a read-only online backup of the configured Re-CTM state database, exact rollback, cross-runtime capabilities and serialized writers.",
+    "MTM-005 is approved but not started; its first action must recheck the complete MTM-004 gate and preserve the 24-tool, OAuth and single-writer boundaries.",
     "Re-CTM remains the sole production authority.",
     "No performance improvement is claimed."
   ],
   "manual_pending": [
     "Other operating systems and site-local toolchain layouts remain target-specific Native evidence.",
-    "SQLite migration/rollback, OAuth/MCP/browser, workflow/finalizer, LaTeX, packaging, full cutover, soak, A6, and Python retirement remain pending for MTM-004 through MTM-008."
+    "OAuth/MCP/browser, workflow/finalizer, LaTeX, packaging, full cutover, soak, A6, and Python retirement remain pending for MTM-005 through MTM-008.",
+    "Additional operating systems and SQLite distributions remain release-specific evidence."
   ]
 }

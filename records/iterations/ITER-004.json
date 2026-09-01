@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0.0",
+  "iteration_id": "ITER-004",
+  "milestone_id": "MTM-004",
+  "title": "Persistence, project state, and capability authority",
+  "started_at": "2026-09-01T02:28:59-07:00",
+  "completed_at": "2026-09-01T03:02:17-07:00",
+  "source_baseline": {
+    "project": "Re-CTM",
+    "version": "0.3.0",
+    "commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
+    "authority": "python"
+  },
+  "previous_iteration_review": {
+    "commit": "604149718ddf7f5fa2cdce8067a3a0853bdac4e0",
+    "subject": "feat(native): establish process and isolation plane [MTM-003]",
+    "working_tree_before_start": "clean after restoring the generated local-validation report",
+    "commands": [
+      "python3 scripts/run_checks.py",
+      "python3 scripts/run_mtm002_conformance.py",
+      "python3 scripts/run_mtm003_conformance.py",
+      "python3 scripts/validate_mtm003_target_evidence.py"
+    ],
+    "result": "The committed MTM-003 gate, both frozen differential corpora, the implementation-bound 14-check target report and the clean repository all passed before MTM-004 began."
+  },
+  "authority": {
+    "component_scope": "MTM-reboot schema-2 SQLite persistence, project/reference state, promotion transactions and capability authority",
+    "before": "python",
+    "after": "rust",
+    "deployed_source_product_writer": "python",
+    "production_database_dual_write": false,
+    "rust_deployed_request_components": 0
+  },
+  "implemented": [
+    "Exact schema migrations from unversioned/v0 through v1 to state schema 2, plus fail-closed future versions",
+    "Runs, metadata, transitions, domains, capability registry, branches and steering with BEGIN IMMEDIATE writes",
+    "Projects, claims, immutable revisions, snapshots, project-run links, proof manifests and dependency graphs",
+    "Reference registry, source snapshots and verifier audits without exposing private content in reports",
+    "Atomic promotion with base conflicts, dependency checks, transaction rollback and source-run idempotency",
+    "HMAC-SHA256 capability issue, decode, registry cross-check, owner/epoch/state/domain/permission validation and revocation",
+    "Deterministic clock and ID injection for shadow tests while production defaults remain UTC and cryptographically random",
+    "Separate physical-database snapshot/digest views and normalized public API row views",
+    "Bounded JSON shadow driver and Python source reference over independent database copies"
+  ],
+  "conformance": {
+    "operation_count": 52,
+    "main_exact_match": true,
+    "migration_cases": {
+      "v0": "exact",
+      "v1": "exact",
+      "v2": "exact",
+      "newer_schema": "same STATE_SCHEMA_NEWER_THAN_RUNTIME denial",
+      "failed_v2": "same normalized denial and exact post-failure version/table state",
+      "rollback_copy": "v1 backup remained intact and resumed under the Python source runtime"
+    },
+    "reference_sha256": "bf0ecab52a25d2edc7fe47c95579a311dc7f14a2f1c4d2fd3e40b7f0d37d94f6",
+    "shadow_side_effect_free": true,
+    "python_reference": {
+      "samples": 7,
+      "elapsed_ms_median": 123.88,
+      "elapsed_ms_p95": 130.949,
+      "max_rss_kib": 28276
+    },
+    "rust_shadow": {
+      "samples": 7,
+      "elapsed_ms_median": 63.509,
+      "elapsed_ms_p95": 65.944,
+      "max_rss_kib": 6500
+    },
+    "interpretation": "A5 resource non-regression passed. The current debug-build cold-process harness favored Rust, but no A6 or general production-speed claim is made."
+  },
+  "target_acceptance": {
+    "report": "mtm004-target-validation.json",
+    "implementation_sha256": "167f6ede075878a5f383ea8f3105f1788c166794ff4474e2785495bd1be6739b",
+    "check_count": 10,
+    "environment": {
+      "platform": "Linux",
+      "release": "7.1.2-070102-generic",
+      "machine": "x86_64",
+      "sqlite_version": "3.53.3"
+    },
+    "evidence": [
+      "The configured Re-CTM state database was opened with SQLite URI mode=ro and copied through the online backup API.",
+      "Python and Rust produced equal copied-database structure/content digests at schema version 2 without publishing any row or digest value.",
+      "A temporary Rust mutation changed only a copy; restoration from the backup exactly recovered the source digest and integrity check.",
+      "Python-issued capabilities validated in Rust and Rust-issued capabilities validated in Python.",
+      "Persisted capability tampering was rejected as CAPABILITY_REGISTRY_MISMATCH.",
+      "A competing Rust writer waited for an existing BEGIN IMMEDIATE transaction and both committed serially.",
+      "The report contains no private rows, run/project/claim identifiers, tokens, proof text, source contents or production writes."
+    ]
+  },
+  "failures_retained": [
+    {
+      "stage": "first Cargo integration",
+      "result": "failed",
+      "cause": "The new Cargo manifest declared mtm-storage-shadow before its bin source existed.",
+      "resolution": "Added the bounded driver entry point, then compiled the real implementation rather than weakening the manifest."
+    },
+    {
+      "stage": "first complete Python-Rust state sequence",
+      "result": "failed at operation 8",
+      "cause": "The Rust transition path reused a normalized public row where latex_passed and sealed were booleans, while its internal update expected SQLite integers.",
+      "resolution": "Separated storage boolean decoding from ordinary integer fields; public API output remains boolean and transaction behavior now matches the source."
+    },
+    {
+      "stage": "physical database snapshot differential",
+      "result": "one remaining mismatch after every API result and capability token matched",
+      "cause": "Python json.dumps preserves comma-space formatting for claim conditions stored as TEXT, while Rust initially used compact JSON.",
+      "resolution": "Preserved the source byte representation for string-array conditions instead of normalizing away a persisted contract."
+    },
+    {
+      "stage": "first migration corpus run",
+      "result": "failed before fixture creation",
+      "cause": "The temporary migrations directory had not been created.",
+      "resolution": "Made fixture directory creation explicit and reran all v0/v1/v2/failure/rollback cases."
+    },
+    {
+      "stage": "Rust lint gate",
+      "result": "failed",
+      "cause": "A negative test used the workspace-prohibited expect_err helper.",
+      "resolution": "Rewrote the test as an explicit Result match without weakening lint policy."
+    },
+    {
+      "stage": "first integrated completed-scope gate",
+      "result": "failed",
+      "cause": "The architecture scan treated the shadow CLI's std::process::exit as process-execution authority, the new target validator required an explicit payload in governance tests, and the shared Cargo.lock change correctly made MTM-003 evidence stale.",
+      "resolution": "Scoped the storage authority scan to library modules, made the validator load its report by default, and reran the full real MTM-003 Bubblewrap/Sage/Magma/TTY/tunnel target suite against the new lockfile."
+    }
+  ],
+  "acceptance": {
+    "A0": "passed: format, Clippy -D warnings, all workspace tests, eight governance tests, graph validators and Git checks",
+    "A1": "passed: exact 52-operation source output plus immutable reference SHA-256 and exact v0/v1/v2 copied database results",
+    "A2": "passed: independent Python/Rust database copies, exact API/token/physical snapshot parity, no repository side effect",
+    "A3": "passed: migration rollback, promotion rollback/idempotency, capability registry tamper denial, owner/epoch/state/domain ACL and serialized writers",
+    "A4": "passed on the current Linux target using a read-only online backup of the configured state database and exact rollback drill",
+    "A5": "passed: seven-sample elapsed/RSS evidence remained inside absolute and relative ceilings",
+    "A6": "not claimed"
+  },
+  "dependencies": {
+    "direct": [
+      "base64",
+      "getrandom",
+      "hmac",
+      "rusqlite with bundled SQLite",
+      "serde",
+      "serde_json",
+      "sha2",
+      "time"
+    ],
+    "review": "Dependencies are locked. mtm-storage has no network, async runtime, Native child-process, model, LaTeX or workflow dependency. Bundled SQLite fixes the Rust runtime library while compatibility is demonstrated against the target Python sqlite3 copy."
+  },
+  "rollback": "Do not route a deployed writer to mtm-storage yet. For a future composition cutover, stop the Rust writer, restore the verified pre-cutover SQLite backup if necessary, and route exclusively back to the Python StateStore/CapabilityAuthority. MTM-004 proved this on copies and never modified production state.",
+  "manual_pending": [
+    "MTM-005 real OAuth/MCP/browser gateway and public catalog",
+    "MTM-006 workflow, vault, verifier, repair and sole finalizer",
+    "MTM-007 integrations, LaTeX, TUI, tunnel presentation and packaging",
+    "MTM-008 complete cutover, rollback drill, soak, A6 and Python retirement",
+    "Additional operating systems and SQLite distributions remain future release evidence"
+  ],
+  "decision": "accepted"
+}

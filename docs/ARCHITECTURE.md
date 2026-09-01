@@ -43,18 +43,18 @@ OAuth + MCP gateway
 
 The machine-audited target graph is [`engineering-graph.json`](../engineering-graph.json).
 
-## Implemented through MTM-003
+## Implemented through MTM-004
 
-The current Rust graph now has three implemented lower-level components:
+The current Rust graph now has four implemented lower-level components:
 
 ```text
-mtm-contracts
-      ▲
-      │
-   mtm-core
-      ▲
-      │
-  mtm-native
+             mtm-contracts
+              ▲         ▲
+              │         │
+           mtm-core  mtm-storage
+              ▲
+              │
+         mtm-native
 ```
 
 `mtm-native` keeps two intentionally separate runtime choke points:
@@ -67,6 +67,25 @@ The command manager owns command ids, TTY, output paging and termination provena
 The helper owns namespace construction, environment clearing, read-only toolchain
 mount validation and attestation. Neither component can read or write workflow state,
 authenticate a client, or publish a verified artifact.
+
+`mtm-storage` owns the schema-2 SQLite boundary, migrations, typed repositories,
+project/claim/reference provenance, optimistic promotion and capability signing plus
+registry validation. Its authority rules are:
+
+```text
+one connection mutex per store
+        +
+BEGIN IMMEDIATE for every multi-step write
+        +
+no network, child process, model, LaTeX, or vault I/O inside transactions
+        +
+one deployed production writer
+```
+
+Python and Rust are compared only on independent copies. The current Re-CTM Python
+runtime remains the deployed writer; `mtm-storage` is authoritative only inside the
+new project until the gateway and workflow composition milestones make a separately
+accepted cutover possible.
 
 ## Implemented slice after MTM-002
 

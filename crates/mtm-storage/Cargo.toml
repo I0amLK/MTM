@@ -1,0 +1,27 @@
+[package]
+name = "mtm-storage"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+base64.workspace = true
+getrandom.workspace = true
+hmac.workspace = true
+mtm-contracts = { path = "../mtm-contracts" }
+rusqlite.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+time.workspace = true
+
+[[bin]]
+name = "mtm-storage-shadow"
+path = "src/bin/shadow.rs"
+
+[dev-dependencies]
+tempfile = "3.20"
+
+[lints]
+workspace = true

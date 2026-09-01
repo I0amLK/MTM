@@ -124,7 +124,7 @@
     {
       "id": "MTM-004",
       "title": "Persistence, project state, and capability authority",
-      "status": "approved",
+      "status": "completed",
       "priority": "P0",
       "production_authority_before": "python",
       "production_authority_after": "rust",
@@ -141,14 +141,22 @@
         "No schema version change without a separate record"
       ],
       "acceptance_levels": ["A0", "A1", "A2", "A3", "A4", "A5"],
-      "validation_commands": [],
+      "validation_commands": [
+        "python3 scripts/run_mtm004_conformance.py",
+        "python3 scripts/run_mtm004_target_validation.py",
+        "python3 scripts/validate_mtm004_target_evidence.py",
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets -- -D warnings",
+        "cargo test --workspace",
+        "python3 scripts/run_checks.py"
+      ],
       "rollback": "Restore Python authority against a verified compatible database backup; cutover is blocked unless rollback is proven on copied data.",
       "dependencies": ["MTM-002"]
     },
     {
       "id": "MTM-005",
       "title": "OAuth, MCP, HTTP gateway, and public tool dispatch",
-      "status": "proposed",
+      "status": "approved",
       "priority": "P0",
       "production_authority_before": "python",
       "production_authority_after": "rust",
@@ -258,7 +266,7 @@
     {"source": "MTM-007", "target": "MTM-006"},
     {"source": "MTM-008", "target": "MTM-007"}
   ],
-  "todo": ["MTM-004"],
+  "todo": ["MTM-005"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -371,6 +379,46 @@
       "status_before": "proposed",
       "status_after": "approved",
       "summary": "Approved persistence, project state and capability authority as the only next milestone; it must begin with a complete MTM-003 recheck and copied-database rollback baseline."
+    },
+    {
+      "event_id": "MEVT-015",
+      "milestone_id": "MTM-004",
+      "at": "2026-09-01T02:28:59-07:00",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Re-ran the committed MTM-003 full gate, both frozen differential corpora and implementation-bound target evidence, restored the generated validation report, confirmed a clean repository, and began copied-database persistence and capability work without enabling dual production writes."
+    },
+    {
+      "event_id": "MEVT-016",
+      "milestone_id": "MTM-004",
+      "at": "2026-09-01T02:50:00-07:00",
+      "status_before": "in_progress",
+      "status_after": "shadow",
+      "summary": "Entered copied-database shadow after 52 API/token/physical-state operations matched exactly and v0/v1/v2, future-version, failed-migration and rollback-copy cases passed without touching the deployed writer."
+    },
+    {
+      "event_id": "MEVT-017",
+      "milestone_id": "MTM-004",
+      "at": "2026-09-01T03:01:00-07:00",
+      "status_before": "shadow",
+      "status_after": "authoritative",
+      "summary": "Accepted mtm-storage as the authoritative persistence/capability implementation inside MTM-reboot after transactional tests, cross-runtime tokens, registry tamper denial, real read-only production-state backup equality, writer serialization and exact rollback passed. Re-CTM Python remains the deployed production writer."
+    },
+    {
+      "event_id": "MEVT-018",
+      "milestone_id": "MTM-004",
+      "at": "2026-09-01T03:02:17-07:00",
+      "status_before": "authoritative",
+      "status_after": "completed",
+      "summary": "Completed MTM-004 with A0-A5 evidence, accepted iteration and receipt records, implementation-bound redacted target validation and no OAuth/MCP, workflow, finalizer or deployed database cutover."
+    },
+    {
+      "event_id": "MEVT-019",
+      "milestone_id": "MTM-005",
+      "at": "2026-09-01T03:02:17-07:00",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "Approved OAuth, MCP, HTTP and public tool dispatch as the only next milestone; it must begin with a complete MTM-004 recheck and preserve the exact 24-tool catalog, OAuth security and one-writer state boundary."
     }
   ],
   "receipt_contract": {
@@ -771,6 +819,166 @@
       "manual_pending": [
         "Other operating systems and proprietary/site-local toolchain layouts require their own target evidence.",
         "Persistence, OAuth/MCP/browser, workflow/finalizer, packaging, full cutover, rollback drill, soak, A6 and Python retirement remain MTM-004 through MTM-008."
+      ],
+      "decision": "accepted"
+    },
+    {
+      "receipt_id": "MREC-004",
+      "milestone_id": "MTM-004",
+      "started_at": "2026-09-01T02:28:59-07:00",
+      "completed_at": "2026-09-01T03:02:17-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "python",
+      "authority_after": "rust",
+      "commit_subject": "feat(storage): establish persistence and capability authority [MTM-004]",
+      "files_changed": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "source-baseline.json",
+        "crates/mtm-contracts/src/enums.rs",
+        "crates/mtm-storage/Cargo.toml",
+        "crates/mtm-storage/src/lib.rs",
+        "crates/mtm-storage/src/schema.rs",
+        "crates/mtm-storage/src/store.rs",
+        "crates/mtm-storage/src/capability.rs",
+        "crates/mtm-storage/src/bin/shadow.rs",
+        "crates/mtm-storage/tests/storage.rs",
+        "conformance/mtm004_scenario.py",
+        "conformance/python_storage_shadow.py",
+        "conformance/golden/mtm004-reference.sha256",
+        "scripts/run_mtm004_conformance.py",
+        "scripts/run_mtm004_target_validation.py",
+        "scripts/validate_mtm004_target_evidence.py",
+        "scripts/run_checks.py",
+        "scripts/validate_engineering_graph.py",
+        "mtm003-target-validation.json",
+        "mtm004-target-validation.json",
+        "tests/test_governance.py",
+        "docs/adr/0004-persistence-and-capability-authority.md",
+        "docs/ARCHITECTURE.md",
+        "docs/MIGRATION_PLAN.md",
+        "README.md",
+        "crates/mtm-cli/src/main.rs",
+        "engineering-graph.json",
+        "migration-graph.json",
+        "project-progress.json",
+        "records/iterations/ITER-004.json",
+        "local-validation.json"
+      ],
+      "commands": [
+        {
+          "command": "python3 scripts/run_checks.py && python3 scripts/run_mtm002_conformance.py && python3 scripts/run_mtm003_conformance.py && python3 scripts/validate_mtm003_target_evidence.py before MTM-004 implementation",
+          "exit_code": 0,
+          "result": "The committed MTM-003 gate, both frozen corpora, target evidence and clean repository passed before persistence work began."
+        },
+        {
+          "command": "cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace during first mtm-storage integration",
+          "exit_code": 101,
+          "result": "Cargo rejected the declared shadow binary before its source existed; the manifest remained strict and the bounded driver was implemented."
+        },
+        {
+          "command": "first deterministic Python-Rust 52-operation state sequence",
+          "exit_code": 0,
+          "result": "The comparison exposed a Rust internal bool/integer row-view mismatch at transition operation 8; no production state was involved."
+        },
+        {
+          "command": "second deterministic state and physical database comparison",
+          "exit_code": 0,
+          "result": "Every API result and capability token matched; the physical snapshot exposed only Python's comma-space JSON representation for persisted condition arrays."
+        },
+        {
+          "command": "python3 scripts/run_mtm004_conformance.py --print-golden",
+          "exit_code": 1,
+          "result": "The initial migration corpus correctly failed because its temporary migrations directory had not been created."
+        },
+        {
+          "command": "python3 scripts/run_mtm004_conformance.py",
+          "exit_code": 0,
+          "result": "All 52 operations, capability tokens, physical snapshots, v0/v1/v2 migrations, future-version denial, failed-migration rollback, backup restoration, golden hash and A5 ceilings passed."
+        },
+        {
+          "command": "cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace with storage integration tests",
+          "exit_code": 101,
+          "result": "The first negative migration test used the prohibited expect_err helper; it was rewritten as an explicit Result match without relaxing lint policy."
+        },
+        {
+          "command": "python3 scripts/run_mtm004_target_validation.py && python3 scripts/validate_mtm004_target_evidence.py",
+          "exit_code": 0,
+          "result": "Ten redacted real-target checks passed against a read-only online backup of the configured state database, including exact copy digest, rollback, cross-runtime tokens, registry tamper denial and writer serialization."
+        },
+        {
+          "command": "python3 scripts/run_checks.py after integrating MTM-004 gates",
+          "exit_code": 1,
+          "result": "The gate exposed a shadow-CLI false positive in the storage authority scan, a validator test-call mismatch, and correctly stale MTM-003 evidence after the shared lockfile changed."
+        },
+        {
+          "command": "python3 scripts/run_mtm003_target_validation.py && python3 scripts/validate_mtm003_target_evidence.py",
+          "exit_code": 0,
+          "result": "The complete real Native target suite was rerun and rebound to the current shared Cargo lockfile rather than manually changing its evidence hash."
+        },
+        {
+          "command": "python3 scripts/run_checks.py",
+          "exit_code": 0,
+          "result": "The completed-MTM-004/approved-MTM-005 local gate passed formatting, Clippy, all Rust and governance tests, graphs, MTM-002/003/004 conformance, both fresh target reports, bootstrap contracts and Git checks."
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "evidence": [
+            "Formatting and Clippy with warnings denied passed.",
+            "All contract, core, Native and storage Rust tests plus governance tests passed.",
+            "Migration, architecture, target-evidence and Git validators passed."
+          ]
+        },
+        "A1": {
+          "passed": true,
+          "evidence": [
+            "All 52 public storage/capability operation results, tokens and physical database snapshots matched the frozen Python source.",
+            "The immutable MTM-004 reference hash is bf0ecab52a25d2edc7fe47c95579a311dc7f14a2f1c4d2fd3e40b7f0d37d94f6.",
+            "v0, v1 and v2 copied databases migrated or reopened identically."
+          ]
+        },
+        "A2": {
+          "passed": true,
+          "evidence": [
+            "Python and Rust operated only on independent copies with deterministic clocks and IDs.",
+            "The shadow produced no Git-visible side effect and no production database write."
+          ]
+        },
+        "A3": {
+          "passed": true,
+          "evidence": [
+            "Failed migration and failed promotion transactions rolled back without partial state.",
+            "Promotion idempotency, optimistic conflicts, owner/epoch/state/domain ACL, registry tamper and revocation tests passed.",
+            "BEGIN IMMEDIATE serialized competing writers."
+          ]
+        },
+        "A4": {
+          "passed": true,
+          "evidence": [
+            "The configured Re-CTM database was opened read-only and copied with the SQLite online backup API.",
+            "Python/Rust copy digests, integrity, temporary mutation and exact restoration passed without publishing private contents.",
+            "Python-issued and Rust-issued capabilities validated across runtimes."
+          ]
+        },
+        "A5": {
+          "passed": true,
+          "evidence": [
+            "Seven Python samples had median/p95 123.880/130.949 ms and maximum RSS 28,276 KiB.",
+            "Seven Rust debug samples had median/p95 63.509/65.944 ms and maximum RSS 6,500 KiB.",
+            "Absolute and relative ceilings passed; no A6 production-speed claim is made."
+          ]
+        }
+      },
+      "behavior_before": "MTM-reboot had no Rust SQLite schema authority, project/reference repository, atomic promotion transaction or capability signing/registry implementation.",
+      "behavior_after": "MTM-reboot has one accepted Rust persistence/capability component with exact source parity, migration and rollback evidence, redacted real copied-state validation and no deployed-writer change. Re-CTM Python remains the only production state writer.",
+      "risk_review": "The crate has no network, Native child-process, model, LaTeX, vault or workflow dependency. All multi-step writes use BEGIN IMMEDIATE, external I/O is absent from transactions, source state was opened read-only, reports omit private content, and no Python/Rust dual write occurred.",
+      "rollback": "Keep or restore the verified compatible SQLite backup, stop any future Rust writer before switching, and route exclusively back to Python StateStore/CapabilityAuthority. This milestone performed that drill on copies and never migrated production state.",
+      "manual_pending": [
+        "OAuth/MCP/browser gateway, workflow/finalizer, integrations/LaTeX/TUI/package, complete cutover, soak, A6 and Python retirement remain MTM-005 through MTM-008.",
+        "Other operating systems and SQLite distributions require separate release evidence."
       ],
       "decision": "accepted"
     }

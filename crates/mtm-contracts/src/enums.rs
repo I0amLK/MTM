@@ -31,6 +31,21 @@ pub enum WorkflowRole {
     Finalizer,
 }
 
+impl WorkflowRole {
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Generator => "generator",
+            Self::Branch => "branch",
+            Self::Join => "join",
+            Self::Assembler => "assembler",
+            Self::Verifier => "verifier",
+            Self::Repair => "repair",
+            Self::Finalizer => "finalizer",
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum WorkflowState {
@@ -56,6 +71,30 @@ pub enum WorkflowState {
 
 impl WorkflowState {
     #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Created => "created",
+            Self::Assess => "assess",
+            Self::Explore => "explore",
+            Self::ProposePlans => "propose_plans",
+            Self::DirectProving => "direct_proving",
+            Self::BranchPrepare => "branch_prepare",
+            Self::BranchRun => "branch_run",
+            Self::BranchJoin => "branch_join",
+            Self::IdentifyFailures => "identify_failures",
+            Self::Replan => "replan",
+            Self::Assemble => "assemble",
+            Self::LatexValidate => "latex_validate",
+            Self::Verify => "verify",
+            Self::Repair => "repair",
+            Self::Finalize => "finalize",
+            Self::Done => "done",
+            Self::Cancelled => "cancelled",
+            Self::Failed => "failed",
+        }
+    }
+
+    #[must_use]
     pub const fn terminal(self) -> bool {
         matches!(self, Self::Done | Self::Cancelled | Self::Failed)
     }
@@ -69,12 +108,34 @@ pub enum DomainStatus {
     Cancelled,
 }
 
+impl DomainStatus {
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Open => "open",
+            Self::Sealed => "sealed",
+            Self::Cancelled => "cancelled",
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum LatexPolicy {
     StaticOnly,
     IfAvailable,
     Required,
+}
+
+impl LatexPolicy {
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::StaticOnly => "static_only",
+            Self::IfAvailable => "if_available",
+            Self::Required => "required",
+        }
+    }
 }
 
 #[cfg(test)]

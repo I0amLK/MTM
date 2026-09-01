@@ -17,6 +17,9 @@
     "src/re_ctm/processes.py",
     "src/re_ctm/toolchains.py",
     "src/re_ctm/native_helper_bwrap.py",
+    "src/re_ctm/storage_schema.py",
+    "src/re_ctm/storage.py",
+    "src/re_ctm/capabilities.py",
     "src/re_ctm/tools.py"
   ],
   "contract": {
