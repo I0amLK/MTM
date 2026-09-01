@@ -189,7 +189,7 @@
     {
       "id": "MTM-006",
       "title": "Workflow, vault, verifier, finalizer, and project semantics",
-      "status": "in_progress",
+      "status": "completed",
       "priority": "P0",
       "production_authority_before": "python",
       "production_authority_after": "rust",
@@ -207,14 +207,22 @@
         "No model-controlled verified label"
       ],
       "acceptance_levels": ["A0", "A1", "A2", "A3", "A4", "A5"],
-      "validation_commands": [],
+      "validation_commands": [
+        "python3 scripts/run_mtm006_conformance.py",
+        "python3 scripts/run_mtm006_target_validation.py",
+        "python3 scripts/validate_mtm006_target_evidence.py",
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets -- -D warnings",
+        "cargo test --workspace",
+        "python3 scripts/run_checks.py"
+      ],
       "rollback": "Return workflow requests to Python before deleting any Python authority; database and artifact compatibility must already be proven.",
       "dependencies": ["MTM-004", "MTM-005"]
     },
     {
       "id": "MTM-007",
       "title": "Remaining tools, integrations, operator UI, and packaging",
-      "status": "proposed",
+      "status": "approved",
       "priority": "P1",
       "production_authority_before": "python",
       "production_authority_after": "rust",
@@ -274,7 +282,7 @@
     {"source": "MTM-007", "target": "MTM-006"},
     {"source": "MTM-008", "target": "MTM-007"}
   ],
-  "todo": ["MTM-006"],
+  "todo": ["MTM-007"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -475,6 +483,38 @@
       "status_before": "approved",
       "status_after": "in_progress",
       "summary": "Revalidated the committed MTM-005 full gate, 44-record OAuth/MCP differential hash, all implementation-bound Native/storage/gateway target reports and a clean pre-check repository, then began workflow migration with validated authority types and one transition/finalizer authority as explicit implementation constraints."
+    },
+    {
+      "event_id": "MEVT-026",
+      "milestone_id": "MTM-006",
+      "at": "2026-09-01T06:32:00-07:00",
+      "status_before": "in_progress",
+      "status_after": "shadow",
+      "summary": "Entered workflow shadow only after four independent scenarios reached 82 exact Python-Rust checkpoints with zero mismatches across task envelopes, capabilities, workflow state, SQLite snapshots and private-vault digests, with no shared production state."
+    },
+    {
+      "event_id": "MEVT-027",
+      "milestone_id": "MTM-006",
+      "at": "2026-09-01T06:47:00-07:00",
+      "status_before": "shadow",
+      "status_after": "authoritative",
+      "summary": "Accepted mtm-workflow as the authoritative workflow/vault/verifier/finalizer implementation inside MTM-reboot after strict all-target builds, verifier-private FinalizationPermit construction, real pdflatex finalization, project promotion, proof-tamper denial and server-derived reference-gap checks passed. Re-CTM Python remains the deployed workflow authority."
+    },
+    {
+      "event_id": "MEVT-028",
+      "milestone_id": "MTM-006",
+      "at": "2026-09-01T06:48:40-07:00",
+      "status_before": "authoritative",
+      "status_after": "completed",
+      "summary": "Completed MTM-006 only after post-commit revalidation repaired the target binary build, real-LaTeX fixture, acceptance-harness hash binding, toolchain resolution and finalization-constructor authority issues, then repeated A0-A5 gates."
+    },
+    {
+      "event_id": "MEVT-029",
+      "milestone_id": "MTM-007",
+      "at": "2026-09-01T06:48:40-07:00",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "Approved remaining adapters, runtime composition, operator UI, Quick Tunnel composition and packaging as the only next milestone; it must begin by revalidating the completed MTM-006 differential and target evidence and may not redesign migrated authority semantics."
     }
   ],
   "receipt_contract": {
@@ -1194,6 +1234,145 @@
         "Production composition, verified catalog asset bundling, integrations, LaTeX, TUI and packaging remain MTM-007.",
         "Complete traffic cutover, rollback drill, soak, A6 and Python retirement remain MTM-008.",
         "Additional browsers, operating systems and reverse-proxy deployments require separate release evidence."
+      ],
+      "decision": "accepted"
+    },
+    {
+      "receipt_id": "MREC-006",
+      "milestone_id": "MTM-006",
+      "started_at": "2026-09-01T04:50:30-07:00",
+      "completed_at": "2026-09-01T06:48:40-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "python",
+      "authority_after": "rust",
+      "commit_subject": "fix(workflow): complete verified workflow acceptance [MTM-006]",
+      "files_changed": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "source-baseline.json",
+        "crates/mtm-storage/src/capability.rs",
+        "crates/mtm-storage/src/lib.rs",
+        "crates/mtm-workflow/Cargo.toml",
+        "crates/mtm-workflow/src/lib.rs",
+        "crates/mtm-workflow/src/kernel.rs",
+        "crates/mtm-workflow/src/methodology.rs",
+        "crates/mtm-workflow/src/vault.rs",
+        "crates/mtm-workflow/src/verifier.rs",
+        "crates/mtm-workflow/src/engine.rs",
+        "crates/mtm-workflow/src/bin/mtm_workflow_shadow.rs",
+        "crates/mtm-workflow/src/bin/target_validation.rs",
+        "crates/mtm-workflow/tests/workflow.rs",
+        "conformance/python_workflow_shadow.py",
+        "conformance/golden/mtm006-reference.sha256",
+        "scripts/run_mtm006_conformance.py",
+        "scripts/run_mtm006_target_validation.py",
+        "scripts/validate_mtm006_target_evidence.py",
+        "scripts/run_checks.py",
+        "scripts/validate_engineering_graph.py",
+        "tests/test_governance.py",
+        "mtm006-target-validation.json",
+        "README.md",
+        "docs/CODE_STANDARD.md",
+        "docs/ARCHITECTURE.md",
+        "engineering-graph.json",
+        "migration-graph.json",
+        "project-progress.json",
+        "records/iterations/ITER-006.json",
+        "crates/mtm-cli/src/main.rs",
+        "local-validation.json",
+        "mtm003-target-validation.json",
+        "mtm004-target-validation.json",
+        "mtm005-target-validation.json"
+      ],
+      "commands": [
+        {
+          "command": "post-commit cargo fmt/clippy/test --workspace --all-targets revalidation before MTM-007",
+          "exit_code": 101,
+          "result": "Revalidation correctly caught that target_validation used tempfile from dev-dependencies and therefore the committed MTM-006 all-target build was not actually clean. MTM-007 was paused."
+        },
+        {
+          "command": "real target_validation with pdflatex before fixture repair",
+          "exit_code": 1,
+          "result": "The real LaTeX fixture omitted amsthm while using the proof environment; pdflatex routed to repair and exposed a misleading verifier-resource denial."
+        },
+        {
+          "command": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace",
+          "exit_code": 0,
+          "result": "Strict all-target Rust gates pass after replacing the acceptance-only tempfile dependency, tightening finalization construction, and keeping the production workflow library free of process/network authority."
+        },
+        {
+          "command": "python3 scripts/run_mtm006_conformance.py",
+          "exit_code": 0,
+          "result": "Four workflow scenarios produced 82 exact Python-Rust checkpoints with zero mismatches and frozen SHA-256 def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0."
+        },
+        {
+          "command": "python3 scripts/run_mtm006_target_validation.py && python3 scripts/validate_mtm006_target_evidence.py",
+          "exit_code": 0,
+          "result": "Eight real pdflatex/finalizer/reference-audit checks passed and are bound to both implementation and acceptance-harness code by implementation SHA-256 e66d021e94ce01ae7fdd3ba81b6023393299bebf03ad7f1cac83f1570f8c4a1e."
+        },
+        {
+          "command": "python3 scripts/run_checks.py",
+          "exit_code": 0,
+          "result": "The complete MTM-006 local gate now resolves the exact pinned Rust toolchain and includes MTM-006 conformance plus target-evidence freshness alongside all lower milestones."
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "evidence": [
+            "Strict cargo fmt, Clippy -D warnings and all workspace/all-target tests pass.",
+            "Ten governance tests plus migration and engineering graph validators pass.",
+            "run_checks.py resolves the exact pinned 1.98.0 toolchain rather than an incomplete Cargo shim."
+          ]
+        },
+        "A1": {
+          "passed": true,
+          "evidence": [
+            "Eighty-two exact workflow/vault/database checkpoints match the frozen Python source with zero differences.",
+            "The immutable MTM-006 reference hash is def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0."
+          ]
+        },
+        "A2": {
+          "passed": true,
+          "evidence": [
+            "Python and Rust use independent SQLite databases and private-vault roots with deterministic clocks/IDs/secrets.",
+            "No production state is shared or dual-written during comparison."
+          ]
+        },
+        "A3": {
+          "passed": true,
+          "evidence": [
+            "CapabilityClaims cannot be publicly field-constructed or deserialized.",
+            "FinalizationPermit is crate-private with a verifier-module-private constructor and is not re-exported.",
+            "Branch barriers, server-owned verdict, compact escalation, proof/manifest hash binding and owner/resource denials fail closed."
+          ]
+        },
+        "A4": {
+          "passed": true,
+          "evidence": [
+            "The repaired fixture compiles with real pdflatex and reaches mechanical finalization.",
+            "Verified project promotion and read-only proof_verified.tex publication pass.",
+            "Post-verifier proof tampering is denied and missing material reference audit becomes a server-derived repair gap.",
+            "The acceptance binary and target runner/validator are themselves hash-bound to freshness evidence."
+          ]
+        },
+        "A5": {
+          "passed": true,
+          "evidence": [
+            "All differential scenarios remain within the established absolute resource ceilings.",
+            "Rust debug memory is materially lower in the recorded shadow scenarios, while tiny cold-process elapsed time is not consistently faster; no A6 speed claim is made."
+          ]
+        }
+      },
+      "behavior_before": "MTM-reboot had no accepted Rust authority for the Rethlas workflow, private logical vault, verifier-derived verdict, branch barrier/repair semantics, mechanical final artifact, or verified project promotion.",
+      "behavior_after": "MTM-reboot has one accepted Rust workflow/vault/verifier/finalizer authority with exact source parity, unforgeable internal authority types, real pdflatex evidence, and no deployed traffic cutover. Re-CTM Python remains the only deployed workflow authority.",
+      "risk_review": "The workflow library has no network, async-runtime, Native-process or gateway dependency. A sealed verifier domain is a finalization precondition, FinalizationPermit can only be created inside verifier.rs after server-computed correctness and LaTeX approval, and the vault re-hashes exact proof bytes before publication. Target-only pdflatex process execution stays outside the production library.",
+      "rollback": "Keep every deployed Rethlas request on Re-CTM Python. MTM-006 used independent temporary/shadow state only, so no production database, private vault, endpoint, or artifact migration must be reversed.",
+      "manual_pending": [
+        "Operational file/Git/image/research/LaTeX adapters, runtime composition, TUI/Quick Tunnel and packaging remain MTM-007.",
+        "Full deployed Rust cutover, soak, rollback drill, A6 performance evidence and Python retirement remain MTM-008.",
+        "Other operating systems and target-specific LaTeX/CAS layouts require separate release evidence."
       ],
       "decision": "accepted"
     }

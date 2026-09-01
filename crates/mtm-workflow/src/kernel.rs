@@ -70,53 +70,6 @@ impl TransitionDecision {
     }
 }
 
-/// An authority-bearing value proving that all mechanical finalization gates were
-/// checked for one exact proof. Its fields are private and there is no public
-/// constructor; only the verifier module can issue it after validation.
-#[derive(Debug)]
-pub struct FinalizationPermit {
-    run_id: String,
-    proof_sha256: String,
-    proof_manifest_sha256: Option<String>,
-    verifier_domain_id: String,
-}
-
-impl FinalizationPermit {
-    pub(crate) fn issue(
-        run_id: String,
-        proof_sha256: String,
-        proof_manifest_sha256: Option<String>,
-        verifier_domain_id: String,
-    ) -> Self {
-        Self {
-            run_id,
-            proof_sha256,
-            proof_manifest_sha256,
-            verifier_domain_id,
-        }
-    }
-
-    #[must_use]
-    pub fn run_id(&self) -> &str {
-        &self.run_id
-    }
-
-    #[must_use]
-    pub fn proof_sha256(&self) -> &str {
-        &self.proof_sha256
-    }
-
-    #[must_use]
-    pub fn proof_manifest_sha256(&self) -> Option<&str> {
-        self.proof_manifest_sha256.as_deref()
-    }
-
-    #[must_use]
-    pub fn verifier_domain_id(&self) -> &str {
-        &self.verifier_domain_id
-    }
-}
-
 fn state_name(state: WorkflowState) -> &'static str {
     match state {
         WorkflowState::Created => "created",

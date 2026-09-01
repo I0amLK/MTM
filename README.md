@@ -13,12 +13,13 @@ The governing order is:
 
 - Source baseline: Re-CTM 0.3.0.
 - Current production authority: Re-CTM's Python implementation.
-- MTM-reboot Rust authority: typed pure contracts/policies, the independent Native
-  process/isolation component, copied-state persistence/capability authority, and the
-  OAuth/MCP/HTTP gateway with a hash-frozen 24-tool catalog. No deployed Re-CTM
-  request path or production database writer has moved.
-- Completed milestones: `MTM-001` through `MTM-005`.
-- Next approved milestone: `MTM-006` workflow, vault, verifier, and finalizer semantics.
+- MTM-reboot Rust authority: typed pure contracts/policies, Native process/isolation,
+  copied-state persistence/capabilities, the OAuth/MCP/HTTP gateway, and the
+  workflow/private-vault/verifier/finalizer component. No deployed Re-CTM request
+  path or production database writer has moved.
+- Completed milestones: `MTM-001` through `MTM-006`.
+- Next approved milestone: `MTM-007` remaining adapters, runtime composition, operator
+  UI, Quick Tunnel composition, and packaging.
 
 ## Eight milestones
 
@@ -43,6 +44,8 @@ python3 scripts/run_mtm004_conformance.py
 python3 scripts/validate_mtm004_target_evidence.py
 python3 scripts/run_mtm005_conformance.py
 python3 scripts/validate_mtm005_target_evidence.py
+python3 scripts/run_mtm006_conformance.py
+python3 scripts/validate_mtm006_target_evidence.py
 cargo run -q -p mtm-cli -- contract
 cargo run -q -p mtm-cli -- status
 python3 scripts/run_mtm002_conformance.py
@@ -61,7 +64,12 @@ content is written to the report. `MTM-005` adds 44 deterministic OAuth/MCP reco
 exact hashes for all 35 tool definitions, and real Firefox + HTTP validation of DCR,
 PKCE, fixed/dynamic issuers, Origin/CORS gates, legacy/modern MCP, public listing,
 hidden aliases, and mirror headers. The old runtime remains the deployed traffic and
-state authority until later milestones are independently accepted.
+state authority until later milestones are independently accepted. `MTM-006` adds 82
+exact workflow/vault/database checkpoints with zero Python-Rust mismatches plus real
+`pdflatex` evidence for mechanical finalization, VERIFIED project promotion,
+post-verifier proof-tamper denial, and server-derived reference-audit gaps. L2
+capability claims and the finalization permit are non-public-construction Rust
+authority types rather than caller-supplied role/state booleans.
 
 The project does not claim parity, safety, or performance merely because a Rust
 binary builds. See [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) and

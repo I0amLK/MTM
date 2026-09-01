@@ -65,6 +65,15 @@ branch barriers, compact/full escalation, proof manifests, reference audits, rep
 project promotion, private vault, and the sole finalizer. Use historical trace replay;
 keep one transition and one finalization authority.
 
+Implemented and accepted after a post-commit revalidation cycle. Four independent
+Python–Rust shadow scenarios now contain 82 exact checkpoints with zero mismatches,
+including task/capability envelopes, SQLite physical state, branch barriers, repair
+escalation, private-vault file digests, and final artifacts. The current Linux target
+passes eight real `pdflatex`/finalization checks. `CapabilityClaims` cannot be publicly
+constructed/deserialized, and `FinalizationPermit` is crate-private with a constructor
+private to the verifier module. Acceptance-harness code is included in the target
+evidence freshness hash so a changed validation driver invalidates the report.
+
 ## MTM-007 — remaining adapters and distribution
 
 Migrate file/Git/image compatibility, research adapters, LaTeX gate, diagnostics,

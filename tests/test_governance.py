@@ -12,6 +12,7 @@ from scripts.validate_migration_graph import load_graph, validate_graph as valid
 from scripts.validate_mtm003_target_evidence import validate as validate_mtm003_target
 from scripts.validate_mtm004_target_evidence import validate as validate_mtm004_target
 from scripts.validate_mtm005_target_evidence import validate as validate_mtm005_target
+from scripts.validate_mtm006_target_evidence import validate as validate_mtm006_target
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -82,6 +83,7 @@ class GovernanceTestCase(unittest.TestCase):
                 "mtm-gateway",
                 "mtm-native",
                 "mtm-storage",
+                "mtm-workflow",
             ],
         )
 
@@ -96,6 +98,10 @@ class GovernanceTestCase(unittest.TestCase):
     def test_current_mtm005_target_evidence_is_fresh_and_redacted(self) -> None:
         summary = validate_mtm005_target()
         self.assertEqual(summary["required_check_count"], 15)
+
+    def test_current_mtm006_target_evidence_is_fresh_and_redacted(self) -> None:
+        summary = validate_mtm006_target()
+        self.assertEqual(summary["required_check_count"], 8)
 
     def test_commit_message_contract(self) -> None:
         message = """docs(governance): establish project foundation [MTM-001]

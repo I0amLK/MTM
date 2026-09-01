@@ -3,7 +3,7 @@
   "iteration_id": "ITER-006",
   "milestone_id": "MTM-006",
   "started_at": "2026-09-01T04:50:30-07:00",
-  "completed_at": "2026-09-01T05:45:00-07:00",
+  "completed_at": "2026-09-01T06:48:40-07:00",
   "authority_before": "python",
   "authority_after": "rust",
   "production_authority_changed": false,
@@ -61,7 +61,7 @@
     {
       "stage": "source regression invocation",
       "failure": "An initial unittest command used filesystem paths where unittest expected module names.",
-      "repair": "Reran from the Re-CTM repository with PYTHONPATH=src and module names tests.test_workflow/tests.test_v020; all 32 source tests passed."
+      "repair": "Reran from the Re-CTM repository with PYTHONPATH=src and module names tests.test_workflow/tests.test_v020; all 27 source tests passed."
     },
     {
       "stage": "shared lockfile evidence freshness",
@@ -72,6 +72,31 @@
       "stage": "full local gate",
       "failure": "The first full run_checks invocation failed only cargo fmt --check after the last workflow edits.",
       "repair": "Ran cargo fmt --all and repeated the entire gate; no formatting exception or lint waiver was introduced."
+    },
+    {
+      "stage": "post-commit all-target revalidation",
+      "failure": "The committed MTM-006 target-validation binary referenced tempfile from dev-dependencies and therefore failed cargo clippy/test --all-targets even though library/unit paths had passed.",
+      "repair": "Paused MTM-007, replaced the binary-only tempfile dependency with a bounded std-only TempWorkspace guard, and reran strict all-target formatting, Clippy, and tests."
+    },
+    {
+      "stage": "real pdflatex fixture",
+      "failure": "The target LaTeX fixture used the proof environment without loading amsthm, so real pdflatex routed the run to repair and the harness later observed a misleading verifier-resource permission denial.",
+      "repair": "Added the required amsthm package to the validation document and reran the real pdflatex flow; all eight target checks now pass for the intended workflow state sequence."
+    },
+    {
+      "stage": "target-evidence freshness binding",
+      "failure": "Changing target_validation.rs did not change the recorded implementation hash because the acceptance binary and validation scripts were absent from the hash input set.",
+      "repair": "Bound target_validation.rs plus the MTM-006 target runner and evidence validator into implementation_sha256 so acceptance-harness drift invalidates evidence mechanically."
+    },
+    {
+      "stage": "finalization authority construction",
+      "failure": "FinalizationPermit had a pub(crate) constructor in kernel.rs, which prevented external crates from forging it but still allowed sibling workflow modules to mint finalization authority directly.",
+      "repair": "Moved FinalizationPermit into verifier.rs, made the type crate-private and its constructor module-private, removed the public re-export, and added engineering-graph checks that reject future public construction or re-export."
+    },
+    {
+      "stage": "project-local Rust toolchain resolution",
+      "failure": "The project-local Cargo shim could run cargo commands but did not expose cargo-fmt/cargo-clippy as subcommands when invoked directly by run_checks.py.",
+      "repair": "Resolved the exact 1.98.0 toolchain bin from the project rustup home, prepended it to PATH, and made MTM-006 conformance/evidence part of the complete local gate."
     }
   ],
   "acceptance": {

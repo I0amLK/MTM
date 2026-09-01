@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project": "MTM-reboot",
   "milestone": "MTM-006",
-  "implementation_sha256": "6b940bfe4c6e4f1679c166225e674afc51f4d31e6920783278bcf60714af4d19",
+  "implementation_sha256": "e66d021e94ce01ae7fdd3ba81b6023393299bebf03ad7f1cac83f1570f8c4a1e",
   "environment": {
     "platform": "Linux",
     "release": "7.1.2-070102-generic",
@@ -10,9 +10,42 @@
     "pdflatex": "pdflatex",
     "pdflatex_version": "pdfTeX 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian)"
   },
-  "passed": false,
-  "check_count": 0,
-  "checks": [],
+  "passed": true,
+  "check_count": 8,
+  "checks": [
+    {
+      "name": "real_pdflatex_finalization",
+      "passed": true
+    },
+    {
+      "name": "verified_project_promotion",
+      "passed": true
+    },
+    {
+      "name": "final_artifact_read_only",
+      "passed": true
+    },
+    {
+      "name": "model_verdict_cannot_override_server",
+      "passed": true
+    },
+    {
+      "name": "post_verifier_proof_tamper_denied",
+      "passed": true
+    },
+    {
+      "name": "tamper_does_not_publish_final_artifact",
+      "passed": true
+    },
+    {
+      "name": "missing_reference_audit_becomes_server_gap",
+      "passed": true
+    },
+    {
+      "name": "reference_gap_routes_to_repair",
+      "passed": true
+    }
+  ],
   "sensitive_content_omitted": true,
   "claim": "This report validates the current Linux target's real pdflatex workflow gate, mechanical finalization, read-only verified artifact, project promotion, server-owned verdict, post-verifier proof-tamper denial, and server-derived missing-reference gap. It uses temporary state/private roots and records no capabilities, proofs, project/run identifiers, private-vault contents, or source database rows."
 }

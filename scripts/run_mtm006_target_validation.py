@@ -7,6 +7,7 @@ import os
 import platform
 import shutil
 import subprocess
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -35,6 +36,9 @@ def implementation_sha256() -> str:
         ROOT / "crates" / "mtm-workflow" / "src" / "methodology.rs",
         ROOT / "crates" / "mtm-workflow" / "src" / "vault.rs",
         ROOT / "crates" / "mtm-workflow" / "src" / "verifier.rs",
+        ROOT / "crates" / "mtm-workflow" / "src" / "bin" / "target_validation.rs",
+        ROOT / "scripts" / "run_mtm006_target_validation.py",
+        ROOT / "scripts" / "validate_mtm006_target_evidence.py",
     ]
     files: list[Path] = []
     for root in roots:
@@ -56,9 +60,22 @@ def cargo_environment() -> dict[str, str]:
     env = os.environ.copy()
     cargo_home = ROOT / ".toolchain" / "cargo"
     rustup_home = ROOT / ".toolchain" / "rustup"
+    toolchain = tomllib.loads((ROOT / "rust-toolchain.toml").read_text(encoding="utf-8"))
+    channel = str(toolchain.get("toolchain", {}).get("channel") or "").strip()
+    candidates = sorted(rustup_home.glob(f"toolchains/{channel}-*/bin")) if channel else []
+    if len(candidates) != 1:
+        raise RuntimeError(f"expected exactly one project toolchain for {channel!r}")
+    toolchain_bin = candidates[0]
     env["CARGO_HOME"] = str(cargo_home)
     env["RUSTUP_HOME"] = str(rustup_home)
-    env["PATH"] = str(cargo_home / "bin") + os.pathsep + env.get("PATH", "")
+    env["PATH"] = (
+        str(toolchain_bin)
+        + os.pathsep
+        + str(cargo_home / "bin")
+        + os.pathsep
+        + env.get("PATH", "")
+    )
+    env["MTM_PINNED_CARGO"] = str(toolchain_bin / "cargo")
     return env
 
 
@@ -68,7 +85,7 @@ def main() -> int:
         print(json.dumps({"ok": False, "error": "pdflatex not found"}, indent=2))
         return 1
     env = cargo_environment()
-    cargo = str(ROOT / ".toolchain" / "cargo" / "bin" / "cargo")
+    cargo = env["MTM_PINNED_CARGO"]
     completed = subprocess.run(
         [
             cargo,

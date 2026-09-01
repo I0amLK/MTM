@@ -2,7 +2,37 @@ use mtm_contracts::{ErrorCategory, ReCtmError};
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
-use crate::kernel::FinalizationPermit;
+/// Authority-bearing proof that the verifier and LaTeX gates accepted one exact
+/// proof. The constructor is private to this module, so sibling workflow modules
+/// cannot mint finalization authority directly.
+#[derive(Debug)]
+pub(crate) struct FinalizationPermit {
+    run_id: String,
+    proof_sha256: String,
+    proof_manifest_sha256: Option<String>,
+}
+
+impl FinalizationPermit {
+    fn issue(run_id: String, proof_sha256: String, proof_manifest_sha256: Option<String>) -> Self {
+        Self {
+            run_id,
+            proof_sha256,
+            proof_manifest_sha256,
+        }
+    }
+
+    pub(crate) fn run_id(&self) -> &str {
+        &self.run_id
+    }
+
+    pub(crate) fn proof_sha256(&self) -> &str {
+        &self.proof_sha256
+    }
+
+    pub(crate) fn proof_manifest_sha256(&self) -> Option<&str> {
+        self.proof_manifest_sha256.as_deref()
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct VerificationFinding {
@@ -101,13 +131,12 @@ impl VerificationDecision {
         })
     }
 
-    pub fn finalization_permit(
+    pub(crate) fn finalization_permit(
         &self,
         run_id: &str,
         latex_passed: bool,
         proof_sha256: &str,
         proof_manifest_sha256: Option<&str>,
-        verifier_domain_id: &str,
     ) -> Result<FinalizationPermit, ReCtmError> {
         if self.verdict != VerificationVerdict::Correct || !latex_passed {
             return Err(ReCtmError::new(
@@ -127,7 +156,6 @@ impl VerificationDecision {
             run_id.to_owned(),
             proof_sha256.to_owned(),
             proof_manifest_sha256.map(str::to_owned),
-            verifier_domain_id.to_owned(),
         ))
     }
 }
@@ -199,12 +227,12 @@ mod tests {
         }))?;
         assert!(
             decision
-                .finalization_permit("run", false, "abc", None, "verifier")
+                .finalization_permit("run", false, "abc", None)
                 .is_err()
         );
         assert!(
             decision
-                .finalization_permit("run", true, "abc", None, "verifier")
+                .finalization_permit("run", true, "abc", None)
                 .is_ok()
         );
         Ok(())

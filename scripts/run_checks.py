@@ -6,6 +6,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tomllib
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -57,7 +58,22 @@ def resolve_tool_environment() -> tuple[dict[str, str], str | None, str | None]:
 
     cargo = shutil.which("cargo")
     rustc = shutil.which("rustc")
-    if project_cargo.is_file() and project_rustc.is_file():
+    toolchain = tomllib.loads((ROOT / "rust-toolchain.toml").read_text(encoding="utf-8"))
+    channel = str(toolchain.get("toolchain", {}).get("channel") or "").strip()
+    pinned_bins = sorted(project_rustup_home.glob(f"toolchains/{channel}-*/bin")) if channel else []
+    if len(pinned_bins) == 1 and (pinned_bins[0] / "cargo").is_file() and (pinned_bins[0] / "rustc").is_file():
+        cargo = str(pinned_bins[0] / "cargo")
+        rustc = str(pinned_bins[0] / "rustc")
+        environment["CARGO_HOME"] = str(project_cargo_home)
+        environment["RUSTUP_HOME"] = str(project_rustup_home)
+        environment["PATH"] = (
+            str(pinned_bins[0])
+            + os.pathsep
+            + str(project_cargo_home / "bin")
+            + os.pathsep
+            + environment.get("PATH", "")
+        )
+    elif project_cargo.is_file() and project_rustc.is_file():
         cargo = str(project_cargo)
         rustc = str(project_rustc)
         environment["CARGO_HOME"] = str(project_cargo_home)
@@ -153,6 +169,18 @@ def main() -> int:
                     capture_json=True,
                 ),
                 run(
+                    "mtm006_conformance",
+                    [sys.executable, "scripts/run_mtm006_conformance.py"],
+                    env=environment,
+                    capture_json=True,
+                ),
+                run(
+                    "mtm006_target_evidence",
+                    [sys.executable, "scripts/validate_mtm006_target_evidence.py"],
+                    env=environment,
+                    capture_json=True,
+                ),
+                run(
                     "bootstrap_contract",
                     [cargo, "run", "-q", "-p", "mtm-cli", "--", "contract"],
                     env=environment,
@@ -197,18 +225,19 @@ def main() -> int:
         "schema_version": "1.0.0",
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "project": "MTM-reboot",
-        "milestone": "MTM-005",
+        "milestone": "MTM-006",
         "production_authority": "python",
         "passed": all(item["passed"] for item in checks),
         "checks": checks,
         "local_claim": (
             "MTM-001 governance, MTM-002 pure contracts/policies, MTM-003 Native isolation, "
-            "MTM-004 copied-database persistence/capability behavior, and MTM-005 OAuth/MCP/HTTP "
-            "gateway behavior were validated by Rust tests and frozen Python-Rust differential "
+            "MTM-004 copied-database persistence/capability behavior, MTM-005 OAuth/MCP/HTTP "
+            "gateway behavior, and MTM-006 workflow/vault/verifier/finalizer behavior were "
+            "validated by Rust tests and frozen Python-Rust differential "
             "checks. This gate verifies the freshness and completeness of separately executed "
-            "MTM-003, MTM-004, and MTM-005 target reports but does not re-run real Bubblewrap/CAS, "
-            "private-state backup, or Firefox OAuth flow. Re-CTM Python remains the deployed "
-            "traffic and state authority. No workflow/finalizer, packaging, A6 performance, or "
+            "MTM-003 through MTM-006 target reports but does not re-run real Bubblewrap/CAS, "
+            "private-state backup, Firefox OAuth, or pdflatex target flows. Re-CTM Python remains "
+            "the deployed traffic and state authority. No packaging/cutover, A6 performance, or "
             "Python-retirement authority is claimed."
         ),
     }

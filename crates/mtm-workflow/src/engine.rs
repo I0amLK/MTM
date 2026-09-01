@@ -12,10 +12,12 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
 
-use crate::kernel::{FinalizationPermit, TransitionDecision, TransitionRequest};
+use crate::kernel::{TransitionDecision, TransitionRequest};
 use crate::methodology::{TaskCatalog, state_name};
 use crate::vault::{BRANCH_CHANNELS, GENERATION_CHANNELS, PrivateVault, VERIFIER_CHANNELS};
-use crate::verifier::{VerificationDecision, VerificationFinding, VerificationVerdict};
+use crate::verifier::{
+    FinalizationPermit, VerificationDecision, VerificationFinding, VerificationVerdict,
+};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct LatexGateResult {
@@ -2715,8 +2717,7 @@ impl WorkflowEngine {
         } else {
             None
         };
-        let verifier_domain = self
-            .store
+        self.store
             .list_domains(run_id, Some("verifier"), Some("sealed"))?
             .into_iter()
             .last()
@@ -2735,7 +2736,6 @@ impl WorkflowEngine {
                 .as_ref()
                 .and_then(|record| record.get("sha256"))
                 .and_then(Value::as_str),
-            text(&verifier_domain, "domain_id")?,
         )?;
         let manifest_hash = manifest_record
             .as_ref()

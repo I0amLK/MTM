@@ -402,7 +402,7 @@ impl PrivateVault {
     pub(crate) fn finalize_proof(
         &self,
         run_id: &str,
-        permit: &crate::kernel::FinalizationPermit,
+        permit: &crate::verifier::FinalizationPermit,
     ) -> Result<PathBuf, ReCtmError> {
         if permit.run_id() != run_id {
             return Err(ReCtmError::new(
@@ -833,12 +833,17 @@ mod tests {
         let vault = PrivateVault::new(temp.path())?;
         vault.initialize_run("run-a", "problem", &[], &serde_json::json!({}))?;
         vault.write_proof("run-a", "proof version one")?;
-        let permit = crate::kernel::FinalizationPermit::issue(
-            "run-a".to_owned(),
-            sha256_text("proof version one"),
-            None,
-            "verifier-domain".to_owned(),
-        );
+        let decision =
+            crate::verifier::VerificationDecision::from_submitted_report(&serde_json::json!({
+                "verification_report": {
+                    "summary": "checked",
+                    "critical_errors": [],
+                    "gaps": []
+                },
+                "repair_hints": ""
+            }))?;
+        let permit =
+            decision.finalization_permit("run-a", true, &sha256_text("proof version one"), None)?;
         vault.write_proof("run-a", "proof version two")?;
         let denied = vault.finalize_proof("run-a", &permit);
         assert_eq!(

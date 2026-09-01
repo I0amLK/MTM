@@ -43,18 +43,19 @@ OAuth + MCP gateway
 
 The machine-audited target graph is [`engineering-graph.json`](../engineering-graph.json).
 
-## Implemented through MTM-005
+## Implemented through MTM-006
 
-The current Rust graph now has five implemented lower-level components:
+The current Rust graph now has six implemented authority components:
 
 ```text
-              mtm-contracts
-            ▲       ▲       ▲
-            │       │       │
-       mtm-core  mtm-storage │
-         ▲                   │
-         │                   │
-    mtm-native          mtm-gateway
+                    mtm-contracts
+                 ▲       ▲        ▲
+                 │       │        │
+            mtm-core  mtm-storage │
+              ▲          ▲        │
+              │          │        │
+         mtm-native  mtm-workflow │
+                              mtm-gateway
 ```
 
 `mtm-native` keeps two intentionally separate runtime choke points:
@@ -98,6 +99,21 @@ During migration, conformance and target tooling generate the catalog snapshot f
 the frozen source files and Rust verifies the immutable hashes before startup. The
 production package will bundle that verified asset in the distribution milestone;
 the deployed gateway will not invoke Python to build its catalog.
+
+`mtm-workflow` owns one deterministic transition authority, the logical private
+vault, verifier computation, repair/escalation, and the mechanical finalizer. It
+depends directly on `mtm-storage` deliberately: a validated L2 capability becomes a
+private-field `CapabilityClaims` value rather than being converted back to an
+untrusted role/state string. `FinalizationPermit` is crate-private to the verifier
+module and has a private constructor; sibling modules cannot mint it. The vault
+re-hashes the current proof before publishing `proof_verified.tex`, so verifier
+approval cannot be replayed after draft mutation.
+
+The workflow library has no network, async-runtime, Native-process, or gateway
+dependency. Real `pdflatex` execution exists only in the target-validation binary in
+MTM-006; the operational LaTeX adapter remains MTM-007. This intentionally keeps the
+authority graph stronger even though it adds the explicit `workflow -> storage`
+dependency edge.
 
 ## Implemented slice after MTM-002
 

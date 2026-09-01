@@ -4,13 +4,43 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Arc;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use mtm_contracts::{ErrorCategory, ReCtmError};
 use mtm_storage::{CapabilityAuthority, StateStore};
 use mtm_workflow::{
     LatexGate, LatexGateResult, PrivateVault, StartRequest, TaskCatalog, WorkflowEngine,
 };
-use serde_json::{Map, Value};
+use serde_json::Value;
+
+struct TempWorkspace {
+    path: PathBuf,
+}
+
+impl TempWorkspace {
+    fn new() -> Result<Self, ReCtmError> {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_err(|error| internal(&format!("system clock before Unix epoch: {error}")))?
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!(
+            "mtm-workflow-target-{}-{nanos}",
+            std::process::id()
+        ));
+        fs::create_dir(&path).map_err(io_error)?;
+        Ok(Self { path })
+    }
+
+    fn path(&self) -> &Path {
+        &self.path
+    }
+}
+
+impl Drop for TempWorkspace {
+    fn drop(&mut self) {
+        let _ = fs::remove_dir_all(&self.path);
+    }
+}
 
 struct RealPdfLatexGate {
     executable: PathBuf,
@@ -60,7 +90,7 @@ impl LatexGate for RealPdfLatexGate {
 }
 
 struct Fixture {
-    root: tempfile::TempDir,
+    root: TempWorkspace,
     store: Arc<StateStore>,
     vault: Arc<PrivateVault>,
     engine: WorkflowEngine,
@@ -141,7 +171,7 @@ fn run() -> Result<Value, ReCtmError> {
 }
 
 fn fixture(methodology: &Value, pdflatex: &str) -> Result<Fixture, ReCtmError> {
-    let root = tempfile::tempdir().map_err(io_error)?;
+    let root = TempWorkspace::new()?;
     let store = Arc::new(StateStore::open(root.path().join("state.sqlite3"))?);
     let vault = Arc::new(PrivateVault::new(root.path().join("private"))?);
     let capabilities = Arc::new(CapabilityAuthority::new(
@@ -508,7 +538,7 @@ fn write_correct_report(
 
 fn latex_document(body: &str) -> String {
     format!(
-        "\\documentclass{{article}}\n\\begin{{document}}\n\\begin{{proof}}{body}\\end{{proof}}\n\\end{{document}}\n"
+        "\\documentclass{{article}}\n\\usepackage{{amsthm}}\n\\begin{{document}}\n\\begin{{proof}}{body}\\end{{proof}}\n\\end{{document}}\n"
     )
 }
 
@@ -533,7 +563,7 @@ fn read_only_mode(path: &Path) -> Result<bool, ReCtmError> {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        return Ok(fs::metadata(path).map_err(io_error)?.permissions().mode() & 0o222 == 0);
+        Ok(fs::metadata(path).map_err(io_error)?.permissions().mode() & 0o222 == 0)
     }
     #[cfg(not(unix))]
     {

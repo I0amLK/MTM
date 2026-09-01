@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 import tomllib
 from collections import Counter
@@ -179,6 +180,71 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
         if required_hash not in catalog_source:
             raise ValueError("mtm-gateway lost a frozen tool-catalog hash")
 
+    workflow_manifest = tomllib.loads(
+        (ROOT / "crates" / "mtm-workflow" / "Cargo.toml").read_text(encoding="utf-8")
+    )
+    workflow_dependencies = set(workflow_manifest.get("dependencies", {}))
+    expected_workflow_dependencies = {
+        "mtm-contracts",
+        "mtm-core",
+        "mtm-storage",
+        "regex",
+        "serde",
+        "serde_json",
+        "sha2",
+    }
+    if workflow_dependencies != expected_workflow_dependencies:
+        raise ValueError(
+            "mtm-workflow dependency boundary drift: "
+            f"expected {sorted(expected_workflow_dependencies)}, got {sorted(workflow_dependencies)}"
+        )
+    if graph["mtm-workflow"] != {"mtm-contracts", "mtm-core", "mtm-storage"}:
+        raise ValueError("mtm-workflow crate graph must preserve contracts/core/storage authority edges")
+    workflow_library_source = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted((ROOT / "crates" / "mtm-workflow" / "src").glob("*.rs"))
+    )
+    forbidden_workflow_tokens = {
+        "std::net": "network authority",
+        "std::process": "child-process authority",
+        "reqwest": "network client authority",
+        "tokio": "async runtime authority",
+        "mtm_native": "Native execution authority",
+        "mtm_gateway": "transport authority",
+    }
+    for token, boundary in forbidden_workflow_tokens.items():
+        if token in workflow_library_source:
+            raise ValueError(f"mtm-workflow acquired forbidden {boundary}: {token}")
+
+    capability_source = (ROOT / "crates" / "mtm-storage" / "src" / "capability.rs").read_text(
+        encoding="utf-8"
+    )
+    claims_match = re.search(
+        r"pub struct CapabilityClaims\s*\{(?P<body>.*?)\n\}",
+        capability_source,
+        flags=re.DOTALL,
+    )
+    if claims_match is None:
+        raise ValueError("CapabilityClaims definition is missing")
+    if re.search(r"^\s*pub\s+[A-Za-z_][A-Za-z0-9_]*\s*:", claims_match.group("body"), re.MULTILINE):
+        raise ValueError("CapabilityClaims fields must remain non-public")
+    claims_prefix = capability_source[: claims_match.start()].rsplit("#[derive", 1)[-1]
+    if "Deserialize" in claims_prefix:
+        raise ValueError("CapabilityClaims must not regain external Deserialize construction")
+
+    verifier_source = (ROOT / "crates" / "mtm-workflow" / "src" / "verifier.rs").read_text(
+        encoding="utf-8"
+    )
+    if "pub(crate) struct FinalizationPermit" not in verifier_source:
+        raise ValueError("FinalizationPermit must remain crate-private to the verifier authority")
+    if "pub(crate) fn issue(" in verifier_source or "pub fn issue(" in verifier_source:
+        raise ValueError("FinalizationPermit constructor must remain private to verifier.rs")
+    workflow_lib = (ROOT / "crates" / "mtm-workflow" / "src" / "lib.rs").read_text(
+        encoding="utf-8"
+    )
+    if "pub use verifier::FinalizationPermit" in workflow_lib or "pub use kernel::FinalizationPermit" in workflow_lib:
+        raise ValueError("FinalizationPermit must not be re-exported from mtm-workflow")
+
     runtime_graph = payload.get("runtime_authority_graph")
     if not isinstance(runtime_graph, dict):
         raise ValueError("missing runtime_authority_graph")
@@ -213,6 +279,10 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
         "mtm_storage_single_writer_boundary": True,
         "mtm_gateway_dependency_count": len(gateway_dependencies),
         "mtm_gateway_transport_only_boundary": True,
+        "mtm_workflow_dependency_count": len(workflow_dependencies),
+        "mtm_workflow_authority_boundary": True,
+        "capability_claims_unforgeable_by_public_construction": True,
+        "finalization_permit_verifier_private": True,
         "runtime_vertices": len(runtime_ids),
         "runtime_edges": len(runtime_edges),
         "invariants": len(invariants),
