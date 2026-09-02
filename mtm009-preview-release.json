@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0.0",
+  "project": "MTM-reboot",
+  "phase": "mtm009_preview_release",
+  "passed": true,
+  "milestone": "MTM-009",
+  "milestone_status": "in_progress",
+  "release_status": "installed_preview",
+  "version": "0.4.0-preview.1",
+  "binary_source_commit": "0ba98d3afdf8de473881571157ac4e2255f96552",
+  "deployment_script_commit": "2d0791243f646fe8579e94dce6c4bd5a256759c8",
+  "production_authority": "rust",
+  "production_command": "/home/lk/.local/bin/mtm",
+  "production_command_target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.1/mtm",
+  "binary_sha256": "e76c2124cddb73370d902394df3c143124870abf8f05240f1a72ca835a8e2477",
+  "binary_size_bytes": 12206408,
+  "release_info": {
+    "name": "mtm",
+    "version": "0.4.0-preview.1",
+    "implementation": "rust",
+    "production_authority": "rust",
+    "python_runtime_required": false,
+    "public_tool_count": 24,
+    "hidden_alias_count": 11,
+    "state_schema_version": 2,
+    "workflow_protocol_version": 2
+  },
+  "workflow_protocols": {
+    "production_default": 2,
+    "preview_opt_in": 3,
+    "opt_in_environment": "MTM_WORKFLOW_PROTOCOL_VERSION=3",
+    "protocol3_default_cutover_allowed": false,
+    "real_web_a4": "pending"
+  },
+  "final_artifact": "proof_verified.tex",
+  "tui_tool_visibility": {
+    "passed": true,
+    "start_event_visible": true,
+    "completion_event_visible": true,
+    "argument_values_hidden": true,
+    "file_content_hidden": true,
+    "harness": "scripts/run_mtm009_tui_visibility.py",
+    "harness_sha256": "259066e3d5c3756202e6a49d87471bfc9310615de8a4c031867f0ee0565f4fe3"
+  },
+  "a5_resource_evidence": {
+    "passed": true,
+    "path": "mtm009-research-resource.json",
+    "sha256": "27e269e336c363f31e7c684c343936473d979d50b340f9a4326cfc2f9d269662",
+    "implementation_sha256": "e76c2124cddb73370d902394df3c143124870abf8f05240f1a72ca835a8e2477",
+    "performance_claim": false
+  },
+  "rollback": {
+    "target": "/home/lk/.local/share/mtm/releases/0.3.0/mtm",
+    "version": "mtm 0.3.0",
+    "sha256": "0a785a122396a3f8961cbc33b967e7a48874b90311333c8860a1e5c75582fd7f",
+    "real_rollback_and_recutover_passed": true
+  },
+  "live_sessions": {
+    "observed_count": 5,
+    "existing_session_binary": "/home/lk/.local/share/mtm/releases/0.3.0/mtm",
+    "existing_sessions_restarted_for_preview": false,
+    "new_launch_binary": "/home/lk/.local/share/mtm/releases/0.4.0-preview.1/mtm"
+  },
+  "simulation": {
+    "complete": true,
+    "official_a4_eligible": false,
+    "cannot_unlock_protocol3_default": true
+  }
+}

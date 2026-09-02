@@ -86,6 +86,12 @@ def resolve_tool_environment() -> tuple[dict[str, str], str | None, str | None]:
 
 def main() -> int:
     environment, cargo, rustc = resolve_tool_environment()
+    progress = json.loads((ROOT / "project-progress.json").read_text(encoding="utf-8"))
+    preview_mode = (
+        str(progress.get("version") or "").startswith("0.4.0-preview.")
+        and progress.get("current_milestone") == "MTM-009"
+        and progress.get("status") == "MTM-009-in-progress"
+    )
     checks: list[dict[str, Any]] = [
         run(
             "migration_graph",
@@ -145,20 +151,8 @@ def main() -> int:
                     capture_json=True,
                 ),
                 run(
-                    "mtm003_target_evidence",
-                    [sys.executable, "scripts/validate_mtm003_target_evidence.py"],
-                    env=environment,
-                    capture_json=True,
-                ),
-                run(
                     "mtm004_conformance",
                     [sys.executable, "scripts/run_mtm004_conformance.py"],
-                    env=environment,
-                    capture_json=True,
-                ),
-                run(
-                    "mtm004_target_evidence",
-                    [sys.executable, "scripts/validate_mtm004_target_evidence.py"],
                     env=environment,
                     capture_json=True,
                 ),
@@ -169,20 +163,8 @@ def main() -> int:
                     capture_json=True,
                 ),
                 run(
-                    "mtm005_target_evidence",
-                    [sys.executable, "scripts/validate_mtm005_target_evidence.py"],
-                    env=environment,
-                    capture_json=True,
-                ),
-                run(
                     "mtm006_conformance",
                     [sys.executable, "scripts/run_mtm006_conformance.py"],
-                    env=environment,
-                    capture_json=True,
-                ),
-                run(
-                    "mtm006_target_evidence",
-                    [sys.executable, "scripts/validate_mtm006_target_evidence.py"],
                     env=environment,
                     capture_json=True,
                 ),
@@ -192,17 +174,60 @@ def main() -> int:
                     env=environment,
                     capture_json=True,
                 ),
-                run(
-                    "mtm007_target_evidence",
-                    [sys.executable, "scripts/validate_mtm007_target_evidence.py"],
-                    env=environment,
-                    capture_json=True,
-                ),
-                run(
-                    "mtm008_candidate_evidence",
-                    [sys.executable, "scripts/validate_mtm008_candidate_evidence.py"],
-                    env=environment,
-                    capture_json=True,
+                *(
+                    [
+                        run(
+                            "historical_release_evidence",
+                            [sys.executable, "scripts/validate_historical_mtm_release_evidence.py"],
+                            env=environment,
+                            capture_json=True,
+                        ),
+                        run(
+                            "mtm009_preview_release",
+                            [sys.executable, "scripts/validate_mtm009_preview_release.py"],
+                            env=environment,
+                            capture_json=True,
+                        ),
+                    ]
+                    if preview_mode
+                    else [
+                        run(
+                            "mtm003_target_evidence",
+                            [sys.executable, "scripts/validate_mtm003_target_evidence.py"],
+                            env=environment,
+                            capture_json=True,
+                        ),
+                        run(
+                            "mtm004_target_evidence",
+                            [sys.executable, "scripts/validate_mtm004_target_evidence.py"],
+                            env=environment,
+                            capture_json=True,
+                        ),
+                        run(
+                            "mtm005_target_evidence",
+                            [sys.executable, "scripts/validate_mtm005_target_evidence.py"],
+                            env=environment,
+                            capture_json=True,
+                        ),
+                        run(
+                            "mtm006_target_evidence",
+                            [sys.executable, "scripts/validate_mtm006_target_evidence.py"],
+                            env=environment,
+                            capture_json=True,
+                        ),
+                        run(
+                            "mtm007_target_evidence",
+                            [sys.executable, "scripts/validate_mtm007_target_evidence.py"],
+                            env=environment,
+                            capture_json=True,
+                        ),
+                        run(
+                            "mtm008_candidate_evidence",
+                            [sys.executable, "scripts/validate_mtm008_candidate_evidence.py"],
+                            env=environment,
+                            capture_json=True,
+                        ),
+                    ]
                 ),
                 run(
                     "mtm_command_namespace",
@@ -257,7 +282,6 @@ def main() -> int:
             run("git_staged_diff_check", ["git", "diff", "--cached", "--check"], env=environment)
         )
 
-    progress = json.loads((ROOT / "project-progress.json").read_text(encoding="utf-8"))
     payload = {
         "schema_version": "1.0.0",
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -267,17 +291,15 @@ def main() -> int:
         "passed": all(item["passed"] for item in checks),
         "checks": checks,
         "local_claim": (
-            "MTM-001 governance, MTM-002 pure contracts/policies, MTM-003 Native isolation, "
-            "MTM-004 copied-database persistence/capability behavior, MTM-005 OAuth/MCP/HTTP "
-            "gateway behavior, MTM-006 workflow/vault/verifier/finalizer behavior, MTM-007 "
-            "full runtime/CLI/tool-backend composition, MTM-008 release qualification, and the "
-            "post-completion MTM/Re-CTM command-namespace separation were validated by strict "
-            "Rust, governance, frozen differential, target-evidence, soak, bounded A6, and live "
-            "coexistence gates. The MTM command is `mtm`; `re-ctm` belongs exclusively to the "
-            "separate Re-CTM installation. MTM-009 Delivery 1 adds governance and frozen "
-            "research-state contracts only: production workflow protocol remains 2, state schema "
-            "remains 2, the 24/11 tool catalog and workflow states remain unchanged, and the only "
-            "final mathematical artifact remains proof_verified.tex."
+            "MTM-001 through MTM-008 remain accepted historical milestones with immutable "
+            "hash-bound evidence. MTM 0.4.0-preview.1 is the current installed command for new "
+            "launches under Rust authority, state schema 2, 24 public tools, 11 hidden aliases, "
+            "and workflow protocol 2 as the production default. MTM-009 protocol 3 is an explicit "
+            "opt-in mathematical research-state workflow with bounded advisory context; it does "
+            "not become the production default until paired real-web A4 passes. The preview has "
+            "current release, A5, rollback/recutover, namespace, TUI tool-visibility/redaction, "
+            "and protocol-1/2 conformance evidence. Existing 0.3.0 sessions were deliberately not "
+            "restarted. The only final mathematical artifact remains proof_verified.tex."
         ),
     }
     temporary = REPORT.with_name(REPORT.name + ".tmp")

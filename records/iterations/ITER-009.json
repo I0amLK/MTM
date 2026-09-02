@@ -539,7 +539,84 @@
       "Run all sixteen real web-model treatments using the frozen pair order and same model/connector configuration within each pair.",
       "Blind-score each A/B final artifact pair before treatment labels are revealed.",
       "Populate only hashed run/artifact facts and predeclared metrics; never store raw web conversation transcripts or private reasoning.",
-      "Do not mark Delivery 6 accepted or begin Delivery 7 cutover until the deterministic evaluation validator reports the real-web release gate passed."
+      "Do not mark Delivery 6 accepted or change the production workflow default to protocol 3 until the deterministic real-web evaluation gate passes. The installed preview remains protocol-2-default with protocol 3 opt-in."
+    ]
+  },
+  "preview_release_receipt": {
+    "status": "installed_preview_not_milestone_completion",
+    "version": "0.4.0-preview.1",
+    "binary_source_commit": "0ba98d3afdf8de473881571157ac4e2255f96552",
+    "release_preparation_commit": "241970c8909a5c184e05e50bfccd031dda81c9f0",
+    "deployment_script_commit": "2d0791243f646fe8579e94dce6c4bd5a256759c8",
+    "production_authority": "rust",
+    "production_command": "/home/lk/.local/bin/mtm",
+    "production_command_target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.1/mtm",
+    "binary_sha256": "e76c2124cddb73370d902394df3c143124870abf8f05240f1a72ca835a8e2477",
+    "binary_size_bytes": 12206408,
+    "state_schema_version": 2,
+    "production_default_workflow_protocol": 2,
+    "protocol3_opt_in": "MTM_WORKFLOW_PROTOCOL_VERSION=3",
+    "public_tools": 24,
+    "hidden_aliases": 11,
+    "final_artifact": "proof_verified.tex",
+    "tui_tool_visibility": {
+      "passed": true,
+      "tool_start_visible": true,
+      "tool_done_visible": true,
+      "argument_values_hidden": true,
+      "file_content_hidden": true,
+      "harness_sha256": "259066e3d5c3756202e6a49d87471bfc9310615de8a4c031867f0ee0565f4fe3"
+    },
+    "a5": {
+      "passed": true,
+      "report": "mtm009-research-resource.json",
+      "report_sha256": "27e269e336c363f31e7c684c343936473d979d50b340f9a4326cfc2f9d269662",
+      "implementation_sha256": "e76c2124cddb73370d902394df3c143124870abf8f05240f1a72ca835a8e2477",
+      "performance_claim": false
+    },
+    "local_validation": {
+      "passed": true,
+      "check_count": 24,
+      "sha256": "b5af42f0424c45fb49b663689a6e52d3921a54b669a5d9fafba32e8ab50aeb32",
+      "generated_at": "2026-09-02T15:25:14.089577Z"
+    },
+    "rollback": {
+      "accepted_target": "/home/lk/.local/share/mtm/releases/0.3.0/mtm",
+      "accepted_sha256": "0a785a122396a3f8961cbc33b967e7a48874b90311333c8860a1e5c75582fd7f",
+      "real_rollback_passed": true,
+      "real_recutover_passed": true
+    },
+    "live_session_posture": {
+      "observed_existing_processes": 5,
+      "existing_process_binary": "/home/lk/.local/share/mtm/releases/0.3.0/mtm",
+      "restarted_for_preview": false,
+      "new_launch_binary": "/home/lk/.local/share/mtm/releases/0.4.0-preview.1/mtm"
+    },
+    "commands": [
+      {
+        "command": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace",
+        "exit_code": 0,
+        "result": "The complete preview workspace passed; mtm-runtime includes the TUI tool-lifecycle regression and mtm-workflow retains 73 unit tests and eight integration tests."
+      },
+      {
+        "command": "run_mtm009_tui_visibility.py",
+        "exit_code": 0,
+        "result": "A real preview TUI process received an OAuth/MCP read_file call, printed tool start/completion lines, and did not print the path argument value or file contents."
+      },
+      {
+        "command": "run_mtm009_protocol3_rollback.py && run_mtm006_conformance.py",
+        "exit_code": 0,
+        "result": "Protocol-3 copied state resumed and advanced under the accepted 0.3.0 binary, and all 82 protocol-1/2 workflow checkpoints retained zero mismatches."
+      },
+      {
+        "command": "release_mtm009_preview.py; mtm008_deployment.py rollback; mtm008_deployment.py recutover",
+        "exit_code": 0,
+        "result": "The real user command was atomically cut to preview, rolled back to exact 0.3.0 SHA-256, and recut to preview without stopping existing MTM processes."
+      }
+    ],
+    "manual_pending": [
+      "Complete paired real-web A4 before making protocol 3 the production default.",
+      "Existing 0.3.0 sessions remain intentionally running until the operator chooses to restart them."
     ]
   },
   "recorded_failures_and_repairs": [
@@ -644,11 +721,35 @@
       "stage": "research-contract validator phase transition",
       "failure": "The first full Delivery-5 gate failed only because the MTM-009 validator still enforced the Delivery-3 invariant that mathematical_research_state must never enter task context.",
       "repair": "Advance the machine invariant to the accepted Delivery-5 boundary: require protocol-3 Generator/Repair-only exposure through ResearchTaskView and continue rejecting exposure to Verifier/Branch/Assembler roles."
+    },
+    {
+      "delivery": 7,
+      "stage": "preview check-config protocol display",
+      "failure": "Post-install verification found that check-config always rendered workflow_protocol_version=2 even when RuntimeSettings had correctly parsed MTM_WORKFLOW_PROTOCOL_VERSION=3; the server path itself was using protocol 3, but the operator-facing diagnostic was misleading.",
+      "repair": "Render settings.workflow_protocol_version in check-config, rerun the complete Rust workspace, and verify a protocol-3 environment reports workflow_protocol_version=3 while release-info continues to advertise protocol 2 as the production default."
+    },
+    {
+      "delivery": 7,
+      "stage": "repeat preview installation rollback metadata",
+      "failure": "Repeating the preview installation with the generic replace-manifest cutover captured the already-installed preview symlink as its own previous release, so the deployment manifest no longer named the accepted 0.3.0 rollback target.",
+      "repair": "Make the preview installer explicitly verify the accepted 0.3.0 path and SHA-256 and always record it as previous; then perform a real rollback to exact 0.3.0 followed by recutover to the preview."
+    },
+    {
+      "delivery": 7,
+      "stage": "historical target evidence freshness after preview",
+      "failure": "The legacy governance suite treated MTM-003 through MTM-008 implementation-bound target reports as if they must match the MTM-009 preview source tree, causing correct historical evidence to become stale by definition after the preview changed shared source files.",
+      "repair": "Freeze the accepted historical report files by exact SHA-256, validate them as historical milestone evidence, and separately validate the current installed preview release. This preview-only governance branch preserves the original current-freshness behavior outside MTM-009 preview mode."
+    },
+    {
+      "delivery": 7,
+      "stage": "MTM-007 additive server-info metadata differential",
+      "failure": "The MTM-007 exact differential reported one server_info mismatch because the preview adds production_default_workflow_protocol_version=2, a new observability field absent from the historical Python reference.",
+      "repair": "Narrowly normalize only this additive metadata key alongside the already-approved product-branding normalization; all other server_info fields, tools and workflow behavior remain exact-differential checked."
     }
   ],
   "manual_pending": [
-    "Delivery 4 must add strict protocol-3 research submissions while preserving the generic rethlas_step envelope and protocol-1/2 behavior.",
-    "Protocol-3 mathematical effect must be measured on a frozen paired corpus before cutover.",
+    "Complete the frozen paired real-web mathematical evaluation before making protocol 3 the production default.",
+    "Existing 0.3.0 MTM processes remain intentionally running until the operator chooses to restart them onto the preview.",
     "Other operating systems and site-local research/CAS layouts remain release-specific evidence."
   ],
   "rollback": "Before protocol-3 cutover, delete MTM-009 scaffolding and remain on the accepted MTM-008 release. After cutover, revert the new-run protocol default to 2 or reinstall the accepted MTM-008 release only after copied protocol-3 state has been proven safely resumable; never rewrite existing final artifacts.",

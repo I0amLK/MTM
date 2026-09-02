@@ -9,6 +9,7 @@ from pathlib import Path
 
 from scripts.validate_commit_message import validate_message
 from scripts.validate_engineering_graph import validate_graph as validate_engineering
+from scripts.validate_historical_mtm_release_evidence import validate as validate_historical_mtm_release_evidence
 from scripts.validate_migration_graph import load_graph, validate_graph as validate_migration
 from scripts.validate_mtm003_target_evidence import validate as validate_mtm003_target
 from scripts.validate_mtm004_target_evidence import validate as validate_mtm004_target
@@ -17,10 +18,29 @@ from scripts.validate_mtm006_target_evidence import validate as validate_mtm006_
 from scripts.validate_mtm007_target_evidence import validate as validate_mtm007_target
 from scripts.validate_mtm008_candidate_evidence import validate as validate_mtm008_candidate
 from scripts.validate_mtm_command_namespace import validate as validate_mtm_command_namespace
+from scripts.validate_mtm009_preview_release import validate as validate_mtm009_preview_release
 from scripts.validate_mtm009_research_contract import validate as validate_mtm009_research_contract
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def mtm009_preview_mode() -> bool:
+    progress = json.loads((ROOT / "project-progress.json").read_text(encoding="utf-8"))
+    return (
+        str(progress.get("version") or "").startswith("0.4.0-preview.")
+        and progress.get("current_milestone") == "MTM-009"
+        and progress.get("status") == "MTM-009-in-progress"
+    )
+
+
+def historical_check_count(milestone: str) -> int:
+    summary = validate_historical_mtm_release_evidence()
+    evidence = summary["evidence"]
+    assert isinstance(evidence, dict)
+    item = evidence[milestone]
+    assert isinstance(item, dict)
+    return int(item["check_count"])
 
 
 class GovernanceTestCase(unittest.TestCase):
@@ -101,32 +121,66 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(summary["deployment_command_namespace_separated"])
 
     def test_current_mtm003_target_evidence_is_fresh(self) -> None:
+        if mtm009_preview_mode():
+            self.assertEqual(historical_check_count("MTM-003"), 14)
+            return
         summary = validate_mtm003_target()
         self.assertEqual(summary["required_check_count"], 14)
 
     def test_current_mtm004_target_evidence_is_fresh_and_redacted(self) -> None:
+        if mtm009_preview_mode():
+            self.assertEqual(historical_check_count("MTM-004"), 10)
+            return
         summary = validate_mtm004_target()
         self.assertEqual(summary["required_check_count"], 10)
 
     def test_current_mtm005_target_evidence_is_fresh_and_redacted(self) -> None:
+        if mtm009_preview_mode():
+            self.assertEqual(historical_check_count("MTM-005"), 15)
+            return
         summary = validate_mtm005_target()
         self.assertEqual(summary["required_check_count"], 15)
 
     def test_current_mtm006_target_evidence_is_fresh_and_redacted(self) -> None:
+        if mtm009_preview_mode():
+            self.assertEqual(historical_check_count("MTM-006"), 8)
+            return
         summary = validate_mtm006_target()
         self.assertEqual(summary["required_check_count"], 8)
 
     def test_current_mtm007_target_evidence_is_fresh_and_redacted(self) -> None:
+        if mtm009_preview_mode():
+            self.assertEqual(historical_check_count("MTM-007"), 12)
+            return
         summary = validate_mtm007_target()
         self.assertEqual(summary["required_check_count"], 12)
 
     def test_current_mtm008_candidate_evidence_is_fresh_and_redacted(self) -> None:
+        if mtm009_preview_mode():
+            self.assertEqual(historical_check_count("MTM-008"), 10)
+            return
         summary = validate_mtm008_candidate()
         self.assertEqual(summary["required_check_count"], 10)
 
     def test_current_mtm_and_re_ctm_command_namespaces_are_separate(self) -> None:
         summary = validate_mtm_command_namespace()
-        self.assertEqual(summary["required_check_count"], 10)
+        if mtm009_preview_mode():
+            self.assertEqual(summary["evidence"], "mtm009_preview_release")
+            self.assertEqual(summary["mtm_version"], "0.4.0-preview.1")
+            self.assertFalse(summary["existing_sessions_restarted_for_preview"])
+        else:
+            self.assertEqual(summary["required_check_count"], 10)
+
+    def test_current_mtm009_preview_release_is_installed_and_bounded(self) -> None:
+        if not mtm009_preview_mode():
+            self.skipTest("MTM-009 preview release is not the current deployment mode")
+        summary = validate_mtm009_preview_release()
+        self.assertEqual(summary["version"], "0.4.0-preview.1")
+        self.assertEqual(summary["production_default_workflow_protocol"], 2)
+        self.assertTrue(summary["protocol3_opt_in"])
+        self.assertFalse(summary["protocol3_default_cutover_allowed"])
+        self.assertEqual(summary["real_web_a4"], "pending")
+        self.assertEqual(summary["final_artifact"], "proof_verified.tex")
 
     def test_mtm009_research_contract_freezes_complexity_and_authority(self) -> None:
         summary = validate_mtm009_research_contract()

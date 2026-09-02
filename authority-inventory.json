@@ -22,14 +22,17 @@
     }
   },
   "live_sessions": {
-    "count": 4,
-    "exact_release": true,
-    "logs_secret_free": true
+    "count": 5,
+    "exact_release": false,
+    "logs_secret_free": true,
+    "existing_session_version": "0.3.0",
+    "restarted_for_preview": false,
+    "new_launch_version": "0.4.0-preview.1"
   },
-  "milestone": "MTM-008",
+  "milestone": "MTM-009",
   "production_authority": "rust",
   "production_command": "/home/lk/.local/bin/mtm",
-  "production_command_target": "/home/lk/.local/share/mtm/releases/0.3.0/mtm",
+  "production_command_target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.1/mtm",
   "runtime_data_root": "/home/lk/.mtm",
   "separate_re_ctm_data_root": "/home/lk/.re-ctm",
   "project": "MTM-reboot",
@@ -42,9 +45,9 @@
     "command": "/home/lk/.local/bin/re-ctm"
   },
   "release": {
-    "path": "/home/lk/.local/share/mtm/releases/0.3.0/mtm",
-    "sha256": "0a785a122396a3f8961cbc33b967e7a48874b90311333c8860a1e5c75582fd7f",
-    "version": "0.3.0"
+    "path": "/home/lk/.local/share/mtm/releases/0.4.0-preview.1/mtm",
+    "sha256": "e76c2124cddb73370d902394df3c143124870abf8f05240f1a72ca835a8e2477",
+    "version": "0.4.0-preview.1"
   },
   "release_info": {
     "hidden_alias_count": 11,
@@ -56,8 +59,16 @@
     "state_schema_version": 2,
     "target_arch": "x86_64",
     "target_os": "linux",
-    "version": "0.3.0",
+    "version": "0.4.0-preview.1",
     "workflow_protocol_version": 2
+  },
+  "preview_policy": {
+    "protocol3_opt_in": true,
+    "protocol3_environment": "MTM_WORKFLOW_PROTOCOL_VERSION=3",
+    "production_default_workflow_protocol": 2,
+    "protocol3_default_cutover_allowed": false,
+    "real_web_a4": "pending",
+    "final_artifact": "proof_verified.tex"
   },
   "rollback": {
     "isolated_restore_verified": {
@@ -91,7 +102,7 @@
   "command_namespace": {
     "mtm": {
       "command": "/home/lk/.local/bin/mtm",
-      "target": "/home/lk/.local/share/mtm/releases/0.3.0/mtm"
+      "target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.1/mtm"
     },
     "re_ctm": {
       "command": "/home/lk/.local/bin/re-ctm",
