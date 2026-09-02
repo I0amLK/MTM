@@ -345,9 +345,9 @@
     "commit_pending": false
   },
   "delivery_5_receipt": {
-    "status": "accepted_pending_commit",
+    "status": "accepted",
     "baseline_commit": "f242d64408b625278690c4dbc23c860d9d134b58",
-    "delivery_commit": null,
+    "delivery_commit": "e61eec0dfef514f2a86a42497e976f2f9875b969",
     "production_behavior_changed": true,
     "authority_before": "rust",
     "authority_after": "rust",
@@ -407,7 +407,7 @@
     "manual_pending": [
       "Projection/task-envelope latency, RSS and write non-regression are measured with the Delivery-6 paired evaluation workload rather than through a flaky unit-test timing assertion."
     ],
-    "commit_pending": true
+    "commit_pending": false
   },
   "recorded_failures_and_repairs": [
     {
