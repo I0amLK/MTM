@@ -410,7 +410,7 @@
     "commit_pending": false
   },
   "delivery_6_progress": {
-    "status": "evaluation_infrastructure_ready_pending_real_web_runs",
+    "status": "simulation_complete_pending_real_web_runs",
     "baseline_commit": "6e3ec2e",
     "production_behavior_changed": false,
     "production_default_workflow_protocol": 2,
@@ -462,12 +462,40 @@
       "blind_score_recorder": "scripts/record_mtm009_blind_score.py",
       "evaluation_finalizer": "scripts/finalize_mtm009_math_evaluation.py",
       "delivery7_release_gate": "scripts/validate_mtm009_release_gate.py",
+      "solver_treatment_scheduler": "scripts/next_mtm009_web_treatment.py",
+      "runbook": "docs/MTM-009-WEB-EVALUATION-RUNBOOK.md",
       "release_gate": [
         "protocol3 verified_tex completion must not regress",
         "at least one predeclared primary research-control metric must improve",
         "systematic harmful advice blocks cutover",
         "A5 engineering resource gate must remain accepted"
       ]
+    },
+    "authorized_simulation": {
+      "path": "conformance/mtm009-math-simulation.json",
+      "validator": "scripts/validate_mtm009_math_simulation.py",
+      "solver_model": "GPT-5.6 Sol",
+      "status": "complete",
+      "official_a4_eligible": false,
+      "evaluator_contaminated": true,
+      "case_count": 8,
+      "protocol2_verified_tex_completion": 8,
+      "protocol3_verified_tex_completion": 8,
+      "protocol2_first_verification_pass": 4,
+      "protocol3_first_verification_pass": 8,
+      "protocol2_repeated_failed_route_without_new_evidence": 4,
+      "protocol3_repeated_failed_route_without_new_evidence": 0,
+      "protocol2_max_no_novelty_retrieval_streak": 2,
+      "protocol3_max_no_novelty_retrieval_streak": 0,
+      "protocol2_preserved_usable_partial_results": 6,
+      "protocol3_preserved_usable_partial_results": 13,
+      "protocol2_repair_count": 4,
+      "protocol3_repair_count": 0,
+      "protocol2_verifier_finding_count": 4,
+      "protocol3_verifier_finding_count": 0,
+      "protocol3_harmful_advice_events": 0,
+      "simulated_readability": {"protocol2": 0, "protocol3": 7, "tie": 1},
+      "interpretation": "The self-simulation is a structural rehearsal showing the intended advisory mechanisms can reduce repeated unproductive moves and repairs while preserving completion. It cannot satisfy A4 because the solver had previously inspected evaluator checks and because no real paired web treatment was executed."
     },
     "commands": [
       {
@@ -494,6 +522,16 @@
         "command": "record_mtm009_web_run.py / record_mtm009_blind_score.py / finalize_mtm009_math_evaluation.py against a temporary evaluation copy",
         "exit_code": 0,
         "result": "The sanitized recorder accepted one fixed treatment slot without storing transcript/private reasoning, blind scoring was rejected until both treatments existed, scoring succeeded after the pair was complete, and deterministic finalization was still rejected while only 1/8 frozen pairs existed. The tracked evaluation remained unchanged at 0/8."
+      },
+      {
+        "command": "python3 scripts/next_mtm009_web_treatment.py plus solver-visibility assertions",
+        "exit_code": 0,
+        "result": "The next-treatment scheduler emitted only the frozen case id, protocol and problem statement for M009-C01 Protocol 2; evaluator checks, research-control focus, capability tags and difficulty metadata were not exposed to the solver payload."
+      },
+      {
+        "command": "python3 scripts/validate_mtm009_math_simulation.py",
+        "exit_code": 0,
+        "result": "The explicitly authorized GPT-5.6 Sol self-simulation produced all eight protocol-2/protocol-3 proof pairs with normalized public traces and predeclared metrics. Both protocols completed 8/8; the simulated protocol-3 lane improved first-pass verification, repeated-failure, no-novelty retrieval, preserved-partial, repair and verifier-finding metrics with zero simulated harmful-advice events. The validator mechanically marks the result official_a4_eligible=false and records evaluator contamination."
       }
     ],
     "manual_pending": [
