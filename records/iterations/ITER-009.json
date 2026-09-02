@@ -545,6 +545,8 @@
   "preview_release_receipt": {
     "status": "installed_preview_not_milestone_completion",
     "version": "0.4.0-preview.1",
+    "qualification_commit": "285ba789e7b2995e41262848edf0111d0dd2ab29",
+    "release_tag": "v0.4.0-preview.1",
     "binary_source_commit": "0ba98d3afdf8de473881571157ac4e2255f96552",
     "release_preparation_commit": "241970c8909a5c184e05e50bfccd031dda81c9f0",
     "deployment_script_commit": "2d0791243f646fe8579e94dce6c4bd5a256759c8",
