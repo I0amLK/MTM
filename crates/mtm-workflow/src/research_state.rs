@@ -11,8 +11,13 @@ use std::fmt;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 
+mod advice;
 mod normalize;
 pub(crate) mod protocol;
+mod view;
+
+pub use advice::{ResearchAdviceRule, ResearchAdvisory};
+pub use view::{MAX_RESEARCH_TASK_VIEW_BYTES, ResearchTaskView};
 
 pub use normalize::{
     LegacyNormalization, LegacyNormalizationSummary, LegacyResearchInput,
@@ -462,6 +467,41 @@ impl ResearchAttempt {
     #[must_use]
     pub fn node_id(&self) -> &ResearchNodeId {
         &self.node_id
+    }
+
+    #[must_use]
+    pub const fn method(&self) -> ResearchAttemptMethod {
+        self.method
+    }
+
+    #[must_use]
+    pub const fn outcome(&self) -> ResearchAttemptOutcome {
+        self.outcome
+    }
+
+    #[must_use]
+    pub fn summary(&self) -> &str {
+        &self.summary
+    }
+
+    #[must_use]
+    pub const fn obstruction(&self) -> Option<ResearchObstruction> {
+        self.obstruction
+    }
+
+    #[must_use]
+    pub fn evidence_ids(&self) -> &BTreeSet<String> {
+        &self.evidence_ids
+    }
+
+    #[must_use]
+    pub const fn created_round(&self) -> u32 {
+        self.created_round
+    }
+
+    #[must_use]
+    pub const fn event_seq(&self) -> u64 {
+        self.event_seq
     }
 }
 

@@ -93,6 +93,13 @@ fn engine(root: &Path, latex: Arc<dyn LatexGate>) -> Result<WorkflowEngine, ReCt
 }
 
 fn start_compact(engine: &WorkflowEngine) -> Result<String, ReCtmError> {
+    start_compact_with_protocol(engine, 2)
+}
+
+fn start_compact_with_protocol(
+    engine: &WorkflowEngine,
+    workflow_protocol_version: i64,
+) -> Result<String, ReCtmError> {
     let started = engine.start(StartRequest {
         owner_id: "owner",
         problem_tex: r"\begin{proposition}Prove $1=1$.\end{proposition}",
@@ -104,7 +111,7 @@ fn start_compact(engine: &WorkflowEngine) -> Result<String, ReCtmError> {
         target_claim_id: None,
         workflow_mode: "compact",
         register_result: true,
-        workflow_protocol_version: 2,
+        workflow_protocol_version,
         trace_id: Some("trace-start"),
     })?;
     started
@@ -273,6 +280,119 @@ fn compact_correct_flow_reaches_mechanical_finalization() -> Result<(), ReCtmErr
 }
 
 #[test]
+fn protocol_three_branch_context_does_not_receive_global_research_view() -> Result<(), ReCtmError> {
+    let temp = tempfile::tempdir().map_err(|error| {
+        ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+    })?;
+    let engine = engine(temp.path(), Arc::new(PassingLatex))?;
+    let started = engine.start(StartRequest {
+        owner_id: "owner",
+        problem_tex: "Prove a two-route protocol-three statement.",
+        problem_id: Some("protocol-three-branch-firewall"),
+        references: &[],
+        native_mode: "dangerous",
+        workspace_export_path: None,
+        project_id: None,
+        target_claim_id: None,
+        workflow_mode: "full",
+        register_result: true,
+        workflow_protocol_version: 3,
+        trace_id: None,
+    })?;
+    let run_id = started["run_id"].as_str().unwrap_or_default().to_owned();
+    let assess = engine.next_task("owner", &run_id, None)?;
+    engine.write(
+        "owner",
+        capability(&assess)?,
+        "memory:generation:immediate_conclusions",
+        &serde_json::json!({"summary":"branch both routes"}),
+        None,
+    )?;
+    engine.commit(
+        "owner",
+        capability(&assess)?,
+        "assessment_complete",
+        &serde_json::json!({"route":"full","requires_multiple_plans":true}),
+        None,
+    )?;
+    let explore = engine.next_task("owner", &run_id, None)?;
+    engine.write(
+        "owner",
+        capability(&explore)?,
+        "memory:generation:events",
+        &serde_json::json!({
+            "event_type":"notation_resolution","symbol":"x","resolution":"fixed",
+            "summary":"notation fixed","evidence_ids":[]
+        }),
+        None,
+    )?;
+    engine.commit(
+        "owner",
+        capability(&explore)?,
+        "exploration_complete",
+        &serde_json::json!({}),
+        None,
+    )?;
+    let planning = engine.next_task("owner", &run_id, None)?;
+    engine.commit(
+        "owner",
+        capability(&planning)?,
+        "plans_proposed",
+        &serde_json::json!({
+            "plans":[
+                {"summary":"Route A","subgoals":[{"key":"a","statement":"Prove A","depends_on":[],"critical":true}],"motivation":[],"dependencies":[],"risks":[]},
+                {"summary":"Route B","subgoals":[{"key":"b","statement":"Prove B","depends_on":[],"critical":true}],"motivation":[],"dependencies":[],"risks":[]}
+            ]
+        }),
+        None,
+    )?;
+    let direct = engine.next_task("owner", &run_id, None)?;
+    let plans = direct["context"]["active_plans"]
+        .as_array()
+        .ok_or_else(|| {
+            ReCtmError::new("TEST_FAILURE", "protocol-three branch plans missing")
+                .with_category(ErrorCategory::Internal)
+        })?;
+    let mut screening = serde_json::Map::new();
+    for plan in plans {
+        let plan_id = plan["plan_id"].as_str().unwrap_or_default().to_owned();
+        let subgoal_id = plan["subgoals"][0]["subgoal_id"]
+            .as_str()
+            .unwrap_or_default()
+            .to_owned();
+        screening.insert(
+            plan_id,
+            serde_json::json!({
+                subgoal_id:{"status":"stuck","summary":"needs branch work","method":"direct","obstruction":"no_progress","evidence_ids":[]}
+            }),
+        );
+    }
+    engine.write(
+        "owner",
+        capability(&direct)?,
+        "memory:generation:proof_steps",
+        &serde_json::json!({"summary":"both routes need branches"}),
+        None,
+    )?;
+    let branched = engine.commit(
+        "owner",
+        capability(&direct)?,
+        "direct_proving_complete",
+        &serde_json::json!({"screening":Value::Object(screening)}),
+        None,
+    )?;
+    assert_eq!(branched["state"], "branch_prepare");
+    let branch = engine.next_task("owner", &run_id, None)?;
+    assert_eq!(branch["role"], "branch");
+    assert!(
+        branch["context"]
+            .get("mathematical_research_state")
+            .is_none()
+    );
+    Ok(())
+}
+
+#[test]
 fn protocol_three_structured_research_contract_reaches_same_tex_finalizer() -> Result<(), ReCtmError>
 {
     let temp = tempfile::tempdir().map_err(|error| {
@@ -307,10 +427,19 @@ fn protocol_three_structured_research_contract_reaches_same_tex_finalizer() -> R
         assess["task"]["mathematical_research_contract"]["final_artifact"],
         "proof_verified.tex"
     );
+    let assess_research = assess["context"]
+        .get("mathematical_research_state")
+        .ok_or_else(|| {
+            ReCtmError::new("TEST_FAILURE", "protocol-3 generator research view missing")
+                .with_category(ErrorCategory::Internal)
+        })?;
+    assert_eq!(assess_research["advisory_only"], true);
+    assert!(assess_research["graph_digest"].as_str().is_some());
     assert!(
-        assess["context"]
-            .get("mathematical_research_state")
-            .is_none()
+        serde_json::to_vec(assess_research)
+            .map_err(|error| ReCtmError::new("TEST_JSON", error.to_string()))?
+            .len()
+            <= mtm_workflow::research_state::MAX_RESEARCH_TASK_VIEW_BYTES
     );
     engine.write(
         "owner",
@@ -398,11 +527,14 @@ fn protocol_three_structured_research_contract_reaches_same_tex_finalizer() -> R
 
     let direct = engine.next_task("owner", &run_id, Some("trace-p3-direct"))?;
     assert_eq!(direct["state"], "direct_proving");
-    assert!(
-        direct["context"]
-            .get("mathematical_research_state")
-            .is_none()
-    );
+    let direct_research = direct["context"]
+        .get("mathematical_research_state")
+        .ok_or_else(|| {
+            ReCtmError::new("TEST_FAILURE", "protocol-3 direct research view missing")
+                .with_category(ErrorCategory::Internal)
+        })?;
+    assert_eq!(direct_research["advisory_only"], true);
+    assert!(direct_research["suggested_next_action"]["rule_id"].is_string());
     let plans = direct["context"]["active_plans"]
         .as_array()
         .ok_or_else(|| {
@@ -899,6 +1031,137 @@ fn research_state_shadow_is_deterministic_owner_scoped_and_side_effect_free()
             .research_state_shadow("different-owner", &run_id)
             .is_err()
     );
+    Ok(())
+}
+
+#[test]
+fn protocol_three_repair_gets_advisory_context_but_verifier_does_not() -> Result<(), ReCtmError> {
+    let temp = tempfile::tempdir().map_err(|error| {
+        ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+    })?;
+    let engine = engine(temp.path(), Arc::new(PassingLatex))?;
+    let run_id = start_compact_with_protocol(&engine, 3)?;
+    let assess = engine.next_task("owner", &run_id, None)?;
+    assert_eq!(
+        assess["context"]["mathematical_research_state"]["advisory_only"],
+        true
+    );
+    engine.write(
+        "owner",
+        capability(&assess)?,
+        "memory:generation:immediate_conclusions",
+        &serde_json::json!({"summary":"direct"}),
+        None,
+    )?;
+    engine.commit(
+        "owner",
+        capability(&assess)?,
+        "assessment_complete",
+        &serde_json::json!({
+            "route":"compact","requires_external_retrieval":false,"requires_multiple_plans":false
+        }),
+        None,
+    )?;
+    let assembler = engine.next_task("owner", &run_id, None)?;
+    assert_eq!(assembler["role"], "assembler");
+    assert!(
+        assembler["context"]
+            .get("mathematical_research_state")
+            .is_none()
+    );
+    engine.write(
+        "owner",
+        capability(&assembler)?,
+        "proof",
+        &Value::String("proof version one".to_owned()),
+        None,
+    )?;
+    engine.write(
+        "owner",
+        capability(&assembler)?,
+        "proof_manifest",
+        &serde_json::json!({
+            "target_statement_tex":"target","dependency_revision_ids":[],"reference_ids":[],
+            "conditional_hypotheses":[],"computational_evidence":[]
+        }),
+        None,
+    )?;
+    engine.commit(
+        "owner",
+        capability(&assembler)?,
+        "proof_submitted",
+        &serde_json::json!({}),
+        None,
+    )?;
+
+    let verifier = engine.next_task("owner", &run_id, None)?;
+    assert_eq!(verifier["role"], "verifier");
+    assert!(
+        verifier["context"]
+            .get("mathematical_research_state")
+            .is_none()
+    );
+    write_wrong_verification(&engine, &verifier, "repair-needed")?;
+    let repair_state = engine.commit(
+        "owner",
+        capability(&verifier)?,
+        "verification_submitted",
+        &serde_json::json!({}),
+        None,
+    )?;
+    assert_eq!(repair_state["state"], "repair");
+    let repair = engine.next_task("owner", &run_id, None)?;
+    assert_eq!(repair["role"], "repair");
+    assert_eq!(
+        repair["context"]["mathematical_research_state"]["advisory_only"],
+        true
+    );
+    assert!(
+        repair["context"]["mathematical_research_state"]["graph_digest"]
+            .as_str()
+            .is_some()
+    );
+    let repair_view = repair["context"]["mathematical_research_state"].to_string();
+    assert!(repair_view.contains("repair the stated gap"));
+    engine.write(
+        "owner",
+        capability(&repair)?,
+        "proof",
+        &Value::String("proof version two".to_owned()),
+        None,
+    )?;
+    engine.write(
+        "owner",
+        capability(&repair)?,
+        "proof_manifest",
+        &serde_json::json!({
+            "target_statement_tex":"target","dependency_revision_ids":[],"reference_ids":[],
+            "conditional_hypotheses":[],"computational_evidence":[]
+        }),
+        None,
+    )?;
+    engine.commit(
+        "owner",
+        capability(&repair)?,
+        "repair_submitted",
+        &serde_json::json!({}),
+        None,
+    )?;
+    let verifier_two = engine.next_task("owner", &run_id, None)?;
+    write_wrong_verification(&engine, &verifier_two, "second-repair-needed")?;
+    let escalated = engine.commit(
+        "owner",
+        capability(&verifier_two)?,
+        "verification_submitted",
+        &serde_json::json!({}),
+        None,
+    )?;
+    assert_eq!(escalated["state"], "explore");
+    let generator = engine.next_task("owner", &run_id, None)?;
+    assert_eq!(generator["role"], "generator");
+    let generator_view = generator["context"]["mathematical_research_state"].to_string();
+    assert!(!generator_view.contains("repair the stated gap"));
+    assert!(!generator_view.contains("legacy-repair"));
     Ok(())
 }
 

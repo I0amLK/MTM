@@ -867,22 +867,22 @@ readable as protocol-2-compatible history.
 
 Tasks:
 
-- [ ] Implement ordered `R01`–`R09` advisory rules.
-- [ ] Implement bounded compact view and explicit truncation.
-- [ ] Insert the view before mechanical task details.
-- [ ] Keep full records available through existing reads/searches.
-- [ ] Ensure advice is omitted from Verifier context.
-- [ ] Include verifier findings only in Repair-appropriate form.
-- [ ] Add task-envelope byte and deterministic-order tests.
-- [ ] Add tests proving advice cannot affect transition/finalization.
+- [x] Implement ordered `R01`–`R09` advisory rules.
+- [x] Implement bounded compact view and explicit truncation.
+- [x] Insert the view into Protocol-3 Generator/Repair task context without changing the mechanical task contract.
+- [x] Keep full records available through existing reads/searches.
+- [x] Ensure advice is omitted from Verifier, Branch, and Assembler context.
+- [x] Include verifier findings only in Repair-appropriate normalized form.
+- [x] Add task-envelope byte and deterministic-order tests.
+- [x] Add tests proving advice can be ignored without affecting transition/finalization.
 
 Acceptance:
 
-- [ ] Every advisory rule has positive and precedence fixtures.
-- [ ] Compact view stays within fixed budget.
-- [ ] Ignoring advice never invalidates an otherwise legal step.
-- [ ] Information-firewall canaries remain absent.
-- [ ] A0–A3 and envelope resource checks pass.
+- [x] Every executable advisory rule has a positive fixture; conflicting conditions cover ordered precedence, and cycle rejection has a stable diagnostic rule.
+- [x] Compact view stays within the fixed 16 KiB serialized budget and fixed item/text caps.
+- [x] Ignoring advice never invalidates an otherwise legal step.
+- [x] Information-firewall checks keep verifier findings out of Generator view and the global view out of Verifier/Branch/Assembler roles.
+- [ ] A0–A3 pass; final task-envelope latency/RSS/write non-regression is measured with Delivery 6 paired evaluation.
 
 Rollback: disable protocol-3 view and continue protocol-2 task rendering.
 

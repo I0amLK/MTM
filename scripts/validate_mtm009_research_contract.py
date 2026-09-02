@@ -84,6 +84,8 @@ FORBIDDEN_PRODUCTION_PATTERNS = (
 
 RESEARCH_STATE_SOURCE_FILES = (
     "crates/mtm-workflow/src/research_state.rs",
+    "crates/mtm-workflow/src/research_state/advice.rs",
+    "crates/mtm-workflow/src/research_state/view.rs",
     "crates/mtm-workflow/src/research_state/protocol.rs",
     "crates/mtm-workflow/src/research_state/normalize.rs",
     "crates/mtm-workflow/src/research_state/normalize/branch.rs",
@@ -234,8 +236,17 @@ def validate() -> dict[str, Any]:
     )
     if "pub fn research_state_shadow" not in engine_source:
         raise ValueError("MTM-009 Delivery 3 read-only shadow projection is missing")
-    if '"mathematical_research_state"' in engine_source:
-        raise ValueError("MTM-009 Delivery 3 shadow projection leaked into task context early")
+    if '"mathematical_research_state"' not in engine_source:
+        raise ValueError("MTM-009 Delivery 5 bounded research task view is missing")
+    if (
+        "protocol >= 3 && matches!(role, WorkflowRole::Generator | WorkflowRole::Repair)"
+        not in engine_source
+    ):
+        raise ValueError(
+            "MTM-009 research task view must be gated to protocol-3 Generator/Repair roles"
+        )
+    if "ResearchTaskView::build" not in engine_source:
+        raise ValueError("MTM-009 Delivery 5 task view is not built through the pure bounded view")
 
     if "final/proof_verified.tex" not in vault_source:
         raise ValueError("verified .tex final artifact path changed")
@@ -328,7 +339,8 @@ def validate() -> dict[str, Any]:
         "zero_complexity_budgets": len(ZERO_BUDGET_KEYS),
         "generic_graph_dependencies": 0,
         "pure_research_state_sources": len(RESEARCH_STATE_SOURCE_FILES),
-        "shadow_model_context_exposure": False,
+        "protocol3_generator_repair_task_view": True,
+        "protocol3_verifier_branch_assembler_task_view": False,
         "final_artifact": "proof_verified.tex",
         "projector_pure_boundary": True,
         "generic_graph_dependencies": 0,

@@ -108,7 +108,8 @@ fn overlay_protocol3_research(
         serde_json::json!({
             "version":1,
             "advisory_only":true,
-            "advisory_layer_pending":true,
+            "advisory_layer":"bounded_research_state",
+            "advisory_context_field":"mathematical_research_state",
             "identity":"Plan and node identifiers returned by the server are canonical. Caller labels are never authority identifiers.",
             "records":"Write concise mathematical conclusions and evidence locators, not web transcripts or hidden reasoning traces.",
             "server_owned_fields":["record_type","record_id","actor_role","actor_domain_id","round_index","created_at"],

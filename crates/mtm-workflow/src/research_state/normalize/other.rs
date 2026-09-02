@@ -455,12 +455,15 @@ pub(super) fn normalize_verification_reports(
     let actor = ResearchDomainId::parse("legacy-repair")?;
     let mut ignored = 0usize;
     for (index, report) in input.verification_reports.iter().enumerate() {
-        let critical = report
-            .get("critical_errors")
+        let findings = report.get("verification_report").and_then(Value::as_object);
+        let critical = findings
+            .and_then(|object| object.get("critical_errors"))
+            .or_else(|| report.get("critical_errors"))
             .and_then(Value::as_array)
             .map_or(0, Vec::len);
-        let gaps = report
-            .get("gaps")
+        let gaps = findings
+            .and_then(|object| object.get("gaps"))
+            .or_else(|| report.get("gaps"))
             .and_then(Value::as_array)
             .map_or(0, Vec::len);
         if critical + gaps == 0 {

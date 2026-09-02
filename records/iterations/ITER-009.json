@@ -76,7 +76,7 @@
     {
       "delivery": 5,
       "name": "bounded_advisory_context",
-      "status": "planned",
+      "status": "accepted",
       "production_behavior_changed": true,
       "goal": "Expose a bounded obstruction-centered quotient and one deterministic advisory action without giving advice any authority."
     },
@@ -114,10 +114,10 @@
     "protocol_1_2_compatibility_and_copied_state_rollback"
   ],
   "acceptance": {
-    "A0": {"status": "accepted_delivery_4", "required": "Build, format, Clippy, tests, graph/governance validators, MTM-009 contract validator and diff checks.", "evidence": "The complete Rust workspace passes format, warnings-denied Clippy, all-target tests, MTM-009 contract validation, migration/engineering graph validation and diff hygiene after protocol-3 contract implementation."},
+    "A0": {"status": "accepted_delivery_5", "required": "Build, format, Clippy, tests, graph/governance validators, MTM-009 contract validator and diff checks.", "evidence": "The complete Rust workspace passes format, warnings-denied Clippy, all-target tests, MTM-009 contract validation, migration/engineering graph validation and diff hygiene after bounded advisory-context integration."},
     "A1": {"status": "accepted_delivery_4", "required": "Protocol-1/2 frozen compatibility plus protocol-3 research-contract golden fixtures.", "evidence": "The 82-checkpoint MTM-006 workflow differential retains zero mismatches and frozen SHA-256 def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0; protocol-3 structured plans, events, screening, branch/failure/replan records and a complete proof_verified.tex path pass strict unit and end-to-end tests."},
     "A2": {"status": "accepted_delivery_3", "required": "Read-only deterministic shadow projection before model-facing exposure.", "evidence": "Protocol-2 history is normalized and projected only through the owner-authorized research_state_shadow diagnostic; repeated and eight-way concurrent projections are byte-identical and leave the complete disposable state tree unchanged."},
-    "A3": {"status": "accepted_applicable_delivery_3", "required": "Retry/crash/concurrency, identity, capability, branch/verifier firewall and finalizer non-regression.", "evidence": "Owner mismatch is denied, unregistered reference IDs and unknown counterexample nodes cannot influence the graph, malformed nested collections fail closed, no research state enters ordinary task context, and all existing capability/verifier/finalizer tests pass."},
+    "A3": {"status": "accepted_delivery_5", "required": "Retry/crash/concurrency, identity, capability, branch/verifier firewall and finalizer non-regression.", "evidence": "Owner mismatch is denied, forged reference/node data cannot influence the graph, malformed collections fail closed, the bounded view is exposed only to protocol-3 Generator/Repair roles, verifier findings enter only Repair-normalized context, Verifier/Branch/Assembler never receive the view, advice is not a precondition, and all existing capability/verifier/finalizer tests pass."},
     "A4": {"status": "pending", "required": "Real web-driven paired mathematical evaluation with normal research/workspace tools and verified .tex outputs."},
     "A5": {"status": "pending", "required": "Task-envelope, projection latency, RSS, writes, replay and shutdown non-regression."}
   },
@@ -344,6 +344,71 @@
     ],
     "commit_pending": false
   },
+  "delivery_5_receipt": {
+    "status": "accepted_pending_commit",
+    "baseline_commit": "f242d64408b625278690c4dbc23c860d9d134b58",
+    "delivery_commit": null,
+    "production_behavior_changed": true,
+    "authority_before": "rust",
+    "authority_after": "rust",
+    "production_default_workflow_protocol": 2,
+    "evaluation_protocols": [2, 3],
+    "state_schema_version": 2,
+    "public_tools": 24,
+    "hidden_aliases": 11,
+    "workflow_states": 18,
+    "new_vault_channels": 0,
+    "new_dependencies": 0,
+    "final_artifact": "proof_verified.tex",
+    "research_task_view_max_bytes": 16384,
+    "advice_source_sha256": "2e08be719e5975e76ed8c987a165491102d683731d6f748cc83ac4b07ed7e5e7",
+    "view_source_sha256": "81bd3ceae9e74ad4eaab28a791b679ba0c9aaa659341724708f8c78c0ab290c7",
+    "research_state_sha256": "0813d88aef7cb5db670cb5ecdac02f979d374a185693d53fa4904fa91a4605d6",
+    "verification_normalizer_sha256": "c22868de5e6964a88c8d600ca2b32f20c74caf203dc671ea1e491f6b5e915d14",
+    "normalizer_tests_sha256": "348bea9a4815a8afff07906a116445e38318b2179d801b026e1996a8c803f10f",
+    "engine_sha256": "9242f7d3b373159ae61935db3dff7e2df1c5ff01cccfa5ef63fb49d8398970c9",
+    "methodology_sha256": "26fdde5564be70c04fa9651e6658bb0bea264c34e8bf5efd94728ae6025d1866",
+    "workflow_integration_tests_sha256": "2a52acd8a6aac3cfd92ba329bef2022f7f1912aaddf53ceeead1493497581058",
+    "contract_validator_sha256": "1cf15f478f571496fc61d9ac1dba4a51ee1b9ecb3217e22655836ba9c3a930e8",
+    "workflow_reference_sha256": "def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0",
+    "tests": {
+      "research_and_existing_workflow_unit_tests": 73,
+      "workflow_integration_tests": 8,
+      "workflow_differential_checkpoints": 82,
+      "research_task_view_max_bytes": 16384,
+      "failures_after_repairs": 0
+    },
+    "implemented": [
+      "Pure ordered advisory rules R01-R09 with explicit rule identifiers and evidence facts",
+      "Bounded deterministic mathematical_research_state view with target, blocker, frontier, recent attempts, counterexample/retrieval coverage, partial results, counts, warnings and graph digest",
+      "Strict 16 KiB serialized task-view ceiling plus fixed item, string, warning and evidence caps with UTF-8-safe truncation",
+      "Protocol-3 task-context exposure only to Generator and Repair roles; Verifier, Branch and Assembler receive no global research view",
+      "Verifier findings are normalized only into Repair research context and are deliberately omitted again when the workflow returns to Generator",
+      "Advice is data only: ignoring it does not affect rethlas_step validity, capability, transition, verifier verdict, finalizer permit or proof_verified.tex publication",
+      "Protocol-2 task context and the frozen research graph digest remain unchanged"
+    ],
+    "commands": [
+      {
+        "command": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace --all-targets",
+        "exit_code": 0,
+        "result": "The complete Rust workspace passed; mtm-workflow ran 73 unit tests and eight integration tests including Generator/Repair exposure, Verifier/Branch/Assembler isolation, repair-to-generator verifier-finding firewall and unchanged finalization."
+      },
+      {
+        "command": "python3 scripts/run_mtm006_conformance.py",
+        "exit_code": 0,
+        "result": "All 82 protocol-1/2 workflow checkpoints retain zero mismatches and frozen SHA-256 def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0."
+      },
+      {
+        "command": "python3 scripts/validate_mtm009_research_contract.py && python3 scripts/validate_migration_graph.py && python3 scripts/validate_engineering_graph.py && git diff --check",
+        "exit_code": 0,
+        "result": "The machine contract now audits advice.rs/view.rs as pure research-state sources and enforces protocol-3 Generator/Repair-only exposure while preserving zero-complexity and authority topology."
+      }
+    ],
+    "manual_pending": [
+      "Projection/task-envelope latency, RSS and write non-regression are measured with the Delivery-6 paired evaluation workload rather than through a flaky unit-test timing assertion."
+    ],
+    "commit_pending": true
+  },
   "recorded_failures_and_repairs": [
     {
       "delivery": 1,
@@ -428,6 +493,24 @@
       "stage": "standalone rollback-harness import path",
       "failure": "The first direct execution of the persistent rollback harness could not import the scripts package because Python placed only the script directory on sys.path.",
       "repair": "Add the repository root to sys.path before importing existing harness modules, matching the established standalone-validator pattern, and rerun the same rollback test successfully."
+    },
+    {
+      "delivery": 5,
+      "stage": "first advisory/view Clippy gate",
+      "failure": "The initial advisory and compact-view tests used unwrap/expect helpers even though the workspace denies those patterns for all targets; warnings-denied Clippy rejected the test code rather than exempting it.",
+      "repair": "Convert every new test helper and test body to Result/Question-mark propagation, remove the unused production import, and rerun formatting, Clippy and all-target tests without lint allowances."
+    },
+    {
+      "delivery": 5,
+      "stage": "delivery-three verifier-report shape discovered by repair context",
+      "failure": "Repair-context integration showed that the legacy research normalizer recognized only flattened critical_errors/gaps records, while the authoritative verifier actually stores a nested verification_report object plus top-level repair_hints; real verifier findings therefore did not enter Repair research state.",
+      "repair": "Normalize both the authoritative nested report shape and the historical flattened compatibility shape, add a regression covering both in one replay, expose only the concise repair summary to Repair, and verify the findings disappear again when the workflow returns to Generator."
+    },
+    {
+      "delivery": 5,
+      "stage": "research-contract validator phase transition",
+      "failure": "The first full Delivery-5 gate failed only because the MTM-009 validator still enforced the Delivery-3 invariant that mathematical_research_state must never enter task context.",
+      "repair": "Advance the machine invariant to the accepted Delivery-5 boundary: require protocol-3 Generator/Repair-only exposure through ResearchTaskView and continue rejecting exposure to Verifier/Branch/Assembler roles."
     }
   ],
   "manual_pending": [

@@ -23,8 +23,8 @@ use crate::research_state::protocol::{
     stamp_protocol3_record,
 };
 use crate::research_state::{
-    LegacyResearchInput, ResearchPlanId, ResearchStateError, ResearchStateProjector,
-    normalize_legacy_research,
+    LegacyNormalization, LegacyResearchInput, ResearchPlanId, ResearchStateError,
+    ResearchStateProjector, ResearchTaskView, normalize_legacy_research,
 };
 use crate::vault::{BRANCH_CHANNELS, GENERATION_CHANNELS, PrivateVault, VERIFIER_CHANNELS};
 use crate::verifier::{
@@ -369,6 +369,33 @@ impl WorkflowEngine {
     /// read-only shadow.
     pub fn research_state_shadow(&self, owner_id: &str, run_id: &str) -> Result<Value, ReCtmError> {
         let run = self.require_owner(run_id, owner_id)?;
+        let normalized = self.normalized_research_state(&run, true)?;
+        let state = ResearchStateProjector::analyze(normalized.snapshot())
+            .map_err(research_state_shadow_error)?;
+        let state = serde_json::to_value(&state)
+            .map_err(|error| internal(&format!("research-state serialization failed: {error}")))?;
+        let normalization = serde_json::to_value(normalized.summary())
+            .map_err(|error| internal(&format!("normalization serialization failed: {error}")))?;
+        let warnings = serde_json::to_value(normalized.warnings())
+            .map_err(|error| internal(&format!("warning serialization failed: {error}")))?;
+        Ok(serde_json::json!({
+            "ok":true,
+            "shadow":true,
+            "run_id":run_id,
+            "workflow_state":run["state"],
+            "workflow_protocol_version":metadata_i64(&run,"workflow_protocol_version",1),
+            "normalization":normalization,
+            "warnings":warnings,
+            "research_state":state
+        }))
+    }
+
+    fn normalized_research_state(
+        &self,
+        run: &Value,
+        include_verification_reports: bool,
+    ) -> Result<LegacyNormalization, ReCtmError> {
+        let run_id = text(run, "run_id")?;
         let metadata = run
             .get("metadata")
             .and_then(Value::as_object)
@@ -400,7 +427,7 @@ impl WorkflowEngine {
                     .map(str::to_owned)
             })
             .collect::<Vec<_>>();
-        let input = LegacyResearchInput::new(
+        let mut input = LegacyResearchInput::new(
             self.vault.read_problem(run_id)?,
             round_index,
             metadata
@@ -422,30 +449,27 @@ impl WorkflowEngine {
         .with_events(self.vault.read_generation_memory(run_id, "events")?)
         .with_registered_reference_ids(registered_reference_ids)
         .with_branch_results(branch_results)
-        .with_join_result(self.vault.read_join_result(run_id)?)
-        .with_verification_reports(
-            self.vault
-                .read_generation_memory(run_id, "verification_reports")?,
-        );
-        let normalized = normalize_legacy_research(&input).map_err(research_state_shadow_error)?;
+        .with_join_result(self.vault.read_join_result(run_id)?);
+        if include_verification_reports {
+            input = input.with_verification_reports(
+                self.vault
+                    .read_generation_memory(run_id, "verification_reports")?,
+            );
+        }
+        normalize_legacy_research(&input).map_err(research_state_shadow_error)
+    }
+
+    fn protocol_three_research_task_view(
+        &self,
+        run: &Value,
+        include_verification_reports: bool,
+    ) -> Result<Value, ReCtmError> {
+        let normalized = self.normalized_research_state(run, include_verification_reports)?;
         let state = ResearchStateProjector::analyze(normalized.snapshot())
-            .map_err(research_state_shadow_error)?;
-        let state = serde_json::to_value(&state)
-            .map_err(|error| internal(&format!("research-state serialization failed: {error}")))?;
-        let normalization = serde_json::to_value(normalized.summary())
-            .map_err(|error| internal(&format!("normalization serialization failed: {error}")))?;
-        let warnings = serde_json::to_value(normalized.warnings())
-            .map_err(|error| internal(&format!("warning serialization failed: {error}")))?;
-        Ok(serde_json::json!({
-            "ok":true,
-            "shadow":true,
-            "run_id":run_id,
-            "workflow_state":run["state"],
-            "workflow_protocol_version":metadata_i64(&run,"workflow_protocol_version",1),
-            "normalization":normalization,
-            "warnings":warnings,
-            "research_state":state
-        }))
+            .map_err(protocol3_state_error)?;
+        ResearchTaskView::build(&state, normalized.warnings())
+            .and_then(|view| view.to_value())
+            .map_err(protocol3_state_error)
     }
 
     pub fn write(
@@ -1443,6 +1467,12 @@ impl WorkflowEngine {
                 }
             }
             _ => {}
+        }
+        if protocol >= 3 && matches!(role, WorkflowRole::Generator | WorkflowRole::Repair) {
+            context.insert(
+                "mathematical_research_state".to_owned(),
+                self.protocol_three_research_task_view(run, role == WorkflowRole::Repair)?,
+            );
         }
         Ok(Value::Object(context))
     }

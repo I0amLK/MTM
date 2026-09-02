@@ -245,16 +245,28 @@ fn verification_failures_and_replanning_decisions_are_normalized() {
             "selected_focus_node_id": focus,
             "new_constraints": ["treat paired factors separately"]
         })])
-        .with_verification_reports(vec![json!({
-            "critical_errors": [{"location": "Lemma 2", "issue": "sign error"}],
-            "gaps": [],
-            "repair_hints": "Correct the sign in the paired case."
-        })]);
+        .with_verification_reports(vec![
+            json!({
+                "verification_report":{
+                    "summary":"needs repair",
+                    "critical_errors": [{"location": "Lemma 2", "issue": "sign error"}],
+                    "gaps": []
+                },
+                "verdict":"wrong",
+                "repair_hints": "Correct the sign in the paired case."
+            }),
+            json!({
+                "critical_errors": [],
+                "gaps": [{"location":"Lemma 3","issue":"missing case"}],
+                "repair_hints": "Add the missing legacy case."
+            }),
+        ]);
     let normalized = normalize_legacy_research(&input).expect("normalization");
     let state = ResearchStateProjector::project(normalized.snapshot()).expect("projection");
     assert_eq!(normalized.summary().normalized_decisions(), 1);
-    assert_eq!(state.attempts().len(), 2);
+    assert_eq!(state.attempts().len(), 3);
     assert_eq!(state.attempts()[1].method, ResearchAttemptMethod::Repair);
+    assert_eq!(state.attempts()[2].method, ResearchAttemptMethod::Repair);
     assert_eq!(
         state.decisions()[0]
             .selected_focus_node_id
