@@ -83,8 +83,18 @@ mtm check-config
 Expected command identity:
 
 ```text
-mtm 0.3.0
+mtm 0.4.0-preview.1
 ```
+
+MTM 0.4.0-preview.1 keeps workflow protocol 2 as the production default. To exercise
+the MTM-009 mathematical research-state workflow for new runs, launch MTM with:
+
+```bash
+MTM_WORKFLOW_PROTOCOL_VERSION=3 mtm tui --quick-tunnel --native-mode dangerous
+```
+
+Protocol 3 is opt-in in this preview. Existing protocol-1/2 runs remain resumable and
+the final mathematical artifact remains `proof_verified.tex`.
 
 ### Install from a local clone
 
@@ -125,7 +135,8 @@ mtm tui --quick-tunnel --native-mode dangerous
 ```
 
 This starts the operator TUI, enables the validated Bubblewrap-backed Native path,
-and attempts to create an owned Cloudflare Quick Tunnel. If `cloudflared` is not
+prints each tool call as it starts/completes (tool name plus argument keys, never
+argument values), and attempts to create an owned Cloudflare Quick Tunnel. If `cloudflared` is not
 available, start locally without the tunnel:
 
 ```bash

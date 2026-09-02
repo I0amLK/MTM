@@ -23,7 +23,7 @@ from scripts.mtm008_runtime_harness import free_port, oauth_token, runtime_envir
 from scripts.run_mtm007_http_smoke import tool_call
 
 
-REPORT = ROOT / "mtm009-research-resource.json"
+REPORT = Path(os.environ.get("MTM009_RESOURCE_REPORT", ROOT / "mtm009-research-resource.json"))
 BINARY = ROOT / "target" / "release" / "mtm"
 SAMPLES = 40
 
