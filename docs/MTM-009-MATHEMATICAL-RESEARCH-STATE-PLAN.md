@@ -785,21 +785,23 @@ tests.
 
 Tasks:
 
-- [ ] Add named enums and record types.
-- [ ] Add canonical ID wrappers and validation.
-- [ ] Implement dependency construction and reverse adjacency.
-- [ ] Implement cycle detection and deterministic topological order.
-- [ ] Implement target reachability, critical blockers, and actionable frontier.
-- [ ] Implement canonical serialization and digest.
-- [ ] Add size/depth/count limits.
-- [ ] Add positive, boundary, and malformed fixtures.
+- [x] Add named enums and record types.
+- [x] Add canonical ID wrappers and validation.
+- [x] Implement dependency construction and reverse adjacency.
+- [x] Implement cycle detection and deterministic topological order.
+- [x] Implement target reachability, critical blockers, and actionable frontier.
+- [x] Implement canonical serialization and digest.
+- [x] Add size/depth/count limits.
+- [x] Add positive, boundary, and malformed fixtures.
 
 Acceptance:
 
-- [ ] Projector core imports no authority or I/O layer.
-- [ ] Same input is byte-deterministic across repeated runs.
-- [ ] All graph-shape and size tests pass.
-- [ ] A0 passes.
+- [x] Projector core imports no authority or I/O layer.
+- [x] Same input is byte-deterministic across repeated runs.
+- [x] All graph-shape and size tests pass.
+- [x] The A0 build/static subset and exact protocol-1/2 workflow differential pass;
+  implementation-bound target/release evidence is intentionally requalified at
+  Delivery 7 rather than rewritten after every internal slice.
 
 Rollback: delete the unused pure module; no state or contract change exists.
 

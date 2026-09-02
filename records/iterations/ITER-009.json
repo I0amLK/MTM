@@ -48,21 +48,21 @@
     {
       "delivery": 1,
       "name": "governance_baseline_frozen_contracts",
-      "status": "validated_pending_commit",
+      "status": "accepted",
       "production_behavior_changed": false,
       "goal": "Approve scope, record the synchronized baseline, freeze complexity budgets and protocol-3 research contract fixtures, and make the constraints machine-checkable."
     },
     {
       "delivery": 2,
       "name": "pure_types_and_graph_algorithms",
-      "status": "planned",
+      "status": "validated_pending_commit",
       "production_behavior_changed": false,
       "goal": "Implement pure deterministic research types, dependency graph construction, cycle detection, reachability, frontier and digest with exhaustive unit/property tests."
     },
     {
       "delivery": 3,
       "name": "normalized_append_only_research_records",
-      "status": "planned",
+      "status": "in_progress",
       "production_behavior_changed": false,
       "goal": "Normalize existing plans, screenings, branches, failures, replans, retrieval and verifier findings into existing logical channels and run projection in read-only shadow."
     },
@@ -115,15 +115,16 @@
   ],
   "acceptance": {
     "A0": {"status": "accepted_delivery_1", "required": "Build, format, Clippy, tests, graph/governance validators, MTM-009 contract validator and diff checks.", "evidence": "python3 scripts/run_checks.py returned ok=true after the MTM-009 governance/contract changes."},
-    "A1": {"status": "pending", "required": "Protocol-1/2 frozen compatibility plus protocol-3 research-contract golden fixtures."},
+    "A1": {"status": "accepted_delivery_2", "required": "Protocol-1/2 frozen compatibility plus protocol-3 research-contract golden fixtures.", "evidence": "The 82-checkpoint MTM-006 workflow differential retained zero mismatches and the pure chain/frontier graph digest is frozen in mtm009-research-graph-v1.json."},
     "A2": {"status": "pending", "required": "Read-only deterministic shadow projection before model-facing exposure."},
     "A3": {"status": "pending", "required": "Retry/crash/concurrency, identity, capability, branch/verifier firewall and finalizer non-regression."},
     "A4": {"status": "pending", "required": "Real web-driven paired mathematical evaluation with normal research/workspace tools and verified .tex outputs."},
     "A5": {"status": "pending", "required": "Task-envelope, projection latency, RSS, writes, replay and shutdown non-regression."}
   },
   "delivery_1_receipt": {
-    "status": "validated_pending_commit",
+    "status": "accepted",
     "baseline_commit": "c3f529282d9378a4177cb845bcbdd40e6e35b662",
+    "delivery_commit": "d9725832b9b7552984f593754b6f83e6c4aa9460",
     "origin_main": "c3f529282d9378a4177cb845bcbdd40e6e35b662",
     "production_behavior_changed": false,
     "production_workflow_protocol": 2,
@@ -150,6 +151,66 @@
         "result": "Complete local gate passed, including all accepted MTM-002 through MTM-008 frozen differential and target-evidence validators; production protocol remained 2."
       }
     ],
+    "commit_pending": false
+  },
+  "delivery_2_receipt": {
+    "status": "validated_pending_commit",
+    "baseline_commit": "d9725832b9b7552984f593754b6f83e6c4aa9460",
+    "production_behavior_changed": false,
+    "authority_before": "rust",
+    "authority_after": "rust",
+    "crate_vertices_before": 8,
+    "crate_vertices_after": 8,
+    "crate_edges_before": 18,
+    "crate_edges_after": 18,
+    "workflow_states_before": 18,
+    "workflow_states_after": 18,
+    "state_schema_version": 2,
+    "production_workflow_protocol": 2,
+    "new_dependencies": 0,
+    "new_vault_channels": 0,
+    "projector_source_sha256": "f55e33875c4e3e4f9bf4c048492f7555965810bb1027177a0d7d658553c2881c",
+    "projector_tests_sha256": "7b26ffe4900dcedb9e5a455ee84fef28044c4dbd1ca2153b34891f627997b67b",
+    "graph_fixture_sha256": "773de052afde372536c3f24605979d5c525c1037837904813f3470be9efcbdc4",
+    "contract_validator_sha256": "765a00243952c24de7afd069dcbf90a5d17bdb035acf2981f7463cbb42257eee",
+    "graph_digest": "sha256:9d72141b73f1bc50d69a954996552ab19e0c4d192eac2f9068adc70fc2f122bf",
+    "workflow_reference_sha256": "def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0",
+    "tests": {
+      "research_and_existing_workflow_unit_tests": 34,
+      "existing_workflow_integration_tests": 4,
+      "exhaustive_small_dag_cases": 1024,
+      "failures": 0
+    },
+    "implemented": [
+      "Validated research node, plan, attempt, decision and domain identifiers",
+      "Closed node, status, attempt, outcome and obstruction enums",
+      "Bounded immutable snapshots and deterministic canonical ordering",
+      "Dependency and reverse-dependency construction",
+      "Strongly connected component cycle detection including self-loops",
+      "Deterministic topological ordering",
+      "Target dependency closure, critical blockers and actionable frontier",
+      "Plan-local terminal-goal inference preserving alternative-route semantics",
+      "Refuted, circular and superseded route propagation",
+      "Canonical SHA-256 research-state digest",
+      "Count, edge, identifier, text, revision and reference limits"
+    ],
+    "commands": [
+      {
+        "command": "cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace",
+        "exit_code": 0,
+        "result": "The entire Rust workspace passed formatting, warnings-denied Clippy, 34 workflow unit tests including 1,024 exhaustive small DAGs, all existing crate tests and four workflow integration tests."
+      },
+      {
+        "command": "python3 scripts/run_mtm006_conformance.py",
+        "exit_code": 0,
+        "result": "All 82 protocol-1/2 workflow checkpoints retained zero mismatches and the frozen reference SHA-256."
+      },
+      {
+        "command": "python3 scripts/validate_mtm009_research_contract.py && python3 scripts/validate_migration_graph.py && python3 scripts/validate_engineering_graph.py && git diff --check",
+        "exit_code": 0,
+        "result": "The pure-boundary, no-graph-dependency, frozen topology, final-.tex, migration-DAG and diff-hygiene gates passed."
+      }
+    ],
     "commit_pending": true
   },
   "recorded_failures_and_repairs": [
@@ -158,10 +219,28 @@
       "stage": "out-of-scope terminology exclusion scan",
       "failure": "The first grep pattern used a bare exclusion substring and falsely matched that substring inside an ordinary word in the implementation plan, causing the combined final check to exit 1 after all validators and tests had already passed.",
       "repair": "Keep the exclusion requirement but use exact phrase and token-boundary matching, then rerun the complete final consistency command."
+    },
+    {
+      "delivery": 2,
+      "stage": "first targeted Rust gate",
+      "failure": "The non-interactive command environment did not place cargo on PATH, so the first targeted gate exited 127 before compiling any source.",
+      "repair": "Used the repository-pinned Rust 1.98.0 toolchain under .toolchain with explicit CARGO_HOME, RUSTUP_HOME and PATH, then reran formatting, Clippy and tests without weakening any gate."
+    },
+    {
+      "delivery": 2,
+      "stage": "alternative-plan graph semantics review",
+      "failure": "The first global dependency interpretation did not explicitly distinguish alternative plan routes and could have encouraged a future normalizer to model all plan goals as conjunctive target dependencies.",
+      "repair": "Added plan-local terminal-goal inference and independent route solved/blocker/invalid/frontier projections, plus a regression proving that one refuted plan does not invalidate another solved plan."
+    },
+    {
+      "delivery": 2,
+      "stage": "historical target-evidence freshness",
+      "failure": "The standalone governance suite correctly reported MTM-006, MTM-007 and MTM-008 implementation-bound target reports as stale after the new workflow source module was added.",
+      "repair": "Preserved the historical reports unchanged, ran the full Rust workspace and exact 82-checkpoint workflow differential now, and deferred fresh target/release requalification to the release delivery where it is meaningful."
     }
   ],
   "manual_pending": [
-    "Delivery 1 governance and frozen-contract gates must pass before production implementation begins.",
+    "Delivery 3 must normalize append-only records and run the projector in read-only shadow before any model-facing exposure.",
     "Protocol-3 mathematical effect must be measured on a frozen paired corpus before cutover.",
     "Other operating systems and site-local research/CAS layouts remain release-specific evidence."
   ],

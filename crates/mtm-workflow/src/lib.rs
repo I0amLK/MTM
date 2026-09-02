@@ -4,6 +4,7 @@ pub mod engine;
 pub mod kernel;
 pub mod methodology;
 pub mod research;
+pub mod research_state;
 pub mod vault;
 pub mod verifier;
 

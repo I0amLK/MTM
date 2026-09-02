@@ -11,6 +11,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "conformance" / "golden" / "mtm009-research-state-contract-v1.json"
+GRAPH_FIXTURE = ROOT / "conformance" / "golden" / "mtm009-research-graph-v1.json"
 
 EXPECTED_MEMBERS = [
     "crates/mtm-contracts",
@@ -81,6 +82,31 @@ FORBIDDEN_PRODUCTION_PATTERNS = (
     "anthropic::",
 )
 
+FORBIDDEN_PROJECTOR_PATTERNS = (
+    "std::fs",
+    "std::io",
+    "std::net",
+    "std::process",
+    "std::time",
+    "tokio",
+    "reqwest",
+    "mtm_storage",
+    "crate::engine",
+    "crate::vault",
+    "crate::verifier",
+    "capabilityclaims",
+    "finalizationpermit",
+    "workflowstate",
+    "deserialize",
+)
+
+FORBIDDEN_GRAPH_DEPENDENCIES = {
+    "petgraph",
+    "graphlib",
+    "daggy",
+    "pathfinding",
+}
+
 
 def validate() -> dict[str, Any]:
     fixture = json.loads(FIXTURE.read_text(encoding="utf-8"))
@@ -103,6 +129,19 @@ def validate() -> dict[str, Any]:
     workspace = tomllib.loads((ROOT / "Cargo.toml").read_text(encoding="utf-8"))
     if workspace.get("workspace", {}).get("members") != EXPECTED_MEMBERS:
         raise ValueError("MTM-009 may not add, remove, or reorder workspace crates")
+    workspace_dependencies = set(workspace.get("workspace", {}).get("dependencies", {}))
+    workflow_manifest = tomllib.loads(
+        (ROOT / "crates" / "mtm-workflow" / "Cargo.toml").read_text(encoding="utf-8")
+    )
+    workflow_dependencies = set(workflow_manifest.get("dependencies", {}))
+    forbidden_graph_dependencies = FORBIDDEN_GRAPH_DEPENDENCIES & (
+        workspace_dependencies | workflow_dependencies
+    )
+    if forbidden_graph_dependencies:
+        raise ValueError(
+            "MTM-009 may not add a generic graph dependency: "
+            f"{sorted(forbidden_graph_dependencies)}"
+        )
 
     catalog_raw = base64.b64decode(
         "".join((ROOT / "crates" / "mtm-cli" / "assets" / "tool-catalog-v1.b64").read_text(encoding="utf-8").split()),
@@ -169,6 +208,62 @@ def validate() -> dict[str, Any]:
     if not reused or not reused.issubset(EXPECTED_GENERATION_CHANNELS):
         raise ValueError("MTM-009 must reuse only existing generation memory channels")
 
+    workflow_lib = (ROOT / "crates" / "mtm-workflow" / "src" / "lib.rs").read_text(
+        encoding="utf-8"
+    )
+    if "pub mod research_state;" not in workflow_lib:
+        raise ValueError("MTM-009 pure research-state module is not exported")
+    projector_path = ROOT / "crates" / "mtm-workflow" / "src" / "research_state.rs"
+    projector_source = projector_path.read_text(encoding="utf-8")
+    projector_lower = projector_source.lower()
+    for pattern in FORBIDDEN_PROJECTOR_PATTERNS:
+        if pattern in projector_lower:
+            raise ValueError(
+                f"research-state projector crossed its pure boundary: {pattern}"
+            )
+    for required in (
+        "pub struct ResearchStateProjector;",
+        "pub fn analyze(",
+        "pub fn project(",
+        "BTreeMap",
+        "BTreeSet",
+        "cycle_components",
+        "topological_order",
+        "dependency_closure",
+        "actionable_frontier",
+        "sha256:",
+    ):
+        if required not in projector_source:
+            raise ValueError(f"research-state projector omits required pure fact: {required}")
+    tests_path = (
+        ROOT
+        / "crates"
+        / "mtm-workflow"
+        / "src"
+        / "research_state"
+        / "tests.rs"
+    )
+    if not tests_path.is_file():
+        raise ValueError("research-state edge tests must remain separated from production code")
+
+    graph_fixture = json.loads(GRAPH_FIXTURE.read_text(encoding="utf-8"))
+    if (
+        graph_fixture.get("schema_version") != "1.0.0"
+        or graph_fixture.get("case_id") != "chain-frontier"
+    ):
+        raise ValueError("MTM-009 research graph golden identity is invalid")
+    expected_graph = graph_fixture.get("expected")
+    if not isinstance(expected_graph, dict):
+        raise ValueError("MTM-009 research graph golden expected payload is missing")
+    graph_digest = expected_graph.get("digest")
+    if (
+        not isinstance(graph_digest, str)
+        or re.fullmatch(r"sha256:[0-9a-f]{64}", graph_digest) is None
+    ):
+        raise ValueError("MTM-009 research graph golden digest is invalid")
+    if expected_graph.get("topological_order") != ["a", "b", "target"]:
+        raise ValueError("MTM-009 research graph golden ordering drifted")
+
     return {
         "planned_workflow_protocol": 3,
         "production_workflow_protocol": 2,
@@ -180,6 +275,9 @@ def validate() -> dict[str, Any]:
         "generation_channels": len(EXPECTED_GENERATION_CHANNELS),
         "zero_complexity_budgets": len(ZERO_BUDGET_KEYS),
         "final_artifact": "proof_verified.tex",
+        "projector_pure_boundary": True,
+        "generic_graph_dependencies": 0,
+        "graph_golden_digest": graph_digest,
     }
 
 

@@ -137,6 +137,9 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(summary["hidden_aliases"], 11)
         self.assertEqual(summary["state_schema_version"], 2)
         self.assertEqual(summary["final_artifact"], "proof_verified.tex")
+        self.assertTrue(summary["projector_pure_boundary"])
+        self.assertEqual(summary["generic_graph_dependencies"], 0)
+        self.assertRegex(summary["graph_golden_digest"], r"^sha256:[0-9a-f]{64}$")
 
     def test_mtm_cli_publishes_only_the_mtm_binary_name(self) -> None:
         manifest = tomllib.loads((ROOT / "crates" / "mtm-cli" / "Cargo.toml").read_text(encoding="utf-8"))

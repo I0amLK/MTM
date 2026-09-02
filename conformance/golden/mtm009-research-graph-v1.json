@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "case_id": "chain-frontier",
+  "input": {
+    "target_node_id": "target",
+    "nodes": [
+      {"node_id": "target", "kind": "target", "status": "open", "dependencies": ["b"]},
+      {"node_id": "b", "kind": "lemma", "status": "open", "dependencies": ["a"]},
+      {"node_id": "a", "kind": "lemma", "status": "open", "dependencies": []}
+    ],
+    "active_plan_ids": ["plan-1"]
+  },
+  "expected": {
+    "schema_version": 1,
+    "topological_order": ["a", "b", "target"],
+    "critical_nodes": ["target", "a", "b"],
+    "critical_blockers": ["target", "a", "b"],
+    "actionable_frontier": ["a"],
+    "plan_routes": {
+      "plan-1": {
+        "goal_node_ids": ["b"],
+        "critical_nodes": ["a", "b"],
+        "blockers": ["a", "b"],
+        "actionable_frontier": ["a"],
+        "invalid_nodes": [],
+        "route_solved": false
+      }
+    },
+    "invalid_route_count": 0,
+    "digest": "sha256:9d72141b73f1bc50d69a954996552ab19e0c4d192eac2f9068adc70fc2f122bf"
+  }
+}
