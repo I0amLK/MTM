@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0.0",
+  "corpus_id": "mtm009-web-mathematics-v1",
+  "purpose": "Frozen paired protocol-2/protocol-3 web-driven mathematics evaluation. Only problem_tex is treatment-visible; evaluator_checks are withheld from the solving conversation.",
+  "treatment_policy": {
+    "surface": "same supported web model and MTM connector configuration within each pair",
+    "research_tools": "normal web research plus MTM workspace/Bash/CAS as available",
+    "pair_order": "balanced AB/BA order encoded per case",
+    "protocol2": "production-compatible workflow protocol 2",
+    "protocol3": "MTM-009 structured research contract plus bounded advisory context",
+    "final_artifact": "proof_verified.tex"
+  },
+  "cases": [
+    {
+      "case_id": "M009-C01-counterexample-group",
+      "pair_order": ["protocol2", "protocol3"],
+      "difficulty": "medium",
+      "capabilities": ["counterexample", "finite_group", "route_rejection"],
+      "research_control_focus": "Does the run test/falsify the overstrong assertion instead of repeatedly trying to prove it?",
+      "problem_tex": "Show that the assertion ‘every finite group whose proper subgroups are cyclic is itself cyclic’ is false. Give an explicit finite counterexample and verify that every proper subgroup of your example is cyclic.",
+      "evaluator_checks": [
+        "A valid counterexample is the Klein four group C_2 x C_2.",
+        "The proof verifies that all proper nontrivial subgroups have order 2 and are cyclic.",
+        "The conclusion explicitly distinguishes refuting the assertion from proving a modified statement."
+      ]
+    },
+    {
+      "case_id": "M009-C02-simultaneous-diagonalization",
+      "pair_order": ["protocol3", "protocol2"],
+      "difficulty": "medium",
+      "capabilities": ["linear_algebra", "decomposition", "multiple_routes"],
+      "research_control_focus": "Does the run identify the invariant eigenspace decomposition as the critical structure and avoid redundant routes?",
+      "problem_tex": "Let A,B in M_n(C) be diagonalizable matrices satisfying AB=BA. Prove that A and B are simultaneously diagonalizable over C.",
+      "evaluator_checks": [
+        "Commutation implies every eigenspace of A is B-invariant.",
+        "The restriction of B to each A-eigenspace is diagonalizable, or an equivalent valid argument is supplied.",
+        "Combining eigenbases of the invariant eigenspaces yields a common eigenbasis."
+      ]
+    },
+    {
+      "case_id": "M009-C03-p-group-center",
+      "pair_order": ["protocol2", "protocol3"],
+      "difficulty": "medium",
+      "capabilities": ["group_theory", "structural_lemma", "proof_planning"],
+      "research_control_focus": "Does the run isolate the class equation/orbit-size obstruction early?",
+      "problem_tex": "Let G be a finite group of order p^n, where p is prime and n>=1. Prove that the center Z(G) is nontrivial.",
+      "evaluator_checks": [
+        "The argument uses conjugacy classes or the conjugation action correctly.",
+        "Every noncentral conjugacy class has size divisible by p.",
+        "The class equation implies |Z(G)| is divisible by p and therefore greater than 1."
+      ]
+    },
+    {
+      "case_id": "M009-C04-euler-trail",
+      "pair_order": ["protocol3", "protocol2"],
+      "difficulty": "medium",
+      "capabilities": ["graph_theory", "construction", "case_split"],
+      "research_control_focus": "Does the run keep necessity and sufficiency as distinct dependencies and assemble them cleanly?",
+      "problem_tex": "Let G be a finite connected graph with at least one edge. Prove that G has a trail using every edge exactly once if and only if G has either zero or two vertices of odd degree. Prove also that the trail may be chosen closed exactly in the zero-odd-vertex case.",
+      "evaluator_checks": [
+        "Necessity follows from parity of entrances/exits along an Euler trail.",
+        "Sufficiency is justified by a valid Euler-circuit/trail construction such as Hierholzer's argument or reduction by adding an edge.",
+        "The closed-trail characterization is handled explicitly."
+      ]
+    },
+    {
+      "case_id": "M009-C05-interval-fixed-point",
+      "pair_order": ["protocol2", "protocol3"],
+      "difficulty": "easy-medium",
+      "capabilities": ["analysis", "diagnostic_function", "direct_proof"],
+      "research_control_focus": "Does the run quickly reduce to the right diagnostic function instead of over-searching?",
+      "problem_tex": "Let f:[0,1]->[0,1] be continuous. Prove that there exists x in [0,1] such that f(x)=x.",
+      "evaluator_checks": [
+        "A valid proof considers g(x)=f(x)-x or an equivalent function.",
+        "The endpoint inequalities are correct.",
+        "The intermediate value theorem is applied with all hypotheses stated."
+      ]
+    },
+    {
+      "case_id": "M009-C06-finite-domain-field",
+      "pair_order": ["protocol3", "protocol2"],
+      "difficulty": "easy-medium",
+      "capabilities": ["ring_theory", "injective_surjective", "lemma_selection"],
+      "research_control_focus": "Does the run recognize the finite injective-implies-surjective lemma as the cheapest route?",
+      "problem_tex": "Prove that every finite integral domain is a field.",
+      "evaluator_checks": [
+        "For each nonzero a, multiplication x -> ax is injective because there are no zero divisors.",
+        "Finiteness implies the multiplication map is surjective.",
+        "Surjectivity produces x with ax=1, so every nonzero element is invertible."
+      ]
+    },
+    {
+      "case_id": "M009-C07-zsigmondy-corollary",
+      "pair_order": ["protocol2", "protocol3"],
+      "difficulty": "hard",
+      "capabilities": ["number_theory", "literature_retrieval", "reference_audit"],
+      "research_control_focus": "Does the run recognize a missing external theorem, perform focused retrieval, and stop searching once the needed source/result is secured?",
+      "problem_tex": "For every integer n>1 with n!=6, prove that 2^n-1 has a prime divisor that does not divide 2^k-1 for any integer 1<=k<n. You may invoke a standard published theorem if you state its hypotheses precisely and identify the exceptional cases relevant here.",
+      "evaluator_checks": [
+        "A correct route invokes the Bang-Zsigmondy theorem or supplies an equivalent complete proof.",
+        "The specialization a=2,b=1 is checked carefully.",
+        "The exceptional case n=6 is handled correctly and no irrelevant general exception is misapplied.",
+        "If an external theorem is used, its assumptions and source disposition are auditable."
+      ]
+    },
+    {
+      "case_id": "M009-C08-finite-field-subgroup-cyclic",
+      "pair_order": ["protocol3", "protocol2"],
+      "difficulty": "hard",
+      "capabilities": ["field_theory", "finite_groups", "polynomial_root_bound", "multi_lemma"],
+      "research_control_focus": "Does the run preserve useful partial lemmas and consolidate them into a clean cyclicity proof?",
+      "problem_tex": "Let K be a field and let G be a finite subgroup of the multiplicative group K^*. Prove that G is cyclic.",
+      "evaluator_checks": [
+        "The proof uses a valid finite-abelian-group argument together with the fact that a nonzero polynomial of degree d over a field has at most d roots, or an equivalent complete method.",
+        "It rules out a noncyclic finite abelian structure without assuming the conclusion.",
+        "All uses of element orders/exponents are justified."
+      ]
+    }
+  ]
+}

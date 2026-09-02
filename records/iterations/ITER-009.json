@@ -83,7 +83,7 @@
     {
       "delivery": 6,
       "name": "paired_web_driven_mathematical_evaluation",
-      "status": "planned",
+      "status": "in_progress",
       "production_behavior_changed": false,
       "goal": "Compare protocol 2 and 3 on a frozen real-use corpus with normal web research, workspace Bash/CAS and independent evaluation of final verified .tex outputs."
     },
@@ -118,8 +118,8 @@
     "A1": {"status": "accepted_delivery_4", "required": "Protocol-1/2 frozen compatibility plus protocol-3 research-contract golden fixtures.", "evidence": "The 82-checkpoint MTM-006 workflow differential retains zero mismatches and frozen SHA-256 def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0; protocol-3 structured plans, events, screening, branch/failure/replan records and a complete proof_verified.tex path pass strict unit and end-to-end tests."},
     "A2": {"status": "accepted_delivery_3", "required": "Read-only deterministic shadow projection before model-facing exposure.", "evidence": "Protocol-2 history is normalized and projected only through the owner-authorized research_state_shadow diagnostic; repeated and eight-way concurrent projections are byte-identical and leave the complete disposable state tree unchanged."},
     "A3": {"status": "accepted_delivery_5", "required": "Retry/crash/concurrency, identity, capability, branch/verifier firewall and finalizer non-regression.", "evidence": "Owner mismatch is denied, forged reference/node data cannot influence the graph, malformed collections fail closed, the bounded view is exposed only to protocol-3 Generator/Repair roles, verifier findings enter only Repair-normalized context, Verifier/Branch/Assembler never receive the view, advice is not a precondition, and all existing capability/verifier/finalizer tests pass."},
-    "A4": {"status": "pending", "required": "Real web-driven paired mathematical evaluation with normal research/workspace tools and verified .tex outputs."},
-    "A5": {"status": "pending", "required": "Task-envelope, projection latency, RSS, writes, replay and shutdown non-regression."}
+    "A4": {"status": "pending_real_web_runs", "required": "Real web-driven paired mathematical evaluation with normal research/workspace tools and verified .tex outputs.", "evidence": "The eight-case paired corpus, balanced AB/BA order, predeclared metrics, blind scoring contract and deterministic release gate are frozen; no real web treatment result is recorded yet."},
+    "A5": {"status": "accepted_delivery_6_resource", "required": "Task-envelope, projection latency, RSS, writes, replay and shutdown non-regression.", "evidence": "The same current Rust release was run under explicit protocol 2 and protocol 3 through the same full workflow to DirectProving; 40 repeated task retrievals per treatment passed all eight bounded non-regression checks in mtm009-research-resource.json. This is explicitly not a performance claim."}
   },
   "delivery_1_receipt": {
     "status": "accepted",
@@ -408,6 +408,80 @@
       "Projection/task-envelope latency, RSS and write non-regression are measured with the Delivery-6 paired evaluation workload rather than through a flaky unit-test timing assertion."
     ],
     "commit_pending": false
+  },
+  "delivery_6_progress": {
+    "status": "evaluation_infrastructure_ready_pending_real_web_runs",
+    "baseline_commit": "6e3ec2e",
+    "production_behavior_changed": false,
+    "production_default_workflow_protocol": 2,
+    "evaluation_protocols": [2, 3],
+    "final_artifact": "proof_verified.tex",
+    "resource_evidence": {
+      "path": "mtm009-research-resource.json",
+      "sha256": "9c04834fc4c2b837d5321fc1f2ff8a0fd4a713782bab12580658a06eefb71afc",
+      "implementation_sha256": "b878c964b07c78017c38160f77bc079c6ea57032e36a13966eb192bccaa61ad5",
+      "harness_sha256": "08e963f067a3fa8ec99cb2fc864cbc50827a845b7986a3455ed20045c416aef1",
+      "samples_per_protocol": 40,
+      "checks_passed": 8,
+      "performance_claim": false,
+      "protocol2": {
+        "latency_ms_median": 0.852112,
+        "latency_ms_p95": 0.995608,
+        "task_bytes_max": 14055,
+        "research_view_bytes": 0,
+        "rss_kib_peak_proxy": 14136,
+        "state_byte_growth": 7786
+      },
+      "protocol3": {
+        "latency_ms_median": 1.282883,
+        "latency_ms_p95": 1.456135,
+        "task_bytes_max": 16498,
+        "research_view_bytes": 2060,
+        "rss_kib_peak_proxy": 14136,
+        "state_byte_growth": 7840
+      }
+    },
+    "frozen_math_corpus": {
+      "path": "conformance/mtm009-math-corpus.json",
+      "corpus_id": "mtm009-web-mathematics-v1",
+      "sha256": "d011f17664bd468121223ca59aa44116ff10eb7ce5a0f55996d21311e60c3e2f",
+      "case_count": 8,
+      "protocol2_first": 4,
+      "protocol3_first": 4,
+      "unique_capability_tags": 26
+    },
+    "evaluation_contract": {
+      "path": "mtm009-research-state-math-evaluation.json",
+      "status": "pending_web_runs",
+      "predeclared_metric_count": 10,
+      "raw_web_transcript_recorded": false,
+      "private_reasoning_recorded": false,
+      "blind_treatment_hidden_until_scores_frozen": true,
+      "release_gate": [
+        "protocol3 verified_tex completion must not regress",
+        "at least one predeclared primary research-control metric must improve",
+        "systematic harmful advice blocks cutover",
+        "A5 engineering resource gate must remain accepted"
+      ]
+    },
+    "commands": [
+      {
+        "command": "cargo build --release --locked -p mtm-cli && python3 scripts/run_mtm009_research_resource.py && python3 scripts/validate_mtm009_research_resource.py",
+        "exit_code": 0,
+        "result": "Protocol-2/protocol-3 task-envelope, p95 latency, RSS, filesystem-write, fd and thread non-regression checks all passed; protocol 3 added a 2060-byte bounded research view and about 2.4 KiB to the measured DirectProving task envelope."
+      },
+      {
+        "command": "python3 scripts/validate_mtm009_math_corpus.py && python3 scripts/validate_mtm009_math_evaluation.py",
+        "exit_code": 0,
+        "result": "The frozen eight-case balanced corpus and pending blind-evaluation contract are internally consistent and hash-bound to the current resource evidence; incomplete evaluation cannot claim aggregate results or acceptance."
+      }
+    ],
+    "manual_pending": [
+      "Run all sixteen real web-model treatments using the frozen pair order and same model/connector configuration within each pair.",
+      "Blind-score each A/B final artifact pair before treatment labels are revealed.",
+      "Populate only hashed run/artifact facts and predeclared metrics; never store raw web conversation transcripts or private reasoning.",
+      "Do not mark Delivery 6 accepted or begin Delivery 7 cutover until the deterministic evaluation validator reports the real-web release gate passed."
+    ]
   },
   "recorded_failures_and_repairs": [
     {

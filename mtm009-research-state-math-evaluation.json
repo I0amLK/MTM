@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0.0",
+  "evaluation_id": "mtm009-web-mathematics-v1",
+  "status": "pending_web_runs",
+  "corpus": {
+    "path": "conformance/mtm009-math-corpus.json",
+    "corpus_id": "mtm009-web-mathematics-v1",
+    "sha256": "d011f17664bd468121223ca59aa44116ff10eb7ce5a0f55996d21311e60c3e2f"
+  },
+  "resource_evidence": {
+    "path": "mtm009-research-resource.json",
+    "sha256": "9c04834fc4c2b837d5321fc1f2ff8a0fd4a713782bab12580658a06eefb71afc"
+  },
+  "treatment_contract": {
+    "same_web_model_surface_within_pair": true,
+    "same_connector_configuration_within_pair": true,
+    "research_tools_policy": "normal_web_plus_mtm_workspace",
+    "protocol2": "workflow_protocol_2",
+    "protocol3": "workflow_protocol_3_structured_research_plus_bounded_advisory",
+    "final_artifact": "proof_verified.tex",
+    "raw_web_transcript_recorded": false,
+    "private_reasoning_recorded": false
+  },
+  "predeclared_metrics": [
+    {
+      "metric": "verified_tex_completion",
+      "direction": "higher_is_better",
+      "release_role": "non_regression_gate",
+      "definition": "Number of paired runs reaching the existing mechanical finalizer and producing proof_verified.tex."
+    },
+    {
+      "metric": "first_verification_pass",
+      "direction": "higher_is_better",
+      "release_role": "secondary_quality",
+      "definition": "Number of verified runs accepted by the first verifier submission without Repair."
+    },
+    {
+      "metric": "repeated_failed_route_without_new_evidence",
+      "direction": "lower_is_better",
+      "release_role": "research_control_primary",
+      "definition": "Count of repeated attempts on an already failed route when no new lemma, source, counterexample, computation, or other evidence was added."
+    },
+    {
+      "metric": "counterexample_probe_on_blocker",
+      "direction": "higher_is_better",
+      "release_role": "research_control_primary_when_applicable",
+      "definition": "For cases where the active obstruction is plausibly false/overstrong, whether a bounded counterexample probe was performed before further repeated proving."
+    },
+    {
+      "metric": "focused_retrieval_when_missing_reference",
+      "direction": "higher_is_better",
+      "release_role": "research_control_primary_when_applicable",
+      "definition": "For cases with a missing-reference obstruction, whether retrieval became focused on that exact missing result."
+    },
+    {
+      "metric": "max_no_novelty_retrieval_streak",
+      "direction": "lower_is_better",
+      "release_role": "research_control_primary",
+      "definition": "Maximum consecutive retrieval attempts that registered no new useful reference/material before switching back to synthesis or proof work."
+    },
+    {
+      "metric": "preserved_usable_partial_results",
+      "direction": "higher_is_better_when_replanning_occurs",
+      "release_role": "research_control_secondary",
+      "definition": "Count of evaluator-confirmed useful partial lemmas/results explicitly preserved across a replan rather than discarded."
+    },
+    {
+      "metric": "repair_count",
+      "direction": "lower_is_better",
+      "release_role": "secondary_quality",
+      "definition": "Number of Repair cycles before finalization or unresolved termination."
+    },
+    {
+      "metric": "verifier_finding_count",
+      "direction": "lower_is_better",
+      "release_role": "secondary_quality",
+      "definition": "Total critical-error plus gap findings submitted by the verifier across the run."
+    },
+    {
+      "metric": "harmful_advice_events",
+      "direction": "lower_is_better",
+      "release_role": "safety_gate",
+      "definition": "Protocol-3 advisory events independently judged to have materially pushed the run toward a worse mathematical action; systematic recurrence blocks cutover."
+    }
+  ],
+  "blind_evaluation_contract": {
+    "treatment_hidden_until_scores_frozen": true,
+    "artifact_labels": ["A", "B"],
+    "scores": {
+      "logic_completeness": {"min": 1, "max": 5},
+      "readability": {"min": 1, "max": 5},
+      "research_efficiency": {"min": 1, "max": 5}
+    },
+    "allowed_winner": ["A", "B", "tie"],
+    "rationale_policy": "concise evaluator rationale only; no solver transcript or private reasoning"
+  },
+  "release_gate": {
+    "verified_tex_completion_non_regression": true,
+    "requires_at_least_one_primary_research_control_improvement": true,
+    "systematic_harmful_advice_blocks_cutover": true,
+    "engineering_A5_resource_gate_required": true
+  },
+  "pairs": [
+    {"case_id":"M009-C01-counterexample-group","pair_order":["protocol2","protocol3"],"protocol2":null,"protocol3":null,"blind_evaluation":null},
+    {"case_id":"M009-C02-simultaneous-diagonalization","pair_order":["protocol3","protocol2"],"protocol2":null,"protocol3":null,"blind_evaluation":null},
+    {"case_id":"M009-C03-p-group-center","pair_order":["protocol2","protocol3"],"protocol2":null,"protocol3":null,"blind_evaluation":null},
+    {"case_id":"M009-C04-euler-trail","pair_order":["protocol3","protocol2"],"protocol2":null,"protocol3":null,"blind_evaluation":null},
+    {"case_id":"M009-C05-interval-fixed-point","pair_order":["protocol2","protocol3"],"protocol2":null,"protocol3":null,"blind_evaluation":null},
+    {"case_id":"M009-C06-finite-domain-field","pair_order":["protocol3","protocol2"],"protocol2":null,"protocol3":null,"blind_evaluation":null},
+    {"case_id":"M009-C07-zsigmondy-corollary","pair_order":["protocol2","protocol3"],"protocol2":null,"protocol3":null,"blind_evaluation":null},
+    {"case_id":"M009-C08-finite-field-subgroup-cyclic","pair_order":["protocol3","protocol2"],"protocol2":null,"protocol3":null,"blind_evaluation":null}
+  ],
+  "aggregate": null,
+  "decision": "pending_real_web_evidence"
+}
