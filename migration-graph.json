@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
-  "title": "MTM-reboot nine-milestone migration graph",
-  "updated_at": "2026-09-01T22:44:00-07:00",
+  "title": "MTM-reboot ten-milestone migration graph",
+  "updated_at": "2026-09-02T10:00:00-07:00",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -324,6 +324,40 @@
       ],
       "rollback": "Before protocol-3 cutover, remove the unused MTM-009 scaffolding. After cutover, set new-run protocol default back to 2 or reinstall the accepted MTM-008 release after proving copied protocol-3 state remains safely resumable; existing protocol-1/2 runs and verified .tex artifacts are never rewritten.",
       "dependencies": ["MTM-008"]
+    },
+    {
+      "id": "MTM-010",
+      "title": "Native resolver compatibility stabilization",
+      "status": "in_progress",
+      "priority": "P0",
+      "production_authority_before": "rust",
+      "production_authority_after": "rust",
+      "functional_goal": "Restore ordinary DNS resolution for network-enabled Bubblewrap Native commands when the host /etc/resolv.conf is a symlink into a runtime resolver directory, without widening /run visibility or weakening safe-mode network isolation.",
+      "scope": [
+        "Resolve the host /etc/resolv.conf target and preserve only an explicitly trusted resolver file when the existing read-only /etc mount would leave the symlink dangling",
+        "Create only the empty destination parent directories required for that single read-only resolver-file bind",
+        "Preserve safe-mode --unshare-net and all existing workspace, private-vault, forbidden-path, capability-drop and toolchain boundaries",
+        "Add unit, target and real-network regressions for regular resolv.conf, supported runtime resolver symlinks, unsafe symlink targets, safe-mode isolation and dangerous-mode DNS",
+        "Rerun the real webpage edge corpus without DoH or curl --resolve workarounds before acceptance"
+      ],
+      "non_goals": [
+        "No broad /run, /var/run, home, secret, credential or service-state mount",
+        "No embedded DNS client, DNS-over-HTTPS fallback, proxy, daemon or background resolver",
+        "No change to safe-mode network isolation or Native dangerous/workflow authority separation",
+        "No workflow protocol, public tool, state schema, OAuth, MCP or finalizer change",
+        "No unrelated Native cleanup, toolchain redesign or performance claim"
+      ],
+      "acceptance_levels": ["A0", "A1", "A2", "A3", "A4", "A5"],
+      "validation_commands": [
+        "python3 scripts/run_mtm010_native_resolver.py",
+        "python3 scripts/validate_mtm010_native_resolver.py",
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets -- -D warnings",
+        "cargo test --workspace",
+        "python3 scripts/run_checks.py"
+      ],
+      "rollback": "Revert the resolver-file mount change and return to the accepted MTM-009/MTM-008 Bubblewrap mount set; no persistent state or workflow artifact migration is involved.",
+      "dependencies": ["MTM-008"]
     }
   ],
   "edges": [
@@ -338,9 +372,10 @@
     {"source": "MTM-007", "target": "MTM-005"},
     {"source": "MTM-007", "target": "MTM-006"},
     {"source": "MTM-008", "target": "MTM-007"},
-    {"source": "MTM-009", "target": "MTM-008"}
+    {"source": "MTM-009", "target": "MTM-008"},
+    {"source": "MTM-010", "target": "MTM-008"}
   ],
-  "todo": ["MTM-009"],
+  "todo": ["MTM-009", "MTM-010"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -661,6 +696,22 @@
       "status_before": "approved",
       "status_after": "in_progress",
       "summary": "Fetched origin/main, confirmed local and GitHub main at c3f529282d9378a4177cb845bcbdd40e6e35b662 with no ahead/behind commits, confirmed deployed MTM 0.3.0 SHA-256 0a785a122396a3f8961cbc33b967e7a48874b90311333c8860a1e5c75582fd7f, and began Delivery 1 governance/contracts only."
+    },
+    {
+      "event_id": "MEVT-041",
+      "milestone_id": "MTM-010",
+      "at": "2026-09-02T09:59:00-07:00",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "Approved a narrow Native resolver compatibility milestone after live MTM-4/Re-CMT tests proved that network-enabled Bubblewrap commands could reach direct IP HTTPS but ordinary hostnames failed because /etc/resolv.conf pointed to an unmounted runtime resolver file. The user explicitly approved the remediation TODO while requiring quality-first implementation."
+    },
+    {
+      "event_id": "MEVT-042",
+      "milestone_id": "MTM-010",
+      "at": "2026-09-02T10:00:00-07:00",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Began Native resolver stabilization only after MTM-009 workflow fixes were independently committed and the new milestone froze the security boundary: no broad /run mount, no safe-mode network weakening, and no workflow/gateway contract changes."
     }
   ],
   "receipt_contract": {

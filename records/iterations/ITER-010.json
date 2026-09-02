@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0.0",
+  "iteration": "ITER-010",
+  "milestone": "MTM-010",
+  "title": "Native resolver compatibility stabilization",
+  "status": "in_progress",
+  "started_at": "2026-09-02T10:00:00-07:00",
+  "baseline_commit": "67a28e24ed5f40ed5ab369bda3d50d26f308ea62",
+  "authority_before": "rust",
+  "authority_after": "rust",
+  "trigger": {
+    "observed_behavior": "Network-enabled Bubblewrap commands could reach direct IP HTTPS but hostname requests failed at DNS resolution.",
+    "sandbox_fact": "/etc/resolv.conf was a symlink whose /run/systemd/resolve target was absent inside the sandbox.",
+    "permission_fact": "Granting the existing network permission did not repair DNS, proving the defect was mount compatibility rather than an authorization denial."
+  },
+  "scope": [
+    "Preserve a trusted host resolver target with one read-only file bind when required.",
+    "Keep /run broadly hidden and safe-mode networking unshared.",
+    "Add fail-closed unit and target evidence for supported and unsafe resolver targets.",
+    "Rerun real hostname/web access without resolver workarounds."
+  ],
+  "non_goals": [
+    "No workflow, OAuth, MCP, state-schema, public-tool or finalizer change.",
+    "No broad /run mount or arbitrary symlink-target mount.",
+    "No DNS-over-HTTPS fallback or embedded resolver.",
+    "No unrelated Native refactor or performance claim."
+  ],
+  "security_invariants": [
+    "Safe mode retains --unshare-net.",
+    "Only an explicitly trusted regular resolver file may be mounted outside existing system roots.",
+    "Private vault, home secrets and unrelated /run service state remain hidden.",
+    "The resolver mount is read-only and creates no new production authority."
+  ],
+  "acceptance": {
+    "A0": "pending",
+    "A1": "pending",
+    "A2": "not_applicable_no_python_authority_change",
+    "A3": "pending",
+    "A4": "pending_real_bubblewrap_and_web",
+    "A5": "pending"
+  },
+  "planned_files": [
+    "crates/mtm-native/src/bubblewrap.rs",
+    "scripts/run_mtm010_native_resolver.py",
+    "scripts/validate_mtm010_native_resolver.py",
+    "local-validation.json",
+    "migration-graph.json",
+    "project-progress.json",
+    "records/iterations/ITER-010.json"
+  ],
+  "recorded_failures_and_repairs": [],
+  "commands": [],
+  "manual_pending": [
+    "Run the real Bubblewrap target test on the current Linux host.",
+    "Rerun the ten-case real webpage edge corpus without DoH or --resolve.",
+    "Do not mark MTM-010 completed until safe-mode isolation is re-proven after the resolver fix."
+  ],
+  "rollback": "Revert only the resolver-file mount change and retain the accepted prior Native sandbox mount set.",
+  "decision": "in_progress"
+}
