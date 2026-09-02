@@ -458,6 +458,9 @@
       "private_reasoning_recorded": false,
       "blind_treatment_hidden_until_scores_frozen": true,
       "blind_bundle_script": "scripts/prepare_mtm009_blind_bundle.py",
+      "run_recorder": "scripts/record_mtm009_web_run.py",
+      "blind_score_recorder": "scripts/record_mtm009_blind_score.py",
+      "evaluation_finalizer": "scripts/finalize_mtm009_math_evaluation.py",
       "delivery7_release_gate": "scripts/validate_mtm009_release_gate.py",
       "release_gate": [
         "protocol3 verified_tex completion must not regress",
@@ -486,6 +489,11 @@
         "command": "python3 -m unittest tests.test_governance -v && python3 scripts/validate_migration_graph.py && python3 scripts/validate_mtm009_math_evaluation.py",
         "exit_code": 0,
         "result": "Governance now fails closed if MTM-009 is ever marked authoritative/completed before the real-web evaluation is complete and its deterministic mathematical release gate passes."
+      },
+      {
+        "command": "record_mtm009_web_run.py / record_mtm009_blind_score.py / finalize_mtm009_math_evaluation.py against a temporary evaluation copy",
+        "exit_code": 0,
+        "result": "The sanitized recorder accepted one fixed treatment slot without storing transcript/private reasoning, blind scoring was rejected until both treatments existed, scoring succeeded after the pair was complete, and deterministic finalization was still rejected while only 1/8 frozen pairs existed. The tracked evaluation remained unchanged at 0/8."
       }
     ],
     "manual_pending": [
