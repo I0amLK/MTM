@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-009",
+  "planned_workflow_protocol": 3,
+  "accepted_baseline_protocols": [1, 2],
+  "generic_public_step_envelope_changes": 0,
+  "complexity_budget": {
+    "new_crates": 0,
+    "new_public_tools": 0,
+    "new_hidden_aliases": 0,
+    "new_workflow_states": 0,
+    "new_sqlite_schema_versions": 0,
+    "new_long_running_workers": 0,
+    "model_codex_api_integrations": 0,
+    "new_independent_web_apps": 0,
+    "new_final_artifact_kinds": 0,
+    "new_vault_channels": 0,
+    "generic_graph_dependencies": 0
+  },
+  "node_kinds": ["target", "lemma", "construction", "definition"],
+  "node_statuses": ["open", "partial", "route_solved", "refuted", "blocked", "superseded"],
+  "attempt_methods": ["direct", "reduction", "toy_example", "counterexample", "retrieval", "computation", "synthesis", "repair"],
+  "attempt_outcomes": ["progress", "route_solved", "failed", "refuted", "inconclusive"],
+  "obstruction_classes": ["false_claim", "missing_hypothesis", "missing_lemma", "missing_reference", "computational_bottleneck", "notation_mismatch", "circular_dependency", "incompatible_partial_results", "no_progress", "unknown"],
+  "exploration_event_types": ["toy_example_result", "counterexample_probe", "retrieval_assessment", "new_candidate_lemma", "notation_resolution"],
+  "advisory_rules": ["R01_REPLAN_REFUTED", "R02_REPLAN_CYCLE", "R03_TEST_COUNTEREXAMPLE", "R04_RETRIEVE_FOCUSED", "R05_STOP_RETRIEVAL", "R06_SCREEN_FRONTIER", "R07_CONSOLIDATE", "R08_ASSEMBLE", "R09_REVIEW_STATE"],
+  "compact_view_limits": {
+    "frontier_nodes": 5,
+    "recent_attempts": 5,
+    "preserved_partial_results": 5,
+    "warnings": 3,
+    "advisory_actions": 1
+  },
+  "reused_generation_channels": ["subgoals", "proof_steps", "counterexamples", "failed_paths", "big_decisions", "branch_states", "events", "verification_reports"],
+  "authority_properties": {
+    "advisory_only": true,
+    "projector_side_effect_free": true,
+    "advice_can_transition": false,
+    "advice_can_issue_capability": false,
+    "advice_can_set_verdict": false,
+    "advice_can_finalize": false,
+    "route_solved_means_verified": false
+  },
+  "final_artifact": {
+    "kind": "verified_tex",
+    "vault_path_suffix": "final/proof_verified.tex",
+    "workspace_default_suffix": "proof_verified.tex",
+    "new_artifact_kinds": 0
+  }
+}

@@ -172,3 +172,35 @@ authority-bearing operation
 A milestone completes only when its acceptance levels pass, records are appended,
 authority is explicit, rollback is proven or documented, and all remaining manual
 checks remain honestly pending.
+
+## 11. Mathematical research-state extensions
+
+Research-state work adds mathematical guidance without creating a second workflow
+authority.
+
+- Mathematical research state is derived from server-normalized append-only records;
+  it is not a parallel mutable database or workflow engine.
+- A research-state projector is pure: no file, database, network, process, clock,
+  random, capability, transition, verifier, finalizer, or artifact-publication action.
+- Research advice is explicitly advisory. Ignoring a suggestion cannot weaken or
+  block an otherwise legal workflow transition.
+- Generator/branch status such as `route_solved` never means mathematically verified.
+  Only the existing verifier/finalizer path may publish the verified `.tex` artifact.
+- Raw JSON stops at protocol boundaries. Canonical node/attempt IDs, enums, records,
+  graph nodes, and advisory rules use named types; canonical IDs, sequence numbers,
+  timestamps, and revisions are server issued.
+- Ordering that affects hashes or model-facing output uses deterministic structures
+  and documented tie-breaking. Identical normalized inputs produce byte-identical
+  projected state, digest, and compact view.
+- Every graph, array, string, record count, nesting depth, replay budget, and compact
+  view has a fixed tested bound before configuration is introduced.
+- Counterexample records distinguish found, bounded-not-found, and inconclusive;
+  failure to find a counterexample is never evidence that a claim is proved.
+- Retrieval records distinguish newly registered references from repeated discovery
+  metadata. Repeated retrieval without new evidence remains visible as a failed
+  research tactic rather than being silently discarded.
+- Do not add a graph framework, event bus, background compactor, new workflow state,
+  new crate, new public tool, new persistence schema, or model-provider integration
+  merely to implement research projection.
+- Research records store concise mathematical conclusions, methods, obstructions,
+  and evidence locators, never raw web conversations or private reasoning traces.

@@ -112,6 +112,26 @@ authenticated loopback OAuth/MCP workload under eight clients: observed Rust/Pyt
 ratios were 2.434771 median throughput, 0.474969 p95 latency, and 0.670765 peak RSS.
 It is not a claim about external retrieval, CAS, LaTeX, or mathematical proof time.
 
+## MTM-009 — mathematical research state
+
+Add a small derived mathematical research-state layer that keeps attention on the
+current proof obstruction instead of expanding the workflow state machine. Reuse the
+existing generation/branch memory channels and workflow authority; introduce no new
+crate, public tool, hidden alias, workflow state, SQLite schema version, long-running
+worker, model/Codex/API integration, web application, or final artifact kind.
+
+The implementation is split into seven separately accepted deliveries: governance
+and frozen contracts; pure graph/types; server-normalized append-only records;
+protocol-3 research contracts; bounded advisory context; paired real web-driven
+mathematical evaluation; and final cutover/release. Protocol-1/2 runs retain their
+contracts throughout. The only final mathematical delivery remains the existing
+verified `.tex` file.
+
+MTM-009 stops rather than widens if advice acquires authority, a research tactic
+requires a new workflow state, the compact view costs more attention than it saves,
+rollback cannot resume copied state, or paired mathematical evaluation shows no
+useful research-control improvement.
+
 ## Stop rules
 
 Stop a milestone rather than widening it when:

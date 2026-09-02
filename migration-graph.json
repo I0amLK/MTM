@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
-  "title": "MTM-reboot eight-milestone migration graph",
-  "updated_at": "2026-09-01T19:18:00-07:00",
+  "title": "MTM-reboot nine-milestone migration graph",
+  "updated_at": "2026-09-01T22:44:00-07:00",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -287,6 +287,43 @@
       ],
       "rollback": "Reinstall the last accepted compatible Python release from immutable artifacts and restore the tested database backup.",
       "dependencies": ["MTM-007"]
+    },
+    {
+      "id": "MTM-009",
+      "title": "Mathematical research state and obstruction-centered guidance",
+      "status": "in_progress",
+      "priority": "P0",
+      "production_authority_before": "rust",
+      "production_authority_after": "rust",
+      "functional_goal": "Derive a deterministic bounded mathematical dependency/obstruction state from existing append-only workflow records and expose one transparent advisory next action so web-driven research centers on the current mathematical bottleneck rather than workflow bookkeeping.",
+      "scope": [
+        "Server-normalized claim, dependency, attempt, obstruction, counterexample, retrieval-novelty, branch, failure and replanning records using existing logical channels",
+        "Pure deterministic mathematical dependency graph projection with cycle, frontier, reachability and blocker analysis",
+        "Workflow protocol 3 task-specific research contracts while preserving the generic rethlas_step envelope",
+        "Bounded obstruction-centered model-facing context and one ordered advisory research action",
+        "Adversarial graph, identity, branch/verifier firewall, retry, crash, size and deterministic replay tests",
+        "Paired real web-driven mathematical evaluation and verified .tex non-regression before release"
+      ],
+      "non_goals": [
+        "No Codex, model API, model-provider abstraction, Agent runtime, scheduler, daemon or background worker",
+        "No new crate, public tool, hidden alias, workflow state, SQLite schema version, vault channel, independent web application or generic graph framework",
+        "No attempt to guarantee external web-model cognitive isolation; existing role/data firewalls remain the enforceable boundary",
+        "No source-ingest or Native sandbox redesign",
+        "No final mathematical artifact other than the existing verified .tex file",
+        "No release merely because architecture or graph metrics look cleaner; paired mathematical evidence is required"
+      ],
+      "acceptance_levels": ["A0", "A1", "A2", "A3", "A4", "A5"],
+      "validation_commands": [
+        "python3 scripts/validate_mtm009_research_contract.py",
+        "python3 scripts/validate_engineering_graph.py",
+        "python3 scripts/validate_migration_graph.py",
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets -- -D warnings",
+        "cargo test --workspace",
+        "python3 scripts/run_checks.py"
+      ],
+      "rollback": "Before protocol-3 cutover, remove the unused MTM-009 scaffolding. After cutover, set new-run protocol default back to 2 or reinstall the accepted MTM-008 release after proving copied protocol-3 state remains safely resumable; existing protocol-1/2 runs and verified .tex artifacts are never rewritten.",
+      "dependencies": ["MTM-008"]
     }
   ],
   "edges": [
@@ -300,9 +337,10 @@
     {"source": "MTM-007", "target": "MTM-003"},
     {"source": "MTM-007", "target": "MTM-005"},
     {"source": "MTM-007", "target": "MTM-006"},
-    {"source": "MTM-008", "target": "MTM-007"}
+    {"source": "MTM-008", "target": "MTM-007"},
+    {"source": "MTM-009", "target": "MTM-008"}
   ],
-  "todo": [],
+  "todo": ["MTM-009"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -607,6 +645,22 @@
       "status_before": "authoritative",
       "status_after": "completed",
       "summary": "Completed MTM-008 after upgrading all four live sessions to the final qualified Rust release, removing the verified Python production tool root and legacy helper entry, restoring the immutable Python wheel in an isolated tool root after deletion, confirming zero Python Re-CTM processes, preserving historical source, recording the complete authority inventory, and passing seventeen independent retirement checks."
+    },
+    {
+      "event_id": "MEVT-039",
+      "milestone_id": "MTM-009",
+      "at": "2026-09-01T22:43:00-07:00",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "Approved a narrow seven-delivery mathematical research-state milestone after rejecting the web-session handoff design. The accepted scope improves obstruction-centered research control without Codex/model APIs, Agent runtime, new workflow states, new crates, new persistence schema, or new artifact kinds."
+    },
+    {
+      "event_id": "MEVT-040",
+      "milestone_id": "MTM-009",
+      "at": "2026-09-01T22:44:00-07:00",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Fetched origin/main, confirmed local and GitHub main at c3f529282d9378a4177cb845bcbdd40e6e35b662 with no ahead/behind commits, confirmed deployed MTM 0.3.0 SHA-256 0a785a122396a3f8961cbc33b967e7a48874b90311333c8860a1e5c75582fd7f, and began Delivery 1 governance/contracts only."
     }
   ],
   "receipt_contract": {

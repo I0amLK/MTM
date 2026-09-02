@@ -77,3 +77,4 @@ the exact function or user-visible path improved.
 | MTM-006 | A0–A5 including full proof, repair, and finalization |
 | MTM-007 | A0–A5 including package, TUI, tunnel, external tools |
 | MTM-008 | A0–A6, rollback drill, and Python retirement evidence |
+| MTM-009 | A0–A5 plus protocol-1/2 non-regression, deterministic bounded research-state projection, adversarial graph/firewall tests, copied-state rollback, and paired real web-driven mathematical evaluation with verified `.tex` non-regression |

@@ -98,6 +98,12 @@ def main() -> int:
             env=environment,
         ),
         run(
+            "mtm009_research_contract",
+            [sys.executable, "scripts/validate_mtm009_research_contract.py"],
+            env=environment,
+            capture_json=True,
+        ),
+        run(
             "python_governance_tests",
             [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"],
             env=environment,
@@ -268,7 +274,10 @@ def main() -> int:
             "post-completion MTM/Re-CTM command-namespace separation were validated by strict "
             "Rust, governance, frozen differential, target-evidence, soak, bounded A6, and live "
             "coexistence gates. The MTM command is `mtm`; `re-ctm` belongs exclusively to the "
-            "separate Re-CTM installation."
+            "separate Re-CTM installation. MTM-009 Delivery 1 adds governance and frozen "
+            "research-state contracts only: production workflow protocol remains 2, state schema "
+            "remains 2, the 24/11 tool catalog and workflow states remain unchanged, and the only "
+            "final mathematical artifact remains proof_verified.tex."
         ),
     }
     temporary = REPORT.with_name(REPORT.name + ".tmp")

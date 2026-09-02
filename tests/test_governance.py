@@ -17,6 +17,7 @@ from scripts.validate_mtm006_target_evidence import validate as validate_mtm006_
 from scripts.validate_mtm007_target_evidence import validate as validate_mtm007_target
 from scripts.validate_mtm008_candidate_evidence import validate as validate_mtm008_candidate
 from scripts.validate_mtm_command_namespace import validate as validate_mtm_command_namespace
+from scripts.validate_mtm009_research_contract import validate as validate_mtm009_research_contract
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,8 +26,8 @@ ROOT = Path(__file__).resolve().parents[1]
 class GovernanceTestCase(unittest.TestCase):
     def test_repository_migration_graph_is_valid(self) -> None:
         summary = validate_migration(load_graph())
-        self.assertEqual(summary["milestone_count"], 8)
-        self.assertEqual(summary["todo_count"], 0)
+        self.assertEqual(summary["milestone_count"], 9)
+        self.assertEqual(summary["todo_count"], 1)
 
     def test_dependency_cycle_is_rejected(self) -> None:
         payload = copy.deepcopy(load_graph())
@@ -126,6 +127,16 @@ class GovernanceTestCase(unittest.TestCase):
     def test_current_mtm_and_re_ctm_command_namespaces_are_separate(self) -> None:
         summary = validate_mtm_command_namespace()
         self.assertEqual(summary["required_check_count"], 10)
+
+    def test_mtm009_research_contract_freezes_complexity_and_authority(self) -> None:
+        summary = validate_mtm009_research_contract()
+        self.assertEqual(summary["planned_workflow_protocol"], 3)
+        self.assertEqual(summary["production_workflow_protocol"], 2)
+        self.assertEqual(summary["workspace_crates"], 8)
+        self.assertEqual(summary["public_tools"], 24)
+        self.assertEqual(summary["hidden_aliases"], 11)
+        self.assertEqual(summary["state_schema_version"], 2)
+        self.assertEqual(summary["final_artifact"], "proof_verified.tex")
 
     def test_mtm_cli_publishes_only_the_mtm_binary_name(self) -> None:
         manifest = tomllib.loads((ROOT / "crates" / "mtm-cli" / "Cargo.toml").read_text(encoding="utf-8"))

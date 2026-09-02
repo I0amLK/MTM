@@ -1,0 +1,170 @@
+{
+  "schema_version": "1.0.0",
+  "iteration_id": "ITER-009",
+  "milestone_id": "MTM-009",
+  "started_at": "2026-09-01T22:44:00-07:00",
+  "completed_at": null,
+  "authority_before": "rust",
+  "authority_after": "rust",
+  "production_authority_changed": false,
+  "functional_goal": "Add a deterministic bounded mathematical research-state layer that derives the current dependency/obstruction picture from existing append-only workflow records and gives the web model one transparent advisory next action without changing workflow authority or verified .tex publication semantics.",
+  "baseline": {
+    "local_head": "c3f529282d9378a4177cb845bcbdd40e6e35b662",
+    "origin_main": "c3f529282d9378a4177cb845bcbdd40e6e35b662",
+    "ahead": 0,
+    "behind": 0,
+    "github_sync": "fast_forward_checked_up_to_date",
+    "deployed_release_version": "0.3.0",
+    "deployed_release_sha256": "0a785a122396a3f8961cbc33b967e7a48874b90311333c8860a1e5c75582fd7f",
+    "workflow_protocol_before": 2,
+    "state_schema_before": 2,
+    "mtm006_workflow_reference_sha256": "def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0",
+    "methodology_v2_sha256": "0403ba1f6caeabfef563e3b2b22bf1472a84c470a76ddbcb5bafce1d5f18a4e8",
+    "public_tools": 24,
+    "hidden_aliases": 11,
+    "workspace_crates": 8,
+    "final_artifact": "proof_verified.tex"
+  },
+  "complexity_budget": {
+    "new_crates": 0,
+    "new_public_tools": 0,
+    "new_hidden_aliases": 0,
+    "new_workflow_states": 0,
+    "new_sqlite_schema_versions": 0,
+    "new_long_running_workers": 0,
+    "model_codex_api_integrations": 0,
+    "new_independent_web_apps": 0,
+    "new_final_artifact_kinds": 0,
+    "new_vault_channels": 0,
+    "generic_graph_dependencies": 0
+  },
+  "governing_documents": [
+    "docs/CODE_STANDARD.md",
+    "docs/ACCEPTANCE.md",
+    "docs/adr/0009-mathematical-research-state.md",
+    "docs/MTM-009-MATHEMATICAL-RESEARCH-STATE-PLAN.md"
+  ],
+  "seven_deliveries": [
+    {
+      "delivery": 1,
+      "name": "governance_baseline_frozen_contracts",
+      "status": "validated_pending_commit",
+      "production_behavior_changed": false,
+      "goal": "Approve scope, record the synchronized baseline, freeze complexity budgets and protocol-3 research contract fixtures, and make the constraints machine-checkable."
+    },
+    {
+      "delivery": 2,
+      "name": "pure_types_and_graph_algorithms",
+      "status": "planned",
+      "production_behavior_changed": false,
+      "goal": "Implement pure deterministic research types, dependency graph construction, cycle detection, reachability, frontier and digest with exhaustive unit/property tests."
+    },
+    {
+      "delivery": 3,
+      "name": "normalized_append_only_research_records",
+      "status": "planned",
+      "production_behavior_changed": false,
+      "goal": "Normalize existing plans, screenings, branches, failures, replans, retrieval and verifier findings into existing logical channels and run projection in read-only shadow."
+    },
+    {
+      "delivery": 4,
+      "name": "protocol_three_research_contracts",
+      "status": "planned",
+      "production_behavior_changed": true,
+      "goal": "Enable structured protocol-3 research fields for new runs while protocol-1/2 behavior and the generic rethlas_step envelope remain compatible."
+    },
+    {
+      "delivery": 5,
+      "name": "bounded_advisory_context",
+      "status": "planned",
+      "production_behavior_changed": true,
+      "goal": "Expose a bounded obstruction-centered quotient and one deterministic advisory action without giving advice any authority."
+    },
+    {
+      "delivery": 6,
+      "name": "paired_web_driven_mathematical_evaluation",
+      "status": "planned",
+      "production_behavior_changed": false,
+      "goal": "Compare protocol 2 and 3 on a frozen real-use corpus with normal web research, workspace Bash/CAS and independent evaluation of final verified .tex outputs."
+    },
+    {
+      "delivery": 7,
+      "name": "cutover_release_and_final_receipt",
+      "status": "planned",
+      "production_behavior_changed": true,
+      "goal": "Make protocol 3 the default only after all engineering and mathematical gates pass, prove rollback on copied state, qualify the release and complete the final receipt."
+    }
+  ],
+  "recording_rules": {
+    "runtime_records": "Server-normalized append-only records contain concise mathematical conclusions, typed methods/obstructions/evidence and server-issued identity/order facts; they never contain raw web conversation transcripts or private reasoning traces.",
+    "engineering_receipts": "Every delivery records before/after commit, changed files, graph changes, commands, exit codes, evidence hashes, failures, repairs, rollback and pending checks before it is accepted.",
+    "failure_policy": "Failed attempts and rejected evidence are retained and classified rather than erased.",
+    "final_delivery": "The only final mathematical artifact remains proof_verified.tex through the existing LaTeX, verifier, permit and finalizer path."
+  },
+  "edge_test_categories": [
+    "dependency_cycles_and_self_loops",
+    "unknown_duplicate_cross_run_and_cross_branch_ids",
+    "status_replay_and_illegal_regression",
+    "counterexample_found_not_found_and_inconclusive",
+    "retrieval_novelty_and_repeated_no_evidence_search",
+    "retry_crash_and_concurrency",
+    "branch_and_verifier_firewalls",
+    "size_depth_count_and_utf8_boundaries",
+    "advice_precedence_determinism_and_non_authority",
+    "protocol_1_2_compatibility_and_copied_state_rollback"
+  ],
+  "acceptance": {
+    "A0": {"status": "accepted_delivery_1", "required": "Build, format, Clippy, tests, graph/governance validators, MTM-009 contract validator and diff checks.", "evidence": "python3 scripts/run_checks.py returned ok=true after the MTM-009 governance/contract changes."},
+    "A1": {"status": "pending", "required": "Protocol-1/2 frozen compatibility plus protocol-3 research-contract golden fixtures."},
+    "A2": {"status": "pending", "required": "Read-only deterministic shadow projection before model-facing exposure."},
+    "A3": {"status": "pending", "required": "Retry/crash/concurrency, identity, capability, branch/verifier firewall and finalizer non-regression."},
+    "A4": {"status": "pending", "required": "Real web-driven paired mathematical evaluation with normal research/workspace tools and verified .tex outputs."},
+    "A5": {"status": "pending", "required": "Task-envelope, projection latency, RSS, writes, replay and shutdown non-regression."}
+  },
+  "delivery_1_receipt": {
+    "status": "validated_pending_commit",
+    "baseline_commit": "c3f529282d9378a4177cb845bcbdd40e6e35b662",
+    "origin_main": "c3f529282d9378a4177cb845bcbdd40e6e35b662",
+    "production_behavior_changed": false,
+    "production_workflow_protocol": 2,
+    "state_schema_version": 2,
+    "workspace_crates": 8,
+    "public_tools": 24,
+    "hidden_aliases": 11,
+    "workflow_states": 18,
+    "generation_channels": 10,
+    "final_artifact": "proof_verified.tex",
+    "contract_fixture_sha256": "578941efede1cd283cf617a8ba2ecd21364590b883208d8c6dda6e8c90258532",
+    "contract_validator_sha256": "1bb4ac76a85596846e8352ab06f8b6247ae50caef67e4dbd4b48f271405f4a6b",
+    "local_validation_sha256": "583f525896f79eadefadeeea547169767b741cf0c34b7ba93dc183e7c491f150",
+    "mtm006_reference_file_sha256": "62af1680402040d2940aa65f45233f27711becd7e60015a51eade6ae360a1048",
+    "commands": [
+      {
+        "command": "python3 scripts/validate_mtm009_research_contract.py && python3 scripts/validate_migration_graph.py && python3 scripts/validate_engineering_graph.py && python3 -m unittest discover -s tests -v && git diff --check",
+        "exit_code": 0,
+        "result": "MTM-009 zero-complexity budgets, nine-milestone DAG, unchanged authority/crate graph, nineteen governance/deployment tests, and diff hygiene passed."
+      },
+      {
+        "command": "python3 scripts/run_checks.py",
+        "exit_code": 0,
+        "result": "Complete local gate passed, including all accepted MTM-002 through MTM-008 frozen differential and target-evidence validators; production protocol remained 2."
+      }
+    ],
+    "commit_pending": true
+  },
+  "recorded_failures_and_repairs": [
+    {
+      "delivery": 1,
+      "stage": "out-of-scope terminology exclusion scan",
+      "failure": "The first grep pattern used a bare exclusion substring and falsely matched that substring inside an ordinary word in the implementation plan, causing the combined final check to exit 1 after all validators and tests had already passed.",
+      "repair": "Keep the exclusion requirement but use exact phrase and token-boundary matching, then rerun the complete final consistency command."
+    }
+  ],
+  "manual_pending": [
+    "Delivery 1 governance and frozen-contract gates must pass before production implementation begins.",
+    "Protocol-3 mathematical effect must be measured on a frozen paired corpus before cutover.",
+    "Other operating systems and site-local research/CAS layouts remain release-specific evidence."
+  ],
+  "rollback": "Before protocol-3 cutover, delete MTM-009 scaffolding and remain on the accepted MTM-008 release. After cutover, revert the new-run protocol default to 2 or reinstall the accepted MTM-008 release only after copied protocol-3 state has been proven safely resumable; never rewrite existing final artifacts.",
+  "decision": "in_progress"
+}
