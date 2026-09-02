@@ -1,6 +1,10 @@
 use mtm_contracts::{ErrorCategory, ReCtmError, WorkflowState};
 use serde_json::{Map, Value};
 
+use crate::research_state::protocol::{
+    protocol3_assessment_event_schema, protocol3_exploration_event_schema,
+};
+
 #[derive(Clone)]
 pub struct TaskCatalog {
     source: Value,
@@ -119,6 +123,7 @@ fn overlay_protocol3_research(
         }),
     );
     match state {
+        WorkflowState::Assess => overlay_protocol3_assess(task),
         WorkflowState::Explore => overlay_protocol3_explore(task),
         WorkflowState::ProposePlans => overlay_protocol3_plans(task),
         WorkflowState::DirectProving => overlay_protocol3_screening(task),
@@ -130,6 +135,48 @@ fn overlay_protocol3_research(
     Ok(())
 }
 
+fn overlay_protocol3_assess(task: &mut Map<String, Value>) {
+    task.insert(
+        "write_contract".to_owned(),
+        serde_json::json!([
+            {
+                "resource":"memory:generation:immediate_conclusions",
+                "content_schema":{"type":"object","additionalProperties":true},
+                "example":{"summary":"State the cheapest verified deductions and their status."}
+            },
+            {
+                "resource":"memory:generation:events",
+                "content_schema":protocol3_assessment_event_schema(),
+                "example":{
+                    "event_type":"assessment",
+                    "summary":"Record the initial reasoning/retrieval plan."
+                }
+            }
+        ]),
+    );
+    if let Some(minimal) = task
+        .get_mut("minimal_submission")
+        .and_then(Value::as_object_mut)
+    {
+        minimal.insert(
+            "writes".to_owned(),
+            serde_json::json!([
+                {
+                    "resource":"memory:generation:immediate_conclusions",
+                    "content":{"summary":"Verified initial deductions."}
+                },
+                {
+                    "resource":"memory:generation:events",
+                    "content":{
+                        "event_type":"assessment",
+                        "summary":"Initial assessment and reasoning plan recorded."
+                    }
+                }
+            ]),
+        );
+    }
+}
+
 fn overlay_protocol3_explore(task: &mut Map<String, Value>) {
     task.insert(
         "write_contract".to_owned(),
@@ -137,7 +184,7 @@ fn overlay_protocol3_explore(task: &mut Map<String, Value>) {
             {
                 "resource":"memory:generation:events",
                 "required":true,
-                "content_schema":protocol3_event_schema(),
+                "content_schema":protocol3_exploration_event_schema(),
                 "example":{
                     "event_type":"toy_example_result",
                     "node_id":"target",
@@ -279,6 +326,26 @@ fn overlay_protocol3_screening(task: &mut Map<String, Value>) {
             "rule":"stuck requires obstruction; solved forbids obstruction; evidence_ids are bounded locators."
         }),
     );
+    if let Some(template) = task
+        .get_mut("minimal_submission_template")
+        .and_then(Value::as_object_mut)
+    {
+        template.insert(
+            "payload".to_owned(),
+            serde_json::json!({
+                "screening":{
+                    "<server plan_id>":{
+                        "<server subgoal_id>":{
+                            "status":"solved",
+                            "summary":"Why this subgoal is solved.",
+                            "method":"direct"
+                        }
+                    }
+                },
+                "proof_route":"Required when at least one complete plan is solved."
+            }),
+        );
+    }
 }
 
 fn overlay_protocol3_branch(task: &mut Map<String, Value>) {
@@ -335,6 +402,22 @@ fn overlay_protocol3_failures(task: &mut Map<String, Value>) {
             }
         }),
     );
+    if let Some(minimal) = task
+        .get_mut("minimal_submission")
+        .and_then(Value::as_object_mut)
+    {
+        minimal.insert(
+            "payload".to_owned(),
+            serde_json::json!({
+                "summary":{
+                    "obstruction":"Main recurring obstruction.",
+                    "next_step":"How the next plan generation must change.",
+                    "affected_node_ids":["target"],
+                    "obstruction_class":"no_progress"
+                }
+            }),
+        );
+    }
 }
 
 fn overlay_protocol3_replan(task: &mut Map<String, Value>) {
@@ -356,6 +439,19 @@ fn overlay_protocol3_replan(task: &mut Map<String, Value>) {
             }
         }),
     );
+    if let Some(minimal) = task
+        .get_mut("minimal_submission")
+        .and_then(Value::as_object_mut)
+    {
+        minimal.insert(
+            "payload".to_owned(),
+            serde_json::json!({
+                "decision":{
+                    "reason":"What new evidence justifies the materially improved direction."
+                }
+            }),
+        );
+    }
 }
 
 fn protocol3_screening_result_schema() -> Value {
@@ -381,17 +477,6 @@ fn protocol3_counterexample_schema() -> Value {
             "probe_scope":{"type":"string","minLength":1},
             "witness":{"type":"string"},
             "evidence_ids":{"type":"array","maxItems":32,"uniqueItems":true,"items":{"type":"string"}}
-        }
-    })
-}
-
-fn protocol3_event_schema() -> Value {
-    serde_json::json!({
-        "type":"object",
-        "description":"One typed event: toy_example_result, retrieval_assessment, new_candidate_lemma, or notation_resolution. The server rejects unknown fields and validates canonical IDs.",
-        "required":["event_type"],
-        "properties":{
-            "event_type":{"type":"string","enum":["toy_example_result","retrieval_assessment","new_candidate_lemma","notation_resolution"]}
         }
     })
 }
@@ -666,13 +751,188 @@ pub fn state_name(state: WorkflowState) -> &'static str {
 }
 
 #[cfg(test)]
+#[allow(clippy::expect_used)]
 mod tests {
     use super::*;
+    use crate::research_state::protocol::{
+        ProtocolRecordStamp, ProtocolResearchScope, normalize_protocol3_generation_record,
+    };
+    use mtm_core::validate_schema_value;
+
+    const EMBEDDED_METHODOLOGY: &str = include_str!("../../mtm-cli/assets/methodology-v2.json");
+
+    fn real_catalog() -> TaskCatalog {
+        let source: Value = serde_json::from_str(EMBEDDED_METHODOLOGY).expect("methodology JSON");
+        TaskCatalog::from_source_snapshot(source).expect("real methodology catalog")
+    }
+
+    fn validate_submission(task: &Value, submission: &Value, path: &str) {
+        assert_eq!(submission["action"], task["commit_action"], "{path}.action");
+        validate_schema_value(
+            submission.get("payload").unwrap_or(&Value::Null),
+            &task["commit_payload_schema"],
+            &format!("{path}.payload"),
+        )
+        .expect("model-facing payload example must satisfy emitted schema");
+        let contracts = task["write_contract"].as_array().expect("write contracts");
+        for (index, write) in submission["writes"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .enumerate()
+        {
+            let resource = write["resource"].as_str().expect("write resource");
+            let contract = contracts
+                .iter()
+                .find(|contract| contract["resource"] == resource)
+                .expect("write resource must exist in emitted contract");
+            validate_schema_value(
+                &write["content"],
+                &contract["content_schema"],
+                &format!("{path}.writes[{index}].content"),
+            )
+            .expect("model-facing write example must satisfy emitted schema");
+        }
+    }
 
     #[test]
     fn invalid_catalog_fails_closed() {
         assert!(
             TaskCatalog::from_source_snapshot(serde_json::json!({"tasks":{"assess":{}}})).is_err()
         );
+    }
+
+    #[test]
+    fn protocol3_assess_example_is_normalizable() {
+        let catalog = TaskCatalog::from_source_snapshot(serde_json::json!({
+            "tasks":{
+                "assess":{
+                    "commit_action":"assessment_complete",
+                    "write_contract":[],
+                    "commit_payload_schema":{"type":"object"},
+                    "minimal_submission":{"writes":[],"action":"assessment_complete","payload":{}}
+                }
+            }
+        }))
+        .expect("catalog");
+        let task = catalog
+            .task_for_run(WorkflowState::Assess, 3, "full", None)
+            .expect("assess task");
+        let event = &task["minimal_submission"]["writes"][1]["content"];
+        assert_eq!(event["event_type"], "assessment");
+        let scope = ProtocolResearchScope::from_active_plans(
+            &Value::Array(Vec::new()),
+            Vec::<String>::new(),
+        )
+        .expect("scope");
+        let stamp = ProtocolRecordStamp {
+            record_id: "test-record",
+            actor_role: "generator",
+            actor_domain_id: "generator-assess-test",
+            round_index: 0,
+            created_at: "2026-09-02T00:00:00Z",
+        };
+        normalize_protocol3_generation_record("events", event, &stamp, &scope)
+            .expect("emitted assess example must normalize");
+    }
+
+    #[test]
+    fn protocol3_overlays_rewrite_stale_payload_examples() {
+        let catalog = TaskCatalog::from_source_snapshot(serde_json::json!({
+            "tasks":{
+                "direct_proving":{
+                    "commit_action":"direct_proving_complete",
+                    "write_contract":[],
+                    "commit_payload_schema":{"type":"object"},
+                    "minimal_submission_template":{"writes":[],"action":"direct_proving_complete","payload":{}}
+                },
+                "identify_failures":{
+                    "commit_action":"failures_identified",
+                    "write_contract":[],
+                    "commit_payload_schema":{"type":"object"},
+                    "minimal_submission":{"writes":[],"action":"failures_identified","payload":{"summary":{"obstruction":"legacy","next_step":"legacy"}}}
+                },
+                "replan":{
+                    "commit_action":"replan_complete",
+                    "write_contract":[],
+                    "commit_payload_schema":{"type":"object"},
+                    "minimal_submission":{"writes":[],"action":"replan_complete","payload":{"decision":{"change":"legacy","reason":"legacy"}}}
+                }
+            }
+        }))
+        .expect("catalog");
+
+        let protocol2_replan = catalog
+            .task_for_run(WorkflowState::Replan, 2, "full", None)
+            .expect("protocol-2 replan task");
+        assert_eq!(
+            protocol2_replan["minimal_submission"]["payload"]["decision"]["change"],
+            "legacy"
+        );
+
+        let direct = catalog
+            .task_for_run(WorkflowState::DirectProving, 3, "full", None)
+            .expect("direct task");
+        assert_eq!(
+            direct["minimal_submission_template"]["payload"]["screening"]["<server plan_id>"]["<server subgoal_id>"]
+                ["method"],
+            "direct"
+        );
+
+        let failures = catalog
+            .task_for_run(WorkflowState::IdentifyFailures, 3, "full", None)
+            .expect("failure task");
+        let failure_summary = &failures["minimal_submission"]["payload"]["summary"];
+        assert_eq!(
+            failure_summary["affected_node_ids"],
+            serde_json::json!(["target"])
+        );
+        assert_eq!(failure_summary["obstruction_class"], "no_progress");
+
+        let replan = catalog
+            .task_for_run(WorkflowState::Replan, 3, "full", None)
+            .expect("replan task");
+        let decision = &replan["minimal_submission"]["payload"]["decision"];
+        assert!(decision.get("change").is_none());
+        assert!(
+            decision["reason"]
+                .as_str()
+                .is_some_and(|value| !value.is_empty())
+        );
+    }
+
+    #[test]
+    fn every_protocol3_model_example_satisfies_the_final_emitted_contract() {
+        let catalog = real_catalog();
+        let states = [
+            WorkflowState::Assess,
+            WorkflowState::Explore,
+            WorkflowState::ProposePlans,
+            WorkflowState::DirectProving,
+            WorkflowState::BranchRun,
+            WorkflowState::BranchJoin,
+            WorkflowState::IdentifyFailures,
+            WorkflowState::Replan,
+            WorkflowState::Assemble,
+            WorkflowState::Verify,
+            WorkflowState::Repair,
+        ];
+        for state in states {
+            let task = catalog
+                .task_for_run(state, 3, "full", None)
+                .expect("protocol-3 task");
+            let state_path = state_name(state);
+            if let Some(submission) = task.get("minimal_submission") {
+                validate_submission(&task, submission, state_path);
+            }
+            if let Some(submission) = task.get("minimal_submission_template") {
+                validate_submission(&task, submission, state_path);
+            }
+            if let Some(examples) = task.get("submission_examples").and_then(Value::as_array) {
+                for (index, submission) in examples.iter().enumerate() {
+                    validate_submission(&task, submission, &format!("{state_path}[{index}]"));
+                }
+            }
+        }
     }
 }

@@ -545,7 +545,11 @@ pub(super) fn normalize_join_decision(
                 .and_then(Value::as_str)
                 .map(str::to_owned)
         });
-    if object.get("selected_branch_id").is_some() && selected_plan.is_none() {
+    let has_selected_branch = object
+        .get("selected_branch_id")
+        .and_then(Value::as_str)
+        .is_some_and(|value| !value.trim().is_empty());
+    if has_selected_branch && selected_plan.is_none() {
         warnings.push(
             "unknown_join_branch",
             "join_result.selected_branch_id",

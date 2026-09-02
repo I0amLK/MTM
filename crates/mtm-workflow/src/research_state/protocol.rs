@@ -21,6 +21,97 @@ const RESERVED_RECORD_FIELDS: [&str; 6] = [
     "created_at",
 ];
 
+pub(crate) fn protocol3_assessment_event_schema() -> Value {
+    serde_json::json!({
+        "type":"object",
+        "required":["event_type","summary"],
+        "additionalProperties":false,
+        "properties":{
+            "event_type":{"const":"assessment"},
+            "summary":{"type":"string","minLength":1,"maxLength":MAX_SUMMARY_BYTES}
+        }
+    })
+}
+
+pub(crate) fn protocol3_exploration_event_schema() -> Value {
+    serde_json::json!({
+        "description":"One typed exploration event. The schema mirrors the protocol-3 record validator, including required fields and conditional reference rules.",
+        "oneOf":[
+            {
+                "type":"object",
+                "required":["event_type","node_id","outcome","summary"],
+                "additionalProperties":false,
+                "properties":{
+                    "event_type":{"const":"toy_example_result"},
+                    "node_id":{"type":"string","minLength":1,"maxLength":MAX_IDENTIFIER_BYTES},
+                    "outcome":{"type":"string","enum":["progress","refuted","inconclusive"]},
+                    "summary":{"type":"string","minLength":1,"maxLength":MAX_SUMMARY_BYTES},
+                    "evidence_ids":{
+                        "type":"array","maxItems":MAX_EVIDENCE_IDS,"uniqueItems":true,
+                        "items":{"type":"string","minLength":1,"maxLength":MAX_EVIDENCE_ID_BYTES}
+                    }
+                }
+            },
+            {
+                "type":"object",
+                "required":["event_type","outcome","summary"],
+                "additionalProperties":false,
+                "properties":{
+                    "event_type":{"const":"retrieval_assessment"},
+                    "node_id":{"type":"string","minLength":1,"maxLength":MAX_IDENTIFIER_BYTES},
+                    "outcome":{"type":"string","enum":["new_material","no_new_material","inconclusive"]},
+                    "summary":{"type":"string","minLength":1,"maxLength":MAX_SUMMARY_BYTES},
+                    "query":{"type":"string","minLength":1,"maxLength":MAX_QUERY_BYTES},
+                    "reference_ids":{
+                        "type":"array","maxItems":MAX_EVIDENCE_IDS,"uniqueItems":true,
+                        "items":{"type":"string","minLength":1,"maxLength":MAX_EVIDENCE_ID_BYTES}
+                    }
+                },
+                "allOf":[{
+                    "if":{"properties":{"outcome":{"const":"new_material"}},"required":["outcome"]},
+                    "then":{"required":["reference_ids"],"properties":{"reference_ids":{"minItems":1}}}
+                }]
+            },
+            {
+                "type":"object",
+                "required":["event_type","statement","summary"],
+                "additionalProperties":false,
+                "properties":{
+                    "event_type":{"const":"new_candidate_lemma"},
+                    "statement":{"type":"string","minLength":1,"maxLength":MAX_STATEMENT_BYTES},
+                    "summary":{"type":"string","minLength":1,"maxLength":MAX_SUMMARY_BYTES},
+                    "depends_on":{
+                        "type":"array","maxItems":MAX_NODE_DEPENDENCIES,"uniqueItems":true,
+                        "items":{"type":"string","minLength":1,"maxLength":MAX_IDENTIFIER_BYTES}
+                    },
+                    "critical":{"type":"boolean"},
+                    "kind":{"type":"string","enum":["lemma","construction","definition"]},
+                    "evidence_ids":{
+                        "type":"array","maxItems":MAX_EVIDENCE_IDS,"uniqueItems":true,
+                        "items":{"type":"string","minLength":1,"maxLength":MAX_EVIDENCE_ID_BYTES}
+                    }
+                }
+            },
+            {
+                "type":"object",
+                "required":["event_type","symbol","resolution","summary"],
+                "additionalProperties":false,
+                "properties":{
+                    "event_type":{"const":"notation_resolution"},
+                    "node_id":{"type":"string","minLength":1,"maxLength":MAX_IDENTIFIER_BYTES},
+                    "symbol":{"type":"string","minLength":1,"maxLength":MAX_SYMBOL_BYTES},
+                    "resolution":{"type":"string","minLength":1,"maxLength":MAX_SUMMARY_BYTES},
+                    "summary":{"type":"string","minLength":1,"maxLength":MAX_SUMMARY_BYTES},
+                    "evidence_ids":{
+                        "type":"array","maxItems":MAX_EVIDENCE_IDS,"uniqueItems":true,
+                        "items":{"type":"string","minLength":1,"maxLength":MAX_EVIDENCE_ID_BYTES}
+                    }
+                }
+            }
+        ]
+    })
+}
+
 #[derive(Clone, Debug)]
 pub(crate) struct ProtocolRecordStamp<'a> {
     pub(crate) record_id: &'a str,
@@ -810,6 +901,18 @@ fn normalize_event(
     let event = object(content, "events")?;
     let event_type = required_text(event.get("event_type"), "events.event_type", 64)?;
     match event_type {
+        "assessment" => {
+            reject_unknown(event, &["event_type", "summary"], "events.assessment")?;
+            let summary = required_text(event.get("summary"), "events.summary", MAX_SUMMARY_BYTES)?;
+            stamp_protocol3_record(
+                "assessment",
+                &serde_json::json!({
+                    "event_type":"assessment",
+                    "summary":summary
+                }),
+                stamp,
+            )
+        }
         "counterexample_probe" => normalize_counterexample(content, stamp, scope),
         "toy_example_result" => {
             reject_unknown(
@@ -1005,7 +1108,7 @@ fn normalize_event(
         }
         _ => Err(malformed(
             "events.event_type",
-            "unknown protocol-3 exploration event type",
+            "unknown protocol-3 research event type",
         )),
     }
 }

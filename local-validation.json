@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-09-02T15:25:14.089577Z",
+  "generated_at": "2026-09-02T16:56:12.804279Z",
   "project": "MTM-reboot",
   "milestone": "MTM-009",
   "production_authority": "rust",
@@ -9,7 +9,7 @@
     {
       "name": "migration_graph",
       "command": [
-        "/usr/bin/python3",
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
         "scripts/validate_migration_graph.py"
       ],
       "passed": true,
@@ -19,7 +19,7 @@
     {
       "name": "engineering_graph",
       "command": [
-        "/usr/bin/python3",
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
         "scripts/validate_engineering_graph.py"
       ],
       "passed": true,
@@ -29,7 +29,7 @@
     {
       "name": "mtm009_research_contract",
       "command": [
-        "/usr/bin/python3",
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
         "scripts/validate_mtm009_research_contract.py"
       ],
       "passed": true,
@@ -60,7 +60,7 @@
     {
       "name": "python_governance_tests",
       "command": [
-        "/usr/bin/python3",
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
         "-m",
         "unittest",
         "discover",
@@ -70,7 +70,7 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "test_commit_message_contract (test_governance.GovernanceTestCase.test_commit_message_contract) ... ok\ntest_completed_milestone_requires_receipt (test_governance.GovernanceTestCase.test_completed_milestone_requires_receipt) ... ok\ntest_current_mtm003_target_evidence_is_fresh (test_governance.GovernanceTestCase.test_current_mtm003_target_evidence_is_fresh) ... ok\ntest_current_mtm004_target_evidence_is_fresh_and_redacted (test_governance.GovernanceTestCase.test_current_mtm004_target_evidence_is_fresh_and_redacted) ... ok\ntest_current_mtm005_target_evidence_is_fresh_and_redacted (test_governance.GovernanceTestCase.test_current_mtm005_target_evidence_is_fresh_and_redacted) ... ok\ntest_current_mtm006_target_evidence_is_fresh_and_redacted (test_governance.GovernanceTestCase.test_current_mtm006_target_evidence_is_fresh_and_redacted) ... ok\ntest_current_mtm007_target_evidence_is_fresh_and_redacted (test_governance.GovernanceTestCase.test_current_mtm007_target_evidence_is_fresh_and_redacted) ... ok\ntest_current_mtm008_candidate_evidence_is_fresh_and_redacted (test_governance.GovernanceTestCase.test_current_mtm008_candidate_evidence_is_fresh_and_redacted) ... ok\ntest_current_mtm009_preview_release_is_installed_and_bounded (test_governance.GovernanceTestCase.test_current_mtm009_preview_release_is_installed_and_bounded) ... ok\ntest_current_mtm_and_re_ctm_command_namespaces_are_separate (test_governance.GovernanceTestCase.test_current_mtm_and_re_ctm_command_namespaces_are_separate) ... ok\ntest_dependency_cycle_is_rejected (test_governance.GovernanceTestCase.test_dependency_cycle_is_rejected) ... ok\ntest_mtm009_research_contract_freezes_complexity_and_authority (test_governance.GovernanceTestCase.test_mtm009_research_contract_freezes_complexity_and_authority) ... ok\ntest_mtm_cli_publishes_only_the_mtm_binary_name (test_governance.GovernanceTestCase.test_mtm_cli_publishes_only_the_mtm_binary_name) ... ok\ntest_perf_commit_requires_a6 (test_governance.GovernanceTestCase.test_perf_commit_requires_a6) ... ok\ntest_repository_migration_graph_is_valid (test_governance.GovernanceTestCase.test_repository_migration_graph_is_valid) ... ok\ntest_target_crate_graph_is_acyclic (test_governance.GovernanceTestCase.test_target_crate_graph_is_acyclic) ... ok\ntest_atomic_cutover_rollback_recutover_and_retirement (test_mtm008_deployment.Mtm008DeploymentTestCase.test_atomic_cutover_rollback_recutover_and_retirement) ... ok\ntest_existing_manifest_requires_explicit_replacement (test_mtm008_deployment.Mtm008DeploymentTestCase.test_existing_manifest_requires_explicit_replacement) ... ok\ntest_manifest_is_owner_only_and_release_is_executable (test_mtm008_deployment.Mtm008DeploymentTestCase.test_manifest_is_owner_only_and_release_is_executable) ... ok\ntest_release_identity_fails_closed (test_mtm008_deployment.Mtm008DeploymentTestCase.test_release_identity_fails_closed) ... ok\n\n----------------------------------------------------------------------\nRan 20 tests in 0.332s\n\nOK\n"
+      "output_tail": "test_commit_message_contract (test_governance.GovernanceTestCase.test_commit_message_contract) ... ok\ntest_completed_milestone_requires_receipt (test_governance.GovernanceTestCase.test_completed_milestone_requires_receipt) ... ok\ntest_current_mtm003_target_evidence_is_fresh (test_governance.GovernanceTestCase.test_current_mtm003_target_evidence_is_fresh) ... ok\ntest_current_mtm004_target_evidence_is_fresh_and_redacted (test_governance.GovernanceTestCase.test_current_mtm004_target_evidence_is_fresh_and_redacted) ... ok\ntest_current_mtm005_target_evidence_is_fresh_and_redacted (test_governance.GovernanceTestCase.test_current_mtm005_target_evidence_is_fresh_and_redacted) ... ok\ntest_current_mtm006_target_evidence_is_fresh_and_redacted (test_governance.GovernanceTestCase.test_current_mtm006_target_evidence_is_fresh_and_redacted) ... ok\ntest_current_mtm007_target_evidence_is_fresh_and_redacted (test_governance.GovernanceTestCase.test_current_mtm007_target_evidence_is_fresh_and_redacted) ... ok\ntest_current_mtm008_candidate_evidence_is_fresh_and_redacted (test_governance.GovernanceTestCase.test_current_mtm008_candidate_evidence_is_fresh_and_redacted) ... ok\ntest_current_mtm009_preview_release_is_installed_and_bounded (test_governance.GovernanceTestCase.test_current_mtm009_preview_release_is_installed_and_bounded) ... ok\ntest_current_mtm_and_re_ctm_command_namespaces_are_separate (test_governance.GovernanceTestCase.test_current_mtm_and_re_ctm_command_namespaces_are_separate) ... ok\ntest_dependency_cycle_is_rejected (test_governance.GovernanceTestCase.test_dependency_cycle_is_rejected) ... ok\ntest_mtm009_research_contract_freezes_complexity_and_authority (test_governance.GovernanceTestCase.test_mtm009_research_contract_freezes_complexity_and_authority) ... ok\ntest_mtm_cli_publishes_only_the_mtm_binary_name (test_governance.GovernanceTestCase.test_mtm_cli_publishes_only_the_mtm_binary_name) ... ok\ntest_perf_commit_requires_a6 (test_governance.GovernanceTestCase.test_perf_commit_requires_a6) ... ok\ntest_repository_migration_graph_is_valid (test_governance.GovernanceTestCase.test_repository_migration_graph_is_valid) ... ok\ntest_target_crate_graph_is_acyclic (test_governance.GovernanceTestCase.test_target_crate_graph_is_acyclic) ... ok\ntest_atomic_cutover_rollback_recutover_and_retirement (test_mtm008_deployment.Mtm008DeploymentTestCase.test_atomic_cutover_rollback_recutover_and_retirement) ... ok\ntest_existing_manifest_requires_explicit_replacement (test_mtm008_deployment.Mtm008DeploymentTestCase.test_existing_manifest_requires_explicit_replacement) ... ok\ntest_manifest_is_owner_only_and_release_is_executable (test_mtm008_deployment.Mtm008DeploymentTestCase.test_manifest_is_owner_only_and_release_is_executable) ... ok\ntest_release_identity_fails_closed (test_mtm008_deployment.Mtm008DeploymentTestCase.test_release_identity_fails_closed) ... ok\n\n----------------------------------------------------------------------\nRan 20 tests in 0.258s\n\nOK\n"
     },
     {
       "name": "rustc_version",
@@ -129,17 +129,17 @@
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.08s\n     Running unittests src/main.rs (target/debug/deps/mtm-22e7040acc1c08e7)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_contracts-de723df7e6224b0a)\n\nrunning 5 tests\ntest enums::tests::enum_wire_values_match_source ... ok\ntest enums::tests::workflow_terminal_states_match_source ... ok\ntest error::tests::payload_matches_source_shape ... ok\ntest tests::bootstrap_json_is_deterministic ... ok\ntest tests::source_contract_is_frozen ... ok\n\ntest result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_core-346e19460d16dbda)\n\nrunning 14 tests\ntest command_policy::tests::identifies_source_inline_interpreters ... ok\ntest evaluator::tests::evaluator_wraps_pure_operations ... ok\ntest patch::tests::applies_unique_hunk_and_preserves_crlf ... ok\ntest path_policy::tests::normalizes_safe_relative_paths ... ok\ntest redaction::tests::fingerprints_match_sha256_prefix ... ok\ntest path_policy::tests::rejects_absolute_and_parent_paths ... ok\ntest patch::tests::parses_add_delete_update_and_move ... ok\ntest schema::tests::validates_nested_object_and_rejects_extra_field ... ok\ntest schema::tests::one_of_requires_exactly_one_match ... ok\ntest url_policy::tests::oauth_origin_policy_matches_source_rules ... ok\ntest url_policy::tests::quick_tunnel_parser_is_strict ... ok\ntest redaction::tests::redacts_keys_and_embedded_values ... ok\ntest command_policy::tests::safe_policy_preserves_permission_order ... ok\ntest command_policy::tests::filtered_environment_matches_source_facts ... ok\n\ntest result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_gateway-20c5a38e70609433)\n\nrunning 8 tests\ntest http::tests::dynamic_issuer_requires_loopback_bind ... ok\ntest catalog::tests::incomplete_catalog_is_rejected ... ok\ntest http::tests::external_host_parser_rejects_userinfo_and_paths ... ok\ntest mcp::tests::envelope_and_modern_mirror_rules_are_fail_closed ... ok\ntest http::tests::origin_policy_allows_loopback_and_rejects_attacker ... ok\ntest mcp::tests::modern_status_and_base64_mirror_match_contract ... ok\ntest oauth::tests::secret_methods_and_pkce_shape_fail_closed ... ok\ntest oauth::tests::public_pkce_code_is_single_use ... ok\n\ntest result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s\n\n     Running unittests src/bin/server.rs (target/debug/deps/mtm_gateway_server-6779f9eee0f4c478)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_native-e500e569c394d279)\n\nrunning 7 tests\ntest capture::tests::retains_head_and_rolling_tail ... ok\ntest quick_tunnel::tests::child_environment_strips_all_known_credentials ... ok\ntest bubblewrap::tests::command_rejects_protected_root_overlap ... ok\ntest quick_tunnel::tests::close_is_idempotent_and_emits_one_closed_event ... ok\ntest toolchain::tests::generic_discovery_and_explicit_roots_match_source_policy ... ok\ntest process::tests::tty_round_trip_uses_owned_terminal_process ... ok\ntest process::tests::command_lifecycle_poll_read_and_kill ... ok\n\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s\n\n     Running unittests src/bin/helper.rs (target/debug/deps/mtm_native_helper-7838011f8de2b9dd)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/bin/shadow.rs (target/debug/deps/mtm_native_shadow-59f1538970c06e76)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_runtime-ea4283286479f9e0)\n\nrunning 7 tests\ntest config::tests::secret_round_trip_and_capability_derivation ... ok\ntest config::tests::workflow_protocol_evaluation_switch_defaults_and_fails_closed ... ok\ntest operator::tests::operator_lines_show_tool_names_without_argument_values ... ok\ntest native_tools::tests::validated_execution_response_preserves_execution_fields ... ok\ntest tool_backend::tests::tool_result_matches_mcp_shape ... ok\ntest research::tests::endpoints_fail_closed ... ok\ntest workspace::tests::workspace_rejects_escape_and_reads_text ... ok\n\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_storage-33f1721d0c888e80)\n\nrunning 2 tests\ntest capability::tests::permission_matrix_matches_source ... ok\ntest capability::tests::verifier_and_branch_firewalls_are_preserved ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/bin/shadow.rs (target/debug/deps/mtm_storage_shadow-5e2114119baae036)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running tests/storage.rs (target/debug/deps/storage-583f81a6ba0ee812)\n\nrunning 6 tests\ntest failed_v2_migration_rolls_back_schema_and_version ... ok\ntest database_snapshot_is_deterministic ... ok\ntest capability_registry_epoch_owner_and_revocation_are_enforced ... ok\ntest promotion_failure_rolls_back_and_repeated_success_is_idempotent ... ok\ntest rollback_copy_remains_a_version_one_database ... ok\ntest historical_v1_migration_preserves_rows_and_rejects_newer_schema ... ok\n\ntest result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_workflow-d7d85266ba3771c7)\n\nrunning 73 tests\ntest kernel::tests::source_transition_graph_is_fail_closed ... ok\ntest methodology::tests::invalid_catalog_fails_closed ... ok\ntest research_state::advice::tests::missing_reference_without_retrieval_suggests_focused_retrieval ... ok\ntest research_state::advice::tests::refuted_only_route_suggests_replanning ... ok\ntest research_state::advice::tests::fallback_and_cycle_diagnostic_have_stable_ids ... ok\ntest research_state::advice::tests::assemble_precedes_refuted_alternative ... ok\ntest research_state::advice::tests::compatible_partial_progress_suggests_consolidation ... ok\ntest research_state::advice::tests::repeated_direct_failure_suggests_counterexample_before_retrieval ... ok\ntest research_state::advice::tests::repeated_no_novelty_retrieval_suggests_stop ... ok\ntest research_state::normalize::tests::inactive_screening_and_branch_data_produce_bounded_warnings ... ok\ntest research_state::normalize::tests::malformed_or_collision_prone_legacy_ids_fail_closed ... ok\ntest research_state::advice::tests::untouched_frontier_suggests_screening ... ok\ntest research_state::normalize::tests::branch_partial_result_updates_only_matched_subgoals ... ok\ntest research_state::normalize::tests::join_selected_branch_is_resolved_to_its_plan ... ok\ntest research_state::normalize::tests::normalization_warnings_are_bounded_and_utf8_safe ... ok\ntest research_state::normalize::tests::normalizes_active_plans_and_current_screening_status ... ok\ntest research_state::normalize::tests::claimed_counterexample_requires_a_witness_before_refuting_a_node ... ok\ntest research_state::normalize::tests::normalizes_direct_screening_attempts_in_stable_order ... ok\ntest research_state::normalize::tests::normalization_and_projection_are_deterministic ... ok\ntest research_state::normalize::tests::nested_legacy_arrays_have_hard_limits ... ok\ntest research_state::normalize::tests::retrieval_ids_must_exist_in_the_authoritative_registry_snapshot ... ok\ntest research_state::normalize::tests::retrieval_novelty_count_can_exceed_bounded_attempt_evidence ... ok\ntest research_state::normalize::tests::retrieval_novelty_counts_registered_reference_ids_not_raw_results ... ok\ntest research_state::normalize::tests::empty_counterexample_witnesses_remain_inconclusive ... ok\ntest research_state::protocol::tests::branch_obstructions_cannot_cross_plan_boundaries ... ok\ntest research_state::protocol::tests::counterexample_records_require_known_node_scope_and_witness ... ok\ntest research_state::protocol::tests::candidate_lemma_and_notation_events_are_strictly_bounded ... ok\ntest research_state::protocol::tests::failure_and_replan_records_require_canonical_scope ... ok\ntest research_state::normalize::tests::unknown_counterexample_node_cannot_refute_the_target ... ok\ntest research_state::normalize::tests::unknown_direct_screening_status_is_inconclusive_not_failed ... ok\ntest research_state::protocol::tests::plan_local_graph_rejects_unknown_self_cycle_duplicate_and_extra_fields ... ok\ntest research_state::protocol::tests::screening_fields_are_typed_and_status_consistent ... ok\ntest research_state::protocol::tests::server_record_fields_cannot_be_supplied_by_the_client ... ok\ntest research_state::protocol::tests::protocol_scope_rejects_duplicate_or_missing_canonical_nodes ... ok\ntest research_state::normalize::tests::verification_failures_and_replanning_decisions_are_normalized ... ok\ntest research_state::protocol::tests::local_keys_are_unambiguous_and_plan_counts_are_bounded ... ok\ntest research_state::tests::active_and_decision_plan_references_fail_closed ... ok\ntest research_state::protocol::tests::structured_plans_receive_canonical_node_dependencies ... ok\ntest research_state::tests::attempt_and_decision_references_are_validated ... ok\ntest research_state::protocol::tests::retrieval_assessment_requires_registered_references ... ok\ntest research_state::tests::alternative_plans_remain_disjunctive ... ok\ntest research_state::normalize::tests::oversized_legacy_channel_is_rejected_before_projection ... ok\ntest research_state::tests::chain_projection_orders_dependencies_before_target ... ok\ntest research_state::tests::a_route_is_not_solved_while_a_required_dependency_is_open ... ok\ntest research_state::tests::canonical_text_trims_outer_whitespace ... ok\ntest research_state::tests::decisions_and_attempts_are_canonically_sorted ... ok\ntest research_state::tests::canonical_digest_is_independent_of_input_order ... ok\ntest research_state::tests::enum_wire_values_match_frozen_contract ... ok\ntest research_state::tests::digest_changes_when_mathematical_status_changes ... ok\ntest research_state::tests::disconnected_nodes_are_not_critical_and_follow_critical_frontier ... ok\ntest research_state::tests::identifiers_fail_closed_on_empty_long_or_unsupported_values ... ok\ntest research_state::tests::cycle_analysis_is_deterministic_and_strict_projection_rejects_it ... ok\ntest research_state::tests::mathematical_text_accepts_utf8_and_rejects_empty_or_nul_content ... ok\ntest research_state::tests::duplicate_node_attempt_and_decision_ids_fail_closed ... ok\ntest research_state::tests::revision_zero_fails_closed ... ok\ntest research_state::tests::disjoint_cycles_are_reported_in_stable_order ... ok\ntest research_state::tests::refuted_dependency_invalidates_all_dependents ... ok\ntest research_state::tests::node_and_attempt_limits_fail_closed ... ok\ntest research_state::tests::target_rules_fail_closed ... ok\ntest research_state::tests::solved_dependency_advances_actionable_frontier ... ok\ntest research_state::tests::superseded_dependency_is_excluded_and_reported ... ok\ntest research_state::tests::unknown_dependency_fails_closed ... ok\ntest research_state::tests::plan_goals_are_terminal_nodes_within_the_plan ... ok\ntest research_state::tests::self_loop_is_a_cycle ... ok\ntest verifier::tests::finalization_permit_requires_both_verifier_and_latex ... ok\ntest verifier::tests::submitted_verdict_is_ignored_and_server_computes_correctness ... ok\ntest research_state::view::tests::view_reports_counterexample_and_retrieval_coverage ... ok\ntest research_state::tests::per_record_and_global_edge_limits_fail_closed ... ok\ntest vault::tests::vault_rejects_path_authority_and_finalization_needs_permit ... ok\ntest research_state::view::tests::compact_view_is_deterministic_bounded_and_contains_no_authority_fields ... ok\ntest vault::tests::finalization_permit_is_bound_to_exact_proof_bytes ... ok\ntest vault::tests::memory_is_partitioned_by_role_and_branch ... ok\ntest research_state::tests::all_small_ordered_dags_have_valid_deterministic_topological_orders ... ok\n\ntest result: ok. 73 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.48s\n\n     Running unittests src/bin/mtm_workflow_shadow.rs (target/debug/deps/mtm_workflow_shadow-7cdaab3520088d52)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/bin/target_validation.rs (target/debug/deps/target_validation-60111c190c8f03b5)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running tests/workflow.rs (target/debug/deps/workflow-c8ffdc7444f6ec6b)\n\nrunning 8 tests\ntest latex_failure_routes_to_repair_without_final_artifact ... ok\ntest compact_correct_flow_reaches_mechanical_finalization ... ok\ntest protocol_three_branch_context_does_not_receive_global_research_view ... ok\ntest second_compact_verifier_failure_escalates_to_full_exploration ... ok\ntest full_mode_branch_barrier_requires_every_branch_to_seal ... ok\ntest protocol_three_repair_gets_advisory_context_but_verifier_does_not ... ok\ntest protocol_three_structured_research_contract_reaches_same_tex_finalizer ... ok\ntest research_state_shadow_is_deterministic_owner_scoped_and_side_effect_free ... ok\n\ntest result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s\n\n   Doc-tests mtm_contracts\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_core\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_gateway\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_native\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_runtime\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_storage\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_workflow\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      "output_tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.08s\n     Running unittests src/main.rs (target/debug/deps/mtm-22e7040acc1c08e7)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_contracts-de723df7e6224b0a)\n\nrunning 5 tests\ntest enums::tests::workflow_terminal_states_match_source ... ok\ntest enums::tests::enum_wire_values_match_source ... ok\ntest tests::bootstrap_json_is_deterministic ... ok\ntest error::tests::payload_matches_source_shape ... ok\ntest tests::source_contract_is_frozen ... ok\n\ntest result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_core-346e19460d16dbda)\n\nrunning 14 tests\ntest command_policy::tests::identifies_source_inline_interpreters ... ok\ntest evaluator::tests::evaluator_wraps_pure_operations ... ok\ntest patch::tests::parses_add_delete_update_and_move ... ok\ntest path_policy::tests::normalizes_safe_relative_paths ... ok\ntest path_policy::tests::rejects_absolute_and_parent_paths ... ok\ntest redaction::tests::fingerprints_match_sha256_prefix ... ok\ntest patch::tests::applies_unique_hunk_and_preserves_crlf ... ok\ntest schema::tests::one_of_requires_exactly_one_match ... ok\ntest schema::tests::validates_nested_object_and_rejects_extra_field ... ok\ntest url_policy::tests::oauth_origin_policy_matches_source_rules ... ok\ntest url_policy::tests::quick_tunnel_parser_is_strict ... ok\ntest redaction::tests::redacts_keys_and_embedded_values ... ok\ntest command_policy::tests::safe_policy_preserves_permission_order ... ok\ntest command_policy::tests::filtered_environment_matches_source_facts ... ok\n\ntest result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_gateway-20c5a38e70609433)\n\nrunning 9 tests\ntest http::tests::dynamic_issuer_requires_loopback_bind ... ok\ntest http::tests::external_host_parser_rejects_userinfo_and_paths ... ok\ntest http::tests::origin_policy_allows_loopback_and_rejects_attacker ... ok\ntest catalog::tests::incomplete_catalog_is_rejected ... ok\ntest mcp::tests::envelope_and_modern_mirror_rules_are_fail_closed ... ok\ntest mcp::tests::modern_status_and_base64_mirror_match_contract ... ok\ntest mcp::tests::server_identity_uses_the_compiled_package_version ... ok\ntest oauth::tests::secret_methods_and_pkce_shape_fail_closed ... ok\ntest oauth::tests::public_pkce_code_is_single_use ... ok\n\ntest result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s\n\n     Running unittests src/bin/server.rs (target/debug/deps/mtm_gateway_server-6779f9eee0f4c478)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_native-e500e569c394d279)\n\nrunning 7 tests\ntest capture::tests::retains_head_and_rolling_tail ... ok\ntest bubblewrap::tests::command_rejects_protected_root_overlap ... ok\ntest quick_tunnel::tests::child_environment_strips_all_known_credentials ... ok\ntest quick_tunnel::tests::close_is_idempotent_and_emits_one_closed_event ... ok\ntest toolchain::tests::generic_discovery_and_explicit_roots_match_source_policy ... ok\ntest process::tests::tty_round_trip_uses_owned_terminal_process ... ok\ntest process::tests::command_lifecycle_poll_read_and_kill ... ok\n\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s\n\n     Running unittests src/bin/helper.rs (target/debug/deps/mtm_native_helper-7838011f8de2b9dd)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/bin/shadow.rs (target/debug/deps/mtm_native_shadow-59f1538970c06e76)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_runtime-ea4283286479f9e0)\n\nrunning 7 tests\ntest config::tests::secret_round_trip_and_capability_derivation ... ok\ntest config::tests::workflow_protocol_evaluation_switch_defaults_and_fails_closed ... ok\ntest operator::tests::operator_lines_show_tool_names_without_argument_values ... ok\ntest tool_backend::tests::tool_result_matches_mcp_shape ... ok\ntest native_tools::tests::validated_execution_response_preserves_execution_fields ... ok\ntest research::tests::endpoints_fail_closed ... ok\ntest workspace::tests::workspace_rejects_escape_and_reads_text ... ok\n\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_storage-33f1721d0c888e80)\n\nrunning 2 tests\ntest capability::tests::permission_matrix_matches_source ... ok\ntest capability::tests::verifier_and_branch_firewalls_are_preserved ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/bin/shadow.rs (target/debug/deps/mtm_storage_shadow-5e2114119baae036)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running tests/storage.rs (target/debug/deps/storage-583f81a6ba0ee812)\n\nrunning 6 tests\ntest failed_v2_migration_rolls_back_schema_and_version ... ok\ntest database_snapshot_is_deterministic ... ok\ntest promotion_failure_rolls_back_and_repeated_success_is_idempotent ... ok\ntest capability_registry_epoch_owner_and_revocation_are_enforced ... ok\ntest rollback_copy_remains_a_version_one_database ... ok\ntest historical_v1_migration_preserves_rows_and_rejects_newer_schema ... ok\n\ntest result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s\n\n     Running unittests src/lib.rs (target/debug/deps/mtm_workflow-d7d85266ba3771c7)\n\nrunning 79 tests\ntest kernel::tests::source_transition_graph_is_fail_closed ... ok\ntest methodology::tests::invalid_catalog_fails_closed ... ok\ntest methodology::tests::protocol3_assess_example_is_normalizable ... ok\ntest research_state::advice::tests::assemble_precedes_refuted_alternative ... ok\ntest research_state::advice::tests::refuted_only_route_suggests_replanning ... ok\ntest methodology::tests::protocol3_overlays_rewrite_stale_payload_examples ... ok\ntest research_state::advice::tests::missing_reference_without_retrieval_suggests_focused_retrieval ... ok\ntest research_state::advice::tests::compatible_partial_progress_suggests_consolidation ... ok\ntest research_state::advice::tests::fallback_and_cycle_diagnostic_have_stable_ids ... ok\ntest research_state::advice::tests::repeated_direct_failure_suggests_counterexample_before_retrieval ... ok\ntest research_state::advice::tests::repeated_no_novelty_retrieval_suggests_stop ... ok\ntest research_state::normalize::tests::inactive_screening_and_branch_data_produce_bounded_warnings ... ok\ntest research_state::normalize::tests::failed_join_with_null_selected_branch_does_not_emit_unknown_branch_warning ... ok\ntest research_state::advice::tests::untouched_frontier_suggests_screening ... ok\ntest research_state::normalize::tests::malformed_or_collision_prone_legacy_ids_fail_closed ... ok\ntest research_state::normalize::tests::branch_partial_result_updates_only_matched_subgoals ... ok\ntest research_state::normalize::tests::join_selected_branch_is_resolved_to_its_plan ... ok\ntest research_state::normalize::tests::nested_legacy_arrays_have_hard_limits ... ok\ntest research_state::normalize::tests::claimed_counterexample_requires_a_witness_before_refuting_a_node ... ok\ntest research_state::normalize::tests::normalizes_active_plans_and_current_screening_status ... ok\ntest research_state::normalize::tests::normalization_warnings_are_bounded_and_utf8_safe ... ok\ntest research_state::normalize::tests::normalizes_direct_screening_attempts_in_stable_order ... ok\ntest research_state::normalize::tests::empty_counterexample_witnesses_remain_inconclusive ... ok\ntest research_state::normalize::tests::retrieval_novelty_count_can_exceed_bounded_attempt_evidence ... ok\ntest research_state::normalize::tests::retrieval_ids_must_exist_in_the_authoritative_registry_snapshot ... ok\ntest methodology::tests::every_protocol3_model_example_satisfies_the_final_emitted_contract ... ok\ntest research_state::normalize::tests::normalization_and_projection_are_deterministic ... ok\ntest research_state::normalize::tests::unknown_counterexample_node_cannot_refute_the_target ... ok\ntest research_state::normalize::tests::retrieval_novelty_counts_registered_reference_ids_not_raw_results ... ok\ntest research_state::protocol::tests::exploration_event_schema_exposes_validator_required_fields ... ok\ntest research_state::protocol::tests::branch_obstructions_cannot_cross_plan_boundaries ... ok\ntest research_state::protocol::tests::candidate_lemma_and_notation_events_are_strictly_bounded ... ok\ntest research_state::protocol::tests::counterexample_records_require_known_node_scope_and_witness ... ok\ntest research_state::protocol::tests::assessment_event_contract_matches_the_protocol3_validator ... ok\ntest research_state::normalize::tests::unknown_direct_screening_status_is_inconclusive_not_failed ... ok\ntest research_state::protocol::tests::failure_and_replan_records_require_canonical_scope ... ok\ntest research_state::protocol::tests::screening_fields_are_typed_and_status_consistent ... ok\ntest research_state::protocol::tests::plan_local_graph_rejects_unknown_self_cycle_duplicate_and_extra_fields ... ok\ntest research_state::protocol::tests::server_record_fields_cannot_be_supplied_by_the_client ... ok\ntest research_state::protocol::tests::protocol_scope_rejects_duplicate_or_missing_canonical_nodes ... ok\ntest research_state::protocol::tests::retrieval_assessment_requires_registered_references ... ok\ntest research_state::normalize::tests::verification_failures_and_replanning_decisions_are_normalized ... ok\ntest research_state::normalize::tests::oversized_legacy_channel_is_rejected_before_projection ... ok\ntest research_state::protocol::tests::structured_plans_receive_canonical_node_dependencies ... ok\ntest research_state::protocol::tests::local_keys_are_unambiguous_and_plan_counts_are_bounded ... ok\ntest research_state::tests::active_and_decision_plan_references_fail_closed ... ok\ntest research_state::tests::attempt_and_decision_references_are_validated ... ok\ntest research_state::tests::a_route_is_not_solved_while_a_required_dependency_is_open ... ok\ntest research_state::tests::alternative_plans_remain_disjunctive ... ok\ntest research_state::tests::chain_projection_orders_dependencies_before_target ... ok\ntest research_state::tests::decisions_and_attempts_are_canonically_sorted ... ok\ntest research_state::tests::canonical_text_trims_outer_whitespace ... ok\ntest research_state::tests::digest_changes_when_mathematical_status_changes ... ok\ntest research_state::tests::cycle_analysis_is_deterministic_and_strict_projection_rejects_it ... ok\ntest research_state::tests::canonical_digest_is_independent_of_input_order ... ok\ntest research_state::tests::enum_wire_values_match_frozen_contract ... ok\ntest research_state::tests::mathematical_text_accepts_utf8_and_rejects_empty_or_nul_content ... ok\ntest research_state::tests::duplicate_node_attempt_and_decision_ids_fail_closed ... ok\ntest research_state::tests::identifiers_fail_closed_on_empty_long_or_unsupported_values ... ok\ntest research_state::tests::disconnected_nodes_are_not_critical_and_follow_critical_frontier ... ok\ntest research_state::tests::revision_zero_fails_closed ... ok\ntest research_state::tests::refuted_dependency_invalidates_all_dependents ... ok\ntest research_state::tests::disjoint_cycles_are_reported_in_stable_order ... ok\ntest research_state::tests::node_and_attempt_limits_fail_closed ... ok\ntest research_state::tests::solved_dependency_advances_actionable_frontier ... ok\ntest research_state::tests::self_loop_is_a_cycle ... ok\ntest research_state::tests::target_rules_fail_closed ... ok\ntest research_state::tests::unknown_dependency_fails_closed ... ok\ntest research_state::tests::superseded_dependency_is_excluded_and_reported ... ok\ntest research_state::tests::plan_goals_are_terminal_nodes_within_the_plan ... ok\ntest research_state::view::tests::view_reports_counterexample_and_retrieval_coverage ... ok\ntest research_state::tests::per_record_and_global_edge_limits_fail_closed ... ok\ntest verifier::tests::finalization_permit_requires_both_verifier_and_latex ... ok\ntest verifier::tests::submitted_verdict_is_ignored_and_server_computes_correctness ... ok\ntest research_state::view::tests::compact_view_is_deterministic_bounded_and_contains_no_authority_fields ... ok\ntest vault::tests::vault_rejects_path_authority_and_finalization_needs_permit ... ok\ntest vault::tests::finalization_permit_is_bound_to_exact_proof_bytes ... ok\ntest vault::tests::memory_is_partitioned_by_role_and_branch ... ok\ntest research_state::tests::all_small_ordered_dags_have_valid_deterministic_topological_orders ... ok\n\ntest result: ok. 79 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.48s\n\n     Running unittests src/bin/mtm_workflow_shadow.rs (target/debug/deps/mtm_workflow_shadow-7cdaab3520088d52)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/bin/target_validation.rs (target/debug/deps/target_validation-60111c190c8f03b5)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running tests/workflow.rs (target/debug/deps/workflow-c8ffdc7444f6ec6b)\n\nrunning 9 tests\ntest protocol_three_inline_references_expose_registered_ids_for_typed_retrieval ... ok\ntest latex_failure_routes_to_repair_without_final_artifact ... ok\ntest compact_correct_flow_reaches_mechanical_finalization ... ok\ntest research_state_shadow_is_deterministic_owner_scoped_and_side_effect_free ... ok\ntest protocol_three_branch_context_does_not_receive_global_research_view ... ok\ntest protocol_three_repair_gets_advisory_context_but_verifier_does_not ... ok\ntest full_mode_branch_barrier_requires_every_branch_to_seal ... ok\ntest protocol_three_structured_research_contract_reaches_same_tex_finalizer ... ok\ntest second_compact_verifier_failure_escalates_to_full_exploration ... ok\n\ntest result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s\n\n   Doc-tests mtm_contracts\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_core\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_gateway\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_native\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_runtime\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_storage\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n   Doc-tests mtm_workflow\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
     },
     {
       "name": "mtm002_conformance",
       "command": [
-        "/usr/bin/python3",
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
         "scripts/run_mtm002_conformance.py"
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 24,\n  \"source_reference_files_clean\": true,\n  \"case_count\": 135,\n  \"operation_counts\": {\n    \"apply_hunks\": 7,\n    \"command_policy\": 11,\n    \"filtered_env\": 8,\n    \"fingerprint\": 2,\n    \"inline_script\": 12,\n    \"oauth_server_url\": 15,\n    \"parse_patch\": 7,\n    \"quick_tunnel_origin\": 12,\n    \"redact\": 4,\n    \"redact_bytes\": 1,\n    \"redirect_uris\": 14,\n    \"schema_validate\": 27,\n    \"workflow_terminal\": 5,\n    \"workspace_path\": 10\n  },\n  \"reference_sha256\": \"1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d\",\n  \"recorded_sha256\": \"1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d\",\n  \"golden_match\": true,\n  \"differential_mismatch_count\": 0,\n  \"mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"request_bytes\": 13719,\n      \"response_bytes\": 12956,\n      \"samples\": 7,\n      \"elapsed_ms_median\": 80.291,\n      \"elapsed_ms_p95\": 81.475,\n      \"max_rss_kib\": 25664,\n      \"limits\": {\n        \"request_bytes\": 1048576,\n        \"response_bytes\": 1048576,\n        \"elapsed_seconds\": 10.0,\n        \"max_rss_kib\": 131072\n      }\n    },\n    \"rust_shadow\": {\n      \"request_bytes\": 13719,\n      \"response_bytes\": 12956,\n      \"samples\": 7,\n      \"elapsed_ms_median\": 89.422,\n      \"elapsed_ms_p95\": 91.088,\n      \"max_rss_kib\": 12528,\n      \"limits\": {\n        \"request_bytes\": 1048576,\n        \"response_bytes\": 1048576,\n        \"elapsed_seconds\": 10.0,\n        \"max_rss_kib\": 131072\n      }\n    },\n    \"rust_non_regression_limits\": {\n      \"elapsed_ms\": 2000.0,\n      \"max_rss_kib\": 65536\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"read_only_shadow\",\n    \"production_authority\": \"python\"\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 24,\n  \"source_reference_files_clean\": true,\n  \"case_count\": 135,\n  \"operation_counts\": {\n    \"apply_hunks\": 7,\n    \"command_policy\": 11,\n    \"filtered_env\": 8,\n    \"fingerprint\": 2,\n    \"inline_script\": 12,\n    \"oauth_server_url\": 15,\n    \"parse_patch\": 7,\n    \"quick_tunnel_origin\": 12,\n    \"redact\": 4,\n    \"redact_bytes\": 1,\n    \"redirect_uris\": 14,\n    \"schema_validate\": 27,\n    \"workflow_terminal\": 5,\n    \"workspace_path\": 10\n  },\n  \"reference_sha256\": \"1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d\",\n  \"recorded_sha256\": \"1aab731f737a00a9b40e614b7751e54d1418676febbb82cbc2e009dfc994430d\",\n  \"golden_match\": true,\n  \"differential_mismatch_count\": 0,\n  \"mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"request_bytes\": 13719,\n      \"response_bytes\": 12956,\n      \"samples\": 7,\n      \"elapsed_ms_median\": 78.339,\n      \"elapsed_ms_p95\": 80.451,\n      \"max_rss_kib\": 26672,\n      \"limits\": {\n        \"request_bytes\": 1048576,\n        \"response_bytes\": 1048576,\n        \"elapsed_seconds\": 10.0,\n        \"max_rss_kib\": 131072\n      }\n    },\n    \"rust_shadow\": {\n      \"request_bytes\": 13719,\n      \"response_bytes\": 12956,\n      \"samples\": 7,\n      \"elapsed_ms_median\": 89.171,\n      \"elapsed_ms_p95\": 90.174,\n      \"max_rss_kib\": 12412,\n      \"limits\": {\n        \"request_bytes\": 1048576,\n        \"response_bytes\": 1048576,\n        \"elapsed_seconds\": 10.0,\n        \"max_rss_kib\": 131072\n      }\n    },\n    \"rust_non_regression_limits\": {\n      \"elapsed_ms\": 2000.0,\n      \"max_rss_kib\": 65536\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"read_only_shadow\",\n    \"production_authority\": \"python\"\n  }\n}\n",
       "json": {
         "ok": true,
         "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
@@ -172,9 +172,9 @@
             "request_bytes": 13719,
             "response_bytes": 12956,
             "samples": 7,
-            "elapsed_ms_median": 80.291,
-            "elapsed_ms_p95": 81.475,
-            "max_rss_kib": 25664,
+            "elapsed_ms_median": 78.339,
+            "elapsed_ms_p95": 80.451,
+            "max_rss_kib": 26672,
             "limits": {
               "request_bytes": 1048576,
               "response_bytes": 1048576,
@@ -186,9 +186,9 @@
             "request_bytes": 13719,
             "response_bytes": 12956,
             "samples": 7,
-            "elapsed_ms_median": 89.422,
-            "elapsed_ms_p95": 91.088,
-            "max_rss_kib": 12528,
+            "elapsed_ms_median": 89.171,
+            "elapsed_ms_p95": 90.174,
+            "max_rss_kib": 12412,
             "limits": {
               "request_bytes": 1048576,
               "response_bytes": 1048576,
@@ -213,12 +213,12 @@
     {
       "name": "mtm003_conformance",
       "command": [
-        "/usr/bin/python3",
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
         "scripts/run_mtm003_conformance.py"
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 24,\n  \"source_reference_files_clean\": true,\n  \"exact_case_count\": 4,\n  \"process_case_count\": 5,\n  \"reference_sha256\": \"5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69\",\n  \"recorded_sha256\": \"5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69\",\n  \"golden_match\": true,\n  \"exact_mismatches\": [],\n  \"process_mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"elapsed_ms\": 444.681,\n      \"max_rss_kib\": 21772,\n      \"request_count\": 14,\n      \"exit_code\": 0,\n      \"stderr_tail\": \"\"\n    },\n    \"rust_shadow\": {\n      \"elapsed_ms\": 613.536,\n      \"max_rss_kib\": 7588,\n      \"request_count\": 14,\n      \"exit_code\": 0,\n      \"stderr_tail\": \"\"\n    },\n    \"limits\": {\n      \"elapsed_seconds\": 30.0,\n      \"max_rss_kib\": 131072\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"read_only_shadow\",\n    \"production_authority\": \"python\"\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 24,\n  \"source_reference_files_clean\": true,\n  \"exact_case_count\": 4,\n  \"process_case_count\": 5,\n  \"reference_sha256\": \"5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69\",\n  \"recorded_sha256\": \"5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69\",\n  \"golden_match\": true,\n  \"exact_mismatches\": [],\n  \"process_mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"elapsed_ms\": 422.311,\n      \"max_rss_kib\": 23320,\n      \"request_count\": 14,\n      \"exit_code\": 0,\n      \"stderr_tail\": \"\"\n    },\n    \"rust_shadow\": {\n      \"elapsed_ms\": 613.013,\n      \"max_rss_kib\": 7556,\n      \"request_count\": 14,\n      \"exit_code\": 0,\n      \"stderr_tail\": \"\"\n    },\n    \"limits\": {\n      \"elapsed_seconds\": 30.0,\n      \"max_rss_kib\": 131072\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"read_only_shadow\",\n    \"production_authority\": \"python\"\n  }\n}\n",
       "json": {
         "ok": true,
         "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
@@ -233,15 +233,15 @@
         "process_mismatches": [],
         "resources": {
           "python_reference": {
-            "elapsed_ms": 444.681,
-            "max_rss_kib": 21772,
+            "elapsed_ms": 422.311,
+            "max_rss_kib": 23320,
             "request_count": 14,
             "exit_code": 0,
             "stderr_tail": ""
           },
           "rust_shadow": {
-            "elapsed_ms": 613.536,
-            "max_rss_kib": 7588,
+            "elapsed_ms": 613.013,
+            "max_rss_kib": 7556,
             "request_count": 14,
             "exit_code": 0,
             "stderr_tail": ""
@@ -263,12 +263,12 @@
     {
       "name": "mtm004_conformance",
       "command": [
-        "/usr/bin/python3",
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
         "scripts/run_mtm004_conformance.py"
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 24,\n  \"source_reference_files_clean\": true,\n  \"operation_count\": 52,\n  \"main_exact_match\": true,\n  \"migration_cases_passed\": true,\n  \"migration_summary\": {\n    \"v0_match\": true,\n    \"v1_match\": true,\n    \"v2_match\": true,\n    \"newer_schema_fail_closed\": true,\n    \"failed_v2_rollback\": true,\n    \"rollback_copy_resumed_by_source\": true\n  },\n  \"reference_sha256\": \"bf0ecab52a25d2edc7fe47c95579a311dc7f14a2f1c4d2fd3e40b7f0d37d94f6\",\n  \"recorded_sha256\": \"bf0ecab52a25d2edc7fe47c95579a311dc7f14a2f1c4d2fd3e40b7f0d37d94f6\",\n  \"golden_match\": true,\n  \"resources\": {\n    \"python_reference\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 128.661,\n      \"elapsed_ms_p95\": 171.57,\n      \"max_rss_kib\": 27200,\n      \"request_bytes\": 9716,\n      \"response_bytes\": 52662\n    },\n    \"rust_shadow\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 64.681,\n      \"elapsed_ms_p95\": 84.564,\n      \"max_rss_kib\": 6512,\n      \"request_bytes\": 9714,\n      \"response_bytes\": 52662\n    },\n    \"rust_non_regression_limits\": {\n      \"elapsed_ms_p95\": 3000.0,\n      \"max_rss_kib\": 65536\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"copied_database_shadow\",\n    \"production_writer\": \"python\"\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 24,\n  \"source_reference_files_clean\": true,\n  \"operation_count\": 52,\n  \"main_exact_match\": true,\n  \"migration_cases_passed\": true,\n  \"migration_summary\": {\n    \"v0_match\": true,\n    \"v1_match\": true,\n    \"v2_match\": true,\n    \"newer_schema_fail_closed\": true,\n    \"failed_v2_rollback\": true,\n    \"rollback_copy_resumed_by_source\": true\n  },\n  \"reference_sha256\": \"bf0ecab52a25d2edc7fe47c95579a311dc7f14a2f1c4d2fd3e40b7f0d37d94f6\",\n  \"recorded_sha256\": \"bf0ecab52a25d2edc7fe47c95579a311dc7f14a2f1c4d2fd3e40b7f0d37d94f6\",\n  \"golden_match\": true,\n  \"resources\": {\n    \"python_reference\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 129.87,\n      \"elapsed_ms_p95\": 173.011,\n      \"max_rss_kib\": 28704,\n      \"request_bytes\": 9716,\n      \"response_bytes\": 52662\n    },\n    \"rust_shadow\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 68.598,\n      \"elapsed_ms_p95\": 94.218,\n      \"max_rss_kib\": 6492,\n      \"request_bytes\": 9714,\n      \"response_bytes\": 52662\n    },\n    \"rust_non_regression_limits\": {\n      \"elapsed_ms_p95\": 3000.0,\n      \"max_rss_kib\": 65536\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"copied_database_shadow\",\n    \"production_writer\": \"python\"\n  }\n}\n",
       "json": {
         "ok": true,
         "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
@@ -291,17 +291,17 @@
         "resources": {
           "python_reference": {
             "samples": 7,
-            "elapsed_ms_median": 128.661,
-            "elapsed_ms_p95": 171.57,
-            "max_rss_kib": 27200,
+            "elapsed_ms_median": 129.87,
+            "elapsed_ms_p95": 173.011,
+            "max_rss_kib": 28704,
             "request_bytes": 9716,
             "response_bytes": 52662
           },
           "rust_shadow": {
             "samples": 7,
-            "elapsed_ms_median": 64.681,
-            "elapsed_ms_p95": 84.564,
-            "max_rss_kib": 6512,
+            "elapsed_ms_median": 68.598,
+            "elapsed_ms_p95": 94.218,
+            "max_rss_kib": 6492,
             "request_bytes": 9714,
             "response_bytes": 52662
           },
@@ -322,12 +322,12 @@
     {
       "name": "mtm005_conformance",
       "command": [
-        "/usr/bin/python3",
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
         "scripts/run_mtm005_conformance.py"
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 24,\n  \"source_reference_files_clean\": true,\n  \"record_count\": 44,\n  \"public_tool_count\": 24,\n  \"hidden_tool_count\": 11,\n  \"public_catalog_sha256\": \"86c8ee7d53a0678d0aaaba47ce2f2f72f5c03747fcb443d78011e005dedaa343\",\n  \"all_tool_definitions_sha256\": \"e89c5d2f8bec198fb4a90e7166aadb04b757e4b3ff0c8f459e5fdd468c59f87e\",\n  \"reference_sha256\": \"787e659b8787fab7765e2ae2bdb7ce774f2484467933fc87624097a9af65e849\",\n  \"recorded_sha256\": \"787e659b8787fab7765e2ae2bdb7ce774f2484467933fc87624097a9af65e849\",\n  \"golden_match\": true,\n  \"release_branding_normalization\": \"re-ctm/Re-CTM identity fields only\",\n  \"differential_mismatch_count\": 0,\n  \"mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 112.051,\n      \"elapsed_ms_p95\": 113.296,\n      \"max_rss_kib\": 27020,\n      \"record_count\": 44,\n      \"response_bytes\": 133512\n    },\n    \"rust_shadow\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 57.897,\n      \"elapsed_ms_p95\": 80.381,\n      \"max_rss_kib\": 12204,\n      \"record_count\": 44,\n      \"response_bytes\": 133494\n    },\n    \"limits\": {\n      \"elapsed_seconds\": 30.0,\n      \"max_rss_kib\": 131072\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"oauth_mcp_gateway_shadow\",\n    \"deployed_traffic_authority\": \"python\"\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 24,\n  \"source_reference_files_clean\": true,\n  \"record_count\": 44,\n  \"public_tool_count\": 24,\n  \"hidden_tool_count\": 11,\n  \"public_catalog_sha256\": \"86c8ee7d53a0678d0aaaba47ce2f2f72f5c03747fcb443d78011e005dedaa343\",\n  \"all_tool_definitions_sha256\": \"e89c5d2f8bec198fb4a90e7166aadb04b757e4b3ff0c8f459e5fdd468c59f87e\",\n  \"reference_sha256\": \"787e659b8787fab7765e2ae2bdb7ce774f2484467933fc87624097a9af65e849\",\n  \"recorded_sha256\": \"787e659b8787fab7765e2ae2bdb7ce774f2484467933fc87624097a9af65e849\",\n  \"golden_match\": true,\n  \"release_branding_normalization\": \"re-ctm/Re-CTM identity plus product release version\",\n  \"differential_mismatch_count\": 0,\n  \"mismatches\": [],\n  \"resources\": {\n    \"python_reference\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 108.792,\n      \"elapsed_ms_p95\": 133.144,\n      \"max_rss_kib\": 28808,\n      \"record_count\": 44,\n      \"response_bytes\": 133512\n    },\n    \"rust_shadow\": {\n      \"samples\": 7,\n      \"elapsed_ms_median\": 59.613,\n      \"elapsed_ms_p95\": 77.335,\n      \"max_rss_kib\": 12184,\n      \"record_count\": 44,\n      \"response_bytes\": 133524\n    },\n    \"limits\": {\n      \"elapsed_seconds\": 30.0,\n      \"max_rss_kib\": 131072\n    }\n  },\n  \"resource_gate_passed\": true,\n  \"shadow_side_effect_free\": true,\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"oauth_mcp_gateway_shadow\",\n    \"deployed_traffic_authority\": \"python\"\n  }\n}\n",
       "json": {
         "ok": true,
         "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
@@ -341,25 +341,25 @@
         "reference_sha256": "787e659b8787fab7765e2ae2bdb7ce774f2484467933fc87624097a9af65e849",
         "recorded_sha256": "787e659b8787fab7765e2ae2bdb7ce774f2484467933fc87624097a9af65e849",
         "golden_match": true,
-        "release_branding_normalization": "re-ctm/Re-CTM identity fields only",
+        "release_branding_normalization": "re-ctm/Re-CTM identity plus product release version",
         "differential_mismatch_count": 0,
         "mismatches": [],
         "resources": {
           "python_reference": {
             "samples": 7,
-            "elapsed_ms_median": 112.051,
-            "elapsed_ms_p95": 113.296,
-            "max_rss_kib": 27020,
+            "elapsed_ms_median": 108.792,
+            "elapsed_ms_p95": 133.144,
+            "max_rss_kib": 28808,
             "record_count": 44,
             "response_bytes": 133512
           },
           "rust_shadow": {
             "samples": 7,
-            "elapsed_ms_median": 57.897,
-            "elapsed_ms_p95": 80.381,
-            "max_rss_kib": 12204,
+            "elapsed_ms_median": 59.613,
+            "elapsed_ms_p95": 77.335,
+            "max_rss_kib": 12184,
             "record_count": 44,
-            "response_bytes": 133494
+            "response_bytes": 133524
           },
           "limits": {
             "elapsed_seconds": 30.0,
@@ -378,12 +378,12 @@
     {
       "name": "mtm006_conformance",
       "command": [
-        "/usr/bin/python3",
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
         "scripts/run_mtm006_conformance.py"
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 24,\n  \"source_reference_files_clean\": true,\n  \"dirty_reference_files\": [],\n  \"scenario_count\": 4,\n  \"record_count\": 82,\n  \"differential_mismatch_count\": 0,\n  \"mismatch_names\": [],\n  \"mismatches\": [],\n  \"reference_sha256\": \"def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0\",\n  \"recorded_sha256\": \"def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0\",\n  \"golden_match\": true,\n  \"resource_gate_passed\": true,\n  \"resources\": {\n    \"compact_correct\": {\n      \"python\": {\n        \"elapsed_ms\": 264.122,\n        \"max_rss_kib\": 30252,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      },\n      \"rust\": {\n        \"elapsed_ms\": 279.349,\n        \"max_rss_kib\": 11864,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      }\n    },\n    \"branch_barrier\": {\n      \"python\": {\n        \"elapsed_ms\": 375.553,\n        \"max_rss_kib\": 30432,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      },\n      \"rust\": {\n        \"elapsed_ms\": 378.488,\n        \"max_rss_kib\": 12308,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      }\n    },\n    \"compact_repair_escalation\": {\n      \"python\": {\n        \"elapsed_ms\": 359.629,\n        \"max_rss_kib\": 30412,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      },\n      \"rust\": {\n        \"elapsed_ms\": 362.797,\n        \"max_rss_kib\": 11956,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      }\n    },\n    \"owner_cancel_reference\": {\n      \"python\": {\n        \"elapsed_ms\": 174.478,\n        \"max_rss_kib\": 30096,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      },\n      \"rust\": {\n        \"elapsed_ms\": 177.64,\n        \"max_rss_kib\": 11936,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      }\n    }\n  },\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"workflow_vault_finalizer_shadow\",\n    \"deployed_workflow_authority\": \"python\",\n    \"shared_state_between_runtimes\": false\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_reference_file_count\": 24,\n  \"source_reference_files_clean\": true,\n  \"dirty_reference_files\": [],\n  \"scenario_count\": 4,\n  \"record_count\": 82,\n  \"differential_mismatch_count\": 0,\n  \"mismatch_names\": [],\n  \"mismatches\": [],\n  \"reference_sha256\": \"def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0\",\n  \"recorded_sha256\": \"def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0\",\n  \"golden_match\": true,\n  \"resource_gate_passed\": true,\n  \"resources\": {\n    \"compact_correct\": {\n      \"python\": {\n        \"elapsed_ms\": 252.531,\n        \"max_rss_kib\": 32028,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      },\n      \"rust\": {\n        \"elapsed_ms\": 255.662,\n        \"max_rss_kib\": 11712,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      }\n    },\n    \"branch_barrier\": {\n      \"python\": {\n        \"elapsed_ms\": 328.942,\n        \"max_rss_kib\": 32272,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      },\n      \"rust\": {\n        \"elapsed_ms\": 332.087,\n        \"max_rss_kib\": 12312,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      }\n    },\n    \"compact_repair_escalation\": {\n      \"python\": {\n        \"elapsed_ms\": 298.449,\n        \"max_rss_kib\": 32124,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      },\n      \"rust\": {\n        \"elapsed_ms\": 305.692,\n        \"max_rss_kib\": 12060,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      }\n    },\n    \"owner_cancel_reference\": {\n      \"python\": {\n        \"elapsed_ms\": 152.558,\n        \"max_rss_kib\": 32052,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      },\n      \"rust\": {\n        \"elapsed_ms\": 155.813,\n        \"max_rss_kib\": 11728,\n        \"exit_code\": 0,\n        \"stderr_tail\": \"\"\n      }\n    }\n  },\n  \"authority\": {\n    \"source_reference\": \"python\",\n    \"rust_mode\": \"workflow_vault_finalizer_shadow\",\n    \"deployed_workflow_authority\": \"python\",\n    \"shared_state_between_runtimes\": false\n  }\n}\n",
       "json": {
         "ok": true,
         "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a",
@@ -402,56 +402,56 @@
         "resources": {
           "compact_correct": {
             "python": {
-              "elapsed_ms": 264.122,
-              "max_rss_kib": 30252,
+              "elapsed_ms": 252.531,
+              "max_rss_kib": 32028,
               "exit_code": 0,
               "stderr_tail": ""
             },
             "rust": {
-              "elapsed_ms": 279.349,
-              "max_rss_kib": 11864,
+              "elapsed_ms": 255.662,
+              "max_rss_kib": 11712,
               "exit_code": 0,
               "stderr_tail": ""
             }
           },
           "branch_barrier": {
             "python": {
-              "elapsed_ms": 375.553,
-              "max_rss_kib": 30432,
+              "elapsed_ms": 328.942,
+              "max_rss_kib": 32272,
               "exit_code": 0,
               "stderr_tail": ""
             },
             "rust": {
-              "elapsed_ms": 378.488,
-              "max_rss_kib": 12308,
+              "elapsed_ms": 332.087,
+              "max_rss_kib": 12312,
               "exit_code": 0,
               "stderr_tail": ""
             }
           },
           "compact_repair_escalation": {
             "python": {
-              "elapsed_ms": 359.629,
-              "max_rss_kib": 30412,
+              "elapsed_ms": 298.449,
+              "max_rss_kib": 32124,
               "exit_code": 0,
               "stderr_tail": ""
             },
             "rust": {
-              "elapsed_ms": 362.797,
-              "max_rss_kib": 11956,
+              "elapsed_ms": 305.692,
+              "max_rss_kib": 12060,
               "exit_code": 0,
               "stderr_tail": ""
             }
           },
           "owner_cancel_reference": {
             "python": {
-              "elapsed_ms": 174.478,
-              "max_rss_kib": 30096,
+              "elapsed_ms": 152.558,
+              "max_rss_kib": 32052,
               "exit_code": 0,
               "stderr_tail": ""
             },
             "rust": {
-              "elapsed_ms": 177.64,
-              "max_rss_kib": 11936,
+              "elapsed_ms": 155.813,
+              "max_rss_kib": 11728,
               "exit_code": 0,
               "stderr_tail": ""
             }
@@ -468,12 +468,12 @@
     {
       "name": "mtm007_conformance",
       "command": [
-        "/usr/bin/python3",
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
         "scripts/run_mtm007_conformance.py"
       ],
       "passed": true,
       "exit_code": 0,
-      "output_tail": "{\n  \"ok\": true,\n  \"project\": \"MTM-reboot\",\n  \"milestone\": \"MTM-007\",\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_runtime_tracked_clean\": true,\n  \"source_repo_tracked_clean\": false,\n  \"record_count\": 18,\n  \"mismatch_count\": 0,\n  \"sha256\": \"6aa4f5699df7099d29c12859788430bd6b1c66a8295828598b6cae62a964d830\",\n  \"release_sha256\": \"5c96780ba1856527d4cd5299094e5cf84d94b974f361e95361481a77e8555eb9\",\n  \"recorded_sha256\": \"6aa4f5699df7099d29c12859788430bd6b1c66a8295828598b6cae62a964d830\",\n  \"golden_match\": true,\n  \"release_branding_normalization\": \"re-ctm/Re-CTM identity plus additive production-default workflow-protocol metadata\",\n  \"mismatches\": [],\n  \"shutdown\": {\n    \"python\": {\n      \"exit_code\": -15,\n      \"stdout_bytes\": 0,\n      \"stderr_bytes\": 1548\n    },\n    \"rust\": {\n      \"exit_code\": -15,\n      \"stdout_bytes\": 0,\n      \"stderr_bytes\": 118\n    }\n  },\n  \"authority\": {\n    \"python\": \"source reference on disposable state\",\n    \"rust\": \"MTM-007 full composition on disposable state\",\n    \"deployed_production\": \"python\"\n  }\n}\n",
+      "output_tail": "{\n  \"ok\": true,\n  \"project\": \"MTM-reboot\",\n  \"milestone\": \"MTM-007\",\n  \"source_commit\": \"50d08eb89e3ecc46317fd49709fa4ebcda135b5a\",\n  \"source_runtime_tracked_clean\": true,\n  \"source_repo_tracked_clean\": false,\n  \"record_count\": 18,\n  \"mismatch_count\": 0,\n  \"sha256\": \"6aa4f5699df7099d29c12859788430bd6b1c66a8295828598b6cae62a964d830\",\n  \"release_sha256\": \"9c3ab78f569b9ecd72a7da61569824ff50964e1f29865fe1998242c9325ff8fa\",\n  \"recorded_sha256\": \"6aa4f5699df7099d29c12859788430bd6b1c66a8295828598b6cae62a964d830\",\n  \"golden_match\": true,\n  \"release_branding_normalization\": \"re-ctm/Re-CTM identity plus product version and additive production-default workflow-protocol metadata\",\n  \"mismatches\": [],\n  \"shutdown\": {\n    \"python\": {\n      \"exit_code\": -15,\n      \"stdout_bytes\": 0,\n      \"stderr_bytes\": 1548\n    },\n    \"rust\": {\n      \"exit_code\": -15,\n      \"stdout_bytes\": 0,\n      \"stderr_bytes\": 118\n    }\n  },\n  \"authority\": {\n    \"python\": \"source reference on disposable state\",\n    \"rust\": \"MTM-007 full composition on disposable state\",\n    \"deployed_production\": \"python\"\n  }\n}\n",
       "json": {
         "ok": true,
         "project": "MTM-reboot",
@@ -484,10 +484,10 @@
         "record_count": 18,
         "mismatch_count": 0,
         "sha256": "6aa4f5699df7099d29c12859788430bd6b1c66a8295828598b6cae62a964d830",
-        "release_sha256": "5c96780ba1856527d4cd5299094e5cf84d94b974f361e95361481a77e8555eb9",
+        "release_sha256": "9c3ab78f569b9ecd72a7da61569824ff50964e1f29865fe1998242c9325ff8fa",
         "recorded_sha256": "6aa4f5699df7099d29c12859788430bd6b1c66a8295828598b6cae62a964d830",
         "golden_match": true,
-        "release_branding_normalization": "re-ctm/Re-CTM identity plus additive production-default workflow-protocol metadata",
+        "release_branding_normalization": "re-ctm/Re-CTM identity plus product version and additive production-default workflow-protocol metadata",
         "mismatches": [],
         "shutdown": {
           "python": {
@@ -511,7 +511,7 @@
     {
       "name": "historical_release_evidence",
       "command": [
-        "/usr/bin/python3",
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
         "scripts/validate_historical_mtm_release_evidence.py"
       ],
       "passed": true,
@@ -559,7 +559,7 @@
     {
       "name": "mtm009_preview_release",
       "command": [
-        "/usr/bin/python3",
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
         "scripts/validate_mtm009_preview_release.py"
       ],
       "passed": true,
@@ -585,7 +585,7 @@
     {
       "name": "mtm_command_namespace",
       "command": [
-        "/usr/bin/python3",
+        "/home/lk/.cache/uv/archive-v0/COfW5iT-ThlLKAgs/bin/python3",
         "scripts/validate_mtm_command_namespace.py"
       ],
       "passed": true,

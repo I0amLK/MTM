@@ -542,6 +542,116 @@
       "Do not mark Delivery 6 accepted or change the production workflow default to protocol 3 until the deterministic real-web evaluation gate passes. The installed preview remains protocol-2-default with protocol 3 opt-in."
     ]
   },
+  "delivery_6_stabilization_receipt": {
+    "status": "implemented_local_acceptance_passed_live_preview_requalification_pending",
+    "recorded_at": "2026-09-02T09:47:39-07:00",
+    "baseline_commit": "f9614ce88bd7d073eb51510898b028732654b744",
+    "commit_pending": true,
+    "production_authority_changed": false,
+    "production_workflow_protocol": 2,
+    "protocol3_opt_in": true,
+    "state_schema_version": 2,
+    "public_tools": 24,
+    "hidden_aliases": 11,
+    "final_artifact": "proof_verified.tex",
+    "trigger": "Real web-model protocol-3 sessions using a compact lemma and the QC Hermitian-hull profile case exposed emitted-contract, reference-registry, join-projection and preview-version inconsistencies before Delivery-6 acceptance.",
+    "fixed": [
+      "Assess now emits and accepts one strict protocol-3 assessment record instead of returning an example rejected by its own validator.",
+      "Exploration event schemas are generated beside the accepting protocol validator and expose the required fields for toy-example, retrieval, candidate-lemma and notation-resolution records.",
+      "Protocol-3 direct-screening, failure-synthesis and replan examples are rewritten after overlay so every required typed field is present and forbidden legacy fields are absent while protocol 1/2 examples remain unchanged.",
+      "Generator/branch/assembler roles that already possess the references logical resource receive at most 64 read-only registered reference locators containing only reference_id, title and source_state; inline reference contents remain private and the Verifier firewall remains unchanged.",
+      "A failed join carrying selected_branch_id=null no longer creates the false unknown_join_branch research-state warning; real non-empty unknown branch IDs still fail visibly.",
+      "MCP server identity and RuntimeToolBackend server_info now derive the release version from CARGO_PKG_VERSION, matching mtm --version and release-info instead of reporting the stale 0.3.0 value."
+    ],
+    "regressions_added": [
+      "Assessment emitted-example normalization and unknown-field rejection.",
+      "Exploration typed-schema required-field and retrieval-reference conditional checks.",
+      "Every protocol-3 model-facing minimal submission, template and submission example from the real embedded methodology is validated against its final post-overlay write and commit schemas.",
+      "Protocol-2 methodology non-regression while protocol-3 stale examples are rewritten.",
+      "Inline rethlas_start reference registration through task-visible server reference_id to retrieval_assessment outcome=new_material.",
+      "Failed join with null selected branch produces no shadow warning.",
+      "Gateway server identity equals the compiled package version."
+    ],
+    "source_hashes": {
+      "methodology_rs": "bdd9b709c69286abd9c45a9a46a09e5b8d70a755d0acca82609fe89d3c62f10f",
+      "protocol_rs": "e70adba084454b5194f0e72513c06cd8dd8c656c3be3916a77a6b832233ea24e",
+      "engine_rs": "5ac03851501f7536469e0ba104f557eb4d0064d0855c4420afbe0c66ed596580",
+      "join_normalizer_rs": "f36c14115de9b2fc5daf24c637719eb1f5096b450d6abf77e1cd215564bcde22",
+      "gateway_mcp_rs": "281f312637030563f1bb9966a20ba5a1a27ad3f9251856482b8ddc25a42c1b4b",
+      "runtime_tool_backend_rs": "8a82de38b8e124c060877f7a5ff96c6852b28f6b27478f403f83a20176349861"
+    },
+    "acceptance": {
+      "workflow_unit_tests": 79,
+      "workflow_integration_tests": 9,
+      "mtm005_differential_mismatches": 0,
+      "mtm007_differential_mismatches": 0,
+      "full_workspace_fmt": "passed",
+      "full_workspace_clippy_all_targets_warnings_denied": "passed",
+      "full_workspace_tests": "passed",
+      "mtm009_contract_validator": "passed",
+      "engineering_graph_validator": "passed",
+      "migration_graph_validator": "passed",
+      "complete_run_checks": "passed",
+      "git_diff_check": "passed",
+      "local_validation_sha256": "c8bbd4453913cdd4c514091ebc5ff4fa12d8745d3e1d695c7b3fdf95779768c1"
+    },
+    "release_identity_probe": {
+      "debug_mtm_version": "mtm 0.4.0-preview.1",
+      "debug_release_info_version": "0.4.0-preview.1",
+      "local_oauth_mcp_server_info_version": "0.4.0-preview.1",
+      "local_oauth_mcp_tool_count": 24,
+      "local_oauth_mcp_workflow_protocol": 3,
+      "mcp_identity_source": "CARGO_PKG_VERSION",
+      "runtime_server_info_source": "CARGO_PKG_VERSION"
+    },
+    "local_http_protocol3_probe": {
+      "passed": true,
+      "transport": "loopback HTTP with real OAuth DCR/PKCE and MCP tools/call",
+      "assess_minimal_submission_accepted": true,
+      "inline_reference_id_exposed": true,
+      "retrieval_assessment_new_material_accepted": true,
+      "state_after_retrieval": "propose_plans",
+      "server_shutdown": "SIGTERM"
+    },
+    "commands": [
+      {
+        "command": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace",
+        "exit_code": 0,
+        "result": "The complete Rust workspace passed after protocol-3 stabilization and preview-version repair."
+      },
+      {
+        "command": "python3 scripts/run_mtm005_conformance.py && python3 scripts/run_mtm007_conformance.py",
+        "exit_code": 0,
+        "result": "Historical behavior baselines retained their frozen hashes with zero mismatches; only explicit MTM/Re-CTM product release versions are normalized in the differential comparison layer."
+      },
+      {
+        "command": "python3 scripts/validate_mtm009_research_contract.py && python3 scripts/validate_engineering_graph.py && python3 scripts/validate_migration_graph.py && python3 scripts/run_checks.py && git diff --check",
+        "exit_code": 0,
+        "result": "Contract, architecture, migration, complete local acceptance and diff-hygiene gates passed."
+      },
+      {
+        "command": "./target/debug/mtm --version && ./target/debug/mtm release-info",
+        "exit_code": 0,
+        "result": "Both compiled binary identity surfaces report 0.4.0-preview.1."
+      },
+      {
+        "command": "loopback OAuth DCR/PKCE -> MCP server_info against target/debug/mtm",
+        "exit_code": 0,
+        "result": "RuntimeToolBackend returned version=0.4.0-preview.1, tool_count=24 and workflow_protocol_version=3 through the real authenticated HTTP path."
+      },
+      {
+        "command": "loopback OAuth DCR/PKCE -> rethlas_start/rethlas_step protocol-3 contract probe",
+        "exit_code": 0,
+        "result": "The emitted Assess minimal submission was accepted verbatim; the inline reference's server-issued reference_id was visible in task context; retrieval_assessment outcome=new_material using that id was accepted and advanced the run to propose_plans."
+      }
+    ],
+    "manual_pending": [
+      "Build and install a new preview binary from the stabilization source, then rerun the real web-model QC/Hermitian case and compact proof case against that exact binary before accepting Delivery 6.",
+      "Rerun the target OAuth/MCP smoke and confirm live server_info.version equals 0.4.0-preview.1 after restart.",
+      "The observed dangling /etc/resolv.conf inside the Native Bubblewrap sandbox is a separate Native security-boundary issue and is not changed by this MTM-009 workflow stabilization; address it under a separately scoped Native change before final 0.4.0 release.",
+      "Do not make protocol 3 the production default until the frozen paired real-web A4 evaluation and deterministic release gate pass."
+    ]
+  },
   "preview_release_receipt": {
     "status": "installed_preview_not_milestone_completion",
     "version": "0.4.0-preview.1",
@@ -747,6 +857,42 @@
       "stage": "MTM-007 additive server-info metadata differential",
       "failure": "The MTM-007 exact differential reported one server_info mismatch because the preview adds production_default_workflow_protocol_version=2, a new observability field absent from the historical Python reference.",
       "repair": "Narrowly normalize only this additive metadata key alongside the already-approved product-branding normalization; all other server_info fields, tools and workflow behavior remain exact-differential checked."
+    },
+    {
+      "delivery": 6,
+      "stage": "real-web protocol-three emitted-contract execution",
+      "failure": "A live protocol-3 Assess task returned event_type=assessment in its own minimal submission while the protocol-3 event validator rejected assessment as an unknown event; further live screening found a missing method field in the direct template and incomplete IdentifyFailures/Replan examples.",
+      "repair": "Add one strict Assess-only assessment record, generate the exploration typed-event schema beside the accepting validator, rewrite protocol-3 task examples after overlay, and add regressions proving the emitted Assess example normalizes while protocol 2 retains its historical payload."
+    },
+    {
+      "delivery": 6,
+      "stage": "real-web inline-reference evidence binding",
+      "failure": "References supplied through rethlas_start were correctly registered in the authoritative registry, but the protocol-3 task context exposed no server reference_id; retrieval_assessment outcome=new_material therefore required the web model to guess an identifier that the validator correctly refused to accept.",
+      "repair": "Expose at most 64 read-only registered reference locators only to roles already authorized for the references logical resource, and add an end-to-end inline-reference test that carries the server-issued id into a valid new_material retrieval record without exposing source contents."
+    },
+    {
+      "delivery": 6,
+      "stage": "failed-branch join shadow projection",
+      "failure": "The authoritative failed join persisted selected_branch_id=null, while the advisory normalizer treated mere key presence as a selected branch and emitted unknown_join_branch even though every branch was legitimately sealed.",
+      "repair": "Treat selected_branch_id as present only when it is a non-empty string; preserve the warning for a genuinely unknown non-empty branch and add a null-selected failed-join regression."
+    },
+    {
+      "delivery": 6,
+      "stage": "preview release identity in MCP and server_info",
+      "failure": "The installed binary and release-info reported 0.4.0-preview.1, but gateway MCP serverInfo and RuntimeToolBackend server_info still hard-coded 0.3.0, misleading live A/B diagnosis and historical conformance scripts.",
+      "repair": "Derive both production identity surfaces from CARGO_PKG_VERSION, test the gateway identity directly, make the HTTP smoke read the expected workspace package version, and narrowly normalize product-version divergence only inside historical Python-vs-Rust differential comparison."
+    },
+    {
+      "delivery": 6,
+      "stage": "stabilization full local acceptance",
+      "failure": "The first full Clippy gate rejected new methodology tests for expect() usage, and after the real version fix the MTM-005/007 historical differential correctly noticed the release-version difference before its comparison normalization was updated.",
+      "repair": "Keep the production lint policy unchanged, scope the established expect-used allowance only to the methodology test module, and make historical conformance normalize release version only inside recognized MTM/Re-CTM identity objects. The complete workspace, frozen hashes, run_checks and diff hygiene then passed."
+    },
+    {
+      "delivery": 6,
+      "stage": "local authenticated HTTP requalification probe",
+      "failure": "The first temporary server port was already occupied, and the broad historical MTM-007 smoke later stopped after the version check because this repository workspace does not contain its external hello.txt fixture.",
+      "repair": "Select a kernel-reported free loopback port and run a purpose-built read-only OAuth/MCP probe that has no workspace-file fixture dependency; it confirmed server_info version 0.4.0-preview.1 and then a second authenticated probe confirmed the protocol-3 Assess and inline-reference fixes end to end."
     }
   ],
   "manual_pending": [

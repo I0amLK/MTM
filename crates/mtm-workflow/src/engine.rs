@@ -75,6 +75,8 @@ pub struct WorkflowEvent {
 
 pub type WorkflowObserver = Arc<dyn Fn(WorkflowEvent) + Send + Sync + 'static>;
 
+const MAX_TASK_REFERENCE_LOCATORS: usize = 64;
+
 pub struct WorkflowEngine {
     store: Arc<StateStore>,
     vault: Arc<PrivateVault>,
@@ -1301,6 +1303,12 @@ impl WorkflowEngine {
             ),
             ("manual_validation_required".to_owned(), Value::Bool(true)),
         ]);
+        if protocol >= 3 && resources.iter().any(|resource| resource == "references") {
+            context.insert(
+                "registered_references".to_owned(),
+                self.protocol3_reference_locators(text(run, "run_id")?)?,
+            );
+        }
         if let Some(project_run) = self
             .store
             .get_project_run(text(run, "run_id")?, Some(text(run, "owner_id")?))?
@@ -1475,6 +1483,24 @@ impl WorkflowEngine {
             );
         }
         Ok(Value::Object(context))
+    }
+
+    fn protocol3_reference_locators(&self, run_id: &str) -> Result<Value, ReCtmError> {
+        let references = self.store.list_run_references(run_id)?;
+        let start = references.len().saturating_sub(MAX_TASK_REFERENCE_LOCATORS);
+        let locators = references
+            .into_iter()
+            .skip(start)
+            .filter_map(|reference| {
+                let reference_id = reference.get("reference_id")?.as_str()?;
+                Some(serde_json::json!({
+                    "reference_id":reference_id,
+                    "title":reference.get("title").and_then(Value::as_str).unwrap_or_default(),
+                    "source_state":reference.get("source_state").and_then(Value::as_str).unwrap_or_default()
+                }))
+            })
+            .collect::<Vec<_>>();
+        Ok(Value::Array(locators))
     }
 
     fn transition(&self, input: TransitionInput<'_>) -> Result<Value, ReCtmError> {

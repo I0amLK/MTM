@@ -361,6 +361,13 @@ def normalize(value: Any, *, server: Server, run_id: str | None = None) -> Any:
 def normalize_release_branding(value: Any) -> Any:
     """Canonicalize intentional product-identity and additive preview metadata divergence."""
     if isinstance(value, dict):
+        name = value.get("name")
+        server = value.get("server")
+        title = value.get("title")
+        product_identity = (
+            (isinstance(name, str) and name in {"re-ctm", "mtm"})
+            or (isinstance(server, str) and server in {"re-ctm", "mtm"})
+        ) and isinstance(title, str) and title in {"Re-CTM", "MTM"}
         normalized: dict[str, Any] = {}
         for key, item in value.items():
             if key == "production_default_workflow_protocol_version":
@@ -369,6 +376,8 @@ def normalize_release_branding(value: Any) -> Any:
                 normalized[key] = "mtm"
             elif key == "title" and item == "Re-CTM":
                 normalized[key] = "MTM"
+            elif key == "version" and product_identity:
+                normalized[key] = "<PRODUCT_VERSION>"
             else:
                 normalized[key] = normalize_release_branding(item)
         return normalized
@@ -607,7 +616,7 @@ def main() -> int:
         "release_sha256": release_digest,
         "recorded_sha256": recorded,
         "golden_match": golden_match,
-        "release_branding_normalization": "re-ctm/Re-CTM identity plus additive production-default workflow-protocol metadata",
+        "release_branding_normalization": "re-ctm/Re-CTM identity plus product version and additive production-default workflow-protocol metadata",
         "mismatches": mismatches,
         "shutdown": shutdown,
         "authority": {

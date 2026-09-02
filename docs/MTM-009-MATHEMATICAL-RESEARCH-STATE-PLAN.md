@@ -304,6 +304,18 @@ notation_resolution
 Each record contains concise conclusions and evidence locators. It must not contain a
 raw transcript or hidden reasoning trace.
 
+The preceding `Assess` state uses a separate typed `assessment` event containing only
+a bounded non-empty summary. It is intentionally not part of the exploration-event
+set above. The protocol-3 methodology overlay and the record normalizer share the
+same assessment/exploration schema builders so model-facing examples cannot drift
+from the accepting validator.
+
+For roles that already have the logical `references` resource, protocol 3 also adds a
+bounded read-only `registered_references` context containing only server-issued
+`reference_id`, title, and source-state locators. Inline references registered by
+`rethlas_start` therefore have usable evidence identifiers for typed retrieval
+records without exposing source contents or weakening the verifier/branch firewalls.
+
 ## 6. Projector semantics
 
 ### 6.1 Inputs

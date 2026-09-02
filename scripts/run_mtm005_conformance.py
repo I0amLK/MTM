@@ -37,16 +37,25 @@ def canonical(value: Any) -> str:
 
 
 def normalize_release_branding(value: Any) -> Any:
-    """Canonicalize only the intentional Re-CTM -> MTM product identity divergence."""
+    """Canonicalize intentional product identity/version divergence across releases."""
     if isinstance(value, list):
         return [normalize_release_branding(item) for item in value]
     if isinstance(value, dict):
+        name = value.get("name")
+        server = value.get("server")
+        title = value.get("title")
+        product_identity = (
+            (isinstance(name, str) and name in {"re-ctm", "mtm"})
+            or (isinstance(server, str) and server in {"re-ctm", "mtm"})
+        ) and isinstance(title, str) and title in {"Re-CTM", "MTM"}
         normalized: dict[str, Any] = {}
         for key, item in value.items():
             if key in {"name", "service", "server"} and item == "re-ctm":
                 normalized[key] = "mtm"
             elif key == "title" and item == "Re-CTM":
                 normalized[key] = "MTM"
+            elif key == "version" and product_identity:
+                normalized[key] = "<PRODUCT_VERSION>"
             else:
                 normalized[key] = normalize_release_branding(item)
         return normalized
@@ -735,7 +744,7 @@ def main(argv: list[str] | None = None) -> int:
         "reference_sha256": reference_hash,
         "recorded_sha256": recorded_hash or None,
         "golden_match": golden_match,
-        "release_branding_normalization": "re-ctm/Re-CTM identity fields only",
+        "release_branding_normalization": "re-ctm/Re-CTM identity plus product release version",
         "differential_mismatch_count": len(mismatches),
         "mismatches": mismatches[:20],
         "resources": {

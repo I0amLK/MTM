@@ -6,8 +6,16 @@ import hashlib
 import http.client
 import json
 import sys
+import tomllib
 import urllib.parse
+from pathlib import Path
 from typing import Any
+
+
+ROOT = Path(__file__).resolve().parents[1]
+EXPECTED_VERSION = tomllib.loads((ROOT / "Cargo.toml").read_text(encoding="utf-8"))["workspace"][
+    "package"
+]["version"]
 
 
 def request(
@@ -171,7 +179,10 @@ def main() -> int:
 
     server_info = tool_call(port, token, "server_info", {})
     server_structured = server_info.get("result", {}).get("structuredContent", {})
-    if server_structured.get("tool_count") != 24 or server_structured.get("version") != "0.3.0":
+    if (
+        server_structured.get("tool_count") != 24
+        or server_structured.get("version") != EXPECTED_VERSION
+    ):
         raise RuntimeError(f"server_info did not reach RuntimeToolBackend: {server_structured}")
 
     read_file = tool_call(port, token, "read_file", {"path": "hello.txt"})

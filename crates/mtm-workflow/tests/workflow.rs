@@ -393,6 +393,102 @@ fn protocol_three_branch_context_does_not_receive_global_research_view() -> Resu
 }
 
 #[test]
+fn protocol_three_inline_references_expose_registered_ids_for_typed_retrieval()
+-> Result<(), ReCtmError> {
+    let temp = tempfile::tempdir().map_err(|error| {
+        ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+    })?;
+    let engine = engine(temp.path(), Arc::new(PassingLatex))?;
+    let references = vec![serde_json::json!({
+        "name":"source-a.txt",
+        "content":"A checked source statement.",
+        "source":"https://example.invalid/source-a"
+    })];
+    let started = engine.start(StartRequest {
+        owner_id: "owner",
+        problem_tex: "Prove a statement using one injected reference.",
+        problem_id: Some("protocol-three-inline-reference"),
+        references: &references,
+        native_mode: "dangerous",
+        workspace_export_path: None,
+        project_id: None,
+        target_claim_id: None,
+        workflow_mode: "full",
+        register_result: true,
+        workflow_protocol_version: 3,
+        trace_id: None,
+    })?;
+    let run_id = started["run_id"].as_str().unwrap_or_default().to_owned();
+    let assess = engine.next_task("owner", &run_id, None)?;
+    let registered = assess["context"]["registered_references"]
+        .as_array()
+        .ok_or_else(|| {
+            ReCtmError::new("TEST_FAILURE", "registered reference locators missing")
+                .with_category(ErrorCategory::Internal)
+        })?;
+    assert_eq!(registered.len(), 1);
+    assert_eq!(registered[0]["title"], "source-a.txt");
+    let reference_id = registered[0]["reference_id"]
+        .as_str()
+        .ok_or_else(|| {
+            ReCtmError::new("TEST_FAILURE", "registered reference id missing")
+                .with_category(ErrorCategory::Internal)
+        })?
+        .to_owned();
+    engine.write(
+        "owner",
+        capability(&assess)?,
+        "memory:generation:immediate_conclusions",
+        &serde_json::json!({"summary":"the injected source is relevant"}),
+        None,
+    )?;
+    engine.write(
+        "owner",
+        capability(&assess)?,
+        "memory:generation:events",
+        &serde_json::json!({
+            "event_type":"assessment",
+            "summary":"Use the registered source during exploration."
+        }),
+        None,
+    )?;
+    engine.commit(
+        "owner",
+        capability(&assess)?,
+        "assessment_complete",
+        &serde_json::json!({"route":"full","requires_external_retrieval":true}),
+        None,
+    )?;
+
+    let explore = engine.next_task("owner", &run_id, None)?;
+    assert_eq!(
+        explore["context"]["registered_references"][0]["reference_id"],
+        reference_id
+    );
+    engine.write(
+        "owner",
+        capability(&explore)?,
+        "memory:generation:events",
+        &serde_json::json!({
+            "event_type":"retrieval_assessment",
+            "outcome":"new_material",
+            "summary":"The injected source supplies relevant material.",
+            "query":"injected source",
+            "reference_ids":[reference_id]
+        }),
+        None,
+    )?;
+    engine.commit(
+        "owner",
+        capability(&explore)?,
+        "exploration_complete",
+        &serde_json::json!({}),
+        None,
+    )?;
+    Ok(())
+}
+
+#[test]
 fn protocol_three_structured_research_contract_reaches_same_tex_finalizer() -> Result<(), ReCtmError>
 {
     let temp = tempfile::tempdir().map_err(|error| {

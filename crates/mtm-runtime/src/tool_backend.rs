@@ -197,7 +197,7 @@ impl RuntimeToolBackend {
         let mut payload = serde_json::json!({
             "server":"mtm",
             "title":"MTM",
-            "version":"0.3.0",
+            "version":env!("CARGO_PKG_VERSION"),
             "supported_protocol_versions":SUPPORTED_PROTOCOL_VERSIONS,
             "workspace":self.workspace.root(),
             "permission_mode":permission_mode,

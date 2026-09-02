@@ -345,8 +345,17 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
     mcp_source = (ROOT / "crates" / "mtm-gateway" / "src" / "mcp.rs").read_text(
         encoding="utf-8"
     )
-    if '{"name": "mtm", "title": "MTM", "version": "0.3.0"}' not in mcp_source:
-        raise ValueError("public MCP server identity must remain MTM")
+    if (
+        '"name": "mtm"' not in mcp_source
+        or '"title": "MTM"' not in mcp_source
+        or '"version": env!("CARGO_PKG_VERSION")' not in mcp_source
+    ):
+        raise ValueError("public MCP server identity must remain MTM and use package version")
+    runtime_backend_source = (
+        ROOT / "crates" / "mtm-runtime" / "src" / "tool_backend.rs"
+    ).read_text(encoding="utf-8")
+    if '"version":env!("CARGO_PKG_VERSION")' not in runtime_backend_source:
+        raise ValueError("server_info must use the same package version as the MTM binary")
 
     catalog_b64 = (ROOT / "crates" / "mtm-cli" / "assets" / "tool-catalog-v1.b64").read_text(
         encoding="utf-8"

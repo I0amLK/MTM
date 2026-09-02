@@ -262,7 +262,11 @@ impl MCPDispatcher {
 
 #[must_use]
 pub fn server_identity() -> Value {
-    serde_json::json!({"name": "mtm", "title": "MTM", "version": "0.3.0"})
+    serde_json::json!({
+        "name": "mtm",
+        "title": "MTM",
+        "version": env!("CARGO_PKG_VERSION")
+    })
 }
 
 #[must_use]
@@ -605,6 +609,14 @@ fn rpc(code: i64, message: &str) -> JSONRPCError {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn server_identity_uses_the_compiled_package_version() {
+        let identity = server_identity();
+        assert_eq!(identity["name"], "mtm");
+        assert_eq!(identity["title"], "MTM");
+        assert_eq!(identity["version"], env!("CARGO_PKG_VERSION"));
+    }
 
     fn modern_meta() -> Value {
         serde_json::json!({

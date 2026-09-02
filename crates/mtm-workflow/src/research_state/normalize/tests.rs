@@ -403,6 +403,24 @@ fn join_selected_branch_is_resolved_to_its_plan() {
 }
 
 #[test]
+fn failed_join_with_null_selected_branch_does_not_emit_unknown_branch_warning() {
+    let input = LegacyResearchInput::new("Target", 2, active_plan(), empty_progress())
+        .with_branch_results(vec![json!({
+            "branch_id": "branch-2-1",
+            "plan_id": "plan-1",
+            "status": "failed",
+            "summary": "route remains blocked"
+        })])
+        .with_join_result(json!({
+            "outcome": "failed",
+            "selected_branch_id": null,
+            "common_failures": ["shared obstruction"]
+        }));
+    let normalized = normalize_legacy_research(&input).expect("normalization");
+    assert!(normalized.warnings().is_empty());
+}
+
+#[test]
 fn unknown_counterexample_node_cannot_refute_the_target() {
     let input = LegacyResearchInput::new("Target", 1, active_plan(), empty_progress())
         .with_counterexamples(vec![json!({

@@ -69,6 +69,87 @@ fn stamp() -> ProtocolRecordStamp<'static> {
 }
 
 #[test]
+fn assessment_event_contract_matches_the_protocol3_validator() {
+    let record = normalize_protocol3_generation_record(
+        "events",
+        &json!({
+            "event_type":"assessment",
+            "summary":"Initial assessment and reasoning plan recorded."
+        }),
+        &stamp(),
+        &scope(),
+    )
+    .expect("assessment record");
+    assert_eq!(record["record_type"], "assessment");
+    assert_eq!(record["event_type"], "assessment");
+
+    let schema = protocol3_assessment_event_schema();
+    assert_eq!(schema["additionalProperties"], false);
+    assert_eq!(schema["properties"]["event_type"]["const"], "assessment");
+    assert_eq!(schema["required"], json!(["event_type", "summary"]));
+
+    assert!(
+        normalize_protocol3_generation_record(
+            "events",
+            &json!({
+                "event_type":"assessment",
+                "summary":"initial plan",
+                "unexpected":true
+            }),
+            &stamp(),
+            &scope(),
+        )
+        .is_err()
+    );
+}
+
+#[test]
+fn exploration_event_schema_exposes_validator_required_fields() {
+    let schema = protocol3_exploration_event_schema();
+    let variants = schema["oneOf"].as_array().expect("event variants");
+    let required_by_type = [
+        (
+            "toy_example_result",
+            vec!["event_type", "node_id", "outcome", "summary"],
+        ),
+        (
+            "retrieval_assessment",
+            vec!["event_type", "outcome", "summary"],
+        ),
+        (
+            "new_candidate_lemma",
+            vec!["event_type", "statement", "summary"],
+        ),
+        (
+            "notation_resolution",
+            vec!["event_type", "symbol", "resolution", "summary"],
+        ),
+    ];
+    for (event_type, required) in required_by_type {
+        let variant = variants
+            .iter()
+            .find(|variant| variant["properties"]["event_type"]["const"] == event_type)
+            .expect("event variant");
+        assert_eq!(variant["additionalProperties"], false);
+        let actual = variant["required"]
+            .as_array()
+            .expect("required fields")
+            .iter()
+            .filter_map(Value::as_str)
+            .collect::<Vec<_>>();
+        assert_eq!(actual, required);
+    }
+    let retrieval = variants
+        .iter()
+        .find(|variant| variant["properties"]["event_type"]["const"] == "retrieval_assessment")
+        .expect("retrieval variant");
+    assert_eq!(
+        retrieval["allOf"][0]["then"]["properties"]["reference_ids"]["minItems"],
+        1
+    );
+}
+
+#[test]
 fn structured_plans_receive_canonical_node_dependencies() {
     let plans = normalized_plans();
     assert_eq!(plans[0]["plan_id"], "plan-r2-1");
