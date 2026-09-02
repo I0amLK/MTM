@@ -274,9 +274,9 @@
     "delivery_commit": "7cef136af2f8f13a7ea152373899780699c75962"
   },
   "delivery_4_receipt": {
-    "status": "accepted_pending_commit",
+    "status": "accepted",
     "baseline_commit": "7cef136af2f8f13a7ea152373899780699c75962",
-    "delivery_commit": null,
+    "delivery_commit": "ebd6b8e195cde82d1b29fca6308f409487d6fdf2",
     "production_behavior_changed": true,
     "authority_before": "rust",
     "authority_after": "rust",
@@ -342,7 +342,7 @@
         "result": "A protocol-3 direct-proving run was copied after clean shutdown; the accepted prior binary with SHA-256 0a785a122396a3f8961cbc33b967e7a48874b90311333c8860a1e5c75582fd7f resumed it on the same OAuth origin and advanced it to branch_run, then shut down cleanly."
       }
     ],
-    "commit_pending": true
+    "commit_pending": false
   },
   "recorded_failures_and_repairs": [
     {
