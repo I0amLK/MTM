@@ -12,6 +12,7 @@ use serde::Serialize;
 use sha2::{Digest, Sha256};
 
 mod normalize;
+pub(crate) mod protocol;
 
 pub use normalize::{
     LegacyNormalization, LegacyNormalizationSummary, LegacyResearchInput,
@@ -87,6 +88,17 @@ impl ResearchNodeKind {
             Self::Definition => "definition",
         }
     }
+
+    #[must_use]
+    pub fn parse(value: &str) -> Option<Self> {
+        match value {
+            "target" => Some(Self::Target),
+            "lemma" => Some(Self::Lemma),
+            "construction" => Some(Self::Construction),
+            "definition" => Some(Self::Definition),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -146,6 +158,21 @@ impl ResearchAttemptMethod {
             Self::Repair => "repair",
         }
     }
+
+    #[must_use]
+    pub fn parse(value: &str) -> Option<Self> {
+        match value {
+            "direct" => Some(Self::Direct),
+            "reduction" => Some(Self::Reduction),
+            "toy_example" => Some(Self::ToyExample),
+            "counterexample" => Some(Self::Counterexample),
+            "retrieval" => Some(Self::Retrieval),
+            "computation" => Some(Self::Computation),
+            "synthesis" => Some(Self::Synthesis),
+            "repair" => Some(Self::Repair),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -167,6 +194,18 @@ impl ResearchAttemptOutcome {
             Self::Failed => "failed",
             Self::Refuted => "refuted",
             Self::Inconclusive => "inconclusive",
+        }
+    }
+
+    #[must_use]
+    pub fn parse(value: &str) -> Option<Self> {
+        match value {
+            "progress" => Some(Self::Progress),
+            "route_solved" => Some(Self::RouteSolved),
+            "failed" => Some(Self::Failed),
+            "refuted" => Some(Self::Refuted),
+            "inconclusive" => Some(Self::Inconclusive),
+            _ => None,
         }
     }
 }
@@ -202,6 +241,23 @@ impl ResearchObstruction {
             Self::Unknown => "unknown",
         }
     }
+
+    #[must_use]
+    pub fn parse(value: &str) -> Option<Self> {
+        match value {
+            "false_claim" => Some(Self::FalseClaim),
+            "missing_hypothesis" => Some(Self::MissingHypothesis),
+            "missing_lemma" => Some(Self::MissingLemma),
+            "missing_reference" => Some(Self::MissingReference),
+            "computational_bottleneck" => Some(Self::ComputationalBottleneck),
+            "notation_mismatch" => Some(Self::NotationMismatch),
+            "circular_dependency" => Some(Self::CircularDependency),
+            "incompatible_partial_results" => Some(Self::IncompatiblePartialResults),
+            "no_progress" => Some(Self::NoProgress),
+            "unknown" => Some(Self::Unknown),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
@@ -211,6 +267,8 @@ pub struct ResearchNode {
     kind: ResearchNodeKind,
     plan_id: Option<ResearchPlanId>,
     dependencies: BTreeSet<ResearchNodeId>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    declared_critical: Option<bool>,
     status: ResearchNodeStatus,
     revision: u32,
     created_round: u32,
@@ -234,6 +292,7 @@ impl ResearchNode {
             kind,
             plan_id: None,
             dependencies: BTreeSet::new(),
+            declared_critical: None,
             status: ResearchNodeStatus::Open,
             revision: 1,
             created_round: 0,
@@ -252,6 +311,12 @@ impl ResearchNode {
     #[must_use]
     pub fn with_dependency(mut self, dependency: ResearchNodeId) -> Self {
         self.dependencies.insert(dependency);
+        self
+    }
+
+    #[must_use]
+    pub fn with_declared_critical(mut self, critical: bool) -> Self {
+        self.declared_critical = Some(critical);
         self
     }
 
@@ -299,6 +364,11 @@ impl ResearchNode {
     #[must_use]
     pub fn dependencies(&self) -> &BTreeSet<ResearchNodeId> {
         &self.dependencies
+    }
+
+    #[must_use]
+    pub const fn declared_critical(&self) -> Option<bool> {
+        self.declared_critical
     }
 
     #[must_use]
@@ -772,6 +842,10 @@ pub enum ResearchStateError {
         location: String,
         reason: String,
     },
+    MalformedProtocolRecord {
+        location: String,
+        reason: String,
+    },
     ActiveDependencyCycle {
         cycle: Vec<ResearchNodeId>,
     },
@@ -842,6 +916,12 @@ impl fmt::Display for ResearchStateError {
                 write!(
                     formatter,
                     "malformed legacy research record at {location}: {reason}"
+                )
+            }
+            Self::MalformedProtocolRecord { location, reason } => {
+                write!(
+                    formatter,
+                    "malformed protocol-3 research record at {location}: {reason}"
                 )
             }
             Self::ActiveDependencyCycle { cycle } => write!(
@@ -1491,13 +1571,23 @@ fn derive_plan_routes(
             .filter(|node| node.plan_id.as_ref() == Some(plan_id))
             .map(|node| node.node_id.clone())
             .collect::<BTreeSet<_>>();
-        let mut goal_set = plan_nodes
+        let declared_critical = plan_nodes
+            .iter()
+            .filter(|node_id| nodes[*node_id].declared_critical == Some(true))
+            .cloned()
+            .collect::<BTreeSet<_>>();
+        let goal_candidates = if declared_critical.is_empty() {
+            &plan_nodes
+        } else {
+            &declared_critical
+        };
+        let mut goal_set = goal_candidates
             .iter()
             .filter(|node_id| {
                 graph.dependents.get(*node_id).is_none_or(|dependents| {
                     dependents
                         .iter()
-                        .all(|dependent| !plan_nodes.contains(dependent))
+                        .all(|dependent| !goal_candidates.contains(dependent))
                 })
             })
             .cloned()

@@ -353,18 +353,21 @@ ResearchState {
 
 ### 6.4 Advisory rule table
 
-The first matching rule wins:
+The first matching valid-state rule wins. Assembly is evaluated before failed
+alternative routes. `R02` is a stable cycle diagnostic identifier returned while an
+invalid submission is rejected; a cyclic graph never becomes an accepted research
+state.
 
 | Rule | Condition | Advisory action |
 |---|---|---|
-| `R01_REPLAN_REFUTED` | critical node refuted | replan around the counterexample |
-| `R02_REPLAN_CYCLE` | active dependency cycle | remove the circular dependency |
+| `R08_ASSEMBLE` | global prerequisites and any alternative route solved | assemble the complete LaTeX proof |
+| `R01_REPLAN_REFUTED` | critical node refuted and no viable alternative remains | replan around the counterexample |
+| `R02_REPLAN_CYCLE` | submitted dependency cycle before persistence | reject and remove the circular dependency |
 | `R03_TEST_COUNTEREXAMPLE` | repeated direct failure and no falsification attempt | test smallest meaningful examples |
 | `R04_RETRIEVE_FOCUSED` | missing-reference obstruction and no focused retrieval | retrieve one targeted result |
 | `R05_STOP_RETRIEVAL` | repeated retrieval adds no new reference IDs | synthesize existing sources without more search |
 | `R06_SCREEN_FRONTIER` | untouched actionable critical node | attempt direct proof or a diagnostic toy example |
-| `R07_CONSOLIDATE` | compatible partial attempts exist | consolidate into one reusable lemma |
-| `R08_ASSEMBLE` | all critical target dependencies route-solved | assemble the complete LaTeX proof |
+| `R07_CONSOLIDATE` | compatible non-retrieval partial attempts exist | consolidate into one reusable lemma |
 | `R09_REVIEW_STATE` | no rule applies | review declarations and choose the next mathematical action |
 
 Every advisory contains `rule_id`, `focus_node_id`, a concise reason, and the evidence
@@ -838,22 +841,22 @@ runs.
 
 Tasks:
 
-- [ ] Add protocol 3 to validation and release facts.
-- [ ] Add structured plan subgoals with local dependency keys.
-- [ ] Add bounded method/obstruction/evidence fields to screening.
-- [ ] Add bounded branch obstruction fields.
-- [ ] Add structured failure and replan fields.
-- [ ] Add typed exploration event schemas.
-- [ ] Keep protocol-1/2 methodology rendering unchanged.
-- [ ] Test accepted prior binary against copied protocol-3 state.
+- [x] Add protocol 3 to validation and evaluation-time runtime facts while the production release protocol remains 2.
+- [x] Add structured plan subgoals with local dependency keys.
+- [x] Add bounded method/obstruction/evidence fields to screening.
+- [x] Add bounded branch obstruction fields.
+- [x] Add structured failure and replan fields.
+- [x] Add typed exploration event schemas.
+- [x] Keep protocol-1/2 methodology rendering unchanged.
+- [x] Test accepted prior binary against copied protocol-3 state.
 
 Acceptance:
 
-- [ ] Public tool catalog unchanged.
-- [ ] State schema unchanged.
-- [ ] Protocol-1/2 fixtures unchanged.
-- [ ] Protocol-3 valid/invalid/boundary fixtures pass.
-- [ ] Copied-state rollback succeeds without finalization bypass.
+- [x] Public tool catalog unchanged.
+- [x] State schema unchanged.
+- [x] Protocol-1/2 fixtures unchanged.
+- [x] Protocol-3 valid/invalid/boundary fixtures pass.
+- [x] Copied-state rollback succeeds without finalization bypass.
 
 Rollback: new binary may default back to protocol 2; protocol-3 state remains safely
 readable as protocol-2-compatible history.

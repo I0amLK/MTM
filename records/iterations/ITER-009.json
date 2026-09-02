@@ -62,14 +62,14 @@
     {
       "delivery": 3,
       "name": "normalized_append_only_research_records",
-      "status": "validated_pending_commit",
+      "status": "accepted",
       "production_behavior_changed": false,
       "goal": "Normalize existing plans, screenings, branches, failures, replans, retrieval and verifier findings into existing logical channels and run projection in read-only shadow."
     },
     {
       "delivery": 4,
       "name": "protocol_three_research_contracts",
-      "status": "planned",
+      "status": "accepted",
       "production_behavior_changed": true,
       "goal": "Enable structured protocol-3 research fields for new runs while protocol-1/2 behavior and the generic rethlas_step envelope remain compatible."
     },
@@ -114,8 +114,8 @@
     "protocol_1_2_compatibility_and_copied_state_rollback"
   ],
   "acceptance": {
-    "A0": {"status": "accepted_delivery_1", "required": "Build, format, Clippy, tests, graph/governance validators, MTM-009 contract validator and diff checks.", "evidence": "python3 scripts/run_checks.py returned ok=true after the MTM-009 governance/contract changes."},
-    "A1": {"status": "accepted_delivery_2", "required": "Protocol-1/2 frozen compatibility plus protocol-3 research-contract golden fixtures.", "evidence": "The 82-checkpoint MTM-006 workflow differential retained zero mismatches and the pure chain/frontier graph digest is frozen in mtm009-research-graph-v1.json."},
+    "A0": {"status": "accepted_delivery_4", "required": "Build, format, Clippy, tests, graph/governance validators, MTM-009 contract validator and diff checks.", "evidence": "The complete Rust workspace passes format, warnings-denied Clippy, all-target tests, MTM-009 contract validation, migration/engineering graph validation and diff hygiene after protocol-3 contract implementation."},
+    "A1": {"status": "accepted_delivery_4", "required": "Protocol-1/2 frozen compatibility plus protocol-3 research-contract golden fixtures.", "evidence": "The 82-checkpoint MTM-006 workflow differential retains zero mismatches and frozen SHA-256 def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0; protocol-3 structured plans, events, screening, branch/failure/replan records and a complete proof_verified.tex path pass strict unit and end-to-end tests."},
     "A2": {"status": "accepted_delivery_3", "required": "Read-only deterministic shadow projection before model-facing exposure.", "evidence": "Protocol-2 history is normalized and projected only through the owner-authorized research_state_shadow diagnostic; repeated and eight-way concurrent projections are byte-identical and leave the complete disposable state tree unchanged."},
     "A3": {"status": "accepted_applicable_delivery_3", "required": "Retry/crash/concurrency, identity, capability, branch/verifier firewall and finalizer non-regression.", "evidence": "Owner mismatch is denied, unregistered reference IDs and unknown counterexample nodes cannot influence the graph, malformed nested collections fail closed, no research state enters ordinary task context, and all existing capability/verifier/finalizer tests pass."},
     "A4": {"status": "pending", "required": "Real web-driven paired mathematical evaluation with normal research/workspace tools and verified .tex outputs."},
@@ -215,7 +215,7 @@
     "commit_pending": false
   },
   "delivery_3_receipt": {
-    "status": "validated_pending_commit",
+    "status": "accepted",
     "baseline_commit": "f5adb6f175ac0a7db62d0a5a989f63e5468f07f2",
     "production_behavior_changed": false,
     "authority_before": "rust",
@@ -270,6 +270,78 @@
         "result": "The no-model-exposure shadow boundary, five-file pure source boundary, no-graph-dependency budget, unchanged authority topology and diff hygiene passed."
       }
     ],
+    "commit_pending": false,
+    "delivery_commit": "7cef136af2f8f13a7ea152373899780699c75962"
+  },
+  "delivery_4_receipt": {
+    "status": "accepted_pending_commit",
+    "baseline_commit": "7cef136af2f8f13a7ea152373899780699c75962",
+    "delivery_commit": null,
+    "production_behavior_changed": true,
+    "authority_before": "rust",
+    "authority_after": "rust",
+    "production_default_workflow_protocol": 2,
+    "evaluation_protocols": [2, 3],
+    "state_schema_version": 2,
+    "public_tools": 24,
+    "hidden_aliases": 11,
+    "workflow_states": 18,
+    "new_vault_channels": 0,
+    "new_dependencies": 0,
+    "final_artifact": "proof_verified.tex",
+    "protocol_source_sha256": "e0757a8c24e2edb07214eb544f3bb428172a01e47b52c080a2f3fb5882ab2f8a",
+    "protocol_tests_sha256": "dbff2b40cfebaae50bc8232cb49daec5433b0d858cbebe026fe02220f97096ed",
+    "engine_sha256": "b671ca2a7e9f344219562cf5f293c7614f118dc456608a548836e386cf54fbd0",
+    "methodology_sha256": "65a9f982681892f28c30945ae4ff557400eddcb5e5fd9cff0f4af19e0b957e0f",
+    "runtime_application_sha256": "dd38c3dcd04c5ef11a639444591919cff9197d2c5f6af86aea6cc23211960079",
+    "runtime_config_sha256": "6c387c9117b276650717b6ffec2e53e36686bf1a1cfe158b5db65f159144f712",
+    "runtime_backend_sha256": "10b284c77ed0c3c02b18174f17293aa859484c6f394beee19f82baf255586e6e",
+    "workflow_integration_tests_sha256": "57d64b8e9f88fe537a49e558eabe0896b7dacb112a68ecb82b185d5fde664d58",
+    "rollback_harness_sha256": "8c510fd0ba97cde36d62e2f85e3d5ed662a41f6290a9a2ad6638c1bf64a01e0e",
+    "contract_validator_sha256": "d4340d01cc12182a9e5efd9163fb6dfca3affc32117020e06a25ed610d6bec33",
+    "workflow_reference_sha256": "def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0",
+    "accepted_prior_binary_sha256": "0a785a122396a3f8961cbc33b967e7a48874b90311333c8860a1e5c75582fd7f",
+    "tests": {
+      "research_and_existing_workflow_unit_tests": 63,
+      "workflow_integration_tests": 6,
+      "workflow_differential_checkpoints": 82,
+      "copied_state_prior_binary_resume": true,
+      "failures_after_repairs": 0
+    },
+    "implemented": [
+      "Strict protocol-3 plan-local structured subgoals with server-issued canonical plan, subgoal and node identifiers",
+      "Unknown, duplicate, self-dependent, cyclic, cross-plan, oversized and extra-field submissions fail closed",
+      "Typed exploration records for toy examples, counterexamples, retrieval, candidate lemmas and notation resolution",
+      "Typed direct-screening method, obstruction and evidence fields with solved/obstruction consistency checks",
+      "Branch-local obstruction records and canonical node boundary enforcement",
+      "Structured failure and replanning records using only server-validated canonical nodes and active plans",
+      "Protocol-3 critical-route semantics without changing protocol-2 canonical serialization or graph digest",
+      "RuntimeSettings-owned explicit protocol-3 evaluation switch with production default remaining protocol 2",
+      "Complete protocol-3 structured research flow through the unchanged verifier/finalizer and proof_verified.tex delivery",
+      "Copied protocol-3 state resumed and advanced by the accepted prior protocol-2 binary on the same OAuth origin"
+    ],
+    "commands": [
+      {
+        "command": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace --all-targets",
+        "exit_code": 0,
+        "result": "The complete Rust workspace passed; mtm-workflow ran 63 unit tests and six integration tests including the full protocol-3 structured research-to-final-.tex path."
+      },
+      {
+        "command": "python3 scripts/run_mtm006_conformance.py",
+        "exit_code": 0,
+        "result": "All 82 protocol-1/2 workflow checkpoints retain zero mismatches and reference SHA-256 def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0."
+      },
+      {
+        "command": "python3 scripts/validate_mtm009_research_contract.py && python3 scripts/validate_migration_graph.py && python3 scripts/validate_engineering_graph.py && git diff --check",
+        "exit_code": 0,
+        "result": "Protocol-3 pure-boundary, zero-complexity budgets, unchanged authority/crate/workflow topology, final-.tex contract and diff hygiene pass."
+      },
+      {
+        "command": "python3 scripts/run_mtm009_protocol3_rollback.py",
+        "exit_code": 0,
+        "result": "A protocol-3 direct-proving run was copied after clean shutdown; the accepted prior binary with SHA-256 0a785a122396a3f8961cbc33b967e7a48874b90311333c8860a1e5c75582fd7f resumed it on the same OAuth origin and advanced it to branch_run, then shut down cleanly."
+      }
+    ],
     "commit_pending": true
   },
   "recorded_failures_and_repairs": [
@@ -314,6 +386,48 @@
       "stage": "legacy identity and join semantics review",
       "failure": "Colon-bearing legacy plan/subgoal components could make concatenated node identities ambiguous, unknown direct-screening statuses were classified too strongly as failures, and a branch join selected_branch_id was not resolved back to its plan.",
       "repair": "Reject ambiguous legacy identity components, normalize absent or future screening statuses as inconclusive with a warning, resolve selected branches through recognized sealed results, and add focused regression tests."
+    },
+    {
+      "delivery": 4,
+      "stage": "first protocol-three compile gate",
+      "failure": "The initial delivery-4 worktree contained interface drift between the delivery-3 normalizer and the new protocol module, plus duplicate engine-side protocol validators and an early delivery-5 task-context projection; warnings-denied Clippy reported 28 compile/dead-code errors.",
+      "repair": "Aligned the normalizer interfaces, removed the duplicate engine validators and premature advisory-context path instead of suppressing warnings, and retained one pure protocol validation module."
+    },
+    {
+      "delivery": 4,
+      "stage": "protocol-two graph digest regression",
+      "failure": "Serializing a newly added critical flag on every research node changed the frozen protocol-2 canonical graph digest even though the field is a protocol-3 semantic.",
+      "repair": "Represent declared criticality as an optional protocol-3 field omitted from legacy serialization; the frozen protocol-2 digest returned to sha256:9d72141b73f1bc50d69a954996552ab19e0c4d192eac2f9068adc70fc2f122bf without changing the fixture."
+    },
+    {
+      "delivery": 4,
+      "stage": "methodology contract duplication review",
+      "failure": "Two protocol-3 methodology overlays both wrote mathematical_research_contract, so the later partial overlay could overwrite the earlier complete write and commit schemas and its field names drifted from the actual parser.",
+      "repair": "Kept one complete protocol-3 methodology overlay, aligned every public field name and fixed bound with the pure protocol parser, and deleted the duplicate overlay rather than maintaining parallel contract definitions."
+    },
+    {
+      "delivery": 4,
+      "stage": "canonical-node public projection",
+      "failure": "A second public_active_plans_v3 formatter rewrote the already normalized plan projection and dropped canonical node_id/kind facts, preventing the web model from referring to the server-issued mathematical node identity.",
+      "repair": "Deleted the redundant formatter and use one public_active_plans projection that preserves canonical node identity and dependency facts."
+    },
+    {
+      "delivery": 4,
+      "stage": "runtime protocol-switch architecture review",
+      "failure": "The first protocol-3 evaluation switch read MTM_WORKFLOW_PROTOCOL_VERSION directly inside RuntimeToolBackend, bypassing RuntimeSettings as the single configuration root.",
+      "repair": "Moved fail-closed parsing to RuntimeSettings, pass the validated protocol value through RuntimeApplication composition, and keep RuntimeToolBackend free of direct environment reads."
+    },
+    {
+      "delivery": 4,
+      "stage": "copied-state rollback OAuth identity",
+      "failure": "The first copied-state rollback probe registered a fresh OAuth client after restart and correctly received RUN_OWNER_MISMATCH; the second reused the original token on a different port and correctly received OAUTH_UNAUTHORIZED because the token issuer changed.",
+      "repair": "Model the real rollback boundary: copy the OAuth database with workflow state, restart the accepted prior binary on the same origin, and reuse the original owner token. The prior binary then resumed and advanced the protocol-3 run without weakening OAuth ownership or issuer checks."
+    },
+    {
+      "delivery": 4,
+      "stage": "standalone rollback-harness import path",
+      "failure": "The first direct execution of the persistent rollback harness could not import the scripts package because Python placed only the script directory on sys.path.",
+      "repair": "Add the repository root to sys.path before importing existing harness modules, matching the established standalone-validator pattern, and rerun the same rollback test successfully."
     }
   ],
   "manual_pending": [

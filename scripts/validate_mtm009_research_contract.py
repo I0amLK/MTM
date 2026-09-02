@@ -84,6 +84,7 @@ FORBIDDEN_PRODUCTION_PATTERNS = (
 
 RESEARCH_STATE_SOURCE_FILES = (
     "crates/mtm-workflow/src/research_state.rs",
+    "crates/mtm-workflow/src/research_state/protocol.rs",
     "crates/mtm-workflow/src/research_state/normalize.rs",
     "crates/mtm-workflow/src/research_state/normalize/branch.rs",
     "crates/mtm-workflow/src/research_state/normalize/other.rs",
@@ -102,13 +103,6 @@ FORBIDDEN_RESEARCH_STATE_IMPORTS = (
     "use crate::vault",
     "use crate::verifier",
 )
-
-FORBIDDEN_GRAPH_DEPENDENCIES = {
-    "daggy",
-    "graphlib",
-    "petgraph",
-    "rustworkx-core",
-}
 
 FORBIDDEN_PROJECTOR_PATTERNS = (
     "std::fs",
@@ -133,6 +127,7 @@ FORBIDDEN_GRAPH_DEPENDENCIES = {
     "graphlib",
     "daggy",
     "pathfinding",
+    "rustworkx-core",
 }
 
 

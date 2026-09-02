@@ -10,13 +10,21 @@ use mtm_storage::{
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
+
 use sha2::{Digest, Sha256};
 
 use crate::kernel::{TransitionDecision, TransitionRequest};
 use crate::methodology::{TaskCatalog, state_name};
 use crate::research::{DisabledResearchProvider, ResearchProvider, ResearchRequest};
+use crate::research_state::protocol::{
+    ProtocolRecordStamp, ProtocolResearchScope, normalize_protocol3_branch_payload,
+    normalize_protocol3_failure_summary, normalize_protocol3_generation_record,
+    normalize_protocol3_plans, normalize_protocol3_replan_decision, protocol3_screening_fields,
+    stamp_protocol3_record,
+};
 use crate::research_state::{
-    LegacyResearchInput, ResearchStateError, ResearchStateProjector, normalize_legacy_research,
+    LegacyResearchInput, ResearchPlanId, ResearchStateError, ResearchStateProjector,
+    normalize_legacy_research,
 };
 use crate::vault::{BRANCH_CHANNELS, GENERATION_CHANNELS, PrivateVault, VERIFIER_CHANNELS};
 use crate::verifier::{
@@ -129,8 +137,8 @@ impl WorkflowEngine {
         if !matches!(request.workflow_mode, "auto" | "compact" | "full") {
             return Err(invalid("workflow_mode must be auto, compact, or full"));
         }
-        if !matches!(request.workflow_protocol_version, 1 | 2) {
-            return Err(invalid("workflow_protocol_version must be 1 or 2"));
+        if !(1..=3).contains(&request.workflow_protocol_version) {
+            return Err(invalid("workflow_protocol_version must be 1, 2, or 3"));
         }
         if request.target_claim_id.is_some() && request.project_id.is_none() {
             return Err(invalid("target_claim_id requires project_id"));
@@ -1332,11 +1340,11 @@ impl WorkflowEngine {
             }
         }
         if state == WorkflowState::DirectProving {
-            let public_plans = public_active_plans(
-                run.get("metadata")
-                    .and_then(Value::as_object)
-                    .and_then(|metadata| metadata.get("active_plans")),
-            );
+            let active_plans = run
+                .get("metadata")
+                .and_then(Value::as_object)
+                .and_then(|metadata| metadata.get("active_plans"));
+            let public_plans = public_active_plans(active_plans);
             context.insert("active_plans".to_owned(), public_plans.clone());
             context.insert(
                 "screening_progress".to_owned(),
@@ -1677,9 +1685,10 @@ impl WorkflowEngine {
                     "generation memory writes require a known channel and JSON object",
                 ));
             }
-            let path = self
-                .vault
-                .append_generation_memory(claims.run_id(), channel, content)?;
+            let normalized = self.normalize_protocol3_generation_write(claims, channel, content)?;
+            let path =
+                self.vault
+                    .append_generation_memory(claims.run_id(), channel, &normalized)?;
             return Ok(
                 serde_json::json!({"path_kind":"generation_memory","channel":channel,"file":file_name(&path)}),
             );
@@ -1754,6 +1763,93 @@ impl WorkflowEngine {
                 serde_json::json!({"resource":resource}),
             )),
         }
+    }
+
+    fn normalize_protocol3_generation_write(
+        &self,
+        claims: &CapabilityClaims,
+        channel: &str,
+        content: &Value,
+    ) -> Result<Value, ReCtmError> {
+        let run = self.store.get_run(claims.run_id())?;
+        if metadata_i64(&run, "workflow_protocol_version", 1) < 3
+            || !matches!(channel, "events" | "counterexamples")
+        {
+            return Ok(content.clone());
+        }
+        let scope = self.protocol3_scope(claims.run_id())?;
+        let record_id = format!("research-{}", self.store.runtime().ids.token_hex(8)?);
+        let created_at = self.store.runtime().clock.now_iso()?;
+        let round_index = u32::try_from(
+            run.get("round_index")
+                .and_then(Value::as_i64)
+                .unwrap_or_default(),
+        )
+        .map_err(|_| internal("run round_index is outside protocol-3 bounds"))?;
+        let stamp = ProtocolRecordStamp {
+            record_id: &record_id,
+            actor_role: role_name(claims.role()),
+            actor_domain_id: claims.domain_id(),
+            round_index,
+            created_at: &created_at,
+        };
+        normalize_protocol3_generation_record(channel, content, &stamp, &scope)
+            .map_err(protocol3_input_error)
+    }
+
+    fn protocol3_scope(&self, run_id: &str) -> Result<ProtocolResearchScope, ReCtmError> {
+        let run = self.store.get_run(run_id)?;
+        let active_plans = run
+            .get("metadata")
+            .and_then(Value::as_object)
+            .and_then(|metadata| metadata.get("active_plans"))
+            .cloned()
+            .unwrap_or_else(|| Value::Array(Vec::new()));
+        let reference_ids = self
+            .store
+            .list_run_references(run_id)?
+            .into_iter()
+            .filter_map(|reference| {
+                reference
+                    .get("reference_id")
+                    .and_then(Value::as_str)
+                    .map(str::to_owned)
+            })
+            .collect::<Vec<_>>();
+        ProtocolResearchScope::from_active_plans(&active_plans, reference_ids)
+            .map_err(protocol3_state_error)
+    }
+
+    fn stamp_protocol3_claim_record(
+        &self,
+        claims: &CapabilityClaims,
+        record_type: &str,
+        content: &Value,
+    ) -> Result<Value, ReCtmError> {
+        let run = self.store.get_run(claims.run_id())?;
+        if metadata_i64(&run, "workflow_protocol_version", 1) < 3 {
+            return Ok(content.clone());
+        }
+        let record_id = format!("research-{}", self.store.runtime().ids.token_hex(8)?);
+        let created_at = self.store.runtime().clock.now_iso()?;
+        let round_index = u32::try_from(
+            run.get("round_index")
+                .and_then(Value::as_i64)
+                .unwrap_or_default(),
+        )
+        .map_err(|_| internal("run round_index is outside protocol-3 bounds"))?;
+        stamp_protocol3_record(
+            record_type,
+            content,
+            &ProtocolRecordStamp {
+                record_id: &record_id,
+                actor_role: role_name(claims.role()),
+                actor_domain_id: claims.domain_id(),
+                round_index,
+                created_at: &created_at,
+            },
+        )
+        .map_err(protocol3_state_error)
     }
 
     fn normalize_proof_manifest(
@@ -2144,16 +2240,22 @@ impl WorkflowEngine {
                     .get("summary")
                     .filter(|value| value.is_object())
                     .ok_or_else(|| invalid("failures_identified requires summary object"))?;
-                let mut record = summary.as_object().cloned().unwrap_or_default();
-                record.insert(
-                    "record_type".to_owned(),
-                    Value::String("key_failures_summary".to_owned()),
-                );
-                self.vault.append_generation_memory(
-                    claims.run_id(),
-                    "failed_paths",
-                    &Value::Object(record),
-                )?;
+                let protocol = metadata_i64(run, "workflow_protocol_version", 1);
+                let record = if protocol >= 3 {
+                    let scope = self.protocol3_scope(claims.run_id())?;
+                    let normalized = normalize_protocol3_failure_summary(summary, &scope)
+                        .map_err(protocol3_input_error)?;
+                    self.stamp_protocol3_claim_record(claims, "key_failures_summary", &normalized)?
+                } else {
+                    let mut record = summary.as_object().cloned().unwrap_or_default();
+                    record.insert(
+                        "record_type".to_owned(),
+                        Value::String("key_failures_summary".to_owned()),
+                    );
+                    Value::Object(record)
+                };
+                self.vault
+                    .append_generation_memory(claims.run_id(), "failed_paths", &record)?;
                 self.seal_and_transition(run, claims, WorkflowState::Replan, trace_id, action, None)
             }
             "replan_complete" => {
@@ -2161,8 +2263,17 @@ impl WorkflowEngine {
                     .get("decision")
                     .filter(|value| value.is_object())
                     .ok_or_else(|| invalid("replan_complete requires decision object"))?;
+                let protocol = metadata_i64(run, "workflow_protocol_version", 1);
+                let decision = if protocol >= 3 {
+                    let scope = self.protocol3_scope(claims.run_id())?;
+                    let normalized = normalize_protocol3_replan_decision(decision, &scope)
+                        .map_err(protocol3_input_error)?;
+                    self.stamp_protocol3_claim_record(claims, "replan_decision", &normalized)?
+                } else {
+                    decision.clone()
+                };
                 self.vault
-                    .append_generation_memory(claims.run_id(), "big_decisions", decision)?;
+                    .append_generation_memory(claims.run_id(), "big_decisions", &decision)?;
                 self.seal_and_transition(
                     run,
                     claims,
@@ -2253,25 +2364,36 @@ impl WorkflowEngine {
         claims: &CapabilityClaims,
         payload: &Value,
     ) -> Result<WorkflowState, ReCtmError> {
-        let plans = validate_plans(
-            payload.get("plans"),
-            run.get("round_index")
-                .and_then(Value::as_i64)
-                .unwrap_or_default()
-                + 1,
-        )?;
+        let protocol = metadata_i64(run, "workflow_protocol_version", 1);
+        let plan_round = run
+            .get("round_index")
+            .and_then(Value::as_i64)
+            .unwrap_or_default()
+            + 1;
+        let plans = if protocol >= 3 {
+            normalize_protocol3_plans(payload.get("plans"), plan_round)
+                .map_err(protocol3_input_error)?
+        } else {
+            validate_plans(payload.get("plans"), plan_round)?
+        };
         for plan in &plans {
             let mut record = plan.as_object().cloned().unwrap_or_default();
-            record.insert(
-                "record_type".to_owned(),
-                Value::String("decomposition_plan".to_owned()),
-            );
             record.insert("status".to_owned(), Value::String("proposed".to_owned()));
-            self.vault.append_generation_memory(
-                claims.run_id(),
-                "subgoals",
-                &Value::Object(record),
-            )?;
+            let record = if protocol >= 3 {
+                self.stamp_protocol3_claim_record(
+                    claims,
+                    "decomposition_plan",
+                    &Value::Object(record),
+                )?
+            } else {
+                record.insert(
+                    "record_type".to_owned(),
+                    Value::String("decomposition_plan".to_owned()),
+                );
+                Value::Object(record)
+            };
+            self.vault
+                .append_generation_memory(claims.run_id(), "subgoals", &record)?;
         }
         self.update_metadata(
             claims.run_id(),
@@ -2298,8 +2420,9 @@ impl WorkflowEngine {
             .get("metadata")
             .and_then(Value::as_object)
             .and_then(|metadata| metadata.get("direct_screening_progress"));
+        let protocol = metadata_i64(run, "workflow_protocol_version", 1);
         let (screening, progress, missing) =
-            merge_direct_screening(payload.get("screening"), &active_plans, previous)?;
+            merge_direct_screening(payload.get("screening"), &active_plans, previous, protocol)?;
         self.update_metadata(
             claims.run_id(),
             serde_json::json!({"direct_screening_progress":progress}),
@@ -2311,15 +2434,38 @@ impl WorkflowEngine {
                 "accepted_progress":screening,"verdict":run.get("verdict")
             }));
         }
-        self.vault.append_generation_memory(
-            claims.run_id(),
-            "proof_steps",
-            &serde_json::json!({
+        let mut persisted_screening = screening.clone();
+        if protocol >= 3 {
+            for plan in &mut persisted_screening {
+                let Some(results) = plan
+                    .get_mut("subgoal_results")
+                    .and_then(Value::as_array_mut)
+                else {
+                    return Err(internal("protocol-3 screening results are not an array"));
+                };
+                for result in results {
+                    result["attempt_id"] = Value::String(format!(
+                        "attempt-{}",
+                        self.store.runtime().ids.token_hex(8)?
+                    ));
+                }
+            }
+        }
+        let screening_record = if protocol >= 3 {
+            self.stamp_protocol3_claim_record(
+                claims,
+                "direct_screening_round",
+                &serde_json::json!({"plans":persisted_screening}),
+            )?
+        } else {
+            serde_json::json!({
                 "record_type":"direct_screening_round",
-                "plans":screening,
+                "plans":persisted_screening,
                 "created_at":self.store.runtime().clock.now_iso()?
-            }),
-        )?;
+            })
+        };
+        self.vault
+            .append_generation_memory(claims.run_id(), "proof_steps", &screening_record)?;
         let solved = screening
             .iter()
             .filter_map(|item| {
@@ -2386,7 +2532,7 @@ impl WorkflowEngine {
 
     fn commit_branch(
         &self,
-        _run: &Value,
+        run: &Value,
         claims: &CapabilityClaims,
         payload: &Value,
         trace_id: &str,
@@ -2409,59 +2555,100 @@ impl WorkflowEngine {
                     .unwrap_or_default(),
             ));
         }
-        let object = payload
-            .as_object()
-            .ok_or_else(|| invalid("branch result must be a JSON object"))?;
-        let status = object
-            .get("status")
-            .and_then(Value::as_str)
-            .map(str::trim)
-            .unwrap_or_default();
-        if !matches!(status, "solved" | "partial" | "failed") {
-            return Err(invalid("branch status must be solved, partial, or failed"));
-        }
-        let summary = object
-            .get("summary")
-            .and_then(Value::as_str)
-            .map(str::trim)
-            .filter(|value| !value.is_empty())
-            .ok_or_else(|| invalid("branch result requires a non-empty summary"))?;
-        if object.contains_key("proof_route") && !object["proof_route"].is_string() {
-            return Err(invalid("branch proof_route must be a string when supplied"));
-        }
-        let proof_route = object
-            .get("proof_route")
-            .and_then(Value::as_str)
-            .unwrap_or_default()
-            .trim();
-        let proved_subgoals =
-            string_array(object.get("proved_subgoals"), "proved_subgoals", false)?;
-        let unproved_subgoals =
-            string_array(object.get("unproved_subgoals"), "unproved_subgoals", false)?;
-        let failure_evidence =
-            string_array(object.get("failure_evidence"), "failure_evidence", false)?;
-        if status == "solved" && proof_route.is_empty() {
-            return Err(invalid("solved branch result requires proof_route"));
-        }
-        if matches!(status, "partial" | "failed")
-            && unproved_subgoals.is_empty()
-            && failure_evidence.is_empty()
-        {
-            return Err(invalid(
-                "partial or failed branch result requires unproved_subgoals or failure_evidence",
-            ));
-        }
         let branch = self.store.get_branch(&branch_id)?;
-        let result_payload = serde_json::json!({
+        let protocol = metadata_i64(run, "workflow_protocol_version", 1);
+        let (
+            status,
+            summary,
+            proof_route,
+            proved_subgoals,
+            unproved_subgoals,
+            failure_evidence,
+            obstructions,
+        ) = if protocol >= 3 {
+            let plan_id =
+                ResearchPlanId::parse(text(&branch, "plan_id")?).map_err(protocol3_state_error)?;
+            let scope = self.protocol3_scope(claims.run_id())?;
+            let fields = normalize_protocol3_branch_payload(payload, &scope, &plan_id)
+                .map_err(protocol3_input_error)?;
+            (
+                fields.status,
+                fields.summary,
+                fields.proof_route,
+                fields.proved_node_ids,
+                fields.unproved_node_ids,
+                fields.failure_evidence,
+                fields.obstructions,
+            )
+        } else {
+            let object = payload
+                .as_object()
+                .ok_or_else(|| invalid("branch result must be a JSON object"))?;
+            let status = object
+                .get("status")
+                .and_then(Value::as_str)
+                .map(str::trim)
+                .unwrap_or_default();
+            if !matches!(status, "solved" | "partial" | "failed") {
+                return Err(invalid("branch status must be solved, partial, or failed"));
+            }
+            let summary = object
+                .get("summary")
+                .and_then(Value::as_str)
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+                .ok_or_else(|| invalid("branch result requires a non-empty summary"))?;
+            if object.contains_key("proof_route") && !object["proof_route"].is_string() {
+                return Err(invalid("branch proof_route must be a string when supplied"));
+            }
+            let proof_route = object
+                .get("proof_route")
+                .and_then(Value::as_str)
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+                .map(str::to_owned);
+            let proved_subgoals =
+                string_array(object.get("proved_subgoals"), "proved_subgoals", false)?;
+            let unproved_subgoals =
+                string_array(object.get("unproved_subgoals"), "unproved_subgoals", false)?;
+            let failure_evidence =
+                string_array(object.get("failure_evidence"), "failure_evidence", false)?;
+            if status == "solved" && proof_route.is_none() {
+                return Err(invalid("solved branch result requires proof_route"));
+            }
+            if matches!(status, "partial" | "failed")
+                && unproved_subgoals.is_empty()
+                && failure_evidence.is_empty()
+            {
+                return Err(invalid(
+                    "partial or failed branch result requires unproved_subgoals or failure_evidence",
+                ));
+            }
+            (
+                status.to_owned(),
+                summary.to_owned(),
+                proof_route,
+                proved_subgoals,
+                unproved_subgoals,
+                failure_evidence,
+                Vec::new(),
+            )
+        };
+        let mut result_payload = serde_json::json!({
             "branch_id":branch_id,
             "plan_id":branch["plan_id"],
             "status":status,
             "summary":summary,
-            "proof_route":if proof_route.is_empty(){Value::Null}else{Value::String(proof_route.to_owned())},
+            "proof_route":proof_route,
             "proved_subgoals":proved_subgoals,
             "unproved_subgoals":unproved_subgoals,
             "failure_evidence":failure_evidence
         });
+        if protocol >= 3 {
+            result_payload["obstructions"] = Value::Array(obstructions);
+            result_payload =
+                self.stamp_protocol3_claim_record(claims, "branch_result", &result_payload)?;
+        }
         let path = self
             .vault
             .write_branch_result(claims.run_id(), &branch_id, &result_payload)?;
@@ -2469,14 +2656,22 @@ impl WorkflowEngine {
         self.store
             .update_branch_status(&branch_id, "sealed", Some(&path_text))?;
         self.store.seal_domain(claims.domain_id())?;
-        self.vault.append_generation_memory(
-            claims.run_id(),
-            "branch_states",
-            &serde_json::json!({
-                "record_type":"branch_sealed","branch_id":branch_id,
-                "plan_id":result_payload["plan_id"],"status":status
-            }),
-        )?;
+        let branch_state = serde_json::json!({
+            "record_type":"branch_sealed","branch_id":branch_id,
+            "plan_id":result_payload["plan_id"],"status":status
+        });
+        let branch_state = if protocol >= 3 {
+            let content = serde_json::json!({
+                "branch_id":branch_id,
+                "plan_id":result_payload["plan_id"],
+                "status":status
+            });
+            self.stamp_protocol3_claim_record(claims, "branch_sealed", &content)?
+        } else {
+            branch_state
+        };
+        self.vault
+            .append_generation_memory(claims.run_id(), "branch_states", &branch_state)?;
         let branches = self.store.list_branches(claims.run_id())?;
         let barrier_complete = !branches.is_empty()
             && branches
@@ -3365,38 +3560,64 @@ fn public_active_plans(value: Option<&Value>) -> Value {
         .iter()
         .filter_map(Value::as_object)
         .map(|plan| {
-            let texts = plan
-                .get("subgoals")
+            let subgoals = if let Some(items) = plan
+                .get("research_subgoals")
                 .and_then(Value::as_array)
-                .map(|items| {
-                    items
-                        .iter()
-                        .filter_map(Value::as_str)
-                        .map(str::to_owned)
-                        .collect::<Vec<_>>()
-                })
-                .unwrap_or_default();
-            let mut ids = plan
-                .get("subgoal_ids")
-                .and_then(Value::as_array)
-                .map(|items| {
-                    items
-                        .iter()
-                        .filter_map(Value::as_str)
-                        .map(str::to_owned)
-                        .collect::<Vec<_>>()
-                })
-                .unwrap_or_default();
-            if ids.len() != texts.len() {
-                ids = (1..=texts.len())
-                    .map(|index| format!("sg-{index}"))
-                    .collect();
-            }
+            {
+                items
+                    .iter()
+                    .filter_map(Value::as_object)
+                    .map(|subgoal| {
+                        serde_json::json!({
+                            "subgoal_id":subgoal.get("subgoal_id").and_then(Value::as_str).unwrap_or_default(),
+                            "node_id":subgoal.get("node_id").and_then(Value::as_str).unwrap_or_default(),
+                            "text":subgoal.get("statement").and_then(Value::as_str).unwrap_or_default(),
+                            "kind":subgoal.get("kind").and_then(Value::as_str).unwrap_or("lemma"),
+                            "depends_on":subgoal.get("depends_on").cloned().unwrap_or_else(||Value::Array(Vec::new())),
+                            "critical":subgoal.get("critical").and_then(Value::as_bool).unwrap_or(false)
+                        })
+                    })
+                    .collect::<Vec<_>>()
+            } else {
+                let texts = plan
+                    .get("subgoals")
+                    .and_then(Value::as_array)
+                    .map(|items| {
+                        items
+                            .iter()
+                            .filter_map(Value::as_str)
+                            .map(str::to_owned)
+                            .collect::<Vec<_>>()
+                    })
+                    .unwrap_or_default();
+                let mut ids = plan
+                    .get("subgoal_ids")
+                    .and_then(Value::as_array)
+                    .map(|items| {
+                        items
+                            .iter()
+                            .filter_map(Value::as_str)
+                            .map(str::to_owned)
+                            .collect::<Vec<_>>()
+                    })
+                    .unwrap_or_default();
+                if ids.len() != texts.len() {
+                    ids = (1..=texts.len())
+                        .map(|index| format!("sg-{index}"))
+                        .collect();
+                }
+                ids.into_iter()
+                    .zip(texts)
+                    .map(|(subgoal_id, text)| {
+                        serde_json::json!({"subgoal_id":subgoal_id,"text":text})
+                    })
+                    .collect::<Vec<_>>()
+            };
             serde_json::json!({
                 "plan_id":plan.get("plan_id").and_then(Value::as_str).unwrap_or_default(),
                 "source_plan_id":plan.get("source_plan_id").cloned().unwrap_or(Value::Null),
                 "summary":plan.get("summary").and_then(Value::as_str).unwrap_or_default(),
-                "subgoals":ids.into_iter().zip(texts).map(|(subgoal_id,text)|serde_json::json!({"subgoal_id":subgoal_id,"text":text})).collect::<Vec<_>>(),
+                "subgoals":subgoals,
                 "motivation":plan.get("motivation").cloned().unwrap_or_else(||Value::Array(Vec::new())),
                 "dependencies":plan.get("dependencies").cloned().unwrap_or_else(||Value::Array(Vec::new())),
                 "risks":plan.get("risks").cloned().unwrap_or_else(||Value::Array(Vec::new()))
@@ -3448,12 +3669,16 @@ type ScreeningProgress = BTreeMap<String, BTreeMap<String, ScreeningResult>>;
 struct ScreeningResult {
     status: String,
     summary: String,
+    method: Option<String>,
+    obstruction: Option<String>,
+    evidence_ids: Vec<String>,
 }
 
 fn merge_direct_screening(
     value: Option<&Value>,
     active_plans: &Value,
     previous: Option<&Value>,
+    protocol: i64,
 ) -> Result<(Vec<Value>, Value, Vec<Value>), ReCtmError> {
     let plans = active_plans
         .as_array()
@@ -3499,11 +3724,33 @@ fn merge_direct_screening(
                     result.get("status").and_then(Value::as_str),
                     result.get("summary").and_then(Value::as_str),
                 ) {
+                    let research = if protocol >= 3 {
+                        Some(
+                            protocol3_screening_fields(
+                                result,
+                                status,
+                                &format!("direct_screening_progress.{plan_id}.{subgoal_id}"),
+                            )
+                            .map_err(protocol3_state_error)?,
+                        )
+                    } else {
+                        None
+                    };
                     bucket.insert(
                         subgoal_id.clone(),
                         ScreeningResult {
                             status: status.to_owned(),
                             summary: summary.to_owned(),
+                            method: research
+                                .as_ref()
+                                .map(|fields| fields.method.as_str().to_owned()),
+                            obstruction: research
+                                .as_ref()
+                                .and_then(|fields| fields.obstruction)
+                                .map(|value| value.as_str().to_owned()),
+                            evidence_ids: research
+                                .map(|fields| fields.evidence_ids)
+                                .unwrap_or_default(),
                         },
                     );
                 }
@@ -3624,11 +3871,33 @@ fn merge_direct_screening(
                     serde_json::json!({"plan_id":plan_id,"subgoal_id":subgoal_id}),
                 ));
             }
+            let research = if protocol >= 3 {
+                Some(
+                    protocol3_screening_fields(
+                        object,
+                        status,
+                        &format!("screening.{plan_id}.{subgoal_id}"),
+                    )
+                    .map_err(protocol3_input_error)?,
+                )
+            } else {
+                None
+            };
             bucket.insert(
                 subgoal_id,
                 ScreeningResult {
                     status: status.to_owned(),
                     summary: summary.to_owned(),
+                    method: research
+                        .as_ref()
+                        .map(|fields| fields.method.as_str().to_owned()),
+                    obstruction: research
+                        .as_ref()
+                        .and_then(|fields| fields.obstruction)
+                        .map(|value| value.as_str().to_owned()),
+                    evidence_ids: research
+                        .map(|fields| fields.evidence_ids)
+                        .unwrap_or_default(),
                 },
             );
         }
@@ -3645,9 +3914,21 @@ fn merge_direct_screening(
                 missing.push(serde_json::json!({"plan_id":plan_id,"subgoal_id":id,"text":text}));
                 continue;
             };
-            results.push(serde_json::json!({
+            let mut normalized_result = serde_json::json!({
                 "subgoal_id":id,"subgoal":text,"status":result.status,"summary":result.summary
-            }));
+            });
+            if protocol >= 3 {
+                normalized_result["method"] = result
+                    .method
+                    .as_ref()
+                    .map_or(Value::Null, |value| Value::String(value.clone()));
+                normalized_result["obstruction"] = result
+                    .obstruction
+                    .as_ref()
+                    .map_or(Value::Null, |value| Value::String(value.clone()));
+                normalized_result["evidence_ids"] = serde_json::json!(result.evidence_ids);
+            }
+            results.push(normalized_result);
         }
         let statuses = results
             .iter()
@@ -3681,7 +3962,17 @@ fn merge_direct_screening(
                     |(subgoal_id, result)| {
                         (
                             subgoal_id,
-                            serde_json::json!({"status":result.status,"summary":result.summary}),
+                            if protocol >= 3 {
+                                serde_json::json!({
+                                    "status":result.status,
+                                    "summary":result.summary,
+                                    "method":result.method,
+                                    "obstruction":result.obstruction,
+                                    "evidence_ids":result.evidence_ids
+                                })
+                            } else {
+                                serde_json::json!({"status":result.status,"summary":result.summary})
+                            },
                         )
                     },
                 ))),
@@ -3837,6 +4128,36 @@ fn research_state_shadow_error(error: ResearchStateError) -> ReCtmError {
     .with_category(ErrorCategory::Internal)
     .with_details(
         serde_json::json!({"reason":error.to_string()})
+            .as_object()
+            .cloned()
+            .unwrap_or_default(),
+    )
+}
+
+fn protocol3_input_error(error: ResearchStateError) -> ReCtmError {
+    let reason = error.to_string().chars().take(1_024).collect::<String>();
+    ReCtmError::new(
+        "INVALID_RESEARCH_RECORD",
+        "The protocol-3 mathematical research record is invalid.",
+    )
+    .with_category(ErrorCategory::Validation)
+    .with_details(
+        serde_json::json!({"reason":reason})
+            .as_object()
+            .cloned()
+            .unwrap_or_default(),
+    )
+}
+
+fn protocol3_state_error(error: ResearchStateError) -> ReCtmError {
+    let reason = error.to_string().chars().take(1_024).collect::<String>();
+    ReCtmError::new(
+        "RESEARCH_STATE_PROTOCOL_INVALID",
+        "The stored protocol-3 mathematical research state is invalid.",
+    )
+    .with_category(ErrorCategory::Internal)
+    .with_details(
+        serde_json::json!({"reason":reason})
             .as_object()
             .cloned()
             .unwrap_or_default(),

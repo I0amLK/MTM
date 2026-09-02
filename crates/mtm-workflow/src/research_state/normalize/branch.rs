@@ -55,6 +55,55 @@ pub(super) fn normalize_branch_results(
             &format!("{location}.unproved_subgoals"),
             MAX_NODE_DEPENDENCIES,
         )?;
+        let mut obstruction_map =
+            BTreeMap::<ResearchNodeId, (ResearchObstruction, Vec<String>)>::new();
+        if let Some(obstructions) = result.get("obstructions") {
+            let obstructions = obstructions
+                .as_array()
+                .ok_or_else(|| malformed(&location, "branch obstructions must be an array"))?;
+            enforce_count(
+                "protocol3_branch_obstructions",
+                obstructions.len(),
+                MAX_NODE_DEPENDENCIES,
+            )?;
+            for (obstruction_index, obstruction) in obstructions.iter().enumerate() {
+                let obstruction_location = format!("{location}.obstructions[{obstruction_index}]");
+                let obstruction = obstruction.as_object().ok_or_else(|| {
+                    malformed(
+                        &obstruction_location,
+                        "branch obstruction must be an object",
+                    )
+                })?;
+                let node_id = ResearchNodeId::parse(required_text(
+                    obstruction.get("node_id"),
+                    &format!("{obstruction_location}.node_id"),
+                )?)?;
+                if !plan_nodes.iter().any(|node| node.node_id == node_id) {
+                    return Err(malformed(
+                        &obstruction_location,
+                        "branch obstruction node is outside the branch plan",
+                    ));
+                }
+                let class = obstruction
+                    .get("class")
+                    .and_then(Value::as_str)
+                    .and_then(ResearchObstruction::parse)
+                    .ok_or_else(|| {
+                        malformed(&obstruction_location, "branch obstruction class is unknown")
+                    })?;
+                let evidence = bounded_optional_string_array(
+                    obstruction.get("evidence_ids"),
+                    &format!("{obstruction_location}.evidence_ids"),
+                    MAX_EVIDENCE_IDS,
+                )?;
+                if obstruction_map.insert(node_id, (class, evidence)).is_some() {
+                    return Err(malformed(
+                        &obstruction_location,
+                        "duplicate branch obstruction node",
+                    ));
+                }
+            }
+        }
         let mut touched = BTreeSet::new();
         if status == "solved" {
             touched.extend(plan_nodes.iter().map(|node| node.node_id.clone()));
@@ -74,13 +123,28 @@ pub(super) fn normalize_branch_results(
                 &mut touched,
                 warnings,
             );
+            touched.extend(obstruction_map.keys().cloned());
+            for node_id in obstruction_map.keys() {
+                if let Some(current) = nodes.get_mut(node_id)
+                    && current.status != ResearchNodeStatus::RouteSolved
+                {
+                    current.status = ResearchNodeStatus::Blocked;
+                }
+            }
         }
         let branch_id = result
             .get("branch_id")
             .and_then(Value::as_str)
             .filter(|value| !value.is_empty())
             .unwrap_or("unknown");
-        let actor = ResearchDomainId::parse(format!("legacy-branch:{branch_id}"))?;
+        let actor = result
+            .get("actor_domain_id")
+            .and_then(Value::as_str)
+            .map(ResearchDomainId::parse)
+            .transpose()?
+            .unwrap_or(ResearchDomainId::parse(format!(
+                "legacy-branch:{branch_id}"
+            ))?);
         for (node_index, node_id) in touched.into_iter().enumerate() {
             *sequence = sequence.saturating_add(1);
             let mut attempt = ResearchAttempt::new(
@@ -89,7 +153,7 @@ pub(super) fn normalize_branch_results(
                     branch_index + 1,
                     node_index + 1
                 ))?,
-                node_id,
+                node_id.clone(),
                 actor.clone(),
                 ResearchAttemptMethod::Synthesis,
                 match status {
@@ -100,7 +164,12 @@ pub(super) fn normalize_branch_results(
                 summary,
             )?
             .with_position(input.round_index, *sequence);
-            if status == "failed" {
+            if let Some((obstruction, evidence_ids)) = obstruction_map.get(&node_id) {
+                attempt = attempt.with_obstruction(*obstruction);
+                for evidence_id in evidence_ids {
+                    attempt = attempt.with_evidence(evidence_id.clone())?;
+                }
+            } else if status == "failed" {
                 attempt = attempt.with_obstruction(ResearchObstruction::NoProgress);
             }
             attempts.push(attempt);

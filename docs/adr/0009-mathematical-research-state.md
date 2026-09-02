@@ -153,19 +153,24 @@ No new SQLite table or vault channel is required for the first accepted version.
 
 ## Advisory policy
 
-The next-action engine is transparent and ordered. The initial rule family is:
+The next-action engine is transparent and ordered. A completed alternative route is
+checked first so that a refuted or partial unused route cannot delay assembly. The
+initial rule family is:
 
-1. A refuted critical node or dependency cycle suggests replanning.
-2. Repeated direct failure without a counterexample probe suggests falsification on
+1. A complete route suggests assembly even when another alternative route failed.
+2. A refuted critical node with no viable alternative suggests replanning. Dependency
+   cycles are rejected at write/projection validation and return an immediate cycle
+   diagnostic rather than entering a valid advisory state.
+3. Repeated direct failure without a counterexample probe suggests falsification on
    the smallest meaningful examples.
-3. A classified missing-reference obstruction without a retrieval attempt suggests
+4. A classified missing-reference obstruction without a retrieval attempt suggests
    focused retrieval.
-4. Repeated retrieval with no new registered references suggests stopping retrieval
+5. Repeated retrieval with no new registered references suggests stopping retrieval
    and synthesizing existing material.
-5. An actionable untouched critical node suggests direct screening, supported by a
+6. An actionable untouched critical node suggests direct screening, supported by a
    toy example when appropriate.
-6. Several compatible partial attempts suggest consolidation into one lemma.
-7. All proof-critical nodes solved suggests assembly.
+7. Several compatible non-retrieval partial attempts suggest consolidation into one
+   lemma.
 
 The task explicitly labels the result `advisory`. The model may choose a different
 action and record why. The server does not block a legal submission merely because it

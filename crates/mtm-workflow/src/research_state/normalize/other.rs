@@ -16,9 +16,14 @@ pub(super) fn normalize_counterexamples(
     sequence: &mut u64,
     warnings: &mut WarningCollector,
 ) -> Result<(), ResearchStateError> {
-    let actor = ResearchDomainId::parse("legacy-generation")?;
     for (index, record) in input.counterexamples.iter().enumerate() {
         let location = format!("counterexamples[{index}]");
+        let actor = record
+            .get("actor_domain_id")
+            .and_then(Value::as_str)
+            .map(ResearchDomainId::parse)
+            .transpose()?
+            .unwrap_or(ResearchDomainId::parse("legacy-generation")?);
         let summary = extract_summary(record).unwrap_or("Counterexample probe was inconclusive.");
         let explicit_node = record.get("node_id").is_some();
         let resolved_node = resolve_canonical_node(record.get("node_id"), nodes);
@@ -52,9 +57,17 @@ pub(super) fn normalize_counterexamples(
         }
         *sequence = sequence.saturating_add(1);
         let mut attempt = ResearchAttempt::new(
-            ResearchAttemptId::parse(format!("attempt:counterexample:{}", index + 1))?,
+            record
+                .get("record_id")
+                .and_then(Value::as_str)
+                .map(|record_id| ResearchAttemptId::parse(format!("attempt:{record_id}")))
+                .transpose()?
+                .unwrap_or(ResearchAttemptId::parse(format!(
+                    "attempt:counterexample:{}",
+                    index + 1
+                ))?),
             node_id,
-            actor.clone(),
+            actor,
             ResearchAttemptMethod::Counterexample,
             if found {
                 ResearchAttemptOutcome::Refuted
@@ -67,6 +80,13 @@ pub(super) fn normalize_counterexamples(
         if found {
             attempt = attempt.with_obstruction(ResearchObstruction::FalseClaim);
         }
+        for evidence_id in bounded_optional_string_array(
+            record.get("evidence_ids"),
+            &format!("{location}.evidence_ids"),
+            MAX_EVIDENCE_IDS,
+        )? {
+            attempt = attempt.with_evidence(evidence_id)?;
+        }
         attempts.push(attempt);
         enforce_attempt_limit(attempts)?;
     }
@@ -75,12 +95,12 @@ pub(super) fn normalize_counterexamples(
 
 pub(super) fn normalize_retrieval_events(
     input: &LegacyResearchInput,
+    nodes: &BTreeMap<ResearchNodeId, ResearchNode>,
     target_id: &ResearchNodeId,
     attempts: &mut Vec<ResearchAttempt>,
     sequence: &mut u64,
     warnings: &mut WarningCollector,
 ) -> Result<RetrievalCounts, ResearchStateError> {
-    let actor = ResearchDomainId::parse("legacy-generation")?;
     let mut seen = BTreeSet::new();
     let mut counts = RetrievalCounts::default();
     for (index, event) in input.events.iter().enumerate() {
@@ -88,6 +108,84 @@ pub(super) fn normalize_retrieval_events(
             .get("event_type")
             .and_then(Value::as_str)
             .unwrap_or_default();
+        if event_type == "retrieval_assessment" {
+            counts.events = counts.events.saturating_add(1);
+            let reference_ids = bounded_optional_string_array(
+                event.get("reference_ids"),
+                &format!("events[{index}].reference_ids"),
+                MAX_EVIDENCE_IDS,
+            )?;
+            let mut novel = Vec::new();
+            for reference_id in reference_ids {
+                if !input.registered_reference_ids.contains(&reference_id) {
+                    return Err(malformed(
+                        format!("events[{index}].reference_ids"),
+                        "protocol-3 retrieval record contains an unregistered reference_id",
+                    ));
+                }
+                if seen.insert(reference_id.clone()) {
+                    counts.novel = counts.novel.saturating_add(1);
+                    novel.push(reference_id);
+                } else {
+                    counts.repeated = counts.repeated.saturating_add(1);
+                }
+            }
+            let explicit_node = event.get("node_id").is_some_and(|value| !value.is_null());
+            let resolved_node = resolve_canonical_node(event.get("node_id"), nodes);
+            if explicit_node && resolved_node.is_none() {
+                return Err(malformed(
+                    format!("events[{index}].node_id"),
+                    "protocol-3 retrieval record refers to an unknown node",
+                ));
+            }
+            let node_id = resolved_node.unwrap_or_else(|| target_id.clone());
+            let outcome = event
+                .get("outcome")
+                .and_then(Value::as_str)
+                .unwrap_or("inconclusive");
+            let summary = event
+                .get("summary")
+                .and_then(Value::as_str)
+                .filter(|value| !value.trim().is_empty())
+                .unwrap_or("Retrieval assessment was inconclusive.");
+            let actor = event
+                .get("actor_domain_id")
+                .and_then(Value::as_str)
+                .map(ResearchDomainId::parse)
+                .transpose()?
+                .unwrap_or(ResearchDomainId::parse("legacy-generation")?);
+            *sequence = sequence.saturating_add(1);
+            let mut attempt = ResearchAttempt::new(
+                event
+                    .get("record_id")
+                    .and_then(Value::as_str)
+                    .map(|record_id| ResearchAttemptId::parse(format!("attempt:{record_id}")))
+                    .transpose()?
+                    .unwrap_or(ResearchAttemptId::parse(format!(
+                        "attempt:retrieval:{}",
+                        index + 1
+                    ))?),
+                node_id,
+                actor,
+                ResearchAttemptMethod::Retrieval,
+                if outcome == "new_material" && !novel.is_empty() {
+                    ResearchAttemptOutcome::Progress
+                } else {
+                    ResearchAttemptOutcome::Inconclusive
+                },
+                summary,
+            )?
+            .with_position(input.round_index, *sequence);
+            if novel.is_empty() {
+                attempt = attempt.with_obstruction(ResearchObstruction::NoProgress);
+            }
+            for reference_id in novel {
+                attempt = attempt.with_evidence(reference_id)?;
+            }
+            attempts.push(attempt);
+            enforce_attempt_limit(attempts)?;
+            continue;
+        }
         if !event_type.starts_with("external_") {
             continue;
         }
@@ -130,6 +228,12 @@ pub(super) fn normalize_retrieval_events(
             .get("operation")
             .and_then(Value::as_str)
             .unwrap_or("research");
+        let actor = event
+            .get("actor_domain_id")
+            .and_then(Value::as_str)
+            .map(ResearchDomainId::parse)
+            .transpose()?
+            .unwrap_or(ResearchDomainId::parse("legacy-generation")?);
         let mut attempt = ResearchAttempt::new(
             ResearchAttemptId::parse(format!("attempt:retrieval:{}", index + 1))?,
             target_id.clone(),
@@ -171,37 +275,84 @@ pub(super) fn normalize_retrieval_events(
 
 pub(super) fn normalize_failures(
     input: &LegacyResearchInput,
+    nodes: &BTreeMap<ResearchNodeId, ResearchNode>,
     target_id: &ResearchNodeId,
     attempts: &mut Vec<ResearchAttempt>,
     sequence: &mut u64,
     warnings: &mut WarningCollector,
 ) -> Result<usize, ResearchStateError> {
-    let actor = ResearchDomainId::parse("legacy-generation")?;
     let mut ignored = 0usize;
     for (index, record) in input.failed_paths.iter().enumerate() {
+        let location = format!("failed_paths[{index}]");
         let Some(summary) = extract_summary(record) else {
             ignored = ignored.saturating_add(1);
             warnings.push(
                 "failure_without_summary",
-                format!("failed_paths[{index}]"),
+                &location,
                 "failure record has no concise summary",
             );
             continue;
         };
-        *sequence = sequence.saturating_add(1);
-        attempts.push(
-            ResearchAttempt::new(
-                ResearchAttemptId::parse(format!("attempt:failure:{}", index + 1))?,
-                target_id.clone(),
-                actor.clone(),
-                ResearchAttemptMethod::Synthesis,
-                ResearchAttemptOutcome::Failed,
-                summary,
-            )?
-            .with_obstruction(ResearchObstruction::Unknown)
-            .with_position(input.round_index, *sequence),
-        );
-        enforce_attempt_limit(attempts)?;
+        let actor = record
+            .get("actor_domain_id")
+            .and_then(Value::as_str)
+            .map(ResearchDomainId::parse)
+            .transpose()?
+            .unwrap_or(ResearchDomainId::parse("legacy-generation")?);
+        let obstruction = record
+            .get("obstruction_class")
+            .and_then(Value::as_str)
+            .and_then(ResearchObstruction::parse)
+            .unwrap_or(ResearchObstruction::Unknown);
+        let affected = bounded_optional_string_array(
+            record.get("affected_node_ids"),
+            &format!("{location}.affected_node_ids"),
+            MAX_DECISION_NODE_IDS,
+        )?;
+        let mut affected_nodes = Vec::new();
+        if affected.is_empty() {
+            affected_nodes.push(target_id.clone());
+        } else {
+            for raw_node_id in affected {
+                let node_id = ResearchNodeId::parse(raw_node_id)?;
+                if !nodes.contains_key(&node_id) {
+                    return Err(malformed(
+                        &location,
+                        "failure record refers to an unknown canonical node",
+                    ));
+                }
+                affected_nodes.push(node_id);
+            }
+        }
+        let record_id = record.get("record_id").and_then(Value::as_str);
+        for (node_index, node_id) in affected_nodes.into_iter().enumerate() {
+            *sequence = sequence.saturating_add(1);
+            let attempt_id = record_id.map_or_else(
+                || {
+                    ResearchAttemptId::parse(format!(
+                        "attempt:failure:{}:{}",
+                        index + 1,
+                        node_index + 1
+                    ))
+                },
+                |record_id| {
+                    ResearchAttemptId::parse(format!("attempt:{record_id}:{}", node_index + 1))
+                },
+            )?;
+            attempts.push(
+                ResearchAttempt::new(
+                    attempt_id,
+                    node_id,
+                    actor.clone(),
+                    ResearchAttemptMethod::Synthesis,
+                    ResearchAttemptOutcome::Failed,
+                    summary,
+                )?
+                .with_obstruction(obstruction)
+                .with_position(input.round_index, *sequence),
+            );
+            enforce_attempt_limit(attempts)?;
+        }
     }
     Ok(ignored)
 }

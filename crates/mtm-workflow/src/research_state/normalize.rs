@@ -313,6 +313,7 @@ pub fn normalize_legacy_research(
     )?;
     let retrieval = normalize_retrieval_events(
         input,
+        &nodes,
         &target_id,
         &mut attempts,
         &mut sequence,
@@ -320,6 +321,7 @@ pub fn normalize_legacy_research(
     )?;
     let ignored_failures = normalize_failures(
         input,
+        &nodes,
         &target_id,
         &mut attempts,
         &mut sequence,
@@ -459,6 +461,117 @@ fn normalize_plans(
                 identifier: plan_id.to_string(),
             });
         }
+        if let Some(research_subgoals) = object.get("research_subgoals").and_then(Value::as_array) {
+            if research_subgoals.is_empty() {
+                return Err(malformed(
+                    format!("{location}.research_subgoals"),
+                    "non-empty canonical research subgoals are required",
+                ));
+            }
+            enforce_count(
+                "protocol3_plan_subgoals",
+                research_subgoals.len(),
+                MAX_NODE_DEPENDENCIES,
+            )?;
+            let mut plan_nodes = Vec::with_capacity(research_subgoals.len());
+            let mut local_ids = BTreeSet::new();
+            for (node_index, raw_node) in research_subgoals.iter().enumerate() {
+                let node_location = format!("{location}.research_subgoals[{node_index}]");
+                let node_object = raw_node
+                    .as_object()
+                    .ok_or_else(|| malformed(&node_location, "expected an object"))?;
+                let subgoal_id = required_text(
+                    node_object.get("subgoal_id"),
+                    &format!("{node_location}.subgoal_id"),
+                )?;
+                if !local_ids.insert(subgoal_id.to_owned()) {
+                    return Err(malformed(&node_location, "duplicate subgoal id"));
+                }
+                let node_id = ResearchNodeId::parse(required_text(
+                    node_object.get("node_id"),
+                    &format!("{node_location}.node_id"),
+                )?)?;
+                if node_id != combined_node_id(&plan_id, &subgoal_id)? {
+                    return Err(malformed(
+                        &node_location,
+                        "canonical node_id does not match plan_id and subgoal_id",
+                    ));
+                }
+                let statement = required_text(
+                    node_object.get("statement"),
+                    &format!("{node_location}.statement"),
+                )?
+                .to_owned();
+                let kind = node_object
+                    .get("kind")
+                    .and_then(Value::as_str)
+                    .and_then(ResearchNodeKind::parse)
+                    .filter(|kind| *kind != ResearchNodeKind::Target)
+                    .ok_or_else(|| {
+                        malformed(
+                            format!("{node_location}.kind"),
+                            "unknown or invalid research node kind",
+                        )
+                    })?;
+                let critical = node_object
+                    .get("critical")
+                    .and_then(Value::as_bool)
+                    .ok_or_else(|| {
+                        malformed(format!("{node_location}.critical"), "boolean is required")
+                    })?;
+                let dependencies = bounded_optional_string_array(
+                    node_object.get("depends_on"),
+                    &format!("{node_location}.depends_on"),
+                    MAX_NODE_DEPENDENCIES,
+                )?;
+                let mut seen_dependencies = BTreeSet::new();
+                let mut node = ResearchNode::new(node_id.clone(), &statement, kind)?
+                    .with_plan(plan_id.clone())
+                    .with_declared_critical(critical)
+                    .with_status(
+                        progress
+                            .and_then(|items| items.get(plan_id.as_str()))
+                            .and_then(Value::as_object)
+                            .and_then(|items| items.get(&subgoal_id))
+                            .and_then(Value::as_object)
+                            .and_then(|item| item.get("status"))
+                            .and_then(Value::as_str)
+                            .map(|status| {
+                                normalize_screening_status(status, &node_location, warnings)
+                            })
+                            .unwrap_or(ResearchNodeStatus::Open),
+                    )
+                    .with_order(
+                        input.round_index,
+                        u32::try_from(plan_index + 1).unwrap_or(u32::MAX),
+                        u32::try_from(node_index + 1).unwrap_or(u32::MAX),
+                    );
+                for dependency in dependencies {
+                    let dependency = ResearchNodeId::parse(dependency)?;
+                    if !seen_dependencies.insert(dependency.clone()) {
+                        return Err(malformed(
+                            &node_location,
+                            "duplicate canonical dependency node_id",
+                        ));
+                    }
+                    node = node.with_dependency(dependency);
+                }
+                if nodes.insert(node_id.clone(), node).is_some() {
+                    return Err(ResearchStateError::DuplicateIdentifier {
+                        kind: "research_node_id",
+                        identifier: node_id.to_string(),
+                    });
+                }
+                enforce_count("legacy_research_nodes", nodes.len(), MAX_RESEARCH_NODES)?;
+                plan_nodes.push(LegacyPlanNode {
+                    node_id,
+                    subgoal_id: subgoal_id.to_owned(),
+                    statement,
+                });
+            }
+            plans.insert(plan_id, plan_nodes);
+            continue;
+        }
         let subgoals = required_string_array(
             object.get("subgoals"),
             &format!("{location}.subgoals"),
@@ -544,11 +657,16 @@ fn normalize_direct_attempts(
     sequence: &mut u64,
     warnings: &mut WarningCollector,
 ) -> Result<(), ResearchStateError> {
-    let actor = ResearchDomainId::parse("legacy-generation")?;
     for (record_index, record) in input.proof_steps.iter().enumerate() {
         if record.get("record_type").and_then(Value::as_str) != Some("direct_screening_round") {
             continue;
         }
+        let actor = record
+            .get("actor_domain_id")
+            .and_then(Value::as_str)
+            .map(ResearchDomainId::parse)
+            .transpose()?
+            .unwrap_or(ResearchDomainId::parse("legacy-generation")?);
         let Some(raw_plans) = record.get("plans").and_then(Value::as_array) else {
             warnings.push(
                 "malformed_direct_round",
@@ -634,22 +752,66 @@ fn normalize_direct_attempts(
                     .filter(|value| !value.trim().is_empty())
                     .unwrap_or("Direct screening produced no summary.");
                 *sequence = sequence.saturating_add(1);
-                let mut attempt = ResearchAttempt::new(
-                    ResearchAttemptId::parse(format!(
+                let method = match result.get("method").and_then(Value::as_str) {
+                    Some(value) => ResearchAttemptMethod::parse(value).ok_or_else(|| {
+                        malformed(
+                            format!(
+                                "proof_steps[{record_index}].plans[{plan_index}].subgoal_results[{result_index}].method"
+                            ),
+                            "unknown protocol-3 attempt method",
+                        )
+                    })?,
+                    None => ResearchAttemptMethod::Direct,
+                };
+                let obstruction = match result.get("obstruction") {
+                    None | Some(Value::Null) => None,
+                    Some(value) => Some(
+                        value
+                            .as_str()
+                            .and_then(ResearchObstruction::parse)
+                            .ok_or_else(|| {
+                                malformed(
+                                    format!(
+                                        "proof_steps[{record_index}].plans[{plan_index}].subgoal_results[{result_index}].obstruction"
+                                    ),
+                                    "unknown protocol-3 obstruction class",
+                                )
+                            })?,
+                    ),
+                };
+                let attempt_id = result
+                    .get("attempt_id")
+                    .and_then(Value::as_str)
+                    .map(ResearchAttemptId::parse)
+                    .transpose()?
+                    .unwrap_or(ResearchAttemptId::parse(format!(
                         "attempt:direct:{}:{}:{}",
                         record_index + 1,
                         plan_index + 1,
                         result_index + 1
-                    ))?,
+                    ))?);
+                let mut attempt = ResearchAttempt::new(
+                    attempt_id,
                     node.node_id.clone(),
                     actor.clone(),
-                    ResearchAttemptMethod::Direct,
+                    method,
                     outcome,
                     summary,
                 )?
                 .with_position(input.round_index, *sequence);
-                if status == "stuck" {
+                if let Some(obstruction) = obstruction {
+                    attempt = attempt.with_obstruction(obstruction);
+                } else if status == "stuck" {
                     attempt = attempt.with_obstruction(ResearchObstruction::NoProgress);
+                }
+                for evidence_id in bounded_optional_string_array(
+                    result.get("evidence_ids"),
+                    &format!(
+                        "proof_steps[{record_index}].plans[{plan_index}].subgoal_results[{result_index}].evidence_ids"
+                    ),
+                    MAX_EVIDENCE_IDS,
+                )? {
+                    attempt = attempt.with_evidence(evidence_id)?;
                 }
                 attempts.push(attempt);
                 if attempts.len() > MAX_RESEARCH_ATTEMPTS {

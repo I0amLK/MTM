@@ -190,12 +190,13 @@ impl RuntimeApplication {
             research,
             workflow_observer,
         ));
-        let backend = Arc::new(RuntimeToolBackend::new_with_observer(
+        let backend = Arc::new(RuntimeToolBackend::new_with_protocol_and_observer(
             Arc::clone(&native),
             workspace,
             Arc::clone(&workflow),
             Arc::clone(&state_store),
             Arc::clone(&capabilities),
+            settings.workflow_protocol_version,
             observer.clone(),
         ));
 

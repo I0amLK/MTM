@@ -177,6 +177,7 @@ Important settings:
 | `MTM_NATIVE_EXEC_BACKEND` | `bubblewrap` or `disabled` | auto-detect on Linux |
 | `MTM_NATIVE_EXEC_ALLOW_ROOTS` | Extra read-only toolchain roots | empty |
 | `MTM_LATEX_POLICY` | `static_only`, `if_available`, or `required` | `required` |
+| `MTM_WORKFLOW_PROTOCOL_VERSION` | New-run workflow protocol during MTM-009 evaluation: `2` or `3` | `2` |
 | `MTM_OAUTH_PASSWORD` | Operator password for OAuth authorization | generated interactively if omitted |
 | `MTM_SERVER_URL` | Fixed external OAuth/MCP base URL | dynamic loopback origin |
 | `MTM_ALLOWED_ORIGINS` | Additional allowed browser origins | empty |

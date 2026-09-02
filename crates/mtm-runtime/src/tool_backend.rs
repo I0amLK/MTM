@@ -38,6 +38,7 @@ pub struct RuntimeToolBackend {
     workflow: Arc<WorkflowEngine>,
     store: Arc<StateStore>,
     capabilities: Arc<CapabilityAuthority>,
+    workflow_protocol_version: i64,
     observer: Option<RuntimeEventSink>,
 }
 
@@ -49,7 +50,15 @@ impl RuntimeToolBackend {
         store: Arc<StateStore>,
         capabilities: Arc<CapabilityAuthority>,
     ) -> Self {
-        Self::new_with_observer(native, workspace, workflow, store, capabilities, None)
+        Self::new_with_protocol_and_observer(
+            native,
+            workspace,
+            workflow,
+            store,
+            capabilities,
+            2,
+            None,
+        )
     }
 
     pub fn new_with_observer(
@@ -60,12 +69,33 @@ impl RuntimeToolBackend {
         capabilities: Arc<CapabilityAuthority>,
         observer: Option<RuntimeEventSink>,
     ) -> Self {
+        Self::new_with_protocol_and_observer(
+            native,
+            workspace,
+            workflow,
+            store,
+            capabilities,
+            2,
+            observer,
+        )
+    }
+
+    pub fn new_with_protocol_and_observer(
+        native: Arc<NativeToolRuntime>,
+        workspace: Arc<NativeWorkspace>,
+        workflow: Arc<WorkflowEngine>,
+        store: Arc<StateStore>,
+        capabilities: Arc<CapabilityAuthority>,
+        workflow_protocol_version: i64,
+        observer: Option<RuntimeEventSink>,
+    ) -> Self {
         Self {
             native,
             workspace,
             workflow,
             store,
             capabilities,
+            workflow_protocol_version,
             observer,
         }
     }
@@ -223,7 +253,7 @@ impl RuntimeToolBackend {
         let workflow_facts = serde_json::json!({
             "mathematical_task_routing":"Concrete proof, derivation, proof-repair, and rigorous verification tasks should start with rethlas_start unless the user explicitly requests a direct informal answer.",
             "verified_latex_delivery":{"automatic_on_done":true,"default_workspace_path":"rethlas-output/<run_id>/proof_verified.tex","explicit_alternate_export_tool":"rethlas_artifact"},
-            "research_workspace":{"state_schema_version":state_schema_version,"workflow_protocol_version":2,"project_registry":true,"compact_verified_lane":true,"proof_manifest":true,"reference_audit":true,"paper_search_provider":"https://api.openalex.org/works","verified_promotion_is_finalizer_only":true},
+            "research_workspace":{"state_schema_version":state_schema_version,"workflow_protocol_version":self.workflow_protocol_version,"production_default_workflow_protocol_version":2,"project_registry":true,"compact_verified_lane":true,"proof_manifest":true,"reference_audit":true,"paper_search_provider":"https://api.openalex.org/works","verified_promotion_is_finalizer_only":true},
             "native":native_info,
             "authorization_axioms":{"native":"OAuth identity AND native mode","workflow":"OAuth identity AND signed run capability AND role ACL AND workflow state","non_inheritance":"native dangerous never implies workflow authority"},
             "complete_flow_locally_validated":false,
@@ -280,7 +310,7 @@ impl RuntimeToolBackend {
                 .get("register_result")
                 .and_then(Value::as_bool)
                 .unwrap_or(true),
-            workflow_protocol_version: 2,
+            workflow_protocol_version: self.workflow_protocol_version,
             trace_id: Some(trace_id),
         })
     }

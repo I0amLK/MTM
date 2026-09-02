@@ -15,7 +15,9 @@ pub(super) fn resolve_plan_node<'a>(
 ) -> Option<&'a ResearchNodeId> {
     plan_nodes
         .iter()
-        .find(|node| node.subgoal_id == label || node.statement == label)
+        .find(|node| {
+            node.node_id.as_str() == label || node.subgoal_id == label || node.statement == label
+        })
         .map(|node| &node.node_id)
 }
 

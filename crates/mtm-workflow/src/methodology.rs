@@ -82,7 +82,6 @@ impl TaskCatalog {
             "workflow_protocol_version".to_owned(),
             Value::from(protocol_version),
         );
-
         if protocol_version >= 2 {
             match state {
                 WorkflowState::Assess => overlay_assess(object),
@@ -93,8 +92,307 @@ impl TaskCatalog {
                 _ => {}
             }
         }
+        if protocol_version >= 3 {
+            overlay_protocol3_research(object, state)?;
+        }
         Ok(task)
     }
+}
+
+fn overlay_protocol3_research(
+    task: &mut Map<String, Value>,
+    state: WorkflowState,
+) -> Result<(), ReCtmError> {
+    task.insert(
+        "mathematical_research_contract".to_owned(),
+        serde_json::json!({
+            "version":1,
+            "advisory_only":true,
+            "advisory_layer_pending":true,
+            "identity":"Plan and node identifiers returned by the server are canonical. Caller labels are never authority identifiers.",
+            "records":"Write concise mathematical conclusions and evidence locators, not web transcripts or hidden reasoning traces.",
+            "server_owned_fields":["record_type","record_id","actor_role","actor_domain_id","round_index","created_at"],
+            "counterexample_semantics":"Use found only with a concrete witness. not_found_within_scope is bounded negative evidence, never a proof.",
+            "route_solved_semantics":"route_solved means a generator or branch reports a usable route; only the existing verifier/finalizer can publish proof_verified.tex.",
+            "final_artifact":"proof_verified.tex"
+        }),
+    );
+    match state {
+        WorkflowState::Explore => overlay_protocol3_explore(task),
+        WorkflowState::ProposePlans => overlay_protocol3_plans(task),
+        WorkflowState::DirectProving => overlay_protocol3_screening(task),
+        WorkflowState::BranchRun => overlay_protocol3_branch(task),
+        WorkflowState::IdentifyFailures => overlay_protocol3_failures(task),
+        WorkflowState::Replan => overlay_protocol3_replan(task),
+        _ => {}
+    }
+    Ok(())
+}
+
+fn overlay_protocol3_explore(task: &mut Map<String, Value>) {
+    task.insert(
+        "write_contract".to_owned(),
+        serde_json::json!([
+            {
+                "resource":"memory:generation:events",
+                "required":true,
+                "content_schema":protocol3_event_schema(),
+                "example":{
+                    "event_type":"toy_example_result",
+                    "node_id":"target",
+                    "outcome":"progress",
+                    "summary":"The smallest nontrivial cases support the proposed reduction.",
+                    "evidence_ids":[]
+                }
+            },
+            {
+                "resource":"memory:generation:counterexamples",
+                "required":false,
+                "content_schema":protocol3_counterexample_schema(),
+                "example":{
+                    "node_id":"target",
+                    "outcome":"not_found_within_scope",
+                    "summary":"No counterexample was found in the stated finite scope.",
+                    "probe_scope":"All cases with q<=5 and dimension<=4.",
+                    "evidence_ids":[]
+                }
+            }
+        ]),
+    );
+    task.insert(
+        "required_records".to_owned(),
+        serde_json::json!(["memory:generation:events"]),
+    );
+    if let Some(minimal) = task
+        .get_mut("minimal_submission")
+        .and_then(Value::as_object_mut)
+    {
+        minimal.insert(
+            "writes".to_owned(),
+            serde_json::json!([{
+                "resource":"memory:generation:events",
+                "content":{
+                    "event_type":"toy_example_result",
+                    "node_id":"target",
+                    "outcome":"inconclusive",
+                    "summary":"Initial diagnostic examples do not yet decide the main obstruction.",
+                    "evidence_ids":[]
+                }
+            }]),
+        );
+    }
+}
+
+fn overlay_protocol3_plans(task: &mut Map<String, Value>) {
+    task.insert(
+        "commit_payload_schema".to_owned(),
+        serde_json::json!({
+            "type":"object","required":["plans"],"additionalProperties":false,
+            "properties":{
+                "plans":{
+                    "type":"array","minItems":2,"maxItems":64,
+                    "items":{
+                        "type":"object","required":["summary","subgoals"],"additionalProperties":false,
+                        "properties":{
+                            "plan_id":{"type":"string","description":"Optional caller label only."},
+                            "summary":{"type":"string","minLength":1},
+                            "subgoals":{
+                                "type":"array","minItems":1,"maxItems":64,
+                                "items":{
+                                    "type":"object","required":["key","statement","depends_on","critical"],"additionalProperties":false,
+                                    "properties":{
+                                        "key":{"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9_.-]*$"},
+                                        "statement":{"type":"string","minLength":1},
+                                        "depends_on":{"type":"array","maxItems":64,"uniqueItems":true,"items":{"type":"string"}},
+                                        "critical":{"type":"boolean"},
+                                        "kind":{"type":"string","enum":["lemma","construction","definition"]}
+                                    }
+                                }
+                            },
+                            "motivation":{"type":"array","maxItems":64,"items":{"type":"string"}},
+                            "dependencies":{"type":"array","maxItems":64,"items":{"type":"string"}},
+                            "risks":{"type":"array","maxItems":64,"items":{"type":"string"}}
+                        }
+                    }
+                }
+            }
+        }),
+    );
+    if let Some(minimal) = task
+        .get_mut("minimal_submission")
+        .and_then(Value::as_object_mut)
+    {
+        minimal.insert(
+            "payload".to_owned(),
+            serde_json::json!({
+                "plans":[
+                    {
+                        "summary":"First materially distinct route",
+                        "subgoals":[{"key":"local","statement":"Prove the local lemma.","depends_on":[],"critical":true,"kind":"lemma"}],
+                        "motivation":["Why this route may work"],"dependencies":[],"risks":["Main risk"]
+                    },
+                    {
+                        "summary":"Second materially distinct route",
+                        "subgoals":[{"key":"global","statement":"Prove the global reduction.","depends_on":[],"critical":true,"kind":"lemma"}],
+                        "motivation":["Why this route differs"],"dependencies":[],"risks":["Main risk"]
+                    }
+                ]
+            }),
+        );
+    }
+    task.insert(
+        "server_derives".to_owned(),
+        serde_json::json!([
+            "canonical plan_id values",
+            "canonical node_id and subgoal_id values",
+            "validated acyclic dependency edges",
+            "memory:generation:subgoals decomposition_plan records"
+        ]),
+    );
+}
+
+fn overlay_protocol3_screening(task: &mut Map<String, Value>) {
+    task.insert(
+        "commit_payload_schema".to_owned(),
+        serde_json::json!({
+            "type":"object","additionalProperties":false,
+            "properties":{
+                "screening":{
+                    "type":"object",
+                    "description":"Map canonical plan_id to a map of canonical subgoal_id to result.",
+                    "additionalProperties":{
+                        "type":"object",
+                        "additionalProperties":protocol3_screening_result_schema()
+                    }
+                },
+                "selected_plan_id":{"type":"string"},
+                "proof_route":{"type":"string"}
+            }
+        }),
+    );
+    task.insert(
+        "screening_research_fields".to_owned(),
+        serde_json::json!({
+            "method":["direct","reduction","toy_example","counterexample","retrieval","computation","synthesis","repair"],
+            "obstruction":["false_claim","missing_hypothesis","missing_lemma","missing_reference","computational_bottleneck","notation_mismatch","circular_dependency","incompatible_partial_results","no_progress","unknown"],
+            "rule":"stuck requires obstruction; solved forbids obstruction; evidence_ids are bounded locators."
+        }),
+    );
+}
+
+fn overlay_protocol3_branch(task: &mut Map<String, Value>) {
+    task.insert(
+        "commit_payload_schema".to_owned(),
+        serde_json::json!({
+            "type":"object","required":["status","summary"],"additionalProperties":false,
+            "properties":{
+                "status":{"type":"string","enum":["solved","partial","failed"]},
+                "summary":{"type":"string","minLength":1},
+                "proof_route":{"type":"string"},
+                "proved_subgoals":{"type":"array","maxItems":64,"uniqueItems":true,"items":{"type":"string","description":"Canonical node_id assigned to this branch plan."}},
+                "unproved_subgoals":{"type":"array","maxItems":64,"uniqueItems":true,"items":{"type":"string","description":"Canonical node_id assigned to this branch plan."}},
+                "failure_evidence":{"type":"array","maxItems":64,"items":{"type":"string"}},
+                "obstructions":{
+                    "type":"array","maxItems":64,
+                    "items":{
+                        "type":"object","required":["node_id","class","summary"],"additionalProperties":false,
+                        "properties":{
+                            "node_id":{"type":"string"},
+                            "class":{"type":"string","enum":["false_claim","missing_hypothesis","missing_lemma","missing_reference","computational_bottleneck","notation_mismatch","circular_dependency","incompatible_partial_results","no_progress","unknown"]},
+                            "summary":{"type":"string","minLength":1},
+                            "evidence_ids":{"type":"array","maxItems":32,"uniqueItems":true,"items":{"type":"string"}}
+                        }
+                    }
+                }
+            }
+        }),
+    );
+}
+
+fn overlay_protocol3_failures(task: &mut Map<String, Value>) {
+    task.insert(
+        "commit_payload_schema".to_owned(),
+        serde_json::json!({
+            "type":"object","required":["summary"],"additionalProperties":false,
+            "properties":{
+                "summary":{
+                    "type":"object",
+                    "required":["obstruction","next_step","affected_node_ids","obstruction_class"],
+                    "additionalProperties":false,
+                    "properties":{
+                        "obstruction":{"type":"string","minLength":1},
+                        "next_step":{"type":"string","minLength":1},
+                        "affected_node_ids":{"type":"array","minItems":1,"maxItems":64,"uniqueItems":true,"items":{"type":"string"}},
+                        "obstruction_class":{"type":"string","enum":["false_claim","missing_hypothesis","missing_lemma","missing_reference","computational_bottleneck","notation_mismatch","circular_dependency","incompatible_partial_results","no_progress","unknown"]},
+                        "excluded_plan_ids":{"type":"array","maxItems":64,"uniqueItems":true,"items":{"type":"string"}},
+                        "preserved_node_ids":{"type":"array","maxItems":64,"uniqueItems":true,"items":{"type":"string"}},
+                        "required_hypotheses":{"type":"array","maxItems":64,"items":{"type":"string"}},
+                        "required_reference_queries":{"type":"array","maxItems":64,"items":{"type":"string"}},
+                        "selected_focus_node_id":{"type":"string"}
+                    }
+                }
+            }
+        }),
+    );
+}
+
+fn overlay_protocol3_replan(task: &mut Map<String, Value>) {
+    task.insert(
+        "commit_payload_schema".to_owned(),
+        serde_json::json!({
+            "type":"object","required":["decision"],"additionalProperties":false,
+            "properties":{
+                "decision":{
+                    "type":"object","required":["reason"],"additionalProperties":false,
+                    "properties":{
+                        "reason":{"type":"string","minLength":1},
+                        "superseded_plan_ids":{"type":"array","maxItems":64,"uniqueItems":true,"items":{"type":"string"}},
+                        "preserved_node_ids":{"type":"array","maxItems":64,"uniqueItems":true,"items":{"type":"string"}},
+                        "new_constraints":{"type":"array","maxItems":64,"uniqueItems":true,"items":{"type":"string"}},
+                        "selected_focus_node_id":{"type":"string"}
+                    }
+                }
+            }
+        }),
+    );
+}
+
+fn protocol3_screening_result_schema() -> Value {
+    serde_json::json!({
+        "type":"object","required":["status","summary","method"],"additionalProperties":false,
+        "properties":{
+            "status":{"type":"string","enum":["solved","partial","stuck"]},
+            "summary":{"type":"string","minLength":1},
+            "method":{"type":"string","enum":["direct","reduction","toy_example","counterexample","retrieval","computation","synthesis","repair"]},
+            "obstruction":{"type":"string","enum":["false_claim","missing_hypothesis","missing_lemma","missing_reference","computational_bottleneck","notation_mismatch","circular_dependency","incompatible_partial_results","no_progress","unknown"]},
+            "evidence_ids":{"type":"array","maxItems":32,"uniqueItems":true,"items":{"type":"string"}}
+        }
+    })
+}
+
+fn protocol3_counterexample_schema() -> Value {
+    serde_json::json!({
+        "type":"object","required":["node_id","outcome","summary","probe_scope"],"additionalProperties":false,
+        "properties":{
+            "node_id":{"type":"string"},
+            "outcome":{"type":"string","enum":["found","not_found_within_scope","inconclusive"]},
+            "summary":{"type":"string","minLength":1},
+            "probe_scope":{"type":"string","minLength":1},
+            "witness":{"type":"string"},
+            "evidence_ids":{"type":"array","maxItems":32,"uniqueItems":true,"items":{"type":"string"}}
+        }
+    })
+}
+
+fn protocol3_event_schema() -> Value {
+    serde_json::json!({
+        "type":"object",
+        "description":"One typed event: toy_example_result, retrieval_assessment, new_candidate_lemma, or notation_resolution. The server rejects unknown fields and validates canonical IDs.",
+        "required":["event_type"],
+        "properties":{
+            "event_type":{"type":"string","enum":["toy_example_result","retrieval_assessment","new_candidate_lemma","notation_resolution"]}
+        }
+    })
 }
 
 fn overlay_assess(task: &mut Map<String, Value>) {

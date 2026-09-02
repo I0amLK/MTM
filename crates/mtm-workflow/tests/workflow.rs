@@ -273,6 +273,290 @@ fn compact_correct_flow_reaches_mechanical_finalization() -> Result<(), ReCtmErr
 }
 
 #[test]
+fn protocol_three_structured_research_contract_reaches_same_tex_finalizer() -> Result<(), ReCtmError>
+{
+    let temp = tempfile::tempdir().map_err(|error| {
+        ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+    })?;
+    let engine = engine(temp.path(), Arc::new(PassingLatex))?;
+    let started = engine.start(StartRequest {
+        owner_id: "owner",
+        problem_tex: r"\begin{proposition}Prove $1=1$.\end{proposition}",
+        problem_id: Some("protocol-three-one-equals-one"),
+        references: &[],
+        native_mode: "dangerous",
+        workspace_export_path: None,
+        project_id: None,
+        target_claim_id: None,
+        workflow_mode: "full",
+        register_result: true,
+        workflow_protocol_version: 3,
+        trace_id: Some("trace-p3-start"),
+    })?;
+    let run_id = started["run_id"]
+        .as_str()
+        .ok_or_else(|| {
+            ReCtmError::new("TEST_FAILURE", "protocol-3 run_id missing")
+                .with_category(ErrorCategory::Internal)
+        })?
+        .to_owned();
+
+    let assess = engine.next_task("owner", &run_id, Some("trace-p3-assess"))?;
+    assert_eq!(assess["task"]["workflow_protocol_version"], 3);
+    assert_eq!(
+        assess["task"]["mathematical_research_contract"]["final_artifact"],
+        "proof_verified.tex"
+    );
+    assert!(
+        assess["context"]
+            .get("mathematical_research_state")
+            .is_none()
+    );
+    engine.write(
+        "owner",
+        capability(&assess)?,
+        "memory:generation:immediate_conclusions",
+        &serde_json::json!({"summary":"Reflexivity should close the target."}),
+        Some("trace-p3-assess-write"),
+    )?;
+    engine.commit(
+        "owner",
+        capability(&assess)?,
+        "assessment_complete",
+        &serde_json::json!({
+            "route":"full","route_reason":"exercise structured research contract",
+            "requires_external_retrieval":false,"requires_multiple_plans":true
+        }),
+        Some("trace-p3-assess-commit"),
+    )?;
+
+    let explore = engine.next_task("owner", &run_id, Some("trace-p3-explore"))?;
+    assert_eq!(explore["state"], "explore");
+    let explore_writes = explore["task"]["write_contract"]
+        .as_array()
+        .ok_or_else(|| {
+            ReCtmError::new("TEST_FAILURE", "protocol-3 explore write contract missing")
+                .with_category(ErrorCategory::Internal)
+        })?;
+    assert_eq!(explore_writes[0]["resource"], "memory:generation:events");
+    assert_eq!(
+        explore_writes[1]["resource"],
+        "memory:generation:counterexamples"
+    );
+    engine.write(
+        "owner",
+        capability(&explore)?,
+        "memory:generation:events",
+        &serde_json::json!({
+            "event_type":"notation_resolution","symbol":"=",
+            "resolution":"Use ordinary equality.","summary":"No notation ambiguity remains.",
+            "evidence_ids":[]
+        }),
+        Some("trace-p3-explore-write"),
+    )?;
+    engine.commit(
+        "owner",
+        capability(&explore)?,
+        "exploration_complete",
+        &serde_json::json!({}),
+        Some("trace-p3-explore-commit"),
+    )?;
+
+    let planning = engine.next_task("owner", &run_id, Some("trace-p3-planning"))?;
+    assert_eq!(planning["state"], "propose_plans");
+    assert_eq!(
+        planning["task"]["commit_payload_schema"]["properties"]["plans"]["items"]["properties"]["subgoals"]
+            ["items"]["type"],
+        "object"
+    );
+    engine.commit(
+        "owner",
+        capability(&planning)?,
+        "plans_proposed",
+        &serde_json::json!({
+            "plans":[
+                {
+                    "summary":"Reduce equality to reflexivity in two explicit steps.",
+                    "subgoals":[
+                        {"key":"base","statement":"Establish reflexivity of 1.","depends_on":[],"critical":true},
+                        {"key":"finish","statement":"Use reflexivity to conclude 1=1.","depends_on":["base"],"critical":true}
+                    ],
+                    "motivation":["Makes the dependency order explicit."],"dependencies":[],"risks":[]
+                },
+                {
+                    "summary":"Use a deliberately distinct algebraic route.",
+                    "subgoals":[
+                        {"key":"alternate","statement":"Derive 1=1 from an equality axiom.","depends_on":[],"critical":true}
+                    ],
+                    "motivation":["Independent route for screening."],"dependencies":[],
+                    "risks":["More machinery than necessary."]
+                }
+            ]
+        }),
+        Some("trace-p3-planning-commit"),
+    )?;
+
+    let direct = engine.next_task("owner", &run_id, Some("trace-p3-direct"))?;
+    assert_eq!(direct["state"], "direct_proving");
+    assert!(
+        direct["context"]
+            .get("mathematical_research_state")
+            .is_none()
+    );
+    let plans = direct["context"]["active_plans"]
+        .as_array()
+        .ok_or_else(|| {
+            ReCtmError::new("TEST_FAILURE", "protocol-3 active plans missing")
+                .with_category(ErrorCategory::Internal)
+        })?;
+    assert_eq!(plans.len(), 2);
+    let first_plan_id = plans[0]["plan_id"].as_str().unwrap_or_default().to_owned();
+    let second_plan_id = plans[1]["plan_id"].as_str().unwrap_or_default().to_owned();
+    let first_subgoals = plans[0]["subgoals"].as_array().ok_or_else(|| {
+        ReCtmError::new("TEST_FAILURE", "first protocol-3 subgoals missing")
+            .with_category(ErrorCategory::Internal)
+    })?;
+    let second_subgoals = plans[1]["subgoals"].as_array().ok_or_else(|| {
+        ReCtmError::new("TEST_FAILURE", "second protocol-3 subgoals missing")
+            .with_category(ErrorCategory::Internal)
+    })?;
+    let base_id = first_subgoals[0]["subgoal_id"]
+        .as_str()
+        .unwrap_or_default()
+        .to_owned();
+    let finish_id = first_subgoals[1]["subgoal_id"]
+        .as_str()
+        .unwrap_or_default()
+        .to_owned();
+    let alternate_id = second_subgoals[0]["subgoal_id"]
+        .as_str()
+        .unwrap_or_default()
+        .to_owned();
+    let base_node_id = first_subgoals[0]["node_id"]
+        .as_str()
+        .unwrap_or_default()
+        .to_owned();
+    assert!(
+        !base_node_id.is_empty(),
+        "protocol-3 active plans: {plans:?}"
+    );
+    assert_eq!(
+        first_subgoals[1]["depends_on"],
+        Value::Array(vec![Value::String(base_node_id)])
+    );
+    engine.write(
+        "owner",
+        capability(&direct)?,
+        "memory:generation:proof_steps",
+        &serde_json::json!({"summary":"Screened both structured routes."}),
+        Some("trace-p3-direct-write"),
+    )?;
+    let mut first_results = serde_json::Map::new();
+    first_results.insert(
+        base_id,
+        serde_json::json!({"status":"solved","summary":"Reflexivity is immediate.","method":"direct","evidence_ids":[]}),
+    );
+    first_results.insert(
+        finish_id,
+        serde_json::json!({"status":"solved","summary":"The target follows.","method":"reduction","evidence_ids":[]}),
+    );
+    let mut second_results = serde_json::Map::new();
+    second_results.insert(
+        alternate_id,
+        serde_json::json!({"status":"stuck","summary":"This route needs an unnecessary lemma.","method":"direct","obstruction":"missing_lemma","evidence_ids":[]}),
+    );
+    let mut screening = serde_json::Map::new();
+    screening.insert(first_plan_id.clone(), Value::Object(first_results));
+    screening.insert(second_plan_id, Value::Object(second_results));
+    let assembled = engine.commit(
+        "owner",
+        capability(&direct)?,
+        "direct_proving_complete",
+        &serde_json::json!({
+            "screening":Value::Object(screening),"selected_plan_id":first_plan_id,
+            "proof_route":"Apply reflexivity and conclude the equality."
+        }),
+        Some("trace-p3-direct-commit"),
+    )?;
+    assert_eq!(assembled["state"], "assemble");
+    let shadow = engine.research_state_shadow("owner", &run_id)?;
+    assert_eq!(shadow["workflow_protocol_version"], 3);
+    assert!(shadow["research_state"]["plan_routes"].is_object());
+
+    let assembler = engine.next_task("owner", &run_id, Some("trace-p3-assemble"))?;
+    let proof = r"\begin{proof}By reflexivity, $1=1$.\end{proof}";
+    engine.write(
+        "owner",
+        capability(&assembler)?,
+        "proof",
+        &Value::String(proof.to_owned()),
+        Some("trace-p3-proof"),
+    )?;
+    engine.write(
+        "owner",
+        capability(&assembler)?,
+        "proof_manifest",
+        &serde_json::json!({
+            "target_statement_tex":"Prove $1=1$.","dependency_revision_ids":[],"reference_ids":[],
+            "conditional_hypotheses":[],"computational_evidence":[]
+        }),
+        Some("trace-p3-manifest"),
+    )?;
+    engine.commit(
+        "owner",
+        capability(&assembler)?,
+        "proof_submitted",
+        &serde_json::json!({"outcome":"proof"}),
+        Some("trace-p3-proof-commit"),
+    )?;
+
+    let verifier = engine.next_task("owner", &run_id, Some("trace-p3-verifier"))?;
+    assert_eq!(verifier["state"], "verify");
+    assert!(
+        verifier["context"]
+            .get("mathematical_research_state")
+            .is_none()
+    );
+    engine.write(
+        "owner",
+        capability(&verifier)?,
+        "memory:verifier:statement_checks",
+        &serde_json::json!({"location":"proof","status":"checked"}),
+        Some("trace-p3-statement-check"),
+    )?;
+    engine.write(
+        "owner",
+        capability(&verifier)?,
+        "memory:verifier:events",
+        &serde_json::json!({"event_type":"verification_audit_complete"}),
+        Some("trace-p3-verifier-event"),
+    )?;
+    engine.write(
+        "owner",
+        capability(&verifier)?,
+        "verification_report",
+        &serde_json::json!({
+            "verification_report":{"summary":"The proof is valid.","critical_errors":[],"gaps":[]},
+            "verdict":"correct","repair_hints":""
+        }),
+        Some("trace-p3-verification-report"),
+    )?;
+    let finalized = engine.commit(
+        "owner",
+        capability(&verifier)?,
+        "verification_submitted",
+        &serde_json::json!({}),
+        Some("trace-p3-verification-commit"),
+    )?;
+    assert_eq!(finalized["state"], "finalize");
+    let done = engine.next_task("owner", &run_id, Some("trace-p3-finalize"))?;
+    assert_eq!(done["state"], "done");
+    let artifact = engine.get_artifact("owner", &run_id, "final_tex")?;
+    assert_eq!(artifact["content"], proof);
+    Ok(())
+}
+
+#[test]
 fn latex_failure_routes_to_repair_without_final_artifact() -> Result<(), ReCtmError> {
     let temp = tempfile::tempdir().map_err(|error| {
         ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)

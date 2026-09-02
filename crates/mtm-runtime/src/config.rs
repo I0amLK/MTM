@@ -17,6 +17,7 @@ pub struct RuntimeSettings {
     pub native_exec_backend: String,
     pub native_exec_allow_roots: Vec<PathBuf>,
     pub latex_policy: LatexPolicy,
+    pub workflow_protocol_version: i64,
     pub debug_enabled: bool,
     pub trace_payloads: bool,
     pub oauth_server_url: String,
@@ -78,6 +79,9 @@ impl RuntimeSettings {
                 .as_deref()
                 .unwrap_or("required"),
         )?;
+        let workflow_protocol_version = parse_workflow_protocol_version(
+            env::var("MTM_WORKFLOW_PROTOCOL_VERSION").ok().as_deref(),
+        )?;
         let token_secret = decode_secret(
             env::var("MTM_TOKEN_SECRET").unwrap_or_default().trim(),
             "MTM_TOKEN_SECRET",
@@ -110,6 +114,7 @@ impl RuntimeSettings {
             native_exec_backend,
             native_exec_allow_roots,
             latex_policy,
+            workflow_protocol_version,
             debug_enabled: truthy(env::var("MTM_DEBUG").ok().as_deref()),
             trace_payloads: truthy(env::var("MTM_TRACE_PAYLOADS").ok().as_deref()),
             oauth_server_url: env::var("MTM_SERVER_URL")
@@ -187,6 +192,18 @@ impl RuntimeSettings {
                 "MTM_THEOREM_SEARCH_TIMEOUT_SECONDS must be between 1 and 300.",
             )
             .with_category(ErrorCategory::Validation));
+        }
+        if !matches!(self.workflow_protocol_version, 2 | 3) {
+            return Err(ReCtmError::new(
+                "INVALID_WORKFLOW_PROTOCOL_VERSION",
+                "MTM_WORKFLOW_PROTOCOL_VERSION must be 2 or 3 during the MTM-009 evaluation period.",
+            )
+            .with_category(ErrorCategory::Validation)
+            .with_details(serde_json::json!({
+                "configured":self.workflow_protocol_version,
+                "production_default":2,
+                "experimental":3
+            })));
         }
         validate_https_endpoint(&self.theorem_search_url)?;
         Ok(())
@@ -365,6 +382,23 @@ fn truthy(value: Option<&str>) -> bool {
     })
 }
 
+fn parse_workflow_protocol_version(value: Option<&str>) -> Result<i64, ReCtmError> {
+    match value.unwrap_or("2").trim() {
+        "2" => Ok(2),
+        "3" => Ok(3),
+        configured => Err(ReCtmError::new(
+            "INVALID_WORKFLOW_PROTOCOL_VERSION",
+            "MTM_WORKFLOW_PROTOCOL_VERSION must be 2 or 3 during the MTM-009 evaluation period.",
+        )
+        .with_category(ErrorCategory::Validation)
+        .with_details(serde_json::json!({
+            "configured":configured,
+            "production_default":2,
+            "experimental":3
+        }))),
+    }
+}
+
 fn executable_on_path(name: &str) -> bool {
     env::var_os("PATH")
         .is_some_and(|path| env::split_paths(&path).any(|directory| directory.join(name).is_file()))
@@ -415,5 +449,24 @@ mod tests {
         assert_eq!(secret.len(), 32);
         assert_eq!(derive_capability_secret(&secret).len(), 32);
         Ok(())
+    }
+
+    #[test]
+    fn workflow_protocol_evaluation_switch_defaults_and_fails_closed() {
+        assert_eq!(parse_workflow_protocol_version(None).ok(), Some(2));
+        assert_eq!(parse_workflow_protocol_version(Some("2")).ok(), Some(2));
+        assert_eq!(parse_workflow_protocol_version(Some(" 3 ")).ok(), Some(3));
+        assert_eq!(
+            parse_workflow_protocol_version(Some("1"))
+                .err()
+                .map(|error| error.code),
+            Some("INVALID_WORKFLOW_PROTOCOL_VERSION".to_owned())
+        );
+        assert_eq!(
+            parse_workflow_protocol_version(Some("latest"))
+                .err()
+                .map(|error| error.code),
+            Some("INVALID_WORKFLOW_PROTOCOL_VERSION".to_owned())
+        );
     }
 }
