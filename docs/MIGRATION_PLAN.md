@@ -96,19 +96,20 @@ Run complete local, target, browser, CAS, LaTeX, upgrade, rollback, soak, resour
 and performance acceptance. Switch all remaining authority to Rust, prove rollback,
 then remove Python production code and interpreter dependency in a separate commit.
 
-Implemented and accepted. The Rust `re-ctm 0.3.0` release has no Python linkage; the
-live command and four serve/TUI sessions execute release SHA-256
-`7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728`.
+Implemented and accepted. The Rust `mtm 0.3.0` release has no Python linkage. A
+post-completion naming correction gives MTM the exclusive `mtm` command and restores
+`re-ctm` to the independently installable Re-CTM project. Both commands and both
+installation roots were verified simultaneously; MTM provides no compatibility alias.
 Real rollback and recutover passed before retirement. After the installed Python tool
 root and legacy helper entry were removed, the immutable wheel was restored in an
 isolated uv tool root, reported `re-ctm 0.3.0`, served OAuth metadata, and shut down
-with a bounded signal. No Python Re-CTM process remains; historical source is retained
-as a non-production reference.
+with a bounded signal. Re-CTM is now a separate co-installable project rather than an
+MTM selector or rollback alias; historical source remains a non-production reference.
 
 The final sixty-second Rust soak completed 169,508 requests with zero errors and 29
 stateful start/cancel cycles. The accepted A6 statement applies only to the recorded
 authenticated loopback OAuth/MCP workload under eight clients: observed Rust/Python
-ratios were 2.345509 median throughput, 0.499841 p95 latency, and 0.670145 peak RSS.
+ratios were 2.434771 median throughput, 0.474969 p95 latency, and 0.670765 peak RSS.
 It is not a claim about external retrieval, CAS, LaTeX, or mathematical proof time.
 
 ## Stop rules

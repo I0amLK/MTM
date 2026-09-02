@@ -199,14 +199,8 @@ def main() -> int:
                     capture_json=True,
                 ),
                 run(
-                    "mtm008_live_evidence",
-                    [sys.executable, "scripts/validate_mtm008_live_evidence.py"],
-                    env=environment,
-                    capture_json=True,
-                ),
-                run(
-                    "mtm008_retirement_evidence",
-                    [sys.executable, "scripts/validate_mtm008_retirement_evidence.py"],
+                    "mtm_command_namespace",
+                    [sys.executable, "scripts/validate_mtm_command_namespace.py"],
                     env=environment,
                     capture_json=True,
                 ),
@@ -270,12 +264,11 @@ def main() -> int:
             "MTM-001 governance, MTM-002 pure contracts/policies, MTM-003 Native isolation, "
             "MTM-004 copied-database persistence/capability behavior, MTM-005 OAuth/MCP/HTTP "
             "gateway behavior, MTM-006 workflow/vault/verifier/finalizer behavior, MTM-007 "
-            "full runtime/CLI/tool-backend composition, and completed MTM-008 candidate, live "
-            "cutover, retirement, authority-inventory, rollback-wheel, soak, and bounded A6 "
-            "evidence were validated by strict Rust, governance, frozen differential, and "
-            "target-evidence gates. The installed Python production tool root is retired; the "
-            "historical source and immutable wheel remain non-production rollback/reference "
-            "artifacts."
+            "full runtime/CLI/tool-backend composition, MTM-008 release qualification, and the "
+            "post-completion MTM/Re-CTM command-namespace separation were validated by strict "
+            "Rust, governance, frozen differential, target-evidence, soak, bounded A6, and live "
+            "coexistence gates. The MTM command is `mtm`; `re-ctm` belongs exclusively to the "
+            "separate Re-CTM installation."
         ),
     }
     temporary = REPORT.with_name(REPORT.name + ".tmp")

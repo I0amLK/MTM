@@ -42,7 +42,7 @@ except ModuleNotFoundError:
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE_BINARY = ROOT / "target" / "release" / "mtm-reboot"
+RELEASE_BINARY = ROOT / "target" / "release" / "mtm"
 REPORT = ROOT / "mtm007-target-validation.json"
 PUBLIC_TUNNEL_RE = re.compile(r"Quick Tunnel: (https://[a-z0-9-]+\.trycloudflare\.com/mcp)")
 
@@ -367,7 +367,7 @@ def release_link_check() -> dict[str, Any]:
             text=True,
             check=True,
         ).stdout.strip()
-        == "re-ctm 0.3.0",
+        == "mtm 0.3.0",
         "python_linked": "python" in completed.stdout.lower(),
     }
 
@@ -390,7 +390,7 @@ def install_check(root: Path, workspace: Path, data_root: Path) -> dict[str, Any
         env=cargo_environment(),
         check=True,
     )
-    binary = install_root / "bin" / "mtm-reboot"
+    binary = install_root / "bin" / "mtm"
     environment = runtime_environment(workspace, data_root, "disabled", "static_only")
     version = subprocess.run(
         [str(binary), "--version"], stdout=subprocess.PIPE, text=True, check=True
@@ -407,7 +407,7 @@ def install_check(root: Path, workspace: Path, data_root: Path) -> dict[str, Any
         ["ldd", str(binary)], stdout=subprocess.PIPE, text=True, check=True
     ).stdout
     return {
-        "version_ok": version == "re-ctm 0.3.0",
+        "version_ok": version == "mtm 0.3.0",
         "tool_count": parsed.get("tool_count"),
         "python_linked": "python" in dynamic.lower(),
     }

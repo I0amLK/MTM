@@ -375,11 +375,12 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
         item.get("id") for item in deployment_vertices if isinstance(item, dict)
     }
     required_deployment_ids = {
-        "python_release",
-        "rollback_wheel",
-        "rust_release",
-        "command_link",
-        "production_sessions",
+        "mtm_rust_release",
+        "mtm_command",
+        "mtm_sessions",
+        "re_ctm_python_release",
+        "re_ctm_command",
+        "re_ctm_wheel",
         "historical_source",
     }
     if deployment_ids != required_deployment_ids:
@@ -389,13 +390,20 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("deployment edge references unknown vertex")
         if not str(edge.get("guard") or "").strip():
             raise ValueError("deployment edge requires a guard")
-    command_targets = {
+    mtm_command_sources = {
         edge.get("source")
         for edge in deployment_edges
-        if edge.get("target") == "command_link"
+        if edge.get("target") == "mtm_command"
     }
-    if command_targets != {"python_release", "rust_release"}:
-        raise ValueError("command_link must select only Python rollback or Rust release")
+    if mtm_command_sources != {"mtm_rust_release"}:
+        raise ValueError("mtm_command must select only the MTM Rust release")
+    re_ctm_command_sources = {
+        edge.get("source")
+        for edge in deployment_edges
+        if edge.get("target") == "re_ctm_command"
+    }
+    if re_ctm_command_sources != {"re_ctm_python_release"}:
+        raise ValueError("re_ctm_command must select only the Re-CTM release")
 
     invariants = payload.get("invariants")
     if not isinstance(invariants, list):
@@ -433,7 +441,7 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
         "runtime_edges": len(runtime_edges),
         "deployment_vertices": len(deployment_ids),
         "deployment_edges": len(deployment_edges),
-        "deployment_atomic_selector_boundary": True,
+        "deployment_command_namespace_separated": True,
         "invariants": len(invariants),
     }
 

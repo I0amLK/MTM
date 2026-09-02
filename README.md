@@ -12,9 +12,9 @@ The governing order is:
 ## Current status
 
 - Source baseline: Re-CTM 0.3.0.
-- Current production authority: the hash-recorded Rust 0.3.0 release selected by
-  `/home/lk/.local/bin/re-ctm`, SHA-256
-  `7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728`.
+- Current MTM production authority: the hash-recorded Rust 0.3.0 release selected by
+  `/home/lk/.local/bin/mtm`, SHA-256
+  `abe861df86dded73a5fba08bc1b71cba46164a846318d004e846409e240e8438`.
 - MTM-reboot Rust authority: typed pure contracts/policies, Native process/isolation,
   copied-state persistence/capabilities, the OAuth/MCP/HTTP gateway, and the
   workflow/private-vault/verifier/finalizer component, plus the single Rust runtime
@@ -25,9 +25,12 @@ The governing order is:
   restore, live cutover/rollback/recutover, 60-second soak, bounded A6 acceptance,
   four-session transfer, final release upgrade, secret-free operator logging, and
   Python production retirement all pass.
-- The installed Python tool root and legacy helper entry are gone; no Python Re-CTM
-  process remains. Historical Python source is preserved as a non-production
-  reference, and the tested rollback wheel remains owner-controlled at
+- MTM no longer owns the `re-ctm` command. Re-CTM 0.3.0 is installed independently at
+  `/home/lk/.local/bin/re-ctm`, while MTM uses only `/home/lk/.local/bin/mtm` and
+  `/home/lk/.local/share/mtm`. The two command names and installation roots are
+  mechanically required to remain distinct; MTM provides no `re-ctm` compatibility alias.
+- Historical Python source is preserved as a non-production reference, and the tested
+  Re-CTM wheel remains owner-controlled at
   `/home/lk/.local/share/re-ctm-rust/rollback/re_ctm-0.3.0-py3-none-any.whl`
   with SHA-256
   `7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b`.
@@ -63,8 +66,7 @@ python3 scripts/run_mtm008_performance.py
 python3 scripts/run_mtm008_soak.py
 python3 scripts/run_mtm008_candidate_validation.py
 python3 scripts/validate_mtm008_candidate_evidence.py
-python3 scripts/validate_mtm008_live_evidence.py
-python3 scripts/validate_mtm008_retirement_evidence.py
+python3 scripts/validate_mtm_command_namespace.py
 cargo run -q -p mtm-cli -- contract
 cargo run -q -p mtm-cli -- status
 cargo run -q -p mtm-cli -- release-info
@@ -106,10 +108,14 @@ retrieval, Sage, Magma, LaTeX, or proof-generation time.
 ## Normal operation
 
 ```bash
-re-ctm tui --quick-tunnel --native-mode dangerous
+mtm tui --quick-tunnel --native-mode dangerous
 ```
 
-The command above runs the Rust release. Bubblewrap remains the Linux operating-system
+`mtm` is the only MTM command. `re-ctm` belongs to the separate Re-CTM project and is
+not an alias for MTM. This allows both projects to be installed on the same machine
+without executable-name or installation-root collisions.
+
+The command above runs the MTM Rust release. Bubblewrap remains the Linux operating-system
 isolation actuator for Native tools; it is not a Python dependency and it does not
 grant workflow or finalizer authority.
 

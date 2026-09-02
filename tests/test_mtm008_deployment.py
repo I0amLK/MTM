@@ -34,18 +34,18 @@ class Mtm008DeploymentTestCase(unittest.TestCase):
             old_root = root / "python-tool"
             old_root.mkdir()
             old = executable(
-                old_root / "re-ctm",
-                "#!/bin/sh\nprintf '%s\\n' 're-ctm 0.3.0-python'\n",
+                old_root / "mtm",
+                "#!/bin/sh\nprintf '%s\\n' 'mtm 0.3.0-previous'\n",
             )
-            link = bin_dir / "re-ctm"
+            link = bin_dir / "mtm"
             link.symlink_to(old)
             rust = executable(
-                root / "rust-re-ctm",
+                root / "rust-mtm",
                 """#!/bin/sh
 if [ "$1" = "release-info" ]; then
-  printf '%s\n' '{"name":"re-ctm","version":"0.3.0","implementation":"rust","python_runtime_required":false,"public_tool_count":24,"hidden_alias_count":11,"state_schema_version":2,"workflow_protocol_version":2}'
+  printf '%s\n' '{"name":"mtm","version":"0.3.0","implementation":"rust","python_runtime_required":false,"public_tool_count":24,"hidden_alias_count":11,"state_schema_version":2,"workflow_protocol_version":2}'
 else
-  printf '%s\n' 're-ctm 0.3.0'
+  printf '%s\n' 'mtm 0.3.0'
 fi
 """,
             )
@@ -67,23 +67,23 @@ fi
             retired = retire_python(layout.manifest, old_root)
             self.assertFalse(old_root.exists())
             self.assertEqual(retired["state"], "rust_active_python_retired")
-            self.assertEqual(load_manifest(layout.manifest)["schema"], "re-ctm-deployment-v1")
+            self.assertEqual(load_manifest(layout.manifest)["schema"], "mtm-deployment-v1")
 
     def test_existing_manifest_requires_explicit_replacement(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mtm008-existing-") as directory:
             root = Path(directory)
             (root / "bin").mkdir()
             rust = executable(
-                root / "rust-re-ctm",
+                root / "rust-mtm",
                 """#!/bin/sh
 if [ "$1" = "release-info" ]; then
-  printf '%s\n' '{"name":"re-ctm","version":"0.3.0","implementation":"rust","python_runtime_required":false,"public_tool_count":24,"hidden_alias_count":11,"state_schema_version":2,"workflow_protocol_version":2}'
+  printf '%s\n' '{"name":"mtm","version":"0.3.0","implementation":"rust","python_runtime_required":false,"public_tool_count":24,"hidden_alias_count":11,"state_schema_version":2,"workflow_protocol_version":2}'
 else
-  printf '%s\n' 're-ctm 0.3.0'
+  printf '%s\n' 'mtm 0.3.0'
 fi
 """,
             )
-            layout = DeploymentLayout(root / "bin" / "re-ctm", root / "state")
+            layout = DeploymentLayout(root / "bin" / "mtm", root / "state")
             cutover(rust, layout, "0.3.0")
             with self.assertRaisesRegex(DeploymentError, "manifest already exists"):
                 cutover(rust, layout, "0.3.0")
@@ -93,16 +93,16 @@ fi
             root = Path(directory)
             (root / "bin").mkdir()
             rust = executable(
-                root / "rust-re-ctm",
+                root / "rust-mtm",
                 """#!/bin/sh
 if [ "$1" = "release-info" ]; then
-  printf '%s\n' '{"name":"re-ctm","version":"0.3.0","implementation":"rust","python_runtime_required":false,"public_tool_count":24,"hidden_alias_count":11,"state_schema_version":2,"workflow_protocol_version":2}'
+  printf '%s\n' '{"name":"mtm","version":"0.3.0","implementation":"rust","python_runtime_required":false,"public_tool_count":24,"hidden_alias_count":11,"state_schema_version":2,"workflow_protocol_version":2}'
 else
-  printf '%s\n' 're-ctm 0.3.0'
+  printf '%s\n' 'mtm 0.3.0'
 fi
 """,
             )
-            layout = DeploymentLayout(root / "bin" / "re-ctm", root / "state")
+            layout = DeploymentLayout(root / "bin" / "mtm", root / "state")
             manifest = cutover(rust, layout, "0.3.0")
             manifest_mode = stat.S_IMODE(layout.manifest.stat().st_mode)
             release_mode = stat.S_IMODE(Path(manifest["release"]["path"]).stat().st_mode)
@@ -117,7 +117,7 @@ fi
                 root / "fake",
                 "#!/bin/sh\nprintf '%s\\n' '{\"implementation\":\"python\"}'\n",
             )
-            layout = DeploymentLayout(root / "bin" / "re-ctm", root / "state")
+            layout = DeploymentLayout(root / "bin" / "mtm", root / "state")
             with self.assertRaisesRegex(DeploymentError, "release identity mismatch"):
                 cutover(fake, layout, "0.3.0")
 

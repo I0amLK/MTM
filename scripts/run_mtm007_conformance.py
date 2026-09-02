@@ -19,7 +19,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ROOT = ROOT.parent / "Re-CTM"
-RUST_BINARY = ROOT / "target" / "debug" / "mtm-reboot"
+RUST_BINARY = ROOT / "target" / "debug" / "mtm"
 GOLDEN_HASH = ROOT / "conformance" / "golden" / "mtm007-reference.sha256"
 SOURCE_COMMIT = "50d08eb89e3ecc46317fd49709fa4ebcda135b5a"
 TOKEN_SECRET = "11" * 32

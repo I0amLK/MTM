@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM-reboot eight-milestone migration graph",
-  "updated_at": "2026-09-01T09:24:00-07:00",
+  "updated_at": "2026-09-01T19:18:00-07:00",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1878,6 +1878,86 @@
         "Publishing internal mtm-* crates to a public registry remains optional and outside the accepted single-binary release."
       ],
       "decision": "accepted"
+    },
+    {
+      "receipt_id": "MREC-008C",
+      "milestone_id": "MTM-008",
+      "started_at": "2026-09-01T19:02:00-07:00",
+      "completed_at": "2026-09-01T19:18:00-07:00",
+      "status_before": "completed",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "fix(cli): separate MTM and Re-CTM commands [MTM-008]",
+      "files_changed": [
+        "crates/mtm-cli/Cargo.toml",
+        "crates/mtm-cli/src/main.rs",
+        "scripts/mtm008_deployment.py",
+        "scripts/mtm008_runtime_harness.py",
+        "scripts/run_mtm002_conformance.py",
+        "scripts/run_mtm007_conformance.py",
+        "scripts/run_mtm007_target_validation.py",
+        "scripts/run_mtm008_candidate_validation.py",
+        "scripts/run_mtm008_soak.py",
+        "scripts/run_mtm_command_namespace_cutover.py",
+        "scripts/validate_mtm_command_namespace.py",
+        "scripts/run_checks.py",
+        "scripts/validate_engineering_graph.py",
+        "tests/test_mtm008_deployment.py",
+        "tests/test_governance.py",
+        "engineering-graph.json",
+        "authority-inventory.json",
+        "project-progress.json",
+        "records/iterations/ITER-008.json",
+        "README.md",
+        "docs/ARCHITECTURE.md",
+        "docs/MIGRATION_PLAN.md",
+        "docs/adr/0008-release-cutover-and-python-retirement.md",
+        "mtm-command-namespace.json",
+        "mtm007-target-validation.json",
+        "mtm008-performance.json",
+        "mtm008-soak.json",
+        "mtm008-candidate-validation.json"
+      ],
+      "commands": [
+        {
+          "command": "cargo fmt/clippy/test plus MTM-002 and MTM-007 differentials after binary rename",
+          "exit_code": 0,
+          "result": "The single mtm binary passes strict Rust gates; 135 pure cases and eighteen full-composition checkpoints retain zero mismatches."
+        },
+        {
+          "command": "MTM-007 target plus MTM-008 A6/soak/candidate requalification for target/release/mtm",
+          "exit_code": 0,
+          "result": "Twelve target checks, seven-repetition A6 qualification, sixty-second soak, and candidate validation pass against release SHA-256 abe861df86dded73a5fba08bc1b71cba46164a846318d004e846409e240e8438."
+        },
+        {
+          "command": "python3 scripts/run_mtm_command_namespace_cutover.py first live attempt",
+          "exit_code": 1,
+          "result": "The mtm selector was created and existing MTM sessions stopped, but uv inherited the sandbox HOME and did not create /home/lk/.local/bin/re-ctm. The partial state was inspected before recovery."
+        },
+        {
+          "command": "python3 scripts/run_mtm_command_namespace_cutover.py && python3 scripts/validate_mtm_command_namespace.py recovery rerun",
+          "exit_code": 0,
+          "result": "Nine coexistence checks pass: MTM and Re-CTM have distinct commands, executables and installation roots; Re-CTM 0.3.0 starts independently; four MTM sessions restart through mtm. Three existing operator keys were recovered from owner-only files and one environment-only key was replaced with a new owner-only key."
+        }
+      ],
+      "acceptance": {
+        "A0": {"passed": true, "evidence": ["Strict Rust format, Clippy, workspace tests, deployment tests, migration graph, engineering graph and governance checks pass with the mtm binary name."]},
+        "A1": {"passed": true, "evidence": ["mtm --version reports mtm 0.3.0 and release-info.name is mtm; re-ctm --version independently reports re-ctm 0.3.0."]},
+        "A2": {"passed": true, "evidence": ["The 135-case pure corpus and eighteen-checkpoint full-composition corpus retain their exact frozen hashes with zero mismatches after command renaming."]},
+        "A3": {"passed": true, "evidence": ["The architecture graph has disjoint mtm_command and re_ctm_command vertices with no cross-project selector edge or compatibility alias."]},
+        "A4": {"passed": true, "evidence": ["Both commands are installed simultaneously, Re-CTM passes a real server startup probe, and four live MTM sessions execute the mtm release on their prior ports/workspaces."]},
+        "A5": {"passed": true, "evidence": ["The renamed MTM release passes MTM-007 resource non-regression and a sixty-second soak with 169990 requests, zero errors and no fd/thread/child growth."]},
+        "A6": {"passed": true, "evidence": ["On the existing bounded eight-client OAuth/MCP workload, the renamed release measured 2.434771x median throughput, 0.474969 p95-latency ratio and 0.670765 RSS ratio versus Python."]}
+      },
+      "behavior_before": "MTM used the re-ctm executable name, so installing the original Re-CTM project on the same host would collide with MTM's production command and selector.",
+      "behavior_after": "MTM owns only /home/lk/.local/bin/mtm and /home/lk/.local/share/mtm; Re-CTM owns only /home/lk/.local/bin/re-ctm and its uv tool root. Both 0.3.0 projects are installed simultaneously, and MTM provides no re-ctm alias.",
+      "risk_review": "Wire/protocol compatibility identities were not gratuitously renamed: the change is confined to the executable/deployment namespace. The first partial live attempt failed closed and was recovered with explicit uv installation roots. One environment-only operator key was necessarily rotated; all replacement keys remain mode-0600 and are excluded from evidence.",
+      "rollback": "Rollback this naming correction only by stopping MTM sessions and restoring the previous MTM release under the mtm namespace; never repoint re-ctm to MTM. Re-CTM remains an independent installation throughout.",
+      "manual_pending": [
+        "Other operating systems and deployment users require their own dual-install namespace verification."
+      ],
+      "decision": "accepted_post_completion_correction"
     }
   ]
 }

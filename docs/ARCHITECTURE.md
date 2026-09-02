@@ -83,10 +83,10 @@ no network, child process, model, LaTeX, or vault I/O inside transactions
 one deployed production writer
 ```
 
-Python and Rust were compared only on independent copies. The final deployed writer
-is Rust; the Python production tool environment has been retired. The immutable
-Python wheel and historical source are rollback/reference artifacts and have no
-active authority.
+Python and Rust were compared only on independent copies during migration. MTM now
+uses `mtm` as its exclusive production command and Re-CTM uses `re-ctm` as a separate
+project command; neither command is an alias for the other. The MTM deployed writer
+is Rust. Re-CTM may be installed independently without acquiring any MTM authority.
 
 `mtm-gateway` owns OAuth DCR/PKCE/code/token behavior, HTTP routing and Origin/CORS
 policy, legacy/modern MCP envelopes, mirror-header checks, and tool dispatch. It
@@ -138,13 +138,15 @@ mtm-contracts
 `mtm-runtime` is the only allowed broad composition root. `mtm-cli` depends only on
 contracts/runtime plus serialization and therefore cannot become a second authority
 source. `OperatorSession` receives redacted events and owns no store, capability,
-vault, or workflow object. The production command atomically selects the hash-recorded
-Rust release, and all four transferred live sessions execute that exact file.
+vault, or workflow object. `/home/lk/.local/bin/mtm` selects the hash-recorded MTM
+Rust release, and all four transferred MTM sessions execute that exact file.
 
-MTM-008 adds a separate deployment authority graph. The user-visible `re-ctm` symlink
-is an atomic selector for the hash-verified Rust release. The old selector form was
-converted to a wheel rollback record at retirement, so it fails closed rather than
-creating a broken Python symlink. Recovery restores the hash-recorded wheel, probes it,
-and then atomically selects it. Historical Python source remains a non-production
-reference. Bubblewrap remains the Native Linux isolation actuator; Rust owns the
-policy, process lifecycle, attestation interpretation, and all application authority.
+The final deployment authority graph separates project namespaces instead of sharing
+one selector. `mtm_rust_release -> mtm_command -> mtm_sessions` is the MTM production
+path. `re_ctm_python_release -> re_ctm_command` is a separate Re-CTM installation
+path. No deployment edge crosses between those command namespaces and MTM installs no
+`re-ctm` compatibility alias. Historical MTM-008 cutover/retirement evidence remains
+migration history, while the current coexistence evidence verifies both commands and
+both installation roots simultaneously. Bubblewrap remains the Native Linux isolation
+actuator; Rust owns MTM policy, process lifecycle, attestation interpretation, and all
+MTM application authority.

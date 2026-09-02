@@ -134,24 +134,36 @@
     "A5": {
       "passed": true,
       "evidence": [
-        "The final sixty-second Rust soak completed 169508 requests with zero errors and 29 stateful start/cancel cycles.",
-        "Tail RSS growth was 880 KiB, fd/thread growth was zero, no child process remained, and shutdown was graceful."
+        "The command-separated sixty-second Rust soak completed 169990 requests with zero errors and 29 stateful start/cancel cycles.",
+        "Tail RSS growth was 928 KiB, fd/thread growth was zero, no child process remained, and shutdown was graceful."
       ]
     },
     "A6": {
       "passed": true,
       "evidence": [
         "Seven repetitions per runtime and 5600 measured requests per runtime used the same authenticated local OAuth/MCP workload with eight clients.",
-        "Observed Rust/Python median throughput ratio was 2.345509; p95 latency ratio 0.499841; peak RSS ratio 0.670145.",
-        "Conservative bootstrap ratios were 2.27984 throughput, 0.514259 p95 latency, and 0.674808 RSS, all beyond predefined thresholds."
+        "Observed Rust/Python median throughput ratio was 2.434771; p95 latency ratio 0.474969; peak RSS ratio 0.670765.",
+        "Conservative bootstrap ratios were 2.400487 throughput, 0.491248 p95 latency, and 0.676948 RSS, all beyond predefined thresholds."
       ],
       "claim_scope": "Authenticated loopback OAuth/MCP ping, tools/list, server_info, read_file, and check_exec_environment under eight concurrent clients only."
     }
+  },
+  "post_completion_command_namespace_correction": {
+    "status": "accepted",
+    "reason": "The original final command name re-ctm would collide when MTM and Re-CTM are installed together.",
+    "mtm_command": "/home/lk/.local/bin/mtm",
+    "mtm_release_sha256": "abe861df86dded73a5fba08bc1b71cba46164a846318d004e846409e240e8438",
+    "re_ctm_command": "/home/lk/.local/bin/re-ctm",
+    "coexistence_evidence": "mtm-command-namespace.json",
+    "checks": 9,
+    "first_attempt_failure": "The first namespace cutover used uv's sandbox HOME defaults, so re-ctm was not linked into /home/lk/.local/bin after the four MTM sessions had stopped.",
+    "repair": "Pinned UV_TOOL_DIR and UV_TOOL_BIN_DIR to the real user installation roots, retained the already-installed mtm release, restored Re-CTM independently, recovered the four MTM sessions, and generated one replacement mode-0600 operator key because the original environment-only key disappeared with its stopped process.",
+    "alias_policy": "MTM provides no re-ctm compatibility alias; Re-CTM provides no mtm alias."
   },
   "manual_pending": [
     "Other operating systems, deployment users, reverse proxies, and site-local CAS/LaTeX layouts require their own release evidence.",
     "Publishing the internal mtm-* crates to a public registry is optional and is not required by the accepted single-binary deployment."
   ],
-  "rollback": "Verify SHA-256 7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b for /home/lk/.local/share/re-ctm-rust/rollback/re_ctm-0.3.0-py3-none-any.whl, reinstall it with uv into an owner-controlled tool root, probe re-ctm 0.3.0 and OAuth metadata, then atomically select the restored command. State schema 2 and workflow protocol 2 remain compatible; no database rewrite is required.",
+  "rollback": "MTM rollback must remain inside the mtm command namespace; Re-CTM restoration remains inside the re-ctm namespace. Never repoint either command to the other project's executable. State schema 2 and workflow protocol 2 remain compatible; no database rewrite is required.",
   "decision": "accepted"
 }

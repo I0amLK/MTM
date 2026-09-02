@@ -3,26 +3,26 @@
   "project": "MTM-reboot",
   "milestone": "MTM-008",
   "passed": true,
-  "duration_seconds": 60.017,
+  "duration_seconds": 60.029,
   "concurrency": 8,
-  "request_count": 169508,
+  "request_count": 169990,
   "request_errors": 0,
   "error_types": [],
   "stateful_start_cancel_cycles": 29,
   "latency_ms": {
-    "median": 2.645865,
-    "p95": 5.139577,
-    "p99": 6.138798
+    "median": 2.642948,
+    "p95": 5.125479,
+    "p99": 6.037625
   },
-  "throughput_requests_per_second": 2824.338,
+  "throughput_requests_per_second": 2831.809,
   "resources": {
-    "sample_count": 1100,
-    "rss_kib_initial": 12016,
-    "rss_kib_final": 24420,
-    "rss_kib_max": 24420,
-    "rss_slope_kib_per_second": 32.385698,
-    "rss_tail_slope_kib_per_second": 16.850099,
-    "rss_tail_growth_kib": 880,
+    "sample_count": 1102,
+    "rss_kib_initial": 11900,
+    "rss_kib_final": 24516,
+    "rss_kib_max": 24516,
+    "rss_slope_kib_per_second": 34.569296,
+    "rss_tail_slope_kib_per_second": 19.668958,
+    "rss_tail_growth_kib": 928,
     "file_descriptors_initial": 16,
     "file_descriptors_final": 16,
     "file_descriptor_growth": 0,
@@ -34,13 +34,13 @@
   "shutdown": {
     "exit_code": 0,
     "forced": false,
-    "elapsed_ms": 7.396,
+    "elapsed_ms": 7.349,
     "stdout_bytes": 0,
-    "stderr_bytes": 111
+    "stderr_bytes": 108
   },
   "release_binary": {
-    "path": "target/release/mtm-reboot",
-    "sha256": "7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728"
+    "path": "target/release/mtm",
+    "sha256": "abe861df86dded73a5fba08bc1b71cba46164a846318d004e846409e240e8438"
   },
   "thresholds": {
     "minimum_duration_seconds": 58.8,

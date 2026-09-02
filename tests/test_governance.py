@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import json
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 
@@ -15,8 +16,7 @@ from scripts.validate_mtm005_target_evidence import validate as validate_mtm005_
 from scripts.validate_mtm006_target_evidence import validate as validate_mtm006_target
 from scripts.validate_mtm007_target_evidence import validate as validate_mtm007_target
 from scripts.validate_mtm008_candidate_evidence import validate as validate_mtm008_candidate
-from scripts.validate_mtm008_live_evidence import validate as validate_mtm008_live
-from scripts.validate_mtm008_retirement_evidence import validate as validate_mtm008_retirement
+from scripts.validate_mtm_command_namespace import validate as validate_mtm_command_namespace
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -95,6 +95,7 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(summary["mtm_cli_presentation_boundary"])
         self.assertTrue(summary["oauth_principal_unforgeable_by_public_construction"])
         self.assertTrue(summary["operator_observer_presentation_only"])
+        self.assertTrue(summary["deployment_command_namespace_separated"])
 
     def test_current_mtm003_target_evidence_is_fresh(self) -> None:
         summary = validate_mtm003_target()
@@ -120,13 +121,13 @@ class GovernanceTestCase(unittest.TestCase):
         summary = validate_mtm008_candidate()
         self.assertEqual(summary["required_check_count"], 10)
 
-    def test_current_mtm008_live_evidence_is_fresh_and_redacted(self) -> None:
-        summary = validate_mtm008_live()
-        self.assertEqual(summary["required_check_count"], 10)
+    def test_current_mtm_and_re_ctm_command_namespaces_are_separate(self) -> None:
+        summary = validate_mtm_command_namespace()
+        self.assertEqual(summary["required_check_count"], 9)
 
-    def test_current_mtm008_retirement_evidence_is_fresh_and_redacted(self) -> None:
-        summary = validate_mtm008_retirement()
-        self.assertEqual(summary["required_check_count"], 17)
+    def test_mtm_cli_publishes_only_the_mtm_binary_name(self) -> None:
+        manifest = tomllib.loads((ROOT / "crates" / "mtm-cli" / "Cargo.toml").read_text(encoding="utf-8"))
+        self.assertEqual([item["name"] for item in manifest.get("bin", [])], ["mtm"])
 
     def test_commit_message_contract(self) -> None:
         message = """docs(governance): establish project foundation [MTM-001]

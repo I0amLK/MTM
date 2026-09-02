@@ -30,7 +30,7 @@ fn main() {
     }
     match command {
         Some("--version" | "-V") => {
-            println!("re-ctm {}", env!("CARGO_PKG_VERSION"));
+            println!("mtm {}", env!("CARGO_PKG_VERSION"));
         }
         Some("contract") => {
             println!("{}", ContractSnapshot::source_baseline().to_json());
@@ -39,7 +39,7 @@ fn main() {
             println!(
                 "{}",
                 serde_json::json!({
-                    "name": "re-ctm",
+                    "name": "mtm",
                     "version": env!("CARGO_PKG_VERSION"),
                     "implementation": "rust",
                     "python_runtime_required": false,
@@ -87,18 +87,18 @@ fn main() {
 
 fn print_help() {
     const HELP: &str = concat!(
-        "Re-CTM Rust runtime\n\n",
+        "MTM Rust runtime\n\n",
         "Usage:\n",
-        "  re-ctm --version\n",
-        "  re-ctm release-info\n",
-        "  re-ctm contract\n",
-        "  re-ctm status\n",
-        "  re-ctm check-config [--workspace PATH] [--native-mode MODE]\n",
-        "  re-ctm attest-native [--workspace PATH] [--native-mode MODE]\n",
-        "  re-ctm serve [--host HOST] [--port PORT] [--workspace PATH] [--native-mode MODE]\n",
-        "  re-ctm tui [--quick-tunnel] [--host HOST] [--port PORT] [--workspace PATH] [--native-mode MODE]\n",
-        "  printf '%s' '<json>' | re-ctm evaluate\n",
-        "  printf '%s' '<json-array>' | re-ctm evaluate-batch\n"
+        "  mtm --version\n",
+        "  mtm release-info\n",
+        "  mtm contract\n",
+        "  mtm status\n",
+        "  mtm check-config [--workspace PATH] [--native-mode MODE]\n",
+        "  mtm attest-native [--workspace PATH] [--native-mode MODE]\n",
+        "  mtm serve [--host HOST] [--port PORT] [--workspace PATH] [--native-mode MODE]\n",
+        "  mtm tui [--quick-tunnel] [--host HOST] [--port PORT] [--workspace PATH] [--native-mode MODE]\n",
+        "  printf '%s' '<json>' | mtm evaluate\n",
+        "  printf '%s' '<json-array>' | mtm evaluate-batch\n"
     );
     println!("{HELP}");
 }
@@ -268,7 +268,7 @@ fn serve(arguments: &[String], tui: bool) -> Result<(), ReCtmError> {
         false,
         observer,
     )?);
-    eprintln!("Re-CTM {} (Rust)", env!("CARGO_PKG_VERSION"));
+    eprintln!("MTM {} (Rust)", env!("CARGO_PKG_VERSION"));
     eprintln!("local MCP: http://{host}:{}/mcp", bound.port());
     eprintln!("mode: {}", settings.native_mode.as_str());
     if generated_password {

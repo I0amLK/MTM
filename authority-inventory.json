@@ -28,27 +28,26 @@
   },
   "milestone": "MTM-008",
   "production_authority": "rust",
-  "production_command": "/home/lk/.local/bin/re-ctm",
-  "production_command_target": "/home/lk/.local/share/re-ctm-rust/releases/0.3.0/re-ctm",
+  "production_command": "/home/lk/.local/bin/mtm",
+  "production_command_target": "/home/lk/.local/share/mtm/releases/0.3.0/mtm",
   "project": "MTM-reboot",
   "python_production_runtime": {
     "active_process_count": 0,
     "historical_source_preserved": true,
-    "legacy_helper_link_removed": true,
-    "retired": true,
-    "tool_root": "/home/lk/.local/share/uv/tools/re-ctm"
+    "retired_from_mtm": true,
+    "separate_re_ctm_project_installed": true,
+    "tool_root": "/home/lk/.local/share/uv/tools/re-ctm",
+    "command": "/home/lk/.local/bin/re-ctm"
   },
   "release": {
-    "installed_at": "2026-09-01T18:01:15.062960Z",
-    "path": "/home/lk/.local/share/re-ctm-rust/releases/0.3.0/re-ctm",
-    "sha256": "7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728",
-    "size_bytes": 11154928,
+    "path": "/home/lk/.local/share/mtm/releases/0.3.0/mtm",
+    "sha256": "abe861df86dded73a5fba08bc1b71cba46164a846318d004e846409e240e8438",
     "version": "0.3.0"
   },
   "release_info": {
     "hidden_alias_count": 11,
     "implementation": "rust",
-    "name": "re-ctm",
+    "name": "mtm",
     "production_authority": "rust",
     "public_tool_count": 24,
     "python_runtime_required": false,
@@ -86,6 +85,17 @@
     "runtime_adapters_operator_ui": "rust",
     "storage_capability": "rust",
     "workflow_vault_verifier_finalizer": "rust"
+  },
+  "command_namespace": {
+    "mtm": {
+      "command": "/home/lk/.local/bin/mtm",
+      "target": "/home/lk/.local/share/mtm/releases/0.3.0/mtm"
+    },
+    "re_ctm": {
+      "command": "/home/lk/.local/bin/re-ctm",
+      "target": "/home/lk/.local/share/uv/tools/re-ctm/bin/re-ctm"
+    },
+    "aliases_shared": false
   },
   "schema_version": "1.0.0",
   "soak": {

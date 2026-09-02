@@ -6,10 +6,10 @@ Accepted and completed.
 
 ## Decision
 
-The final user command remains `re-ctm`. A versioned Rust release is copied to an
-owner-controlled release root and verified by SHA-256 plus a typed `release-info`
-contract. The command in the user's binary directory is an atomically replaced
-symlink selecting exactly one runtime.
+The final MTM user command is `mtm`. A versioned Rust release is copied to an
+owner-controlled MTM release root and verified by SHA-256 plus a typed `release-info`
+contract. `re-ctm` is reserved exclusively for the separate Re-CTM project; MTM does
+not install a compatibility alias under that name.
 
 The migration uses three independently reviewable phases:
 
@@ -31,14 +31,12 @@ binary. Generated operator keys are written only to owner-mode `0600` secret fil
 background session logs contain the fixed `configured externally` marker rather than
 raw keys.
 
-The final retirement upgraded all four sessions to release SHA-256
-`7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728`,
-removed `/home/lk/.local/share/uv/tools/re-ctm` and the legacy
-`re-ctm-native-helper` entry, and confirmed that no Python Re-CTM process remained.
-After deletion, rollback wheel SHA-256
-`7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b`
-was installed in an isolated uv tool root and served real OAuth metadata. Historical
-source remains preserved but has no production authority.
+The retirement phase removed Python from MTM production authority after restoring and
+probing the Re-CTM wheel. The subsequent command-namespace correction installed MTM
+under `/home/lk/.local/bin/mtm` and `/home/lk/.local/share/mtm`, then restored
+Re-CTM under `/home/lk/.local/bin/re-ctm` and its independent uv tool root. Four MTM
+sessions were restarted on the MTM release. The projects can now be installed
+simultaneously without sharing an executable name or installation root.
 
 ## Performance claim boundary
 
@@ -50,7 +48,8 @@ the same factor.
 
 ## Rollback
 
-After retirement, verify the immutable wheel hash, restore it into an owner-controlled
-tool root, verify `re-ctm 0.3.0` and OAuth metadata, stop the Rust sessions, and
-atomically select the restored command. Database and private-vault formats remain
-schema-compatible and were never dual-written during the drill.
+Re-CTM recovery is now a separate-project operation: verify its immutable wheel and
+restore `re-ctm` under its own tool root. MTM recovery uses the `mtm` release selector
+only. Neither recovery path aliases or overwrites the other project's command.
+Database and private-vault formats remain schema-compatible and were never dual-written
+during the migration drills.

@@ -17,8 +17,8 @@ from pathlib import Path
 from typing import Any
 
 
-MANIFEST_SCHEMA = "re-ctm-deployment-v1"
-COMMAND_NAME = "re-ctm"
+MANIFEST_SCHEMA = "mtm-deployment-v1"
+COMMAND_NAME = "mtm"
 RELEASE_INFO_TIMEOUT_SECONDS = 10
 
 
@@ -171,7 +171,7 @@ def validate_rust_release(binary: Path, expected_version: str) -> dict[str, Any]
     }
     if mismatches:
         raise DeploymentError(f"release identity mismatch: {mismatches}")
-    if run_version(binary) != f"re-ctm {expected_version}":
+    if run_version(binary) != f"mtm {expected_version}":
         raise DeploymentError("release --version output is not the compatibility command identity")
     return info
 
@@ -190,7 +190,7 @@ def capture_previous_entry(link: Path, rollback_root: Path) -> dict[str, Any]:
         }
     if link.is_file():
         ensure_directory(rollback_root)
-        stored = rollback_root / "previous-re-ctm"
+        stored = rollback_root / "previous-mtm"
         shutil.copy2(link, stored)
         os.chmod(stored, stat.S_IMODE(link.stat().st_mode))
         return {

@@ -21,7 +21,7 @@ from typing import Any, Callable, Iterable, Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ROOT = ROOT.parent / "Re-CTM"
-RUST_BINARY = ROOT / "target" / "release" / "mtm-reboot"
+RUST_BINARY = ROOT / "target" / "release" / "mtm"
 TOKEN_SECRET = "61" * 32
 CAPABILITY_SECRET = "62" * 32
 OPERATOR_PASSWORD = "mtm008-benchmark-operator"

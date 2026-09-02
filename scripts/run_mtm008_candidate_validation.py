@@ -241,13 +241,13 @@ def main() -> int:
         wheel_sha256 = sha256_file(wheel)
         wheel_size = wheel.stat().st_size
         restore = restore_wheel(wheel, root / "restore")
-        previous = root / "previous" / "re-ctm"
+        previous = root / "previous" / "mtm"
         previous.parent.mkdir(parents=True)
         shutil.copy2(SOURCE_ROOT / ".venv" / "bin" / "re-ctm", previous)
         os.chmod(previous, 0o755)
         bin_dir = root / "live-bin"
         bin_dir.mkdir()
-        link = bin_dir / "re-ctm"
+        link = bin_dir / "mtm"
         link.symlink_to(previous)
         layout = DeploymentLayout(link, root / "deployment")
         deployed = cutover(RUST_BINARY, layout, VERSION, wheel)

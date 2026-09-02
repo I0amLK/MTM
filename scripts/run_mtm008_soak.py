@@ -221,8 +221,8 @@ def main() -> int:
         },
         "shutdown": shutdown,
         "release_binary": {
-            "path": "target/release/mtm-reboot",
-            "sha256": sha256_file(ROOT / "target" / "release" / "mtm-reboot"),
+            "path": "target/release/mtm",
+            "sha256": sha256_file(ROOT / "target" / "release" / "mtm"),
         },
         "thresholds": {
             "minimum_duration_seconds": DURATION_SECONDS * 0.98,

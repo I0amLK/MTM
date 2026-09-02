@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0.0",
+  "project": "MTM-reboot",
+  "phase": "command_namespace_separation",
+  "passed": true,
+  "implementation_sha256": "2b3677c0bf9cf5cb15e09d1eb0ec6646634592f933034d168dcfe11610285551",
+  "checks": [
+    {
+      "name": "mtm_command_unique",
+      "passed": true
+    },
+    {
+      "name": "re_ctm_command_unique",
+      "passed": true
+    },
+    {
+      "name": "mtm_identity",
+      "passed": true
+    },
+    {
+      "name": "re_ctm_identity",
+      "passed": true
+    },
+    {
+      "name": "mtm_release_info",
+      "passed": true
+    },
+    {
+      "name": "re_ctm_server_probe",
+      "passed": true
+    },
+    {
+      "name": "mtm_sessions_restarted",
+      "passed": true
+    },
+    {
+      "name": "old_mtm_selector_released",
+      "passed": true
+    },
+    {
+      "name": "distinct_install_roots",
+      "passed": true
+    }
+  ],
+  "mtm": {
+    "command": "/home/lk/.local/bin/mtm",
+    "target": "/home/lk/.local/share/mtm/releases/0.3.0/mtm",
+    "version": "mtm 0.3.0",
+    "release_sha256": "abe861df86dded73a5fba08bc1b71cba46164a846318d004e846409e240e8438"
+  },
+  "re_ctm": {
+    "command": "/home/lk/.local/bin/re-ctm",
+    "target": "/home/lk/.local/share/uv/tools/re-ctm/bin/re-ctm",
+    "version": "re-ctm 0.3.0"
+  },
+  "sessions": {
+    "stopped": {
+      "owned": 0,
+      "sigterm": 0,
+      "remaining": 0
+    },
+    "restarted_count": 4
+  },
+  "recovery_after_partial_cutover": true,
+  "historical_migration_root_retained": true,
+  "sensitive_content_recorded": false
+}

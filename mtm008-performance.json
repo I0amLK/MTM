@@ -32,7 +32,7 @@
     "cpu_model": "Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz",
     "python": "3.13.9",
     "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
-    "rust_binary_sha256": "7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728",
+    "rust_binary_sha256": "abe861df86dded73a5fba08bc1b71cba46164a846318d004e846409e240e8438",
     "source_commit": "50d08eb89e3ecc46317fd49709fa4ebcda135b5a"
   },
   "runtimes": {
@@ -42,61 +42,61 @@
       "total_errors": 0,
       "throughput_requests_per_second": {
         "count": 7,
-        "median": 1118.884931,
-        "p95": 1125.811441,
-        "p99": 1126.265624,
-        "mean": 1119.464753,
-        "stdev": 5.501296,
+        "median": 1088.174511,
+        "p95": 1098.297346,
+        "p99": 1100.087749,
+        "mean": 1085.266619,
+        "stdev": 11.046836,
         "median_ci_95": {
-          "lower_95": 1115.176942,
-          "upper_95": 1124.486739
+          "lower_95": 1075.460495,
+          "upper_95": 1093.075336
         },
-        "coefficient_of_variation": 0.004914
+        "coefficient_of_variation": 0.010179
       },
       "latency_ms": {
-        "median_of_request_medians": 6.206558,
-        "median_of_p95": 11.226337,
-        "median_of_p99": 12.636712,
+        "median_of_request_medians": 6.330493,
+        "median_of_p95": 11.547683,
+        "median_of_p99": 12.544004,
         "p95_median_ci_95": {
-          "lower_95": 11.077763,
-          "upper_95": 11.305983
+          "lower_95": 11.396552,
+          "upper_95": 11.635449
         },
         "p99_median_ci_95": {
-          "lower_95": 12.191065,
-          "upper_95": 12.782285
+          "lower_95": 12.415143,
+          "upper_95": 12.867168
         }
       },
       "startup_ms": {
         "count": 7,
-        "median": 101.322512,
-        "p95": 102.054486,
-        "p99": 102.261208,
-        "mean": 101.470745,
-        "stdev": 0.382644,
+        "median": 101.318866,
+        "p95": 116.246774,
+        "p99": 121.336108,
+        "mean": 104.34454,
+        "stdev": 8.053872,
         "median_ci_95": {
-          "lower_95": 101.272515,
-          "upper_95": 101.451548
+          "lower_95": 101.262609,
+          "upper_95": 101.402881
         }
       },
       "rss_kib_max": {
         "count": 7,
-        "median": 31820.0,
-        "p95": 31990.8,
-        "p99": 31991.76,
-        "mean": 31856.0,
-        "stdev": 104.639062,
+        "median": 31880.0,
+        "p95": 32004.0,
+        "p99": 32023.2,
+        "mean": 31872.571429,
+        "stdev": 101.309521,
         "median_ci_95": {
           "lower_95": 31772.0,
-          "upper_95": 31988.0
+          "upper_95": 31948.0
         }
       },
       "shutdown_ms": {
         "count": 7,
         "median": 15.414,
-        "p95": 31.596,
-        "p99": 31.6296,
-        "mean": 20.025571,
-        "stdev": 7.885417
+        "p95": 26.6443,
+        "p99": 30.48646,
+        "mean": 17.683571,
+        "stdev": 6.069301
       }
     },
     "rust": {
@@ -105,61 +105,61 @@
       "total_errors": 0,
       "throughput_requests_per_second": {
         "count": 7,
-        "median": 2624.354264,
-        "p95": 2649.133932,
-        "p99": 2654.428841,
-        "mean": 2608.011505,
-        "stdev": 38.793621,
+        "median": 2649.455407,
+        "p95": 2678.275486,
+        "p99": 2684.275543,
+        "mean": 2644.054852,
+        "stdev": 28.276264,
         "median_ci_95": {
-          "lower_95": 2563.649817,
-          "upper_95": 2633.690448
+          "lower_95": 2623.913589,
+          "upper_95": 2660.77532
         },
-        "coefficient_of_variation": 0.014875
+        "coefficient_of_variation": 0.010694
       },
       "latency_ms": {
-        "median_of_request_medians": 2.728012,
-        "median_of_p95": 5.611386,
-        "median_of_p99": 6.788426,
+        "median_of_request_medians": 2.742494,
+        "median_of_p95": 5.484791,
+        "median_of_p99": 6.680779,
         "p95_median_ci_95": {
-          "lower_95": 5.595372,
-          "upper_95": 5.696835
+          "lower_95": 5.427494,
+          "upper_95": 5.598537
         },
         "p99_median_ci_95": {
-          "lower_95": 6.582079,
-          "upper_95": 6.971667
+          "lower_95": 6.6533,
+          "upper_95": 6.827291
         }
       },
       "startup_ms": {
         "count": 7,
-        "median": 20.528652,
-        "p95": 20.615655,
-        "p99": 20.628072,
-        "mean": 20.544166,
-        "stdev": 0.048965,
+        "median": 20.591448,
+        "p95": 20.634022,
+        "p99": 20.640564,
+        "mean": 20.57882,
+        "stdev": 0.047329,
         "median_ci_95": {
-          "lower_95": 20.505835,
-          "upper_95": 20.57944
+          "lower_95": 20.538998,
+          "upper_95": 20.614941
         }
       },
       "rss_kib_max": {
         "count": 7,
-        "median": 21324.0,
-        "p95": 21479.2,
-        "p99": 21492.64,
-        "mean": 21323.428571,
-        "stdev": 116.697411,
+        "median": 21384.0,
+        "p95": 21564.0,
+        "p99": 21583.2,
+        "mean": 21389.714286,
+        "stdev": 132.219154,
         "median_ci_95": {
-          "lower_95": 21228.0,
-          "upper_95": 21440.0
+          "lower_95": 21288.0,
+          "upper_95": 21508.0
         }
       },
       "shutdown_ms": {
         "count": 7,
-        "median": 7.283,
-        "p95": 7.4103,
-        "p99": 7.41246,
-        "mean": 7.308857,
-        "stdev": 0.087953
+        "median": 7.268,
+        "p95": 7.3862,
+        "p99": 7.38764,
+        "mean": 7.304714,
+        "stdev": 0.067823
       }
     }
   },
@@ -167,65 +167,65 @@
     "python": [
       {
         "repetition": 0,
-        "startup_ms": 102.312888,
+        "startup_ms": 122.608442,
         "request_count": 800,
         "success_count": 800,
         "error_count": 0,
         "error_types": [],
-        "elapsed_seconds": 0.71024,
-        "throughput_requests_per_second": 1126.37917,
+        "elapsed_seconds": 0.726919,
+        "throughput_requests_per_second": 1100.53535,
         "latency_ms": {
           "count": 800,
-          "median": 6.135851,
-          "p95": 11.077763,
-          "p99": 12.090368,
-          "mean": 7.045606,
-          "stdev": 2.277203
+          "median": 6.211713,
+          "p95": 11.39554,
+          "p99": 12.544004,
+          "mean": 7.206765,
+          "stdev": 2.361681
         },
         "operations": {
           "check_exec_environment": {
             "count": 80,
-            "median": 9.865845,
-            "p95": 11.515173,
-            "p99": 11.851841,
-            "mean": 9.622833,
-            "stdev": 1.551001
+            "median": 10.187133,
+            "p95": 11.486818,
+            "p99": 12.993969,
+            "mean": 10.004262,
+            "stdev": 1.449478
           },
           "ping": {
             "count": 400,
-            "median": 5.41222,
-            "p95": 6.301026,
-            "p99": 6.901689,
-            "mean": 5.299771,
-            "stdev": 0.751958
+            "median": 5.499592,
+            "p95": 6.467757,
+            "p99": 7.784406,
+            "mean": 5.409773,
+            "stdev": 0.822171
           },
           "read_file": {
             "count": 80,
-            "median": 10.257609,
-            "p95": 12.385652,
-            "p99": 12.978778,
-            "mean": 10.223712,
-            "stdev": 1.196671
+            "median": 10.708448,
+            "p95": 12.427474,
+            "p99": 13.128942,
+            "mean": 10.493664,
+            "stdev": 1.315327
           },
           "server_info": {
             "count": 80,
-            "median": 10.463248,
-            "p95": 11.681966,
-            "p99": 12.277122,
-            "mean": 10.415379,
-            "stdev": 0.836722
+            "median": 10.659719,
+            "p95": 12.193418,
+            "p99": 12.863592,
+            "mean": 10.49491,
+            "stdev": 1.313907
           },
           "tools_list": {
             "count": 160,
-            "median": 6.80688,
-            "p95": 8.024753,
-            "p99": 8.601192,
-            "mean": 6.847641,
-            "stdev": 0.735327
+            "median": 7.081228,
+            "p95": 8.180801,
+            "p99": 8.693531,
+            "mean": 7.012977,
+            "stdev": 0.771739
           }
         },
         "resources": {
-          "rss_kib_median": 31536,
+          "rss_kib_median": 31584.0,
           "rss_kib_max": 31772,
           "threads_max": 10,
           "file_descriptors_max": 20,
@@ -234,148 +234,222 @@
         "shutdown": {
           "exit_code": 130,
           "forced": false,
-          "elapsed_ms": 15.304,
+          "elapsed_ms": 15.37,
           "stdout_bytes": 0,
           "stderr_bytes": 55950
         }
       },
       {
         "repetition": 1,
-        "startup_ms": 101.451548,
+        "startup_ms": 101.318866,
         "request_count": 800,
         "success_count": 800,
         "error_count": 0,
         "error_types": [],
-        "elapsed_seconds": 0.714998,
-        "throughput_requests_per_second": 1118.884931,
+        "elapsed_seconds": 0.734053,
+        "throughput_requests_per_second": 1089.83901,
         "latency_ms": {
           "count": 800,
-          "median": 6.206558,
-          "p95": 11.305983,
-          "p99": 12.782285,
-          "mean": 7.099652,
-          "stdev": 2.353091
+          "median": 6.330493,
+          "p95": 11.430339,
+          "p99": 12.951432,
+          "mean": 7.288665,
+          "stdev": 2.413958
         },
         "operations": {
           "check_exec_environment": {
             "count": 80,
-            "median": 9.926164,
-            "p95": 12.286512,
-            "p99": 13.557693,
-            "mean": 9.845363,
-            "stdev": 1.708485
+            "median": 10.26536,
+            "p95": 12.563199,
+            "p99": 13.456968,
+            "mean": 9.949084,
+            "stdev": 1.898459
           },
           "ping": {
             "count": 400,
-            "median": 5.403539,
-            "p95": 6.523206,
-            "p99": 7.883891,
-            "mean": 5.348385,
-            "stdev": 0.865467
+            "median": 5.597891,
+            "p95": 6.526651,
+            "p99": 7.05387,
+            "mean": 5.491701,
+            "stdev": 0.903291
           },
           "read_file": {
             "count": 80,
-            "median": 10.456886,
-            "p95": 12.593981,
-            "p99": 12.834433,
-            "mean": 10.380539,
-            "stdev": 1.241971
+            "median": 10.567551,
+            "p95": 12.461801,
+            "p99": 13.947995,
+            "mean": 10.623491,
+            "stdev": 1.179502
           },
           "server_info": {
             "count": 80,
-            "median": 10.536922,
-            "p95": 12.577144,
-            "p99": 13.631432,
-            "mean": 10.355179,
-            "stdev": 1.326271
+            "median": 10.893752,
+            "p95": 12.883629,
+            "p99": 13.208818,
+            "mean": 10.811149,
+            "stdev": 1.143149
           },
           "tools_list": {
             "count": 160,
-            "median": 6.794692,
-            "p95": 7.974158,
-            "p99": 8.598794,
-            "mean": 6.836759,
-            "stdev": 0.72621
+            "median": 7.026658,
+            "p95": 8.25649,
+            "p99": 8.597435,
+            "mean": 7.022211,
+            "stdev": 0.713594
           }
         },
         "resources": {
-          "rss_kib_median": 31676,
-          "rss_kib_max": 31892,
-          "threads_max": 9,
+          "rss_kib_median": 31524.0,
+          "rss_kib_max": 31904,
+          "threads_max": 10,
           "file_descriptors_max": 19,
           "children_max": 0
         },
         "shutdown": {
           "exit_code": 130,
           "forced": false,
-          "elapsed_ms": 31.638,
+          "elapsed_ms": 15.435,
           "stdout_bytes": 0,
           "stderr_bytes": 55950
         }
       },
       {
         "repetition": 2,
-        "startup_ms": 101.322512,
+        "startup_ms": 101.333141,
         "request_count": 800,
         "success_count": 800,
         "error_count": 0,
         "error_types": [],
-        "elapsed_seconds": 0.717375,
-        "throughput_requests_per_second": 1115.176942,
+        "elapsed_seconds": 0.73188,
+        "throughput_requests_per_second": 1093.075336,
         "latency_ms": {
           "count": 800,
-          "median": 6.29864,
-          "p95": 11.226337,
-          "p99": 12.636712,
-          "mean": 7.124944,
-          "stdev": 2.34595
+          "median": 6.288082,
+          "p95": 11.547683,
+          "p99": 12.717496,
+          "mean": 7.269348,
+          "stdev": 2.412637
         },
         "operations": {
           "check_exec_environment": {
             "count": 80,
-            "median": 10.085453,
-            "p95": 11.914629,
-            "p99": 12.83317,
-            "mean": 9.738506,
-            "stdev": 1.714727
+            "median": 10.338002,
+            "p95": 11.831249,
+            "p99": 12.480649,
+            "mean": 9.972455,
+            "stdev": 1.65572
           },
           "ping": {
             "count": 400,
-            "median": 5.42068,
-            "p95": 6.429051,
-            "p99": 7.297116,
-            "mean": 5.338877,
-            "stdev": 0.797572
+            "median": 5.572162,
+            "p95": 6.46609,
+            "p99": 6.823658,
+            "mean": 5.41884,
+            "stdev": 0.737757
           },
           "read_file": {
             "count": 80,
-            "median": 10.19765,
-            "p95": 12.596518,
-            "p99": 13.430131,
-            "mean": 10.329395,
-            "stdev": 1.295458
+            "median": 10.770649,
+            "p95": 12.747127,
+            "p99": 13.696167,
+            "mean": 10.67771,
+            "stdev": 1.340953
           },
           "server_info": {
             "count": 80,
-            "median": 10.48334,
-            "p95": 12.319655,
-            "p99": 13.25524,
-            "mean": 10.574992,
-            "stdev": 1.076711
+            "median": 10.897783,
+            "p95": 12.585024,
+            "p99": 13.285416,
+            "mean": 10.831203,
+            "stdev": 1.010009
           },
           "tools_list": {
             "count": 160,
-            "median": 6.935708,
-            "p95": 8.14489,
-            "p99": 8.800129,
-            "mean": 6.956082,
-            "stdev": 0.736655
+            "median": 7.019381,
+            "p95": 8.27974,
+            "p99": 8.80067,
+            "mean": 7.058955,
+            "stdev": 0.747206
           }
         },
         "resources": {
-          "rss_kib_median": 31680,
-          "rss_kib_max": 31992,
-          "threads_max": 9,
+          "rss_kib_median": 31566.0,
+          "rss_kib_max": 31732,
+          "threads_max": 10,
+          "file_descriptors_max": 19,
+          "children_max": 0
+        },
+        "shutdown": {
+          "exit_code": 130,
+          "forced": false,
+          "elapsed_ms": 31.447,
+          "stdout_bytes": 0,
+          "stderr_bytes": 55950
+        }
+      },
+      {
+        "repetition": 3,
+        "startup_ms": 101.262609,
+        "request_count": 800,
+        "success_count": 800,
+        "error_count": 0,
+        "error_types": [],
+        "elapsed_seconds": 0.739465,
+        "throughput_requests_per_second": 1081.863912,
+        "latency_ms": {
+          "count": 800,
+          "median": 6.420668,
+          "p95": 11.635449,
+          "p99": 12.455914,
+          "mean": 7.342556,
+          "stdev": 2.406725
+        },
+        "operations": {
+          "check_exec_environment": {
+            "count": 80,
+            "median": 10.359783,
+            "p95": 12.202166,
+            "p99": 12.537117,
+            "mean": 10.172005,
+            "stdev": 1.569437
+          },
+          "ping": {
+            "count": 400,
+            "median": 5.559211,
+            "p95": 6.540324,
+            "p99": 6.949998,
+            "mean": 5.502173,
+            "stdev": 0.85107
+          },
+          "read_file": {
+            "count": 80,
+            "median": 10.618091,
+            "p95": 12.18205,
+            "p99": 12.459984,
+            "mean": 10.593005,
+            "stdev": 1.198007
+          },
+          "server_info": {
+            "count": 80,
+            "median": 10.81882,
+            "p95": 12.535953,
+            "p99": 13.214155,
+            "mean": 10.902913,
+            "stdev": 1.05467
+          },
+          "tools_list": {
+            "count": 160,
+            "median": 7.079551,
+            "p95": 8.285265,
+            "p99": 9.004578,
+            "mean": 7.123386,
+            "stdev": 0.713495
+          }
+        },
+        "resources": {
+          "rss_kib_median": 31708.0,
+          "rss_kib_max": 31880,
+          "threads_max": 10,
           "file_descriptors_max": 19,
           "children_max": 0
         },
@@ -388,297 +462,223 @@
         }
       },
       {
-        "repetition": 3,
-        "startup_ms": 101.190397,
-        "request_count": 800,
-        "success_count": 800,
-        "error_count": 0,
-        "error_types": [],
-        "elapsed_seconds": 0.720193,
-        "throughput_requests_per_second": 1110.813782,
-        "latency_ms": {
-          "count": 800,
-          "median": 6.184902,
-          "p95": 11.495222,
-          "p99": 13.604322,
-          "mean": 7.151017,
-          "stdev": 2.46052
-        },
-        "operations": {
-          "check_exec_environment": {
-            "count": 80,
-            "median": 9.964536,
-            "p95": 13.022441,
-            "p99": 14.55956,
-            "mean": 9.913525,
-            "stdev": 1.805568
-          },
-          "ping": {
-            "count": 400,
-            "median": 5.406683,
-            "p95": 6.601839,
-            "p99": 8.108858,
-            "mean": 5.326254,
-            "stdev": 0.870416
-          },
-          "read_file": {
-            "count": 80,
-            "median": 10.330129,
-            "p95": 13.60982,
-            "p99": 14.709417,
-            "mean": 10.62443,
-            "stdev": 1.625228
-          },
-          "server_info": {
-            "count": 80,
-            "median": 10.406773,
-            "p95": 12.651862,
-            "p99": 13.923234,
-            "mean": 10.576257,
-            "stdev": 1.212098
-          },
-          "tools_list": {
-            "count": 160,
-            "median": 6.764481,
-            "p95": 8.171928,
-            "p99": 8.701083,
-            "mean": 6.882346,
-            "stdev": 0.772906
-          }
-        },
-        "resources": {
-          "rss_kib_median": 31784,
-          "rss_kib_max": 31988,
-          "threads_max": 10,
-          "file_descriptors_max": 20,
-          "children_max": 0
-        },
-        "shutdown": {
-          "exit_code": 130,
-          "forced": false,
-          "elapsed_ms": 15.367,
-          "stdout_bytes": 0,
-          "stderr_bytes": 55950
-        }
-      },
-      {
         "repetition": 4,
-        "startup_ms": 101.442779,
+        "startup_ms": 101.287762,
         "request_count": 800,
         "success_count": 800,
         "error_count": 0,
         "error_types": [],
-        "elapsed_seconds": 0.712455,
-        "throughput_requests_per_second": 1122.877263,
+        "elapsed_seconds": 0.735176,
+        "throughput_requests_per_second": 1088.174511,
         "latency_ms": {
           "count": 800,
-          "median": 6.275972,
-          "p95": 11.027432,
-          "p99": 12.191065,
-          "mean": 7.076024,
-          "stdev": 2.286991
+          "median": 6.279482,
+          "p95": 11.607982,
+          "p99": 12.415143,
+          "mean": 7.299332,
+          "stdev": 2.367962
         },
         "operations": {
           "check_exec_environment": {
             "count": 80,
-            "median": 9.745135,
-            "p95": 11.355959,
-            "p99": 11.498924,
-            "mean": 9.518486,
-            "stdev": 1.582117
+            "median": 10.444959,
+            "p95": 11.962812,
+            "p99": 12.481212,
+            "mean": 9.99412,
+            "stdev": 1.647297
           },
           "ping": {
             "count": 400,
-            "median": 5.379844,
-            "p95": 6.563131,
-            "p99": 8.025516,
-            "mean": 5.348265,
-            "stdev": 0.847897
+            "median": 5.622998,
+            "p95": 6.444401,
+            "p99": 7.089847,
+            "mean": 5.493838,
+            "stdev": 0.718466
           },
           "read_file": {
             "count": 80,
-            "median": 10.333235,
-            "p95": 12.221053,
-            "p99": 13.372017,
-            "mean": 10.261766,
-            "stdev": 1.325188
+            "median": 10.548295,
+            "p95": 12.276794,
+            "p99": 12.737237,
+            "mean": 10.619159,
+            "stdev": 1.1398
           },
           "server_info": {
             "count": 80,
-            "median": 10.542669,
-            "p95": 11.910265,
-            "p99": 12.508857,
-            "mean": 10.476133,
-            "stdev": 0.944346
+            "median": 10.851715,
+            "p95": 12.274365,
+            "p99": 13.397657,
+            "mean": 10.795837,
+            "stdev": 1.187762
           },
           "tools_list": {
             "count": 160,
-            "median": 6.880919,
-            "p95": 7.952039,
-            "p99": 8.158822,
-            "mean": 6.881263,
-            "stdev": 0.66869
+            "median": 7.052888,
+            "p95": 8.327308,
+            "p99": 9.097804,
+            "mean": 7.05751,
+            "stdev": 0.759814
           }
         },
         "resources": {
-          "rss_kib_median": 31624,
-          "rss_kib_max": 31804,
+          "rss_kib_median": 31548.0,
+          "rss_kib_max": 31948,
           "threads_max": 10,
-          "file_descriptors_max": 20,
-          "children_max": 0
-        },
-        "shutdown": {
-          "exit_code": 130,
-          "forced": false,
-          "elapsed_ms": 15.412,
-          "stdout_bytes": 0,
-          "stderr_bytes": 55950
-        }
-      },
-      {
-        "repetition": 5,
-        "startup_ms": 101.302575,
-        "request_count": 800,
-        "success_count": 800,
-        "error_count": 0,
-        "error_types": [],
-        "elapsed_seconds": 0.715798,
-        "throughput_requests_per_second": 1117.634445,
-        "latency_ms": {
-          "count": 800,
-          "median": 6.252553,
-          "p95": 11.301781,
-          "p99": 12.778886,
-          "mean": 7.112872,
-          "stdev": 2.32251
-        },
-        "operations": {
-          "check_exec_environment": {
-            "count": 80,
-            "median": 9.742386,
-            "p95": 12.055412,
-            "p99": 12.464441,
-            "mean": 9.62654,
-            "stdev": 1.486978
-          },
-          "ping": {
-            "count": 400,
-            "median": 5.437346,
-            "p95": 6.445485,
-            "p99": 7.588096,
-            "mean": 5.355547,
-            "stdev": 0.828927
-          },
-          "read_file": {
-            "count": 80,
-            "median": 10.372101,
-            "p95": 12.77901,
-            "p99": 13.619099,
-            "mean": 10.394308,
-            "stdev": 1.303491
-          },
-          "server_info": {
-            "count": 80,
-            "median": 10.440666,
-            "p95": 12.295018,
-            "p99": 13.222993,
-            "mean": 10.51726,
-            "stdev": 1.167183
-          },
-          "tools_list": {
-            "count": 160,
-            "median": 6.882293,
-            "p95": 8.09178,
-            "p99": 8.841994,
-            "mean": 6.906439,
-            "stdev": 0.722361
-          }
-        },
-        "resources": {
-          "rss_kib_median": 31488,
-          "rss_kib_max": 31724,
-          "threads_max": 9,
           "file_descriptors_max": 19,
           "children_max": 0
         },
         "shutdown": {
           "exit_code": 130,
           "forced": false,
-          "elapsed_ms": 15.546,
+          "elapsed_ms": 15.387,
           "stdout_bytes": 0,
           "stderr_bytes": 55950
         }
       },
       {
-        "repetition": 6,
-        "startup_ms": 101.272515,
+        "repetition": 5,
+        "startup_ms": 101.198077,
         "request_count": 800,
         "success_count": 800,
         "error_count": 0,
         "error_types": [],
-        "elapsed_seconds": 0.711436,
-        "throughput_requests_per_second": 1124.486739,
+        "elapsed_seconds": 0.749121,
+        "throughput_requests_per_second": 1067.917722,
         "latency_ms": {
           "count": 800,
-          "median": 6.201821,
-          "p95": 11.121822,
-          "p99": 12.214549,
-          "mean": 7.063771,
-          "stdev": 2.276478
+          "median": 6.467398,
+          "p95": 11.758376,
+          "p99": 12.867168,
+          "mean": 7.436761,
+          "stdev": 2.481814
         },
         "operations": {
           "check_exec_environment": {
             "count": 80,
-            "median": 10.109755,
-            "p95": 12.169372,
-            "p99": 12.549366,
-            "mean": 9.929375,
-            "stdev": 1.373613
+            "median": 10.428707,
+            "p95": 12.082974,
+            "p99": 13.120735,
+            "mean": 10.20947,
+            "stdev": 1.745402
           },
           "ping": {
             "count": 400,
-            "median": 5.407683,
-            "p95": 6.281867,
-            "p99": 6.926343,
-            "mean": 5.328311,
-            "stdev": 0.715836
+            "median": 5.591226,
+            "p95": 6.802218,
+            "p99": 7.21798,
+            "mean": 5.524911,
+            "stdev": 0.815784
           },
           "read_file": {
             "count": 80,
-            "median": 10.359725,
-            "p95": 12.084434,
-            "p99": 13.387592,
-            "mean": 10.270717,
-            "stdev": 1.360616
+            "median": 10.912196,
+            "p95": 12.622577,
+            "p99": 13.670577,
+            "mean": 10.85436,
+            "stdev": 1.281103
           },
           "server_info": {
             "count": 80,
-            "median": 10.241948,
-            "p95": 11.829083,
-            "p99": 12.222665,
-            "mean": 10.128177,
-            "stdev": 1.170116
+            "median": 11.140994,
+            "p95": 12.724545,
+            "p99": 13.691349,
+            "mean": 11.107641,
+            "stdev": 0.950253
           },
           "tools_list": {
             "count": 160,
-            "median": 6.794917,
-            "p95": 7.966164,
-            "p99": 8.671667,
-            "mean": 6.833941,
-            "stdev": 0.746677
+            "median": 7.280836,
+            "p95": 8.649741,
+            "p99": 9.182837,
+            "mean": 7.285792,
+            "stdev": 0.872316
           }
         },
         "resources": {
-          "rss_kib_median": 31640,
-          "rss_kib_max": 31820,
-          "threads_max": 9,
+          "rss_kib_median": 31652,
+          "rss_kib_max": 31844,
+          "threads_max": 10,
           "file_descriptors_max": 20,
           "children_max": 0
         },
         "shutdown": {
           "exit_code": 130,
           "forced": false,
-          "elapsed_ms": 31.498,
+          "elapsed_ms": 15.438,
+          "stdout_bytes": 0,
+          "stderr_bytes": 55950
+        }
+      },
+      {
+        "repetition": 6,
+        "startup_ms": 101.402881,
+        "request_count": 800,
+        "success_count": 800,
+        "error_count": 0,
+        "error_types": [],
+        "elapsed_seconds": 0.743867,
+        "throughput_requests_per_second": 1075.460495,
+        "latency_ms": {
+          "count": 800,
+          "median": 6.467808,
+          "p95": 11.396552,
+          "p99": 12.378161,
+          "mean": 7.382438,
+          "stdev": 2.389297
+        },
+        "operations": {
+          "check_exec_environment": {
+            "count": 80,
+            "median": 10.366999,
+            "p95": 11.667315,
+            "p99": 12.144405,
+            "mean": 10.276661,
+            "stdev": 1.175632
+          },
+          "ping": {
+            "count": 400,
+            "median": 5.65096,
+            "p95": 6.694853,
+            "p99": 7.34615,
+            "mean": 5.520994,
+            "stdev": 0.842521
+          },
+          "read_file": {
+            "count": 80,
+            "median": 10.761954,
+            "p95": 12.764747,
+            "p99": 13.532915,
+            "mean": 10.604098,
+            "stdev": 1.436523
+          },
+          "server_info": {
+            "count": 80,
+            "median": 10.851409,
+            "p95": 12.100468,
+            "p99": 13.082806,
+            "mean": 10.775393,
+            "stdev": 1.178605
+          },
+          "tools_list": {
+            "count": 160,
+            "median": 7.316453,
+            "p95": 8.602795,
+            "p99": 8.915825,
+            "mean": 7.281631,
+            "stdev": 0.739999
+          }
+        },
+        "resources": {
+          "rss_kib_median": 31752,
+          "rss_kib_max": 32028,
+          "threads_max": 10,
+          "file_descriptors_max": 20,
+          "children_max": 0
+        },
+        "shutdown": {
+          "exit_code": 130,
+          "forced": false,
+          "elapsed_ms": 15.294,
           "stdout_bytes": 0,
           "stderr_bytes": 55950
         }
@@ -687,66 +687,214 @@
     "rust": [
       {
         "repetition": 0,
-        "startup_ms": 20.490463,
+        "startup_ms": 20.602198,
         "request_count": 800,
         "success_count": 800,
         "error_count": 0,
         "error_types": [],
-        "elapsed_seconds": 0.304837,
-        "throughput_requests_per_second": 2624.354264,
+        "elapsed_seconds": 0.300664,
+        "throughput_requests_per_second": 2660.77532,
         "latency_ms": {
           "count": 800,
-          "median": 2.675774,
-          "p95": 5.605741,
-          "p99": 6.582079,
-          "mean": 3.000021,
-          "stdev": 1.339515
+          "median": 2.742494,
+          "p95": 5.484791,
+          "p99": 6.668806,
+          "mean": 2.965051,
+          "stdev": 1.379302
         },
         "operations": {
           "check_exec_environment": {
             "count": 80,
-            "median": 2.84342,
-            "p95": 5.138144,
-            "p99": 5.646217,
-            "mean": 2.85012,
-            "stdev": 1.227483
+            "median": 2.715561,
+            "p95": 5.033855,
+            "p99": 5.758003,
+            "mean": 2.986577,
+            "stdev": 1.319703
           },
           "ping": {
             "count": 400,
-            "median": 2.432261,
-            "p95": 4.565906,
-            "p99": 5.921901,
-            "mean": 2.628455,
-            "stdev": 1.05559
+            "median": 2.513088,
+            "p95": 4.461311,
+            "p99": 6.131215,
+            "mean": 2.635448,
+            "stdev": 1.154977
           },
           "read_file": {
             "count": 80,
-            "median": 2.450447,
-            "p95": 4.782752,
-            "p99": 5.570491,
-            "mean": 2.69834,
-            "stdev": 1.105418
+            "median": 2.314426,
+            "p95": 4.537415,
+            "p99": 4.98001,
+            "mean": 2.497784,
+            "stdev": 1.140605
           },
           "server_info": {
             "count": 80,
-            "median": 2.367996,
-            "p95": 5.139648,
-            "p99": 6.158797,
-            "mean": 2.625826,
-            "stdev": 1.270215
+            "median": 2.203767,
+            "p95": 4.541394,
+            "p99": 5.159822,
+            "mean": 2.385653,
+            "stdev": 1.070607
           },
           "tools_list": {
             "count": 160,
-            "median": 4.510527,
-            "p95": 6.40864,
-            "p99": 7.280723,
-            "mean": 4.341824,
-            "stdev": 1.332825
+            "median": 4.344093,
+            "p95": 6.382453,
+            "p99": 7.40237,
+            "mean": 4.301628,
+            "stdev": 1.334733
           }
         },
         "resources": {
-          "rss_kib_median": 21264,
-          "rss_kib_max": 21324,
+          "rss_kib_median": 21068,
+          "rss_kib_max": 21224,
+          "threads_max": 9,
+          "file_descriptors_max": 24,
+          "children_max": 0
+        },
+        "shutdown": {
+          "exit_code": 0,
+          "forced": false,
+          "elapsed_ms": 7.268,
+          "stdout_bytes": 0,
+          "stderr_bytes": 108
+        }
+      },
+      {
+        "repetition": 1,
+        "startup_ms": 20.642199,
+        "request_count": 800,
+        "success_count": 800,
+        "error_count": 0,
+        "error_types": [],
+        "elapsed_seconds": 0.304092,
+        "throughput_requests_per_second": 2630.787115,
+        "latency_ms": {
+          "count": 800,
+          "median": 2.788908,
+          "p95": 5.354791,
+          "p99": 6.680779,
+          "mean": 2.996034,
+          "stdev": 1.304184
+        },
+        "operations": {
+          "check_exec_environment": {
+            "count": 80,
+            "median": 2.694076,
+            "p95": 4.540545,
+            "p99": 4.861101,
+            "mean": 2.682619,
+            "stdev": 1.1013
+          },
+          "ping": {
+            "count": 400,
+            "median": 2.568272,
+            "p95": 4.577689,
+            "p99": 5.983273,
+            "mean": 2.688637,
+            "stdev": 1.095184
+          },
+          "read_file": {
+            "count": 80,
+            "median": 2.379989,
+            "p95": 4.212023,
+            "p99": 4.629857,
+            "mean": 2.52529,
+            "stdev": 0.976355
+          },
+          "server_info": {
+            "count": 80,
+            "median": 2.633674,
+            "p95": 4.512605,
+            "p99": 5.236195,
+            "mean": 2.813002,
+            "stdev": 1.097591
+          },
+          "tools_list": {
+            "count": 160,
+            "median": 4.145694,
+            "p95": 6.61404,
+            "p99": 7.061565,
+            "mean": 4.248121,
+            "stdev": 1.367292
+          }
+        },
+        "resources": {
+          "rss_kib_median": 21180,
+          "rss_kib_max": 21288,
+          "threads_max": 9,
+          "file_descriptors_max": 24,
+          "children_max": 0
+        },
+        "shutdown": {
+          "exit_code": 0,
+          "forced": false,
+          "elapsed_ms": 7.258,
+          "stdout_bytes": 0,
+          "stderr_bytes": 108
+        }
+      },
+      {
+        "repetition": 2,
+        "startup_ms": 20.614941,
+        "request_count": 800,
+        "success_count": 800,
+        "error_count": 0,
+        "error_types": [],
+        "elapsed_seconds": 0.300976,
+        "throughput_requests_per_second": 2658.020216,
+        "latency_ms": {
+          "count": 800,
+          "median": 2.719588,
+          "p95": 5.427494,
+          "p99": 6.6533,
+          "mean": 2.959722,
+          "stdev": 1.314474
+        },
+        "operations": {
+          "check_exec_environment": {
+            "count": 80,
+            "median": 2.738471,
+            "p95": 4.314662,
+            "p99": 4.557059,
+            "mean": 2.753213,
+            "stdev": 0.990906
+          },
+          "ping": {
+            "count": 400,
+            "median": 2.35218,
+            "p95": 4.458477,
+            "p99": 5.479594,
+            "mean": 2.561281,
+            "stdev": 1.00866
+          },
+          "read_file": {
+            "count": 80,
+            "median": 2.650727,
+            "p95": 4.386041,
+            "p99": 5.642429,
+            "mean": 2.701997,
+            "stdev": 1.104934
+          },
+          "server_info": {
+            "count": 80,
+            "median": 2.329948,
+            "p95": 4.503199,
+            "p99": 6.030997,
+            "mean": 2.613526,
+            "stdev": 1.145593
+          },
+          "tools_list": {
+            "count": 160,
+            "median": 4.176541,
+            "p95": 6.657505,
+            "p99": 8.012464,
+            "mean": 4.361039,
+            "stdev": 1.375668
+          }
+        },
+        "resources": {
+          "rss_kib_median": 21344,
+          "rss_kib_max": 21508,
           "threads_max": 9,
           "file_descriptors_max": 24,
           "children_max": 0
@@ -756,367 +904,145 @@
           "forced": false,
           "elapsed_ms": 7.382,
           "stdout_bytes": 0,
-          "stderr_bytes": 111
-        }
-      },
-      {
-        "repetition": 1,
-        "startup_ms": 20.631176,
-        "request_count": 800,
-        "success_count": 800,
-        "error_count": 0,
-        "error_types": [],
-        "elapsed_seconds": 0.30768,
-        "throughput_requests_per_second": 2600.105576,
-        "latency_ms": {
-          "count": 800,
-          "median": 2.706364,
-          "p95": 5.696835,
-          "p99": 6.890717,
-          "mean": 3.017128,
-          "stdev": 1.381256
-        },
-        "operations": {
-          "check_exec_environment": {
-            "count": 80,
-            "median": 2.506391,
-            "p95": 4.608754,
-            "p99": 5.257292,
-            "mean": 2.717812,
-            "stdev": 1.150159
-          },
-          "ping": {
-            "count": 400,
-            "median": 2.423602,
-            "p95": 4.535937,
-            "p99": 6.173176,
-            "mean": 2.614766,
-            "stdev": 1.080401
-          },
-          "read_file": {
-            "count": 80,
-            "median": 2.625963,
-            "p95": 5.073168,
-            "p99": 5.41509,
-            "mean": 2.851976,
-            "stdev": 1.084387
-          },
-          "server_info": {
-            "count": 80,
-            "median": 2.419707,
-            "p95": 5.201383,
-            "p99": 6.113593,
-            "mean": 2.704749,
-            "stdev": 1.251492
-          },
-          "tools_list": {
-            "count": 160,
-            "median": 4.306715,
-            "p95": 6.596411,
-            "p99": 8.432697,
-            "mean": 4.411458,
-            "stdev": 1.472036
-          }
-        },
-        "resources": {
-          "rss_kib_median": 21140,
-          "rss_kib_max": 21276,
-          "threads_max": 9,
-          "file_descriptors_max": 23,
-          "children_max": 0
-        },
-        "shutdown": {
-          "exit_code": 0,
-          "forced": false,
-          "elapsed_ms": 7.413,
-          "stdout_bytes": 0,
-          "stderr_bytes": 111
-        }
-      },
-      {
-        "repetition": 2,
-        "startup_ms": 20.505835,
-        "request_count": 800,
-        "success_count": 800,
-        "error_count": 0,
-        "error_types": [],
-        "elapsed_seconds": 0.303756,
-        "throughput_requests_per_second": 2633.690448,
-        "latency_ms": {
-          "count": 800,
-          "median": 2.680874,
-          "p95": 5.595372,
-          "p99": 6.971667,
-          "mean": 2.97012,
-          "stdev": 1.408783
-        },
-        "operations": {
-          "check_exec_environment": {
-            "count": 80,
-            "median": 2.746056,
-            "p95": 5.222913,
-            "p99": 6.39787,
-            "mean": 2.93816,
-            "stdev": 1.309233
-          },
-          "ping": {
-            "count": 400,
-            "median": 2.371563,
-            "p95": 4.664652,
-            "p99": 5.289644,
-            "mean": 2.542098,
-            "stdev": 1.064191
-          },
-          "read_file": {
-            "count": 80,
-            "median": 2.507775,
-            "p95": 4.509371,
-            "p99": 4.89358,
-            "mean": 2.565718,
-            "stdev": 1.074962
-          },
-          "server_info": {
-            "count": 80,
-            "median": 2.299289,
-            "p95": 5.018577,
-            "p99": 5.464619,
-            "mean": 2.538894,
-            "stdev": 1.182637
-          },
-          "tools_list": {
-            "count": 160,
-            "median": 4.44885,
-            "p95": 6.973085,
-            "p99": 8.457269,
-            "mean": 4.473971,
-            "stdev": 1.448306
-          }
-        },
-        "resources": {
-          "rss_kib_median": 21040,
-          "rss_kib_max": 21228,
-          "threads_max": 9,
-          "file_descriptors_max": 24,
-          "children_max": 0
-        },
-        "shutdown": {
-          "exit_code": 0,
-          "forced": false,
-          "elapsed_ms": 7.404,
-          "stdout_bytes": 0,
-          "stderr_bytes": 111
+          "stderr_bytes": 108
         }
       },
       {
         "repetition": 3,
-        "startup_ms": 20.57944,
+        "startup_ms": 20.555973,
         "request_count": 800,
         "success_count": 800,
         "error_count": 0,
         "error_types": [],
-        "elapsed_seconds": 0.312055,
-        "throughput_requests_per_second": 2563.649817,
+        "elapsed_seconds": 0.304888,
+        "throughput_requests_per_second": 2623.913589,
         "latency_ms": {
           "count": 800,
-          "median": 2.728806,
-          "p95": 5.821089,
-          "p99": 6.67032,
-          "mean": 3.069467,
-          "stdev": 1.416782
+          "median": 2.772911,
+          "p95": 5.611659,
+          "p99": 6.614887,
+          "mean": 2.995032,
+          "stdev": 1.353981
         },
         "operations": {
           "check_exec_environment": {
             "count": 80,
-            "median": 2.625953,
-            "p95": 5.366513,
-            "p99": 5.785056,
-            "mean": 2.987417,
-            "stdev": 1.352793
+            "median": 2.814297,
+            "p95": 4.665806,
+            "p99": 5.471314,
+            "mean": 2.865839,
+            "stdev": 1.148824
           },
           "ping": {
             "count": 400,
-            "median": 2.452783,
-            "p95": 4.899945,
-            "p99": 6.081164,
-            "mean": 2.663359,
-            "stdev": 1.182428
+            "median": 2.369982,
+            "p95": 4.421865,
+            "p99": 5.888871,
+            "mean": 2.56575,
+            "stdev": 1.087273
           },
           "read_file": {
             "count": 80,
-            "median": 2.612049,
-            "p95": 5.340369,
-            "p99": 5.972091,
-            "mean": 2.896108,
-            "stdev": 1.225088
+            "median": 2.878189,
+            "p95": 5.176223,
+            "p99": 5.539332,
+            "mean": 3.0175,
+            "stdev": 1.239345
           },
           "server_info": {
             "count": 80,
-            "median": 2.484165,
-            "p95": 4.77815,
-            "p99": 5.088786,
-            "mean": 2.616251,
-            "stdev": 1.117841
+            "median": 2.411386,
+            "p95": 4.518691,
+            "p99": 5.641199,
+            "mean": 2.558228,
+            "stdev": 1.163663
           },
           "tools_list": {
             "count": 160,
-            "median": 4.39652,
-            "p95": 6.608187,
-            "p99": 7.28289,
-            "mean": 4.439049,
-            "stdev": 1.370467
+            "median": 4.222165,
+            "p95": 6.489219,
+            "p99": 7.685697,
+            "mean": 4.340003,
+            "stdev": 1.328759
           }
         },
         "resources": {
-          "rss_kib_median": 19996,
-          "rss_kib_max": 21160,
+          "rss_kib_median": 21164,
+          "rss_kib_max": 21288,
           "threads_max": 9,
-          "file_descriptors_max": 23,
+          "file_descriptors_max": 24,
           "children_max": 0
         },
         "shutdown": {
           "exit_code": 0,
           "forced": false,
-          "elapsed_ms": 7.283,
+          "elapsed_ms": 7.355,
           "stdout_bytes": 0,
-          "stderr_bytes": 111
+          "stderr_bytes": 108
         }
       },
       {
         "repetition": 4,
-        "startup_ms": 20.528652,
+        "startup_ms": 20.538998,
         "request_count": 800,
         "success_count": 800,
         "error_count": 0,
         "error_types": [],
-        "elapsed_seconds": 0.301233,
-        "throughput_requests_per_second": 2655.752568,
+        "elapsed_seconds": 0.301949,
+        "throughput_requests_per_second": 2649.455407,
         "latency_ms": {
           "count": 800,
-          "median": 2.728012,
-          "p95": 5.458328,
-          "p99": 6.506929,
-          "mean": 2.949209,
-          "stdev": 1.353061
+          "median": 2.685202,
+          "p95": 5.476351,
+          "p99": 6.795105,
+          "mean": 2.957751,
+          "stdev": 1.342248
         },
         "operations": {
           "check_exec_environment": {
             "count": 80,
-            "median": 2.965907,
-            "p95": 4.837167,
-            "p99": 5.242713,
-            "mean": 3.035229,
-            "stdev": 1.169853
+            "median": 2.529472,
+            "p95": 4.964099,
+            "p99": 5.595105,
+            "mean": 2.809967,
+            "stdev": 1.17874
           },
           "ping": {
             "count": 400,
-            "median": 2.501724,
-            "p95": 4.457283,
-            "p99": 5.365562,
-            "mean": 2.569322,
-            "stdev": 1.069918
+            "median": 2.412411,
+            "p95": 4.432124,
+            "p99": 5.141692,
+            "mean": 2.566366,
+            "stdev": 1.032998
           },
           "read_file": {
             "count": 80,
-            "median": 2.221241,
-            "p95": 4.065282,
-            "p99": 4.799779,
-            "mean": 2.407106,
-            "stdev": 1.009658
+            "median": 2.480462,
+            "p95": 4.052601,
+            "p99": 4.883684,
+            "mean": 2.436268,
+            "stdev": 1.047179
           },
           "server_info": {
             "count": 80,
-            "median": 2.311497,
-            "p95": 4.801256,
-            "p99": 5.223248,
-            "mean": 2.558254,
-            "stdev": 1.071167
+            "median": 2.476841,
+            "p95": 4.61918,
+            "p99": 5.714651,
+            "mean": 2.605778,
+            "stdev": 1.115634
           },
           "tools_list": {
             "count": 160,
-            "median": 4.402066,
-            "p95": 6.511469,
-            "p99": 7.747399,
-            "mean": 4.322448,
-            "stdev": 1.442764
+            "median": 4.429692,
+            "p95": 6.787602,
+            "p99": 7.398878,
+            "mean": 4.446831,
+            "stdev": 1.30203
           }
         },
         "resources": {
-          "rss_kib_median": 21220,
-          "rss_kib_max": 21496,
-          "threads_max": 9,
-          "file_descriptors_max": 24,
-          "children_max": 0
-        },
-        "shutdown": {
-          "exit_code": 0,
-          "forced": false,
-          "elapsed_ms": 7.219,
-          "stdout_bytes": 0,
-          "stderr_bytes": 111
-        }
-      },
-      {
-        "repetition": 5,
-        "startup_ms": 20.515965,
-        "request_count": 800,
-        "success_count": 800,
-        "error_count": 0,
-        "error_types": [],
-        "elapsed_seconds": 0.313731,
-        "throughput_requests_per_second": 2549.953875,
-        "latency_ms": {
-          "count": 800,
-          "median": 2.799395,
-          "p95": 5.611386,
-          "p99": 7.313661,
-          "mean": 3.083812,
-          "stdev": 1.387515
-        },
-        "operations": {
-          "check_exec_environment": {
-            "count": 80,
-            "median": 3.077193,
-            "p95": 5.079395,
-            "p99": 5.857239,
-            "mean": 3.092997,
-            "stdev": 1.118195
-          },
-          "ping": {
-            "count": 400,
-            "median": 2.518551,
-            "p95": 4.741656,
-            "p99": 6.686814,
-            "mean": 2.660561,
-            "stdev": 1.175868
-          },
-          "read_file": {
-            "count": 80,
-            "median": 2.752118,
-            "p95": 4.7571,
-            "p99": 5.316261,
-            "mean": 2.866772,
-            "stdev": 1.137729
-          },
-          "server_info": {
-            "count": 80,
-            "median": 2.677903,
-            "p95": 4.889386,
-            "p99": 5.922017,
-            "mean": 2.840737,
-            "stdev": 1.299415
-          },
-          "tools_list": {
-            "count": 160,
-            "median": 4.436551,
-            "p95": 6.840477,
-            "p99": 7.888479,
-            "mean": 4.367401,
-            "stdev": 1.392584
-          }
-        },
-        "resources": {
-          "rss_kib_median": 20348,
-          "rss_kib_max": 21440,
+          "rss_kib_median": 21460,
+          "rss_kib_max": 21588,
           "threads_max": 9,
           "file_descriptors_max": 23,
           "children_max": 0
@@ -1124,73 +1050,73 @@
         "shutdown": {
           "exit_code": 0,
           "forced": false,
-          "elapsed_ms": 7.222,
+          "elapsed_ms": 7.225,
           "stdout_bytes": 0,
-          "stderr_bytes": 111
+          "stderr_bytes": 108
         }
       },
       {
-        "repetition": 6,
-        "startup_ms": 20.55763,
+        "repetition": 5,
+        "startup_ms": 20.591448,
         "request_count": 800,
         "success_count": 800,
         "error_count": 0,
         "error_types": [],
-        "elapsed_seconds": 0.304348,
-        "throughput_requests_per_second": 2628.573986,
+        "elapsed_seconds": 0.297866,
+        "throughput_requests_per_second": 2685.775557,
         "latency_ms": {
           "count": 800,
-          "median": 2.744572,
-          "p95": 5.68432,
-          "p99": 6.788426,
-          "mean": 2.980609,
-          "stdev": 1.406986
+          "median": 2.680082,
+          "p95": 5.515293,
+          "p99": 6.904109,
+          "mean": 2.926964,
+          "stdev": 1.345575
         },
         "operations": {
           "check_exec_environment": {
             "count": 80,
-            "median": 2.923265,
-            "p95": 5.236466,
-            "p99": 5.907966,
-            "mean": 2.987894,
-            "stdev": 1.363164
+            "median": 2.66542,
+            "p95": 4.623037,
+            "p99": 5.361163,
+            "mean": 2.751931,
+            "stdev": 1.140168
           },
           "ping": {
             "count": 400,
-            "median": 2.36885,
-            "p95": 4.412587,
-            "p99": 5.390259,
-            "mean": 2.567467,
-            "stdev": 0.997455
+            "median": 2.420644,
+            "p95": 4.382956,
+            "p99": 6.188907,
+            "mean": 2.552813,
+            "stdev": 1.092734
           },
           "read_file": {
             "count": 80,
-            "median": 2.317173,
-            "p95": 4.69433,
-            "p99": 6.169616,
-            "mean": 2.541972,
-            "stdev": 1.377656
+            "median": 2.41149,
+            "p95": 4.583677,
+            "p99": 5.390272,
+            "mean": 2.549287,
+            "stdev": 1.15171
           },
           "server_info": {
             "count": 80,
-            "median": 2.294922,
-            "p95": 5.043912,
-            "p99": 5.532624,
-            "mean": 2.622037,
-            "stdev": 1.257101
+            "median": 2.433268,
+            "p95": 4.540407,
+            "p99": 5.744615,
+            "mean": 2.534903,
+            "stdev": 1.110457
           },
           "tools_list": {
             "count": 160,
-            "median": 4.28589,
-            "p95": 6.779304,
-            "p99": 8.491232,
-            "mean": 4.408428,
-            "stdev": 1.468779
+            "median": 4.262906,
+            "p95": 6.325977,
+            "p99": 7.292589,
+            "mean": 4.334726,
+            "stdev": 1.293597
           }
         },
         "resources": {
-          "rss_kib_median": 21158.0,
-          "rss_kib_max": 21340,
+          "rss_kib_median": 21268,
+          "rss_kib_max": 21448,
           "threads_max": 9,
           "file_descriptors_max": 24,
           "children_max": 0
@@ -1198,9 +1124,83 @@
         "shutdown": {
           "exit_code": 0,
           "forced": false,
-          "elapsed_ms": 7.239,
+          "elapsed_ms": 7.257,
           "stdout_bytes": 0,
-          "stderr_bytes": 111
+          "stderr_bytes": 108
+        }
+      },
+      {
+        "repetition": 6,
+        "startup_ms": 20.505986,
+        "request_count": 800,
+        "success_count": 800,
+        "error_count": 0,
+        "error_types": [],
+        "elapsed_seconds": 0.307733,
+        "throughput_requests_per_second": 2599.656761,
+        "latency_ms": {
+          "count": 800,
+          "median": 2.768215,
+          "p95": 5.598537,
+          "p99": 6.827291,
+          "mean": 3.011187,
+          "stdev": 1.36251
+        },
+        "operations": {
+          "check_exec_environment": {
+            "count": 80,
+            "median": 2.952367,
+            "p95": 4.791776,
+            "p99": 5.931905,
+            "mean": 2.916943,
+            "stdev": 1.223317
+          },
+          "ping": {
+            "count": 400,
+            "median": 2.420762,
+            "p95": 4.413244,
+            "p99": 6.11818,
+            "mean": 2.55473,
+            "stdev": 1.082849
+          },
+          "read_file": {
+            "count": 80,
+            "median": 2.640904,
+            "p95": 5.106944,
+            "p99": 5.21333,
+            "mean": 2.850306,
+            "stdev": 1.191678
+          },
+          "server_info": {
+            "count": 80,
+            "median": 2.459159,
+            "p95": 5.031982,
+            "p99": 5.270703,
+            "mean": 2.746347,
+            "stdev": 1.088459
+          },
+          "tools_list": {
+            "count": 160,
+            "median": 4.447392,
+            "p95": 6.694246,
+            "p99": 7.582377,
+            "mean": 4.412313,
+            "stdev": 1.340221
+          }
+        },
+        "resources": {
+          "rss_kib_median": 21148,
+          "rss_kib_max": 21384,
+          "threads_max": 9,
+          "file_descriptors_max": 24,
+          "children_max": 0
+        },
+        "shutdown": {
+          "exit_code": 0,
+          "forced": false,
+          "elapsed_ms": 7.388,
+          "stdout_bytes": 0,
+          "stderr_bytes": 108
         }
       }
     ]
@@ -1210,14 +1210,14 @@
     "path": "authenticated local OAuth/MCP mixed request path",
     "scope": "ping, tools/list, server_info, read_file, and check_exec_environment under eight concurrent clients",
     "observed": {
-      "throughput_median_ratio_rust_over_python": 2.345509,
-      "p95_latency_ratio_rust_over_python": 0.499841,
-      "p99_latency_ratio_rust_over_python": 0.537199,
-      "rss_ratio_rust_over_python": 0.670145,
-      "startup_ratio_rust_over_python": 0.202607,
-      "conservative_throughput_ratio": 2.27984,
-      "conservative_p95_ratio": 0.514259,
-      "conservative_rss_ratio": 0.674808
+      "throughput_median_ratio_rust_over_python": 2.434771,
+      "p95_latency_ratio_rust_over_python": 0.474969,
+      "p99_latency_ratio_rust_over_python": 0.532587,
+      "rss_ratio_rust_over_python": 0.670765,
+      "startup_ratio_rust_over_python": 0.203234,
+      "conservative_throughput_ratio": 2.400487,
+      "conservative_p95_ratio": 0.491248,
+      "conservative_rss_ratio": 0.676948
     },
     "thresholds": {
       "conservative_throughput_ratio_min": 1.15,

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "graph_id": "mtm-reboot-target-architecture",
-  "updated_at": "2026-09-01T11:01:20-07:00",
+  "updated_at": "2026-09-01T19:18:00-07:00",
   "principles": [
     "Functional authority is preserved before structural optimization.",
     "The crate dependency graph is acyclic.",
@@ -71,20 +71,20 @@
   },
   "deployment_authority_graph": {
     "vertices": [
-      {"id": "python_release", "kind": "bounded_rollback"},
-      {"id": "rollback_wheel", "kind": "immutable_artifact"},
-      {"id": "rust_release", "kind": "hash_verified_release"},
-      {"id": "command_link", "kind": "atomic_selector"},
-      {"id": "production_sessions", "kind": "runtime_authority"},
+      {"id": "mtm_rust_release", "kind": "hash_verified_release"},
+      {"id": "mtm_command", "kind": "exclusive_command_namespace"},
+      {"id": "mtm_sessions", "kind": "runtime_authority"},
+      {"id": "re_ctm_python_release", "kind": "separate_project_release"},
+      {"id": "re_ctm_command", "kind": "exclusive_command_namespace"},
+      {"id": "re_ctm_wheel", "kind": "immutable_artifact"},
       {"id": "historical_source", "kind": "non_production_reference"}
     ],
     "edges": [
-      {"source": "python_release", "target": "rollback_wheel", "guard": "Wheel built and SHA-256 recorded before retirement"},
-      {"source": "python_release", "target": "command_link", "guard": "Rollback drill only; one active selector"},
-      {"source": "rust_release", "target": "command_link", "guard": "Release identity, executable hash, and no-Python linkage verified"},
-      {"source": "command_link", "target": "production_sessions", "guard": "Atomic symlink selects exactly one runtime"},
-      {"source": "rollback_wheel", "target": "python_release", "guard": "Offline/local restore drill succeeds"},
-      {"source": "historical_source", "target": "rollback_wheel", "guard": "Frozen Re-CTM 0.3.0 runtime files and source commit recorded"}
+      {"source": "mtm_rust_release", "target": "mtm_command", "guard": "MTM release identity, executable hash, and no-Python linkage verified"},
+      {"source": "mtm_command", "target": "mtm_sessions", "guard": "Only the mtm command starts MTM production sessions"},
+      {"source": "historical_source", "target": "re_ctm_wheel", "guard": "Frozen Re-CTM 0.3.0 source and wheel provenance remain recorded"},
+      {"source": "re_ctm_wheel", "target": "re_ctm_python_release", "guard": "Wheel restoration and Re-CTM server probe succeed"},
+      {"source": "re_ctm_python_release", "target": "re_ctm_command", "guard": "Only the re-ctm command selects the Re-CTM installation"}
     ]
   },
   "invariants": [
@@ -96,7 +96,7 @@
     {"id": "INV-006", "statement": "Only the mechanical finalizer publishes verified artifacts or verified claim revisions."},
     {"id": "INV-007", "statement": "The observer can display redacted facts but cannot authorize, persist, or transition state."},
     {"id": "INV-008", "statement": "Graph metrics never override functional or security boundaries."},
-    {"id": "INV-009", "statement": "The deployed re-ctm command is an atomic selector for exactly one hash-verified runtime release."},
-    {"id": "INV-010", "statement": "Python production retirement is forbidden until rollback-wheel restore, live rollback, Rust recutover, soak, and A6 qualification have passed."}
+    {"id": "INV-009", "statement": "The mtm command namespace belongs exclusively to MTM and selects only a hash-verified MTM Rust release."},
+    {"id": "INV-010", "statement": "MTM and Re-CTM use distinct commands and installation roots; neither project provides a compatibility alias for the other."}
   ]
 }

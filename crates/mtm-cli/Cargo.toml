@@ -6,7 +6,7 @@ rust-version.workspace = true
 license.workspace = true
 
 [[bin]]
-name = "mtm-reboot"
+name = "mtm"
 path = "src/main.rs"
 
 [dependencies]
