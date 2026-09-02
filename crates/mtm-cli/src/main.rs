@@ -195,7 +195,7 @@ fn check_config(arguments: &[String]) -> Result<(), ReCtmError> {
             "bind_host": host,
             "bind_port": port,
             "tool_count": assets.tool_catalog()["public_names"].as_array().map_or(0, Vec::len),
-            "workflow_protocol_version": 2,
+            "workflow_protocol_version": settings.workflow_protocol_version,
             "secrets_materialized": settings.token_secret.len() >= 32 && settings.capability_secret.len() >= 32,
         })
     );
