@@ -474,6 +474,7 @@
     "authorized_simulation": {
       "path": "conformance/mtm009-math-simulation.json",
       "validator": "scripts/validate_mtm009_math_simulation.py",
+      "simulation_commit": "171f04d2b92ae06b69c736808da491716f1098e4",
       "solver_model": "GPT-5.6 Sol",
       "status": "complete",
       "official_a4_eligible": false,
