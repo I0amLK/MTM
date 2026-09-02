@@ -457,6 +457,8 @@
       "raw_web_transcript_recorded": false,
       "private_reasoning_recorded": false,
       "blind_treatment_hidden_until_scores_frozen": true,
+      "blind_bundle_script": "scripts/prepare_mtm009_blind_bundle.py",
+      "delivery7_release_gate": "scripts/validate_mtm009_release_gate.py",
       "release_gate": [
         "protocol3 verified_tex completion must not regress",
         "at least one predeclared primary research-control metric must improve",
@@ -474,6 +476,16 @@
         "command": "python3 scripts/validate_mtm009_math_corpus.py && python3 scripts/validate_mtm009_math_evaluation.py",
         "exit_code": 0,
         "result": "The frozen eight-case balanced corpus and pending blind-evaluation contract are internally consistent and hash-bound to the current resource evidence; incomplete evaluation cannot claim aggregate results or acceptance."
+      },
+      {
+        "command": "prepare_mtm009_blind_bundle.py on two temporary .tex artifacts plus validate_mtm009_release_gate.py",
+        "exit_code": 0,
+        "result": "The evaluator bundle contained only treatment-free A/B artifact hashes, the protocol mapping file was mode 0600, and the Delivery-7 release gate correctly returned blocked while the real-web evaluation remained 0/8 complete pairs."
+      },
+      {
+        "command": "python3 -m unittest tests.test_governance -v && python3 scripts/validate_migration_graph.py && python3 scripts/validate_mtm009_math_evaluation.py",
+        "exit_code": 0,
+        "result": "Governance now fails closed if MTM-009 is ever marked authoritative/completed before the real-web evaluation is complete and its deterministic mathematical release gate passes."
       }
     ],
     "manual_pending": [
