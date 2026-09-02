@@ -11,6 +11,13 @@ use std::fmt;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 
+mod normalize;
+
+pub use normalize::{
+    LegacyNormalization, LegacyNormalizationSummary, LegacyResearchInput,
+    ResearchNormalizationWarning, normalize_legacy_research,
+};
+
 pub const RESEARCH_STATE_SCHEMA_VERSION: u16 = 1;
 pub const MAX_RESEARCH_NODES: usize = 256;
 pub const MAX_RESEARCH_EDGES: usize = 1_024;
@@ -761,6 +768,10 @@ pub enum ResearchStateError {
     InvalidRevision {
         node_id: ResearchNodeId,
     },
+    MalformedLegacyRecord {
+        location: String,
+        reason: String,
+    },
     ActiveDependencyCycle {
         cycle: Vec<ResearchNodeId>,
     },
@@ -826,6 +837,12 @@ impl fmt::Display for ResearchStateError {
             }
             Self::InvalidRevision { node_id } => {
                 write!(formatter, "research node {node_id} has revision zero")
+            }
+            Self::MalformedLegacyRecord { location, reason } => {
+                write!(
+                    formatter,
+                    "malformed legacy research record at {location}: {reason}"
+                )
             }
             Self::ActiveDependencyCycle { cycle } => write!(
                 formatter,

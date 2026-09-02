@@ -1,4 +1,5 @@
-use std::path::Path;
+use std::fs;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use mtm_contracts::{ErrorCategory, ReCtmError};
@@ -7,6 +8,7 @@ use mtm_workflow::{
     LatexGate, LatexGateResult, PrivateVault, StartRequest, TaskCatalog, WorkflowEngine,
 };
 use serde_json::Value;
+use sha2::{Digest, Sha256};
 
 struct PassingLatex;
 
@@ -121,6 +123,51 @@ fn capability(task: &Value) -> Result<&str, ReCtmError> {
             ReCtmError::new("TEST_FAILURE", "capability missing")
                 .with_category(ErrorCategory::Internal)
         })
+}
+
+fn tree_digest(root: &Path) -> Result<String, ReCtmError> {
+    fn collect(root: &Path, current: &Path, paths: &mut Vec<PathBuf>) -> Result<(), ReCtmError> {
+        let mut entries = fs::read_dir(current)
+            .map_err(|error| {
+                ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+            })?
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|error| {
+                ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+            })?;
+        entries.sort_by_key(fs::DirEntry::file_name);
+        for entry in entries {
+            let path = entry.path();
+            paths.push(path.strip_prefix(root).unwrap_or(&path).to_path_buf());
+            if entry
+                .file_type()
+                .map_err(|error| {
+                    ReCtmError::new("TEST_IO", error.to_string())
+                        .with_category(ErrorCategory::Runtime)
+                })?
+                .is_dir()
+            {
+                collect(root, &path, paths)?;
+            }
+        }
+        Ok(())
+    }
+
+    let mut paths = Vec::new();
+    collect(root, root, &mut paths)?;
+    let mut digest = Sha256::new();
+    for relative in paths {
+        digest.update(relative.to_string_lossy().as_bytes());
+        digest.update([0]);
+        let absolute = root.join(&relative);
+        if absolute.is_file() {
+            digest.update(fs::read(&absolute).map_err(|error| {
+                ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+            })?);
+        }
+        digest.update([0xff]);
+    }
+    Ok(format!("{:x}", digest.finalize()))
 }
 
 #[test]
@@ -424,6 +471,150 @@ fn full_mode_branch_barrier_requires_every_branch_to_seal() -> Result<(), ReCtmE
         None,
     )?;
     assert_eq!(assembled["state"], "assemble");
+    Ok(())
+}
+
+#[test]
+fn research_state_shadow_is_deterministic_owner_scoped_and_side_effect_free()
+-> Result<(), ReCtmError> {
+    let temp = tempfile::tempdir().map_err(|error| {
+        ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+    })?;
+    let engine = engine(temp.path(), Arc::new(PassingLatex))?;
+    let started = engine.start(StartRequest {
+        owner_id: "owner",
+        problem_tex: "Prove a two-route research-state statement.",
+        problem_id: Some("research-shadow"),
+        references: &[],
+        native_mode: "dangerous",
+        workspace_export_path: None,
+        project_id: None,
+        target_claim_id: None,
+        workflow_mode: "full",
+        register_result: true,
+        workflow_protocol_version: 2,
+        trace_id: None,
+    })?;
+    let run_id = started["run_id"].as_str().unwrap_or_default().to_owned();
+    let assess = engine.next_task("owner", &run_id, None)?;
+    engine.write(
+        "owner",
+        capability(&assess)?,
+        "memory:generation:immediate_conclusions",
+        &serde_json::json!({"summary":"use two independent routes"}),
+        None,
+    )?;
+    engine.commit(
+        "owner",
+        capability(&assess)?,
+        "assessment_complete",
+        &serde_json::json!({"route":"full"}),
+        None,
+    )?;
+    let explore = engine.next_task("owner", &run_id, None)?;
+    engine.write(
+        "owner",
+        capability(&explore)?,
+        "memory:generation:events",
+        &serde_json::json!({
+            "event_type":"external_theorem_search",
+            "operation":"theorem_search",
+            "query":"private search wording",
+            "results":[{"reference_id":"ref-shadow-a"}]
+        }),
+        None,
+    )?;
+    engine.commit(
+        "owner",
+        capability(&explore)?,
+        "exploration_complete",
+        &serde_json::json!({}),
+        None,
+    )?;
+    let planning = engine.next_task("owner", &run_id, None)?;
+    engine.commit(
+        "owner",
+        capability(&planning)?,
+        "plans_proposed",
+        &serde_json::json!({
+            "plans":[
+                {"plan_id":"first","summary":"Split into cases","subgoals":["case A"]},
+                {"plan_id":"second","summary":"Use an invariant","subgoals":["invariant B"]}
+            ]
+        }),
+        None,
+    )?;
+    let direct = engine.next_task("owner", &run_id, None)?;
+    assert!(
+        direct["context"]
+            .get("mathematical_research_state")
+            .is_none()
+    );
+    engine.write(
+        "owner",
+        capability(&direct)?,
+        "memory:generation:proof_steps",
+        &serde_json::json!({"attempt":"screen both routes"}),
+        None,
+    )?;
+    let branched = engine.commit(
+        "owner",
+        capability(&direct)?,
+        "direct_proving_complete",
+        &serde_json::json!({
+            "screening":{
+                "plan-r1-1":{"sg-1":{"status":"stuck","summary":"needs branch work"}},
+                "plan-r1-2":{"sg-1":{"status":"partial","summary":"invariant is plausible"}}
+            }
+        }),
+        None,
+    )?;
+    assert_eq!(branched["state"], "branch_prepare");
+
+    let before = tree_digest(temp.path())?;
+    let first = engine.research_state_shadow("owner", &run_id)?;
+    let second = engine.research_state_shadow("owner", &run_id)?;
+    let after = tree_digest(temp.path())?;
+    assert_eq!(before, after);
+    assert_eq!(first, second);
+    let concurrent = std::thread::scope(|scope| {
+        let handles = (0..8)
+            .map(|_| {
+                let engine = &engine;
+                let run_id = run_id.as_str();
+                scope.spawn(move || engine.research_state_shadow("owner", run_id))
+            })
+            .collect::<Vec<_>>();
+        handles
+            .into_iter()
+            .map(|handle| {
+                handle.join().map_err(|_| {
+                    ReCtmError::new("TEST_THREAD_PANIC", "research-state shadow thread panicked")
+                        .with_category(ErrorCategory::Internal)
+                })?
+            })
+            .collect::<Result<Vec<_>, ReCtmError>>()
+    })?;
+    assert!(concurrent.iter().all(|value| value == &first));
+    assert_eq!(before, tree_digest(temp.path())?);
+    assert_eq!(first["shadow"], true);
+    assert_eq!(first["workflow_protocol_version"], 2);
+    assert_eq!(first["normalization"]["normalized_nodes"], 3);
+    assert_eq!(first["normalization"]["normalized_attempts"], 3);
+    assert_eq!(first["normalization"]["retrieval_events"], 1);
+    assert_eq!(first["normalization"]["novel_reference_ids"], 0);
+    assert_eq!(first["normalization"]["warning_count"], 1);
+    assert_eq!(
+        first["warnings"][0]["code"],
+        "unregistered_retrieval_reference"
+    );
+    assert!(first["research_state"].get("advisory_action").is_none());
+    assert!(!first.to_string().contains("private search wording"));
+    assert!(
+        engine
+            .research_state_shadow("different-owner", &run_id)
+            .is_err()
+    );
     Ok(())
 }
 

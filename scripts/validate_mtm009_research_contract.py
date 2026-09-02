@@ -82,6 +82,34 @@ FORBIDDEN_PRODUCTION_PATTERNS = (
     "anthropic::",
 )
 
+RESEARCH_STATE_SOURCE_FILES = (
+    "crates/mtm-workflow/src/research_state.rs",
+    "crates/mtm-workflow/src/research_state/normalize.rs",
+    "crates/mtm-workflow/src/research_state/normalize/branch.rs",
+    "crates/mtm-workflow/src/research_state/normalize/other.rs",
+    "crates/mtm-workflow/src/research_state/normalize/support.rs",
+)
+
+FORBIDDEN_RESEARCH_STATE_IMPORTS = (
+    "use std::fs",
+    "use std::net",
+    "use std::process",
+    "use std::time",
+    "use tokio",
+    "use reqwest",
+    "use mtm_storage",
+    "use crate::engine",
+    "use crate::vault",
+    "use crate::verifier",
+)
+
+FORBIDDEN_GRAPH_DEPENDENCIES = {
+    "daggy",
+    "graphlib",
+    "petgraph",
+    "rustworkx-core",
+}
+
 FORBIDDEN_PROJECTOR_PATTERNS = (
     "std::fs",
     "std::io",
@@ -129,6 +157,16 @@ def validate() -> dict[str, Any]:
     workspace = tomllib.loads((ROOT / "Cargo.toml").read_text(encoding="utf-8"))
     if workspace.get("workspace", {}).get("members") != EXPECTED_MEMBERS:
         raise ValueError("MTM-009 may not add, remove, or reorder workspace crates")
+
+    workflow_manifest = tomllib.loads(
+        (ROOT / "crates" / "mtm-workflow" / "Cargo.toml").read_text(encoding="utf-8")
+    )
+    workflow_dependencies = set(workflow_manifest.get("dependencies", {}))
+    graph_dependencies = workflow_dependencies & FORBIDDEN_GRAPH_DEPENDENCIES
+    if graph_dependencies:
+        raise ValueError(
+            f"MTM-009 may not add a generic graph dependency: {sorted(graph_dependencies)}"
+        )
     workspace_dependencies = set(workspace.get("workspace", {}).get("dependencies", {}))
     workflow_manifest = tomllib.loads(
         (ROOT / "crates" / "mtm-workflow" / "Cargo.toml").read_text(encoding="utf-8")
@@ -184,6 +222,25 @@ def validate() -> dict[str, Any]:
         for pattern in FORBIDDEN_PRODUCTION_PATTERNS:
             if pattern in text:
                 raise ValueError(f"forbidden model/Codex integration in production path: {path}: {pattern}")
+
+    for relative in RESEARCH_STATE_SOURCE_FILES:
+        source_path = ROOT / relative
+        if not source_path.is_file():
+            raise ValueError(f"MTM-009 research-state source is missing: {relative}")
+        source = source_path.read_text(encoding="utf-8")
+        for pattern in FORBIDDEN_RESEARCH_STATE_IMPORTS:
+            if pattern in source:
+                raise ValueError(
+                    f"research-state projection acquired I/O or authority dependency: {relative}: {pattern}"
+                )
+
+    engine_source = (ROOT / "crates" / "mtm-workflow" / "src" / "engine.rs").read_text(
+        encoding="utf-8"
+    )
+    if "pub fn research_state_shadow" not in engine_source:
+        raise ValueError("MTM-009 Delivery 3 read-only shadow projection is missing")
+    if '"mathematical_research_state"' in engine_source:
+        raise ValueError("MTM-009 Delivery 3 shadow projection leaked into task context early")
 
     if "final/proof_verified.tex" not in vault_source:
         raise ValueError("verified .tex final artifact path changed")
@@ -274,6 +331,9 @@ def validate() -> dict[str, Any]:
         "workflow_states": len(EXPECTED_WORKFLOW_STATES),
         "generation_channels": len(EXPECTED_GENERATION_CHANNELS),
         "zero_complexity_budgets": len(ZERO_BUDGET_KEYS),
+        "generic_graph_dependencies": 0,
+        "pure_research_state_sources": len(RESEARCH_STATE_SOURCE_FILES),
+        "shadow_model_context_exposure": False,
         "final_artifact": "proof_verified.tex",
         "projector_pure_boundary": True,
         "generic_graph_dependencies": 0,

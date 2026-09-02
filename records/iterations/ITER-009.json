@@ -55,14 +55,14 @@
     {
       "delivery": 2,
       "name": "pure_types_and_graph_algorithms",
-      "status": "validated_pending_commit",
+      "status": "accepted",
       "production_behavior_changed": false,
       "goal": "Implement pure deterministic research types, dependency graph construction, cycle detection, reachability, frontier and digest with exhaustive unit/property tests."
     },
     {
       "delivery": 3,
       "name": "normalized_append_only_research_records",
-      "status": "in_progress",
+      "status": "validated_pending_commit",
       "production_behavior_changed": false,
       "goal": "Normalize existing plans, screenings, branches, failures, replans, retrieval and verifier findings into existing logical channels and run projection in read-only shadow."
     },
@@ -116,8 +116,8 @@
   "acceptance": {
     "A0": {"status": "accepted_delivery_1", "required": "Build, format, Clippy, tests, graph/governance validators, MTM-009 contract validator and diff checks.", "evidence": "python3 scripts/run_checks.py returned ok=true after the MTM-009 governance/contract changes."},
     "A1": {"status": "accepted_delivery_2", "required": "Protocol-1/2 frozen compatibility plus protocol-3 research-contract golden fixtures.", "evidence": "The 82-checkpoint MTM-006 workflow differential retained zero mismatches and the pure chain/frontier graph digest is frozen in mtm009-research-graph-v1.json."},
-    "A2": {"status": "pending", "required": "Read-only deterministic shadow projection before model-facing exposure."},
-    "A3": {"status": "pending", "required": "Retry/crash/concurrency, identity, capability, branch/verifier firewall and finalizer non-regression."},
+    "A2": {"status": "accepted_delivery_3", "required": "Read-only deterministic shadow projection before model-facing exposure.", "evidence": "Protocol-2 history is normalized and projected only through the owner-authorized research_state_shadow diagnostic; repeated and eight-way concurrent projections are byte-identical and leave the complete disposable state tree unchanged."},
+    "A3": {"status": "accepted_applicable_delivery_3", "required": "Retry/crash/concurrency, identity, capability, branch/verifier firewall and finalizer non-regression.", "evidence": "Owner mismatch is denied, unregistered reference IDs and unknown counterexample nodes cannot influence the graph, malformed nested collections fail closed, no research state enters ordinary task context, and all existing capability/verifier/finalizer tests pass."},
     "A4": {"status": "pending", "required": "Real web-driven paired mathematical evaluation with normal research/workspace tools and verified .tex outputs."},
     "A5": {"status": "pending", "required": "Task-envelope, projection latency, RSS, writes, replay and shutdown non-regression."}
   },
@@ -154,8 +154,9 @@
     "commit_pending": false
   },
   "delivery_2_receipt": {
-    "status": "validated_pending_commit",
+    "status": "accepted",
     "baseline_commit": "d9725832b9b7552984f593754b6f83e6c4aa9460",
+    "delivery_commit": "f5adb6f175ac0a7db62d0a5a989f63e5468f07f2",
     "production_behavior_changed": false,
     "authority_before": "rust",
     "authority_after": "rust",
@@ -211,6 +212,64 @@
         "result": "The pure-boundary, no-graph-dependency, frozen topology, final-.tex, migration-DAG and diff-hygiene gates passed."
       }
     ],
+    "commit_pending": false
+  },
+  "delivery_3_receipt": {
+    "status": "validated_pending_commit",
+    "baseline_commit": "f5adb6f175ac0a7db62d0a5a989f63e5468f07f2",
+    "production_behavior_changed": false,
+    "authority_before": "rust",
+    "authority_after": "rust",
+    "production_workflow_protocol": 2,
+    "state_schema_version": 2,
+    "public_task_context_changed": false,
+    "new_vault_channels": 0,
+    "new_dependencies": 0,
+    "engine_sha256": "a6d5d5bbe90b15b521d967249039a9253b7a3e93dedaa1a8e26133d312986f50",
+    "research_state_sha256": "c5d8fc4f30bfa645ff238d6f2482662b0e9833f97874c8cb3da97e60e71aaca7",
+    "normalizer_sha256": "3599757bc8287304a4d1310b0f59b281257822315becd6583df192c40770ad97",
+    "branch_normalizer_sha256": "b15cdd1eec32cf7c84a6e52ab65c9d4c5af00775dff9f7e671d982039f59819c",
+    "other_normalizer_sha256": "388755ccb61d54fa558086a8f8edbc42c8a5f0c4359c05557ac8475ab3eab75a",
+    "support_sha256": "501d1c83939ded429dba55ee4cf255f62041fac2a29addbf32aea6d65beafd8b",
+    "normalizer_tests_sha256": "b9efe922728130d923dd498e51ad2f3ccdd0557675439114d28c7b1a73688ee2",
+    "workflow_integration_tests_sha256": "83e3c306d442d26c1c81f3d07f6cd08fc88f6af9e486c9aa8cbdc2ca83ddac78",
+    "contract_validator_sha256": "b2d52e17e4f26db85bb3b6d6c49b36fe4e62bf9dd53bd52bc40987de48d6fadd",
+    "workflow_reference_sha256": "def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0",
+    "tests": {
+      "research_and_existing_workflow_unit_tests": 52,
+      "workflow_integration_tests": 5,
+      "concurrent_shadow_readers": 8,
+      "workflow_differential_checkpoints": 82,
+      "failures": 0
+    },
+    "implemented": [
+      "Pure normalization of protocol-2 active plans and current direct-screening status",
+      "Stable attempts for direct screening, sealed branches, counterexample probes, retrieval, failures and repair findings",
+      "Stable replanning and join decisions including selected-branch to selected-plan resolution",
+      "Authoritative reference-registry cross-check before retrieval novelty is counted",
+      "Witness and canonical-node requirements before a counterexample can refute a node",
+      "Hard bounds for channels, nested arrays, evidence, nodes, attempts, decisions and warnings",
+      "UTF-8-safe warning truncation and explicit warning truncation marker",
+      "Owner-authorized read-only research_state_shadow with deterministic concurrent replay",
+      "Static proof that the projector imports no I/O or workflow authority and remains absent from ordinary model task context"
+    ],
+    "commands": [
+      {
+        "command": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace",
+        "exit_code": 0,
+        "result": "The complete Rust workspace passed; mtm-workflow ran 52 unit tests and five integration tests including eight concurrent identical shadow projections with no state-tree mutation."
+      },
+      {
+        "command": "python3 scripts/run_mtm006_conformance.py",
+        "exit_code": 0,
+        "result": "All 82 protocol-1/2 workflow checkpoints retained zero mismatches and reference SHA-256 def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0."
+      },
+      {
+        "command": "python3 scripts/validate_mtm009_research_contract.py && python3 scripts/validate_migration_graph.py && python3 scripts/validate_engineering_graph.py && git diff --check",
+        "exit_code": 0,
+        "result": "The no-model-exposure shadow boundary, five-file pure source boundary, no-graph-dependency budget, unchanged authority topology and diff hygiene passed."
+      }
+    ],
     "commit_pending": true
   },
   "recorded_failures_and_repairs": [
@@ -237,10 +296,28 @@
       "stage": "historical target-evidence freshness",
       "failure": "The standalone governance suite correctly reported MTM-006, MTM-007 and MTM-008 implementation-bound target reports as stale after the new workflow source module was added.",
       "repair": "Preserved the historical reports unchanged, ran the full Rust workspace and exact 82-checkpoint workflow differential now, and deferred fresh target/release requalification to the release delivery where it is meaningful."
+    },
+    {
+      "delivery": 3,
+      "stage": "shadow provenance and counterexample review",
+      "failure": "The first legacy shadow normalizer accepted any reference_id written into the generation event channel and attached an unknown-node counterexample to the target, which could have distorted future advice despite the layer being non-authoritative.",
+      "repair": "Cross-check retrieval IDs against the authoritative reference registry, require a recognized canonical node and a meaningful non-empty witness before refutation, and add forged-ID, unknown-node and empty-witness regressions."
+    },
+    {
+      "delivery": 3,
+      "stage": "nested input and warning-bound review",
+      "failure": "Top-level channels were bounded, but nested plan, screening, branch and retrieval arrays were not all bounded; the original warning collector could also emit one detail beyond its declared maximum when adding the truncation marker.",
+      "repair": "Added hard limits to every normalized nested array, bounded retrieval evidence independently from novelty counts, reserved one warning slot for the truncation marker, and applied UTF-8-safe location/message truncation with adversarial tests."
+    },
+    {
+      "delivery": 3,
+      "stage": "legacy identity and join semantics review",
+      "failure": "Colon-bearing legacy plan/subgoal components could make concatenated node identities ambiguous, unknown direct-screening statuses were classified too strongly as failures, and a branch join selected_branch_id was not resolved back to its plan.",
+      "repair": "Reject ambiguous legacy identity components, normalize absent or future screening statuses as inconclusive with a warning, resolve selected branches through recognized sealed results, and add focused regression tests."
     }
   ],
   "manual_pending": [
-    "Delivery 3 must normalize append-only records and run the projector in read-only shadow before any model-facing exposure.",
+    "Delivery 4 must add strict protocol-3 research submissions while preserving the generic rethlas_step envelope and protocol-1/2 behavior.",
     "Protocol-3 mathematical effect must be measured on a frozen paired corpus before cutover.",
     "Other operating systems and site-local research/CAS layouts remain release-specific evidence."
   ],

@@ -15,6 +15,9 @@ use sha2::{Digest, Sha256};
 use crate::kernel::{TransitionDecision, TransitionRequest};
 use crate::methodology::{TaskCatalog, state_name};
 use crate::research::{DisabledResearchProvider, ResearchProvider, ResearchRequest};
+use crate::research_state::{
+    LegacyResearchInput, ResearchStateError, ResearchStateProjector, normalize_legacy_research,
+};
 use crate::vault::{BRANCH_CHANNELS, GENERATION_CHANNELS, PrivateVault, VERIFIER_CHANNELS};
 use crate::verifier::{
     FinalizationPermit, VerificationDecision, VerificationFinding, VerificationVerdict,
@@ -349,6 +352,91 @@ impl WorkflowEngine {
             "task": task,
             "context": context,
             "trace_id": trace,
+        }))
+    }
+
+    /// Derive the protocol-2 mathematical research state without changing the run,
+    /// issuing a capability, or exposing the projection through the public task
+    /// contract. This is an owner-authorized diagnostic used while MTM-009 remains in
+    /// read-only shadow.
+    pub fn research_state_shadow(&self, owner_id: &str, run_id: &str) -> Result<Value, ReCtmError> {
+        let run = self.require_owner(run_id, owner_id)?;
+        let metadata = run
+            .get("metadata")
+            .and_then(Value::as_object)
+            .ok_or_else(|| internal("run metadata is not an object"))?;
+        let round_index = run
+            .get("round_index")
+            .and_then(Value::as_i64)
+            .unwrap_or_default();
+        let round_index = u32::try_from(round_index)
+            .map_err(|_| internal("run round_index is outside the supported range"))?;
+        let mut branch_results = Vec::new();
+        for branch in self.store.list_branches(run_id)? {
+            if branch.get("status").and_then(Value::as_str) != Some("sealed") {
+                continue;
+            }
+            branch_results.push(
+                self.vault
+                    .read_branch_result(run_id, text(&branch, "branch_id")?)?,
+            );
+        }
+        let registered_reference_ids = self
+            .store
+            .list_run_references(run_id)?
+            .into_iter()
+            .filter_map(|reference| {
+                reference
+                    .get("reference_id")
+                    .and_then(Value::as_str)
+                    .map(str::to_owned)
+            })
+            .collect::<Vec<_>>();
+        let input = LegacyResearchInput::new(
+            self.vault.read_problem(run_id)?,
+            round_index,
+            metadata
+                .get("active_plans")
+                .cloned()
+                .unwrap_or_else(|| Value::Array(Vec::new())),
+            metadata
+                .get("direct_screening_progress")
+                .cloned()
+                .unwrap_or_else(|| Value::Object(Map::new())),
+        )
+        .with_proof_steps(self.vault.read_generation_memory(run_id, "proof_steps")?)
+        .with_counterexamples(
+            self.vault
+                .read_generation_memory(run_id, "counterexamples")?,
+        )
+        .with_failed_paths(self.vault.read_generation_memory(run_id, "failed_paths")?)
+        .with_big_decisions(self.vault.read_generation_memory(run_id, "big_decisions")?)
+        .with_events(self.vault.read_generation_memory(run_id, "events")?)
+        .with_registered_reference_ids(registered_reference_ids)
+        .with_branch_results(branch_results)
+        .with_join_result(self.vault.read_join_result(run_id)?)
+        .with_verification_reports(
+            self.vault
+                .read_generation_memory(run_id, "verification_reports")?,
+        );
+        let normalized = normalize_legacy_research(&input).map_err(research_state_shadow_error)?;
+        let state = ResearchStateProjector::analyze(normalized.snapshot())
+            .map_err(research_state_shadow_error)?;
+        let state = serde_json::to_value(&state)
+            .map_err(|error| internal(&format!("research-state serialization failed: {error}")))?;
+        let normalization = serde_json::to_value(normalized.summary())
+            .map_err(|error| internal(&format!("normalization serialization failed: {error}")))?;
+        let warnings = serde_json::to_value(normalized.warnings())
+            .map_err(|error| internal(&format!("warning serialization failed: {error}")))?;
+        Ok(serde_json::json!({
+            "ok":true,
+            "shadow":true,
+            "run_id":run_id,
+            "workflow_state":run["state"],
+            "workflow_protocol_version":metadata_i64(&run,"workflow_protocol_version",1),
+            "normalization":normalization,
+            "warnings":warnings,
+            "research_state":state
         }))
     }
 
@@ -3739,6 +3827,20 @@ fn invalid_details(message: &str, details: Value) -> ReCtmError {
 
 fn internal(message: &str) -> ReCtmError {
     ReCtmError::new("WORKFLOW_INTERNAL", message).with_category(ErrorCategory::Internal)
+}
+
+fn research_state_shadow_error(error: ResearchStateError) -> ReCtmError {
+    ReCtmError::new(
+        "RESEARCH_STATE_SHADOW_INVALID",
+        "The stored research history could not be projected in read-only shadow mode.",
+    )
+    .with_category(ErrorCategory::Internal)
+    .with_details(
+        serde_json::json!({"reason":error.to_string()})
+            .as_object()
+            .cloned()
+            .unwrap_or_default(),
+    )
 }
 
 fn sha256_text(value: &str) -> String {
