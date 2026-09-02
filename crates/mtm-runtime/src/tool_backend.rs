@@ -165,8 +165,8 @@ impl RuntimeToolBackend {
         .then_some("bubblewrap");
         let state_schema_version = self.store.schema_version()?;
         let mut payload = serde_json::json!({
-            "server":"re-ctm",
-            "title":"Re-CTM",
+            "server":"mtm",
+            "title":"MTM",
             "version":"0.3.0",
             "supported_protocol_versions":SUPPORTED_PROTOCOL_VERSIONS,
             "workspace":self.workspace.root(),
@@ -1204,7 +1204,7 @@ fn render_summary(name: &str, payload: &Map<String, Value>) -> String {
     }
     if name == "server_info" {
         return format!(
-            "Re-CTM {} with {} fixed tools.",
+            "MTM {} with {} fixed tools.",
             json_text(payload, "version"),
             payload
                 .get("tool_count")

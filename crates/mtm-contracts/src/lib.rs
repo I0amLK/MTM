@@ -30,7 +30,7 @@ pub const PUBLIC_TOOL_COUNT: u16 = NATIVE_TOOL_COUNT + RETHLAS_TOOL_COUNT;
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum RuntimeAuthority {
-    /// Re-CTM's Python runtime remains authoritative.
+    /// Historical source-reference authority used during the Re-CTM migration.
     Python,
     /// Rust executes only read-only differential shadow checks.
     RustShadow,

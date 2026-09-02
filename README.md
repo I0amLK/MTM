@@ -1,124 +1,285 @@
-# MTM-reboot
+# MTM
 
-MTM-reboot is the incremental Rust reboot of Re-CTM. The migration is deliberately
-split into eight independently accepted and reversible milestones.
+MTM is a Rust-native mathematical research runtime with capability-gated workflows,
+isolated Native tools, OAuth/MCP access, private workflow state, verifier/finalizer
+gates, and a single operational CLI/TUI.
 
-The governing order is:
+MTM was migrated from the Re-CTM 0.3.0 compatibility baseline, but it is now a
+separate project with its own executable, configuration namespace, and runtime data.
 
-1. preserve and deliver functionality, compatibility, and security;
-2. implement with records, differential checks, and rollback evidence;
-3. optimize only after equivalent behavior is demonstrated.
+Repository: <https://github.com/I0amLK/MTM>
 
-## Current status
+## Highlights
 
-- Source baseline: Re-CTM 0.3.0.
-- Current MTM production authority: the hash-recorded Rust 0.3.0 release selected by
-  `/home/lk/.local/bin/mtm`, SHA-256
-  `abe861df86dded73a5fba08bc1b71cba46164a846318d004e846409e240e8438`.
-- MTM-reboot Rust authority: typed pure contracts/policies, Native process/isolation,
-  copied-state persistence/capabilities, the OAuth/MCP/HTTP gateway, and the
-  workflow/private-vault/verifier/finalizer component, plus the single Rust runtime
-  composition, remaining adapters, CLI/TUI, Quick Tunnel session, and installable
-  release binary. All transferred live Re-CTM sessions now execute that Rust release.
-- Completed milestones: `MTM-001` through `MTM-008`.
-- `MTM-008` status: `completed`. Candidate qualification, immutable Python-wheel
-  restore, live cutover/rollback/recutover, 60-second soak, bounded A6 acceptance,
-  four-session transfer, final release upgrade, secret-free operator logging, and
-  Python production retirement all pass.
-- MTM no longer owns the `re-ctm` command. Re-CTM 0.3.0 is installed independently at
-  `/home/lk/.local/bin/re-ctm`, while MTM uses only `/home/lk/.local/bin/mtm` and
-  `/home/lk/.local/share/mtm`. The two command names and installation roots are
-  mechanically required to remain distinct; MTM provides no `re-ctm` compatibility alias.
-- Historical Python source is preserved as a non-production reference, and the tested
-  Re-CTM wheel remains owner-controlled at
-  `/home/lk/.local/share/re-ctm-rust/rollback/re_ctm-0.3.0-py3-none-any.whl`
-  with SHA-256
-  `7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b`.
+- Single Rust executable: `mtm`.
+- 24 public MCP tools plus 11 hidden compatibility aliases.
+- OAuth DCR, PKCE, bearer-token validation, legacy/modern MCP, and HTTP gateway.
+- Capability-gated Rethlas workflow with private vault, verifier, repair, and
+  mechanical finalizer.
+- Native command lifecycle with bounded output, TTY, timeout/kill provenance, and
+  Bubblewrap isolation on Linux.
+- File, Git, image, research, LaTeX, TUI, and Quick Tunnel integration.
+- No Python runtime dependency for MTM itself.
+- MTM and Re-CTM can be installed on the same machine without sharing an executable,
+  installation root, environment-variable namespace, or default runtime-data root.
 
-## Eight milestones
+## Platform and prerequisites
 
-1. Foundation, governance, source baseline, and conformance harness.
-2. Typed contract and pure policy core.
-3. Native process lifecycle and isolation worker.
-4. Persistence, migration, project state, and capability authority.
-5. OAuth, MCP, HTTP gateway, and public tool dispatch.
-6. Workflow, vault, verifier/finalizer, and project registry behavior.
-7. Remaining tools, integrations, TUI, Quick Tunnel, and packaging.
-8. Full cutover, target acceptance, performance evidence, and Python retirement.
+The current release is qualified on Linux x86_64. Other platforms may compile, but
+they do not yet have the same target acceptance evidence.
 
-The authoritative milestone graph is [`migration-graph.json`](migration-graph.json).
+Build requirements:
 
-## Bootstrap commands
+- Rust 1.85 or newer; Rust 1.98.0 is the tested release toolchain.
+- Cargo.
+- Git.
+
+Runtime requirements:
+
+- `curl` — required by the bounded research adapter.
+- `bubblewrap` / `bwrap` — strongly recommended and required for the validated Linux
+  Native isolation path used by `dangerous` mode.
+- `latexmk` and `pdflatex` — required for the fully compiled verifier/finalizer path
+  when LaTeX policy is `required`.
+- `cloudflared` — optional; required only for `--quick-tunnel`.
+- SageMath, Magma, or other CAS installations are optional and exposed through the
+  generic read-only toolchain-root policy when configured.
+
+Useful checks:
 
 ```bash
-python3 scripts/run_checks.py
-python3 scripts/run_mtm003_conformance.py
-python3 scripts/validate_mtm003_target_evidence.py
-python3 scripts/run_mtm004_conformance.py
-python3 scripts/validate_mtm004_target_evidence.py
-python3 scripts/run_mtm005_conformance.py
-python3 scripts/validate_mtm005_target_evidence.py
-python3 scripts/run_mtm006_conformance.py
-python3 scripts/validate_mtm006_target_evidence.py
-python3 scripts/run_mtm007_conformance.py
-python3 scripts/validate_mtm007_target_evidence.py
-python3 scripts/run_mtm008_performance.py
-python3 scripts/run_mtm008_soak.py
-python3 scripts/run_mtm008_candidate_validation.py
-python3 scripts/validate_mtm008_candidate_evidence.py
-python3 scripts/validate_mtm_command_namespace.py
-cargo run -q -p mtm-cli -- contract
-cargo run -q -p mtm-cli -- status
-cargo run -q -p mtm-cli -- release-info
-python3 scripts/run_mtm002_conformance.py
+rustc --version
+cargo --version
+command -v curl
+command -v bwrap
+command -v latexmk
+command -v pdflatex
+command -v cloudflared   # optional
 ```
 
-`MTM-002` compares 135 pure valid, invalid, boundary, and adversarial cases against
-the frozen Re-CTM Python source. `MTM-003` adds exact/semantic Native differential
-checks plus hash-bound real target evidence for Bubblewrap, TTY, SageMath, Magma,
-read-only toolchains, private-root denial, timeout/kill provenance, and Quick Tunnel
-ownership. At that milestone the old runtime remained the deployed production and
-rollback implementation until later milestones were independently accepted. `MTM-004` adds a
-52-operation exact state/capability corpus, v0/v1/v2 migration and rollback fixtures,
-and hash-bound real target evidence from a read-only backup of the configured Re-CTM
-state database. No private database row, run/project id, token, proof, or source
-content is written to the report. `MTM-005` adds 44 deterministic OAuth/MCP records,
-exact hashes for all 35 tool definitions, and real Firefox + HTTP validation of DCR,
-PKCE, fixed/dynamic issuers, Origin/CORS gates, legacy/modern MCP, public listing,
-hidden aliases, and mirror headers. At that milestone the old runtime remained the
-deployed traffic and state authority until later milestones were independently
-accepted. `MTM-006` adds 82
-exact workflow/vault/database checkpoints with zero Python-Rust mismatches plus real
-`pdflatex` evidence for mechanical finalization, VERIFIED project promotion,
-post-verifier proof-tamper denial, and server-derived reference-audit gaps. L2
-capability claims and the finalization permit are non-public-construction Rust
-authority types rather than caller-supplied role/state booleans. `MTM-007` adds an
-18-checkpoint full HTTP/OAuth/MCP/tool composition differential with frozen SHA-256
-`6aa4f5699df7099d29c12859788430bd6b1c66a8295828598b6cae62a964d830`, static
-hash-bound catalog/methodology assets, real release Bubblewrap/research/LaTeX/TUI/
-Quick-Tunnel acceptance, and `cargo install --path` single-binary distribution without
-Python/libpython linkage. Its A5 resource samples are non-regression evidence only;
-The accepted MTM-008 A6 statement is deliberately narrow: on the recorded
-authenticated loopback OAuth/MCP mix
-(`ping`, `tools/list`, `server_info`, `read_file`, and
-`check_exec_environment`) under eight clients, Rust passed conservative throughput,
-p95-latency, and RSS thresholds. That evidence is not a claim about external
-retrieval, Sage, Magma, LaTeX, or proof-generation time.
+## Install
 
-## Normal operation
+### Directly from GitHub
+
+```bash
+cargo install --git https://github.com/I0amLK/MTM.git --locked --bin mtm mtm-cli
+```
+
+Cargo normally installs the executable into `~/.cargo/bin`. Make sure that directory
+is on `PATH`:
+
+```bash
+export PATH="$HOME/.cargo/bin:$PATH"
+```
+
+Verify the installation:
+
+```bash
+mtm --version
+mtm release-info
+mtm check-config
+```
+
+Expected command identity:
+
+```text
+mtm 0.3.0
+```
+
+### Install from a local clone
+
+```bash
+git clone https://github.com/I0amLK/MTM.git
+cd MTM
+cargo install --path crates/mtm-cli --locked --force
+```
+
+## Update
+
+For an installation made directly from GitHub:
+
+```bash
+cargo install --git https://github.com/I0amLK/MTM.git --locked --bin mtm mtm-cli --force
+mtm --version
+mtm check-config
+```
+
+For a local clone:
+
+```bash
+cd MTM
+git pull --ff-only
+cargo install --path crates/mtm-cli --locked --force
+mtm --version
+```
+
+`--force` replaces the installed `mtm` binary only. MTM does not install or replace
+the `re-ctm` executable.
+
+## Start MTM
+
+### Recommended interactive launch
 
 ```bash
 mtm tui --quick-tunnel --native-mode dangerous
 ```
 
-`mtm` is the only MTM command. `re-ctm` belongs to the separate Re-CTM project and is
-not an alias for MTM. This allows both projects to be installed on the same machine
-without executable-name or installation-root collisions.
+This starts the operator TUI, enables the validated Bubblewrap-backed Native path,
+and attempts to create an owned Cloudflare Quick Tunnel. If `cloudflared` is not
+available, start locally without the tunnel:
 
-The command above runs the MTM Rust release. Bubblewrap remains the Linux operating-system
-isolation actuator for Native tools; it is not a Python dependency and it does not
-grant workflow or finalizer authority.
+```bash
+mtm tui --native-mode dangerous
+```
 
-The project does not claim parity, safety, or performance merely because a Rust
-binary builds. See [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) and
-[`docs/MIGRATION_PLAN.md`](docs/MIGRATION_PLAN.md).
+### Conservative local launch
+
+```bash
+mtm tui --native-mode safe
+```
+
+### Run the HTTP/MCP server directly
+
+```bash
+mtm serve \
+  --host 127.0.0.1 \
+  --port 8000 \
+  --workspace "$PWD" \
+  --native-mode safe
+```
+
+### Inspect configuration and Native isolation
+
+```bash
+mtm check-config
+mtm attest-native --workspace "$PWD" --native-mode dangerous
+```
+
+When no OAuth operator password is configured, an interactive launch generates one
+and prints it to the local terminal after the server has successfully bound. For
+background services, configure a password explicitly instead of relying on terminal
+output.
+
+## Configuration
+
+MTM uses only the `MTM_*` environment-variable namespace. It intentionally does not
+consume Re-CTM's `RE_CTM_*` variables.
+
+Important settings:
+
+| Variable | Purpose | Default |
+| --- | --- | --- |
+| `MTM_WORKSPACE` | Native/project workspace | current directory |
+| `MTM_DATA_ROOT` | Runtime state root | `~/.mtm` |
+| `MTM_PRIVATE_ROOT` | Private workflow/vault root | `$MTM_DATA_ROOT/private` |
+| `MTM_DEBUG_ROOT` | Debug/event root | `$MTM_DATA_ROOT/debug` |
+| `MTM_NATIVE_MODE` | `safe`, `trusted`, or `dangerous` | `safe` |
+| `MTM_NATIVE_EXEC_BACKEND` | `bubblewrap` or `disabled` | auto-detect on Linux |
+| `MTM_NATIVE_EXEC_ALLOW_ROOTS` | Extra read-only toolchain roots | empty |
+| `MTM_LATEX_POLICY` | `static_only`, `if_available`, or `required` | `required` |
+| `MTM_OAUTH_PASSWORD` | Operator password for OAuth authorization | generated interactively if omitted |
+| `MTM_SERVER_URL` | Fixed external OAuth/MCP base URL | dynamic loopback origin |
+| `MTM_ALLOWED_ORIGINS` | Additional allowed browser origins | empty |
+| `MTM_TOKEN_SECRET` | Hex-encoded OAuth signing secret | owner-only generated file |
+| `MTM_CAPABILITY_SECRET` | Hex-encoded L2 capability secret | derived/generated |
+| `MTM_THEOREM_SEARCH_URL` | Fixed theorem-search endpoint | LeanSearch endpoint |
+| `MTM_THEOREM_SEARCH_TIMEOUT_SECONDS` | Research timeout | `30` |
+| `MTM_DEBUG` | Enable debug event recording | off |
+| `MTM_TRACE_PAYLOADS` | Permit configured payload tracing | off |
+
+Example background configuration:
+
+```bash
+export MTM_OAUTH_PASSWORD='replace-with-a-long-random-secret'
+export MTM_NATIVE_MODE='dangerous'
+export MTM_LATEX_POLICY='required'
+
+mtm serve --host 127.0.0.1 --port 8000 --workspace "$PWD"
+```
+
+## MTM and Re-CTM can coexist
+
+The two projects deliberately use different namespaces:
+
+```text
+MTM
+  command:      mtm
+  config:       MTM_*
+  default data: ~/.mtm
+
+Re-CTM
+  command:      re-ctm
+  config:       RE_CTM_*
+  default data: ~/.re-ctm
+```
+
+MTM provides no `re-ctm` compatibility alias. Installing or updating MTM must not
+replace the Re-CTM executable, and installing Re-CTM must not replace `mtm`.
+
+You can verify both installations independently:
+
+```bash
+mtm --version
+re-ctm --version
+```
+
+## Native security model
+
+Rust and Bubblewrap protect different layers.
+
+Rust owns:
+
+- typed capability and authority boundaries;
+- command policy;
+- process ownership and lifecycle;
+- bounded output and timeout/kill provenance;
+- workflow state, verifier/finalizer permits, and private-vault access rules.
+
+Bubblewrap remains the Linux operating-system isolation actuator for arbitrary Native
+commands. It provides namespace/mount isolation and read-only toolchain exposure; it
+does not grant workflow, storage, verifier, or finalizer authority.
+
+`dangerous` Native mode therefore does **not** imply Rethlas/workflow authority.
+
+## Engineering and acceptance
+
+The Rust rewrite was accepted through eight recorded milestones. The repository keeps
+the migration graph, implementation graph, frozen Python/Rust differential corpora,
+real target evidence, rollback drills, soak results, and bounded A6 performance
+evidence.
+
+Key checks include:
+
+- 135-case pure policy differential.
+- Native lifecycle/isolation target checks with Bubblewrap, TTY, SageMath, Magma,
+  timeout/kill, private-root denial, and Quick Tunnel ownership.
+- 52-operation storage/capability differential and SQLite migration/rollback checks.
+- 44-record OAuth/MCP differential and real Firefox PKCE flow.
+- 82-checkpoint workflow/vault/verifier/finalizer differential.
+- 18-checkpoint full runtime composition differential, with only the intentional
+  product-identity transition from Re-CTM to MTM normalized for comparison.
+- Real LaTeX/finalizer, research, packaging, TUI, Quick Tunnel, rollback, and soak
+  validation.
+
+The performance claim is deliberately narrow: it applies only to the recorded
+authenticated loopback OAuth/MCP mixed workload under eight concurrent clients. It is
+not a general claim about external research, CAS workloads, LaTeX, or mathematical
+proof-generation time.
+
+Run the complete local gate from a source checkout with:
+
+```bash
+python3 scripts/run_checks.py
+```
+
+See also:
+
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md)
+- [`docs/MIGRATION_PLAN.md`](docs/MIGRATION_PLAN.md)
+- [`migration-graph.json`](migration-graph.json)
+- [`engineering-graph.json`](engineering-graph.json)
+
+## License
+
+Apache-2.0. See [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).

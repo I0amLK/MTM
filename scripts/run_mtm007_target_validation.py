@@ -95,22 +95,28 @@ def build_release() -> None:
     )
 
 
-def runtime_environment(workspace: Path, data_root: Path, backend: str, latex_policy: str) -> dict[str, str]:
+def runtime_environment(
+    workspace: Path,
+    data_root: Path,
+    backend: str,
+    latex_policy: str,
+    prefix: str = "MTM",
+) -> dict[str, str]:
     environment = os.environ.copy()
     environment.update(
         {
-            "RE_CTM_WORKSPACE": str(workspace),
-            "RE_CTM_DATA_ROOT": str(data_root),
-            "RE_CTM_PRIVATE_ROOT": str(data_root / "private"),
-            "RE_CTM_DEBUG_ROOT": str(data_root / "debug"),
-            "RE_CTM_NATIVE_EXEC_BACKEND": backend,
-            "RE_CTM_NATIVE_MODE": "safe",
-            "RE_CTM_LATEX_POLICY": latex_policy,
-            "RE_CTM_OAUTH_PASSWORD": OPERATOR_PASSWORD,
-            "RE_CTM_TOKEN_SECRET": TOKEN_SECRET,
-            "RE_CTM_CAPABILITY_SECRET": CAPABILITY_SECRET,
-            "RE_CTM_SERVER_URL": "",
-            "RE_CTM_DEBUG": "0",
+            f"{prefix}_WORKSPACE": str(workspace),
+            f"{prefix}_DATA_ROOT": str(data_root),
+            f"{prefix}_PRIVATE_ROOT": str(data_root / "private"),
+            f"{prefix}_DEBUG_ROOT": str(data_root / "debug"),
+            f"{prefix}_NATIVE_EXEC_BACKEND": backend,
+            f"{prefix}_NATIVE_MODE": "safe",
+            f"{prefix}_LATEX_POLICY": latex_policy,
+            f"{prefix}_OAUTH_PASSWORD": OPERATOR_PASSWORD,
+            f"{prefix}_TOKEN_SECRET": TOKEN_SECRET,
+            f"{prefix}_CAPABILITY_SECRET": CAPABILITY_SECRET,
+            f"{prefix}_SERVER_URL": "",
+            f"{prefix}_DEBUG": "0",
         }
     )
     return environment
@@ -493,7 +499,13 @@ def resource_sample(kind: str, root: Path, sample_index: int) -> dict[str, float
     data_root = root / f"{kind}-data-{sample_index}"
     port = free_port()
     base = f"http://127.0.0.1:{port}"
-    environment = runtime_environment(workspace, data_root, "disabled", "static_only")
+    environment = runtime_environment(
+        workspace,
+        data_root,
+        "disabled",
+        "static_only",
+        "MTM" if kind == "rust" else "RE_CTM",
+    )
     if kind == "rust":
         command = [
             str(RELEASE_BINARY),

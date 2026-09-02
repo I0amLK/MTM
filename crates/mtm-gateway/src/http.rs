@@ -118,7 +118,7 @@ async fn health(State(state): State<Arc<GatewayState>>, request: Request) -> Res
         StatusCode::OK,
         serde_json::json!({
             "ok": true,
-            "service": "re-ctm",
+            "service": "mtm",
             "oauth_only": true,
             "complete_flow_locally_validated": state.config.complete_flow_locally_validated,
             "trace_id": trace,
@@ -158,8 +158,8 @@ async fn mcp_card(
     let trace = trace_id(&state);
     let result = resolve_base_url(&state, request.headers(), Some(peer)).and_then(|base| {
         Ok(serde_json::json!({
-            "name": "re-ctm",
-            "title": "Re-CTM",
+            "name": "mtm",
+            "title": "MTM",
             "endpoint": format!("{base}{MCP_PATH}"),
             "oauth": state.oauth.protected_resource_metadata(Some(&base))?,
             "tool_count": state.catalog.list_public().len(),
@@ -217,7 +217,7 @@ async fn authorize_page(
                 })
                 .collect::<String>();
             let body = format!(
-                "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><title>Authorize Re-CTM</title>\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<style>body{{font-family:sans-serif;max-width:32rem;margin:4rem auto;padding:1rem}}input,button{{width:100%;padding:.7rem;margin:.4rem 0;box-sizing:border-box}}code{{overflow-wrap:anywhere}}</style>\n</head><body><h1>Authorize Re-CTM</h1>\n<p>Client: <code>{}</code></p>\n<p>Redirect: <code>{}</code></p>\n<form method=\"post\" action=\"/oauth/authorize\">{}\n<label>Operator password<input type=\"password\" name=\"password\" autocomplete=\"current-password\" required></label>\n<button type=\"submit\">Authorize</button></form>\n<p>Trace: <code>{}</code></p></body></html>",
+                "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><title>Authorize MTM</title>\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<style>body{{font-family:sans-serif;max-width:32rem;margin:4rem auto;padding:1rem}}input,button{{width:100%;padding:.7rem;margin:.4rem 0;box-sizing:border-box}}code{{overflow-wrap:anywhere}}</style>\n</head><body><h1>Authorize MTM</h1>\n<p>Client: <code>{}</code></p>\n<p>Redirect: <code>{}</code></p>\n<form method=\"post\" action=\"/oauth/authorize\">{}\n<label>Operator password<input type=\"password\" name=\"password\" autocomplete=\"current-password\" required></label>\n<button type=\"submit\">Authorize</button></form>\n<p>Trace: <code>{}</code></p></body></html>",
                 html_escape(&validated["client_id"]),
                 html_escape(&validated["redirect_uri"]),
                 hidden_html,
@@ -590,7 +590,7 @@ fn error_response(
             state,
         );
         if let Ok(value) = HeaderValue::from_str(&format!(
-            "Bearer realm=\"re-ctm\", resource_metadata=\"{base}/.well-known/oauth-protected-resource\""
+            "Bearer realm=\"mtm\", resource_metadata=\"{base}/.well-known/oauth-protected-resource\""
         )) {
             response.headers_mut().insert(WWW_AUTHENTICATE, value);
         }

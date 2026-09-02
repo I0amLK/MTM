@@ -148,8 +148,8 @@ def probe_server(executable: Path, root: Path, label: str) -> dict[str, Any]:
     data_root = root / f"{label}-data"
     prepare_workspace(workspace)
     port = free_port()
-    environment = runtime_environment(workspace, data_root)
-    environment["RE_CTM_OAUTH_PASSWORD"] = OPERATOR_PASSWORD
+    kind = "rust" if label.startswith("rust") else "python"
+    environment = runtime_environment(workspace, data_root, kind)
     command = [
         str(executable),
         "serve",

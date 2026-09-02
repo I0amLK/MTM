@@ -151,7 +151,7 @@ impl StateStore {
         if raw_version > STATE_SCHEMA_VERSION {
             return Err(ReCtmError::new(
                 "STATE_SCHEMA_NEWER_THAN_RUNTIME",
-                "The Re-CTM state database was created by a newer runtime.",
+                "The MTM state database was created by a newer runtime.",
             )
             .with_category(ErrorCategory::Conflict)
             .with_details(serde_json::json!({
@@ -171,7 +171,7 @@ impl StateStore {
         if version != STATE_SCHEMA_VERSION {
             return Err(ReCtmError::new(
                 "STATE_SCHEMA_MIGRATION_FAILED",
-                "The Re-CTM state database could not be migrated to the current schema.",
+                "The MTM state database could not be migrated to the current schema.",
             )
             .with_category(ErrorCategory::Internal)
             .with_details(serde_json::json!({

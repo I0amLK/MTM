@@ -31,29 +31,29 @@ pub struct RuntimeSettings {
 impl RuntimeSettings {
     pub fn from_env() -> Result<Self, ReCtmError> {
         let cwd = env::current_dir().map_err(io_error)?;
-        let workspace = absolute_path(env::var("RE_CTM_WORKSPACE").ok().as_deref(), &cwd)?;
+        let workspace = absolute_path(env::var("MTM_WORKSPACE").ok().as_deref(), &cwd)?;
         let home = env::var_os("HOME")
             .map(PathBuf::from)
-            .ok_or_else(|| validation("HOME is required to resolve default Re-CTM data paths."))?;
+            .ok_or_else(|| validation("HOME is required to resolve default MTM data paths."))?;
         let data_root = absolute_path(
-            env::var("RE_CTM_DATA_ROOT").ok().as_deref(),
-            &home.join(".re-ctm"),
+            env::var("MTM_DATA_ROOT").ok().as_deref(),
+            &home.join(".mtm"),
         )?;
         let private_root = absolute_path(
-            env::var("RE_CTM_PRIVATE_ROOT").ok().as_deref(),
+            env::var("MTM_PRIVATE_ROOT").ok().as_deref(),
             &data_root.join("private"),
         )?;
         let debug_root = absolute_path(
-            env::var("RE_CTM_DEBUG_ROOT").ok().as_deref(),
+            env::var("MTM_DEBUG_ROOT").ok().as_deref(),
             &data_root.join("debug"),
         )?;
         let native_mode = parse_native_mode(
-            env::var("RE_CTM_NATIVE_MODE")
+            env::var("MTM_NATIVE_MODE")
                 .ok()
                 .as_deref()
                 .unwrap_or("safe"),
         )?;
-        let configured_backend = env::var("RE_CTM_NATIVE_EXEC_BACKEND")
+        let configured_backend = env::var("MTM_NATIVE_EXEC_BACKEND")
             .unwrap_or_default()
             .trim()
             .to_owned();
@@ -67,41 +67,39 @@ impl RuntimeSettings {
             configured_backend
         };
         let native_exec_allow_roots = parse_allow_roots(
-            env::var("RE_CTM_NATIVE_EXEC_ALLOW_ROOTS")
+            env::var("MTM_NATIVE_EXEC_ALLOW_ROOTS")
                 .ok()
                 .as_deref()
                 .unwrap_or_default(),
         )?;
         let latex_policy = parse_latex_policy(
-            env::var("RE_CTM_LATEX_POLICY")
+            env::var("MTM_LATEX_POLICY")
                 .ok()
                 .as_deref()
                 .unwrap_or("required"),
         )?;
         let token_secret = decode_secret(
-            env::var("RE_CTM_TOKEN_SECRET").unwrap_or_default().trim(),
-            "RE_CTM_TOKEN_SECRET",
+            env::var("MTM_TOKEN_SECRET").unwrap_or_default().trim(),
+            "MTM_TOKEN_SECRET",
         )?;
         let mut capability_secret = decode_secret(
-            env::var("RE_CTM_CAPABILITY_SECRET")
-                .unwrap_or_default()
-                .trim(),
-            "RE_CTM_CAPABILITY_SECRET",
+            env::var("MTM_CAPABILITY_SECRET").unwrap_or_default().trim(),
+            "MTM_CAPABILITY_SECRET",
         )?;
         if capability_secret.is_empty() && !token_secret.is_empty() {
             capability_secret = derive_capability_secret(&token_secret);
         }
-        let allowed_origins = env::var("RE_CTM_ALLOWED_ORIGINS")
+        let allowed_origins = env::var("MTM_ALLOWED_ORIGINS")
             .unwrap_or_default()
             .split(',')
             .map(str::trim)
             .filter(|value| !value.is_empty())
             .map(|value| value.trim_end_matches('/').to_owned())
             .collect::<BTreeSet<_>>();
-        let timeout = env::var("RE_CTM_THEOREM_SEARCH_TIMEOUT_SECONDS")
+        let timeout = env::var("MTM_THEOREM_SEARCH_TIMEOUT_SECONDS")
             .unwrap_or_else(|_| "30".to_owned())
             .parse::<u64>()
-            .map_err(|_| validation("RE_CTM_THEOREM_SEARCH_TIMEOUT_SECONDS must be an integer."))?;
+            .map_err(|_| validation("MTM_THEOREM_SEARCH_TIMEOUT_SECONDS must be an integer."))?;
 
         let settings = Self {
             workspace,
@@ -112,15 +110,15 @@ impl RuntimeSettings {
             native_exec_backend,
             native_exec_allow_roots,
             latex_policy,
-            debug_enabled: truthy(env::var("RE_CTM_DEBUG").ok().as_deref()),
-            trace_payloads: truthy(env::var("RE_CTM_TRACE_PAYLOADS").ok().as_deref()),
-            oauth_server_url: env::var("RE_CTM_SERVER_URL")
+            debug_enabled: truthy(env::var("MTM_DEBUG").ok().as_deref()),
+            trace_payloads: truthy(env::var("MTM_TRACE_PAYLOADS").ok().as_deref()),
+            oauth_server_url: env::var("MTM_SERVER_URL")
                 .unwrap_or_default()
                 .trim_end_matches('/')
                 .to_owned(),
-            oauth_password: env::var("RE_CTM_OAUTH_PASSWORD").unwrap_or_default(),
+            oauth_password: env::var("MTM_OAUTH_PASSWORD").unwrap_or_default(),
             allowed_origins,
-            theorem_search_url: env::var("RE_CTM_THEOREM_SEARCH_URL")
+            theorem_search_url: env::var("MTM_THEOREM_SEARCH_URL")
                 .unwrap_or_else(|_| "https://leansearch.net/thm/search".to_owned())
                 .trim()
                 .to_owned(),
@@ -136,7 +134,7 @@ impl RuntimeSettings {
         if !self.workspace.is_dir() {
             return Err(ReCtmError::new(
                 "INVALID_WORKSPACE",
-                "RE_CTM_WORKSPACE must be an existing directory.",
+                "MTM_WORKSPACE must be an existing directory.",
             )
             .with_category(ErrorCategory::Validation)
             .with_details(serde_json::json!({"workspace":self.workspace})));
@@ -165,14 +163,14 @@ impl RuntimeSettings {
         if !matches!(self.native_exec_backend.as_str(), "disabled" | "bubblewrap") {
             return Err(ReCtmError::new(
                 "INVALID_NATIVE_EXEC_BACKEND",
-                "MTM-reboot currently supports disabled or bubblewrap Native execution.",
+                "MTM currently supports disabled or bubblewrap Native execution.",
             )
             .with_category(ErrorCategory::Validation));
         }
         if !self.native_exec_allow_roots.is_empty() && self.native_exec_backend != "bubblewrap" {
             return Err(ReCtmError::new(
                 "NATIVE_TOOLCHAIN_ROOTS_UNSUPPORTED",
-                "RE_CTM_NATIVE_EXEC_ALLOW_ROOTS requires the built-in Bubblewrap backend.",
+                "MTM_NATIVE_EXEC_ALLOW_ROOTS requires the built-in Bubblewrap backend.",
             )
             .with_category(ErrorCategory::Validation));
         }
@@ -186,7 +184,7 @@ impl RuntimeSettings {
         if !(1..=300).contains(&self.theorem_search_timeout_seconds) {
             return Err(ReCtmError::new(
                 "INVALID_RESEARCH_TIMEOUT",
-                "RE_CTM_THEOREM_SEARCH_TIMEOUT_SECONDS must be between 1 and 300.",
+                "MTM_THEOREM_SEARCH_TIMEOUT_SECONDS must be between 1 and 300.",
             )
             .with_category(ErrorCategory::Validation));
         }
@@ -276,7 +274,7 @@ fn parse_allow_roots(value: &str) -> Result<Vec<PathBuf>, ReCtmError> {
             let path = PathBuf::from(item);
             if !path.is_absolute() {
                 return Err(validation(
-                    "RE_CTM_NATIVE_EXEC_ALLOW_ROOTS entries must be absolute paths.",
+                    "MTM_NATIVE_EXEC_ALLOW_ROOTS entries must be absolute paths.",
                 ));
             }
             path.canonicalize().map_err(io_error)
@@ -302,7 +300,7 @@ fn parse_native_mode(value: &str) -> Result<NativeMode, ReCtmError> {
         "trusted" => Ok(NativeMode::Trusted),
         "dangerous" => Ok(NativeMode::Dangerous),
         _ => Err(validation(
-            "RE_CTM_NATIVE_MODE must be safe, trusted, or dangerous.",
+            "MTM_NATIVE_MODE must be safe, trusted, or dangerous.",
         )),
     }
 }
@@ -313,7 +311,7 @@ fn parse_latex_policy(value: &str) -> Result<LatexPolicy, ReCtmError> {
         "if_available" => Ok(LatexPolicy::IfAvailable),
         "required" => Ok(LatexPolicy::Required),
         _ => Err(validation(
-            "RE_CTM_LATEX_POLICY must be static_only, if_available, or required.",
+            "MTM_LATEX_POLICY must be static_only, if_available, or required.",
         )),
     }
 }

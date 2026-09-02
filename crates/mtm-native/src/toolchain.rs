@@ -84,7 +84,7 @@ pub fn parse_native_exec_allow_roots(raw: Option<&str>) -> Result<Vec<PathBuf>, 
         if !path.is_absolute() {
             return Err(ReCtmError::new(
                 "INVALID_NATIVE_EXEC_ALLOW_ROOT",
-                "RE_CTM_NATIVE_EXEC_ALLOW_ROOTS entries must be absolute paths.",
+                "MTM_NATIVE_EXEC_ALLOW_ROOTS entries must be absolute paths.",
             )
             .with_category(ErrorCategory::Validation)
             .with_details(serde_json::json!({"root": value})));
@@ -232,7 +232,7 @@ impl RootPolicy {
             .iter()
             .any(|forbidden| overlaps(&path, forbidden))
         {
-            Some("root overlaps Re-CTM data/private state")
+            Some("root overlaps MTM data/private state")
         } else {
             None
         };

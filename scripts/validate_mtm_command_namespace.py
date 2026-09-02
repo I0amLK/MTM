@@ -6,7 +6,9 @@ from pathlib import Path
 
 try:
     from scripts.run_mtm_command_namespace_cutover import (
+        LEGACY_SHARED_DATA_ROOT,
         MTM_BIN,
+        MTM_DATA_ROOT,
         MTM_STATE_ROOT,
         RE_CTM_BIN,
         RE_CTM_TOOL_ROOT,
@@ -15,7 +17,9 @@ try:
     )
 except ModuleNotFoundError:
     from run_mtm_command_namespace_cutover import (
+        LEGACY_SHARED_DATA_ROOT,
         MTM_BIN,
+        MTM_DATA_ROOT,
         MTM_STATE_ROOT,
         RE_CTM_BIN,
         RE_CTM_TOOL_ROOT,
@@ -34,6 +38,7 @@ REQUIRED = {
     "mtm_sessions_restarted",
     "old_mtm_selector_released",
     "distinct_install_roots",
+    "distinct_runtime_data_roots",
 }
 
 
@@ -57,6 +62,10 @@ def validate() -> dict[str, object]:
         raise ValueError("MTM and Re-CTM resolve to the same executable")
     if MTM_STATE_ROOT.resolve() == RE_CTM_TOOL_ROOT.resolve():
         raise ValueError("MTM and Re-CTM share an installation root")
+    if not MTM_DATA_ROOT.is_dir() or MTM_DATA_ROOT.is_symlink():
+        raise ValueError("MTM runtime data root is missing or unsafe")
+    if MTM_DATA_ROOT.resolve() == LEGACY_SHARED_DATA_ROOT.resolve():
+        raise ValueError("MTM and Re-CTM share a runtime data root")
     serialized = json.dumps(payload, ensure_ascii=False).lower()
     for forbidden in ("access_token", "client_secret", "oauth operator key:", "capability_secret"):
         if forbidden in serialized:
@@ -66,6 +75,7 @@ def validate() -> dict[str, object]:
         "required_check_count": len(REQUIRED),
         "mtm_target": str(MTM_BIN.resolve()),
         "re_ctm_target": str(RE_CTM_BIN.resolve()),
+        "mtm_data_root": str(MTM_DATA_ROOT.resolve()),
     }
 
 

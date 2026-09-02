@@ -332,6 +332,22 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
         if forbidden in operator_source:
             raise ValueError(f"operator observer acquired authority-bearing type: {forbidden}")
 
+    runtime_config_source = (
+        ROOT / "crates" / "mtm-runtime" / "src" / "config.rs"
+    ).read_text(encoding="utf-8")
+    if 'env::var("RE_CTM_' in runtime_config_source:
+        raise ValueError("MTM runtime must not consume the Re-CTM environment namespace")
+    if 'env::var("MTM_' not in runtime_config_source:
+        raise ValueError("MTM runtime environment namespace is missing")
+    if '&home.join(".mtm")' not in runtime_config_source:
+        raise ValueError("MTM default runtime data root must remain ~/.mtm")
+
+    mcp_source = (ROOT / "crates" / "mtm-gateway" / "src" / "mcp.rs").read_text(
+        encoding="utf-8"
+    )
+    if '{"name": "mtm", "title": "MTM", "version": "0.3.0"}' not in mcp_source:
+        raise ValueError("public MCP server identity must remain MTM")
+
     catalog_b64 = (ROOT / "crates" / "mtm-cli" / "assets" / "tool-catalog-v1.b64").read_text(
         encoding="utf-8"
     )
@@ -435,6 +451,8 @@ def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:
         "mtm_cli_presentation_boundary": True,
         "oauth_principal_unforgeable_by_public_construction": True,
         "operator_observer_presentation_only": True,
+        "mtm_runtime_namespace_isolated": True,
+        "mtm_public_identity": True,
         "embedded_tool_catalog_sha256": catalog_raw_sha256,
         "embedded_methodology_sha256": methodology_sha256,
         "runtime_vertices": len(runtime_ids),

@@ -97,6 +97,6 @@
     {"id": "INV-007", "statement": "The observer can display redacted facts but cannot authorize, persist, or transition state."},
     {"id": "INV-008", "statement": "Graph metrics never override functional or security boundaries."},
     {"id": "INV-009", "statement": "The mtm command namespace belongs exclusively to MTM and selects only a hash-verified MTM Rust release."},
-    {"id": "INV-010", "statement": "MTM and Re-CTM use distinct commands and installation roots; neither project provides a compatibility alias for the other."}
+    {"id": "INV-010", "statement": "MTM and Re-CTM use distinct commands, installation roots, environment-variable namespaces, and default runtime-data roots; neither project provides a compatibility alias for the other."}
   ]
 }

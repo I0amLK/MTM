@@ -95,6 +95,8 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(summary["mtm_cli_presentation_boundary"])
         self.assertTrue(summary["oauth_principal_unforgeable_by_public_construction"])
         self.assertTrue(summary["operator_observer_presentation_only"])
+        self.assertTrue(summary["mtm_runtime_namespace_isolated"])
+        self.assertTrue(summary["mtm_public_identity"])
         self.assertTrue(summary["deployment_command_namespace_separated"])
 
     def test_current_mtm003_target_evidence_is_fresh(self) -> None:
@@ -123,7 +125,7 @@ class GovernanceTestCase(unittest.TestCase):
 
     def test_current_mtm_and_re_ctm_command_namespaces_are_separate(self) -> None:
         summary = validate_mtm_command_namespace()
-        self.assertEqual(summary["required_check_count"], 9)
+        self.assertEqual(summary["required_check_count"], 10)
 
     def test_mtm_cli_publishes_only_the_mtm_binary_name(self) -> None:
         manifest = tomllib.loads((ROOT / "crates" / "mtm-cli" / "Cargo.toml").read_text(encoding="utf-8"))

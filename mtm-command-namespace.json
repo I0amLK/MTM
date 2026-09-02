@@ -3,7 +3,7 @@
   "project": "MTM-reboot",
   "phase": "command_namespace_separation",
   "passed": true,
-  "implementation_sha256": "2b3677c0bf9cf5cb15e09d1eb0ec6646634592f933034d168dcfe11610285551",
+  "implementation_sha256": "981b50116eae98b72d03376c5b0819cfd904d2f8641b5df16820763fdf95b930",
   "checks": [
     {
       "name": "mtm_command_unique",
@@ -40,13 +40,17 @@
     {
       "name": "distinct_install_roots",
       "passed": true
+    },
+    {
+      "name": "distinct_runtime_data_roots",
+      "passed": true
     }
   ],
   "mtm": {
     "command": "/home/lk/.local/bin/mtm",
     "target": "/home/lk/.local/share/mtm/releases/0.3.0/mtm",
     "version": "mtm 0.3.0",
-    "release_sha256": "abe861df86dded73a5fba08bc1b71cba46164a846318d004e846409e240e8438"
+    "release_sha256": "0a785a122396a3f8961cbc33b967e7a48874b90311333c8860a1e5c75582fd7f"
   },
   "re_ctm": {
     "command": "/home/lk/.local/bin/re-ctm",
@@ -55,13 +59,18 @@
   },
   "sessions": {
     "stopped": {
-      "owned": 0,
+      "owned": 5,
       "sigterm": 0,
       "remaining": 0
     },
     "restarted_count": 4
   },
-  "recovery_after_partial_cutover": true,
+  "runtime_data_fork": {
+    "created": false,
+    "source_present": true,
+    "destination": "/home/lk/.mtm"
+  },
+  "recovery_after_partial_cutover": false,
   "historical_migration_root_retained": true,
   "sensitive_content_recorded": false
 }

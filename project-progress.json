@@ -47,15 +47,15 @@
     "OAuthPrincipal is no longer publicly constructible/deserializable in production; the legacy shadow constructor is feature-gated off by default, and OperatorSession owns no storage/capability/vault/workflow authority.",
     "MTM-008 began only after commit 5c7aa283977bc705f425efe23f6fcb0ac7a9359b, the MTM-007 golden, all lower target evidence and the complete local gate were revalidated.",
     "The MTM-008 Rust 0.3.0 candidate is shadow-qualified: release identity and no-Python linkage, immutable Python-wheel restore, temporary atomic cutover/rollback/recutover, all prior target evidence, a sixty-second soak and bounded A6 qualification pass.",
-    "On the exact authenticated local OAuth/MCP mixed workload with eight clients, the command-separated MTM release observed a 2.435x median throughput ratio, a 0.475 p95-latency ratio and a 0.671 peak-RSS ratio for Rust versus Python; this claim is limited to that recorded workload.",
-    "The command-separated sixty-second Rust soak completed 169,990 requests with zero errors and 29 stateful start/cancel cycles, no file-descriptor or thread growth, no child process, and graceful shutdown.",
+    "On the exact authenticated local OAuth/MCP mixed workload with eight clients, the final public MTM release observed a 2.226x median throughput ratio, a 0.505 p95-latency ratio and a 0.670 peak-RSS ratio for Rust versus Python; this claim is limited to that recorded workload.",
+    "The final public-release sixty-second Rust soak completed 168,845 requests with zero errors and 29 stateful start/cancel cycles, no file-descriptor or thread growth, no child process, and graceful shutdown.",
     "The live /home/lk/.local/bin/mtm selector points to the hash-recorded MTM Rust 0.3.0 release; four serve/TUI sessions execute it. /home/lk/.local/bin/re-ctm is a distinct independently installed Re-CTM 0.3.0 command, not an MTM alias.",
     "The first live restart was rejected because generated operator keys entered owner-only logs; the final rerun stores generated keys only in mode-0600 secret files and all background logs contain only the configured-externally marker.",
-    "A6 claims only the recorded authenticated loopback OAuth/MCP mixed workload: Rust achieved a 2.435x median throughput ratio, 0.475 p95-latency ratio and 0.671 peak-RSS ratio versus Python under eight clients.",
-    "The MTM command-separated release SHA-256 is abe861df86dded73a5fba08bc1b71cba46164a846318d004e846409e240e8438; the binary reports name=mtm, Rust production authority, and no Python runtime dependency.",
+    "A6 claims only the recorded authenticated loopback OAuth/MCP mixed workload: Rust achieved a 2.226x median throughput ratio, 0.505 p95-latency ratio and 0.670 peak-RSS ratio versus Python under eight clients.",
+    "The final MTM public-release SHA-256 is 0a785a122396a3f8961cbc33b967e7a48874b90311333c8860a1e5c75582fd7f; the binary reports name=mtm, Rust production authority, and no Python runtime dependency.",
     "MTM-008 retirement removed Python from MTM production authority. Re-CTM 0.3.0 is now restored as a separate co-installable project under its own command and uv tool root, while all four MTM sessions execute the exact MTM Rust release.",
     "The immutable rollback wheel remains at /home/lk/.local/share/re-ctm-rust/rollback/re_ctm-0.3.0-py3-none-any.whl with SHA-256 7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b; it was restored and served OAuth metadata after Python retirement.",
-    "authority-inventory.json records every MTM production authority as Rust, with Bubblewrap retained only as the Linux kernel-isolation actuator; command-namespace evidence proves mtm and re-ctm resolve to different executables and installation roots."
+    "authority-inventory.json records every MTM production authority as Rust, with Bubblewrap retained only as the Linux kernel-isolation actuator; release evidence proves MTM uses mtm / MTM_* / ~/.mtm while Re-CTM uses re-ctm / RE_CTM_* / ~/.re-ctm."
   ],
   "manual_pending": [
     "Other operating systems and site-local toolchain layouts remain target-specific Native evidence.",

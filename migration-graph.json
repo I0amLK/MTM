@@ -1958,6 +1958,103 @@
         "Other operating systems and deployment users require their own dual-install namespace verification."
       ],
       "decision": "accepted_post_completion_correction"
+    },
+    {
+      "receipt_id": "MREC-008D",
+      "milestone_id": "MTM-008",
+      "started_at": "2026-09-01T19:20:00-07:00",
+      "completed_at": "2026-09-01T19:54:00-07:00",
+      "status_before": "completed",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "fix(release): prepare MTM public distribution [MTM-008]",
+      "files_changed": [
+        "README.md",
+        "Cargo.toml",
+        "crates/mtm-contracts/src/lib.rs",
+        "crates/mtm-gateway/src/http.rs",
+        "crates/mtm-gateway/src/mcp.rs",
+        "crates/mtm-gateway/src/oauth.rs",
+        "crates/mtm-native/src/quick_tunnel.rs",
+        "crates/mtm-native/src/toolchain.rs",
+        "crates/mtm-runtime/src/config.rs",
+        "crates/mtm-runtime/src/tool_backend.rs",
+        "crates/mtm-storage/src/store.rs",
+        "scripts/mtm008_runtime_harness.py",
+        "scripts/run_mtm003_conformance.py",
+        "scripts/run_mtm005_conformance.py",
+        "scripts/run_mtm007_conformance.py",
+        "scripts/run_mtm007_target_validation.py",
+        "scripts/run_mtm008_candidate_validation.py",
+        "scripts/run_mtm_command_namespace_cutover.py",
+        "scripts/validate_engineering_graph.py",
+        "scripts/validate_mtm_command_namespace.py",
+        "tests/test_governance.py",
+        "engineering-graph.json",
+        "authority-inventory.json",
+        "project-progress.json",
+        "records/iterations/ITER-008.json",
+        "mtm-command-namespace.json",
+        "mtm003-target-validation.json",
+        "mtm004-target-validation.json",
+        "mtm005-target-validation.json",
+        "mtm006-target-validation.json",
+        "mtm007-target-validation.json",
+        "mtm008-performance.json",
+        "mtm008-soak.json",
+        "mtm008-candidate-validation.json"
+      ],
+      "commands": [
+        {
+          "command": "cargo fmt/clippy/test plus MTM-002, MTM-005 and MTM-007 conformance after public namespace split",
+          "exit_code": 0,
+          "result": "Strict Rust gates pass; frozen source hashes remain unchanged and all differentials have zero semantic mismatches. Intentional product branding is normalized only in explicitly named identity fields."
+        },
+        {
+          "command": "MTM-003 through MTM-007 real target revalidation",
+          "exit_code": 0,
+          "result": "All implementation-bound Linux target evidence was regenerated. The first MTM-007 A5 rerun correctly failed because the Python reference received MTM_* instead of RE_CTM_*; the harness was split by runtime and the complete twelve-check target then passed."
+        },
+        {
+          "command": "python3 scripts/run_mtm008_performance.py; run_mtm008_soak.py; run_mtm008_candidate_validation.py",
+          "exit_code": 0,
+          "result": "The final public release SHA-256 0a785a122396a3f8961cbc33b967e7a48874b90311333c8860a1e5c75582fd7f passed bounded A6, a sixty-second 168845-request zero-error soak, rollback-wheel restore and candidate qualification."
+        },
+        {
+          "command": "python3 scripts/run_mtm_command_namespace_cutover.py && python3 scripts/validate_mtm_command_namespace.py",
+          "exit_code": 0,
+          "result": "Ten coexistence checks pass. MTM owns mtm / MTM_* / ~/.mtm; Re-CTM owns re-ctm / RE_CTM_* / ~/.re-ctm. The formerly shared runtime state was copied once under a stopped-session boundary, Re-CTM state was not modified, and an idempotent rerun performed no second copy."
+        },
+        {
+          "command": "cargo install --git file://<committed-MTM-repository> --locked --bin mtm mtm-cli --root <temporary> --force",
+          "exit_code": 0,
+          "result": "The committed Git source installed successfully through Cargo's --git path and produced only the mtm executable; mtm --version and release-info returned the final MTM identity."
+        },
+        {
+          "command": "python3 scripts/run_checks.py",
+          "exit_code": 0,
+          "result": "The unified completed-state gate passes after the public naming, configuration, runtime-data and documentation changes."
+        }
+      ],
+      "acceptance": {
+        "A0": {"passed": true, "evidence": ["Rust formatting, warnings-denied Clippy, workspace tests, governance tests, migration/engineering graphs and unified local checks pass."]},
+        "A1": {"passed": true, "evidence": ["The release publishes exactly one executable named mtm; public HTTP/MCP identity is MTM; the Cargo repository metadata points to https://github.com/I0amLK/MTM.git."]},
+        "A2": {"passed": true, "evidence": ["Historical Re-CTM source golden hashes remain unchanged; MTM-003/005/007 permit only narrowly declared product-identity wording differences while ordinary protocol and behavior fields remain exact."]},
+        "A3": {"passed": true, "evidence": ["Architecture validation rejects RE_CTM_* consumption by MTM, requires ~/.mtm as the MTM default data root, and preserves distinct mtm/re-ctm command and installation namespaces."]},
+        "A4": {"passed": true, "evidence": ["All MTM-003 through MTM-007 real Linux target evidence passes against the final release; MTM and Re-CTM start independently and four MTM live sessions use the final release after the state-root fork."]},
+        "A5": {"passed": true, "evidence": ["MTM-007 resource non-regression passes and the final release completed 168845 requests over sixty seconds with zero errors, zero fd/thread growth and no child leak."]},
+        "A6": {"passed": true, "evidence": ["On the bounded eight-client authenticated loopback OAuth/MCP workload, final observed Rust/Python ratios were 2.225839 median throughput, 0.505386 p95 latency and 0.669716 peak RSS; conservative thresholds also passed."]}
+      },
+      "behavior_before": "The mtm command was already distinct from re-ctm, but MTM still consumed the RE_CTM_* environment namespace, defaulted runtime state to ~/.re-ctm, and exposed several Re-CTM product labels, so a dual installation could still have configuration/state ambiguity.",
+      "behavior_after": "MTM is a fully separate public distribution: the only binary is mtm, configuration is MTM_*, default runtime state is ~/.mtm, public HTTP/MCP identity is MTM, Re-CTM retains re-ctm/RE_CTM_*/~/.re-ctm, and the README documents GitHub install, update and startup commands.",
+      "risk_review": "The runtime-state separation copied the prior shared state only while MTM sessions were stopped and never removed or modified the Re-CTM source root. Internal helper protocol/sandbox labels that are security compatibility contracts were intentionally left unchanged. Frozen source differentials retain original hashes and only explicitly enumerated product-branding fields are normalized.",
+      "rollback": "Stop MTM sessions and reinstall the prior accepted mtm release if required; ~/.mtm and ~/.re-ctm are independent, so reverting MTM never requires repointing or overwriting the separate re-ctm installation.",
+      "manual_pending": [
+        "Push the release-preparation commit to https://github.com/I0amLK/MTM.git and verify the documented cargo --git installation from the published repository.",
+        "Other operating systems and deployment users require independent release qualification."
+      ],
+      "decision": "accepted_public_release_preparation"
     }
   ]
 }

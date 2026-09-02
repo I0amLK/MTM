@@ -16,8 +16,8 @@ version = "0.3.0"
 edition = "2024"
 rust-version = "1.85"
 license = "Apache-2.0"
-authors = ["MTM-reboot Contributors"]
-repository = "https://github.com/I0amLK/MTM-reboot"
+authors = ["MTM Contributors"]
+repository = "https://github.com/I0amLK/MTM.git"
 
 [workspace.dependencies]
 regex = "1.11"

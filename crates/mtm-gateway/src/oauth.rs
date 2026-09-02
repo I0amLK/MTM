@@ -330,7 +330,7 @@ impl OAuthService {
         if password.is_empty() {
             return Err(ReCtmError::new(
                 "OAUTH_PASSWORD_REQUIRED",
-                "RE_CTM_OAUTH_PASSWORD is required.",
+                "MTM_OAUTH_PASSWORD is required.",
             )
             .with_category(ErrorCategory::Security));
         }

@@ -596,7 +596,9 @@ def main(argv: list[str] | None = None) -> int:
 def compare_mapping(expected: dict[str, Any], actual: dict[str, Any]) -> list[dict[str, Any]]:
     mismatches = []
     for key in sorted(set(expected) | set(actual)):
-        if expected.get(key) != actual.get(key):
+        if normalize_release_branding(expected.get(key)) != normalize_release_branding(
+            actual.get(key)
+        ):
             mismatches.append(
                 {
                     "case": key,
@@ -605,6 +607,16 @@ def compare_mapping(expected: dict[str, Any], actual: dict[str, Any]) -> list[di
                 }
             )
     return mismatches
+
+
+def normalize_release_branding(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {key: normalize_release_branding(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [normalize_release_branding(item) for item in value]
+    if value == "root overlaps Re-CTM data/private state":
+        return "root overlaps MTM data/private state"
+    return value
 
 
 def normalize_paths(value: Any, root: str) -> Any:

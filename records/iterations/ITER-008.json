@@ -86,6 +86,16 @@
       "stage": "standalone retirement-validator import path",
       "failure": "The retirement report passed all seventeen checks, but direct execution of the independent validator could not import the scripts package from its script-directory sys.path.",
       "repair": "Added the same script/module import fallback used by the earlier target validators, changed no acceptance condition, invalidated the evidence hash, and reran both retirement and independent validation successfully."
+    },
+    {
+      "stage": "public release namespace audit",
+      "failure": "README preparation exposed that the renamed mtm executable still consumed RE_CTM_* environment variables and defaulted to ~/.re-ctm, so co-installed MTM and Re-CTM could still share configuration and runtime state despite distinct command names.",
+      "repair": "Moved MTM runtime configuration exclusively to MTM_*, changed the default runtime-data root to ~/.mtm, retained Re-CTM at RE_CTM_*/~/.re-ctm, forked the previously shared runtime state under a stopped-session boundary, and added architecture/governance checks that reject namespace regression."
+    },
+    {
+      "stage": "MTM-007 resource reference after environment separation",
+      "failure": "The first post-namespace MTM-007 target rerun gave the Python reference MTM_* variables, so its OAuth operator password was absent and the reference authorization correctly failed with HTTP 403.",
+      "repair": "Made the target harness choose MTM_* only for Rust and RE_CTM_* only for the frozen Python reference, then reran the full twelve-check target suite successfully."
     }
   ],
   "acceptance": {
@@ -101,7 +111,7 @@
       "passed": true,
       "evidence": [
         "All MTM-002 through MTM-007 frozen differentials remain exact.",
-        "The release-info contract identifies re-ctm 0.3.0, Rust implementation, no Python runtime, 24 public tools, 11 hidden aliases, state schema 2 and workflow protocol 2."
+        "The final release-info contract identifies mtm 0.3.0, Rust implementation, no Python runtime, 24 public tools, 11 hidden aliases, state schema 2 and workflow protocol 2."
       ]
     },
     "A2": {
@@ -142,8 +152,8 @@
       "passed": true,
       "evidence": [
         "Seven repetitions per runtime and 5600 measured requests per runtime used the same authenticated local OAuth/MCP workload with eight clients.",
-        "Observed Rust/Python median throughput ratio was 2.434771; p95 latency ratio 0.474969; peak RSS ratio 0.670765.",
-        "Conservative bootstrap ratios were 2.400487 throughput, 0.491248 p95 latency, and 0.676948 RSS, all beyond predefined thresholds."
+        "Final public-release measurement observed Rust/Python median throughput ratio 2.225839; p95 latency ratio 0.505386; peak RSS ratio 0.669716.",
+        "Final conservative bootstrap ratios were 2.205282 throughput, 0.52023 p95 latency, and 0.674448 RSS, all beyond predefined thresholds."
       ],
       "claim_scope": "Authenticated loopback OAuth/MCP ping, tools/list, server_info, read_file, and check_exec_environment under eight concurrent clients only."
     }

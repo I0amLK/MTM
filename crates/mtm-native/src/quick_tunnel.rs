@@ -16,7 +16,10 @@ use nix::unistd::Pid;
 use serde::{Deserialize, Serialize};
 
 const MAX_LOG_CHUNK: usize = 16_384;
-const SECRET_ENV_KEYS: [&str; 8] = [
+const SECRET_ENV_KEYS: [&str; 11] = [
+    "MTM_OAUTH_PASSWORD",
+    "MTM_TOKEN_SECRET",
+    "MTM_CAPABILITY_SECRET",
     "RE_CTM_OAUTH_PASSWORD",
     "RE_CTM_TOKEN_SECRET",
     "RE_CTM_CAPABILITY_SECRET",

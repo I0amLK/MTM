@@ -1,14 +1,14 @@
 {
   "a6_claim": {
     "observed": {
-      "conservative_p95_ratio": 0.514259,
-      "conservative_rss_ratio": 0.674808,
-      "conservative_throughput_ratio": 2.27984,
-      "p95_latency_ratio_rust_over_python": 0.499841,
-      "p99_latency_ratio_rust_over_python": 0.537199,
-      "rss_ratio_rust_over_python": 0.670145,
-      "startup_ratio_rust_over_python": 0.202607,
-      "throughput_median_ratio_rust_over_python": 2.345509
+      "conservative_p95_ratio": 0.52023,
+      "conservative_rss_ratio": 0.674448,
+      "conservative_throughput_ratio": 2.205282,
+      "p95_latency_ratio_rust_over_python": 0.505386,
+      "p99_latency_ratio_rust_over_python": 0.543811,
+      "rss_ratio_rust_over_python": 0.669716,
+      "startup_ratio_rust_over_python": 0.203229,
+      "throughput_median_ratio_rust_over_python": 2.225839
     },
     "passed": true,
     "path": "authenticated local OAuth/MCP mixed request path",
@@ -30,6 +30,8 @@
   "production_authority": "rust",
   "production_command": "/home/lk/.local/bin/mtm",
   "production_command_target": "/home/lk/.local/share/mtm/releases/0.3.0/mtm",
+  "runtime_data_root": "/home/lk/.mtm",
+  "separate_re_ctm_data_root": "/home/lk/.re-ctm",
   "project": "MTM-reboot",
   "python_production_runtime": {
     "active_process_count": 0,
@@ -41,7 +43,7 @@
   },
   "release": {
     "path": "/home/lk/.local/share/mtm/releases/0.3.0/mtm",
-    "sha256": "abe861df86dded73a5fba08bc1b71cba46164a846318d004e846409e240e8438",
+    "sha256": "0a785a122396a3f8961cbc33b967e7a48874b90311333c8860a1e5c75582fd7f",
     "version": "0.3.0"
   },
   "release_info": {
@@ -99,21 +101,21 @@
   },
   "schema_version": "1.0.0",
   "soak": {
-    "duration_seconds": 60.017,
-    "request_count": 169508,
+    "duration_seconds": 60.002,
+    "request_count": 168845,
     "request_errors": 0,
     "resources": {
       "child_processes_max": 0,
       "file_descriptor_growth": 0,
       "file_descriptors_final": 16,
       "file_descriptors_initial": 16,
-      "rss_kib_final": 24420,
-      "rss_kib_initial": 12016,
-      "rss_kib_max": 24420,
-      "rss_slope_kib_per_second": 32.385698,
-      "rss_tail_growth_kib": 880,
-      "rss_tail_slope_kib_per_second": 16.850099,
-      "sample_count": 1100,
+      "rss_kib_final": 24488,
+      "rss_kib_initial": 11880,
+      "rss_kib_max": 24488,
+      "rss_slope_kib_per_second": 32.41717,
+      "rss_tail_growth_kib": 892,
+      "rss_tail_slope_kib_per_second": 16.857549,
+      "sample_count": 1101,
       "thread_growth": 0,
       "threads_final": 9,
       "threads_initial": 9

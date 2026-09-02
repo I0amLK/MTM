@@ -36,6 +36,23 @@ def canonical(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
+def normalize_release_branding(value: Any) -> Any:
+    """Canonicalize only the intentional Re-CTM -> MTM product identity divergence."""
+    if isinstance(value, list):
+        return [normalize_release_branding(item) for item in value]
+    if isinstance(value, dict):
+        normalized: dict[str, Any] = {}
+        for key, item in value.items():
+            if key in {"name", "service", "server"} and item == "re-ctm":
+                normalized[key] = "mtm"
+            elif key == "title" and item == "Re-CTM":
+                normalized[key] = "MTM"
+            else:
+                normalized[key] = normalize_release_branding(item)
+        return normalized
+    return value
+
+
 def source_facts() -> tuple[Path, str, list[str]]:
     baseline = json.loads(SOURCE_BASELINE.read_text(encoding="utf-8"))
     source = (ROOT / baseline["source_path"]).resolve()
@@ -657,7 +674,7 @@ def main(argv: list[str] | None = None) -> int:
     assert reference_records is not None and rust_records is not None
     mismatches = []
     for expected, actual in zip(reference_records, rust_records, strict=True):
-        if expected != actual:
+        if normalize_release_branding(expected) != normalize_release_branding(actual):
             mismatches.append(
                 {
                     "name": expected.get("name"),
@@ -718,6 +735,7 @@ def main(argv: list[str] | None = None) -> int:
         "reference_sha256": reference_hash,
         "recorded_sha256": recorded_hash or None,
         "golden_match": golden_match,
+        "release_branding_normalization": "re-ctm/Re-CTM identity fields only",
         "differential_mismatch_count": len(mismatches),
         "mismatches": mismatches[:20],
         "resources": {

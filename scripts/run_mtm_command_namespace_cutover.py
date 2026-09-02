@@ -14,10 +14,34 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from scripts.mtm008_deployment import DeploymentLayout, cutover, load_manifest, run_json, run_version, sha256_file
+    from scripts.mtm008_deployment import (
+        DeploymentLayout,
+        atomic_symlink,
+        atomic_write_json,
+        cutover,
+        fsync_directory,
+        install_release,
+        load_manifest,
+        run_json,
+        run_version,
+        sha256_file,
+        utc_now,
+    )
     from scripts.mtm008_runtime_harness import ROOT, RUST_BINARY, build_release, prepare_workspace, free_port, wait_for_port
 except ModuleNotFoundError:
-    from mtm008_deployment import DeploymentLayout, cutover, load_manifest, run_json, run_version, sha256_file
+    from mtm008_deployment import (
+        DeploymentLayout,
+        atomic_symlink,
+        atomic_write_json,
+        cutover,
+        fsync_directory,
+        install_release,
+        load_manifest,
+        run_json,
+        run_version,
+        sha256_file,
+        utc_now,
+    )
     from mtm008_runtime_harness import ROOT, RUST_BINARY, build_release, prepare_workspace, free_port, wait_for_port
 
 
@@ -26,6 +50,8 @@ REPORT = ROOT / "mtm-command-namespace.json"
 MTM_BIN = HOME / ".local" / "bin" / "mtm"
 RE_CTM_BIN = HOME / ".local" / "bin" / "re-ctm"
 MTM_STATE_ROOT = HOME / ".local" / "share" / "mtm"
+MTM_DATA_ROOT = HOME / ".mtm"
+LEGACY_SHARED_DATA_ROOT = HOME / ".re-ctm"
 OLD_MTM_ROOT = HOME / ".local" / "share" / "re-ctm-rust"
 RE_CTM_WHEEL = OLD_MTM_ROOT / "rollback" / "re_ctm-0.3.0-py3-none-any.whl"
 RE_CTM_TOOL_ROOT = HOME / ".local" / "share" / "uv" / "tools" / "re-ctm"
@@ -34,6 +60,9 @@ EXPECTED_SESSIONS = 4
 IMPLEMENTATION_FILES = [
     ROOT / "crates" / "mtm-cli" / "Cargo.toml",
     ROOT / "crates" / "mtm-cli" / "src" / "main.rs",
+    ROOT / "crates" / "mtm-runtime" / "src" / "config.rs",
+    ROOT / "crates" / "mtm-gateway" / "src" / "http.rs",
+    ROOT / "crates" / "mtm-gateway" / "src" / "mcp.rs",
     ROOT / "scripts" / "mtm008_deployment.py",
     ROOT / "scripts" / "run_mtm_command_namespace_cutover.py",
     ROOT / "scripts" / "validate_mtm_command_namespace.py",
@@ -76,7 +105,12 @@ def session_record(pid: int) -> dict[str, Any] | None:
     for item in env_items:
         key, value = item.split(b"=", 1)
         key_text = key.decode("utf-8", "replace")
-        if key_text.startswith("RE_CTM_") or key_text in {"LANG", "LC_ALL", "LC_CTYPE", "TMPDIR"}:
+        if key_text.startswith(("MTM_", "RE_CTM_")) or key_text in {
+            "LANG",
+            "LC_ALL",
+            "LC_CTYPE",
+            "TMPDIR",
+        }:
             environment[key_text] = value.decode("utf-8", "replace")
     return {
         "pid": pid,
@@ -146,6 +180,38 @@ def stop_sessions(sessions: list[dict[str, Any]]) -> dict[str, int]:
     if remaining:
         raise RuntimeError(f"MTM session descendants remain after shutdown: {len(remaining)}")
     return {"owned": len(owned), "sigterm": len(term), "remaining": 0}
+
+
+def fork_runtime_data_root() -> dict[str, Any]:
+    if MTM_DATA_ROOT.exists():
+        if MTM_DATA_ROOT.is_symlink() or not MTM_DATA_ROOT.is_dir():
+            raise RuntimeError("MTM runtime data root must be a real directory")
+        return {
+            "created": False,
+            "source_present": LEGACY_SHARED_DATA_ROOT.is_dir(),
+            "destination": str(MTM_DATA_ROOT),
+        }
+    if LEGACY_SHARED_DATA_ROOT.is_symlink():
+        raise RuntimeError("legacy shared data root must not be a symlink")
+    temporary = MTM_DATA_ROOT.with_name(f".{MTM_DATA_ROOT.name}.migrate-{os.getpid()}")
+    if temporary.exists():
+        shutil.rmtree(temporary)
+    try:
+        if LEGACY_SHARED_DATA_ROOT.is_dir():
+            shutil.copytree(LEGACY_SHARED_DATA_ROOT, temporary, symlinks=True)
+        else:
+            temporary.mkdir(mode=0o700)
+        os.chmod(temporary, 0o700)
+        os.replace(temporary, MTM_DATA_ROOT)
+        fsync_directory(MTM_DATA_ROOT.parent)
+    finally:
+        if temporary.exists():
+            shutil.rmtree(temporary)
+    return {
+        "created": True,
+        "source_present": LEGACY_SHARED_DATA_ROOT.is_dir(),
+        "destination": str(MTM_DATA_ROOT),
+    }
 
 
 def verify_re_ctm_wheel() -> None:
@@ -223,7 +289,7 @@ def recovered_session_specs() -> list[dict[str, Any]]:
             "pid": 0,
             "cwd": "/home/lk/桌面/re-test",
             "command": ["tui", "--quick-tunnel", "--native-mode", "dangerous"],
-            "environment": {"RE_CTM_OAUTH_PASSWORD": password_for(1)},
+            "environment": {"MTM_OAUTH_PASSWORD": password_for(1)},
         },
         {
             "pid": 0,
@@ -233,19 +299,19 @@ def recovered_session_specs() -> list[dict[str, Any]]:
                 "--workspace", "/home/lk/桌面/tempcoding/Re-CTM",
                 "--native-mode", "safe", "--latex-policy", "required",
             ],
-            "environment": {"RE_CTM_OAUTH_PASSWORD": password_for(2)},
+            "environment": {"MTM_OAUTH_PASSWORD": password_for(2)},
         },
         {
             "pid": 0,
             "cwd": "/home/lk/桌面/re-test",
             "command": ["serve", "--host", "127.0.0.1", "--port", "44567", "--native-mode", "dangerous"],
-            "environment": {"RE_CTM_OAUTH_PASSWORD": password_for(3)},
+            "environment": {"MTM_OAUTH_PASSWORD": password_for(3)},
         },
         {
             "pid": 0,
             "cwd": "/home/lk/桌面/re-test",
             "command": ["serve", "--host", "127.0.0.1", "--port", "34569", "--native-mode", "dangerous"],
-            "environment": {"RE_CTM_OAUTH_PASSWORD": password_for(4)},
+            "environment": {"MTM_OAUTH_PASSWORD": password_for(4)},
         },
     ]
 
@@ -256,9 +322,17 @@ def restart_sessions(sessions: list[dict[str, Any]], release: Path) -> list[dict
     os.chmod(root, 0o700)
     restarted: list[dict[str, Any]] = []
     for index, session in enumerate(sessions, 1):
-        env = {key: value for key, value in os.environ.items() if not key.startswith("RE_CTM_")}
-        env.update(session["environment"])
-        if not env.get("RE_CTM_OAUTH_PASSWORD"):
+        env = {
+            key: value
+            for key, value in os.environ.items()
+            if not key.startswith("RE_CTM_") and not key.startswith("MTM_")
+        }
+        for key, value in session["environment"].items():
+            if key.startswith("RE_CTM_"):
+                env[f"MTM_{key[len('RE_CTM_'):]}"] = value
+            elif key.startswith("MTM_") or key in {"LANG", "LC_ALL", "LC_CTYPE", "TMPDIR"}:
+                env[key] = value
+        if not env.get("MTM_OAUTH_PASSWORD"):
             raise RuntimeError("captured MTM session lacks an operator key; refusing background restart")
         log_path = root / f"session-{index}.log"
         with log_path.open("wb", buffering=0) as log:
@@ -340,11 +414,22 @@ def main() -> int:
     if len(sessions) != EXPECTED_SESSIONS:
         raise RuntimeError(f"expected {EXPECTED_SESSIONS} live MTM sessions, found {len(sessions)}")
     stopped = stop_sessions(sessions) if not recovered else {"owned": 0, "sigterm": 0, "remaining": 0}
+    data_fork = fork_runtime_data_root()
 
+    layout = DeploymentLayout(MTM_BIN, MTM_STATE_ROOT)
     if MTM_STATE_ROOT.exists():
-        deployment = load_manifest(MTM_STATE_ROOT / "deployment" / "deployment-v1.json")
+        deployment = load_manifest(layout.manifest)
+        release_metadata = install_release(RUST_BINARY, layout, VERSION)
+        deployment["release"] = release_metadata
+        deployment["state"] = "rust_active"
+        deployment["updated_at"] = utc_now()
+        deployment.setdefault("history", []).append(
+            {"at": utc_now(), "action": "namespace_release_upgrade", "state": "rust_active"}
+        )
+        atomic_symlink(release_metadata["path"], MTM_BIN)
+        atomic_write_json(layout.manifest, deployment)
     else:
-        deployment = cutover(RUST_BINARY, DeploymentLayout(MTM_BIN, MTM_STATE_ROOT), VERSION)
+        deployment = cutover(RUST_BINARY, layout, VERSION)
     release = Path(str(deployment["release"]["path"]))
     install_re_ctm()
     restarted = restart_sessions(sessions, release)
@@ -359,6 +444,12 @@ def main() -> int:
         {"name": "mtm_sessions_restarted", "passed": len(restarted) == EXPECTED_SESSIONS},
         {"name": "old_mtm_selector_released", "passed": RE_CTM_BIN.resolve() != release.resolve()},
         {"name": "distinct_install_roots", "passed": MTM_STATE_ROOT.resolve() != RE_CTM_TOOL_ROOT.resolve()},
+        {
+            "name": "distinct_runtime_data_roots",
+            "passed": MTM_DATA_ROOT.is_dir()
+            and not MTM_DATA_ROOT.is_symlink()
+            and MTM_DATA_ROOT.resolve() != LEGACY_SHARED_DATA_ROOT.resolve(),
+        },
     ]
     report = {
         "schema_version": "1.0.0",
@@ -370,6 +461,7 @@ def main() -> int:
         "mtm": {"command": str(MTM_BIN), "target": str(MTM_BIN.resolve()), "version": run_version(MTM_BIN.resolve()), "release_sha256": sha256_file(release)},
         "re_ctm": {"command": str(RE_CTM_BIN), "target": str(RE_CTM_BIN.resolve()), "version": run_version(RE_CTM_BIN.resolve())},
         "sessions": {"stopped": stopped, "restarted_count": len(restarted)},
+        "runtime_data_fork": data_fork,
         "recovery_after_partial_cutover": recovered,
         "historical_migration_root_retained": OLD_MTM_ROOT.exists(),
         "sensitive_content_recorded": False,

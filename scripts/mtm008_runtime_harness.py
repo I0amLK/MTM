@@ -211,22 +211,23 @@ def oauth_token(port: int, base: str, client_name: str) -> str:
     return str(result["access_token"])
 
 
-def runtime_environment(workspace: Path, data_root: Path) -> dict[str, str]:
+def runtime_environment(workspace: Path, data_root: Path, kind: str = "rust") -> dict[str, str]:
     environment = os.environ.copy()
+    prefix = "MTM" if kind == "rust" else "RE_CTM"
     environment.update(
         {
-            "RE_CTM_WORKSPACE": str(workspace),
-            "RE_CTM_DATA_ROOT": str(data_root),
-            "RE_CTM_PRIVATE_ROOT": str(data_root / "private"),
-            "RE_CTM_DEBUG_ROOT": str(data_root / "debug"),
-            "RE_CTM_NATIVE_EXEC_BACKEND": "disabled",
-            "RE_CTM_NATIVE_MODE": "safe",
-            "RE_CTM_LATEX_POLICY": "static_only",
-            "RE_CTM_OAUTH_PASSWORD": OPERATOR_PASSWORD,
-            "RE_CTM_TOKEN_SECRET": TOKEN_SECRET,
-            "RE_CTM_CAPABILITY_SECRET": CAPABILITY_SECRET,
-            "RE_CTM_SERVER_URL": "",
-            "RE_CTM_DEBUG": "0",
+            f"{prefix}_WORKSPACE": str(workspace),
+            f"{prefix}_DATA_ROOT": str(data_root),
+            f"{prefix}_PRIVATE_ROOT": str(data_root / "private"),
+            f"{prefix}_DEBUG_ROOT": str(data_root / "debug"),
+            f"{prefix}_NATIVE_EXEC_BACKEND": "disabled",
+            f"{prefix}_NATIVE_MODE": "safe",
+            f"{prefix}_LATEX_POLICY": "static_only",
+            f"{prefix}_OAUTH_PASSWORD": OPERATOR_PASSWORD,
+            f"{prefix}_TOKEN_SECRET": TOKEN_SECRET,
+            f"{prefix}_CAPABILITY_SECRET": CAPABILITY_SECRET,
+            f"{prefix}_SERVER_URL": "",
+            f"{prefix}_DEBUG": "0",
         }
     )
     return environment
@@ -246,7 +247,7 @@ class RuntimeServer:
         self.data_root = data_root
         self.port = free_port()
         self.base = f"http://127.0.0.1:{self.port}"
-        environment = runtime_environment(workspace, data_root)
+        environment = runtime_environment(workspace, data_root, kind)
         if kind == "rust":
             command = [
                 str(RUST_BINARY),

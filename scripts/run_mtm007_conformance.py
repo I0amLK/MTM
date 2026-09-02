@@ -81,20 +81,21 @@ class Server:
         self.port = free_port()
         self.base = f"http://127.0.0.1:{self.port}"
         environment = os.environ.copy()
+        prefix = "MTM" if kind == "rust" else "RE_CTM"
         environment.update(
             {
-                "RE_CTM_WORKSPACE": str(workspace),
-                "RE_CTM_DATA_ROOT": str(data_root),
-                "RE_CTM_PRIVATE_ROOT": str(data_root / "private"),
-                "RE_CTM_DEBUG_ROOT": str(data_root / "debug"),
-                "RE_CTM_NATIVE_EXEC_BACKEND": "disabled",
-                "RE_CTM_NATIVE_MODE": "safe",
-                "RE_CTM_LATEX_POLICY": "static_only",
-                "RE_CTM_OAUTH_PASSWORD": OPERATOR_PASSWORD,
-                "RE_CTM_TOKEN_SECRET": TOKEN_SECRET,
-                "RE_CTM_CAPABILITY_SECRET": CAPABILITY_SECRET,
-                "RE_CTM_SERVER_URL": "",
-                "RE_CTM_DEBUG": "0",
+                f"{prefix}_WORKSPACE": str(workspace),
+                f"{prefix}_DATA_ROOT": str(data_root),
+                f"{prefix}_PRIVATE_ROOT": str(data_root / "private"),
+                f"{prefix}_DEBUG_ROOT": str(data_root / "debug"),
+                f"{prefix}_NATIVE_EXEC_BACKEND": "disabled",
+                f"{prefix}_NATIVE_MODE": "safe",
+                f"{prefix}_LATEX_POLICY": "static_only",
+                f"{prefix}_OAUTH_PASSWORD": OPERATOR_PASSWORD,
+                f"{prefix}_TOKEN_SECRET": TOKEN_SECRET,
+                f"{prefix}_CAPABILITY_SECRET": CAPABILITY_SECRET,
+                f"{prefix}_SERVER_URL": "",
+                f"{prefix}_DEBUG": "0",
             }
         )
         if kind == "rust":
@@ -357,6 +358,25 @@ def normalize(value: Any, *, server: Server, run_id: str | None = None) -> Any:
     return value
 
 
+def normalize_release_branding(value: Any) -> Any:
+    """Canonicalize only the intentional Re-CTM -> MTM product identity divergence."""
+    if isinstance(value, dict):
+        normalized: dict[str, Any] = {}
+        for key, item in value.items():
+            if key in {"name", "service", "server"} and item == "re-ctm":
+                normalized[key] = "mtm"
+            elif key == "title" and item == "Re-CTM":
+                normalized[key] = "MTM"
+            else:
+                normalized[key] = normalize_release_branding(item)
+        return normalized
+    if isinstance(value, list):
+        return [normalize_release_branding(item) for item in value]
+    if isinstance(value, str) and value.startswith("Re-CTM "):
+        return "MTM " + value[len("Re-CTM ") :]
+    return value
+
+
 def record_pair(
     records: list[dict[str, Any]],
     name: str,
@@ -368,7 +388,8 @@ def record_pair(
             "name": name,
             "python": python_value,
             "rust": rust_value,
-            "match": python_value == rust_value,
+            "match": normalize_release_branding(python_value)
+            == normalize_release_branding(rust_value),
         }
     )
 
@@ -554,11 +575,23 @@ def main() -> int:
 
     mismatches = [record for record in records if not record["match"]]
     comparable = [{"name": item["name"], "python": item["python"], "rust": item["rust"]} for item in records]
-    digest = hashlib.sha256(
+    source_golden_comparable = [
+        {"name": item["name"], "python": item["python"], "rust": item["python"]}
+        for item in records
+    ]
+    source_digest = hashlib.sha256(
+        json.dumps(
+            source_golden_comparable,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+        ).encode()
+    ).hexdigest()
+    release_digest = hashlib.sha256(
         json.dumps(comparable, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
     ).hexdigest()
     recorded = GOLDEN_HASH.read_text(encoding="utf-8").strip()
-    golden_match = digest == recorded
+    golden_match = source_digest == recorded
     report = {
         "ok": not mismatches and golden_match,
         "project": "MTM-reboot",
@@ -568,9 +601,11 @@ def main() -> int:
         "source_repo_tracked_clean": source["repo_tracked_clean"],
         "record_count": len(records),
         "mismatch_count": len(mismatches),
-        "sha256": digest,
+        "sha256": source_digest,
+        "release_sha256": release_digest,
         "recorded_sha256": recorded,
         "golden_match": golden_match,
+        "release_branding_normalization": "re-ctm/Re-CTM identity fields only",
         "mismatches": mismatches,
         "shutdown": shutdown,
         "authority": {

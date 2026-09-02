@@ -262,7 +262,7 @@ impl MCPDispatcher {
 
 #[must_use]
 pub fn server_identity() -> Value {
-    serde_json::json!({"name": "re-ctm", "title": "Re-CTM", "version": "0.3.0"})
+    serde_json::json!({"name": "mtm", "title": "MTM", "version": "0.3.0"})
 }
 
 #[must_use]
