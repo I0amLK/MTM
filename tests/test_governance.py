@@ -203,7 +203,7 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(summary["generic_graph_dependencies"], 0)
         self.assertRegex(summary["graph_golden_digest"], r"^sha256:[0-9a-f]{64}$")
 
-    def test_mtm011_cutover_contract_remains_frozen_during_evaluation(self) -> None:
+    def test_mtm011_cutover_contract_remains_frozen_through_qualification(self) -> None:
         corpus_path = ROOT / "conformance" / "mtm011-math-corpus.json"
         evaluation_path = ROOT / "mtm011-protocol3-cutover-evaluation.json"
         corpus = json.loads(corpus_path.read_text(encoding="utf-8"))
@@ -219,7 +219,15 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertGreaterEqual(evaluation_summary["complete_pairs"], 0)
         self.assertLessEqual(evaluation_summary["complete_pairs"], 6)
         self.assertIn(evaluation_summary["status"], {"pending_web_runs", "in_progress", "complete"})
-        self.assertFalse(evaluation_summary["release_gate_passed"])
+        if evaluation_summary["status"] == "complete":
+            self.assertEqual(evaluation_summary["complete_pairs"], 6)
+            self.assertTrue(evaluation_summary["release_gate_passed"])
+            self.assertEqual(
+                evaluation_summary["evaluation_sha256"],
+                "1820027a361604fd77da2e303e1c7c43ab6f25edd7a7401cc6176705c280bd05",
+            )
+        else:
+            self.assertFalse(evaluation_summary["release_gate_passed"])
         iteration = json.loads((ROOT / "records" / "iterations" / "ITER-011.json").read_text(encoding="utf-8"))
         frozen = iteration["frozen_a4_contract"]
         self.assertEqual(
@@ -236,8 +244,12 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(evaluation["release_gate"]["minimum_strict_structural_primary_improvements"], 2)
         authority = json.loads((ROOT / "authority-inventory.json").read_text(encoding="utf-8"))
         protocols = authority["preview_policy"]
-        self.assertEqual(protocols["production_default_workflow_protocol"], 2)
-        self.assertFalse(protocols["protocol3_default_cutover_allowed"])
+        if protocols["protocol3_default_cutover_allowed"]:
+            self.assertEqual(protocols["production_default_workflow_protocol"], 3)
+            self.assertEqual(evaluation_summary["status"], "complete")
+            self.assertTrue(evaluation_summary["release_gate_passed"])
+        else:
+            self.assertEqual(protocols["production_default_workflow_protocol"], 2)
         self.assertTrue(protocols["mtm009_v1_evaluation_immutable"])
 
     def test_mtm011_gate_requires_two_structural_improvements_and_behavioral_non_regression(self) -> None:
@@ -305,7 +317,15 @@ class GovernanceTestCase(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="mtm011-ledger-") as raw_root:
             root = Path(raw_root)
             ledger = root / "evaluation.json"
-            ledger.write_bytes(before)
+            isolated_seed = json.loads(before)
+            isolated_seed["status"] = "pending_web_runs"
+            isolated_seed["aggregate"] = None
+            isolated_seed["decision"] = "pending"
+            for pair in isolated_seed["pairs"]:
+                pair["protocol2"] = None
+                pair["protocol3"] = None
+                pair["blind_evaluation"] = None
+            ledger.write_text(json.dumps(isolated_seed, indent=2) + "\n", encoding="utf-8")
             proof = root / "proof.tex"
             proof.write_text(
                 "\\documentclass{article}\\begin{document}ok\\end{document}\n",

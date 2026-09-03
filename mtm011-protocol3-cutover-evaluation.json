@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "evaluation_id": "mtm011-protocol3-cutover-v1",
-  "status": "pending_web_runs",
+  "status": "complete",
   "corpus": {
     "path": "conformance/mtm011-math-corpus.json",
     "corpus_id": "mtm011-protocol3-cutover-v1",
@@ -134,9 +134,82 @@
         "protocol2",
         "protocol3"
       ],
-      "protocol2": null,
-      "protocol3": null,
-      "blind_evaluation": null
+      "protocol2": {
+        "status": "complete",
+        "protocol": 2,
+        "binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+        "run_fingerprint": "173279b795a5a34ac44373aa281b2cf5fa8fae8d64de01d72838920d7c24ee21",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "mtm011-current-candidate-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "de88860c96af8584957937aaaf198912612a684119efae5dfd51fb0bcf398f10",
+        "first_verification_pass": false,
+        "repair_count": 1,
+        "verifier_finding_count": 1,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": true,
+        "focused_retrieval_when_missing_reference": true,
+        "max_no_novelty_retrieval_streak": 0,
+        "harmful_advice_events": 0,
+        "refuted_target_state_preserved": false,
+        "typed_obstruction_class_preserved": false,
+        "canonical_partial_results_preserved": 0,
+        "advisory_rule_counts": {},
+        "transition_log_sha256": "956df0e0a9b7aa1f7c600e8dcbfa88434895906bf6a99a0d411e74c4b7d16f77",
+        "verification_report_sha256": "d1cd94634e77568af32374e2e054fddef88dcace5ef4a2abecb11d72cb3071a3",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "protocol3": {
+        "status": "complete",
+        "protocol": 3,
+        "binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+        "run_fingerprint": "d2da93b28ceb9db89593347027eb554d7672af7aa97537ffe0a7de341fc3d539",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "mtm011-current-candidate-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "233567067aebfadcf957a91ca36b0adcd8eda3dae1bcf8dc9f273e274229bdb2",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": true,
+        "focused_retrieval_when_missing_reference": true,
+        "max_no_novelty_retrieval_streak": 0,
+        "harmful_advice_events": 0,
+        "refuted_target_state_preserved": true,
+        "typed_obstruction_class_preserved": true,
+        "canonical_partial_results_preserved": 0,
+        "advisory_rule_counts": {
+          "R01_REPLAN_REFUTED": 1,
+          "R06_SCREEN_FRONTIER": 2
+        },
+        "transition_log_sha256": "b924947dea25dabdb71faa4f12bfe886f8807b302c928fbe2445e3b35c548bb4",
+        "verification_report_sha256": "b7a0c555b4062b9c9433ed32428a3288a8710587cf7a7ee96df2eb438f6a058d",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "blind_evaluation": {
+        "status": "scored",
+        "treatment_hidden_until_scores_frozen": true,
+        "evaluator_id_hash": "38f5de4f91c4695cc64c1de5478fb952b538631546ceeeb25d4fdb2c165e13bc",
+        "artifacts": {
+          "A": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          },
+          "B": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          }
+        },
+        "winner": "tie",
+        "rationale": "Both blinded artifacts satisfy all frozen evaluator checks: each gives a valid successive-Galois counterexample, proves the exact lift/minimality correction, defines both G-actions, and proves Artin equivariance. Their differences are expository rather than substantive."
+      }
     },
     {
       "case_id": "M011-C02-fixed-point-uniqueness",
@@ -144,9 +217,82 @@
         "protocol3",
         "protocol2"
       ],
-      "protocol2": null,
-      "protocol3": null,
-      "blind_evaluation": null
+      "protocol2": {
+        "status": "complete",
+        "protocol": 2,
+        "binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+        "run_fingerprint": "dff200dcbe62fd3c5881251f58de0cfba0c7979083c87763cf7d6ff7c6d98e02",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "mtm011-current-candidate-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "a112de24654f50013fc125031f27bd2ac59f4fe6e7c21ce14071d96c8a52ce7f",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": true,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "harmful_advice_events": 0,
+        "refuted_target_state_preserved": false,
+        "typed_obstruction_class_preserved": false,
+        "canonical_partial_results_preserved": 0,
+        "advisory_rule_counts": {},
+        "transition_log_sha256": "b924947dea25dabdb71faa4f12bfe886f8807b302c928fbe2445e3b35c548bb4",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "protocol3": {
+        "status": "complete",
+        "protocol": 3,
+        "binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+        "run_fingerprint": "6e0c1c1ee8d0012dce9912281cc15c91d2668b55a4c1d9c38f9adece0b1fc21e",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "mtm011-current-candidate-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "a112de24654f50013fc125031f27bd2ac59f4fe6e7c21ce14071d96c8a52ce7f",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": true,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "harmful_advice_events": 0,
+        "refuted_target_state_preserved": true,
+        "typed_obstruction_class_preserved": true,
+        "canonical_partial_results_preserved": 0,
+        "advisory_rule_counts": {
+          "R01_REPLAN_REFUTED": 1,
+          "R06_SCREEN_FRONTIER": 2
+        },
+        "transition_log_sha256": "b924947dea25dabdb71faa4f12bfe886f8807b302c928fbe2445e3b35c548bb4",
+        "verification_report_sha256": "61db448bae5af92fb0f394911267c432ca4195fd0a38c21c90b45a281da583a1",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "blind_evaluation": {
+        "status": "scored",
+        "treatment_hidden_until_scores_frozen": true,
+        "evaluator_id_hash": "38f5de4f91c4695cc64c1de5478fb952b538631546ceeeb25d4fdb2c165e13bc",
+        "artifacts": {
+          "A": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          },
+          "B": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          }
+        },
+        "winner": "tie",
+        "rationale": "The blinded verified TeX artifacts are byte-identical and fully satisfy the frozen checks: uniqueness is refuted by the identity map and the strongest guaranteed conclusion, existence of a fixed point, is proved by IVT."
+      }
     },
     {
       "case_id": "M011-C03-order-p2-cyclic",
@@ -154,9 +300,82 @@
         "protocol2",
         "protocol3"
       ],
-      "protocol2": null,
-      "protocol3": null,
-      "blind_evaluation": null
+      "protocol2": {
+        "status": "complete",
+        "protocol": 2,
+        "binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+        "run_fingerprint": "0c520aa11e2e9aa5514e939698fbe264251c54cb92767a85f11860dbd242a64c",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "mtm011-current-candidate-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "6947907c74f484522f5d5f4448e6eca823754f2f010c1e63a6b8186a6b244a3c",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": true,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "harmful_advice_events": 0,
+        "refuted_target_state_preserved": false,
+        "typed_obstruction_class_preserved": false,
+        "canonical_partial_results_preserved": 0,
+        "advisory_rule_counts": {},
+        "transition_log_sha256": "b924947dea25dabdb71faa4f12bfe886f8807b302c928fbe2445e3b35c548bb4",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "protocol3": {
+        "status": "complete",
+        "protocol": 3,
+        "binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+        "run_fingerprint": "6fc242bbe3d8a8708788939d12f3b9282a70537f1bd3b71d4abd3b4706317dbc",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "mtm011-current-candidate-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "6947907c74f484522f5d5f4448e6eca823754f2f010c1e63a6b8186a6b244a3c",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": true,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "harmful_advice_events": 0,
+        "refuted_target_state_preserved": true,
+        "typed_obstruction_class_preserved": true,
+        "canonical_partial_results_preserved": 0,
+        "advisory_rule_counts": {
+          "R01_REPLAN_REFUTED": 1,
+          "R06_SCREEN_FRONTIER": 2
+        },
+        "transition_log_sha256": "b924947dea25dabdb71faa4f12bfe886f8807b302c928fbe2445e3b35c548bb4",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "blind_evaluation": {
+        "status": "scored",
+        "treatment_hidden_until_scores_frozen": true,
+        "evaluator_id_hash": "38f5de4f91c4695cc64c1de5478fb952b538631546ceeeb25d4fdb2c165e13bc",
+        "artifacts": {
+          "A": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          },
+          "B": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          }
+        },
+        "winner": "tie",
+        "rationale": "The blinded verified TeX artifacts are byte-identical. Both refute mandatory cyclicity with C_p x C_p and give a complete class-equation/center proof that every group of order p^2 is abelian."
+      }
     },
     {
       "case_id": "M011-C04-zsigmondy-retrieval",
@@ -164,9 +383,83 @@
         "protocol3",
         "protocol2"
       ],
-      "protocol2": null,
-      "protocol3": null,
-      "blind_evaluation": null
+      "protocol2": {
+        "status": "complete",
+        "protocol": 2,
+        "binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+        "run_fingerprint": "057691521688f2e4a348bb7571c1b569450a817c6d1dd1e722de2730b1c43ace",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "mtm011-current-candidate-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "5be36f10de240b418668e2c20e78db385533b625909c58c82805b57d471cddfe",
+        "first_verification_pass": false,
+        "repair_count": 1,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": true,
+        "max_no_novelty_retrieval_streak": 1,
+        "harmful_advice_events": 0,
+        "refuted_target_state_preserved": null,
+        "typed_obstruction_class_preserved": false,
+        "canonical_partial_results_preserved": 0,
+        "advisory_rule_counts": {},
+        "transition_log_sha256": "f9dd22997dc387a0723f323efffb67a9c8c8e86e0de482b8c49527c2e3e01c6b",
+        "verification_report_sha256": "d0a2b4cf83d07297c63272c32eb02f149dc9ae28965d99c45e95d8b4cf0ae322",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "protocol3": {
+        "status": "complete",
+        "protocol": 3,
+        "binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+        "run_fingerprint": "2b6f430f71825e276e9b5ab00d5025a0bc7e4ed9c1497d2d4d1236c9dbfeb082",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "mtm011-current-candidate-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "5be36f10de240b418668e2c20e78db385533b625909c58c82805b57d471cddfe",
+        "first_verification_pass": false,
+        "repair_count": 1,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": true,
+        "max_no_novelty_retrieval_streak": 1,
+        "harmful_advice_events": 0,
+        "refuted_target_state_preserved": null,
+        "typed_obstruction_class_preserved": false,
+        "canonical_partial_results_preserved": 0,
+        "advisory_rule_counts": {
+          "R06_SCREEN_FRONTIER": 2,
+          "R08_ASSEMBLE": 1,
+          "R09_REVIEW_STATE": 1
+        },
+        "transition_log_sha256": "f9dd22997dc387a0723f323efffb67a9c8c8e86e0de482b8c49527c2e3e01c6b",
+        "verification_report_sha256": "a94bc13854363dea73880c4626865b66ae4a1ef4b0f3d96d03f1a53b77272338",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "blind_evaluation": {
+        "status": "scored",
+        "treatment_hidden_until_scores_frozen": true,
+        "evaluator_id_hash": "38f5de4f91c4695cc64c1de5478fb952b538631546ceeeb25d4fdb2c165e13bc",
+        "artifacts": {
+          "A": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          },
+          "B": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          }
+        },
+        "winner": "tie",
+        "rationale": "The blinded verified TeX artifacts are byte-identical. Both state and audit Gyory--Smyth Theorem 13 precisely, check all exceptions for a=2,b=1, and derive exactly the primitive-prime-divisor conclusion."
+      }
     },
     {
       "case_id": "M011-C05-finite-field-subgroup",
@@ -174,9 +467,81 @@
         "protocol2",
         "protocol3"
       ],
-      "protocol2": null,
-      "protocol3": null,
-      "blind_evaluation": null
+      "protocol2": {
+        "status": "complete",
+        "protocol": 2,
+        "binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+        "run_fingerprint": "9a1a61be659f48c47b0699e88425614e2d86b518784ec558e6c1934a68f49761",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "mtm011-current-candidate-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "41c65fdf2df92290fc16a416d99c2ef88ebb503b2102a97d39baa98471e1e4ed",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "harmful_advice_events": 0,
+        "refuted_target_state_preserved": null,
+        "typed_obstruction_class_preserved": null,
+        "canonical_partial_results_preserved": 0,
+        "advisory_rule_counts": {},
+        "transition_log_sha256": "b924947dea25dabdb71faa4f12bfe886f8807b302c928fbe2445e3b35c548bb4",
+        "verification_report_sha256": "d89a2070f38b1718fff9a6d3ce0c3c5af589440ab9aa7cde269b6122fc36103f",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "protocol3": {
+        "status": "complete",
+        "protocol": 3,
+        "binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+        "run_fingerprint": "a7e000d3dbd4722c57cf95abc08a6c5eb22e3fa9cee168ee8ec177abc40251aa",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "mtm011-current-candidate-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "41c65fdf2df92290fc16a416d99c2ef88ebb503b2102a97d39baa98471e1e4ed",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "harmful_advice_events": 0,
+        "refuted_target_state_preserved": null,
+        "typed_obstruction_class_preserved": null,
+        "canonical_partial_results_preserved": 0,
+        "advisory_rule_counts": {
+          "R06_SCREEN_FRONTIER": 3
+        },
+        "transition_log_sha256": "b924947dea25dabdb71faa4f12bfe886f8807b302c928fbe2445e3b35c548bb4",
+        "verification_report_sha256": "f8acc26909eaf9ed0fee36e55994620bfd34a62d13f63d067cc26c61cce03f59",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "blind_evaluation": {
+        "status": "scored",
+        "treatment_hidden_until_scores_frozen": true,
+        "evaluator_id_hash": "6892f9fe09d5566204996bc223486e0c08ad3376b4266dccfc3153ff033a214f",
+        "artifacts": {
+          "A": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          },
+          "B": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          }
+        },
+        "winner": "tie",
+        "rationale": "A and B are byte-identical verified TeX artifacts. Both give a noncircular construction of an element of lcm order, explicitly prove the coprime-order product and order-of-a-power claims, justify the polynomial root bound, and conclude cyclicity."
+      }
     },
     {
       "case_id": "M011-C06-euler-trail",
@@ -184,11 +549,126 @@
         "protocol3",
         "protocol2"
       ],
-      "protocol2": null,
-      "protocol3": null,
-      "blind_evaluation": null
+      "protocol2": {
+        "status": "complete",
+        "protocol": 2,
+        "binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+        "run_fingerprint": "d8c9041d0ba673b7af635e10dd4cbed7eb4ba7397744e9d19d9ae92bddc80a5d",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "mtm011-current-candidate-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "91aeb1ac2bc3f1e08e0d22f04ecfd30768ab92415104518c234ab0558a3f1ac3",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "harmful_advice_events": 0,
+        "refuted_target_state_preserved": null,
+        "typed_obstruction_class_preserved": null,
+        "canonical_partial_results_preserved": 0,
+        "advisory_rule_counts": {},
+        "transition_log_sha256": "b924947dea25dabdb71faa4f12bfe886f8807b302c928fbe2445e3b35c548bb4",
+        "verification_report_sha256": "2c6b291d7287671fc16429cd5cb5d30ada2336e1667bd4467cd8e1066ae33eeb",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "protocol3": {
+        "status": "complete",
+        "protocol": 3,
+        "binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+        "run_fingerprint": "27c9851f349dd130958caaed89503533a54f4e179ea73e71a11b901b4204b0ee",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "mtm011-current-candidate-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "91aeb1ac2bc3f1e08e0d22f04ecfd30768ab92415104518c234ab0558a3f1ac3",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "harmful_advice_events": 0,
+        "refuted_target_state_preserved": null,
+        "typed_obstruction_class_preserved": null,
+        "canonical_partial_results_preserved": 0,
+        "advisory_rule_counts": {
+          "R06_SCREEN_FRONTIER": 3
+        },
+        "transition_log_sha256": "b924947dea25dabdb71faa4f12bfe886f8807b302c928fbe2445e3b35c548bb4",
+        "verification_report_sha256": "23b148b148af083709be5138d457e1ffd87755b3a8b71cb396d8f46333ed20b6",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "blind_evaluation": {
+        "status": "scored",
+        "treatment_hidden_until_scores_frozen": true,
+        "evaluator_id_hash": "6892f9fe09d5566204996bc223486e0c08ad3376b4266dccfc3153ff033a214f",
+        "artifacts": {
+          "A": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          },
+          "B": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          }
+        },
+        "winner": "tie",
+        "rationale": "A and B are byte-identical verified TeX artifacts. Both prove parity necessity, give a complete all-even Hierholzer construction with residual-degree and connectedness/splicing arguments, reduce the two-odd case by an auxiliary degree-2 vertex, and prove the exact closedness characterization."
+      }
     }
   ],
-  "aggregate": null,
-  "decision": "pending"
+  "aggregate": {
+    "verified_tex_completion": {
+      "protocol2": 6,
+      "protocol3": 6
+    },
+    "first_verification_pass": {
+      "protocol2": 4,
+      "protocol3": 5
+    },
+    "repair_count": {
+      "protocol2": 2,
+      "protocol3": 1
+    },
+    "verifier_finding_count": {
+      "protocol2": 1,
+      "protocol3": 0
+    },
+    "repeated_failed_route_without_new_evidence": {
+      "protocol2": 0,
+      "protocol3": 0
+    },
+    "max_no_novelty_retrieval_streak_sum": {
+      "protocol2": 1,
+      "protocol3": 1
+    },
+    "protocol3_harmful_advice_events": 0,
+    "structural_primary_improvements": {
+      "refuted_target_state_preserved": true,
+      "typed_obstruction_class_preserved": true,
+      "canonical_partial_results_preserved": false
+    },
+    "strict_structural_improvement_count": 2,
+    "behavioral_non_regression": {
+      "verified_tex_completion": true,
+      "first_verification_pass": true,
+      "repair_count": true,
+      "verifier_finding_count": true,
+      "repeated_failed_route_without_new_evidence": true,
+      "max_no_novelty_retrieval_streak": true,
+      "counterexample_probe_on_blocker": true,
+      "focused_retrieval_when_missing_reference": true
+    },
+    "release_gate_passed": true
+  },
+  "decision": "accepted"
 }

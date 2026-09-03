@@ -102,7 +102,7 @@
     "protocol3_rss_kib": 14820,
     "check_count": 8,
     "performance_claim": false,
-    "first_treatment_recorded": false
+    "first_treatment_recorded": true
   },
   "sanitized_treatment_evidence_hashing": {
     "status": "defined_before_first_pair_recording",
@@ -135,6 +135,38 @@
       }
     }
   ],
+  "accepted_a4": {
+    "status": "accepted",
+    "completed_pairs": 6,
+    "completed_treatments": 12,
+    "blind_scores": 6,
+    "candidate_binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+    "evaluation_sha256": "1820027a361604fd77da2e303e1c7c43ab6f25edd7a7401cc6176705c280bd05",
+    "verified_tex_completion": {"protocol2": 6, "protocol3": 6},
+    "first_verification_pass": {"protocol2": 4, "protocol3": 5},
+    "repair_count": {"protocol2": 2, "protocol3": 1},
+    "verifier_finding_count": {"protocol2": 1, "protocol3": 0},
+    "max_no_novelty_retrieval_streak_sum": {"protocol2": 1, "protocol3": 1},
+    "repeated_failed_route_without_new_evidence": {"protocol2": 0, "protocol3": 0},
+    "protocol3_harmful_advice_events": 0,
+    "structural_primary_improvements": {
+      "refuted_target_state_preserved": true,
+      "typed_obstruction_class_preserved": true,
+      "canonical_partial_results_preserved": false
+    },
+    "strict_structural_improvement_count": 2,
+    "behavioral_non_regression": true,
+    "deterministic_finalizer": {"decision": "accepted", "release_gate_passed": true},
+    "independent_release_gate": {
+      "delivery_cutover_allowed": true,
+      "candidate_binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+      "resource_report_sha256": "d4c85a56515b798848b264f318f5357a3b90032777c965c2fdd1bc919c0be7e1",
+      "mtm009_v1_immutable_sha256": "e7596fbaed70655228bd1530376ba457153e575ea0b845c4c8e64e2848e7e564",
+      "production_default_before_cutover": 2,
+      "target_default_after_cutover": 3,
+      "rollback_default": 2
+    }
+  },
   "cutover_plan": [
     "Freeze and validate the MTM-011 corpus/evaluation contract.",
     "Record fresh current-candidate A5 evidence.",
@@ -145,9 +177,9 @@
   ],
   "rollback": "Until cutover, no rollback is needed because protocol 2 remains the default. After cutover, restore protocol 2 as the new-run default without rewriting existing runs or verified artifacts.",
   "manual_pending": [
-    "Freeze the MTM-011 mathematical corpus and evaluation schema before collecting any treatment evidence.",
-    "Refresh A5 against the exact post-fix candidate binary.",
-    "Complete all paired web treatments and the deterministic release gate before changing the default."
+    "Change only the new-run production default from protocol 2 to protocol 3 after this accepted qualification is committed; do not rewrite existing runs or historical MTM-009 evidence.",
+    "Build and install a versioned post-cutover candidate, verify default protocol 3 with MTM_WORKFLOW_PROTOCOL_VERSION unset, and preserve explicit protocol-2 selection as rollback.",
+    "Perform a real protocol-2 rollback and protocol-3 recutover drill before declaring MTM-011 complete."
   ],
-  "decision": "in_progress"
+  "decision": "qualified_for_cutover"
 }
