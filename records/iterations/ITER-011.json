@@ -180,6 +180,22 @@
     "existing_run_state_rewritten": false,
     "deployment_pending": true
   },
+  "post_cutover_candidate_a5": {
+    "status": "accepted",
+    "source_commit": "2b763e7130ffdd88707b6c1d97974a0ea29bc0b2",
+    "version": "0.4.0-preview.2",
+    "binary_sha256": "5ed668d5bf765be2efd1b50933e941cf60dbbd414e3b6daab77745624d5cfa81",
+    "resource_report": "mtm011-cutover-resource.json",
+    "resource_report_sha256": "fc9ad093e0abb91d4b90fb05f9c2b280d359557938d701da81dcd5789bdf6f8d",
+    "protocol2_p95_ms": 1.946103,
+    "protocol3_p95_ms": 2.95705,
+    "protocol3_research_view_bytes": 1172,
+    "protocol2_rss_kib": 14264,
+    "protocol3_rss_kib": 14520,
+    "check_count": 8,
+    "performance_claim": false,
+    "purpose": "Post-cutover binary A5 non-regression only; the frozen A/B acceptance remains bound to its original candidate and is not rewritten."
+  },
   "cutover_plan": [
     "Freeze and validate the MTM-011 corpus/evaluation contract.",
     "Record fresh current-candidate A5 evidence.",
