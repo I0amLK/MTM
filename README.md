@@ -83,10 +83,10 @@ mtm check-config
 Expected command identity:
 
 ```text
-mtm 0.4.0-preview.2
+mtm 0.4.0-preview.3
 ```
 
-MTM 0.4.0-preview.2 uses workflow protocol 3 as the production default for new runs
+MTM 0.4.0-preview.3 uses workflow protocol 3 as the production default for new runs
 after the accepted MTM-011 cutover qualification. Protocol 2 remains available as an
 explicit rollback selection:
 
@@ -136,12 +136,20 @@ mtm tui --quick-tunnel --native-mode dangerous
 ```
 
 This starts the operator TUI, enables the validated Bubblewrap-backed Native path,
-prints each tool call as it starts/completes (tool name plus argument keys, never
-argument values), and attempts to create an owned Cloudflare Quick Tunnel. If `cloudflared` is not
-available, start locally without the tunnel:
+shows each tool once when it starts, reports failures, suppresses routine successful
+completion/trace/argument-key noise, and attempts to create an owned Cloudflare Quick
+Tunnel. If `cloudflared` is not available, start locally without the tunnel:
 
 ```bash
 mtm tui --native-mode dangerous
+```
+
+For diagnostic sessions, `--verbose` restores the detailed redacted lifecycle view
+with tool start/done/error lines, trace identifiers, and argument-key names. Argument
+values and secrets are never printed:
+
+```bash
+mtm tui --verbose --native-mode dangerous
 ```
 
 ### Conservative local launch

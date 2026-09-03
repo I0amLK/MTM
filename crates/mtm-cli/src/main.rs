@@ -99,7 +99,7 @@ fn print_help() {
         "  mtm check-config [--workspace PATH] [--native-mode MODE]\n",
         "  mtm attest-native [--workspace PATH] [--native-mode MODE]\n",
         "  mtm serve [--host HOST] [--port PORT] [--workspace PATH] [--native-mode MODE]\n",
-        "  mtm tui [--quick-tunnel] [--host HOST] [--port PORT] [--workspace PATH] [--native-mode MODE]\n",
+        "  mtm tui [--quick-tunnel] [--verbose] [--host HOST] [--port PORT] [--workspace PATH] [--native-mode MODE]\n",
         "  printf '%s' '<json>' | mtm evaluate\n",
         "  printf '%s' '<json-array>' | mtm evaluate-batch\n"
     );
@@ -223,6 +223,7 @@ fn exit_on_error(result: Result<(), ReCtmError>) {
 
 fn serve(arguments: &[String], tui: bool) -> Result<(), ReCtmError> {
     let quick_tunnel_requested = tui && arguments.iter().any(|item| item == "--quick-tunnel");
+    let verbose_tui_requested = tui && arguments.iter().any(|item| item == "--verbose");
     if !tui && arguments.iter().any(|item| item == "--quick-tunnel") {
         return Err(ReCtmError::new(
             "INVALID_ARGUMENT",
@@ -230,10 +231,17 @@ fn serve(arguments: &[String], tui: bool) -> Result<(), ReCtmError> {
         )
         .with_category(ErrorCategory::Validation));
     }
+    if !tui && arguments.iter().any(|item| item == "--verbose") {
+        return Err(ReCtmError::new(
+            "INVALID_ARGUMENT",
+            "--verbose is available only with the tui command",
+        )
+        .with_category(ErrorCategory::Validation));
+    }
     let port_explicit = arguments.iter().any(|item| item == "--port");
     let filtered_arguments = arguments
         .iter()
-        .filter(|item| item.as_str() != "--quick-tunnel")
+        .filter(|item| !matches!(item.as_str(), "--quick-tunnel" | "--verbose"))
         .cloned()
         .collect::<Vec<_>>();
     let (mut settings, host, mut port) = settings_with_overrides(&filtered_arguments)?;
@@ -261,7 +269,13 @@ fn serve(arguments: &[String], tui: bool) -> Result<(), ReCtmError> {
     })?;
 
     let assets = embedded_assets()?;
-    let operator = tui.then(OperatorSession::default);
+    let operator = tui.then(|| {
+        if verbose_tui_requested {
+            OperatorSession::verbose()
+        } else {
+            OperatorSession::compact()
+        }
+    });
     let observer = operator.as_ref().map(OperatorSession::event_sink);
     let application = Arc::new(RuntimeApplication::build_with_observer(
         settings.clone(),
@@ -271,16 +285,29 @@ fn serve(arguments: &[String], tui: bool) -> Result<(), ReCtmError> {
         false,
         observer,
     )?);
-    eprintln!("MTM {} (Rust)", env!("CARGO_PKG_VERSION"));
-    eprintln!("local MCP: http://{host}:{}/mcp", bound.port());
-    eprintln!("mode: {}", settings.native_mode.as_str());
-    if generated_password {
-        eprintln!("OAuth operator key: {}", settings.oauth_password);
+    if tui && !verbose_tui_requested {
+        eprintln!(
+            "MTM {} | P{} | {}",
+            env!("CARGO_PKG_VERSION"),
+            settings.workflow_protocol_version,
+            settings.native_mode.as_str()
+        );
+        eprintln!("MCP: http://{host}:{}/mcp", bound.port());
+        if generated_password {
+            eprintln!("OAuth key: {}", settings.oauth_password);
+        }
     } else {
-        eprintln!("OAuth operator key: configured externally");
-    }
-    if tui {
-        eprintln!("TUI: minimal operator session monitor active");
+        eprintln!("MTM {} (Rust)", env!("CARGO_PKG_VERSION"));
+        eprintln!("local MCP: http://{host}:{}/mcp", bound.port());
+        eprintln!("mode: {}", settings.native_mode.as_str());
+        if generated_password {
+            eprintln!("OAuth operator key: {}", settings.oauth_password);
+        } else {
+            eprintln!("OAuth operator key: configured externally");
+        }
+        if tui {
+            eprintln!("TUI: verbose operator diagnostics active");
+        }
     }
     let mut quick_tunnel = if quick_tunnel_requested {
         let sink = operator
@@ -299,7 +326,9 @@ fn serve(arguments: &[String], tui: bool) -> Result<(), ReCtmError> {
         match tunnel.start(&address) {
             Ok(_) => Some(tunnel),
             Err(error) => {
-                eprintln!("Quick Tunnel unavailable: {}", error.code);
+                if verbose_tui_requested {
+                    eprintln!("Quick Tunnel unavailable: {}", error.code);
+                }
                 let _ = tunnel.close();
                 None
             }

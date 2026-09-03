@@ -8,9 +8,9 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-mtm-contracts = { version = "=0.4.0-preview.2", path = "../mtm-contracts" }
-mtm-core = { version = "=0.4.0-preview.2", path = "../mtm-core" }
-mtm-storage = { version = "=0.4.0-preview.2", path = "../mtm-storage" }
+mtm-contracts = { version = "=0.4.0-preview.3", path = "../mtm-contracts" }
+mtm-core = { version = "=0.4.0-preview.3", path = "../mtm-core" }
+mtm-storage = { version = "=0.4.0-preview.3", path = "../mtm-storage" }
 regex.workspace = true
 serde.workspace = true
 serde_json.workspace = true

@@ -99,6 +99,10 @@ def main() -> int:
         in {"MTM-011-in-progress", "MTM-011-completed", "MTM-012-in-progress"}
     )
     mtm011_cutover_mode = mtm011_preview_mode
+    mtm012_source_mode = (
+        progress.get("current_milestone") == "MTM-012"
+        and progress.get("status") == "MTM-012-in-progress"
+    )
     checks: list[dict[str, Any]] = [
         run(
             "migration_graph",
@@ -206,11 +210,20 @@ def main() -> int:
                             ]
                             if mtm009_preview_mode
                             else [
-                                run(
-                                    "mtm011_cutover_source",
-                                    [sys.executable, "scripts/validate_mtm011_cutover_source.py"],
-                                    env=environment,
-                                    capture_json=True,
+                                *(
+                                    []
+                                    if mtm012_source_mode
+                                    else [
+                                        run(
+                                            "mtm011_cutover_source",
+                                            [
+                                                sys.executable,
+                                                "scripts/validate_mtm011_cutover_source.py",
+                                            ],
+                                            env=environment,
+                                            capture_json=True,
+                                        )
+                                    ]
                                 ),
                                 run(
                                     "mtm011_cutover_resource",
