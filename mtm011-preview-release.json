@@ -1,0 +1,56 @@
+{
+  "binary_sha256": "5ed668d5bf765be2efd1b50933e941cf60dbbd414e3b6daab77745624d5cfa81",
+  "existing_runs_rewritten": false,
+  "final_artifact": "proof_verified.tex",
+  "milestone": "MTM-011",
+  "milestone_status": "in_progress",
+  "passed": true,
+  "phase": "mtm011_preview_release",
+  "production_command": "/home/lk/.local/bin/mtm",
+  "production_command_target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.2/mtm",
+  "project": "MTM-reboot",
+  "qualification": {
+    "accepted_evaluation_sha256": "1820027a361604fd77da2e303e1c7c43ab6f25edd7a7401cc6176705c280bd05",
+    "post_cutover_a5_binary_sha256": "5ed668d5bf765be2efd1b50933e941cf60dbbd414e3b6daab77745624d5cfa81",
+    "post_cutover_a5_sha256": "fc9ad093e0abb91d4b90fb05f9c2b280d359557938d701da81dcd5789bdf6f8d"
+  },
+  "release_info": {
+    "hidden_alias_count": 11,
+    "implementation": "rust",
+    "name": "mtm",
+    "production_authority": "rust",
+    "public_tool_count": 24,
+    "python_runtime_required": false,
+    "state_schema_version": 2,
+    "target_arch": "x86_64",
+    "target_os": "linux",
+    "version": "0.4.0-preview.2",
+    "workflow_protocol_version": 3
+  },
+  "rollback": {
+    "real_rollback_and_recutover_passed": true,
+    "sha256": "e76c2124cddb73370d902394df3c143124870abf8f05240f1a72ca835a8e2477",
+    "target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.1/mtm",
+    "version": "mtm 0.4.0-preview.1"
+  },
+  "runtime_probes": {
+    "preview1_default_during_rollback": 2,
+    "preview2_default_after_cutover": 3,
+    "preview2_default_after_recutover": 3,
+    "preview2_explicit_protocol2": 2
+  },
+  "schema_version": "1.0.0",
+  "shell_command_alias": {
+    "a4_candidate_archive": "/home/lk/.local/share/mtm/evidence/mtm011-a4-candidate-5cebde6458f2/mtm",
+    "a4_candidate_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+    "path": "/home/lk/.cargo/bin/mtm",
+    "resolved_target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.2/mtm"
+  },
+  "source_commit": "2b763e7130ffdd88707b6c1d97974a0ea29bc0b2",
+  "version": "0.4.0-preview.2",
+  "workflow_protocols": {
+    "production_default": 3,
+    "protocol3_default_cutover_allowed": true,
+    "rollback_override": 2
+  }
+}

@@ -362,7 +362,7 @@
     {
       "id": "MTM-011",
       "title": "Protocol 3 default-cutover qualification",
-      "status": "in_progress",
+      "status": "completed",
       "priority": "P0",
       "production_authority_before": "rust",
       "production_authority_after": "rust",
@@ -387,8 +387,9 @@
       "validation_commands": [
         "python3 scripts/validate_mtm011_math_corpus.py",
         "python3 scripts/validate_mtm011_math_evaluation.py",
-        "python3 scripts/validate_mtm011_release_gate.py",
         "python3 scripts/validate_mtm011_cutover_source.py",
+        "python3 scripts/validate_mtm011_cutover_resource.py",
+        "python3 scripts/validate_mtm011_preview_release.py",
         "python3 scripts/validate_migration_graph.py",
         "python3 scripts/validate_engineering_graph.py",
         "cargo fmt --all -- --check",
@@ -396,7 +397,7 @@
         "cargo test --workspace",
         "python3 scripts/run_checks.py"
       ],
-      "rollback": "Before cutover, leave production_default_workflow_protocol_version=2. After cutover, atomically restore the default to 2 and restart only new-run entrypoints as needed; do not rewrite existing protocol-3 run state, capabilities, project revisions or proof_verified.tex artifacts.",
+      "rollback": "For new runs, set MTM_WORKFLOW_PROTOCOL_VERSION=2. For a selector-level release rollback, atomically restore /home/lk/.local/bin/mtm to the preserved 0.4.0-preview.1 release; do not rewrite existing protocol-3 run state, capabilities, project revisions or proof_verified.tex artifacts.",
       "dependencies": ["MTM-009", "MTM-010"]
     }
   ],
@@ -417,7 +418,7 @@
     {"source": "MTM-011", "target": "MTM-009"},
     {"source": "MTM-011", "target": "MTM-010"}
   ],
-  "todo": ["MTM-009", "MTM-011"],
+  "todo": ["MTM-009"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -778,6 +779,14 @@
       "status_before": "approved",
       "status_after": "in_progress",
       "summary": "Began prospective MTM-011 qualification with production default still fixed at protocol 2. The first work boundary is governance plus a frozen obstruction-heavy A4-v2 contract; no treatment evidence may be collected against the new corpus before its hash and release rule are committed."
+    },
+    {
+      "event_id": "MEVT-046",
+      "milestone_id": "MTM-011",
+      "at": "2026-09-03T02:54:35-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "summary": "Completed protocol-3 default cutover after the frozen six-pair A4 accepted with two strict structural-primary improvements and no behavioral regression, the final preview.2 artifact passed eight post-cutover A5 checks, the selector was atomically cut over/rolled back/recut over, and live OAuth/MCP new-run probes confirmed protocol 3 by default with explicit protocol 2 rollback preserved."
     }
   ],
   "receipt_contract": {
@@ -2319,6 +2328,70 @@
       "manual_pending": [
         "Other Linux distributions or resolver managers outside the approved runtime target prefixes require independent target qualification.",
         "The next MTM preview/final release must be built from this accepted source before users receive the resolver fix."
+      ],
+      "decision": "accepted"
+    },
+    {
+      "receipt_id": "MREC-011",
+      "milestone_id": "MTM-011",
+      "started_at": "2026-09-02T23:25:00-07:00",
+      "completed_at": "2026-09-03T02:54:35-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "docs(mtm011): complete protocol-three default cutover [MTM-011]",
+      "files_changed": [
+        "authority-inventory.json",
+        "project-progress.json",
+        "migration-graph.json",
+        "records/iterations/ITER-011.json",
+        "docs/releases/0.4.0-preview.2.md",
+        "mtm011-preview-release.json",
+        "scripts/run_checks.py",
+        "scripts/validate_mtm_command_namespace.py",
+        "scripts/release_mtm011_preview.py",
+        "scripts/validate_mtm011_preview_release.py",
+        "tests/test_governance.py",
+        "local-validation.json"
+      ],
+      "commands": [
+        {
+          "command": "python3 scripts/finalize_mtm011_math_evaluation.py && python3 scripts/validate_mtm011_math_evaluation.py",
+          "exit_code": 0,
+          "result": "The frozen six-pair evaluation finalized accepted with 6/6 verified TeX for both protocols, two strict structural-primary improvements, zero protocol-3 harmful-advice events and behavioral non-regression."
+        },
+        {
+          "command": "python3 scripts/run_mtm011_cutover_resource.py && python3 scripts/validate_mtm011_cutover_resource.py",
+          "exit_code": 0,
+          "result": "The exact preview.2 release artifact SHA-256 5ed668d5bf765be2efd1b50933e941cf60dbbd414e3b6daab77745624d5cfa81 passed all eight post-cutover A5 non-regression checks."
+        },
+        {
+          "command": "python3 scripts/release_mtm011_preview.py && python3 scripts/validate_mtm011_preview_release.py",
+          "exit_code": 0,
+          "result": "Installed preview.2, archived the exact A4 candidate before replacing the login-shell-preferred Cargo command with a selector alias, verified no-override protocol 3 and explicit protocol 2, performed a real selector rollback to preview.1/default2, then recut to preview.2/default3 while preserving both versioned releases."
+        },
+        {
+          "command": "live OAuth/MCP server_info + rethlas_start probes on /home/lk/.local/bin/mtm",
+          "exit_code": 0,
+          "result": "A no-override server and fresh run both reported workflow protocol 3 and production default 3; an explicit protocol-2 server and fresh run both reported protocol 2 while retaining production default 3."
+        }
+      ],
+      "acceptance": {
+        "A0": {"passed": true, "evidence": ["Full workspace format, warnings-denied Clippy, tests, governance and unified local validation pass after the deployed-state updates."]},
+        "A1": {"passed": true, "evidence": ["Existing protocol-2/3 run state, state schema 2, public tool count 24 and workflow/finalizer authority boundaries are unchanged by the new-run default selection."]},
+        "A2": {"passed": true, "evidence": ["MTM-009 v1 remains immutable/rejected and historical protocol-2 differentials remain pinned to their accepted protocol instead of inheriting the new default."]},
+        "A3": {"passed": true, "evidence": ["Verifier, capability, Native/workflow and finalizer firewalls are unchanged; protocol 2 remains an explicit rollback rather than being removed."]},
+        "A4": {"passed": true, "evidence": ["Prospective obstruction-heavy A/B completed 6/6 pairs and achieved the frozen minimum of two strict structural-primary improvements with verified-output non-regression."]},
+        "A5": {"passed": true, "evidence": ["Both the A/B candidate and the final installed preview.2 artifact passed independent eight-check resource non-regression evidence without a performance claim."]}
+      },
+      "behavior_before": "New runs selected workflow protocol 2 unless protocol 3 was explicitly requested; MTM-009 had rejected changing that default.",
+      "behavior_after": "New runs select workflow protocol 3 when no override is present. MTM_WORKFLOW_PROTOCOL_VERSION=2 remains a supported rollback, preview.1 remains installed as a selector-level rollback release, and existing runs are not rewritten.",
+      "risk_review": "The cutover was prospective rather than retroactive, kept the rejected MTM-009 evaluation immutable, required two independent structural-primary improvements, retained zero-harmful-advice and behavioral non-regression gates, measured the exact final artifact, preserved preview.1 byte-for-byte, and completed real command-selector plus live MCP rollback/recutover probes.",
+      "rollback": "Set MTM_WORKFLOW_PROTOCOL_VERSION=2 for a new-run rollback or atomically repoint /home/lk/.local/bin/mtm to /home/lk/.local/share/mtm/releases/0.4.0-preview.1/mtm. Neither path rewrites existing workflow state or proof_verified.tex artifacts.",
+      "manual_pending": [
+        "Stable 0.4.0 remains a separate release decision.",
+        "Existing long-running sessions may be restarted on preview.2 only when operationally desired."
       ],
       "decision": "accepted"
     }

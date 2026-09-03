@@ -27,19 +27,32 @@ from scripts.validate_mtm011_math_evaluation import (
     aggregate_complete as aggregate_mtm011_complete,
     validate as validate_mtm011_math_evaluation,
 )
+from scripts.validate_mtm011_preview_release import validate as validate_mtm011_preview_release
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def qualification_preview_mode() -> bool:
+def deployment_mode() -> str:
     progress = json.loads((ROOT / "project-progress.json").read_text(encoding="utf-8"))
     milestone = progress.get("current_milestone")
-    return (
+    if (
         str(progress.get("version") or "").startswith("0.4.0-preview.")
-        and milestone in {"MTM-009", "MTM-011"}
-        and progress.get("status") == f"{milestone}-in-progress"
-    )
+        and milestone == "MTM-009"
+        and progress.get("status") == "MTM-009-in-progress"
+    ):
+        return "mtm009_preview"
+    if (
+        progress.get("version") == "0.4.0-preview.2"
+        and milestone == "MTM-011"
+        and progress.get("status") in {"MTM-011-in-progress", "MTM-011-completed"}
+    ):
+        return "mtm011_preview"
+    return "non_preview"
+
+
+def historical_evidence_mode() -> bool:
+    return deployment_mode() in {"mtm009_preview", "mtm011_preview"}
 
 
 def historical_check_count(milestone: str) -> int:
@@ -55,7 +68,7 @@ class GovernanceTestCase(unittest.TestCase):
     def test_repository_migration_graph_is_valid(self) -> None:
         summary = validate_migration(load_graph())
         self.assertEqual(summary["milestone_count"], 11)
-        self.assertEqual(summary["todo_count"], 2)
+        self.assertEqual(summary["todo_count"], 1)
 
     def test_dependency_cycle_is_rejected(self) -> None:
         payload = copy.deepcopy(load_graph())
@@ -129,42 +142,42 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(summary["deployment_command_namespace_separated"])
 
     def test_current_mtm003_target_evidence_is_fresh(self) -> None:
-        if qualification_preview_mode():
+        if historical_evidence_mode():
             self.assertEqual(historical_check_count("MTM-003"), 14)
             return
         summary = validate_mtm003_target()
         self.assertEqual(summary["required_check_count"], 14)
 
     def test_current_mtm004_target_evidence_is_fresh_and_redacted(self) -> None:
-        if qualification_preview_mode():
+        if historical_evidence_mode():
             self.assertEqual(historical_check_count("MTM-004"), 10)
             return
         summary = validate_mtm004_target()
         self.assertEqual(summary["required_check_count"], 10)
 
     def test_current_mtm005_target_evidence_is_fresh_and_redacted(self) -> None:
-        if qualification_preview_mode():
+        if historical_evidence_mode():
             self.assertEqual(historical_check_count("MTM-005"), 15)
             return
         summary = validate_mtm005_target()
         self.assertEqual(summary["required_check_count"], 15)
 
     def test_current_mtm006_target_evidence_is_fresh_and_redacted(self) -> None:
-        if qualification_preview_mode():
+        if historical_evidence_mode():
             self.assertEqual(historical_check_count("MTM-006"), 8)
             return
         summary = validate_mtm006_target()
         self.assertEqual(summary["required_check_count"], 8)
 
     def test_current_mtm007_target_evidence_is_fresh_and_redacted(self) -> None:
-        if qualification_preview_mode():
+        if historical_evidence_mode():
             self.assertEqual(historical_check_count("MTM-007"), 12)
             return
         summary = validate_mtm007_target()
         self.assertEqual(summary["required_check_count"], 12)
 
     def test_current_mtm008_candidate_evidence_is_fresh_and_redacted(self) -> None:
-        if qualification_preview_mode():
+        if historical_evidence_mode():
             self.assertEqual(historical_check_count("MTM-008"), 10)
             return
         summary = validate_mtm008_candidate()
@@ -172,15 +185,21 @@ class GovernanceTestCase(unittest.TestCase):
 
     def test_current_mtm_and_re_ctm_command_namespaces_are_separate(self) -> None:
         summary = validate_mtm_command_namespace()
-        if qualification_preview_mode():
+        if deployment_mode() == "mtm009_preview":
             self.assertEqual(summary["evidence"], "mtm009_preview_release")
             self.assertEqual(summary["mtm_version"], "0.4.0-preview.1")
             self.assertFalse(summary["existing_sessions_restarted_for_preview"])
+        elif deployment_mode() == "mtm011_preview":
+            self.assertEqual(summary["evidence"], "mtm011_preview_release")
+            self.assertEqual(summary["mtm_version"], "0.4.0-preview.2")
+            self.assertEqual(summary["production_default_workflow_protocol"], 3)
+            self.assertEqual(summary["rollback_workflow_protocol"], 2)
+            self.assertTrue(summary["real_rollback_and_recutover_passed"])
         else:
             self.assertEqual(summary["required_check_count"], 10)
 
     def test_current_mtm009_preview_release_is_installed_and_bounded(self) -> None:
-        if not qualification_preview_mode():
+        if deployment_mode() != "mtm009_preview":
             self.skipTest("MTM-009 preview release is not the current deployment mode")
         summary = validate_mtm009_preview_release()
         self.assertEqual(summary["version"], "0.4.0-preview.1")
@@ -188,6 +207,16 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(summary["protocol3_opt_in"])
         self.assertFalse(summary["protocol3_default_cutover_allowed"])
         self.assertEqual(summary["real_web_a4"], "complete_rejected")
+        self.assertEqual(summary["final_artifact"], "proof_verified.tex")
+
+    def test_current_mtm011_preview_release_is_installed_and_rollback_qualified(self) -> None:
+        if deployment_mode() != "mtm011_preview":
+            self.skipTest("MTM-011 preview release is not the current deployment mode")
+        summary = validate_mtm011_preview_release()
+        self.assertEqual(summary["version"], "0.4.0-preview.2")
+        self.assertEqual(summary["production_default_workflow_protocol"], 3)
+        self.assertEqual(summary["rollback_workflow_protocol"], 2)
+        self.assertTrue(summary["real_rollback_and_recutover_passed"])
         self.assertEqual(summary["final_artifact"], "proof_verified.tex")
 
     def test_mtm009_research_contract_freezes_complexity_and_authority(self) -> None:

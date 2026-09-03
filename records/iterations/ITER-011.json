@@ -168,7 +168,7 @@
     }
   },
   "cutover_implementation": {
-    "status": "source_staged_not_deployed",
+    "status": "deployed_and_rollback_qualified",
     "version": "0.4.0-preview.2",
     "qualification_evidence_commit": "47cc76728030ef36ab105fed5684995b73487066",
     "historical_source_baseline_protocol": 2,
@@ -178,7 +178,32 @@
     "public_tool_count": 24,
     "authority_boundary_changed": false,
     "existing_run_state_rewritten": false,
-    "deployment_pending": true
+    "deployment_pending": false,
+    "installed_binary_sha256": "5ed668d5bf765be2efd1b50933e941cf60dbbd414e3b6daab77745624d5cfa81",
+    "installed_path": "/home/lk/.local/share/mtm/releases/0.4.0-preview.2/mtm",
+    "selector": "/home/lk/.local/bin/mtm",
+    "selector_rollback_target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.1/mtm",
+    "selector_rollback_sha256": "e76c2124cddb73370d902394df3c143124870abf8f05240f1a72ca835a8e2477",
+    "preview_release_report": "mtm011-preview-release.json",
+    "preview_release_report_sha256": "4978afc094fba9f6ca5e7aaad93483d338241ad16e1bc9b4dfbd37565fb8dc3d",
+    "deployment_manifest_sha256": "a7ac7979ced169dd1e23d9e256b4dce1099acff57696abab610bf46b487a47b7",
+    "deployed_at": "2026-09-03T02:54:35-07:00",
+    "shell_command_alias": "/home/lk/.cargo/bin/mtm",
+    "shell_command_resolved_target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.2/mtm",
+    "a4_candidate_archive": "/home/lk/.local/share/mtm/evidence/mtm011-a4-candidate-5cebde6458f2/mtm",
+    "a4_candidate_archive_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+    "runtime_probes": {
+      "selector_preview2_default": 3,
+      "selector_preview2_explicit_protocol2": 2,
+      "selector_preview1_default_during_rollback": 2,
+      "selector_preview2_default_after_recutover": 3,
+      "mcp_default_server_protocol": 3,
+      "mcp_default_new_run_protocol": 3,
+      "mcp_explicit_protocol2_server_protocol": 2,
+      "mcp_explicit_protocol2_new_run_protocol": 2,
+      "server_reported_production_default": 3
+    },
+    "real_rollback_and_recutover_passed": true
   },
   "post_cutover_candidate_a5": {
     "status": "accepted",
@@ -204,11 +229,10 @@
     "Only after every gate passes, change the production new-run default from protocol 2 to protocol 3.",
     "Build/install the versioned candidate, verify server_info/release-info/default behavior, and perform a real protocol-2 rollback/recutover drill."
   ],
-  "rollback": "Until cutover, no rollback is needed because protocol 2 remains the default. After cutover, restore protocol 2 as the new-run default without rewriting existing runs or verified artifacts.",
+  "rollback": "For a new run set MTM_WORKFLOW_PROTOCOL_VERSION=2. For selector-level release rollback atomically repoint /home/lk/.local/bin/mtm to the preserved 0.4.0-preview.1 binary; neither rollback path rewrites existing runs or verified artifacts.",
   "manual_pending": [
-    "Change only the new-run production default from protocol 2 to protocol 3 after this accepted qualification is committed; do not rewrite existing runs or historical MTM-009 evidence.",
-    "Build and install a versioned post-cutover candidate, verify default protocol 3 with MTM_WORKFLOW_PROTOCOL_VERSION unset, and preserve explicit protocol-2 selection as rollback.",
-    "Perform a real protocol-2 rollback and protocol-3 recutover drill before declaring MTM-011 complete."
+    "Stable 0.4.0 remains a separate release decision; keep the protocol-2 rollback available through the preview period.",
+    "Existing long-running sessions were not restarted by the selector cutover; restart them only when operationally desired."
   ],
-  "decision": "qualified_for_cutover"
+  "decision": "completed"
 }

@@ -15,7 +15,13 @@ EVALUATION = ROOT / "mtm011-protocol3-cutover-evaluation.json"
 POST_A5 = ROOT / "mtm011-cutover-resource.json"
 DEPLOYMENT = HOME / ".local" / "share" / "mtm" / "deployment" / "deployment-v1.json"
 MTM_BIN = HOME / ".local" / "bin" / "mtm"
+CARGO_MTM_BIN = HOME / ".cargo" / "bin" / "mtm"
 RE_CTM_BIN = HOME / ".local" / "bin" / "re-ctm"
+EXPECTED_A4_CANDIDATE_SHA256 = "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036"
+A4_CANDIDATE_ARCHIVE = (
+    HOME / ".local" / "share" / "mtm" / "evidence"
+    / f"mtm011-a4-candidate-{EXPECTED_A4_CANDIDATE_SHA256[:12]}" / "mtm"
+)
 EXPECTED_EVALUATION_SHA256 = "1820027a361604fd77da2e303e1c7c43ab6f25edd7a7401cc6176705c280bd05"
 EXPECTED_POST_A5_SHA256 = "fc9ad093e0abb91d4b90fb05f9c2b280d359557938d701da81dcd5789bdf6f8d"
 
@@ -53,6 +59,19 @@ def validate() -> dict[str, object]:
     target = Path(str(report.get("production_command_target") or ""))
     if not MTM_BIN.is_symlink() or MTM_BIN.resolve() != target.resolve(strict=True):
         raise ValueError("installed mtm command does not select preview.2")
+    shell_alias = report.get("shell_command_alias")
+    if not isinstance(shell_alias, dict):
+        raise ValueError("preview.2 shell command alias evidence is missing")
+    if not CARGO_MTM_BIN.is_symlink() or CARGO_MTM_BIN.resolve() != MTM_BIN.resolve():
+        raise ValueError("~/.cargo/bin/mtm does not follow the production MTM selector")
+    if shell_alias.get("path") != str(CARGO_MTM_BIN):
+        raise ValueError("preview.2 shell command alias path drifted")
+    if shell_alias.get("a4_candidate_archive") != str(A4_CANDIDATE_ARCHIVE):
+        raise ValueError("preview.2 A4 candidate archive path drifted")
+    if shell_alias.get("a4_candidate_sha256") != EXPECTED_A4_CANDIDATE_SHA256:
+        raise ValueError("preview.2 A4 candidate archive hash binding drifted")
+    if not A4_CANDIDATE_ARCHIVE.is_file() or sha256_file(A4_CANDIDATE_ARCHIVE) != EXPECTED_A4_CANDIDATE_SHA256:
+        raise ValueError("MTM-011 A4 candidate archive is unavailable or drifted")
     expected_sha = str(report.get("binary_sha256") or "")
     if sha256_file(target) != expected_sha:
         raise ValueError("installed preview.2 binary hash mismatch")
@@ -111,6 +130,8 @@ def validate() -> dict[str, object]:
         "production_default_workflow_protocol": 3,
         "rollback_workflow_protocol": 2,
         "real_rollback_and_recutover_passed": True,
+        "shell_command_alias": str(CARGO_MTM_BIN),
+        "a4_candidate_archive_sha256": EXPECTED_A4_CANDIDATE_SHA256,
         "state_schema_version": 2,
         "public_tools": 24,
         "hidden_aliases": 11,
