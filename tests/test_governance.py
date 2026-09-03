@@ -217,7 +217,19 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(evaluation_summary["complete_pairs"], 0)
         self.assertEqual(evaluation_summary["status"], "pending_web_runs")
         self.assertFalse(evaluation_summary["release_gate_passed"])
-        self.assertIsNone(evaluation["candidate"]["binary_sha256"])
+        iteration = json.loads((ROOT / "records" / "iterations" / "ITER-011.json").read_text(encoding="utf-8"))
+        frozen = iteration["frozen_a4_contract"]
+        self.assertEqual(
+            frozen["initial_evaluation_sha256"],
+            "824a0c6700903a6e5e848f4492246ea87fb8d05572eebf39a0575d40ecc22460",
+        )
+        candidate_sha = evaluation["candidate"]["binary_sha256"]
+        if candidate_sha is not None:
+            resource = evaluation["resource_evidence"]
+            self.assertEqual(resource["status"], "accepted_current_candidate")
+            resource_payload = json.loads((ROOT / resource["path"]).read_text(encoding="utf-8"))
+            self.assertEqual(candidate_sha, resource_payload["implementation_sha256"])
+            self.assertEqual(candidate_sha, iteration["current_candidate_a5"]["binary_sha256"])
         self.assertEqual(evaluation["release_gate"]["minimum_strict_structural_primary_improvements"], 2)
         authority = json.loads((ROOT / "authority-inventory.json").read_text(encoding="utf-8"))
         protocols = authority["preview_policy"]

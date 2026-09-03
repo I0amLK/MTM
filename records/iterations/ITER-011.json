@@ -73,7 +73,7 @@
     "contract_tool_hashes": {
       "validate_corpus": "942cb24af7f7c65200d1416bb3728a18dc597789047a099e341b002e1d3c1b2c",
       "record_web_run": "3d65edbce2ff36a35aab059796c0e19a5836d8e59a2efda998aecd008eccae67",
-      "validate_evaluation": "13b05d625804f9620c799090f60f409d148e9f22ade5db80dd9532ee617848d7",
+      "validate_evaluation": "0fc730442ac1080ed846bf13c75d3f115e9bc206f46bab92cb189b1f518df18e",
       "finalize_evaluation": "b20fa776df754460337e369d04cb851512f825e0e0090cc11a635f447a8a4e09",
       "validate_release_gate": "8134f34651edd676188cb218a554a6468e21b653066154815e089715b4fb31f4"
     }
@@ -87,6 +87,30 @@
     "Regenerate resource evidence against the exact candidate binary used by the paired A4 treatments.",
     "Keep protocol 2 and protocol 3 task/view/RSS/fd/thread limits at or below the predeclared bounds.",
     "No A6 performance claim is implied by cutover qualification."
+  ],
+  "current_candidate_a5": {
+    "status": "accepted_before_first_treatment",
+    "source_commit": "83aab38bb1af07c6cce7ba4264ceb35c573a4aa2",
+    "binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+    "resource_report": "mtm011-research-resource.json",
+    "resource_report_sha256": "d4c85a56515b798848b264f318f5357a3b90032777c965c2fdd1bc919c0be7e1",
+    "evaluation_sha256_after_binding": "ac06b718a3eb4d9044c3e369cdf63ee47062a7f60397847446659a2b31e8116c",
+    "protocol2_p95_ms": 1.89273,
+    "protocol3_p95_ms": 2.971442,
+    "protocol3_research_view_bytes": 1172,
+    "protocol2_rss_kib": 14128,
+    "protocol3_rss_kib": 14820,
+    "check_count": 8,
+    "performance_claim": false,
+    "first_treatment_recorded": false
+  },
+  "pre_treatment_repairs": [
+    {
+      "stage": "first current-candidate A5 binding",
+      "failure": "The MTM-011 evaluation validator initially rejected a candidate SHA whenever zero web treatments were recorded, contradicting the frozen execution order that requires accepted A5 evidence to bind the exact candidate before the first treatment.",
+      "repair": "Allow a zero-treatment candidate binding only when an accepted resource-evidence file is already bound and its implementation_sha256 exactly equals the candidate SHA. Recorded treatments still require the same candidate, and a candidate without A5 remains rejected.",
+      "scope_review": "No corpus problem, pair order, metric, applicability rule, structural-improvement threshold or release criterion changed; the repair only makes the validator enforce the already-frozen A5-before-A4 order."
+    }
   ],
   "cutover_plan": [
     "Freeze and validate the MTM-011 corpus/evaluation contract.",

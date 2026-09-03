@@ -187,11 +187,12 @@ def validate(payload: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("evaluation pair count does not match corpus")
     candidate_sha = payload.get("candidate", {}).get("binary_sha256")
     recorded_runs = sum(pair.get("protocol2") is not None for pair in pairs) + sum(pair.get("protocol3") is not None for pair in pairs)
-    if recorded_runs:
-        if not isinstance(candidate_sha, str) or SHA256_RE.fullmatch(candidate_sha) is None:
-            raise ValueError("recorded treatments require one candidate binary SHA-256")
-    elif candidate_sha is not None:
-        raise ValueError("candidate binary may not be bound before the first treatment")
+    if candidate_sha is not None and (
+        not isinstance(candidate_sha, str) or SHA256_RE.fullmatch(candidate_sha) is None
+    ):
+        raise ValueError("candidate binary SHA-256 is invalid")
+    if recorded_runs and candidate_sha is None:
+        raise ValueError("recorded treatments require one candidate binary SHA-256")
     complete_pairs = 0
     for pair in pairs:
         case_id = pair.get("case_id")
@@ -221,6 +222,11 @@ def validate(payload: dict[str, Any]) -> dict[str, Any]:
         resource_path = ROOT / str(resource.get("path"))
         if not resource_path.is_file() or sha256_file(resource_path) != resource_sha:
             raise ValueError("resource evidence binding is stale")
+        resource_payload = json.loads(resource_path.read_text(encoding="utf-8"))
+        if candidate_sha != resource_payload.get("implementation_sha256"):
+            raise ValueError("candidate binary does not match accepted A5 implementation")
+    elif candidate_sha is not None:
+        raise ValueError("candidate binary may be bound before treatments only through accepted A5 evidence")
     status = payload.get("status")
     if status not in {"pending_web_runs", "in_progress", "complete"}:
         raise ValueError("invalid evaluation status")

@@ -20,6 +20,7 @@
   "completed_milestones": ["MTM-001", "MTM-002", "MTM-003", "MTM-004", "MTM-005", "MTM-006", "MTM-007", "MTM-008", "MTM-010"],
   "next_milestone": null,
   "claims": [
+    "MTM-011 current-candidate A5 is accepted before the first treatment: release binary SHA-256 5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036 passed all eight protocol-2/protocol-3 resource checks, with report SHA-256 d4c85a56515b798848b264f318f5357a3b90032777c965c2fdd1bc919c0be7e1. The production default remains protocol 2 and no MTM-011 A4 treatment has yet been recorded.",
     "MTM-011 is the prospective protocol-3 default-cutover qualification. Production remains protocol-2-default while a new six-pair obstruction-heavy A4 contract is frozen before treatment collection; the completed MTM-009 v1 evaluation remains immutable and rejected.",
     "Post-MTM-009 live regression on binary SHA-256 489eb4be5bde83bb9ddb4da8ddfe359e88245ba0f9b076ccaa530e02f8a9d88e confirms the retrieval projector fix: a first typed new_material assessment remains Progress with consecutive_no_new_material=0, while repeating the same assessed reference becomes Inconclusive/NoProgress.",
     "A post-gate Artin hidden-hypothesis A/B case provides prospective design evidence for MTM-011: protocol 3 preserved target=refuted, counterexample coverage, missing_hypothesis obstruction and usable partial results across replan. This evidence is not retroactively counted toward the immutable MTM-009 v1 gate.",

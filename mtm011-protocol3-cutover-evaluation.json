@@ -9,11 +9,11 @@
   },
   "resource_evidence": {
     "path": "mtm011-research-resource.json",
-    "sha256": null,
-    "status": "pending_current_candidate"
+    "sha256": "d4c85a56515b798848b264f318f5357a3b90032777c965c2fdd1bc919c0be7e1",
+    "status": "accepted_current_candidate"
   },
   "candidate": {
-    "binary_sha256": null,
+    "binary_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
     "same_binary_required_for_all_treatments": true,
     "production_default_during_evaluation": 2
   },
@@ -29,18 +29,69 @@
     "private_reasoning_recorded": false
   },
   "predeclared_metrics": [
-    {"metric": "verified_tex_completion", "direction": "higher_is_better", "release_role": "non_regression_gate"},
-    {"metric": "first_verification_pass", "direction": "higher_is_better", "release_role": "secondary_quality"},
-    {"metric": "repeated_failed_route_without_new_evidence", "direction": "lower_is_better", "release_role": "behavioral_non_regression"},
-    {"metric": "counterexample_probe_on_blocker", "direction": "higher_is_better", "release_role": "behavioral_non_regression_when_applicable"},
-    {"metric": "focused_retrieval_when_missing_reference", "direction": "higher_is_better", "release_role": "behavioral_non_regression_when_applicable"},
-    {"metric": "max_no_novelty_retrieval_streak", "direction": "lower_is_better", "release_role": "behavioral_non_regression"},
-    {"metric": "repair_count", "direction": "lower_is_better", "release_role": "secondary_quality"},
-    {"metric": "verifier_finding_count", "direction": "lower_is_better", "release_role": "behavioral_non_regression"},
-    {"metric": "harmful_advice_events", "direction": "lower_is_better", "release_role": "safety_gate"},
-    {"metric": "refuted_target_state_preserved", "direction": "higher_is_better", "release_role": "structural_primary_when_applicable", "definition": "After a concrete refutation and after any subsequent replan, the bounded server research state still marks the original target refuted rather than silently reopening it."},
-    {"metric": "typed_obstruction_class_preserved", "direction": "higher_is_better", "release_role": "structural_primary_when_applicable", "definition": "The material obstruction is retained as a canonical typed class such as false_claim or missing_hypothesis through failure synthesis/replan rather than only free-form text."},
-    {"metric": "canonical_partial_results_preserved", "direction": "higher_is_better", "release_role": "structural_primary_when_applicable", "definition": "Evaluator-confirmed useful partial results are surfaced by canonical node identity after replan and remain reusable without resurrecting a refuted target."}
+    {
+      "metric": "verified_tex_completion",
+      "direction": "higher_is_better",
+      "release_role": "non_regression_gate"
+    },
+    {
+      "metric": "first_verification_pass",
+      "direction": "higher_is_better",
+      "release_role": "secondary_quality"
+    },
+    {
+      "metric": "repeated_failed_route_without_new_evidence",
+      "direction": "lower_is_better",
+      "release_role": "behavioral_non_regression"
+    },
+    {
+      "metric": "counterexample_probe_on_blocker",
+      "direction": "higher_is_better",
+      "release_role": "behavioral_non_regression_when_applicable"
+    },
+    {
+      "metric": "focused_retrieval_when_missing_reference",
+      "direction": "higher_is_better",
+      "release_role": "behavioral_non_regression_when_applicable"
+    },
+    {
+      "metric": "max_no_novelty_retrieval_streak",
+      "direction": "lower_is_better",
+      "release_role": "behavioral_non_regression"
+    },
+    {
+      "metric": "repair_count",
+      "direction": "lower_is_better",
+      "release_role": "secondary_quality"
+    },
+    {
+      "metric": "verifier_finding_count",
+      "direction": "lower_is_better",
+      "release_role": "behavioral_non_regression"
+    },
+    {
+      "metric": "harmful_advice_events",
+      "direction": "lower_is_better",
+      "release_role": "safety_gate"
+    },
+    {
+      "metric": "refuted_target_state_preserved",
+      "direction": "higher_is_better",
+      "release_role": "structural_primary_when_applicable",
+      "definition": "After a concrete refutation and after any subsequent replan, the bounded server research state still marks the original target refuted rather than silently reopening it."
+    },
+    {
+      "metric": "typed_obstruction_class_preserved",
+      "direction": "higher_is_better",
+      "release_role": "structural_primary_when_applicable",
+      "definition": "The material obstruction is retained as a canonical typed class such as false_claim or missing_hypothesis through failure synthesis/replan rather than only free-form text."
+    },
+    {
+      "metric": "canonical_partial_results_preserved",
+      "direction": "higher_is_better",
+      "release_role": "structural_primary_when_applicable",
+      "definition": "Evaluator-confirmed useful partial results are surfaced by canonical node identity after replan and remain reusable without resurrecting a refuted target."
+    }
   ],
   "release_gate": {
     "verified_tex_completion_non_regression": true,
@@ -52,17 +103,91 @@
   },
   "blind_evaluation_contract": {
     "treatment_hidden_until_scores_frozen": true,
-    "artifact_labels": ["A", "B"],
-    "scores": {"logic_completeness": {"min": 1, "max": 5}, "readability": {"min": 1, "max": 5}, "research_efficiency": {"min": 1, "max": 5}},
-    "allowed_winner": ["A", "B", "tie"]
+    "artifact_labels": [
+      "A",
+      "B"
+    ],
+    "scores": {
+      "logic_completeness": {
+        "min": 1,
+        "max": 5
+      },
+      "readability": {
+        "min": 1,
+        "max": 5
+      },
+      "research_efficiency": {
+        "min": 1,
+        "max": 5
+      }
+    },
+    "allowed_winner": [
+      "A",
+      "B",
+      "tie"
+    ]
   },
   "pairs": [
-    {"case_id": "M011-C01-artin-hidden-galois", "pair_order": ["protocol2", "protocol3"], "protocol2": null, "protocol3": null, "blind_evaluation": null},
-    {"case_id": "M011-C02-fixed-point-uniqueness", "pair_order": ["protocol3", "protocol2"], "protocol2": null, "protocol3": null, "blind_evaluation": null},
-    {"case_id": "M011-C03-order-p2-cyclic", "pair_order": ["protocol2", "protocol3"], "protocol2": null, "protocol3": null, "blind_evaluation": null},
-    {"case_id": "M011-C04-zsigmondy-retrieval", "pair_order": ["protocol3", "protocol2"], "protocol2": null, "protocol3": null, "blind_evaluation": null},
-    {"case_id": "M011-C05-finite-field-subgroup", "pair_order": ["protocol2", "protocol3"], "protocol2": null, "protocol3": null, "blind_evaluation": null},
-    {"case_id": "M011-C06-euler-trail", "pair_order": ["protocol3", "protocol2"], "protocol2": null, "protocol3": null, "blind_evaluation": null}
+    {
+      "case_id": "M011-C01-artin-hidden-galois",
+      "pair_order": [
+        "protocol2",
+        "protocol3"
+      ],
+      "protocol2": null,
+      "protocol3": null,
+      "blind_evaluation": null
+    },
+    {
+      "case_id": "M011-C02-fixed-point-uniqueness",
+      "pair_order": [
+        "protocol3",
+        "protocol2"
+      ],
+      "protocol2": null,
+      "protocol3": null,
+      "blind_evaluation": null
+    },
+    {
+      "case_id": "M011-C03-order-p2-cyclic",
+      "pair_order": [
+        "protocol2",
+        "protocol3"
+      ],
+      "protocol2": null,
+      "protocol3": null,
+      "blind_evaluation": null
+    },
+    {
+      "case_id": "M011-C04-zsigmondy-retrieval",
+      "pair_order": [
+        "protocol3",
+        "protocol2"
+      ],
+      "protocol2": null,
+      "protocol3": null,
+      "blind_evaluation": null
+    },
+    {
+      "case_id": "M011-C05-finite-field-subgroup",
+      "pair_order": [
+        "protocol2",
+        "protocol3"
+      ],
+      "protocol2": null,
+      "protocol3": null,
+      "blind_evaluation": null
+    },
+    {
+      "case_id": "M011-C06-euler-trail",
+      "pair_order": [
+        "protocol3",
+        "protocol2"
+      ],
+      "protocol2": null,
+      "protocol3": null,
+      "blind_evaluation": null
+    }
   ],
   "aggregate": null,
   "decision": "pending"
