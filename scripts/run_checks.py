@@ -94,8 +94,9 @@ def main() -> int:
     )
     mtm011_preview_mode = (
         progress.get("version") == "0.4.0-preview.2"
-        and progress.get("current_milestone") == "MTM-011"
-        and progress.get("status") in {"MTM-011-in-progress", "MTM-011-completed"}
+        and progress.get("current_milestone") in {"MTM-011", "MTM-012"}
+        and progress.get("status")
+        in {"MTM-011-in-progress", "MTM-011-completed", "MTM-012-in-progress"}
     )
     mtm011_cutover_mode = mtm011_preview_mode
     checks: list[dict[str, Any]] = [

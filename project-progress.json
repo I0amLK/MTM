@@ -2,8 +2,8 @@
   "schema_version": "1.0.0",
   "project": "MTM-reboot",
   "version": "0.4.0-preview.2",
-  "status": "MTM-011-completed",
-  "updated_at": "2026-09-03T02:54:35-07:00",
+  "status": "MTM-012-in-progress",
+  "updated_at": "2026-09-03T03:40:00-07:00",
   "source_baseline": "source-baseline.json",
   "current_production_authority": "rust",
   "rust_production_components": 7,
@@ -15,11 +15,12 @@
   "rust_authoritative_runtime_components": 1,
   "python_production_runtime_retired": true,
   "re_ctm_separate_project_installed": true,
-  "milestone_count": 11,
-  "current_milestone": "MTM-011",
+  "milestone_count": 12,
+  "current_milestone": "MTM-012",
   "completed_milestones": ["MTM-001", "MTM-002", "MTM-003", "MTM-004", "MTM-005", "MTM-006", "MTM-007", "MTM-008", "MTM-010", "MTM-011"],
   "next_milestone": null,
   "claims": [
+    "MTM-012 is an approved presentation-only TUI usability milestone. The current default monitor is intentionally being reduced from duplicated start/done lifecycle lines with trace and argument-key metadata to a compact tool-visible surface with explicit failures and an opt-in verbose diagnostic fallback. Workflow protocol 3, protocol-2 rollback, OAuth, Native/workflow authority, state schema, tool contracts and proof finalization are out of scope.",
     "MTM-011 is completed and MTM 0.4.0-preview.2 is installed at /home/lk/.local/share/mtm/releases/0.4.0-preview.2/mtm with SHA-256 5ed668d5bf765be2efd1b50933e941cf60dbbd414e3b6daab77745624d5cfa81. Both /home/lk/.local/bin/mtm and the login-shell-preferred /home/lk/.cargo/bin/mtm now follow the same selector. Protocol 3 is the no-override default for new runs, explicit MTM_WORKFLOW_PROTOCOL_VERSION=2 remains the rollback, the formal A4 candidate 5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036 is archived byte-for-byte, and real selector rollback/recutover plus live MCP new-run probes passed.",
     "MTM-011 mathematical qualification is accepted: the frozen six-pair evaluation completed 6/6 verified TeX for both protocols, strictly improved two structural-primary metrics under protocol 3, recorded zero harmful-advice events, and passed the independent cutover gate.",
     "MTM-011 current-candidate A5 was accepted before the first treatment: release binary SHA-256 5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036 passed all eight protocol-2/protocol-3 resource checks, with report SHA-256 d4c85a56515b798848b264f318f5357a3b90032777c965c2fdd1bc919c0be7e1.",
@@ -68,6 +69,7 @@
     "authority-inventory.json records every MTM production authority as Rust, with Bubblewrap retained only as the Linux kernel-isolation actuator; release evidence proves MTM uses mtm / MTM_* / ~/.mtm while Re-CTM uses re-ctm / RE_CTM_* / ~/.re-ctm."
   ],
   "manual_pending": [
+    "Complete MTM-012 compact/verbose TUI tests and a real OAuth/MCP operator-monitor smoke before packaging a new preview; preview.2 remains the installed rollback until that acceptance passes.",
     "Stable 0.4.0 remains a separate release decision; preview.2 cutover evidence does not by itself authorize removing the protocol-2 rollback or rewriting existing runs.",
     "Existing 0.3.0 MTM sessions were deliberately left running during preview command cutover; restart them only when operationally desired.",
     "Other operating systems and site-local toolchain layouts remain target-specific Native evidence.",

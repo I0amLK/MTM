@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0",
+  "iteration_id": "ITER-012",
+  "milestone_id": "MTM-012",
+  "title": "Compact TUI information hierarchy",
+  "started_at": "2026-09-03T03:40:00-07:00",
+  "authority": {
+    "component_scope": "CLI/TUI presentation only",
+    "before": "rust",
+    "target_after_acceptance": "rust",
+    "workflow_transition_authority_changed": false,
+    "finalizer_authority_changed": false,
+    "native_authority_changed": false
+  },
+  "trigger": {
+    "user_feedback": "The current TUI gives the user too much routine information.",
+    "current_behavior": "The default operator monitor prints tool start and successful completion as separate lines and includes argument-key lists and trace identifiers; startup information is also spread across several lines.",
+    "preserved_requirement": "Users must still be able to see which tool is being used and must receive clear failures, generated OAuth operator keys and public Quick Tunnel URLs."
+  },
+  "frozen_policy": {
+    "compact_default": true,
+    "verbose_diagnostics_available": true,
+    "compact_tool_start_visible": true,
+    "compact_success_completion_silent": true,
+    "compact_tool_failure_visible": true,
+    "compact_trace_ids_hidden": true,
+    "compact_argument_keys_hidden": true,
+    "argument_values_never_shown": true,
+    "generated_operator_key_still_shown_once": true,
+    "quick_tunnel_public_url_still_shown": true,
+    "protocol3_default_unchanged": true,
+    "protocol2_rollback_unchanged": true,
+    "public_tool_contract_unchanged": true,
+    "state_schema_unchanged": true
+  },
+  "implementation_plan": [
+    "Introduce a typed compact-versus-verbose operator presentation mode in mtm-runtime without changing observer authority.",
+    "Make compact event formatting optional-output so routine successful completion events can be intentionally silent.",
+    "Keep the existing detailed lifecycle representation behind an explicit TUI verbose flag, still redacted to argument keys rather than values.",
+    "Compress CLI startup lines into a short identity/status line plus MCP endpoint and only the credentials/tunnel information the user actually needs.",
+    "Add regression tests for compact tool visibility, duplicate-success suppression, failure visibility, verbose compatibility and redaction.",
+    "Run a real local OAuth/MCP TUI smoke that invokes tools and inspects the actual captured TUI output."
+  ],
+  "acceptance": {
+    "A0": "Full format, Clippy, workspace tests, governance and unified local gate pass.",
+    "A1": "Compact and verbose output have deterministic tested text contracts; compact mode removes routine diagnostic metadata but preserves required operating information.",
+    "A3": "No argument value, capability, OAuth secret, bearer token or other sensitive field is introduced into TUI output; operator remains presentation-only.",
+    "A4": "A real local OAuth/MCP TUI process shows tool identity in compact mode, omits successful done/trace/arg-key noise, shows failures, and supports verbose fallback."
+  },
+  "rollback": "Revert MTM-012 presentation changes and restore the preview.2 selector. No database, run state, capability, project revision or proof artifact changes are required.",
+  "manual_pending": [
+    "Implement and test the compact/verbose event formatter.",
+    "Run the real TUI OAuth/MCP acceptance smoke.",
+    "Package and install a new preview only after all MTM-012 gates pass."
+  ],
+  "decision": "in_progress"
+}

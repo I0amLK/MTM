@@ -399,6 +399,41 @@
       ],
       "rollback": "For new runs, set MTM_WORKFLOW_PROTOCOL_VERSION=2. For a selector-level release rollback, atomically restore /home/lk/.local/bin/mtm to the preserved 0.4.0-preview.1 release; do not rewrite existing protocol-3 run state, capabilities, project revisions or proof_verified.tex artifacts.",
       "dependencies": ["MTM-009", "MTM-010"]
+    },
+    {
+      "id": "MTM-012",
+      "title": "Compact TUI information hierarchy",
+      "status": "in_progress",
+      "priority": "P1",
+      "production_authority_before": "rust",
+      "production_authority_after": "rust",
+      "functional_goal": "Reduce default TUI noise while preserving tool visibility, actionable failures, generated operator-key delivery, Quick Tunnel discovery, redaction, and the existing runtime/workflow authority boundaries.",
+      "scope": [
+        "Make the default operator monitor compact: one visible line when a tool starts, no duplicate success-completion line, and a clear failure line when a tool fails",
+        "Hide trace identifiers, argument-key lists, allow reasons and other diagnostic metadata from the default TUI surface",
+        "Retain an explicit verbose TUI mode that exposes the existing diagnostic lifecycle format without exposing argument values or secrets",
+        "Compress startup/status output while preserving the MCP endpoint, protocol/default mode, generated OAuth operator key when one must be shown, and public Quick Tunnel URL",
+        "Add unit and real OAuth/MCP TUI acceptance proving compact output, verbose fallback and secret redaction",
+        "Package the accepted change under a new preview identity without changing protocol 3 as the new-run default or protocol 2 as the rollback override"
+      ],
+      "non_goals": [
+        "No change to the 24 public tools, hidden aliases, OAuth protocol, state schema, workflow protocol, verifier/finalizer semantics or Native/workflow authority",
+        "No terminal UI framework, alternate-screen dependency, background renderer or persistent UI state",
+        "No hiding of tool failures, generated operator keys, public tunnel URLs or other information required for the user to operate or recover the service",
+        "No performance claim; the goal is information hierarchy and usability"
+      ],
+      "acceptance_levels": ["A0", "A1", "A3", "A4"],
+      "validation_commands": [
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets -- -D warnings",
+        "cargo test --workspace",
+        "python3 scripts/run_mtm012_tui_validation.py",
+        "python3 scripts/validate_migration_graph.py",
+        "python3 scripts/validate_engineering_graph.py",
+        "python3 scripts/run_checks.py"
+      ],
+      "rollback": "Restore the preview.2 operator formatting and selector; no run, project, database, capability or proof artifact migration is involved.",
+      "dependencies": ["MTM-011"]
     }
   ],
   "edges": [
@@ -416,9 +451,10 @@
     {"source": "MTM-009", "target": "MTM-008"},
     {"source": "MTM-010", "target": "MTM-008"},
     {"source": "MTM-011", "target": "MTM-009"},
-    {"source": "MTM-011", "target": "MTM-010"}
+    {"source": "MTM-011", "target": "MTM-010"},
+    {"source": "MTM-012", "target": "MTM-011"}
   ],
-  "todo": ["MTM-009"],
+  "todo": ["MTM-009", "MTM-012"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -787,6 +823,22 @@
       "status_before": "in_progress",
       "status_after": "completed",
       "summary": "Completed protocol-3 default cutover after the frozen six-pair A4 accepted with two strict structural-primary improvements and no behavioral regression, the final preview.2 artifact passed eight post-cutover A5 checks, the selector was atomically cut over/rolled back/recut over, and live OAuth/MCP new-run probes confirmed protocol 3 by default with explicit protocol 2 rollback preserved."
+    },
+    {
+      "event_id": "MEVT-047",
+      "milestone_id": "MTM-012",
+      "at": "2026-09-03T03:39:56-07:00",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "The user explicitly requested a TUI usability pass because the current operator monitor exposes too much routine information. The approved boundary is presentation-only: reduce default noise while retaining tool identity, failures, operator credentials when generated, tunnel discovery, redaction and a verbose diagnostic fallback."
+    },
+    {
+      "event_id": "MEVT-048",
+      "milestone_id": "MTM-012",
+      "at": "2026-09-03T03:40:00-07:00",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Began compact-TUI implementation after freezing the presentation-only scope, non-goals, rollback and A0/A1/A3/A4 acceptance requirements."
     }
   ],
   "receipt_contract": {
