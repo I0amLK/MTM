@@ -68,6 +68,8 @@
     "production_default_workflow_protocol": 2,
     "protocol3_default_cutover_allowed": false,
     "real_web_a4": "complete_rejected",
+    "default_cutover_qualification": "MTM-011-in-progress",
+    "mtm009_v1_evaluation_immutable": true,
     "final_artifact": "proof_verified.tex"
   },
   "rollback": {

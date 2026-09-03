@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0.0",
+  "iteration_id": "ITER-011",
+  "milestone_id": "MTM-011",
+  "title": "Protocol 3 default-cutover qualification",
+  "started_at": "2026-09-02T23:25:00-07:00",
+  "authority": {
+    "component_scope": "MTM workflow protocol selection for new runs",
+    "before": "rust protocol-2-default with protocol-3 opt-in",
+    "target_after_acceptance": "rust protocol-3-default with protocol-2 rollback",
+    "workflow_transition_authority_changed": false,
+    "finalizer_authority_changed": false,
+    "native_authority_changed": false
+  },
+  "trigger": {
+    "mtm009_v1_evaluation_sha256": "e7596fbaed70655228bd1530376ba457153e575ea0b845c4c8e64e2848e7e564",
+    "mtm009_v1_release_gate_passed": false,
+    "post_gate_retrieval_projector_fix": "a9cd38d6b4a3b45ca7dd1d1faad30febe7fac4bb",
+    "live_candidate_sha256": "489eb4be5bde83bb9ddb4da8ddfe359e88245ba0f9b076ccaa530e02f8a9d88e",
+    "prospective_evidence": "An Artin-reciprocity hidden-hypothesis A/B run showed protocol 3 preserving target=refuted, counterexample coverage, missing_hypothesis obstruction and usable conditional partial results across replan, while protocol 2 retained only free-form failure summaries. This evidence was collected after v1 completion and is design evidence only, not MTM-011 acceptance evidence."
+  },
+  "frozen_policy": {
+    "v1_immutability": "The completed MTM-009 v1 corpus, scores, aggregate, SHA and rejected decision are immutable and remain independently valid historical evidence.",
+    "evidence_order": "The MTM-011 corpus, metrics, applicability rules, pair order and cutover threshold must be committed before the first MTM-011 web treatment is recorded.",
+    "same_binary_within_pair": true,
+    "same_model_surface_within_pair": true,
+    "same_connector_profile_within_pair": true,
+    "production_default_during_evaluation": 2,
+    "protocol3_opt_in_during_evaluation": true,
+    "raw_web_transcript_recorded": false,
+    "private_reasoning_recorded": false
+  },
+  "planned_a4": {
+    "pair_count": 6,
+    "order_balance": "3 protocol2-first / 3 protocol3-first",
+    "case_mix": [
+      "hidden Galois-stability hypothesis in Artin reciprocity equivariance",
+      "false uniqueness strengthening of the interval fixed-point theorem",
+      "false cyclic strengthening for groups of order p^2",
+      "external-theorem retrieval and audit for a Zsigmondy corollary",
+      "true finite-subgroup-of-field-multiplicative-group cyclicity with reusable partial lemmas",
+      "true Euler-trail existence with multi-lemma assembly"
+    ],
+    "structural_primary_metrics": [
+      "refuted_target_state_preserved",
+      "typed_obstruction_class_preserved",
+      "canonical_partial_results_preserved"
+    ],
+    "behavioral_non_regression_metrics": [
+      "verified_tex_completion",
+      "first_verification_pass",
+      "repeated_failed_route_without_new_evidence",
+      "counterexample_probe_on_blocker",
+      "focused_retrieval_when_missing_reference",
+      "max_no_novelty_retrieval_streak",
+      "repair_count",
+      "verifier_finding_count",
+      "harmful_advice_events"
+    ],
+    "cutover_rule": "Protocol 3 must not regress verified completion, must have zero harmful-advice events and no material behavioral research-control regression, and must strictly improve at least two applicable structural-primary metrics over protocol 2."
+  },
+  "frozen_a4_contract": {
+    "frozen_before_first_treatment": true,
+    "corpus_path": "conformance/mtm011-math-corpus.json",
+    "corpus_id": "mtm011-protocol3-cutover-v1",
+    "corpus_sha256": "6420422bd4017ec811187fe27b37150fe01a90cf62da49d0b328f5ff8e71fa2c",
+    "initial_evaluation_path": "mtm011-protocol3-cutover-evaluation.json",
+    "initial_evaluation_sha256": "824a0c6700903a6e5e848f4492246ea87fb8d05572eebf39a0575d40ecc22460",
+    "pair_count": 6,
+    "protocol2_first": 3,
+    "protocol3_first": 3,
+    "structural_primary_minimum_strict_improvements": 2,
+    "contract_tool_hashes": {
+      "validate_corpus": "942cb24af7f7c65200d1416bb3728a18dc597789047a099e341b002e1d3c1b2c",
+      "record_web_run": "3d65edbce2ff36a35aab059796c0e19a5836d8e59a2efda998aecd008eccae67",
+      "validate_evaluation": "13b05d625804f9620c799090f60f409d148e9f22ade5db80dd9532ee617848d7",
+      "finalize_evaluation": "b20fa776df754460337e369d04cb851512f825e0e0090cc11a635f447a8a4e09",
+      "validate_release_gate": "8134f34651edd676188cb218a554a6468e21b653066154815e089715b4fb31f4"
+    }
+  },
+  "a0_preconditions": [
+    "Keep the MTM-003 historical golden immutable while diagnosing its environment-sensitive fixture-parent hash; do not update the golden merely to make Paper Helper green.",
+    "Run full workspace format, warnings-denied Clippy and tests after all MTM-011 harness work.",
+    "Run the unified local gate in a target-equivalent environment before cutover."
+  ],
+  "a5_preconditions": [
+    "Regenerate resource evidence against the exact candidate binary used by the paired A4 treatments.",
+    "Keep protocol 2 and protocol 3 task/view/RSS/fd/thread limits at or below the predeclared bounds.",
+    "No A6 performance claim is implied by cutover qualification."
+  ],
+  "cutover_plan": [
+    "Freeze and validate the MTM-011 corpus/evaluation contract.",
+    "Record fresh current-candidate A5 evidence.",
+    "Run all twelve paired treatments in frozen order and blind-score completed verified artifacts.",
+    "Run the deterministic aggregate gate and independent release gate.",
+    "Only after every gate passes, change the production new-run default from protocol 2 to protocol 3.",
+    "Build/install the versioned candidate, verify server_info/release-info/default behavior, and perform a real protocol-2 rollback/recutover drill."
+  ],
+  "rollback": "Until cutover, no rollback is needed because protocol 2 remains the default. After cutover, restore protocol 2 as the new-run default without rewriting existing runs or verified artifacts.",
+  "manual_pending": [
+    "Freeze the MTM-011 mathematical corpus and evaluation schema before collecting any treatment evidence.",
+    "Refresh A5 against the exact post-fix candidate binary.",
+    "Complete all paired web treatments and the deterministic release gate before changing the default."
+  ],
+  "decision": "in_progress"
+}

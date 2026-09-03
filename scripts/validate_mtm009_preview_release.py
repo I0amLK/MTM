@@ -117,7 +117,7 @@ def validate() -> dict[str, object]:
     if tui.get("passed") is not True or tui.get("argument_values_hidden") is not True:
         raise ValueError("preview TUI visibility/redaction evidence is incomplete")
     progress = json.loads((ROOT / "project-progress.json").read_text(encoding="utf-8"))
-    if progress.get("version") != VERSION or progress.get("current_milestone") != "MTM-009":
+    if progress.get("version") != VERSION or progress.get("current_milestone") not in {"MTM-009", "MTM-011"}:
         raise ValueError("project progress does not identify the installed preview")
     return {
         "version": VERSION,

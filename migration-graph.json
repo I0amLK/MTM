@@ -358,6 +358,45 @@
       ],
       "rollback": "Revert the resolver-file mount change and return to the accepted MTM-009/MTM-008 Bubblewrap mount set; no persistent state or workflow artifact migration is involved.",
       "dependencies": ["MTM-008"]
+    },
+    {
+      "id": "MTM-011",
+      "title": "Protocol 3 default-cutover qualification",
+      "status": "in_progress",
+      "priority": "P0",
+      "production_authority_before": "rust",
+      "production_authority_after": "rust",
+      "functional_goal": "Prospectively qualify workflow protocol 3 as the default for new runs using obstruction-heavy mathematical A/B evidence, current-candidate resource evidence, deterministic rollback, and an atomic protocol-default cutover without changing the existing workflow/finalizer authority boundary.",
+      "scope": [
+        "Freeze a versioned obstruction-heavy paired mathematical corpus before collecting any MTM-011 treatment evidence",
+        "Measure server-preserved refutation/obstruction/partial-result research state separately from behavioral non-regression metrics",
+        "Require verified .tex non-regression, zero systematic harmful advice, bounded resources and no material behavioral research-control regression",
+        "Repair the historical MTM-003 conformance harness only if needed to remove environment-path nondeterminism without relaxing Python/Rust exact differential checks or rewriting the accepted MTM-003 receipt",
+        "Bind A5 and A4 to the exact post-MTM-009-fix candidate binary used by both protocol treatments",
+        "Change only the new-run production workflow default from protocol 2 to protocol 3 after every frozen cutover gate passes",
+        "Prove rollback by restoring protocol 2 as the default while preserving existing protocol-3 runs and verified artifacts"
+      ],
+      "non_goals": [
+        "No retrospective edit, rescore, threshold relaxation or replacement of the completed MTM-009 v1 rejected evaluation",
+        "No new workflow state, public tool, hidden alias, state-schema version, persistence schema, Agent runtime, scheduler or model API",
+        "No weakening of verifier, branch, Native/workflow authority or finalizer firewalls",
+        "No claim that protocol 3 improves every direct compact proof; the qualification target is obstruction-centered research control plus non-regression",
+        "No stable 0.4.0 release identity until the cutover candidate is versioned, packaged and rollback-qualified separately"
+      ],
+      "acceptance_levels": ["A0", "A1", "A2", "A3", "A4", "A5"],
+      "validation_commands": [
+        "python3 scripts/validate_mtm011_math_corpus.py",
+        "python3 scripts/validate_mtm011_math_evaluation.py",
+        "python3 scripts/validate_mtm011_release_gate.py",
+        "python3 scripts/validate_migration_graph.py",
+        "python3 scripts/validate_engineering_graph.py",
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets -- -D warnings",
+        "cargo test --workspace",
+        "python3 scripts/run_checks.py"
+      ],
+      "rollback": "Before cutover, leave production_default_workflow_protocol_version=2. After cutover, atomically restore the default to 2 and restart only new-run entrypoints as needed; do not rewrite existing protocol-3 run state, capabilities, project revisions or proof_verified.tex artifacts.",
+      "dependencies": ["MTM-009", "MTM-010"]
     }
   ],
   "edges": [
@@ -373,9 +412,11 @@
     {"source": "MTM-007", "target": "MTM-006"},
     {"source": "MTM-008", "target": "MTM-007"},
     {"source": "MTM-009", "target": "MTM-008"},
-    {"source": "MTM-010", "target": "MTM-008"}
+    {"source": "MTM-010", "target": "MTM-008"},
+    {"source": "MTM-011", "target": "MTM-009"},
+    {"source": "MTM-011", "target": "MTM-010"}
   ],
-  "todo": ["MTM-009"],
+  "todo": ["MTM-009", "MTM-011"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -720,6 +761,22 @@
       "status_before": "in_progress",
       "status_after": "completed",
       "summary": "Completed Native resolver stabilization after unit and full-workspace gates, real Trusted/Dangerous hostname HTTPS, Safe network isolation, exact resolver-file /run visibility, a ten-case real-web corpus without resolver workarounds, and twenty-request fd/thread/helper non-regression all passed."
+    },
+    {
+      "event_id": "MEVT-044",
+      "milestone_id": "MTM-011",
+      "at": "2026-09-02T23:24:31-07:00",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "Approved a separate protocol-3 default-cutover qualification after the immutable MTM-009 v1 A4 gate rejected cutover and post-gate Artin hidden-hypothesis A/B evidence demonstrated a real obstruction-centered structural advantage that the original direct-proof-heavy corpus did not measure. The v1 evaluation remains immutable."
+    },
+    {
+      "event_id": "MEVT-045",
+      "milestone_id": "MTM-011",
+      "at": "2026-09-02T23:25:00-07:00",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Began prospective MTM-011 qualification with production default still fixed at protocol 2. The first work boundary is governance plus a frozen obstruction-heavy A4-v2 contract; no treatment evidence may be collected against the new corpus before its hash and release rule are committed."
     }
   ],
   "receipt_contract": {

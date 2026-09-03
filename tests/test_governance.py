@@ -20,17 +20,23 @@ from scripts.validate_mtm008_candidate_evidence import validate as validate_mtm0
 from scripts.validate_mtm_command_namespace import validate as validate_mtm_command_namespace
 from scripts.validate_mtm009_preview_release import validate as validate_mtm009_preview_release
 from scripts.validate_mtm009_research_contract import validate as validate_mtm009_research_contract
+from scripts.validate_mtm011_math_corpus import validate as validate_mtm011_math_corpus
+from scripts.validate_mtm011_math_evaluation import (
+    aggregate_complete as aggregate_mtm011_complete,
+    validate as validate_mtm011_math_evaluation,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def mtm009_preview_mode() -> bool:
+def qualification_preview_mode() -> bool:
     progress = json.loads((ROOT / "project-progress.json").read_text(encoding="utf-8"))
+    milestone = progress.get("current_milestone")
     return (
         str(progress.get("version") or "").startswith("0.4.0-preview.")
-        and progress.get("current_milestone") == "MTM-009"
-        and progress.get("status") == "MTM-009-in-progress"
+        and milestone in {"MTM-009", "MTM-011"}
+        and progress.get("status") == f"{milestone}-in-progress"
     )
 
 
@@ -46,8 +52,8 @@ def historical_check_count(milestone: str) -> int:
 class GovernanceTestCase(unittest.TestCase):
     def test_repository_migration_graph_is_valid(self) -> None:
         summary = validate_migration(load_graph())
-        self.assertEqual(summary["milestone_count"], 10)
-        self.assertEqual(summary["todo_count"], 1)
+        self.assertEqual(summary["milestone_count"], 11)
+        self.assertEqual(summary["todo_count"], 2)
 
     def test_dependency_cycle_is_rejected(self) -> None:
         payload = copy.deepcopy(load_graph())
@@ -121,42 +127,42 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(summary["deployment_command_namespace_separated"])
 
     def test_current_mtm003_target_evidence_is_fresh(self) -> None:
-        if mtm009_preview_mode():
+        if qualification_preview_mode():
             self.assertEqual(historical_check_count("MTM-003"), 14)
             return
         summary = validate_mtm003_target()
         self.assertEqual(summary["required_check_count"], 14)
 
     def test_current_mtm004_target_evidence_is_fresh_and_redacted(self) -> None:
-        if mtm009_preview_mode():
+        if qualification_preview_mode():
             self.assertEqual(historical_check_count("MTM-004"), 10)
             return
         summary = validate_mtm004_target()
         self.assertEqual(summary["required_check_count"], 10)
 
     def test_current_mtm005_target_evidence_is_fresh_and_redacted(self) -> None:
-        if mtm009_preview_mode():
+        if qualification_preview_mode():
             self.assertEqual(historical_check_count("MTM-005"), 15)
             return
         summary = validate_mtm005_target()
         self.assertEqual(summary["required_check_count"], 15)
 
     def test_current_mtm006_target_evidence_is_fresh_and_redacted(self) -> None:
-        if mtm009_preview_mode():
+        if qualification_preview_mode():
             self.assertEqual(historical_check_count("MTM-006"), 8)
             return
         summary = validate_mtm006_target()
         self.assertEqual(summary["required_check_count"], 8)
 
     def test_current_mtm007_target_evidence_is_fresh_and_redacted(self) -> None:
-        if mtm009_preview_mode():
+        if qualification_preview_mode():
             self.assertEqual(historical_check_count("MTM-007"), 12)
             return
         summary = validate_mtm007_target()
         self.assertEqual(summary["required_check_count"], 12)
 
     def test_current_mtm008_candidate_evidence_is_fresh_and_redacted(self) -> None:
-        if mtm009_preview_mode():
+        if qualification_preview_mode():
             self.assertEqual(historical_check_count("MTM-008"), 10)
             return
         summary = validate_mtm008_candidate()
@@ -164,7 +170,7 @@ class GovernanceTestCase(unittest.TestCase):
 
     def test_current_mtm_and_re_ctm_command_namespaces_are_separate(self) -> None:
         summary = validate_mtm_command_namespace()
-        if mtm009_preview_mode():
+        if qualification_preview_mode():
             self.assertEqual(summary["evidence"], "mtm009_preview_release")
             self.assertEqual(summary["mtm_version"], "0.4.0-preview.1")
             self.assertFalse(summary["existing_sessions_restarted_for_preview"])
@@ -172,7 +178,7 @@ class GovernanceTestCase(unittest.TestCase):
             self.assertEqual(summary["required_check_count"], 10)
 
     def test_current_mtm009_preview_release_is_installed_and_bounded(self) -> None:
-        if not mtm009_preview_mode():
+        if not qualification_preview_mode():
             self.skipTest("MTM-009 preview release is not the current deployment mode")
         summary = validate_mtm009_preview_release()
         self.assertEqual(summary["version"], "0.4.0-preview.1")
@@ -194,6 +200,89 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(summary["projector_pure_boundary"])
         self.assertEqual(summary["generic_graph_dependencies"], 0)
         self.assertRegex(summary["graph_golden_digest"], r"^sha256:[0-9a-f]{64}$")
+
+    def test_mtm011_cutover_contract_is_frozen_before_treatments(self) -> None:
+        corpus_path = ROOT / "conformance" / "mtm011-math-corpus.json"
+        evaluation_path = ROOT / "mtm011-protocol3-cutover-evaluation.json"
+        corpus = json.loads(corpus_path.read_text(encoding="utf-8"))
+        evaluation = json.loads(evaluation_path.read_text(encoding="utf-8"))
+        corpus_summary = validate_mtm011_math_corpus(corpus)
+        evaluation_summary = validate_mtm011_math_evaluation(evaluation)
+        self.assertEqual(corpus_summary["case_count"], 6)
+        self.assertEqual(corpus_summary["order_counts"], {"protocol2_first": 3, "protocol3_first": 3})
+        self.assertEqual(
+            corpus_summary["corpus_sha256"],
+            "6420422bd4017ec811187fe27b37150fe01a90cf62da49d0b328f5ff8e71fa2c",
+        )
+        self.assertEqual(evaluation_summary["complete_pairs"], 0)
+        self.assertEqual(evaluation_summary["status"], "pending_web_runs")
+        self.assertFalse(evaluation_summary["release_gate_passed"])
+        self.assertIsNone(evaluation["candidate"]["binary_sha256"])
+        self.assertEqual(evaluation["release_gate"]["minimum_strict_structural_primary_improvements"], 2)
+        authority = json.loads((ROOT / "authority-inventory.json").read_text(encoding="utf-8"))
+        protocols = authority["preview_policy"]
+        self.assertEqual(protocols["production_default_workflow_protocol"], 2)
+        self.assertFalse(protocols["protocol3_default_cutover_allowed"])
+        self.assertTrue(protocols["mtm009_v1_evaluation_immutable"])
+
+    def test_mtm011_gate_requires_two_structural_improvements_and_behavioral_non_regression(self) -> None:
+        corpus = json.loads(
+            (ROOT / "conformance" / "mtm011-math-corpus.json").read_text(encoding="utf-8")
+        )
+        cases = {item["case_id"]: item for item in corpus["cases"]}
+
+        def run(protocol: int, case: dict[str, object]) -> dict[str, object]:
+            applicability = case["metric_applicability"]
+            assert isinstance(applicability, dict)
+            return {
+                "final_outcome": "verified_tex",
+                "first_verification_pass": True,
+                "repair_count": 0,
+                "verifier_finding_count": 0,
+                "repeated_failed_route_without_new_evidence": 0,
+                "max_no_novelty_retrieval_streak": 0,
+                "harmful_advice_events": 0,
+                "counterexample_probe_on_blocker": False
+                if applicability["counterexample_probe_on_blocker"]
+                else None,
+                "focused_retrieval_when_missing_reference": False
+                if applicability["focused_retrieval_when_missing_reference"]
+                else None,
+                "refuted_target_state_preserved": False
+                if applicability["refuted_target_state_preserved"]
+                else None,
+                "typed_obstruction_class_preserved": False
+                if applicability["typed_obstruction_class_preserved"]
+                else None,
+                "canonical_partial_results_preserved": 0,
+                "protocol": protocol,
+            }
+
+        pairs = []
+        for case in corpus["cases"]:
+            pairs.append(
+                {
+                    "case_id": case["case_id"],
+                    "protocol2": run(2, case),
+                    "protocol3": run(3, case),
+                }
+            )
+        first = pairs[0]["protocol3"]
+        first["refuted_target_state_preserved"] = True
+        aggregate, gate = aggregate_mtm011_complete(pairs, cases)
+        self.assertEqual(aggregate["strict_structural_improvement_count"], 1)
+        self.assertFalse(gate)
+
+        second = pairs[1]["protocol3"]
+        second["typed_obstruction_class_preserved"] = True
+        aggregate, gate = aggregate_mtm011_complete(pairs, cases)
+        self.assertEqual(aggregate["strict_structural_improvement_count"], 2)
+        self.assertTrue(gate)
+
+        second["verifier_finding_count"] = 1
+        aggregate, gate = aggregate_mtm011_complete(pairs, cases)
+        self.assertFalse(aggregate["behavioral_non_regression"]["verifier_finding_count"])
+        self.assertFalse(gate)
 
     def test_mtm_cli_publishes_only_the_mtm_binary_name(self) -> None:
         manifest = tomllib.loads((ROOT / "crates" / "mtm-cli" / "Cargo.toml").read_text(encoding="utf-8"))
