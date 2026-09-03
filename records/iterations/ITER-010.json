@@ -3,8 +3,9 @@
   "iteration": "ITER-010",
   "milestone": "MTM-010",
   "title": "Native resolver compatibility stabilization",
-  "status": "in_progress",
+  "status": "completed",
   "started_at": "2026-09-02T10:00:00-07:00",
+  "completed_at": "2026-09-02T19:37:07-07:00",
   "baseline_commit": "67a28e24ed5f40ed5ab369bda3d50d26f308ea62",
   "authority_before": "rust",
   "authority_after": "rust",
@@ -32,12 +33,12 @@
     "The resolver mount is read-only and creates no new production authority."
   ],
   "acceptance": {
-    "A0": "pending",
-    "A1": "pending",
+    "A0": "passed_full_workspace_and_unified_local_gate",
+    "A1": "passed_fail_closed_resolver_mount_contract",
     "A2": "not_applicable_no_python_authority_change",
-    "A3": "pending",
-    "A4": "pending_real_bubblewrap_and_web",
-    "A5": "pending"
+    "A3": "passed_safe_network_and_sensitive_path_isolation",
+    "A4": "passed_real_bubblewrap_and_ten_case_web_corpus",
+    "A5": "passed_twenty_request_resource_non_regression"
   },
   "planned_files": [
     "crates/mtm-native/src/bubblewrap.rs",
@@ -48,13 +49,53 @@
     "project-progress.json",
     "records/iterations/ITER-010.json"
   ],
-  "recorded_failures_and_repairs": [],
-  "commands": [],
+  "evidence": {
+    "report": "mtm010-native-resolver.json",
+    "report_sha256": "687d36e00506e357ac11213822dd339f14ac981344fc5fead99964e7fd11f903",
+    "implementation_sha256": "d961a4dfabef93c663011059f2c2292370cbc6c2a724bb103268cbe28df0b120",
+    "helper_sha256": "2d430f480ebd5c6c3faa60140262e73f58e8372fd2d452ecea7a1401f4f4091b",
+    "host_resolver_target": "/run/systemd/resolve/stub-resolv.conf",
+    "trusted_hostname_https": 200,
+    "dangerous_hostname_https": 200,
+    "safe_network_isolated": true,
+    "web_case_count": 10,
+    "resolver_workaround_used": false,
+    "broad_run_mount": false,
+    "resource_repetitions": 20
+  },
+  "recorded_failures_and_repairs": [
+    {
+      "stage": "implementation review before target acceptance",
+      "failure": "The first resolver-mount draft applied only to Dangerous mode even though Trusted mode also shares the host network namespace and would therefore have retained the same dangling resolver defect.",
+      "repair": "Treat both Trusted and Dangerous as network-enabled modes for the narrowly scoped resolver-file bind, keep Safe mode excluded and --unshare-net, and add real Trusted and Dangerous DNS/HTTPS checks."
+    },
+    {
+      "stage": "A5 evidence review",
+      "failure": "The first target script proved that helper processes exited but did not yet measure repeated-request fd/thread non-growth, which was insufficient for the declared A5 boundary.",
+      "repair": "Add a twenty-request resource non-regression check requiring zero helper-process growth, zero thread growth, bounded fd delta and no performance claim."
+    }
+  ],
+  "commands": [
+    {
+      "command": "cargo fmt --all -- --check && cargo clippy -p mtm-native --all-targets -- -D warnings && cargo test -p mtm-native",
+      "exit_code": 0,
+      "result": "Native targeted gate passed with twelve unit tests, including trusted regular-file/symlink handling, unsafe target rejection and proof that no broad /run bind is emitted."
+    },
+    {
+      "command": "python3 scripts/run_mtm010_native_resolver.py && python3 scripts/validate_mtm010_native_resolver.py",
+      "exit_code": 0,
+      "result": "Real Bubblewrap target passed seven security/resource checks and ten real-web cases without resolver workarounds; Trusted and Dangerous hostname HTTPS both returned 200 while Safe remained network-isolated."
+    },
+    {
+      "command": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && python3 scripts/validate_migration_graph.py && python3 scripts/validate_engineering_graph.py && python3 scripts/run_checks.py && git diff --check",
+      "exit_code": 0,
+      "result": "The complete workspace, architecture/migration governance, unified local validation and diff hygiene passed with the resolver change present."
+    }
+  ],
   "manual_pending": [
-    "Run the real Bubblewrap target test on the current Linux host.",
-    "Rerun the ten-case real webpage edge corpus without DoH or --resolve.",
-    "Do not mark MTM-010 completed until safe-mode isolation is re-proven after the resolver fix."
+    "Other Linux distributions or resolver managers whose /etc/resolv.conf targets differ from the approved runtime prefixes require their own target qualification.",
+    "Packaging this source into the next MTM preview/final release remains part of release qualification and does not change MTM-010's source-level acceptance."
   ],
   "rollback": "Revert only the resolver-file mount change and retain the accepted prior Native sandbox mount set.",
-  "decision": "in_progress"
+  "decision": "accepted"
 }

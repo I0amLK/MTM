@@ -25,6 +25,12 @@ pub const MAX_REQUEST_BYTES: usize = 1_048_576;
 const MAX_ARG_COUNT: usize = 512;
 const MAX_ARG_BYTES: usize = 256 * 1024;
 const MAX_PATH_ARRAY: usize = 256;
+const RESOLV_CONF_PATH: &str = "/etc/resolv.conf";
+const TRUSTED_RUNTIME_RESOLVER_ROOTS: [&str; 3] = [
+    "/run/systemd/resolve",
+    "/run/NetworkManager",
+    "/run/resolvconf",
+];
 const SYSTEM_READ_ROOTS: [&str; 9] = [
     "/usr",
     "/bin",
@@ -265,6 +271,11 @@ pub fn build_bubblewrap_command(
         spec.extra_read_roots,
         &normalized_forbidden,
     )?;
+    let resolver_target = if matches!(spec.mode, NativeMode::Trusted | NativeMode::Dangerous) {
+        host_runtime_resolver_target()?
+    } else {
+        None
+    };
     let mut command = vec![
         bwrap,
         "--die-with-parent".to_owned(),
@@ -331,6 +342,9 @@ pub fn build_bubblewrap_command(
         PathBuf::from("/home"),
         PathBuf::from("/home/re-ctm"),
     ]);
+    if let Some(target) = resolver_target.as_deref() {
+        append_runtime_resolver_mount(target, &mut command, &mut created_dirs);
+    }
     for root in &normalized_extra_roots {
         ensure_mount_parents(root, &mut command, &mut created_dirs);
         command.extend([
@@ -911,6 +925,71 @@ fn ensure_mount_parents(
     }
 }
 
+fn host_runtime_resolver_target() -> Result<Option<PathBuf>, ReCtmError> {
+    let trusted_roots = TRUSTED_RUNTIME_RESOLVER_ROOTS
+        .iter()
+        .map(PathBuf::from)
+        .collect::<Vec<_>>();
+    runtime_resolver_target(Path::new(RESOLV_CONF_PATH), &trusted_roots)
+}
+
+fn runtime_resolver_target(
+    resolv_conf: &Path,
+    trusted_roots: &[PathBuf],
+) -> Result<Option<PathBuf>, ReCtmError> {
+    let metadata = match fs::symlink_metadata(resolv_conf) {
+        Ok(metadata) => metadata,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(error) => {
+            return Err(runtime_error(
+                "NATIVE_RESOLVER_INSPECTION_FAILED",
+                &format!("Unable to inspect resolver configuration: {error}"),
+            ));
+        }
+    };
+    if !metadata.file_type().is_symlink() {
+        return Ok(None);
+    }
+
+    let target = fs::canonicalize(resolv_conf).map_err(|error| {
+        ReCtmError::new(
+            "NATIVE_RESOLVER_TARGET_INVALID",
+            format!("Resolver configuration symlink target is unavailable: {error}"),
+        )
+        .with_category(ErrorCategory::Security)
+    })?;
+    if is_system_root(&target) {
+        return Ok(None);
+    }
+    if !target.is_file() {
+        return Err(ReCtmError::new(
+            "NATIVE_RESOLVER_TARGET_INVALID",
+            "Resolver configuration symlink must resolve to a regular file.",
+        )
+        .with_category(ErrorCategory::Security)
+        .with_details(serde_json::json!({"target":target})));
+    }
+    if !trusted_roots.iter().any(|root| target.starts_with(root)) {
+        return Err(ReCtmError::new(
+            "NATIVE_RESOLVER_TARGET_DENIED",
+            "Resolver configuration symlink resolves outside trusted runtime resolver roots.",
+        )
+        .with_category(ErrorCategory::Security)
+        .with_details(serde_json::json!({"target":target})));
+    }
+    Ok(Some(target))
+}
+
+fn append_runtime_resolver_mount(
+    target: &Path,
+    command: &mut Vec<String>,
+    created_dirs: &mut BTreeSet<PathBuf>,
+) {
+    ensure_mount_parents(target, command, created_dirs);
+    let target = target.to_string_lossy().into_owned();
+    command.extend(["--ro-bind".to_owned(), target.clone(), target]);
+}
+
 fn helper_child_env() -> BTreeMap<String, String> {
     ["PATH", "LANG", "LC_ALL", "LC_CTYPE"]
         .into_iter()
@@ -1055,6 +1134,7 @@ const fn default_timeout_ms() -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::os::unix::fs::symlink;
     use tempfile::TempDir;
 
     #[test]
@@ -1082,5 +1162,98 @@ mod tests {
             Err("NATIVE_TOOLCHAIN_ROOT_DENIED".to_owned())
         );
         Ok(())
+    }
+
+    #[test]
+    fn regular_resolv_conf_needs_no_extra_runtime_mount() -> Result<(), ReCtmError> {
+        let temp = TempDir::new().map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        let resolv_conf = temp.path().join("resolv.conf");
+        fs::write(&resolv_conf, b"nameserver 127.0.0.53\n")
+            .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        assert_eq!(
+            runtime_resolver_target(&resolv_conf, &[temp.path().join("trusted")])?,
+            None
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn trusted_runtime_resolver_symlink_returns_only_the_regular_file() -> Result<(), ReCtmError> {
+        let temp = TempDir::new().map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        let trusted = temp.path().join("run/systemd/resolve");
+        fs::create_dir_all(&trusted).map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        let target = trusted.join("stub-resolv.conf");
+        fs::write(&target, b"nameserver 127.0.0.53\n")
+            .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        let resolv_conf = temp.path().join("resolv.conf");
+        symlink(&target, &resolv_conf)
+            .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+
+        assert_eq!(
+            runtime_resolver_target(&resolv_conf, std::slice::from_ref(&trusted))?,
+            Some(
+                fs::canonicalize(target)
+                    .map_err(|error| { ReCtmError::new("TEST", error.to_string()) })?
+            )
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn runtime_resolver_symlink_outside_trusted_roots_fails_closed() -> Result<(), ReCtmError> {
+        let temp = TempDir::new().map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        let trusted = temp.path().join("trusted");
+        let untrusted = temp.path().join("secret");
+        fs::create_dir_all(&trusted).map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        fs::write(&untrusted, b"must-not-mount\n")
+            .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        let resolv_conf = temp.path().join("resolv.conf");
+        symlink(&untrusted, &resolv_conf)
+            .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+
+        assert_eq!(
+            runtime_resolver_target(&resolv_conf, &[trusted]).map_err(|error| error.code),
+            Err("NATIVE_RESOLVER_TARGET_DENIED".to_owned())
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn runtime_resolver_target_must_be_a_regular_file() -> Result<(), ReCtmError> {
+        let temp = TempDir::new().map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        let trusted = temp.path().join("run/systemd/resolve");
+        let directory = trusted.join("resolver-dir");
+        fs::create_dir_all(&directory)
+            .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        let resolv_conf = temp.path().join("resolv.conf");
+        symlink(&directory, &resolv_conf)
+            .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+
+        assert_eq!(
+            runtime_resolver_target(&resolv_conf, &[trusted]).map_err(|error| error.code),
+            Err("NATIVE_RESOLVER_TARGET_INVALID".to_owned())
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn runtime_resolver_mount_is_one_read_only_file_without_broad_run_bind() {
+        let target = Path::new("/run/systemd/resolve/stub-resolv.conf");
+        let mut command = Vec::new();
+        let mut created_dirs = BTreeSet::new();
+        append_runtime_resolver_mount(target, &mut command, &mut created_dirs);
+
+        let target_text = target.to_string_lossy().into_owned();
+        assert!(command.windows(3).any(|items| {
+            items
+                == [
+                    "--ro-bind".to_owned(),
+                    target_text.clone(),
+                    target_text.clone(),
+                ]
+        }));
+        assert!(!command.windows(3).any(|items| {
+            items == ["--ro-bind".to_owned(), "/run".to_owned(), "/run".to_owned()]
+        }));
     }
 }

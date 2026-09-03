@@ -328,7 +328,7 @@
     {
       "id": "MTM-010",
       "title": "Native resolver compatibility stabilization",
-      "status": "in_progress",
+      "status": "completed",
       "priority": "P0",
       "production_authority_before": "rust",
       "production_authority_after": "rust",
@@ -375,7 +375,7 @@
     {"source": "MTM-009", "target": "MTM-008"},
     {"source": "MTM-010", "target": "MTM-008"}
   ],
-  "todo": ["MTM-009", "MTM-010"],
+  "todo": ["MTM-009"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -712,6 +712,14 @@
       "status_before": "approved",
       "status_after": "in_progress",
       "summary": "Began Native resolver stabilization only after MTM-009 workflow fixes were independently committed and the new milestone froze the security boundary: no broad /run mount, no safe-mode network weakening, and no workflow/gateway contract changes."
+    },
+    {
+      "event_id": "MEVT-043",
+      "milestone_id": "MTM-010",
+      "at": "2026-09-02T19:37:07-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "summary": "Completed Native resolver stabilization after unit and full-workspace gates, real Trusted/Dangerous hostname HTTPS, Safe network isolation, exact resolver-file /run visibility, a ten-case real-web corpus without resolver workarounds, and twenty-request fd/thread/helper non-regression all passed."
     }
   ],
   "receipt_contract": {
@@ -2160,6 +2168,101 @@
         "Other operating systems and deployment users require independent release qualification."
       ],
       "decision": "accepted_public_release_preparation"
+    },
+    {
+      "receipt_id": "MREC-010",
+      "milestone_id": "MTM-010",
+      "started_at": "2026-09-02T10:00:00-07:00",
+      "completed_at": "2026-09-02T19:37:07-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "fix(native): preserve host resolver file in networked sandbox [MTM-010]",
+      "files_changed": [
+        "crates/mtm-native/src/bubblewrap.rs",
+        "scripts/run_mtm010_native_resolver.py",
+        "scripts/validate_mtm010_native_resolver.py",
+        "mtm010-native-resolver.json",
+        "local-validation.json",
+        "migration-graph.json",
+        "project-progress.json",
+        "records/iterations/ITER-010.json"
+      ],
+      "commands": [
+        {
+          "command": "cargo fmt --all -- --check && cargo clippy -p mtm-native --all-targets -- -D warnings && cargo test -p mtm-native",
+          "exit_code": 0,
+          "result": "Native targeted acceptance passed with twelve tests covering regular resolver files, trusted runtime symlink resolution, fail-closed untrusted targets, regular-file enforcement and exact read-only resolver mount construction without broad /run binding."
+        },
+        {
+          "command": "python3 scripts/run_mtm010_native_resolver.py && python3 scripts/validate_mtm010_native_resolver.py",
+          "exit_code": 0,
+          "result": "The current Linux Bubblewrap target passed seven resolver/security/resource checks and all ten real-web edge cases without DoH, --resolve or another DNS workaround. Trusted and Dangerous hostname HTTPS returned 200, Safe remained network-isolated, and only /run/systemd/resolve/stub-resolv.conf plus its empty parents were visible."
+        },
+        {
+          "command": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && python3 scripts/validate_migration_graph.py && python3 scripts/validate_engineering_graph.py && python3 scripts/run_checks.py && git diff --check",
+          "exit_code": 0,
+          "result": "The complete workspace, historical compatibility gates, architecture/migration governance, unified local validation and diff hygiene passed with MTM-010 present."
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "evidence": [
+            "Full workspace rustfmt check passed.",
+            "Warnings-denied Clippy passed for all targets.",
+            "The complete Rust workspace and unified local validation passed."
+          ]
+        },
+        "A1": {
+          "passed": true,
+          "evidence": [
+            "A regular /etc/resolv.conf adds no runtime resolver mount.",
+            "A trusted runtime symlink resolves to one exact regular file bind.",
+            "Targets outside approved resolver roots and directory targets fail closed.",
+            "Command construction contains no broad --ro-bind /run /run."
+          ]
+        },
+        "A2": {
+          "passed": true,
+          "evidence": [
+            "No Python/native authority transition or source differential is involved; Rust remains the sole production Native authority and all historical unified checks pass."
+          ]
+        },
+        "A3": {
+          "passed": true,
+          "evidence": [
+            "Safe mode retains network_isolated=true and curl cannot reach the public network.",
+            "The target sandbox exposes only /run/systemd, /run/systemd/resolve and the single resolver file; unrelated /run service state and sensitive home paths remain hidden.",
+            "The resolver file is mounted read-only and no new capability or workflow authority is introduced."
+          ]
+        },
+        "A4": {
+          "passed": true,
+          "evidence": [
+            "Trusted and Dangerous modes both resolve example.com and complete HTTPS with HTTP 200.",
+            "The ten-case real-web corpus passes without DoH or curl --resolve, covering redirect chain, gzip, UTF-8, 404, delayed response, large RFC HTML, Chinese Wikipedia, expired TLS and wrong-host TLS semantics.",
+            "Expired and hostname-mismatch certificates remain rejected with curl 60 and the expected SSL verification results."
+          ]
+        },
+        "A5": {
+          "passed": true,
+          "evidence": [
+            "Twenty repeated helper requests leave zero helper-process growth and zero thread growth with bounded fd delta.",
+            "The evidence makes no performance claim and the resolver change adds no daemon, worker or persistent child."
+          ]
+        }
+      },
+      "behavior_before": "Network-enabled Bubblewrap Native commands inherited /etc/resolv.conf as a symlink into /run/systemd/resolve, but the symlink target was absent because /run was intentionally hidden; direct-IP HTTPS worked while ordinary hostname resolution failed with curl 6.",
+      "behavior_after": "Trusted and Dangerous Bubblewrap commands preserve only the trusted canonical resolver file required by the host /etc/resolv.conf symlink, so ordinary DNS/HTTPS works without widening /run. Safe mode remains in an isolated network namespace and all prior authority/security boundaries remain intact.",
+      "risk_review": "The implementation canonicalizes the resolver target, requires a regular file under an explicit runtime-resolver prefix, rejects arbitrary targets, creates only destination parent directories, and binds only that exact file read-only. Review additionally caught and repaired an initial Dangerous-only implementation so Trusted mode cannot retain the original defect.",
+      "rollback": "Revert the MTM-010 resolver-file mount helper and target evidence. No SQLite state, OAuth state, workflow run, capability, proof artifact or project revision migration is required.",
+      "manual_pending": [
+        "Other Linux distributions or resolver managers outside the approved runtime target prefixes require independent target qualification.",
+        "The next MTM preview/final release must be built from this accepted source before users receive the resolver fix."
+      ],
+      "decision": "accepted"
     }
   ]
 }

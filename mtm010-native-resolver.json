@@ -1,0 +1,256 @@
+{
+  "baseline_commit": "67a28e24ed5f40ed5ab369bda3d50d26f308ea62",
+  "checks": [
+    {
+      "details": {
+        "is_symlink": true,
+        "path": "/etc/resolv.conf",
+        "target": "/run/systemd/resolve/stub-resolv.conf",
+        "target_is_file": true,
+        "target_trusted_runtime_resolver": true
+      },
+      "name": "host_resolver_shape",
+      "passed": true
+    },
+    {
+      "curl_rc": 0,
+      "getent_rc": 0,
+      "getent_returned_address": true,
+      "http_code": "200",
+      "name": "trusted_dns_and_https",
+      "network_isolated": false,
+      "passed": true,
+      "resolver_target": "/run/systemd/resolve/stub-resolv.conf"
+    },
+    {
+      "curl_rc": 0,
+      "getent_rc": 0,
+      "getent_returned_address": true,
+      "http_code": "200",
+      "name": "dangerous_dns_and_https",
+      "network_isolated": false,
+      "passed": true,
+      "resolver_target": "/run/systemd/resolve/stub-resolv.conf"
+    },
+    {
+      "curl_rc": 6,
+      "getent_rc": 2,
+      "name": "safe_mode_network_isolation",
+      "network_isolated": true,
+      "passed": true
+    },
+    {
+      "allowed_run_entries": [
+        "/run/systemd",
+        "/run/systemd/resolve",
+        "/run/systemd/resolve/stub-resolv.conf"
+      ],
+      "missing_expected_run_entries": [],
+      "name": "resolver_mount_boundary",
+      "observed_run_entries": [
+        "/run/systemd",
+        "/run/systemd/resolve",
+        "/run/systemd/resolve/stub-resolv.conf"
+      ],
+      "passed": true,
+      "sensitive_paths_visible": [],
+      "unexpected_run_entries": []
+    },
+    {
+      "after": {
+        "fds": 4,
+        "helpers": 0,
+        "threads": 1
+      },
+      "before": {
+        "fds": 4,
+        "helpers": 0,
+        "threads": 1
+      },
+      "fd_delta": 0,
+      "helper_delta": 0,
+      "name": "resource_non_regression",
+      "passed": true,
+      "performance_claim": false,
+      "repetitions": 20,
+      "thread_delta": 0
+    },
+    {
+      "helper_process_count": 0,
+      "name": "no_persistent_helper_process",
+      "passed": true
+    }
+  ],
+  "generated_at": "2026-09-03T02:36:52.701104+00:00",
+  "helper_sha256": "2d430f480ebd5c6c3faa60140262e73f58e8372fd2d452ecea7a1401f4f4091b",
+  "host_resolver": {
+    "is_symlink": true,
+    "path": "/etc/resolv.conf",
+    "target": "/run/systemd/resolve/stub-resolv.conf",
+    "target_is_file": true,
+    "target_trusted_runtime_resolver": true
+  },
+  "implementation_sha256": "d961a4dfabef93c663011059f2c2292370cbc6c2a724bb103268cbe28df0b120",
+  "milestone": "MTM-010",
+  "schema_version": "1.0.0",
+  "summary": {
+    "all_passed": true,
+    "broad_run_mount_allowed": false,
+    "check_count": 7,
+    "resolver_workaround_used": false,
+    "safe_network_isolation_required": true,
+    "web_case_count": 10
+  },
+  "web_cases": [
+    {
+      "curl_rc": 0,
+      "effective_url": "https://example.com/",
+      "http_code": "200",
+      "name": "normal_https",
+      "passed": true,
+      "redirects": 0,
+      "remote_ip_present": true,
+      "resolver_workaround": false,
+      "size_download": 318,
+      "ssl_verify_result": "0",
+      "stderr_prefix": "",
+      "time_total_seconds": 0.206947,
+      "url": "https://example.com/"
+    },
+    {
+      "curl_rc": 0,
+      "effective_url": "https://httpbingo.org/get",
+      "http_code": "200",
+      "name": "redirect_chain5",
+      "passed": true,
+      "redirects": 5,
+      "remote_ip_present": true,
+      "resolver_workaround": false,
+      "size_download": 318,
+      "ssl_verify_result": "0",
+      "stderr_prefix": "",
+      "time_total_seconds": 1.643715,
+      "url": "https://httpbingo.org/redirect/5"
+    },
+    {
+      "curl_rc": 0,
+      "effective_url": "https://httpbingo.org/gzip",
+      "http_code": "200",
+      "name": "gzip",
+      "passed": true,
+      "redirects": 0,
+      "remote_ip_present": true,
+      "resolver_workaround": false,
+      "size_download": 309,
+      "ssl_verify_result": "0",
+      "stderr_prefix": "",
+      "time_total_seconds": 0.495555,
+      "url": "https://httpbingo.org/gzip"
+    },
+    {
+      "curl_rc": 0,
+      "effective_url": "https://httpbingo.org/encoding/utf8",
+      "http_code": "200",
+      "name": "utf8",
+      "passed": true,
+      "redirects": 0,
+      "remote_ip_present": true,
+      "resolver_workaround": false,
+      "size_download": 7540,
+      "ssl_verify_result": "0",
+      "stderr_prefix": "",
+      "time_total_seconds": 0.663128,
+      "url": "https://httpbingo.org/encoding/utf8"
+    },
+    {
+      "curl_rc": 0,
+      "effective_url": "https://httpbingo.org/status/404",
+      "http_code": "404",
+      "name": "http_404",
+      "passed": true,
+      "redirects": 0,
+      "remote_ip_present": true,
+      "resolver_workaround": false,
+      "size_download": 0,
+      "ssl_verify_result": "0",
+      "stderr_prefix": "",
+      "time_total_seconds": 0.576301,
+      "url": "https://httpbingo.org/status/404"
+    },
+    {
+      "curl_rc": 0,
+      "effective_url": "https://httpbingo.org/delay/2",
+      "http_code": "200",
+      "name": "slow_2s",
+      "passed": true,
+      "redirects": 0,
+      "remote_ip_present": true,
+      "resolver_workaround": false,
+      "size_download": 349,
+      "ssl_verify_result": "0",
+      "stderr_prefix": "",
+      "time_total_seconds": 2.555541,
+      "url": "https://httpbingo.org/delay/2"
+    },
+    {
+      "curl_rc": 0,
+      "effective_url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "http_code": "200",
+      "name": "large_rfc",
+      "passed": true,
+      "redirects": 0,
+      "remote_ip_present": true,
+      "resolver_workaround": false,
+      "size_download": 212574,
+      "ssl_verify_result": "0",
+      "stderr_prefix": "",
+      "time_total_seconds": 0.697512,
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html"
+    },
+    {
+      "curl_rc": 0,
+      "effective_url": "https://zh.wikipedia.org/wiki/%E6%95%B0%E5%AD%A6",
+      "http_code": "200",
+      "name": "zh_wikipedia",
+      "passed": true,
+      "redirects": 0,
+      "remote_ip_present": true,
+      "resolver_workaround": false,
+      "size_download": 111425,
+      "ssl_verify_result": "0",
+      "stderr_prefix": "",
+      "time_total_seconds": 0.441879,
+      "url": "https://zh.wikipedia.org/wiki/%E6%95%B0%E5%AD%A6"
+    },
+    {
+      "curl_rc": 60,
+      "effective_url": "https://expired.badssl.com/",
+      "http_code": "000",
+      "name": "expired_tls",
+      "passed": true,
+      "redirects": 0,
+      "remote_ip_present": true,
+      "resolver_workaround": false,
+      "size_download": 0,
+      "ssl_verify_result": "10",
+      "stderr_prefix": "curl: (60) SSL certificate problem: certificate has expired\nMore details here: https://curl.se/docs/sslcerts.html\n\ncurl failed to verify the legitimacy of the server and therefore ",
+      "time_total_seconds": 0.501819,
+      "url": "https://expired.badssl.com/"
+    },
+    {
+      "curl_rc": 60,
+      "effective_url": "https://wrong.host.badssl.com/",
+      "http_code": "000",
+      "name": "wrong_host_tls",
+      "passed": true,
+      "redirects": 0,
+      "remote_ip_present": true,
+      "resolver_workaround": false,
+      "size_download": 0,
+      "ssl_verify_result": "1",
+      "stderr_prefix": "curl: (60) SSL: no alternative certificate subject name matches target host name 'wrong.host.badssl.com'\nMore details here: https://curl.se/docs/sslcerts.html\n\ncurl failed to verif",
+      "time_total_seconds": 0.70226,
+      "url": "https://wrong.host.badssl.com/"
+    }
+  ]
+}
