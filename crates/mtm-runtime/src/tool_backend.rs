@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
-use mtm_contracts::{ErrorCategory, ReCtmError};
+use mtm_contracts::{ErrorCategory, PRODUCTION_WORKFLOW_PROTOCOL_VERSION, ReCtmError};
 use mtm_gateway::{
     HIDDEN_TOOL_NAMES, OAuthPrincipal, PUBLIC_TOOL_NAMES, SUPPORTED_PROTOCOL_VERSIONS, ToolBackend,
 };
@@ -253,7 +253,7 @@ impl RuntimeToolBackend {
         let workflow_facts = serde_json::json!({
             "mathematical_task_routing":"Concrete proof, derivation, proof-repair, and rigorous verification tasks should start with rethlas_start unless the user explicitly requests a direct informal answer.",
             "verified_latex_delivery":{"automatic_on_done":true,"default_workspace_path":"rethlas-output/<run_id>/proof_verified.tex","explicit_alternate_export_tool":"rethlas_artifact"},
-            "research_workspace":{"state_schema_version":state_schema_version,"workflow_protocol_version":self.workflow_protocol_version,"production_default_workflow_protocol_version":2,"project_registry":true,"compact_verified_lane":true,"proof_manifest":true,"reference_audit":true,"paper_search_provider":"https://api.openalex.org/works","verified_promotion_is_finalizer_only":true},
+            "research_workspace":{"state_schema_version":state_schema_version,"workflow_protocol_version":self.workflow_protocol_version,"production_default_workflow_protocol_version":PRODUCTION_WORKFLOW_PROTOCOL_VERSION,"project_registry":true,"compact_verified_lane":true,"proof_manifest":true,"reference_audit":true,"paper_search_provider":"https://api.openalex.org/works","verified_promotion_is_finalizer_only":true},
             "native":native_info,
             "authorization_axioms":{"native":"OAuth identity AND native mode","workflow":"OAuth identity AND signed run capability AND role ACL AND workflow state","non_inheritance":"native dangerous never implies workflow authority"},
             "complete_flow_locally_validated":false,

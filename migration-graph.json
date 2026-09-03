@@ -388,6 +388,7 @@
         "python3 scripts/validate_mtm011_math_corpus.py",
         "python3 scripts/validate_mtm011_math_evaluation.py",
         "python3 scripts/validate_mtm011_release_gate.py",
+        "python3 scripts/validate_mtm011_cutover_source.py",
         "python3 scripts/validate_migration_graph.py",
         "python3 scripts/validate_engineering_graph.py",
         "cargo fmt --all -- --check",

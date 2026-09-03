@@ -3,7 +3,10 @@ use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use mtm_contracts::{ErrorCategory, LatexPolicy, NativeMode, ReCtmError};
+use mtm_contracts::{
+    ErrorCategory, LatexPolicy, NativeMode, PRODUCTION_WORKFLOW_PROTOCOL_VERSION,
+    ROLLBACK_WORKFLOW_PROTOCOL_VERSION, ReCtmError,
+};
 use mtm_native::validate_explicit_toolchain_roots;
 use sha2::{Digest, Sha256};
 
@@ -196,13 +199,13 @@ impl RuntimeSettings {
         if !matches!(self.workflow_protocol_version, 2 | 3) {
             return Err(ReCtmError::new(
                 "INVALID_WORKFLOW_PROTOCOL_VERSION",
-                "MTM_WORKFLOW_PROTOCOL_VERSION must be 2 or 3 during the MTM-009 evaluation period.",
+                "MTM_WORKFLOW_PROTOCOL_VERSION must be 2 or 3.",
             )
             .with_category(ErrorCategory::Validation)
             .with_details(serde_json::json!({
                 "configured":self.workflow_protocol_version,
-                "production_default":2,
-                "experimental":3
+                "production_default":PRODUCTION_WORKFLOW_PROTOCOL_VERSION,
+                "rollback":ROLLBACK_WORKFLOW_PROTOCOL_VERSION
             })));
         }
         validate_https_endpoint(&self.theorem_search_url)?;
@@ -383,18 +386,23 @@ fn truthy(value: Option<&str>) -> bool {
 }
 
 fn parse_workflow_protocol_version(value: Option<&str>) -> Result<i64, ReCtmError> {
-    match value.unwrap_or("2").trim() {
+    let default = match PRODUCTION_WORKFLOW_PROTOCOL_VERSION {
+        2 => "2",
+        3 => "3",
+        _ => unreachable!("production workflow protocol must be 2 or 3"),
+    };
+    match value.unwrap_or(default).trim() {
         "2" => Ok(2),
         "3" => Ok(3),
         configured => Err(ReCtmError::new(
             "INVALID_WORKFLOW_PROTOCOL_VERSION",
-            "MTM_WORKFLOW_PROTOCOL_VERSION must be 2 or 3 during the MTM-009 evaluation period.",
+            "MTM_WORKFLOW_PROTOCOL_VERSION must be 2 or 3.",
         )
         .with_category(ErrorCategory::Validation)
         .with_details(serde_json::json!({
             "configured":configured,
-            "production_default":2,
-            "experimental":3
+            "production_default":PRODUCTION_WORKFLOW_PROTOCOL_VERSION,
+            "rollback":ROLLBACK_WORKFLOW_PROTOCOL_VERSION
         }))),
     }
 }
@@ -452,8 +460,8 @@ mod tests {
     }
 
     #[test]
-    fn workflow_protocol_evaluation_switch_defaults_and_fails_closed() {
-        assert_eq!(parse_workflow_protocol_version(None).ok(), Some(2));
+    fn workflow_protocol_cutover_defaults_to_three_and_preserves_rollback() {
+        assert_eq!(parse_workflow_protocol_version(None).ok(), Some(3));
         assert_eq!(parse_workflow_protocol_version(Some("2")).ok(), Some(2));
         assert_eq!(parse_workflow_protocol_version(Some(" 3 ")).ok(), Some(3));
         assert_eq!(

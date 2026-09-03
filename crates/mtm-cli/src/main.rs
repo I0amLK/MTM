@@ -6,7 +6,10 @@ use std::net::TcpListener;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use mtm_contracts::{ContractSnapshot, ErrorCategory, LatexPolicy, NativeMode, ReCtmError};
+use mtm_contracts::{
+    ContractSnapshot, ErrorCategory, LatexPolicy, NativeMode, PRODUCTION_WORKFLOW_PROTOCOL_VERSION,
+    ReCtmError,
+};
 use mtm_runtime::{
     OperatorSession, QuickTunnel, RuntimeApplication, RuntimeAssets, RuntimeSettings,
     attest_native, evaluate_request, generate_operator_password, materialize_secrets, serve_bound,
@@ -46,7 +49,7 @@ fn main() {
                     "public_tool_count": 24,
                     "hidden_alias_count": 11,
                     "state_schema_version": 2,
-                    "workflow_protocol_version": 2,
+                    "workflow_protocol_version": PRODUCTION_WORKFLOW_PROTOCOL_VERSION,
                     "production_authority": "rust",
                     "target_os": env::consts::OS,
                     "target_arch": env::consts::ARCH,

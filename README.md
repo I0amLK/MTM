@@ -83,18 +83,19 @@ mtm check-config
 Expected command identity:
 
 ```text
-mtm 0.4.0-preview.1
+mtm 0.4.0-preview.2
 ```
 
-MTM 0.4.0-preview.1 keeps workflow protocol 2 as the production default. To exercise
-the MTM-009 mathematical research-state workflow for new runs, launch MTM with:
+MTM 0.4.0-preview.2 uses workflow protocol 3 as the production default for new runs
+after the accepted MTM-011 cutover qualification. Protocol 2 remains available as an
+explicit rollback selection:
 
 ```bash
-MTM_WORKFLOW_PROTOCOL_VERSION=3 mtm tui --quick-tunnel --native-mode dangerous
+MTM_WORKFLOW_PROTOCOL_VERSION=2 mtm tui --quick-tunnel --native-mode dangerous
 ```
 
-Protocol 3 is opt-in in this preview. Existing protocol-1/2 runs remain resumable and
-the final mathematical artifact remains `proof_verified.tex`.
+Existing protocol-2/3 runs remain resumable and the final mathematical artifact remains
+`proof_verified.tex`; changing the new-run default does not rewrite existing run state.
 
 ### Install from a local clone
 
@@ -188,7 +189,7 @@ Important settings:
 | `MTM_NATIVE_EXEC_BACKEND` | `bubblewrap` or `disabled` | auto-detect on Linux |
 | `MTM_NATIVE_EXEC_ALLOW_ROOTS` | Extra read-only toolchain roots | empty |
 | `MTM_LATEX_POLICY` | `static_only`, `if_available`, or `required` | `required` |
-| `MTM_WORKFLOW_PROTOCOL_VERSION` | New-run workflow protocol during MTM-009 evaluation: `2` or `3` | `2` |
+| `MTM_WORKFLOW_PROTOCOL_VERSION` | Optional explicit new-run workflow protocol: `2` or `3` | `3` |
 | `MTM_OAUTH_PASSWORD` | Operator password for OAuth authorization | generated interactively if omitted |
 | `MTM_SERVER_URL` | Fixed external OAuth/MCP base URL | dynamic loopback origin |
 | `MTM_ALLOWED_ORIGINS` | Additional allowed browser origins | empty |

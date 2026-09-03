@@ -167,6 +167,19 @@
       "rollback_default": 2
     }
   },
+  "cutover_implementation": {
+    "status": "source_staged_not_deployed",
+    "version": "0.4.0-preview.2",
+    "qualification_evidence_commit": "47cc76728030ef36ab105fed5684995b73487066",
+    "historical_source_baseline_protocol": 2,
+    "new_run_default": 3,
+    "rollback_override": "MTM_WORKFLOW_PROTOCOL_VERSION=2",
+    "state_schema_version": 2,
+    "public_tool_count": 24,
+    "authority_boundary_changed": false,
+    "existing_run_state_rewritten": false,
+    "deployment_pending": true
+  },
   "cutover_plan": [
     "Freeze and validate the MTM-011 corpus/evaluation contract.",
     "Record fresh current-candidate A5 evidence.",

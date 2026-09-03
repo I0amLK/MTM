@@ -20,8 +20,14 @@ pub const HIDDEN_ALIAS_COUNT: u16 = 11;
 /// Current persistent-state schema supported by the source baseline.
 pub const STATE_SCHEMA_VERSION: u16 = 2;
 
-/// Current workflow protocol supported by the source baseline.
+/// Historical workflow protocol captured by the immutable source baseline.
 pub const WORKFLOW_PROTOCOL_VERSION: u16 = 2;
+
+/// Workflow protocol selected for new production runs when no override is set.
+pub const PRODUCTION_WORKFLOW_PROTOCOL_VERSION: u16 = 3;
+
+/// Explicit rollback protocol retained for new-run selection after cutover.
+pub const ROLLBACK_WORKFLOW_PROTOCOL_VERSION: u16 = 2;
 
 /// Total public tools exposed by the source contract.
 pub const PUBLIC_TOOL_COUNT: u16 = NATIVE_TOOL_COUNT + RETHLAS_TOOL_COUNT;

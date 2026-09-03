@@ -99,6 +99,10 @@ class Server:
             }
         )
         if kind == "rust":
+            # MTM-007 is a historical protocol-2 composition differential. Pin
+            # that accepted protocol explicitly so a later qualified new-run
+            # default cannot redefine the historical corpus.
+            environment["MTM_WORKFLOW_PROTOCOL_VERSION"] = "2"
             command = [
                 str(RUST_BINARY),
                 "serve",

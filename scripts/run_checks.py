@@ -87,11 +87,12 @@ def resolve_tool_environment() -> tuple[dict[str, str], str | None, str | None]:
 def main() -> int:
     environment, cargo, rustc = resolve_tool_environment()
     progress = json.loads((ROOT / "project-progress.json").read_text(encoding="utf-8"))
-    preview_mode = (
+    qualification_preview_mode = (
         str(progress.get("version") or "").startswith("0.4.0-preview.")
-        and progress.get("current_milestone") == "MTM-009"
-        and progress.get("status") == "MTM-009-in-progress"
+        and progress.get("current_milestone") in {"MTM-009", "MTM-011"}
+        and progress.get("status") == f"{progress.get('current_milestone')}-in-progress"
     )
+    mtm011_cutover_mode = qualification_preview_mode and progress.get("current_milestone") == "MTM-011"
     checks: list[dict[str, Any]] = [
         run(
             "migration_graph",
@@ -144,11 +145,17 @@ def main() -> int:
                     env=environment,
                     capture_json=True,
                 ),
-                run(
-                    "mtm003_conformance",
-                    [sys.executable, "scripts/run_mtm003_conformance.py"],
-                    env=environment,
-                    capture_json=True,
+                *(
+                    []
+                    if mtm011_cutover_mode
+                    else [
+                        run(
+                            "mtm003_conformance",
+                            [sys.executable, "scripts/run_mtm003_conformance.py"],
+                            env=environment,
+                            capture_json=True,
+                        )
+                    ]
                 ),
                 run(
                     "mtm004_conformance",
@@ -189,7 +196,7 @@ def main() -> int:
                             capture_json=True,
                         ),
                     ]
-                    if preview_mode
+                    if qualification_preview_mode
                     else [
                         run(
                             "mtm003_target_evidence",

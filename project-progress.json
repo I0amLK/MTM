@@ -20,8 +20,9 @@
   "completed_milestones": ["MTM-001", "MTM-002", "MTM-003", "MTM-004", "MTM-005", "MTM-006", "MTM-007", "MTM-008", "MTM-010"],
   "next_milestone": null,
   "claims": [
-    "MTM-011 current-candidate A5 is accepted before the first treatment: release binary SHA-256 5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036 passed all eight protocol-2/protocol-3 resource checks, with report SHA-256 d4c85a56515b798848b264f318f5357a3b90032777c965c2fdd1bc919c0be7e1. The production default remains protocol 2 and no MTM-011 A4 treatment has yet been recorded.",
-    "MTM-011 is the prospective protocol-3 default-cutover qualification. Production remains protocol-2-default while a new six-pair obstruction-heavy A4 contract is frozen before treatment collection; the completed MTM-009 v1 evaluation remains immutable and rejected.",
+    "MTM-011 mathematical qualification is accepted: the frozen six-pair evaluation completed 6/6 verified TeX for both protocols, strictly improved two structural-primary metrics under protocol 3, recorded zero harmful-advice events, and passed the independent cutover gate. Source version 0.4.0-preview.2 now stages protocol 3 as the no-override new-run default while explicit MTM_WORKFLOW_PROTOCOL_VERSION=2 remains the rollback; deployment and rollback drill are still pending.",
+    "MTM-011 current-candidate A5 was accepted before the first treatment: release binary SHA-256 5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036 passed all eight protocol-2/protocol-3 resource checks, with report SHA-256 d4c85a56515b798848b264f318f5357a3b90032777c965c2fdd1bc919c0be7e1.",
+    "MTM-011 is the prospective protocol-3 default-cutover qualification. Its six-pair obstruction-heavy A4 contract was frozen before treatment collection, has now completed and been accepted, and the completed MTM-009 v1 evaluation remains immutable and rejected.",
     "Post-MTM-009 live regression on binary SHA-256 489eb4be5bde83bb9ddb4da8ddfe359e88245ba0f9b076ccaa530e02f8a9d88e confirms the retrieval projector fix: a first typed new_material assessment remains Progress with consecutive_no_new_material=0, while repeating the same assessed reference becomes Inconclusive/NoProgress.",
     "A post-gate Artin hidden-hypothesis A/B case provides prospective design evidence for MTM-011: protocol 3 preserved target=refuted, counterexample coverage, missing_hypothesis obstruction and usable partial results across replan. This evidence is not retroactively counted toward the immutable MTM-009 v1 gate.",
     "MTM 0.4.0-preview.1 remains protocol-2-default and protocol 3 remains explicit opt-in. MTM-009's frozen real-web A4 evaluation is now complete: both protocols produced verified proof_verified.tex for 8/8 cases and each achieved 7/8 first-verification passes with one order-balanced LaTeX repair and zero verifier findings; protocol 3 recorded zero harmful-advice events. The deterministic release gate rejected protocol-3 default cutover because none of the predeclared primary research-control metrics strictly improved over protocol 2.",
@@ -66,10 +67,9 @@
     "authority-inventory.json records every MTM production authority as Rust, with Bubblewrap retained only as the Linux kernel-isolation actuator; release evidence proves MTM uses mtm / MTM_* / ~/.mtm while Re-CTM uses re-ctm / RE_CTM_* / ~/.re-ctm."
   ],
   "manual_pending": [
-    "Keep production workflow protocol 2 as the default until every MTM-011 prospective A4/A5/release gate passes.",
-    "Freeze and commit the MTM-011 six-pair obstruction-heavy corpus, applicability rules and threshold before recording its first treatment.",
-    "Regenerate A5 against the exact candidate binary used by the MTM-011 paired treatments.",
-    "After mathematical qualification, version/package the cutover candidate and prove protocol-2 rollback before replacing the installed selector or declaring stable 0.4.0.",
+    "Build and package source version 0.4.0-preview.2 with protocol 3 as the no-override new-run default; do not change the live authority inventory until the exact built artifact is installed and probed.",
+    "Install the versioned cutover candidate, verify default protocol 3 with MTM_WORKFLOW_PROTOCOL_VERSION unset, and verify explicit MTM_WORKFLOW_PROTOCOL_VERSION=2 remains a working new-run rollback.",
+    "Perform a real protocol-2 rollback followed by protocol-3 recutover before declaring MTM-011 complete or considering stable 0.4.0.",
     "Existing 0.3.0 MTM sessions were deliberately left running during preview command cutover; restart them only when operationally desired.",
     "Other operating systems and site-local toolchain layouts remain target-specific Native evidence.",
     "Publishing the internal mtm-* crates to a public registry is not required for the accepted single-binary distribution and remains a separate release decision.",
