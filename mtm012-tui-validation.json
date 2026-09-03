@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-012",
+  "version": "0.4.0-preview.3",
+  "binary_sha256": "545ab9ef8cc01edf804581cb52c2b1a4158d03bd8a25ea00c7785039167f3659",
+  "harness_sha256": "f5489f12ef4d2302f8d87a55acf9e06497c99a9543fdd9c2360ef82d9a10978b",
+  "checks": {
+    "compact_process_exits_cleanly": true,
+    "verbose_process_exits_cleanly": true,
+    "generated_key_process_exits_cleanly": true,
+    "compact_header_is_short": true,
+    "compact_mcp_endpoint_visible": true,
+    "compact_tool_identity_visible": true,
+    "compact_success_completion_silent": true,
+    "compact_failure_visible": true,
+    "compact_trace_hidden": true,
+    "compact_argument_keys_hidden": true,
+    "compact_external_password_status_silent": true,
+    "compact_tool_lines_are_not_duplicated": true,
+    "verbose_mode_announced": true,
+    "verbose_start_and_done_visible": true,
+    "verbose_failure_visible": true,
+    "verbose_trace_visible": true,
+    "verbose_argument_keys_visible": true,
+    "compact_secrets_redacted": true,
+    "verbose_secrets_redacted": true,
+    "generated_operator_key_shown_once": true
+  },
+  "compact_tool_line_count": 3,
+  "verbose_diagnostic_markers": {
+    "start": 3,
+    "done": 2,
+    "error": 1
+  },
+  "generated_operator_key_recorded": false,
+  "raw_tui_log_recorded": false,
+  "performance_claim": false,
+  "ok": true
+}

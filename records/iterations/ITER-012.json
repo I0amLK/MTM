@@ -41,6 +41,27 @@
     "Add regression tests for compact tool visibility, duplicate-success suppression, failure visibility, verbose compatibility and redaction.",
     "Run a real local OAuth/MCP TUI smoke that invokes tools and inspects the actual captured TUI output."
   ],
+  "source_implementation": {
+    "status": "accepted_for_release_a4",
+    "source_commit": "e9276f2ea0917f4c0ae14146a2407c01d4e425cc",
+    "version": "0.4.0-preview.3",
+    "installed_release_unchanged_during_source_validation": "0.4.0-preview.2",
+    "protocol3_default_unchanged": true,
+    "protocol2_rollback_unchanged": true,
+    "public_tool_count": 24,
+    "state_schema_version": 2
+  },
+  "release_a4": {
+    "status": "accepted",
+    "release_binary_sha256": "545ab9ef8cc01edf804581cb52c2b1a4158d03bd8a25ea00c7785039167f3659",
+    "tui_report": "mtm012-tui-validation.json",
+    "tui_report_sha256": "be9a9317988afc7a727a7f4bba00f7dcf0119394773c0825b4526a77f9aa868b",
+    "check_count": 20,
+    "compact_tool_line_count_for_three_tool_attempts": 3,
+    "generated_operator_key_recorded": false,
+    "raw_tui_log_recorded": false,
+    "performance_claim": false
+  },
   "acceptance": {
     "A0": "Full format, Clippy, workspace tests, governance and unified local gate pass.",
     "A1": "Compact and verbose output have deterministic tested text contracts; compact mode removes routine diagnostic metadata but preserves required operating information.",
@@ -49,9 +70,9 @@
   },
   "rollback": "Revert MTM-012 presentation changes and restore the preview.2 selector. No database, run state, capability, project revision or proof artifact changes are required.",
   "manual_pending": [
-    "Implement and test the compact/verbose event formatter.",
-    "Run the real TUI OAuth/MCP acceptance smoke.",
-    "Package and install a new preview only after all MTM-012 gates pass."
+    "Install the A4-qualified preview.3 release binary without overwriting preview.2.",
+    "Perform a real preview.3 -> preview.2 -> preview.3 selector rollback/recutover drill and verify the login-shell-preferred mtm path follows the selector.",
+    "Rerun the complete post-install local gate before marking MTM-012 completed."
   ],
   "decision": "in_progress"
 }
