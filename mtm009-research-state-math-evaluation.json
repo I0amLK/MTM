@@ -1,15 +1,15 @@
 {
   "schema_version": "1.0.0",
   "evaluation_id": "mtm009-web-mathematics-v1",
-  "status": "pending_web_runs",
+  "status": "complete",
   "corpus": {
     "path": "conformance/mtm009-math-corpus.json",
     "corpus_id": "mtm009-web-mathematics-v1",
-    "sha256": "d011f17664bd468121223ca59aa44116ff10eb7ce5a0f55996d21311e60c3e2f"
+    "sha256": "2ed0cfe3a0e9f2e6148bfe4cbd93c79f6be2f7178ceb7d396d3ee80179b21a76"
   },
   "resource_evidence": {
     "path": "mtm009-research-resource.json",
-    "sha256": "9c04834fc4c2b837d5321fc1f2ff8a0fd4a713782bab12580658a06eefb71afc"
+    "sha256": "7a83ba248680cd5b968c2b2a7e00743ced24326d1e0dd0846813c660cbf73489"
   },
   "treatment_contract": {
     "same_web_model_surface_within_pair": true,
@@ -85,13 +85,29 @@
   ],
   "blind_evaluation_contract": {
     "treatment_hidden_until_scores_frozen": true,
-    "artifact_labels": ["A", "B"],
+    "artifact_labels": [
+      "A",
+      "B"
+    ],
     "scores": {
-      "logic_completeness": {"min": 1, "max": 5},
-      "readability": {"min": 1, "max": 5},
-      "research_efficiency": {"min": 1, "max": 5}
+      "logic_completeness": {
+        "min": 1,
+        "max": 5
+      },
+      "readability": {
+        "min": 1,
+        "max": 5
+      },
+      "research_efficiency": {
+        "min": 1,
+        "max": 5
+      }
     },
-    "allowed_winner": ["A", "B", "tie"],
+    "allowed_winner": [
+      "A",
+      "B",
+      "tie"
+    ],
     "rationale_policy": "concise evaluator rationale only; no solver transcript or private reasoning"
   },
   "release_gate": {
@@ -101,15 +117,641 @@
     "engineering_A5_resource_gate_required": true
   },
   "pairs": [
-    {"case_id":"M009-C01-counterexample-group","pair_order":["protocol2","protocol3"],"protocol2":null,"protocol3":null,"blind_evaluation":null},
-    {"case_id":"M009-C02-simultaneous-diagonalization","pair_order":["protocol3","protocol2"],"protocol2":null,"protocol3":null,"blind_evaluation":null},
-    {"case_id":"M009-C03-p-group-center","pair_order":["protocol2","protocol3"],"protocol2":null,"protocol3":null,"blind_evaluation":null},
-    {"case_id":"M009-C04-euler-trail","pair_order":["protocol3","protocol2"],"protocol2":null,"protocol3":null,"blind_evaluation":null},
-    {"case_id":"M009-C05-interval-fixed-point","pair_order":["protocol2","protocol3"],"protocol2":null,"protocol3":null,"blind_evaluation":null},
-    {"case_id":"M009-C06-finite-domain-field","pair_order":["protocol3","protocol2"],"protocol2":null,"protocol3":null,"blind_evaluation":null},
-    {"case_id":"M009-C07-zsigmondy-corollary","pair_order":["protocol2","protocol3"],"protocol2":null,"protocol3":null,"blind_evaluation":null},
-    {"case_id":"M009-C08-finite-field-subgroup-cyclic","pair_order":["protocol3","protocol2"],"protocol2":null,"protocol3":null,"blind_evaluation":null}
+    {
+      "case_id": "M009-C01-counterexample-group",
+      "pair_order": [
+        "protocol2",
+        "protocol3"
+      ],
+      "protocol2": {
+        "status": "complete",
+        "protocol": 2,
+        "run_fingerprint": "31e58d8ac5ea1d1eb6f85a1f16106ae5d26061f8ad0e86ba90b37daaf2b378cc",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "1f5952ece1f99703ca38aac0faaea2ccdb43c1fa3cf687263eda5e68dde4a2c5",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": true,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {},
+        "transition_log_sha256": "eb609c596907a8bb2c953fb546c3a9956662dbbb2e0607d5612b9929586d46a0",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "protocol3": {
+        "status": "complete",
+        "protocol": 3,
+        "run_fingerprint": "7cf2f5994ee0b2d74f7099a05d2c7bf96c82fcb28a204bbdb22e6361e74b48d2",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "1f5952ece1f99703ca38aac0faaea2ccdb43c1fa3cf687263eda5e68dde4a2c5",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": true,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {
+          "R06_SCREEN_FRONTIER": 1
+        },
+        "transition_log_sha256": "8b49404bbb4abb700d773bcfdae64c01f321fa9dfeda246aa13296dda0449ca8",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "blind_evaluation": {
+        "status": "scored",
+        "treatment_hidden_until_scores_frozen": true,
+        "evaluator_id_hash": "8a6f6a696b0193310033a016530e8d713b15449afcc137dd110f026b7c595025",
+        "artifacts": {
+          "A": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          },
+          "B": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          }
+        },
+        "winner": "tie",
+        "rationale": "A and B are byte-identical, self-contained proofs. Both give S_3, prove it noncyclic via noncommutativity, and use Lagrange plus prime-order cyclicity to verify every proper subgroup is cyclic."
+      }
+    },
+    {
+      "case_id": "M009-C02-simultaneous-diagonalization",
+      "pair_order": [
+        "protocol3",
+        "protocol2"
+      ],
+      "protocol2": {
+        "status": "complete",
+        "protocol": 2,
+        "run_fingerprint": "c539010d0589abfd062f35f398c89caef7d455805f09458a4b7f4eac20a3abfd",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "563efb8650c279b2604efea5824dd23bff3c70b34c4caa81eb1c89b2aaf35efa",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {},
+        "transition_log_sha256": "4d3c39e5697991221020d1f9c6edc3a717b7a058ccaf7acd2c5ee28181bcd229",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "protocol3": {
+        "status": "complete",
+        "protocol": 3,
+        "run_fingerprint": "8da00a6d801f57ffbcb2507f495b7dc0074185f7472073507a89d6506ea50fc4",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "1749ec307854a08367e4682d498057ee6862bcb37d7523f5914623c744159bb8",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {
+          "R06_SCREEN_FRONTIER": 1
+        },
+        "transition_log_sha256": "a600fb2a2a8e024ecd03ad82820da6eb21a9816c8b65c6352c7b5229c8331ded",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "blind_evaluation": {
+        "status": "scored",
+        "treatment_hidden_until_scores_frozen": true,
+        "evaluator_id_hash": "8a6f6a696b0193310033a016530e8d713b15449afcc137dd110f026b7c595025",
+        "artifacts": {
+          "A": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 4
+          },
+          "B": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          }
+        },
+        "winner": "B",
+        "rationale": "Both artifacts are complete and correct. A spells out the invariance computation and the squarefree-minimal-polynomial restriction argument in more detail; B preserves the same rigorous core with slightly less redundancy, so B is marginally more efficient."
+      }
+    },
+    {
+      "case_id": "M009-C03-p-group-center",
+      "pair_order": [
+        "protocol2",
+        "protocol3"
+      ],
+      "protocol2": {
+        "status": "complete",
+        "protocol": 2,
+        "run_fingerprint": "40aa221b1272b4b24fcd0387da0e6ad41135f45aca42be94ba9796be736b10bc",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "a62de42c8bcc2bffd1979be7110ca2bd241a8045983a5b85a9d6dfbf823f7d30",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {},
+        "transition_log_sha256": "4673309b70d15afed083bb82e0fdb41dfeef3bcfa5531c43ff89ff545c990a30",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "protocol3": {
+        "status": "complete",
+        "protocol": 3,
+        "run_fingerprint": "221f625cedc0d92ad57ab13c9f811efe7b25d2efd847eb89b17bffe6dccb85a3",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "a62de42c8bcc2bffd1979be7110ca2bd241a8045983a5b85a9d6dfbf823f7d30",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {
+          "R06_SCREEN_FRONTIER": 1
+        },
+        "transition_log_sha256": "76a06347de6b918e20f9c2e8dc5dbdb806b1237e6955537cf9af2bd9bb4f1e2f",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "blind_evaluation": {
+        "status": "scored",
+        "treatment_hidden_until_scores_frozen": true,
+        "evaluator_id_hash": "8a6f6a696b0193310033a016530e8d713b15449afcc137dd110f026b7c595025",
+        "artifacts": {
+          "A": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          },
+          "B": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          }
+        },
+        "winner": "tie",
+        "rationale": "The two verified TeX artifacts are byte-identical. Both use the class equation correctly and conclude p divides |Z(G)|, hence the center has at least p elements and is nontrivial."
+      }
+    },
+    {
+      "case_id": "M009-C04-euler-trail",
+      "pair_order": [
+        "protocol3",
+        "protocol2"
+      ],
+      "protocol2": {
+        "status": "complete",
+        "protocol": 2,
+        "run_fingerprint": "e9194f21c43249d03db2229a7e6112176bbfb6a9f33625d99fd0d2cc297ad0a0",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "aec26ce9bbd3d7c8262036145b1319256b8007db583c061013ec6d0b16149ddd",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {},
+        "transition_log_sha256": "4fba1bf8ad014788ff397604743ce313b85b1fa8d6af331744cbdf64a9bdfdad",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "protocol3": {
+        "status": "complete",
+        "protocol": 3,
+        "run_fingerprint": "d188387029c0b5e319f49e84d7dc1ba7bd4f85142595e9f4152b15ccd48e06d0",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "aec26ce9bbd3d7c8262036145b1319256b8007db583c061013ec6d0b16149ddd",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {
+          "R06_SCREEN_FRONTIER": 1
+        },
+        "transition_log_sha256": "481aaf542139566e415e876a8641ad5ef7a9677bfc237c01405f89ccfd1ad602",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "blind_evaluation": {
+        "status": "scored",
+        "treatment_hidden_until_scores_frozen": true,
+        "evaluator_id_hash": "8a6f6a696b0193310033a016530e8d713b15449afcc137dd110f026b7c595025",
+        "artifacts": {
+          "A": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          },
+          "B": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          }
+        },
+        "winner": "tie",
+        "rationale": "The two verified TeX artifacts are byte-identical. The proof establishes necessity by parity along a trail, constructs the all-even Euler circuit by Hierholzer splicing, and reduces the two-odd case via a degree-two auxiliary vertex."
+      }
+    },
+    {
+      "case_id": "M009-C05-interval-fixed-point",
+      "pair_order": [
+        "protocol2",
+        "protocol3"
+      ],
+      "protocol2": {
+        "status": "complete",
+        "protocol": 2,
+        "run_fingerprint": "66695c09bbd79a7aff7886da06acc45f320bf318c522c3abb408b915899dc4f7",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "2f7659e34721b5ac3f54000ff3a4e8c853b2c2e876cde09e1a80abc7c8d84cce",
+        "first_verification_pass": false,
+        "repair_count": 1,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {},
+        "transition_log_sha256": "dd91e4239518b42524ed2e6034fa224d62780f2c562c509da4f5d8366a2bd00f",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "protocol3": {
+        "status": "complete",
+        "protocol": 3,
+        "run_fingerprint": "49c6ee1ea4223a6d61ba0b5f7b07a96fb874d66a33c9930bf5550114ed9b560d",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "2f7659e34721b5ac3f54000ff3a4e8c853b2c2e876cde09e1a80abc7c8d84cce",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {
+          "R06_SCREEN_FRONTIER": 1
+        },
+        "transition_log_sha256": "1340020ae4b7b9437c65b34ca0e7abca12f95f3db969133b47dc387c5e8a4669",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "blind_evaluation": {
+        "status": "scored",
+        "treatment_hidden_until_scores_frozen": true,
+        "evaluator_id_hash": "8a6f6a696b0193310033a016530e8d713b15449afcc137dd110f026b7c595025",
+        "artifacts": {
+          "A": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          },
+          "B": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          }
+        },
+        "winner": "tie",
+        "rationale": "The final verified TeX artifacts are byte-identical and give the standard complete IVT proof using g=f-id. The differing repair history is intentionally not visible to artifact-blind scoring."
+      }
+    },
+    {
+      "case_id": "M009-C06-finite-domain-field",
+      "pair_order": [
+        "protocol3",
+        "protocol2"
+      ],
+      "protocol2": {
+        "status": "complete",
+        "protocol": 2,
+        "run_fingerprint": "3722493b92be5b38bb8dbaffb6b51d590f0b6c2641d7aff059327f32e6ff32d2",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "d33802038887520f067c9e4837061d83ab268b0f59fc5e92d2eead690a9b7ee5",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {},
+        "transition_log_sha256": "4b671953be67080461fef6d85bdc67c9f83263f0fa1396457bf63ee1642aea3c",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "protocol3": {
+        "status": "complete",
+        "protocol": 3,
+        "run_fingerprint": "c1804b06de6cb2de194f96a2f78b343244867fe21c52b394f25f26d3f24fe310",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "d33802038887520f067c9e4837061d83ab268b0f59fc5e92d2eead690a9b7ee5",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {
+          "R06_SCREEN_FRONTIER": 1
+        },
+        "transition_log_sha256": "4066101f274757212f6b2d664fc36dfe9b3d25ebed316d13e6ad4e3944fcfe52",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "blind_evaluation": {
+        "status": "scored",
+        "treatment_hidden_until_scores_frozen": true,
+        "evaluator_id_hash": "8a6f6a696b0193310033a016530e8d713b15449afcc137dd110f026b7c595025",
+        "artifacts": {
+          "A": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          },
+          "B": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          }
+        },
+        "winner": "tie",
+        "rationale": "The final verified TeX artifacts are byte-identical. Both prove that multiplication by a nonzero element is injective in an integral domain and hence surjective on the finite set, yielding an inverse."
+      }
+    },
+    {
+      "case_id": "M009-C07-zsigmondy-corollary",
+      "pair_order": [
+        "protocol2",
+        "protocol3"
+      ],
+      "protocol2": {
+        "status": "complete",
+        "protocol": 2,
+        "run_fingerprint": "41409cad9368e210c14bdb561aad120076ee300983a8ab9bbdcac3865d87df70",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "5e5800fd20d5045a7888433fc5e91ce447ff041788c5b51171fbbaa7f5b2ff09",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": true,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {},
+        "transition_log_sha256": "f43d667b6d755b622eddcf985487d21a55bec95f2fbd32939c6471fc74512c96",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "protocol3": {
+        "status": "complete",
+        "protocol": 3,
+        "run_fingerprint": "23842d9442f8419bee9eaa4734c3c28b4fa1dbd9e3450b700da215f021e3f763",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "5e5800fd20d5045a7888433fc5e91ce447ff041788c5b51171fbbaa7f5b2ff09",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": true,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {
+          "R06_SCREEN_FRONTIER": 3,
+          "R09_REVIEW_STATE": 1
+        },
+        "transition_log_sha256": "6d4588d6db22861aa0350363d722480c153472770c680817fd9dff704da33366",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "blind_evaluation": {
+        "status": "scored",
+        "treatment_hidden_until_scores_frozen": true,
+        "evaluator_id_hash": "8a6f6a696b0193310033a016530e8d713b15449afcc137dd110f026b7c595025",
+        "artifacts": {
+          "A": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          },
+          "B": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          }
+        },
+        "winner": "tie",
+        "rationale": "The final verified artifacts are byte-identical. They state the precise Zsigmondy hypotheses, identify both exceptional cases, specialize to a=2,b=1, eliminate the n=2 exception via a+b=3, and exclude n=6 by hypothesis."
+      }
+    },
+    {
+      "case_id": "M009-C08-finite-field-subgroup-cyclic",
+      "pair_order": [
+        "protocol3",
+        "protocol2"
+      ],
+      "protocol2": {
+        "status": "complete",
+        "protocol": 2,
+        "run_fingerprint": "dd4d69fb454bd004f746544eb071934da285179fe5fa3f1add053ceb891f5b7b",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "ea574a13538d2ee4cd6a4d21d5f02e38e2429bc82dbdf90ade10b3a5bb749297",
+        "first_verification_pass": true,
+        "repair_count": 0,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {},
+        "transition_log_sha256": "a14ba8c4a524d39932556180a8f755846bee24faf95b629819c406ab37a5e20d",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "protocol3": {
+        "status": "complete",
+        "protocol": 3,
+        "run_fingerprint": "ade545640bba6921877680601637921e1f5dc02a0e4c28bfbd8cf2a75b0ff905",
+        "model_surface": "GPT-5.6 Sol project-session A4",
+        "connector_profile": "current-release-loopback-mtm-same-config-v1",
+        "research_tools_policy": "normal_web_plus_mtm_workspace",
+        "final_outcome": "verified_tex",
+        "final_tex_sha256": "ea574a13538d2ee4cd6a4d21d5f02e38e2429bc82dbdf90ade10b3a5bb749297",
+        "first_verification_pass": false,
+        "repair_count": 1,
+        "verifier_finding_count": 0,
+        "repeated_failed_route_without_new_evidence": 0,
+        "counterexample_probe_on_blocker": null,
+        "focused_retrieval_when_missing_reference": null,
+        "max_no_novelty_retrieval_streak": 0,
+        "preserved_usable_partial_results": 0,
+        "harmful_advice_events": 0,
+        "advisory_rule_counts": {
+          "R06_SCREEN_FRONTIER": 2
+        },
+        "transition_log_sha256": "e95b2ff304120c2b244069975b4dd1de889253d1ed7dc13ae33c9775ffb10f94",
+        "verification_report_sha256": "75d96cd45b315038d7eca2508fbd4fbaed66c13f3f2926609296b8e609b36232",
+        "raw_web_transcript_recorded": false,
+        "private_reasoning_recorded": false
+      },
+      "blind_evaluation": {
+        "status": "scored",
+        "treatment_hidden_until_scores_frozen": true,
+        "evaluator_id_hash": "8a6f6a696b0193310033a016530e8d713b15449afcc137dd110f026b7c595025",
+        "artifacts": {
+          "A": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          },
+          "B": {
+            "logic_completeness": 5,
+            "readability": 5,
+            "research_efficiency": 5
+          }
+        },
+        "winner": "tie",
+        "rationale": "The final verified TeX artifacts are byte-identical. Both use a maximal-order element, a p-primary order-mixing contradiction, and the field polynomial root bound to force the maximal order to equal |G|."
+      }
+    }
   ],
-  "aggregate": null,
-  "decision": "pending_real_web_evidence"
+  "aggregate": {
+    "verified_tex_completion": {
+      "protocol2": 8,
+      "protocol3": 8
+    },
+    "first_verification_pass": {
+      "protocol2": 7,
+      "protocol3": 7
+    },
+    "repeated_failed_route_without_new_evidence": {
+      "protocol2": 0,
+      "protocol3": 0
+    },
+    "max_no_novelty_retrieval_streak_sum": {
+      "protocol2": 0,
+      "protocol3": 0
+    },
+    "protocol3_harmful_advice_events": 0,
+    "primary_research_control_improvements": {
+      "repeated_failed_route_without_new_evidence": false,
+      "max_no_novelty_retrieval_streak": false,
+      "counterexample_probe_on_blocker": false,
+      "focused_retrieval_when_missing_reference": false
+    },
+    "release_gate_passed": false
+  },
+  "decision": "rejected"
 }

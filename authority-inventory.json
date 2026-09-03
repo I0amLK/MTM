@@ -67,7 +67,7 @@
     "protocol3_environment": "MTM_WORKFLOW_PROTOCOL_VERSION=3",
     "production_default_workflow_protocol": 2,
     "protocol3_default_cutover_allowed": false,
-    "real_web_a4": "pending",
+    "real_web_a4": "complete_rejected",
     "final_artifact": "proof_verified.tex"
   },
   "rollback": {

@@ -118,8 +118,8 @@
     "A1": {"status": "accepted_delivery_4", "required": "Protocol-1/2 frozen compatibility plus protocol-3 research-contract golden fixtures.", "evidence": "The 82-checkpoint MTM-006 workflow differential retains zero mismatches and frozen SHA-256 def4f7abd3878638ff84952ce2632480eb427649a83868660087c97790de10b0; protocol-3 structured plans, events, screening, branch/failure/replan records and a complete proof_verified.tex path pass strict unit and end-to-end tests."},
     "A2": {"status": "accepted_delivery_3", "required": "Read-only deterministic shadow projection before model-facing exposure.", "evidence": "Protocol-2 history is normalized and projected only through the owner-authorized research_state_shadow diagnostic; repeated and eight-way concurrent projections are byte-identical and leave the complete disposable state tree unchanged."},
     "A3": {"status": "accepted_delivery_5", "required": "Retry/crash/concurrency, identity, capability, branch/verifier firewall and finalizer non-regression.", "evidence": "Owner mismatch is denied, forged reference/node data cannot influence the graph, malformed collections fail closed, the bounded view is exposed only to protocol-3 Generator/Repair roles, verifier findings enter only Repair-normalized context, Verifier/Branch/Assembler never receive the view, advice is not a precondition, and all existing capability/verifier/finalizer tests pass."},
-    "A4": {"status": "pending_real_web_runs", "required": "Real web-driven paired mathematical evaluation with normal research/workspace tools and verified .tex outputs.", "evidence": "The eight-case paired corpus, balanced AB/BA order, predeclared metrics, blind scoring contract and deterministic release gate are frozen; no real web treatment result is recorded yet."},
-    "A5": {"status": "accepted_delivery_6_resource", "required": "Task-envelope, projection latency, RSS, writes, replay and shutdown non-regression.", "evidence": "The same current Rust release was run under explicit protocol 2 and protocol 3 through the same full workflow to DirectProving; 40 repeated task retrievals per treatment passed all eight bounded non-regression checks in mtm009-research-resource.json. This is explicitly not a performance claim."}
+    "A4": {"status": "completed_release_gate_rejected", "required": "Real web-driven paired mathematical evaluation with normal research/workspace tools and verified .tex outputs.", "evidence": "All eight frozen AB/BA pairs and sixteen treatments completed under the same GPT-5.6 Sol model surface and connector profile. Protocol 2 and protocol 3 each produced verified proof_verified.tex for 8/8 cases, each achieved 7/8 first-verification passes, each had one order-balanced LaTeX repair, all verifier finding counts were zero, protocol 3 had zero harmful-advice events, and the externally sourced Zsigmondy case passed focused retrieval plus stored-source reference audit in both protocols. The predeclared release gate nevertheless rejected protocol-3 default cutover because none of the four primary research-control metrics strictly improved over protocol 2. Evaluation SHA-256: e7596fbaed70655228bd1530376ba457153e575ea0b845c4c8e64e2848e7e564."},
+    "A5": {"status": "accepted_delivery_6_resource_current_candidate", "required": "Task-envelope, projection latency, RSS, writes, replay and shutdown non-regression.", "evidence": "The current release candidate SHA-256 9292feec8b6fca9db621293a666673f9649442690be613c7ef232c95e9c945b2 was run under explicit protocol 2 and protocol 3 through the same full workflow to DirectProving. Forty repeated task retrievals per treatment passed all eight bounded non-regression checks: protocol-2/3 p95 task latency was 1.843016/5.310511 ms, protocol-3 research view was 1172 bytes, RSS remained bounded, and fd/thread counts were stable. This is explicitly not a performance claim. Resource report SHA-256: 7a83ba248680cd5b968c2b2a7e00743ced24326d1e0dd0846813c660cbf73489."}
   },
   "delivery_1_receipt": {
     "status": "accepted",
@@ -410,7 +410,7 @@
     "commit_pending": false
   },
   "delivery_6_progress": {
-    "status": "simulation_complete_pending_real_web_runs",
+    "status": "real_web_evaluation_complete_cutover_rejected",
     "baseline_commit": "6e3ec2e",
     "production_behavior_changed": false,
     "production_default_workflow_protocol": 2,
@@ -418,41 +418,41 @@
     "final_artifact": "proof_verified.tex",
     "resource_evidence": {
       "path": "mtm009-research-resource.json",
-      "sha256": "9c04834fc4c2b837d5321fc1f2ff8a0fd4a713782bab12580658a06eefb71afc",
-      "implementation_sha256": "b878c964b07c78017c38160f77bc079c6ea57032e36a13966eb192bccaa61ad5",
-      "harness_sha256": "08e963f067a3fa8ec99cb2fc864cbc50827a845b7986a3455ed20045c416aef1",
+      "sha256": "7a83ba248680cd5b968c2b2a7e00743ced24326d1e0dd0846813c660cbf73489",
+      "implementation_sha256": "9292feec8b6fca9db621293a666673f9649442690be613c7ef232c95e9c945b2",
+      "harness_sha256": "91bfe27c5f1010e8e668d34468a98f44e6321c8e600090b8fb7d7c90019773e0",
       "samples_per_protocol": 40,
       "checks_passed": 8,
       "performance_claim": false,
       "protocol2": {
-        "latency_ms_median": 0.852112,
-        "latency_ms_p95": 0.995608,
-        "task_bytes_max": 14055,
+        "latency_ms_median": 1.658571,
+        "latency_ms_p95": 1.843016,
+        "task_bytes_max": 5982,
         "research_view_bytes": 0,
-        "rss_kib_peak_proxy": 14136,
-        "state_byte_growth": 7786
+        "rss_kib_peak_proxy": 14168,
+        "state_byte_growth": 531480
       },
       "protocol3": {
-        "latency_ms_median": 1.282883,
-        "latency_ms_p95": 1.456135,
-        "task_bytes_max": 16498,
-        "research_view_bytes": 2060,
-        "rss_kib_peak_proxy": 14136,
-        "state_byte_growth": 7840
+        "latency_ms_median": 2.737616,
+        "latency_ms_p95": 5.310511,
+        "task_bytes_max": 9104,
+        "research_view_bytes": 1172,
+        "rss_kib_peak_proxy": 14532,
+        "state_byte_growth": 531480
       }
     },
     "frozen_math_corpus": {
       "path": "conformance/mtm009-math-corpus.json",
       "corpus_id": "mtm009-web-mathematics-v1",
-      "sha256": "d011f17664bd468121223ca59aa44116ff10eb7ce5a0f55996d21311e60c3e2f",
+      "sha256": "2ed0cfe3a0e9f2e6148bfe4cbd93c79f6be2f7178ceb7d396d3ee80179b21a76",
       "case_count": 8,
       "protocol2_first": 4,
       "protocol3_first": 4,
-      "unique_capability_tags": 26
+      "unique_capability_tags": 25
     },
     "evaluation_contract": {
       "path": "mtm009-research-state-math-evaluation.json",
-      "status": "pending_web_runs",
+      "status": "complete",
       "predeclared_metric_count": 10,
       "raw_web_transcript_recorded": false,
       "private_reasoning_recorded": false,
@@ -470,6 +470,29 @@
         "systematic harmful advice blocks cutover",
         "A5 engineering resource gate must remain accepted"
       ]
+    },
+    "real_web_evaluation": {
+      "evaluation_sha256": "e7596fbaed70655228bd1530376ba457153e575ea0b845c4c8e64e2848e7e564",
+      "status": "complete",
+      "decision": "rejected",
+      "complete_pairs": 8,
+      "treatment_count": 16,
+      "protocol2_verified_tex_completion": 8,
+      "protocol3_verified_tex_completion": 8,
+      "protocol2_first_verification_pass": 7,
+      "protocol3_first_verification_pass": 7,
+      "protocol2_repair_count": 1,
+      "protocol3_repair_count": 1,
+      "protocol2_verifier_finding_count": 0,
+      "protocol3_verifier_finding_count": 0,
+      "protocol2_repeated_failed_route_without_new_evidence": 0,
+      "protocol3_repeated_failed_route_without_new_evidence": 0,
+      "protocol2_max_no_novelty_retrieval_streak_sum": 0,
+      "protocol3_max_no_novelty_retrieval_streak_sum": 0,
+      "protocol3_harmful_advice_events": 0,
+      "primary_research_control_improvements": 0,
+      "release_gate_passed": false,
+      "interpretation": "Protocol 3 demonstrated verified-output, verifier, safety, reference-audit and engineering non-regression, but the frozen corpus did not exhibit a strict advantage over protocol 2 on any predeclared primary research-control metric. The release rule is therefore honored as written and protocol 3 remains opt-in."
     },
     "authorized_simulation": {
       "path": "conformance/mtm009-math-simulation.json",
@@ -536,10 +559,9 @@
       }
     ],
     "manual_pending": [
-      "Run all sixteen real web-model treatments using the frozen pair order and same model/connector configuration within each pair.",
-      "Blind-score each A/B final artifact pair before treatment labels are revealed.",
-      "Populate only hashed run/artifact facts and predeclared metrics; never store raw web conversation transcripts or private reasoning.",
-      "Do not mark Delivery 6 accepted or change the production workflow default to protocol 3 until the deterministic real-web evaluation gate passes. The installed preview remains protocol-2-default with protocol 3 opt-in."
+      "Do not change the production workflow default to protocol 3 from this evaluation: the frozen mathematical release gate completed and rejected cutover because no primary research-control metric strictly improved.",
+      "If a future default-cutover claim is desired, define a new versioned prospective evaluation before running it, with obstruction-heavy cases that can distinguish repeated-failure, no-novelty retrieval, missing-reference and preserved-partial behavior; never rewrite or relax this completed v1 evaluation post hoc.",
+      "A bug-fix preview release may still carry protocol 3 as an explicit opt-in because engineering A0-A5 and verified-output non-regression passed; any such release must keep production_default_workflow_protocol_version=2."
     ]
   },
   "delivery_6_stabilization_receipt": {
@@ -732,6 +754,51 @@
       "Existing 0.3.0 sessions remain intentionally running until the operator chooses to restart them."
     ]
   },
+  "post_gate_stabilization": {
+    "status": "v1_release_gate_rejected_post_gate_bugfix_validated",
+    "recorded_at": "2026-09-02T23:24:31-07:00",
+    "v1_evaluation": {
+      "path": "mtm009-research-state-math-evaluation.json",
+      "sha256": "e7596fbaed70655228bd1530376ba457153e575ea0b845c4c8e64e2848e7e564",
+      "complete_pairs": 8,
+      "protocol2_verified_tex": 8,
+      "protocol3_verified_tex": 8,
+      "protocol2_first_verification_pass": 7,
+      "protocol3_first_verification_pass": 7,
+      "protocol2_repair_count": 1,
+      "protocol3_repair_count": 1,
+      "protocol2_verifier_findings": 0,
+      "protocol3_verifier_findings": 0,
+      "release_gate_passed": false,
+      "decision": "rejected"
+    },
+    "retrieval_projector_fix": {
+      "commit": "a9cd38d6b4a3b45ca7dd1d1faad30febe7fac4bb",
+      "problem": "A protocol-3 retrieval_assessment with outcome=new_material could be projected as Inconclusive/NoProgress when the same registered reference_id had just appeared in the preceding external retrieval event, because one deduplication set was incorrectly shared by discovery novelty and typed-assessment evidence consumption.",
+      "fix": "Keep aggregate retrieval novelty and typed-assessment evidence-consumption deduplication separate. A newly registered source can therefore be assessed once as new material, while repeated typed claims over the same source remain NoProgress.",
+      "regressions": [
+        "external retrieval followed by typed new_material remains Progress and does not trigger R05_STOP_RETRIEVAL",
+        "a second typed new_material claim over the same reference becomes Inconclusive/NoProgress",
+        "typed no_new_material remains Inconclusive even when it carries a registered reference"
+      ],
+      "local_validation": "mtm-workflow 82 unit tests and 9 integration tests, workspace fmt, warnings-denied Clippy and workspace tests passed."
+    },
+    "live_requalification": {
+      "binary_sha256": "489eb4be5bde83bb9ddb4da8ddfe359e88245ba0f9b076ccaa530e02f8a9d88e",
+      "protocol2_binary_match": true,
+      "protocol3_binary_match": true,
+      "typed_new_material_projected_progress": true,
+      "consecutive_no_new_material_after_new_material": 0,
+      "duplicate_typed_reference_becomes_no_progress": true,
+      "artin_hidden_hypothesis_exploratory_ab": {
+        "formal_v1_score_eligible": false,
+        "reason": "Collected only after the immutable v1 release decision and therefore retained as prospective corpus-design evidence rather than retroactively changing v1.",
+        "protocol2_behavior": "The same concrete counterexample was retained only in free-form exploration and the workflow proceeded to ordinary planning.",
+        "protocol3_behavior": "The target became refuted, counterexample_coverage became found, R01_REPLAN_REFUTED was selected, missing_hypothesis was retained through branch/join/failure synthesis, and conditional partial results remained preserved across replan."
+      }
+    },
+    "interpretation": "The v1 rejection remains immutable. Post-gate evidence demonstrates a real obstruction-centered protocol-3 control advantage on a hidden-hypothesis case and validates the retrieval-projector repair, but a new prospective frozen evaluation is required before default cutover."
+  },
   "recorded_failures_and_repairs": [
     {
       "delivery": 1,
@@ -897,10 +964,11 @@
     }
   ],
   "manual_pending": [
-    "Complete the frozen paired real-web mathematical evaluation before making protocol 3 the production default.",
+    "The frozen v1 paired real-web mathematical evaluation is complete and rejected default cutover; never rewrite or relax that historical gate.",
+    "Any protocol-3 default cutover must use a new prospectively frozen obstruction-heavy evaluation and current-candidate resource evidence.",
     "Existing 0.3.0 MTM processes remain intentionally running until the operator chooses to restart them onto the preview.",
     "Other operating systems and site-local research/CAS layouts remain release-specific evidence."
   ],
   "rollback": "Before protocol-3 cutover, delete MTM-009 scaffolding and remain on the accepted MTM-008 release. After cutover, revert the new-run protocol default to 2 or reinstall the accepted MTM-008 release only after copied protocol-3 state has been proven safely resumable; never rewrite existing final artifacts.",
-  "decision": "in_progress"
+  "decision": "v1_complete_cutover_rejected_pending_new_qualification"
 }

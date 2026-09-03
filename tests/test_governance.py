@@ -179,7 +179,7 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(summary["production_default_workflow_protocol"], 2)
         self.assertTrue(summary["protocol3_opt_in"])
         self.assertFalse(summary["protocol3_default_cutover_allowed"])
-        self.assertEqual(summary["real_web_a4"], "pending")
+        self.assertEqual(summary["real_web_a4"], "complete_rejected")
         self.assertEqual(summary["final_artifact"], "proof_verified.tex")
 
     def test_mtm009_research_contract_freezes_complexity_and_authority(self) -> None:

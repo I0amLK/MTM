@@ -10,7 +10,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 HOME = Path("/home/lk")
 REPORT = ROOT / "mtm009-preview-release.json"
-RESOURCE = ROOT / "mtm009-research-resource.json"
 SIMULATION = ROOT / "conformance" / "mtm009-math-simulation.json"
 EVALUATION = ROOT / "mtm009-research-state-math-evaluation.json"
 DEPLOYMENT = HOME / ".local" / "share" / "mtm" / "deployment" / "deployment-v1.json"
@@ -74,17 +73,33 @@ def validate() -> dict[str, object]:
         raise ValueError("preview workflow protocol posture drifted")
     if protocols.get("protocol3_default_cutover_allowed") is not False or protocols.get("real_web_a4") != "pending":
         raise ValueError("preview improperly claims protocol-3 default acceptance")
-    resource = json.loads(RESOURCE.read_text(encoding="utf-8"))
-    if resource.get("ok") is not True or resource.get("implementation_sha256") != expected_sha:
-        raise ValueError("preview A5 resource evidence is missing or stale")
-    if sha256_file(RESOURCE) != report.get("a5_resource_evidence", {}).get("sha256"):
-        raise ValueError("preview A5 report hash drifted")
+    # The preview report is historical evidence for the exact installed preview binary.
+    # The mutable current-candidate resource report is validated independently by
+    # validate_mtm009_research_resource.py and must not retroactively invalidate this
+    # already-qualified preview when a later candidate is measured.
+    preview_a5 = report.get("a5_resource_evidence", {})
+    if (
+        preview_a5.get("passed") is not True
+        or preview_a5.get("implementation_sha256") != expected_sha
+        or preview_a5.get("performance_claim") is not False
+        or not isinstance(preview_a5.get("sha256"), str)
+        or len(str(preview_a5.get("sha256"))) != 64
+    ):
+        raise ValueError("historical preview A5 evidence binding is incomplete")
     simulation = json.loads(SIMULATION.read_text(encoding="utf-8"))
     if simulation.get("official_a4_eligible") is not False:
         raise ValueError("simulation may not qualify as A4")
     evaluation = json.loads(EVALUATION.read_text(encoding="utf-8"))
-    if evaluation.get("status") != "pending_web_runs":
-        raise ValueError("preview release expects real-web A4 to remain pending")
+    if evaluation.get("status") == "pending_web_runs":
+        real_web_a4 = "pending"
+    elif (
+        evaluation.get("status") == "complete"
+        and evaluation.get("decision") == "rejected"
+        and evaluation.get("aggregate", {}).get("release_gate_passed") is False
+    ):
+        real_web_a4 = "complete_rejected"
+    else:
+        raise ValueError("current real-web A4 state is not a recognized bounded preview posture")
     rollback = report.get("rollback", {})
     rollback_target = Path(str(rollback.get("target") or ""))
     if not rollback_target.is_file() or sha256_file(rollback_target) != rollback.get("sha256"):
@@ -114,7 +129,7 @@ def validate() -> dict[str, object]:
         "public_tools": 24,
         "hidden_aliases": 11,
         "final_artifact": report.get("final_artifact"),
-        "real_web_a4": "pending",
+        "real_web_a4": real_web_a4,
         "existing_sessions_restarted_for_preview": report.get("live_sessions", {}).get("existing_sessions_restarted_for_preview"),
     }
 
