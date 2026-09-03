@@ -4,6 +4,7 @@
   "milestone_id": "MTM-012",
   "title": "Compact TUI information hierarchy",
   "started_at": "2026-09-03T03:40:00-07:00",
+  "completed_at": "2026-09-03T03:59:59-07:00",
   "authority": {
     "component_scope": "CLI/TUI presentation only",
     "before": "rust",
@@ -62,6 +63,29 @@
     "raw_tui_log_recorded": false,
     "performance_claim": false
   },
+  "deployment": {
+    "status": "installed_and_rollback_qualified",
+    "version": "0.4.0-preview.3",
+    "release_binary_sha256": "545ab9ef8cc01edf804581cb52c2b1a4158d03bd8a25ea00c7785039167f3659",
+    "installed_path": "/home/lk/.local/share/mtm/releases/0.4.0-preview.3/mtm",
+    "selector": "/home/lk/.local/bin/mtm",
+    "shell_selector_alias": "/home/lk/.cargo/bin/mtm",
+    "rollback_version": "0.4.0-preview.2",
+    "rollback_binary_sha256": "5ed668d5bf765be2efd1b50933e941cf60dbbd414e3b6daab77745624d5cfa81",
+    "preview_release_report": "mtm012-preview-release.json",
+    "preview_release_report_sha256": "c269822e3d35536f0c4f402edd1ea570e97ac49fe4b421216b375bbe825b342f",
+    "deployment_manifest_sha256": "b381aa5d4a78c95d61221ed5fb2c10ed127be289edac53cce947c779ec95ccd2",
+    "runtime_probes": {
+      "preview3_default_after_cutover": 3,
+      "preview3_explicit_protocol2": 2,
+      "preview2_default_during_rollback": 3,
+      "preview3_default_after_recutover": 3
+    },
+    "real_selector_rollback_and_recutover_passed": true,
+    "installed_tui_smoke_repeated_twenty_checks": true,
+    "existing_sessions_restarted": false,
+    "existing_runs_rewritten": false
+  },
   "acceptance": {
     "A0": "Full format, Clippy, workspace tests, governance and unified local gate pass.",
     "A1": "Compact and verbose output have deterministic tested text contracts; compact mode removes routine diagnostic metadata but preserves required operating information.",
@@ -70,9 +94,8 @@
   },
   "rollback": "Revert MTM-012 presentation changes and restore the preview.2 selector. No database, run state, capability, project revision or proof artifact changes are required.",
   "manual_pending": [
-    "Install the A4-qualified preview.3 release binary without overwriting preview.2.",
-    "Perform a real preview.3 -> preview.2 -> preview.3 selector rollback/recutover drill and verify the login-shell-preferred mtm path follows the selector.",
-    "Rerun the complete post-install local gate before marking MTM-012 completed."
+    "Stable 0.4.0 remains a separate release decision.",
+    "Existing long-running sessions may be restarted on preview.3 only when operationally desired."
   ],
-  "decision": "in_progress"
+  "decision": "accepted"
 }

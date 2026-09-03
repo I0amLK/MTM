@@ -1,0 +1,53 @@
+{
+  "binary_sha256": "545ab9ef8cc01edf804581cb52c2b1a4158d03bd8a25ea00c7785039167f3659",
+  "evidence_commit": "8a740ce5abdcdc90ff408d04ff41562cf40093d2",
+  "existing_runs_rewritten": false,
+  "final_artifact": "proof_verified.tex",
+  "milestone": "MTM-012",
+  "milestone_status": "in_progress",
+  "passed": true,
+  "phase": "mtm012_preview_release",
+  "production_command": "/home/lk/.local/bin/mtm",
+  "production_command_target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.3/mtm",
+  "project": "MTM-reboot",
+  "release_info": {
+    "hidden_alias_count": 11,
+    "implementation": "rust",
+    "name": "mtm",
+    "production_authority": "rust",
+    "public_tool_count": 24,
+    "python_runtime_required": false,
+    "state_schema_version": 2,
+    "target_arch": "x86_64",
+    "target_os": "linux",
+    "version": "0.4.0-preview.3",
+    "workflow_protocol_version": 3
+  },
+  "rollback": {
+    "real_rollback_and_recutover_passed": true,
+    "sha256": "5ed668d5bf765be2efd1b50933e941cf60dbbd414e3b6daab77745624d5cfa81",
+    "target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.2/mtm",
+    "version": "mtm 0.4.0-preview.2"
+  },
+  "runtime_probes": {
+    "preview2_default_during_rollback": 3,
+    "preview3_default_after_cutover": 3,
+    "preview3_default_after_recutover": 3,
+    "preview3_explicit_protocol2": 2
+  },
+  "schema_version": "1.0.0",
+  "shell_command_alias": "/home/lk/.cargo/bin/mtm",
+  "source_commit": "e9276f2ea0917f4c0ae14146a2407c01d4e425cc",
+  "tui_a4": {
+    "check_count": 20,
+    "generated_operator_key_recorded": false,
+    "raw_tui_log_recorded": false,
+    "report": "mtm012-tui-validation.json",
+    "report_sha256": "be9a9317988afc7a727a7f4bba00f7dcf0119394773c0825b4526a77f9aa868b"
+  },
+  "version": "0.4.0-preview.3",
+  "workflow_protocols": {
+    "production_default": 3,
+    "rollback_override": 2
+  }
+}

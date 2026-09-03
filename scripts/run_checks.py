@@ -98,7 +98,14 @@ def main() -> int:
         and progress.get("status")
         in {"MTM-011-in-progress", "MTM-011-completed", "MTM-012-in-progress"}
     )
-    mtm011_cutover_mode = mtm011_preview_mode
+    mtm012_preview_mode = (
+        progress.get("version") == "0.4.0-preview.3"
+        and progress.get("current_milestone") == "MTM-012"
+        and progress.get("status") in {"MTM-012-in-progress", "MTM-012-completed"}
+    )
+    current_preview_mode = mtm011_preview_mode or mtm012_preview_mode
+    historical_preview_mode = mtm009_preview_mode or current_preview_mode
+    mtm011_cutover_mode = current_preview_mode
     mtm012_source_mode = (
         progress.get("current_milestone") == "MTM-012"
         and progress.get("status") == "MTM-012-in-progress"
@@ -209,38 +216,67 @@ def main() -> int:
                                 )
                             ]
                             if mtm009_preview_mode
-                            else [
-                                *(
-                                    []
-                                    if mtm012_source_mode
-                                    else [
-                                        run(
-                                            "mtm011_cutover_source",
-                                            [
-                                                sys.executable,
-                                                "scripts/validate_mtm011_cutover_source.py",
-                                            ],
-                                            env=environment,
-                                            capture_json=True,
-                                        )
-                                    ]
-                                ),
-                                run(
-                                    "mtm011_cutover_resource",
-                                    [sys.executable, "scripts/validate_mtm011_cutover_resource.py"],
-                                    env=environment,
-                                    capture_json=True,
-                                ),
-                                run(
-                                    "mtm011_preview_release",
-                                    [sys.executable, "scripts/validate_mtm011_preview_release.py"],
-                                    env=environment,
-                                    capture_json=True,
-                                ),
-                            ]
+                            else (
+                                [
+                                    run(
+                                        "mtm012_tui_validation",
+                                        [
+                                            sys.executable,
+                                            "scripts/validate_mtm012_tui_validation.py",
+                                        ],
+                                        env=environment,
+                                        capture_json=True,
+                                    ),
+                                    run(
+                                        "mtm012_preview_release",
+                                        [
+                                            sys.executable,
+                                            "scripts/validate_mtm012_preview_release.py",
+                                        ],
+                                        env=environment,
+                                        capture_json=True,
+                                    ),
+                                ]
+                                if mtm012_preview_mode
+                                else [
+                                    *(
+                                        []
+                                        if mtm012_source_mode
+                                        else [
+                                            run(
+                                                "mtm011_cutover_source",
+                                                [
+                                                    sys.executable,
+                                                    "scripts/validate_mtm011_cutover_source.py",
+                                                ],
+                                                env=environment,
+                                                capture_json=True,
+                                            )
+                                        ]
+                                    ),
+                                    run(
+                                        "mtm011_cutover_resource",
+                                        [
+                                            sys.executable,
+                                            "scripts/validate_mtm011_cutover_resource.py",
+                                        ],
+                                        env=environment,
+                                        capture_json=True,
+                                    ),
+                                    run(
+                                        "mtm011_preview_release",
+                                        [
+                                            sys.executable,
+                                            "scripts/validate_mtm011_preview_release.py",
+                                        ],
+                                        env=environment,
+                                        capture_json=True,
+                                    ),
+                                ]
+                            )
                         ),
                     ]
-                    if mtm009_preview_mode or mtm011_preview_mode
+                    if historical_preview_mode
                     else [
                         run(
                             "mtm003_target_evidence",

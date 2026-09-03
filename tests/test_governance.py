@@ -28,6 +28,7 @@ from scripts.validate_mtm011_math_evaluation import (
     validate as validate_mtm011_math_evaluation,
 )
 from scripts.validate_mtm011_preview_release import validate as validate_mtm011_preview_release
+from scripts.validate_mtm012_preview_release import validate as validate_mtm012_preview_release
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -49,11 +50,17 @@ def deployment_mode() -> str:
         in {"MTM-011-in-progress", "MTM-011-completed", "MTM-012-in-progress"}
     ):
         return "mtm011_preview"
+    if (
+        progress.get("version") == "0.4.0-preview.3"
+        and milestone == "MTM-012"
+        and progress.get("status") in {"MTM-012-in-progress", "MTM-012-completed"}
+    ):
+        return "mtm012_preview"
     return "non_preview"
 
 
 def historical_evidence_mode() -> bool:
-    return deployment_mode() in {"mtm009_preview", "mtm011_preview"}
+    return deployment_mode() in {"mtm009_preview", "mtm011_preview", "mtm012_preview"}
 
 
 def historical_check_count(milestone: str) -> int:
@@ -69,7 +76,7 @@ class GovernanceTestCase(unittest.TestCase):
     def test_repository_migration_graph_is_valid(self) -> None:
         summary = validate_migration(load_graph())
         self.assertEqual(summary["milestone_count"], 12)
-        self.assertEqual(summary["todo_count"], 2)
+        self.assertEqual(summary["todo_count"], 1)
 
     def test_dependency_cycle_is_rejected(self) -> None:
         payload = copy.deepcopy(load_graph())
@@ -196,6 +203,12 @@ class GovernanceTestCase(unittest.TestCase):
             self.assertEqual(summary["production_default_workflow_protocol"], 3)
             self.assertEqual(summary["rollback_workflow_protocol"], 2)
             self.assertTrue(summary["real_rollback_and_recutover_passed"])
+        elif deployment_mode() == "mtm012_preview":
+            self.assertEqual(summary["evidence"], "mtm012_preview_release")
+            self.assertEqual(summary["mtm_version"], "0.4.0-preview.3")
+            self.assertEqual(summary["production_default_workflow_protocol"], 3)
+            self.assertEqual(summary["rollback_workflow_protocol"], 2)
+            self.assertTrue(summary["real_rollback_and_recutover_passed"])
         else:
             self.assertEqual(summary["required_check_count"], 10)
 
@@ -218,6 +231,18 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(summary["production_default_workflow_protocol"], 3)
         self.assertEqual(summary["rollback_workflow_protocol"], 2)
         self.assertTrue(summary["real_rollback_and_recutover_passed"])
+        self.assertEqual(summary["final_artifact"], "proof_verified.tex")
+
+    def test_current_mtm012_preview_release_is_installed_and_tui_qualified(self) -> None:
+        if deployment_mode() != "mtm012_preview":
+            self.skipTest("MTM-012 preview release is not the current deployment mode")
+        summary = validate_mtm012_preview_release()
+        self.assertEqual(summary["version"], "0.4.0-preview.3")
+        self.assertEqual(summary["production_default_workflow_protocol"], 3)
+        self.assertEqual(summary["rollback_workflow_protocol"], 2)
+        self.assertEqual(summary["selector_rollback_version"], "0.4.0-preview.2")
+        self.assertTrue(summary["real_rollback_and_recutover_passed"])
+        self.assertEqual(summary["tui_check_count"], 20)
         self.assertEqual(summary["final_artifact"], "proof_verified.tex")
 
     def test_mtm009_research_contract_freezes_complexity_and_authority(self) -> None:

@@ -22,23 +22,24 @@
     }
   },
   "live_sessions": {
-    "count": 7,
+    "count": 9,
     "exact_release": false,
     "logs_secret_free": true,
     "existing_session_version": "mixed pre-cutover processes",
     "active_executable_sha256_counts": {
       "0a785a122396a3f8961cbc33b967e7a48874b90311333c8860a1e5c75582fd7f": 4,
+      "e76c2124cddb73370d902394df3c143124870abf8f05240f1a72ca835a8e2477": 2,
       "728540db13486f25685b59ad357f20e7a04c41da3ac76b2d09e8dce821227a74": 1,
       "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036": 2
     },
     "restarted_for_preview": false,
-    "new_launch_version": "0.4.0-preview.2"
+    "new_launch_version": "0.4.0-preview.3"
   },
-  "milestone": "MTM-011",
+  "milestone": "MTM-012",
   "production_authority": "rust",
   "production_command": "/home/lk/.local/bin/mtm",
   "production_shell_command": "/home/lk/.cargo/bin/mtm",
-  "production_command_target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.2/mtm",
+  "production_command_target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.3/mtm",
   "production_shell_command_follows_selector": true,
   "runtime_data_root": "/home/lk/.mtm",
   "separate_re_ctm_data_root": "/home/lk/.re-ctm",
@@ -52,13 +53,15 @@
     "command": "/home/lk/.local/bin/re-ctm"
   },
   "release": {
-    "path": "/home/lk/.local/share/mtm/releases/0.4.0-preview.2/mtm",
-    "sha256": "5ed668d5bf765be2efd1b50933e941cf60dbbd414e3b6daab77745624d5cfa81",
-    "version": "0.4.0-preview.2"
+    "path": "/home/lk/.local/share/mtm/releases/0.4.0-preview.3/mtm",
+    "sha256": "545ab9ef8cc01edf804581cb52c2b1a4158d03bd8a25ea00c7785039167f3659",
+    "version": "0.4.0-preview.3"
   },
   "qualification_artifacts": {
     "mtm011_a4_candidate_archive": "/home/lk/.local/share/mtm/evidence/mtm011-a4-candidate-5cebde6458f2/mtm",
-    "mtm011_a4_candidate_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036"
+    "mtm011_a4_candidate_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+    "mtm012_tui_report": "mtm012-tui-validation.json",
+    "mtm012_tui_report_sha256": "be9a9317988afc7a727a7f4bba00f7dcf0119394773c0825b4526a77f9aa868b"
   },
   "release_info": {
     "hidden_alias_count": 11,
@@ -70,7 +73,7 @@
     "state_schema_version": 2,
     "target_arch": "x86_64",
     "target_os": "linux",
-    "version": "0.4.0-preview.2",
+    "version": "0.4.0-preview.3",
     "workflow_protocol_version": 3
   },
   "preview_policy": {
@@ -84,11 +87,27 @@
     "mtm009_v1_evaluation_immutable": true,
     "final_artifact": "proof_verified.tex"
   },
+  "tui_policy": {
+    "default_detail": "compact",
+    "verbose_flag": "--verbose",
+    "tool_start_visible": true,
+    "successful_completion_silent": true,
+    "tool_failure_visible": true,
+    "compact_trace_ids_hidden": true,
+    "compact_argument_keys_hidden": true,
+    "argument_values_hidden_in_all_modes": true,
+    "selector_rollback_version": "0.4.0-preview.2"
+  },
   "rollback": {
     "protocol_default": {
       "explicit_environment": "MTM_WORKFLOW_PROTOCOL_VERSION=2",
       "preview1_target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.1/mtm",
       "preview1_sha256": "e76c2124cddb73370d902394df3c143124870abf8f05240f1a72ca835a8e2477",
+      "real_selector_rollback_and_recutover_passed": true
+    },
+    "tui_release": {
+      "preview2_target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.2/mtm",
+      "preview2_sha256": "5ed668d5bf765be2efd1b50933e941cf60dbbd414e3b6daab77745624d5cfa81",
       "real_selector_rollback_and_recutover_passed": true
     },
     "isolated_restore_verified": {
@@ -122,7 +141,7 @@
   "command_namespace": {
     "mtm": {
       "command": "/home/lk/.local/bin/mtm",
-      "target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.2/mtm"
+      "target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.3/mtm"
     },
     "re_ctm": {
       "command": "/home/lk/.local/bin/re-ctm",

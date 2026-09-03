@@ -403,7 +403,7 @@
     {
       "id": "MTM-012",
       "title": "Compact TUI information hierarchy",
-      "status": "in_progress",
+      "status": "completed",
       "priority": "P1",
       "production_authority_before": "rust",
       "production_authority_after": "rust",
@@ -454,7 +454,7 @@
     {"source": "MTM-011", "target": "MTM-010"},
     {"source": "MTM-012", "target": "MTM-011"}
   ],
-  "todo": ["MTM-009", "MTM-012"],
+  "todo": ["MTM-009"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -839,6 +839,14 @@
       "status_before": "approved",
       "status_after": "in_progress",
       "summary": "Began compact-TUI implementation after freezing the presentation-only scope, non-goals, rollback and A0/A1/A3/A4 acceptance requirements."
+    },
+    {
+      "event_id": "MEVT-049",
+      "milestone_id": "MTM-012",
+      "at": "2026-09-03T03:59:59-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "summary": "Completed the compact TUI preview after release preview.3 passed twenty real OAuth/MCP presentation checks, was installed without overwriting preview.2, survived a real preview.3-to-preview.2 rollback and preview.3 recutover, and both supported shell command paths resolved to the accepted preview.3 binary while existing sessions were left running."
     }
   ],
   "receipt_contract": {
@@ -2444,6 +2452,76 @@
       "manual_pending": [
         "Stable 0.4.0 remains a separate release decision.",
         "Existing long-running sessions may be restarted on preview.2 only when operationally desired."
+      ],
+      "decision": "accepted"
+    },
+    {
+      "receipt_id": "MREC-012",
+      "milestone_id": "MTM-012",
+      "started_at": "2026-09-03T03:40:00-07:00",
+      "completed_at": "2026-09-03T03:59:59-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "docs(mtm012): complete compact tui preview [MTM-012]",
+      "files_changed": [
+        "crates/mtm-runtime/src/operator.rs",
+        "crates/mtm-cli/src/main.rs",
+        "Cargo.toml",
+        "Cargo.lock",
+        "README.md",
+        "docs/releases/0.4.0-preview.3.md",
+        "scripts/run_mtm012_tui_validation.py",
+        "scripts/validate_mtm012_tui_validation.py",
+        "scripts/release_mtm012_preview.py",
+        "scripts/validate_mtm012_preview_release.py",
+        "scripts/validate_mtm_command_namespace.py",
+        "mtm012-tui-validation.json",
+        "mtm012-preview-release.json",
+        "authority-inventory.json",
+        "project-progress.json",
+        "migration-graph.json",
+        "records/iterations/ITER-012.json",
+        "tests/test_governance.py",
+        "scripts/run_checks.py",
+        "local-validation.json"
+      ],
+      "commands": [
+        {
+          "command": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace",
+          "exit_code": 0,
+          "result": "The full preview.3 Rust workspace passed formatting, warnings-denied Clippy and all unit/integration/doc tests; operator tests covered compact tool identity, successful-completion suppression, failure visibility, verbose diagnostics and compact tunnel event filtering."
+        },
+        {
+          "command": "python3 scripts/run_mtm012_tui_validation.py && python3 scripts/validate_mtm012_tui_validation.py",
+          "exit_code": 0,
+          "result": "The exact preview.3 release binary SHA-256 545ab9ef8cc01edf804581cb52c2b1a4158d03bd8a25ea00c7785039167f3659 passed twenty real local OAuth/MCP TUI checks. The evidence stores neither raw TUI logs nor the generated operator key."
+        },
+        {
+          "command": "python3 scripts/release_mtm012_preview.py && python3 scripts/validate_mtm012_preview_release.py",
+          "exit_code": 0,
+          "result": "Installed preview.3, retained preview.2 byte-for-byte, verified protocol 3 remains the default and explicit protocol 2 remains available, rolled the selector back to preview.2, recut to preview.3, and verified both /home/lk/.local/bin/mtm and /home/lk/.cargo/bin/mtm follow the accepted selector."
+        },
+        {
+          "command": "MTM012_BINARY=/home/lk/.local/bin/mtm python3 scripts/run_mtm012_tui_validation.py",
+          "exit_code": 0,
+          "result": "The installed selector artifact repeated the same twenty compact/verbose TUI checks successfully after recutover."
+        }
+      ],
+      "acceptance": {
+        "A0": {"passed": true, "evidence": ["Full Rust workspace and unified local validation pass after the presentation change and deployed-state update."]},
+        "A1": {"passed": true, "evidence": ["Compact formatting is deterministic: tool start remains visible, routine success completion is silent, failure remains visible, and verbose mode retains the prior redacted lifecycle diagnostics."]},
+        "A3": {"passed": true, "evidence": ["Compact and verbose real-process checks contain no actual OAuth password, signing secret, capability secret or bearer token; the operator session remains presentation-only."]},
+        "A4": {"passed": true, "evidence": ["The exact release artifact and the installed selector each passed twenty real OAuth/MCP TUI checks including generated-key display, compact metadata suppression, verbose fallback and tool failure visibility."]}
+      },
+      "behavior_before": "The default TUI printed separate tool-start and tool-done lines with trace identifiers and argument-key lists, plus several startup/status lines, causing routine workflow activity to dominate the user-visible terminal.",
+      "behavior_after": "The default TUI prints a short MTM/protocol/Native-mode header, the MCP endpoint, generated OAuth key only when needed, one line when each tool starts, explicit tool failures, and public tunnel/failure information. Successful completion, trace identifiers, argument-key lists and routine tunnel lifecycle noise are hidden by default; --verbose restores the detailed redacted view.",
+      "risk_review": "The change is confined to CLI/runtime presentation. Tool dispatch, OAuth, capabilities, workflow protocol 3 default, protocol-2 rollback, state schema 2, Native/workflow authority, verifier/finalizer and proof_verified.tex semantics are unchanged. Preview.2 remains installed as the selector-level UI rollback and the release drill did not restart existing sessions.",
+      "rollback": "Atomically repoint the MTM selector to /home/lk/.local/share/mtm/releases/0.4.0-preview.2/mtm. The login-shell Cargo alias follows that selector automatically; no database, workflow run, capability, project revision or proof artifact migration is required.",
+      "manual_pending": [
+        "Stable 0.4.0 remains a separate release decision.",
+        "Existing long-running sessions may be restarted on preview.3 only when operationally desired."
       ],
       "decision": "accepted"
     }
