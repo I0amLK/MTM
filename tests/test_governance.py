@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import copy
 import json
+import subprocess
+import sys
 import tempfile
 import tomllib
 import unittest
@@ -201,7 +203,7 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(summary["generic_graph_dependencies"], 0)
         self.assertRegex(summary["graph_golden_digest"], r"^sha256:[0-9a-f]{64}$")
 
-    def test_mtm011_cutover_contract_is_frozen_before_treatments(self) -> None:
+    def test_mtm011_cutover_contract_remains_frozen_during_evaluation(self) -> None:
         corpus_path = ROOT / "conformance" / "mtm011-math-corpus.json"
         evaluation_path = ROOT / "mtm011-protocol3-cutover-evaluation.json"
         corpus = json.loads(corpus_path.read_text(encoding="utf-8"))
@@ -214,8 +216,9 @@ class GovernanceTestCase(unittest.TestCase):
             corpus_summary["corpus_sha256"],
             "6420422bd4017ec811187fe27b37150fe01a90cf62da49d0b328f5ff8e71fa2c",
         )
-        self.assertEqual(evaluation_summary["complete_pairs"], 0)
-        self.assertEqual(evaluation_summary["status"], "pending_web_runs")
+        self.assertGreaterEqual(evaluation_summary["complete_pairs"], 0)
+        self.assertLessEqual(evaluation_summary["complete_pairs"], 6)
+        self.assertIn(evaluation_summary["status"], {"pending_web_runs", "in_progress", "complete"})
         self.assertFalse(evaluation_summary["release_gate_passed"])
         iteration = json.loads((ROOT / "records" / "iterations" / "ITER-011.json").read_text(encoding="utf-8"))
         frozen = iteration["frozen_a4_contract"]
@@ -295,6 +298,87 @@ class GovernanceTestCase(unittest.TestCase):
         aggregate, gate = aggregate_mtm011_complete(pairs, cases)
         self.assertFalse(aggregate["behavioral_non_regression"]["verifier_finding_count"])
         self.assertFalse(gate)
+
+    def test_mtm011_recorders_can_use_isolated_evaluation_ledgers(self) -> None:
+        production = ROOT / "mtm011-protocol3-cutover-evaluation.json"
+        before = production.read_bytes()
+        with tempfile.TemporaryDirectory(prefix="mtm011-ledger-") as raw_root:
+            root = Path(raw_root)
+            ledger = root / "evaluation.json"
+            ledger.write_bytes(before)
+            proof = root / "proof.tex"
+            proof.write_text(
+                "\\documentclass{article}\\begin{document}ok\\end{document}\n",
+                encoding="utf-8",
+            )
+            common = [
+                "--evaluation", str(ledger),
+                "--case-id", "M011-C02-fixed-point-uniqueness",
+                "--binary-sha256", "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
+                "--model-surface", "isolated-test-surface",
+                "--connector-profile", "isolated-test-profile",
+                "--final-outcome", "verified_tex",
+                "--final-tex", str(proof),
+                "--first-verification-pass", "true",
+                "--repair-count", "0",
+                "--verifier-finding-count", "0",
+                "--repeated-failed-route-without-new-evidence", "0",
+                "--counterexample-probe-on-blocker", "true",
+                "--focused-retrieval-when-missing-reference", "na",
+                "--max-no-novelty-retrieval-streak", "0",
+                "--harmful-advice-events", "0",
+                "--canonical-partial-results-preserved", "0",
+                "--transition-log-sha256", "b" * 64,
+                "--verification-report-sha256", "c" * 64,
+            ]
+            for protocol, refuted, typed, fingerprint in (
+                (2, "false", "false", "d" * 64),
+                (3, "true", "true", "e" * 64),
+            ):
+                subprocess.run(
+                    [
+                        sys.executable,
+                        str(ROOT / "scripts" / "record_mtm011_web_run.py"),
+                        *common,
+                        "--protocol", str(protocol),
+                        "--run-fingerprint", fingerprint,
+                        "--refuted-target-state-preserved", refuted,
+                        "--typed-obstruction-class-preserved", typed,
+                    ],
+                    cwd=ROOT,
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "record_mtm011_blind_score.py"),
+                    "--evaluation", str(ledger),
+                    "--case-id", "M011-C02-fixed-point-uniqueness",
+                    "--evaluator-id-hash", "f" * 64,
+                    "--a-logic", "5", "--a-readability", "5", "--a-efficiency", "5",
+                    "--b-logic", "5", "--b-readability", "5", "--b-efficiency", "5",
+                    "--winner", "tie",
+                    "--rationale", "Isolated ledger smoke test.",
+                ],
+                cwd=ROOT,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            isolated = json.loads(ledger.read_text(encoding="utf-8"))
+            pair = next(
+                item
+                for item in isolated["pairs"]
+                if item["case_id"] == "M011-C02-fixed-point-uniqueness"
+            )
+            self.assertIsNotNone(pair["protocol2"])
+            self.assertIsNotNone(pair["protocol3"])
+            self.assertIsNotNone(pair["blind_evaluation"])
+        self.assertEqual(production.read_bytes(), before)
 
     def test_mtm_cli_publishes_only_the_mtm_binary_name(self) -> None:
         manifest = tomllib.loads((ROOT / "crates" / "mtm-cli" / "Cargo.toml").read_text(encoding="utf-8"))

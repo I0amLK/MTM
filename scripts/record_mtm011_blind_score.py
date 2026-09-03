@@ -25,6 +25,7 @@ def atomic_write(path: Path, payload: dict[str, object]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Record one frozen treatment-blind MTM-011 A/B score.")
+    parser.add_argument("--evaluation", type=Path, default=EVALUATION)
     parser.add_argument("--case-id", required=True)
     parser.add_argument("--evaluator-id-hash", required=True)
     parser.add_argument("--a-logic", type=score, required=True)
@@ -40,7 +41,7 @@ def main() -> int:
         raise SystemExit("evaluator-id-hash must be 12..128 characters")
     if not arguments.rationale.strip() or len(arguments.rationale) > 2000:
         raise SystemExit("rationale must be non-empty and <=2000 characters")
-    evaluation = json.loads(EVALUATION.read_text(encoding="utf-8"))
+    evaluation = json.loads(arguments.evaluation.read_text(encoding="utf-8"))
     if evaluation.get("status") == "complete":
         raise SystemExit("evaluation is already complete and immutable")
     pair = next((item for item in evaluation["pairs"] if item["case_id"] == arguments.case_id), None)
@@ -60,7 +61,7 @@ def main() -> int:
         "rationale": arguments.rationale.strip()
     }
     evaluation["status"] = "in_progress"
-    atomic_write(EVALUATION, evaluation)
+    atomic_write(arguments.evaluation, evaluation)
     print(json.dumps({"ok": True, "case_id": arguments.case_id, "blind_score": "recorded"}, indent=2))
     return 0
 

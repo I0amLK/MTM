@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -20,7 +21,10 @@ def atomic_write(path: Path, payload: dict[str, object]) -> None:
 
 
 def main() -> int:
-    evaluation = json.loads(EVALUATION.read_text(encoding="utf-8"))
+    parser = argparse.ArgumentParser(description="Finalize one complete MTM-011 evaluation ledger.")
+    parser.add_argument("--evaluation", type=Path, default=EVALUATION)
+    arguments = parser.parse_args()
+    evaluation = json.loads(arguments.evaluation.read_text(encoding="utf-8"))
     if evaluation.get("status") == "complete":
         raise SystemExit("evaluation is already complete and immutable")
     corpus = json.loads(CORPUS.read_text(encoding="utf-8"))
@@ -35,8 +39,11 @@ def main() -> int:
     evaluation["aggregate"] = aggregate
     evaluation["decision"] = "accepted" if gate else "rejected"
     evaluation["status"] = "complete"
-    atomic_write(EVALUATION, evaluation)
-    summary = validate(json.loads(EVALUATION.read_text(encoding="utf-8")))
+    atomic_write(arguments.evaluation, evaluation)
+    summary = validate(
+        json.loads(arguments.evaluation.read_text(encoding="utf-8")),
+        evaluation_path=arguments.evaluation,
+    )
     print(json.dumps({"ok": True, "summary": summary, "decision": evaluation["decision"]}, indent=2))
     return 0 if gate else 1
 

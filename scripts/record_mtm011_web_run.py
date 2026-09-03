@@ -87,6 +87,7 @@ def require_applicability(name: str, value: bool | None, applicable: bool) -> No
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Record one sanitized MTM-011 paired web treatment.")
+    parser.add_argument("--evaluation", type=Path, default=EVALUATION)
     parser.add_argument("--case-id", required=True)
     parser.add_argument("--protocol", type=int, choices=(2, 3), required=True)
     parser.add_argument("--binary-sha256", required=True)
@@ -163,7 +164,7 @@ def main() -> int:
     if arguments.protocol == 2 and arguments.harmful_advice_events != 0:
         raise SystemExit("protocol 2 cannot report harmful advisory events")
 
-    evaluation = json.loads(EVALUATION.read_text(encoding="utf-8"))
+    evaluation = json.loads(arguments.evaluation.read_text(encoding="utf-8"))
     if evaluation.get("status") == "complete":
         raise SystemExit("evaluation is already complete and immutable")
     candidate = evaluation["candidate"]
@@ -213,7 +214,7 @@ def main() -> int:
         "private_reasoning_recorded": False,
     }
     evaluation["status"] = "in_progress"
-    atomic_write(EVALUATION, evaluation)
+    atomic_write(arguments.evaluation, evaluation)
     print(json.dumps({"ok": True, "case_id": arguments.case_id, "slot": slot}, indent=2))
     return 0
 

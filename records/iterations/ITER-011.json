@@ -104,12 +104,35 @@
     "performance_claim": false,
     "first_treatment_recorded": false
   },
+  "sanitized_treatment_evidence_hashing": {
+    "status": "defined_before_first_pair_recording",
+    "purpose": "Audit binding only; these hashes do not affect any mathematical metric, pair order, applicability flag, blind score, or release threshold.",
+    "transition_log_sha256": "SHA-256 of canonical JSON (UTF-8, sorted object keys, compact separators) of the server-visible transition list after projecting each entry to exactly sequence, actor, before_state, after_state, and reason. Volatile created_at, database id, trace_id, evidence payloads, and compiler output are excluded.",
+    "verification_report_sha256": "SHA-256 of canonical JSON (UTF-8, sorted object keys, compact separators) of the final server-visible verification_report artifact content.",
+    "run_fingerprint": "SHA-256 of the public run_id string; this is an identifier fingerprint only and does not expose private reasoning.",
+    "scope_note": "This audit serialization rule was added after both C01 treatments finished but before either treatment was recorded or blind-scored. It standardizes non-scoring evidence only; frozen problems, metrics, applicability, pair order and thresholds are unchanged."
+  },
   "pre_treatment_repairs": [
     {
       "stage": "first current-candidate A5 binding",
       "failure": "The MTM-011 evaluation validator initially rejected a candidate SHA whenever zero web treatments were recorded, contradicting the frozen execution order that requires accepted A5 evidence to bind the exact candidate before the first treatment.",
       "repair": "Allow a zero-treatment candidate binding only when an accepted resource-evidence file is already bound and its implementation_sha256 exactly equals the candidate SHA. Recorded treatments still require the same candidate, and a candidate without A5 remains rejected.",
       "scope_review": "No corpus problem, pair order, metric, applicability rule, structural-improvement threshold or release criterion changed; the repair only makes the validator enforce the already-frozen A5-before-A4 order."
+    }
+  ],
+  "a4_infrastructure_incidents": [
+    {
+      "stage": "post-C01 evidence recording preparation",
+      "failure": "The MTM-011 recorder and blind-score/finalizer scripts initially hard-coded the production evaluation path. Pre-A4 smoke tests therefore left synthetic C01/C02 treatment records in the working-tree ledger even though the committed candidate-binding baseline still had all six pairs empty. The synthetic final-artifact hashes did not match the live C01 artifacts and were detected before any real C01 treatment was recorded or blind-scored.",
+      "repair": "Add an explicit --evaluation path to every state-mutating MTM-011 evaluation utility so tests can operate only on temporary ledgers; restore the working evaluation from the committed 237b7a3 zero-treatment baseline via the repository patch authority, then record C01 only from server-exported transition/report evidence and the actual finalized TeX files.",
+      "scope_review": "No frozen problem, pair order, metric, applicability flag, candidate SHA, A5 evidence, structural-primary threshold or release-gate rule changed. This is an evaluation-storage isolation fix only.",
+      "repair_tool_hashes": {
+        "record_web_run": "2c18d0ef931d3a2bb73346d5af2be0836b0a70dfa8db13998e27ad1b0a5a04c3",
+        "record_blind_score": "a8b19a9e8cc19d94c9e7396b904e8d0d17e4181d21bee7ce07ec2a8e057e6d1e",
+        "finalize_evaluation": "0569169b8885c360602f7cbae93a616dc4da78a61a814018bdc958fca1a6fdff",
+        "validate_evaluation": "f347f888947b1dab9a5bde32fb009174a9fb3cb8f3598a0d1013bb350e2a10d8",
+        "governance_test": "98b98ded56ef7e7b148c30364c8c14d7aad3b525e990760f5dc919dea1630723"
+      }
     }
   ],
   "cutover_plan": [

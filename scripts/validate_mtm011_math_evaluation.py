@@ -175,7 +175,11 @@ def aggregate_complete(pairs: list[dict[str, Any]], cases: dict[str, dict[str, A
     return aggregate, gate
 
 
-def validate(payload: dict[str, Any]) -> dict[str, Any]:
+def validate(
+    payload: dict[str, Any],
+    *,
+    evaluation_path: Path = EVALUATION,
+) -> dict[str, Any]:
     if payload.get("schema_version") != "1.0.0" or payload.get("evaluation_id") != "mtm011-protocol3-cutover-v1":
         raise ValueError("unexpected MTM-011 evaluation identity")
     corpus_payload = json.loads(CORPUS.read_text(encoding="utf-8"))
@@ -243,7 +247,7 @@ def validate(payload: dict[str, Any]) -> dict[str, Any]:
         if payload.get("aggregate") is not None or payload.get("decision") != "pending":
             raise ValueError("non-complete evaluation may not publish aggregate/decision")
     return {
-        "evaluation_sha256": sha256_file(EVALUATION),
+        "evaluation_sha256": sha256_file(evaluation_path),
         "complete_pairs": complete_pairs,
         "total_pairs": len(pairs),
         "status": status,
