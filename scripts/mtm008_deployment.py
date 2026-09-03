@@ -149,7 +149,11 @@ def run_version(executable: Path) -> str:
     return completed.stdout.strip()
 
 
-def validate_rust_release(binary: Path, expected_version: str) -> dict[str, Any]:
+def validate_rust_release(
+    binary: Path,
+    expected_version: str,
+    expected_workflow_protocol: int = 2,
+) -> dict[str, Any]:
     binary = ensure_absolute(binary, "release binary").resolve(strict=True)
     if not binary.is_file() or not os.access(binary, os.X_OK):
         raise DeploymentError(f"release binary must be an executable regular file: {binary}")
@@ -162,7 +166,7 @@ def validate_rust_release(binary: Path, expected_version: str) -> dict[str, Any]
         "public_tool_count": 24,
         "hidden_alias_count": 11,
         "state_schema_version": 2,
-        "workflow_protocol_version": 2,
+        "workflow_protocol_version": expected_workflow_protocol,
     }
     mismatches = {
         key: {"expected": value, "actual": info.get(key)}
@@ -202,8 +206,13 @@ def capture_previous_entry(link: Path, rollback_root: Path) -> dict[str, Any]:
     raise DeploymentError(f"existing command entry is neither a symlink nor regular file: {link}")
 
 
-def install_release(binary: Path, layout: DeploymentLayout, version: str) -> dict[str, Any]:
-    validate_rust_release(binary, version)
+def install_release(
+    binary: Path,
+    layout: DeploymentLayout,
+    version: str,
+    expected_workflow_protocol: int = 2,
+) -> dict[str, Any]:
+    validate_rust_release(binary, version, expected_workflow_protocol)
     destination_dir = layout.releases_root / version
     ensure_directory(destination_dir, 0o755)
     destination = destination_dir / COMMAND_NAME
@@ -217,7 +226,7 @@ def install_release(binary: Path, layout: DeploymentLayout, version: str) -> dic
         fsync_directory(destination_dir)
     finally:
         temporary.unlink(missing_ok=True)
-    validate_rust_release(destination, version)
+    validate_rust_release(destination, version, expected_workflow_protocol)
     metadata = {
         "path": str(destination),
         "sha256": sha256_file(destination),
@@ -296,7 +305,11 @@ def manifest_layout(manifest: dict[str, Any]) -> DeploymentLayout:
     return DeploymentLayout(bin_link=link, state_root=state_root)
 
 
-def verify_active_rust(layout: DeploymentLayout, manifest: dict[str, Any]) -> None:
+def verify_active_rust(
+    layout: DeploymentLayout,
+    manifest: dict[str, Any],
+    expected_workflow_protocol: int = 2,
+) -> None:
     release = manifest.get("release")
     if not isinstance(release, dict):
         raise DeploymentError("deployment manifest has no release object")
@@ -309,7 +322,7 @@ def verify_active_rust(layout: DeploymentLayout, manifest: dict[str, Any]) -> No
         raise DeploymentError("active command does not resolve to the recorded Rust release")
     if sha256_file(target) != expected_sha:
         raise DeploymentError("active Rust release hash does not match the deployment manifest")
-    validate_rust_release(target, version)
+    validate_rust_release(target, version, expected_workflow_protocol)
 
 
 def rollback(manifest_path: Path) -> dict[str, Any]:
