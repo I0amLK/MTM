@@ -1,6 +1,6 @@
 use serde_json::json;
 
-use super::super::ResearchStateProjector;
+use super::super::{ResearchAdviceRule, ResearchAdvisory, ResearchStateProjector};
 use super::*;
 
 fn active_plan() -> Value {
@@ -227,6 +227,139 @@ fn retrieval_novelty_counts_registered_reference_ids_not_raw_results() {
     );
     assert_eq!(state.attempts()[0].evidence_ids.len(), 2);
     assert_eq!(state.attempts()[1].evidence_ids.len(), 1);
+}
+
+#[test]
+fn typed_new_material_survives_preceding_external_registration() {
+    let input = LegacyResearchInput::new("Target", 1, active_plan(), empty_progress())
+        .with_registered_reference_ids(vec!["ref-a".to_owned(), "ref-b".to_owned()])
+        .with_events(vec![
+            json!({
+                "event_type": "external_paper_search",
+                "operation": "paper_search",
+                "results": [{"reference_id": "ref-a"}]
+            }),
+            json!({
+                "event_type": "external_paper_lookup",
+                "operation": "paper_lookup",
+                "results": [{"reference_id": "ref-b"}]
+            }),
+            json!({
+                "event_type": "retrieval_assessment",
+                "outcome": "new_material",
+                "summary": "The first retrieved source resolves one missing fact.",
+                "reference_ids": ["ref-a"]
+            }),
+            json!({
+                "event_type": "retrieval_assessment",
+                "outcome": "new_material",
+                "summary": "The second retrieved source resolves another missing fact.",
+                "reference_ids": ["ref-b"]
+            }),
+        ]);
+
+    let normalized = normalize_legacy_research(&input).expect("normalization");
+    assert_eq!(normalized.summary.retrieval_events, 4);
+    assert_eq!(normalized.summary.novel_reference_ids, 2);
+    assert_eq!(normalized.summary.repeated_reference_ids, 2);
+
+    let state = ResearchStateProjector::project(normalized.snapshot()).expect("projection");
+    assert_eq!(state.attempts().len(), 4);
+    assert!(
+        state
+            .attempts()
+            .iter()
+            .all(|attempt| attempt.outcome() == ResearchAttemptOutcome::Progress)
+    );
+    assert_eq!(
+        state.attempts()[2].evidence_ids,
+        BTreeSet::from(["ref-a".to_owned()])
+    );
+    assert_eq!(
+        state.attempts()[3].evidence_ids,
+        BTreeSet::from(["ref-b".to_owned()])
+    );
+    assert_ne!(
+        ResearchAdvisory::select(&state).rule_id(),
+        ResearchAdviceRule::StopRetrieval
+    );
+}
+
+#[test]
+fn repeated_typed_new_material_does_not_reuse_assessed_evidence() {
+    let input = LegacyResearchInput::new("Target", 1, active_plan(), empty_progress())
+        .with_registered_reference_ids(vec!["ref-a".to_owned()])
+        .with_events(vec![
+            json!({
+                "event_type": "external_paper_lookup",
+                "operation": "paper_lookup",
+                "results": [{"reference_id": "ref-a"}]
+            }),
+            json!({
+                "event_type": "retrieval_assessment",
+                "outcome": "new_material",
+                "summary": "The retrieved source supplies the missing theorem.",
+                "reference_ids": ["ref-a"]
+            }),
+            json!({
+                "event_type": "retrieval_assessment",
+                "outcome": "new_material",
+                "summary": "The same source is claimed again without new evidence.",
+                "reference_ids": ["ref-a"]
+            }),
+        ]);
+
+    let normalized = normalize_legacy_research(&input).expect("normalization");
+    let state = ResearchStateProjector::project(normalized.snapshot()).expect("projection");
+    assert_eq!(state.attempts().len(), 3);
+    assert_eq!(
+        state.attempts()[1].outcome(),
+        ResearchAttemptOutcome::Progress
+    );
+    assert_eq!(
+        state.attempts()[2].outcome(),
+        ResearchAttemptOutcome::Inconclusive
+    );
+    assert_eq!(
+        state.attempts()[2].obstruction(),
+        Some(ResearchObstruction::NoProgress)
+    );
+    assert!(state.attempts()[2].evidence_ids.is_empty());
+}
+
+#[test]
+fn typed_no_new_material_remains_inconclusive_with_registered_evidence() {
+    let input = LegacyResearchInput::new("Target", 1, active_plan(), empty_progress())
+        .with_registered_reference_ids(vec!["ref-a".to_owned()])
+        .with_events(vec![
+            json!({
+                "event_type": "external_paper_lookup",
+                "operation": "paper_lookup",
+                "results": [{"reference_id": "ref-a"}]
+            }),
+            json!({
+                "event_type": "retrieval_assessment",
+                "outcome": "no_new_material",
+                "summary": "The registered source does not resolve the obstruction.",
+                "reference_ids": ["ref-a"]
+            }),
+        ]);
+
+    let normalized = normalize_legacy_research(&input).expect("normalization");
+    let state = ResearchStateProjector::project(normalized.snapshot()).expect("projection");
+    assert_eq!(state.attempts().len(), 2);
+    assert_eq!(
+        state.attempts()[0].outcome(),
+        ResearchAttemptOutcome::Progress
+    );
+    assert_eq!(
+        state.attempts()[1].outcome(),
+        ResearchAttemptOutcome::Inconclusive
+    );
+    assert_eq!(
+        state.attempts()[1].obstruction(),
+        Some(ResearchObstruction::NoProgress)
+    );
 }
 
 #[test]

@@ -101,7 +101,14 @@ pub(super) fn normalize_retrieval_events(
     sequence: &mut u64,
     warnings: &mut WarningCollector,
 ) -> Result<RetrievalCounts, ResearchStateError> {
+    // `seen` owns aggregate novelty across every retrieval record, including the
+    // server-emitted external_* discovery event and the later typed assessment.
+    // `assessed` is deliberately separate: an external discovery must not consume
+    // the evidence before the model can record its first typed new_material
+    // assessment, while repeated typed assessments of the same evidence must not
+    // manufacture fresh progress.
     let mut seen = BTreeSet::new();
+    let mut assessed = BTreeSet::new();
     let mut counts = RetrievalCounts::default();
     for (index, event) in input.events.iter().enumerate() {
         let event_type = event
@@ -115,7 +122,7 @@ pub(super) fn normalize_retrieval_events(
                 &format!("events[{index}].reference_ids"),
                 MAX_EVIDENCE_IDS,
             )?;
-            let mut novel = Vec::new();
+            let mut assessment_evidence = Vec::new();
             for reference_id in reference_ids {
                 if !input.registered_reference_ids.contains(&reference_id) {
                     return Err(malformed(
@@ -125,9 +132,11 @@ pub(super) fn normalize_retrieval_events(
                 }
                 if seen.insert(reference_id.clone()) {
                     counts.novel = counts.novel.saturating_add(1);
-                    novel.push(reference_id);
                 } else {
                     counts.repeated = counts.repeated.saturating_add(1);
+                }
+                if assessed.insert(reference_id.clone()) {
+                    assessment_evidence.push(reference_id);
                 }
             }
             let explicit_node = event.get("node_id").is_some_and(|value| !value.is_null());
@@ -154,6 +163,8 @@ pub(super) fn normalize_retrieval_events(
                 .map(ResearchDomainId::parse)
                 .transpose()?
                 .unwrap_or(ResearchDomainId::parse("legacy-generation")?);
+            let assessment_made_progress =
+                outcome == "new_material" && !assessment_evidence.is_empty();
             *sequence = sequence.saturating_add(1);
             let mut attempt = ResearchAttempt::new(
                 event
@@ -168,7 +179,7 @@ pub(super) fn normalize_retrieval_events(
                 node_id,
                 actor,
                 ResearchAttemptMethod::Retrieval,
-                if outcome == "new_material" && !novel.is_empty() {
+                if assessment_made_progress {
                     ResearchAttemptOutcome::Progress
                 } else {
                     ResearchAttemptOutcome::Inconclusive
@@ -176,10 +187,10 @@ pub(super) fn normalize_retrieval_events(
                 summary,
             )?
             .with_position(input.round_index, *sequence);
-            if novel.is_empty() {
+            if !assessment_made_progress {
                 attempt = attempt.with_obstruction(ResearchObstruction::NoProgress);
             }
-            for reference_id in novel {
+            for reference_id in assessment_evidence {
                 attempt = attempt.with_evidence(reference_id)?;
             }
             attempts.push(attempt);
