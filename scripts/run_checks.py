@@ -111,6 +111,11 @@ def main() -> int:
         progress.get("current_milestone") == "MTM-012"
         and progress.get("status") == "MTM-012-in-progress"
     )
+    mtm013_stable_source_mode = (
+        progress.get("current_milestone") == "MTM-013"
+        and progress.get("status") == "MTM-013-in-progress"
+        and progress.get("version") == "0.4.0"
+    )
     checks: list[dict[str, Any]] = [
         run(
             "migration_graph",
@@ -143,6 +148,23 @@ def main() -> int:
                 capture_json=True,
             )
         )
+        if (ROOT / "mtm013-stable-qualification.json").is_file():
+            checks.append(
+                run(
+                    "mtm013_stable_qualification",
+                    [sys.executable, "scripts/validate_mtm013_stable_qualification.py"],
+                    env=environment,
+                    capture_json=True,
+                )
+            )
+            checks.append(
+                run(
+                    "mtm013_stable_resource",
+                    [sys.executable, "scripts/validate_mtm013_stable_resource.py"],
+                    env=environment,
+                    capture_json=True,
+                )
+            )
 
     if cargo is None or rustc is None:
         checks.append(
@@ -228,14 +250,20 @@ def main() -> int:
                             if mtm009_preview_mode
                             else (
                                 [
-                                    run(
-                                        "mtm012_tui_validation",
-                                        [
-                                            sys.executable,
-                                            "scripts/validate_mtm012_tui_validation.py",
-                                        ],
-                                        env=environment,
-                                        capture_json=True,
+                                    *(
+                                        []
+                                        if mtm013_stable_source_mode
+                                        else [
+                                            run(
+                                                "mtm012_tui_validation",
+                                                [
+                                                    sys.executable,
+                                                    "scripts/validate_mtm012_tui_validation.py",
+                                                ],
+                                                env=environment,
+                                                capture_json=True,
+                                            )
+                                        ]
                                     ),
                                     run(
                                         "mtm012_preview_release",

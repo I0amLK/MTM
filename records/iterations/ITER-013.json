@@ -54,6 +54,26 @@
     "raw_capability_recorded": false,
     "raw_oauth_token_recorded": false
   },
+  "stable_local_qualification": {
+    "status": "accepted_public_distribution_pending",
+    "source_commit": "fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3",
+    "version": "0.4.0",
+    "release_binary_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+    "qualification_report": "mtm013-stable-qualification.json",
+    "qualification_report_sha256": "94b57b08d10f268d9f13b63c32478a5888ec6034ddeae8ef807d06357fa18412",
+    "resource_report": "mtm013-stable-resource.json",
+    "resource_report_sha256": "73629371264f0be12eb8c6cc138d4009483d78ab796487fa56c1596815a8e1d2",
+    "local_clean_clone_install": true,
+    "copied_existing_state_upgrade": true,
+    "real_proof_finalization": true,
+    "release_capability_hardening_checks": 12,
+    "release_tui_checks": 20,
+    "soak_duration_seconds": 10.0,
+    "soak_requests": 23513,
+    "a5_resource_checks": 8,
+    "public_github_main_at_validation": "60883071931501a8700b29a8882587f4250c1ad3",
+    "public_github_install_pending_reason": "The non-interactive coding environment has no GitHub write credentials, so source commit fcdc0cd cannot be pushed from this session. Stable selector cutover remains blocked until the public branch contains the frozen source and the documented cargo --git install is verified."
+  },
   "acceptance": {
     "A0": "Full format, warnings-denied Clippy, workspace tests, governance and unified local gate pass.",
     "A1": "Capability error taxonomy remains deterministic and stable; only CAPABILITY_INVALID before writes gets a fresh envelope and no malformed token gains write authority.",
@@ -63,8 +83,8 @@
   },
   "rollback": "Keep preview.3 installed and selected until stable qualification passes. After stable deployment, atomically restore preview.3 if needed; no persistent data or verified artifacts are rewritten.",
   "manual_pending": [
-    "Qualify the exact stable 0.4.0 artifact from a committed source SHA.",
-    "Run clean install, existing-state upgrade, proof finalization, rollback/recutover and soak before completion."
+    "Push the four MTM-009/013 commits through fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3 to GitHub main from an authenticated interactive shell, then verify cargo install --git from that exact public commit.",
+    "After public installation passes, perform the already-prepared stable selector/cargo-command rollback/recutover drill before completing MTM-013."
   ],
   "decision": "in_progress"
 }

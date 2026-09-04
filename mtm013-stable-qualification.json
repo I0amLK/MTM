@@ -1,0 +1,73 @@
+{
+  "binary_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+  "checks": {
+    "bounded_soak_fds_stable": true,
+    "bounded_soak_requests": true,
+    "bounded_soak_rss": true,
+    "bounded_soak_threads_stable": true,
+    "clean_clone_install": true,
+    "copied_existing_state_opens": true,
+    "copied_state_keeps_protocol3_default": true,
+    "copied_state_reports_complete_flow_validated": true,
+    "proof_finalization_reaches_done": true,
+    "release_capability_hardening": true,
+    "release_tui_non_regression": true,
+    "stable_default_protocol3": true,
+    "stable_explicit_protocol2": true,
+    "stable_release_identity": true
+  },
+  "clean_install": {
+    "binary_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+    "identity_ok": true,
+    "source_commit": "fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3",
+    "version": "mtm 0.4.0"
+  },
+  "existing_state_upgrade": {
+    "complete_flow_locally_validated": true,
+    "oauth_backup_bytes": 20480,
+    "production_default": 3,
+    "projects_query_ok": true,
+    "server_version": "0.4.0",
+    "source_bytes": 24688795,
+    "state_backup_bytes": 3497984,
+    "state_schema_version": 2,
+    "workflow_protocol_version": 3
+  },
+  "hardening_check_count": 12,
+  "milestone": "MTM-013",
+  "ok": true,
+  "phase": "stable_0_4_0_qualification",
+  "proof_finalization": {
+    "export_relative": true,
+    "final_contains_document": true,
+    "final_exists": true,
+    "run_id_present": true,
+    "states": [
+      "assess",
+      "assemble",
+      "verify",
+      "done"
+    ]
+  },
+  "public_github_install": {
+    "local_clean_clone_exact_commit_passed": true,
+    "status": "pending_push_credentials"
+  },
+  "raw_capability_recorded": false,
+  "raw_oauth_token_recorded": false,
+  "raw_proof_recorded": false,
+  "schema_version": "1.0.0",
+  "soak": {
+    "duration_seconds": 10.0,
+    "fds_after": 16,
+    "fds_before": 16,
+    "requests": 23513,
+    "rss_kib_after": 12604,
+    "rss_kib_before": 12252,
+    "threads_after": 9,
+    "threads_before": 9
+  },
+  "source_commit": "fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3",
+  "tui_check_count": 20,
+  "version": "0.4.0"
+}
