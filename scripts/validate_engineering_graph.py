@@ -13,7 +13,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-GRAPH = ROOT / "engineering-graph.json"
+GRAPH = ROOT / "records/governance/engineering-graph.json"
 
 
 def validate_graph(payload: dict[str, Any]) -> dict[str, Any]:

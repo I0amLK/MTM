@@ -70,7 +70,7 @@
     "interpretation": "A5 resource non-regression passed. The current debug-build cold-process harness favored Rust, but no A6 or general production-speed claim is made."
   },
   "target_acceptance": {
-    "report": "mtm004-target-validation.json",
+    "report": "records/evidence/MTM-004/target-validation.json",
     "implementation_sha256": "167f6ede075878a5f383ea8f3105f1788c166794ff4474e2785495bd1be6739b",
     "check_count": 10,
     "environment": {

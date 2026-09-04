@@ -3,8 +3,8 @@
   "project": "MTM-reboot",
   "version": "0.4.0",
   "status": "MTM-013-in-progress",
-  "updated_at": "2026-09-03T23:31:03-07:00",
-  "source_baseline": "source-baseline.json",
+  "updated_at": "2026-09-04T00:34:08-07:00",
+  "source_baseline": "records/governance/source-baseline.json",
   "current_production_authority": "rust",
   "rust_production_components": 7,
   "rust_authoritative_pure_components": 1,
@@ -20,6 +20,7 @@
   "completed_milestones": ["MTM-001", "MTM-002", "MTM-003", "MTM-004", "MTM-005", "MTM-006", "MTM-007", "MTM-008", "MTM-009", "MTM-010", "MTM-011", "MTM-012"],
   "next_milestone": null,
   "claims": [
+    "Repository record governance is normalized: the 32 former root-level JSON records now live under records/governance, records/iterations, records/evidence/MTM-NNN, or records/validation; accepted relocated evidence remains byte-identical and 26 evidence SHA-256 bindings are enforced by records/governance/record-layout.json. The unified local gate rejects any future repository-root JSON record.",
     "MTM 0.4.0 is now the active stable selector and login-shell command. Public main c6fd8494a3d750784a7d8ffe945f023fb25bbb32 contains the frozen stable source fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3; public cargo install reproduced stable identity and the qualified binary SHA-256 3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3, and the real preview.3 rollback plus stable recutover passed.",
     "MTM-013 remains in progress only for the exact post-cutover stable live QC constituent-matching/compact-proof regressions and final governance receipt. Capability recovery, complete-flow metadata, clean/public installation, copied-state upgrade, proof finalization, A5 soak/resource qualification, stable selector activation and rollback/recutover have passed without changing state schema 2, verifier/finalizer authority or the explicit protocol-2 rollback.",
     "Post-cutover governance now distinguishes stable 0.4.0 from preview.3 using the actual selector and stable-release receipt; command namespace validates against stable evidence instead of incorrectly replaying the preview.3 selector validator.",
@@ -70,7 +71,7 @@
     "The accepted MTM-008 public-release SHA-256 0a785a122396a3f8961cbc33b967e7a48874b90311333c8860a1e5c75582fd7f remains the tested rollback target for the MTM-009 preview.",
     "MTM-008 retirement removed Python from MTM production authority. Re-CTM 0.3.0 is now restored as a separate co-installable project under its own command and uv tool root, while all four MTM sessions execute the exact MTM Rust release.",
     "The immutable rollback wheel remains at /home/lk/.local/share/re-ctm-rust/rollback/re_ctm-0.3.0-py3-none-any.whl with SHA-256 7133ee2ba083760081b7055a2c75447c5c7f0e7e45b10649badd70bbdc50fd9b; it was restored and served OAuth metadata after Python retirement.",
-    "authority-inventory.json records every MTM production authority as Rust, with Bubblewrap retained only as the Linux kernel-isolation actuator; release evidence proves MTM uses mtm / MTM_* / ~/.mtm while Re-CTM uses re-ctm / RE_CTM_* / ~/.re-ctm."
+    "records/governance/authority-inventory.json records every MTM production authority as Rust, with Bubblewrap retained only as the Linux kernel-isolation actuator; release evidence proves MTM uses mtm / MTM_* / ~/.mtm while Re-CTM uses re-ctm / RE_CTM_* / ~/.re-ctm."
   ],
   "manual_pending": [
     "Reconnect or restart the live MTM MCP session onto stable 0.4.0 and rerun the QC constituent-matching and compact-proof semantic regressions against the exact stable release before completing MTM-013.",

@@ -8,7 +8,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT = ROOT / "mtm013-stable-resource.json"
+REPORT = ROOT / "records/evidence/MTM-013/stable-resource.json"
 BINARY = ROOT / "target" / "release" / "mtm"
 WRAPPER = ROOT / "scripts" / "run_mtm013_stable_resource.py"
 MEASUREMENT = ROOT / "scripts" / "run_mtm009_research_resource.py"

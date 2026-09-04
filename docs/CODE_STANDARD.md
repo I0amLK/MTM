@@ -110,6 +110,32 @@ move downward only when they are stable contracts rather than implementation det
 - Serialization used in signatures, hashes, manifests, or comparison fixtures is
   deterministic and versioned.
 
+### 6.1 Repository records
+
+- Repository-root JSON record files are forbidden. The root is reserved for normal
+  project entry points such as `Cargo.toml`, `README.md`, license files, and tooling
+  configuration.
+- Current governance state lives under `records/governance/`; append-oriented
+  milestone ledgers live under `records/iterations/`; milestone-owned evidence lives
+  under `records/evidence/MTM-NNN/`; regenerable aggregate reports live under
+  `records/validation/`.
+- `conformance/` contains test inputs, corpora, simulations, and golden fixtures. It
+  is not a substitute location for generated project records.
+- Accepted evidence is content-immutable. A layout migration may move or rename an
+  accepted evidence file only byte-for-byte and must bind the relocation to the
+  original SHA-256 in `records/governance/record-layout.json`.
+- Code, ledgers, and documentation use canonical repository-relative paths. Do not
+  create compatibility copies or symlinks at obsolete root paths merely to keep old
+  path assumptions alive.
+- `scripts/validate_record_layout.py` is part of the required local gate and rejects
+  root JSON records, malformed record namespaces, missing relocation targets, and
+  hash drift of relocated accepted evidence.
+- A historical harness whose source SHA is itself part of an accepted receipt may
+  retain its original root-output default so that the receipt remains verifiable.
+  Such a harness is frozen evidence machinery, not a current record-writing API:
+  canonical validators resolve its sealed legacy locators through the relocation
+  index, and any accidental root JSON output is rejected by the record-layout gate.
+
 ## 7. Security
 
 - L0 OAuth, L1 Native, L2 workflow capability, and project/finalizer authority remain

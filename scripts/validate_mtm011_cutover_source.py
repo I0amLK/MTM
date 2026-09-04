@@ -16,7 +16,7 @@ from scripts.validate_mtm011_math_evaluation import validate as validate_evaluat
 
 
 VERSION = "0.4.0-preview.2"
-EVALUATION = ROOT / "mtm011-protocol3-cutover-evaluation.json"
+EVALUATION = ROOT / "records/evidence/MTM-011/protocol3-cutover-evaluation.json"
 ACCEPTED_EVALUATION_SHA256 = "1820027a361604fd77da2e303e1c7c43ab6f25edd7a7401cc6176705c280bd05"
 
 

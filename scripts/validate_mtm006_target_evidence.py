@@ -11,7 +11,7 @@ except ModuleNotFoundError:
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT = ROOT / "mtm006-target-validation.json"
+REPORT = ROOT / "records/evidence/MTM-006/target-validation.json"
 REQUIRED_CHECKS = {
     "real_pdflatex_finalization",
     "verified_project_promotion",

@@ -44,7 +44,7 @@
     },
     "governance_tests": 6,
     "golden_contract": "exact match",
-    "report": "local-validation.json"
+    "report": "records/validation/local-validation.json"
   },
   "commit": {
     "subject": "docs(governance): establish project foundation [MTM-001]",

@@ -10,7 +10,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 HOME = Path("/home/lk")
-REPORT = ROOT / "mtm013-stable-release.json"
+REPORT = ROOT / "records/evidence/MTM-013/stable-release.json"
 DEPLOYMENT = HOME / ".local" / "share" / "mtm" / "deployment" / "deployment-v1.json"
 SELECTOR = HOME / ".local" / "bin" / "mtm"
 CARGO_COMMAND = HOME / ".cargo" / "bin" / "mtm"

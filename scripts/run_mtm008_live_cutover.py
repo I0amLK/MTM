@@ -66,7 +66,7 @@ except ModuleNotFoundError:
     from validate_mtm008_candidate_evidence import validate as validate_candidate
 
 
-REPORT = ROOT / "mtm008-live-cutover.json"
+REPORT = ROOT / "records/evidence/MTM-008/live-cutover.json"
 HOME = Path("/home/lk")
 BIN_LINK = HOME / ".local" / "bin" / "re-ctm"
 STATE_ROOT = HOME / ".local" / "share" / "re-ctm-rust"

@@ -961,10 +961,10 @@
         "docs/MIGRATION_PLAN.md",
         "docs/ARCHITECTURE.md",
         "docs/adr/0001-function-first-incremental-rust.md",
-        "engineering-graph.json",
-        "migration-graph.json",
-        "source-baseline.json",
-        "project-progress.json",
+        "records/governance/engineering-graph.json",
+        "records/governance/migration-graph.json",
+        "records/governance/source-baseline.json",
+        "records/governance/project-progress.json",
         "conformance/golden/source-contract-v1.json",
         "crates/mtm-contracts/src/lib.rs",
         "crates/mtm-cli/src/main.rs",
@@ -1061,11 +1061,11 @@
         "docs/ARCHITECTURE.md",
         "docs/MIGRATION_PLAN.md",
         "README.md",
-        "engineering-graph.json",
-        "migration-graph.json",
-        "project-progress.json",
+        "records/governance/engineering-graph.json",
+        "records/governance/migration-graph.json",
+        "records/governance/project-progress.json",
         "records/iterations/ITER-002.json",
-        "local-validation.json"
+        "records/validation/local-validation.json"
       ],
       "commands": [
         {
@@ -1170,7 +1170,7 @@
       "files_changed": [
         "Cargo.toml",
         "Cargo.lock",
-        "source-baseline.json",
+        "records/governance/source-baseline.json",
         "crates/mtm-contracts/src/error.rs",
         "crates/mtm-native/Cargo.toml",
         "crates/mtm-native/src/lib.rs",
@@ -1188,17 +1188,17 @@
         "scripts/run_mtm003_target_validation.py",
         "scripts/validate_mtm003_target_evidence.py",
         "scripts/run_checks.py",
-        "mtm003-target-validation.json",
+        "records/evidence/MTM-003/target-validation.json",
         "tests/test_governance.py",
         "docs/adr/0003-native-process-and-isolation-plane.md",
         "docs/ARCHITECTURE.md",
         "docs/MIGRATION_PLAN.md",
         "README.md",
-        "engineering-graph.json",
-        "migration-graph.json",
-        "project-progress.json",
+        "records/governance/engineering-graph.json",
+        "records/governance/migration-graph.json",
+        "records/governance/project-progress.json",
         "records/iterations/ITER-003.json",
-        "local-validation.json"
+        "records/validation/local-validation.json"
       ],
       "commands": [
         {
@@ -1323,7 +1323,7 @@
       "files_changed": [
         "Cargo.toml",
         "Cargo.lock",
-        "source-baseline.json",
+        "records/governance/source-baseline.json",
         "crates/mtm-contracts/src/enums.rs",
         "crates/mtm-storage/Cargo.toml",
         "crates/mtm-storage/src/lib.rs",
@@ -1340,19 +1340,19 @@
         "scripts/validate_mtm004_target_evidence.py",
         "scripts/run_checks.py",
         "scripts/validate_engineering_graph.py",
-        "mtm003-target-validation.json",
-        "mtm004-target-validation.json",
+        "records/evidence/MTM-003/target-validation.json",
+        "records/evidence/MTM-004/target-validation.json",
         "tests/test_governance.py",
         "docs/adr/0004-persistence-and-capability-authority.md",
         "docs/ARCHITECTURE.md",
         "docs/MIGRATION_PLAN.md",
         "README.md",
         "crates/mtm-cli/src/main.rs",
-        "engineering-graph.json",
-        "migration-graph.json",
-        "project-progress.json",
+        "records/governance/engineering-graph.json",
+        "records/governance/migration-graph.json",
+        "records/governance/project-progress.json",
         "records/iterations/ITER-004.json",
-        "local-validation.json"
+        "records/validation/local-validation.json"
       ],
       "commands": [
         {
@@ -1483,7 +1483,7 @@
       "files_changed": [
         "Cargo.toml",
         "Cargo.lock",
-        "source-baseline.json",
+        "records/governance/source-baseline.json",
         "crates/mtm-gateway/Cargo.toml",
         "crates/mtm-gateway/src/lib.rs",
         "crates/mtm-gateway/src/runtime.rs",
@@ -1498,7 +1498,7 @@
         "scripts/run_mtm005_conformance.py",
         "scripts/run_mtm005_target_validation.py",
         "scripts/validate_mtm005_target_evidence.py",
-        "mtm005-target-validation.json",
+        "records/evidence/MTM-005/target-validation.json",
         "scripts/run_checks.py",
         "scripts/validate_engineering_graph.py",
         "tests/test_governance.py",
@@ -1507,13 +1507,13 @@
         "docs/MIGRATION_PLAN.md",
         "README.md",
         "crates/mtm-cli/src/main.rs",
-        "engineering-graph.json",
-        "migration-graph.json",
-        "project-progress.json",
+        "records/governance/engineering-graph.json",
+        "records/governance/migration-graph.json",
+        "records/governance/project-progress.json",
         "records/iterations/ITER-005.json",
-        "local-validation.json",
-        "mtm003-target-validation.json",
-        "mtm004-target-validation.json"
+        "records/validation/local-validation.json",
+        "records/evidence/MTM-003/target-validation.json",
+        "records/evidence/MTM-004/target-validation.json"
       ],
       "commands": [
         {
@@ -1642,7 +1642,7 @@
       "files_changed": [
         "Cargo.toml",
         "Cargo.lock",
-        "source-baseline.json",
+        "records/governance/source-baseline.json",
         "crates/mtm-storage/src/capability.rs",
         "crates/mtm-storage/src/lib.rs",
         "crates/mtm-workflow/Cargo.toml",
@@ -1663,19 +1663,19 @@
         "scripts/run_checks.py",
         "scripts/validate_engineering_graph.py",
         "tests/test_governance.py",
-        "mtm006-target-validation.json",
+        "records/evidence/MTM-006/target-validation.json",
         "README.md",
         "docs/CODE_STANDARD.md",
         "docs/ARCHITECTURE.md",
-        "engineering-graph.json",
-        "migration-graph.json",
-        "project-progress.json",
+        "records/governance/engineering-graph.json",
+        "records/governance/migration-graph.json",
+        "records/governance/project-progress.json",
         "records/iterations/ITER-006.json",
         "crates/mtm-cli/src/main.rs",
-        "local-validation.json",
-        "mtm003-target-validation.json",
-        "mtm004-target-validation.json",
-        "mtm005-target-validation.json"
+        "records/validation/local-validation.json",
+        "records/evidence/MTM-003/target-validation.json",
+        "records/evidence/MTM-004/target-validation.json",
+        "records/evidence/MTM-005/target-validation.json"
       ],
       "commands": [
         {
@@ -1817,15 +1817,15 @@
         "scripts/run_checks.py",
         "scripts/validate_engineering_graph.py",
         "tests/test_governance.py",
-        "engineering-graph.json",
-        "migration-graph.json",
-        "project-progress.json",
-        "local-validation.json",
-        "mtm003-target-validation.json",
-        "mtm004-target-validation.json",
-        "mtm005-target-validation.json",
-        "mtm006-target-validation.json",
-        "mtm007-target-validation.json",
+        "records/governance/engineering-graph.json",
+        "records/governance/migration-graph.json",
+        "records/governance/project-progress.json",
+        "records/validation/local-validation.json",
+        "records/evidence/MTM-003/target-validation.json",
+        "records/evidence/MTM-004/target-validation.json",
+        "records/evidence/MTM-005/target-validation.json",
+        "records/evidence/MTM-006/target-validation.json",
+        "records/evidence/MTM-007/target-validation.json",
         "records/iterations/ITER-007.json"
       ],
       "commands": [
@@ -1971,15 +1971,15 @@
       "files_changed": [
         "README.md",
         "docs/adr/0008-release-cutover-and-python-retirement.md",
-        "migration-graph.json",
-        "project-progress.json",
+        "records/governance/migration-graph.json",
+        "records/governance/project-progress.json",
         "records/iterations/ITER-008.json",
         "scripts/run_mtm008_live_cutover.py",
         "scripts/validate_mtm008_live_evidence.py",
         "scripts/run_checks.py",
         "tests/test_governance.py",
-        "mtm008-live-cutover.json",
-        "local-validation.json"
+        "records/evidence/MTM-008/live-cutover.json",
+        "records/validation/local-validation.json"
       ],
       "commands": [
         {
@@ -2079,15 +2079,15 @@
       "commit_subject": "chore(retirement): retire Python production runtime [MTM-008]",
       "files_changed": [
         "README.md",
-        "authority-inventory.json",
+        "records/governance/authority-inventory.json",
         "docs/ARCHITECTURE.md",
         "docs/MIGRATION_PLAN.md",
         "docs/adr/0008-release-cutover-and-python-retirement.md",
-        "engineering-graph.json",
-        "local-validation.json",
-        "migration-graph.json",
-        "mtm008-retirement.json",
-        "project-progress.json",
+        "records/governance/engineering-graph.json",
+        "records/validation/local-validation.json",
+        "records/governance/migration-graph.json",
+        "records/evidence/MTM-008/retirement.json",
+        "records/governance/project-progress.json",
         "records/iterations/ITER-008.json",
         "scripts/run_checks.py",
         "scripts/run_mtm008_python_retirement.py",
@@ -2205,19 +2205,19 @@
         "scripts/validate_engineering_graph.py",
         "tests/test_mtm008_deployment.py",
         "tests/test_governance.py",
-        "engineering-graph.json",
-        "authority-inventory.json",
-        "project-progress.json",
+        "records/governance/engineering-graph.json",
+        "records/governance/authority-inventory.json",
+        "records/governance/project-progress.json",
         "records/iterations/ITER-008.json",
         "README.md",
         "docs/ARCHITECTURE.md",
         "docs/MIGRATION_PLAN.md",
         "docs/adr/0008-release-cutover-and-python-retirement.md",
-        "mtm-command-namespace.json",
-        "mtm007-target-validation.json",
-        "mtm008-performance.json",
-        "mtm008-soak.json",
-        "mtm008-candidate-validation.json"
+        "records/evidence/MTM-008/command-namespace.json",
+        "records/evidence/MTM-007/target-validation.json",
+        "records/evidence/MTM-008/performance.json",
+        "records/evidence/MTM-008/soak.json",
+        "records/evidence/MTM-008/candidate-validation.json"
       ],
       "commands": [
         {
@@ -2291,19 +2291,19 @@
         "scripts/validate_engineering_graph.py",
         "scripts/validate_mtm_command_namespace.py",
         "tests/test_governance.py",
-        "engineering-graph.json",
-        "authority-inventory.json",
-        "project-progress.json",
+        "records/governance/engineering-graph.json",
+        "records/governance/authority-inventory.json",
+        "records/governance/project-progress.json",
         "records/iterations/ITER-008.json",
-        "mtm-command-namespace.json",
-        "mtm003-target-validation.json",
-        "mtm004-target-validation.json",
-        "mtm005-target-validation.json",
-        "mtm006-target-validation.json",
-        "mtm007-target-validation.json",
-        "mtm008-performance.json",
-        "mtm008-soak.json",
-        "mtm008-candidate-validation.json"
+        "records/evidence/MTM-008/command-namespace.json",
+        "records/evidence/MTM-003/target-validation.json",
+        "records/evidence/MTM-004/target-validation.json",
+        "records/evidence/MTM-005/target-validation.json",
+        "records/evidence/MTM-006/target-validation.json",
+        "records/evidence/MTM-007/target-validation.json",
+        "records/evidence/MTM-008/performance.json",
+        "records/evidence/MTM-008/soak.json",
+        "records/evidence/MTM-008/candidate-validation.json"
       ],
       "commands": [
         {
@@ -2370,10 +2370,10 @@
         "crates/mtm-native/src/bubblewrap.rs",
         "scripts/run_mtm010_native_resolver.py",
         "scripts/validate_mtm010_native_resolver.py",
-        "mtm010-native-resolver.json",
-        "local-validation.json",
-        "migration-graph.json",
-        "project-progress.json",
+        "records/evidence/MTM-010/native-resolver.json",
+        "records/validation/local-validation.json",
+        "records/governance/migration-graph.json",
+        "records/governance/project-progress.json",
         "records/iterations/ITER-010.json"
       ],
       "commands": [
@@ -2462,18 +2462,18 @@
       "authority_after": "rust",
       "commit_subject": "docs(mtm011): complete protocol-three default cutover [MTM-011]",
       "files_changed": [
-        "authority-inventory.json",
-        "project-progress.json",
-        "migration-graph.json",
+        "records/governance/authority-inventory.json",
+        "records/governance/project-progress.json",
+        "records/governance/migration-graph.json",
         "records/iterations/ITER-011.json",
         "docs/releases/0.4.0-preview.2.md",
-        "mtm011-preview-release.json",
+        "records/evidence/MTM-011/preview-release.json",
         "scripts/run_checks.py",
         "scripts/validate_mtm_command_namespace.py",
         "scripts/release_mtm011_preview.py",
         "scripts/validate_mtm011_preview_release.py",
         "tests/test_governance.py",
-        "local-validation.json"
+        "records/validation/local-validation.json"
       ],
       "commands": [
         {
@@ -2537,15 +2537,15 @@
         "scripts/release_mtm012_preview.py",
         "scripts/validate_mtm012_preview_release.py",
         "scripts/validate_mtm_command_namespace.py",
-        "mtm012-tui-validation.json",
-        "mtm012-preview-release.json",
-        "authority-inventory.json",
-        "project-progress.json",
-        "migration-graph.json",
+        "records/evidence/MTM-012/tui-validation.json",
+        "records/evidence/MTM-012/preview-release.json",
+        "records/governance/authority-inventory.json",
+        "records/governance/project-progress.json",
+        "records/governance/migration-graph.json",
         "records/iterations/ITER-012.json",
         "tests/test_governance.py",
         "scripts/run_checks.py",
-        "local-validation.json"
+        "records/validation/local-validation.json"
       ],
       "commands": [
         {
@@ -2596,11 +2596,11 @@
       "authority_after": "rust",
       "commit_subject": "docs(mtm009): close historical research-state milestone [MTM-009]",
       "files_changed": [
-        "migration-graph.json",
-        "project-progress.json",
+        "records/governance/migration-graph.json",
+        "records/governance/project-progress.json",
         "records/iterations/ITER-009.json",
         "tests/test_governance.py",
-        "local-validation.json"
+        "records/validation/local-validation.json"
       ],
       "commands": [
         {

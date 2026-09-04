@@ -7,10 +7,12 @@ import re
 from pathlib import Path
 from typing import Any
 
+from scripts.record_paths import resolve_repository_record
+
 
 ROOT = Path(__file__).resolve().parents[1]
 CORPUS = ROOT / "conformance" / "mtm011-math-corpus.json"
-EVALUATION = ROOT / "mtm011-protocol3-cutover-evaluation.json"
+EVALUATION = ROOT / "records/evidence/MTM-011/protocol3-cutover-evaluation.json"
 SHA256_RE = re.compile(r"[0-9a-f]{64}$")
 ALLOWED_ADVICE = {
     "R01_REPLAN_REFUTED", "R02_REPLAN_CYCLE", "R03_TEST_COUNTEREXAMPLE",
@@ -223,7 +225,7 @@ def validate(
     if resource_sha is not None:
         if not isinstance(resource_sha, str) or SHA256_RE.fullmatch(resource_sha) is None:
             raise ValueError("resource evidence SHA is invalid")
-        resource_path = ROOT / str(resource.get("path"))
+        resource_path = resolve_repository_record(str(resource.get("path")))
         if not resource_path.is_file() or sha256_file(resource_path) != resource_sha:
             raise ValueError("resource evidence binding is stale")
         resource_payload = json.loads(resource_path.read_text(encoding="utf-8"))

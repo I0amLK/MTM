@@ -10,7 +10,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EVALUATION = ROOT / "mtm011-protocol3-cutover-evaluation.json"
+EVALUATION = ROOT / "records/evidence/MTM-011/protocol3-cutover-evaluation.json"
 CORPUS = ROOT / "conformance" / "mtm011-math-corpus.json"
 HEX_RE = re.compile(r"[0-9a-f]{12,64}$")
 SHA256_RE = re.compile(r"[0-9a-f]{64}$")

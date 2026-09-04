@@ -16,7 +16,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-BASELINE = ROOT / "source-baseline.json"
+BASELINE = ROOT / "records/governance/source-baseline.json"
 GOLDEN = ROOT / "conformance" / "golden" / "mtm003-reference.sha256"
 CARGO_HOME = ROOT / ".toolchain" / "cargo"
 RUSTUP_HOME = ROOT / ".toolchain" / "rustup"

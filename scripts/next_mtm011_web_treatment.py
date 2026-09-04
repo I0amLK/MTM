@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CORPUS = ROOT / "conformance" / "mtm011-math-corpus.json"
-EVALUATION = ROOT / "mtm011-protocol3-cutover-evaluation.json"
+EVALUATION = ROOT / "records/evidence/MTM-011/protocol3-cutover-evaluation.json"
 
 
 def main() -> int:

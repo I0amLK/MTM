@@ -8,7 +8,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT = ROOT / "mtm009-research-resource.json"
+REPORT = ROOT / "records/evidence/MTM-009/research-resource.json"
 HARNESS = ROOT / "scripts" / "run_mtm009_research_resource.py"
 BINARY = ROOT / "target" / "release" / "mtm"
 

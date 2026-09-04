@@ -1,7 +1,7 @@
 # MTM-reboot engineering rules
 
 Read `docs/CODE_STANDARD.md`, `docs/COMMIT_STANDARD.md`,
-`docs/ACCEPTANCE.md`, and `migration-graph.json` before changing code.
+`docs/ACCEPTANCE.md`, and `records/governance/migration-graph.json` before changing code.
 
 ## Priority
 

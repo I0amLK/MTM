@@ -21,7 +21,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT = ROOT / "mtm005-target-validation.json"
+REPORT = ROOT / "records/evidence/MTM-005/target-validation.json"
 CARGO_HOME = ROOT / ".toolchain" / "cargo"
 RUSTUP_HOME = ROOT / ".toolchain" / "rustup"
 SERVER = ROOT / "target" / "debug" / "mtm-gateway-server"

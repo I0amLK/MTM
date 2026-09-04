@@ -10,8 +10,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 HOME = Path("/home/lk")
 VERSION = "0.4.0-preview.3"
-REPORT = ROOT / "mtm012-preview-release.json"
-TUI_REPORT = ROOT / "mtm012-tui-validation.json"
+REPORT = ROOT / "records/evidence/MTM-012/preview-release.json"
+TUI_REPORT = ROOT / "records/evidence/MTM-012/tui-validation.json"
 DEPLOYMENT = HOME / ".local" / "share" / "mtm" / "deployment" / "deployment-v1.json"
 MTM_BIN = HOME / ".local" / "bin" / "mtm"
 CARGO_ALIAS = HOME / ".cargo" / "bin" / "mtm"

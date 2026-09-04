@@ -26,7 +26,7 @@ from scripts.run_mtm007_http_smoke import tool_call
 
 
 CURRENT = ROOT / "target" / "release" / "mtm"
-AUTHORITY_INVENTORY = ROOT / "authority-inventory.json"
+AUTHORITY_INVENTORY = ROOT / "records/governance/authority-inventory.json"
 
 
 def sha256_file(path: Path) -> str:

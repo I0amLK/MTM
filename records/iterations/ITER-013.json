@@ -39,7 +39,7 @@
     "status": "accepted",
     "stable_source_version": "0.4.0",
     "runtime_binary_sha256": "5e3a3dcdad7600b42b3eee201bac19b2b10eb88c5e0eb5da3bedf6860427a8ac",
-    "report": "mtm013-runtime-hardening.json",
+    "report": "records/evidence/MTM-013/runtime-hardening.json",
     "report_sha256": "8dfdc7a898e8d90a7d39863ce05db4a608cd8f53b0acfb87e70db7e7b60703bd",
     "harness_sha256": "0e14509d7c259e19af77196a52f3b6142c69ebdca8b445f20888837ff1eade0c",
     "check_count": 12,
@@ -59,9 +59,9 @@
     "source_commit": "fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3",
     "version": "0.4.0",
     "release_binary_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
-    "qualification_report": "mtm013-stable-qualification.json",
+    "qualification_report": "records/evidence/MTM-013/stable-qualification.json",
     "qualification_report_sha256": "94b57b08d10f268d9f13b63c32478a5888ec6034ddeae8ef807d06357fa18412",
-    "resource_report": "mtm013-stable-resource.json",
+    "resource_report": "records/evidence/MTM-013/stable-resource.json",
     "resource_report_sha256": "73629371264f0be12eb8c6cc138d4009483d78ab796487fa56c1596815a8e1d2",
     "local_clean_clone_install": true,
     "copied_existing_state_upgrade": true,
@@ -94,7 +94,7 @@
     "public_install_negative_test_passed": true,
     "stable_deployment_negative_test_passed": true,
     "selector_changed_by_negative_test": false,
-    "public_install_report": "mtm013-public-install.json",
+    "public_install_report": "records/evidence/MTM-013/public-install.json",
     "public_install_report_sha256": "2ac0d3a4aa3450ffc2898130833901dc831cfca0d9b3ae4d1726a5b32e9dd710",
     "reason": "Authenticated operator push placed the frozen stable source on public main; cargo install --git --rev fcdc0cd then reproduced the accepted stable identity and binary SHA-256."
   },
@@ -105,7 +105,7 @@
     "public_main": "c6fd8494a3d750784a7d8ffe945f023fb25bbb32",
     "version": "0.4.0",
     "binary_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
-    "stable_release_report": "mtm013-stable-release.json",
+    "stable_release_report": "records/evidence/MTM-013/stable-release.json",
     "stable_release_report_sha256": "9244cf7179d8665127fc630d8986e6a205416d1fc0bb910b1e7f58c78d8902c8",
     "selector_target": "/home/lk/.local/share/mtm/releases/0.4.0/mtm",
     "shell_command": "/home/lk/.cargo/bin/mtm",
@@ -118,7 +118,7 @@
     "recorded_at": "2026-09-03T22:59:14-07:00",
     "invalid_capability_edge_corpus": {
       "status": "accepted_stable_candidate",
-      "integration_report": "mtm013-runtime-hardening.json",
+      "integration_report": "records/evidence/MTM-013/runtime-hardening.json",
       "integration_checks": 12,
       "single_character_mutation_refresh_zero_writes": true,
       "truncation_refresh_zero_writes": true,
@@ -166,9 +166,31 @@
     {
       "stage": "post-cutover unified governance validation",
       "failure": "After the successful 0.4.0 cutover, command-namespace governance still classified progress.version=0.4.0 under the MTM-012 preview deployment branch. It therefore tried to validate preview.3 against a selector that correctly resolved to stable 0.4.0, producing two stale-evidence errors even though public install and stable rollback/recutover had passed.",
-      "repair": "Introduce an explicit mtm013_stable deployment mode keyed to the actual stable selector and stable-release receipt, validate command namespace through mtm013-stable-release.json, retain historical lower-milestone evidence in stable mode, and make run_checks include public-install plus stable-release validators instead of replaying the preview.3 selector validator."
+      "repair": "Introduce an explicit mtm013_stable deployment mode keyed to the actual stable selector and stable-release receipt, validate command namespace through records/evidence/MTM-013/stable-release.json, retain historical lower-milestone evidence in stable mode, and make run_checks include public-install plus stable-release validators instead of replaying the preview.3 selector validator."
     }
   ],
+  "repository_record_layout": {
+    "status": "accepted",
+    "validated_at": "2026-09-04T00:34:08-07:00",
+    "legacy_root_json_count": 32,
+    "canonical_root_json_count": 0,
+    "canonical_roots": {
+      "governance": "records/governance",
+      "iterations": "records/iterations",
+      "evidence": "records/evidence/MTM-NNN",
+      "validation": "records/validation"
+    },
+    "layout_contract": "records/governance/record-layout.json",
+    "layout_validator": "scripts/validate_record_layout.py",
+    "accepted_evidence_move_semantics": "byte_preserving_sha256_bound",
+    "accepted_evidence_hashes_checked": 26,
+    "relocations_checked": 32,
+    "governance_test_count": 25,
+    "unified_local_gate_passed": true,
+    "historical_evidence_payloads_rewritten": false,
+    "root_json_recurrence_forbidden": true,
+    "conformance_fixtures_remain_separate": true
+  },
   "acceptance": {
     "A0": "Full format, warnings-denied Clippy, workspace tests, governance and unified local gate pass.",
     "A1": "Capability error taxonomy remains deterministic and stable; only CAPABILITY_INVALID before writes gets a fresh envelope and no malformed token gains write authority.",

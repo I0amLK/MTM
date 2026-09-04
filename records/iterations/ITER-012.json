@@ -55,7 +55,7 @@
   "release_a4": {
     "status": "accepted",
     "release_binary_sha256": "545ab9ef8cc01edf804581cb52c2b1a4158d03bd8a25ea00c7785039167f3659",
-    "tui_report": "mtm012-tui-validation.json",
+    "tui_report": "records/evidence/MTM-012/tui-validation.json",
     "tui_report_sha256": "be9a9317988afc7a727a7f4bba00f7dcf0119394773c0825b4526a77f9aa868b",
     "check_count": 20,
     "compact_tool_line_count_for_three_tool_attempts": 3,
@@ -72,7 +72,7 @@
     "shell_selector_alias": "/home/lk/.cargo/bin/mtm",
     "rollback_version": "0.4.0-preview.2",
     "rollback_binary_sha256": "5ed668d5bf765be2efd1b50933e941cf60dbbd414e3b6daab77745624d5cfa81",
-    "preview_release_report": "mtm012-preview-release.json",
+    "preview_release_report": "records/evidence/MTM-012/preview-release.json",
     "preview_release_report_sha256": "c269822e3d35536f0c4f402edd1ea570e97ac49fe4b421216b375bbe825b342f",
     "deployment_manifest_sha256": "b381aa5d4a78c95d61221ed5fb2c10ed127be289edac53cce947c779ec95ccd2",
     "runtime_probes": {

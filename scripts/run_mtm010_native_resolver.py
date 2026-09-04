@@ -12,7 +12,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT = ROOT / "mtm010-native-resolver.json"
+REPORT = ROOT / "records/evidence/MTM-010/native-resolver.json"
 CARGO_HOME = ROOT / ".toolchain" / "cargo"
 RUSTUP_HOME = ROOT / ".toolchain" / "rustup"
 HELPER = ROOT / "target" / "debug" / "mtm-native-helper"

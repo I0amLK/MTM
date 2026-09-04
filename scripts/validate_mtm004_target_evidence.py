@@ -8,7 +8,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT = ROOT / "mtm004-target-validation.json"
+REPORT = ROOT / "records/evidence/MTM-004/target-validation.json"
 
 try:
     from scripts.run_mtm004_target_validation import implementation_sha256

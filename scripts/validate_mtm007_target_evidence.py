@@ -21,7 +21,7 @@ except ModuleNotFoundError:
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT = ROOT / "mtm007-target-validation.json"
+REPORT = ROOT / "records/evidence/MTM-007/target-validation.json"
 REQUIRED_CHECKS = {
     "release_binary_has_no_python_runtime",
     "cargo_install_path_distribution",

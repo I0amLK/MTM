@@ -43,7 +43,7 @@ except ModuleNotFoundError:
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_BINARY = ROOT / "target" / "release" / "mtm"
-REPORT = ROOT / "mtm007-target-validation.json"
+REPORT = ROOT / "records/evidence/MTM-007/target-validation.json"
 PUBLIC_TUNNEL_RE = re.compile(r"Quick Tunnel: (https://[a-z0-9-]+\.trycloudflare\.com/mcp)")
 
 

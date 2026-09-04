@@ -41,7 +41,7 @@ OAuth + MCP gateway
   utility module.
 - Observability receives redacted events and cannot authorize or mutate behavior.
 
-The machine-audited target graph is [`engineering-graph.json`](../engineering-graph.json).
+The machine-audited target graph is [`records/governance/engineering-graph.json`](../records/governance/engineering-graph.json).
 
 ## Implemented through MTM-006
 

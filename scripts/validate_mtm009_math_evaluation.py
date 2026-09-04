@@ -8,9 +8,9 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EVALUATION = ROOT / "mtm009-research-state-math-evaluation.json"
+EVALUATION = ROOT / "records/evidence/MTM-009/research-state-math-evaluation.json"
 CORPUS = ROOT / "conformance" / "mtm009-math-corpus.json"
-RESOURCE = ROOT / "mtm009-research-resource.json"
+RESOURCE = ROOT / "records/evidence/MTM-009/research-resource.json"
 
 EXPECTED_METRICS = {
     "verified_tex_completion",

@@ -13,13 +13,13 @@
       "status": "accepted",
       "release_version": "0.3.0",
       "production_authority": "python",
-      "candidate_evidence": "mtm008-candidate-validation.json",
-      "performance_evidence": "mtm008-performance.json",
-      "soak_evidence": "mtm008-soak.json"
+      "candidate_evidence": "records/evidence/MTM-008/candidate-validation.json",
+      "performance_evidence": "records/evidence/MTM-008/performance.json",
+      "soak_evidence": "records/evidence/MTM-008/soak.json"
     },
     "live_cutover": {
       "status": "accepted",
-      "evidence": "mtm008-live-cutover.json",
+      "evidence": "records/evidence/MTM-008/live-cutover.json",
       "candidate_commit": "4117734941970e8068cfe49291ff6f13a3123792",
       "production_authority": "rust",
       "rollback_wheel_retained": true,
@@ -27,15 +27,15 @@
     },
     "final_release_requalification": {
       "status": "accepted",
-      "candidate_evidence": "mtm008-candidate-validation.json",
+      "candidate_evidence": "records/evidence/MTM-008/candidate-validation.json",
       "release_sha256": "7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728",
       "candidate_implementation_sha256": "7230fd8e487a51f83fbd80fbbae0b3777485f86dcc9d94d53f4bccbd78a3fc48",
       "reason": "Synchronize final production-authority and completed-milestone status without making the binary claim knowledge of host Python-installation state."
     },
     "python_retirement": {
       "status": "accepted",
-      "evidence": "mtm008-retirement.json",
-      "authority_inventory": "authority-inventory.json",
+      "evidence": "records/evidence/MTM-008/retirement.json",
+      "authority_inventory": "records/governance/authority-inventory.json",
       "qualification_commit": "b1601149d3dd555278bcd26ecda02f39a0600860",
       "release_sha256": "7142cf77775552533fc6472f46391989cc1d5d3ed12d1bdf08c48b7d7ae70728",
       "retirement_implementation_sha256": "6029dc39e07ee27793667c724cd2e0eae29ba779def81b1482b1f9beea269e56",
@@ -164,7 +164,7 @@
     "mtm_command": "/home/lk/.local/bin/mtm",
     "mtm_release_sha256": "abe861df86dded73a5fba08bc1b71cba46164a846318d004e846409e240e8438",
     "re_ctm_command": "/home/lk/.local/bin/re-ctm",
-    "coexistence_evidence": "mtm-command-namespace.json",
+    "coexistence_evidence": "records/evidence/MTM-008/command-namespace.json",
     "checks": 9,
     "first_attempt_failure": "The first namespace cutover used uv's sandbox HOME defaults, so re-ctm was not linked into /home/lk/.local/bin after the four MTM sessions had stopped.",
     "repair": "Pinned UV_TOOL_DIR and UV_TOOL_BIN_DIR to the real user installation roots, retained the already-installed mtm release, restored Re-CTM independently, recovered the four MTM sessions, and generated one replacement mode-0600 operator key because the original environment-only key disappeared with its stopped process.",

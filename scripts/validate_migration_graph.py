@@ -10,7 +10,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-GRAPH = ROOT / "migration-graph.json"
+GRAPH = ROOT / "records/governance/migration-graph.json"
 ID_RE = re.compile(r"MTM-\d{3}$")
 COMMIT_RE = re.compile(
     r"(?:docs|test|build|feat|fix|refactor|perf|chore)"

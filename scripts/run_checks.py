@@ -13,7 +13,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT = ROOT / "local-validation.json"
+REPORT = ROOT / "records/validation/local-validation.json"
 
 
 def run(
@@ -86,13 +86,13 @@ def resolve_tool_environment() -> tuple[dict[str, str], str | None, str | None]:
 
 def main() -> int:
     environment, cargo, rustc = resolve_tool_environment()
-    progress = json.loads((ROOT / "project-progress.json").read_text(encoding="utf-8"))
+    progress = json.loads((ROOT / "records/governance/project-progress.json").read_text(encoding="utf-8"))
     selector = Path("/home/lk/.local/bin/mtm")
     mtm013_stable_deployed_mode = (
         progress.get("version") == "0.4.0"
         and progress.get("current_milestone") == "MTM-013"
         and progress.get("status") in {"MTM-013-in-progress", "MTM-013-completed"}
-        and (ROOT / "mtm013-stable-release.json").is_file()
+        and (ROOT / "records/evidence/MTM-013/stable-release.json").is_file()
         and selector.is_symlink()
         and "/releases/0.4.0/" in str(selector.resolve())
     )
@@ -140,6 +140,12 @@ def main() -> int:
             env=environment,
         ),
         run(
+            "record_layout",
+            [sys.executable, "scripts/validate_record_layout.py"],
+            env=environment,
+            capture_json=True,
+        ),
+        run(
             "mtm009_research_contract",
             [sys.executable, "scripts/validate_mtm009_research_contract.py"],
             env=environment,
@@ -160,7 +166,7 @@ def main() -> int:
                 capture_json=True,
             )
         )
-        if (ROOT / "mtm013-stable-qualification.json").is_file():
+        if (ROOT / "records/evidence/MTM-013/stable-qualification.json").is_file():
             checks.append(
                 run(
                     "mtm013_stable_qualification",
@@ -178,7 +184,7 @@ def main() -> int:
                 )
             )
 
-        if (ROOT / "mtm013-public-install.json").is_file():
+        if (ROOT / "records/evidence/MTM-013/public-install.json").is_file():
             checks.append(
                 run(
                     "mtm013_public_install",
@@ -188,7 +194,7 @@ def main() -> int:
                 )
             )
 
-        if (ROOT / "mtm013-stable-release.json").is_file():
+        if (ROOT / "records/evidence/MTM-013/stable-release.json").is_file():
             checks.append(
                 run(
                     "mtm013_stable_release",

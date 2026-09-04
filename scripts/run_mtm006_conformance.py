@@ -14,7 +14,7 @@ from typing import Any, Callable
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ROOT = (ROOT / ".." / "Re-CTM").resolve()
-BASELINE = ROOT / "source-baseline.json"
+BASELINE = ROOT / "records/governance/source-baseline.json"
 GOLDEN = ROOT / "conformance" / "golden" / "mtm006-reference.sha256"
 PYTHON_SHADOW = ROOT / "conformance" / "python_workflow_shadow.py"
 RUST_SHADOW = ROOT / "target" / "debug" / "mtm_workflow_shadow"

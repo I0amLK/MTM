@@ -11,7 +11,7 @@ except ModuleNotFoundError:
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT = ROOT / "mtm003-target-validation.json"
+REPORT = ROOT / "records/evidence/MTM-003/target-validation.json"
 REQUIRED_CHECKS = {
     "bubblewrap_attestation",
     "safe_workspace_read",

@@ -46,7 +46,7 @@ except ModuleNotFoundError:
 
 
 HOME = Path("/home/lk")
-REPORT = ROOT / "mtm-command-namespace.json"
+REPORT = ROOT / "records/evidence/MTM-008/command-namespace.json"
 MTM_BIN = HOME / ".local" / "bin" / "mtm"
 RE_CTM_BIN = HOME / ".local" / "bin" / "re-ctm"
 MTM_STATE_ROOT = HOME / ".local" / "share" / "mtm"

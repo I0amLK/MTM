@@ -8,7 +8,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT = ROOT / "mtm013-public-install.json"
+REPORT = ROOT / "records/evidence/MTM-013/public-install.json"
 SOURCE_COMMIT = "fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3"
 REPOSITORY = "https://github.com/I0amLK/MTM.git"
 

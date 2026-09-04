@@ -14,7 +14,7 @@ if str(ROOT) not in sys.path:
 from scripts.validate_mtm011_research_resource import REPORT, validate as validate_resource
 
 
-EVALUATION = ROOT / "mtm011-protocol3-cutover-evaluation.json"
+EVALUATION = ROOT / "records/evidence/MTM-011/protocol3-cutover-evaluation.json"
 
 
 def sha256_file(path: Path) -> str:
@@ -39,7 +39,7 @@ def main() -> int:
         raise SystemExit("resource candidate differs from already-recorded treatment binary")
     candidate["binary_sha256"] = implementation_sha
     evaluation["resource_evidence"] = {
-        "path": "mtm011-research-resource.json",
+        "path": "records/evidence/MTM-011/research-resource.json",
         "sha256": sha256_file(REPORT),
         "status": "accepted_current_candidate"
     }

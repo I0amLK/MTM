@@ -60,7 +60,7 @@
   "qualification_artifacts": {
     "mtm011_a4_candidate_archive": "/home/lk/.local/share/mtm/evidence/mtm011-a4-candidate-5cebde6458f2/mtm",
     "mtm011_a4_candidate_sha256": "5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036",
-    "mtm012_tui_report": "mtm012-tui-validation.json",
+    "mtm012_tui_report": "records/evidence/MTM-012/tui-validation.json",
     "mtm012_tui_report_sha256": "be9a9317988afc7a727a7f4bba00f7dcf0119394773c0825b4526a77f9aa868b"
   },
   "release_info": {

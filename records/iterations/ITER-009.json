@@ -417,7 +417,7 @@
     "evaluation_protocols": [2, 3],
     "final_artifact": "proof_verified.tex",
     "resource_evidence": {
-      "path": "mtm009-research-resource.json",
+      "path": "records/evidence/MTM-009/research-resource.json",
       "sha256": "7a83ba248680cd5b968c2b2a7e00743ced24326d1e0dd0846813c660cbf73489",
       "implementation_sha256": "9292feec8b6fca9db621293a666673f9649442690be613c7ef232c95e9c945b2",
       "harness_sha256": "91bfe27c5f1010e8e668d34468a98f44e6321c8e600090b8fb7d7c90019773e0",
@@ -451,7 +451,7 @@
       "unique_capability_tags": 25
     },
     "evaluation_contract": {
-      "path": "mtm009-research-state-math-evaluation.json",
+      "path": "records/evidence/MTM-009/research-state-math-evaluation.json",
       "status": "complete",
       "predeclared_metric_count": 10,
       "raw_web_transcript_recorded": false,
@@ -722,7 +722,7 @@
     },
     "a5": {
       "passed": true,
-      "report": "mtm009-research-resource.json",
+      "report": "records/evidence/MTM-009/research-resource.json",
       "report_sha256": "27e269e336c363f31e7c684c343936473d979d50b340f9a4326cfc2f9d269662",
       "implementation_sha256": "e76c2124cddb73370d902394df3c143124870abf8f05240f1a72ca835a8e2477",
       "performance_claim": false
@@ -776,7 +776,7 @@
     "status": "v1_release_gate_rejected_post_gate_bugfix_validated",
     "recorded_at": "2026-09-02T23:24:31-07:00",
     "v1_evaluation": {
-      "path": "mtm009-research-state-math-evaluation.json",
+      "path": "records/evidence/MTM-009/research-state-math-evaluation.json",
       "sha256": "e7596fbaed70655228bd1530376ba457153e575ea0b845c4c8e64e2848e7e564",
       "complete_pairs": 8,
       "protocol2_verified_tex": 8,

@@ -60,9 +60,9 @@ except ModuleNotFoundError:
     )
 
 
-REPORT = ROOT / "mtm008-candidate-validation.json"
-PERFORMANCE_REPORT = ROOT / "mtm008-performance.json"
-SOAK_REPORT = ROOT / "mtm008-soak.json"
+REPORT = ROOT / "records/evidence/MTM-008/candidate-validation.json"
+PERFORMANCE_REPORT = ROOT / "records/evidence/MTM-008/performance.json"
+SOAK_REPORT = ROOT / "records/evidence/MTM-008/soak.json"
 VERSION = "0.3.0"
 IMPLEMENTATION_PATHS = [
     ROOT / "Cargo.toml",

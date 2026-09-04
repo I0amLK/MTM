@@ -62,7 +62,7 @@
     "interpretation": "A5 absolute and relative resource ceilings passed. Rust used substantially less resident memory but was slower in this small debug-build cold-process scenario, so no A6 speed claim is made."
   },
   "target_validation": {
-    "report": "mtm003-target-validation.json",
+    "report": "records/evidence/MTM-003/target-validation.json",
     "implementation_sha256": "77c52b9fd6de366d80f045b7adb091ef0e4095147dee0c515173fe1ab1766a13",
     "environment": {
       "platform": "Linux",

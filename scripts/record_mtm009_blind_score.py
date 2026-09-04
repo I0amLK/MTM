@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EVALUATION = ROOT / "mtm009-research-state-math-evaluation.json"
+EVALUATION = ROOT / "records/evidence/MTM-009/research-state-math-evaluation.json"
 
 
 def score(value: str) -> int:

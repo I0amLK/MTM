@@ -13,6 +13,8 @@ from scripts.validate_commit_message import validate_message
 from scripts.validate_engineering_graph import validate_graph as validate_engineering
 from scripts.validate_historical_mtm_release_evidence import validate as validate_historical_mtm_release_evidence
 from scripts.validate_migration_graph import load_graph, validate_graph as validate_migration
+from scripts.validate_record_layout import validate as validate_record_layout
+from scripts.record_paths import resolve_repository_record
 from scripts.validate_mtm003_target_evidence import validate as validate_mtm003_target
 from scripts.validate_mtm004_target_evidence import validate as validate_mtm004_target
 from scripts.validate_mtm005_target_evidence import validate as validate_mtm005_target
@@ -36,9 +38,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def deployment_mode() -> str:
-    progress = json.loads((ROOT / "project-progress.json").read_text(encoding="utf-8"))
+    progress = json.loads((ROOT / "records/governance/project-progress.json").read_text(encoding="utf-8"))
     milestone = progress.get("current_milestone")
-    stable_report = ROOT / "mtm013-stable-release.json"
+    stable_report = ROOT / "records/evidence/MTM-013/stable-release.json"
     stable_selector = Path("/home/lk/.local/bin/mtm")
     if (
         progress.get("version") == "0.4.0"
@@ -143,7 +145,7 @@ class GovernanceTestCase(unittest.TestCase):
             validate_migration(payload)
 
     def test_target_crate_graph_is_acyclic(self) -> None:
-        payload = json.loads((ROOT / "engineering-graph.json").read_text(encoding="utf-8"))
+        payload = json.loads((ROOT / "records/governance/engineering-graph.json").read_text(encoding="utf-8"))
         summary = validate_engineering(payload)
         self.assertTrue(summary["crate_graph_acyclic"])
         self.assertEqual(
@@ -166,6 +168,16 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(summary["mtm_runtime_namespace_isolated"])
         self.assertTrue(summary["mtm_public_identity"])
         self.assertTrue(summary["deployment_command_namespace_separated"])
+
+    def test_repository_record_layout_is_canonical(self) -> None:
+        payload = json.loads(
+            (ROOT / "records/governance/record-layout.json").read_text(encoding="utf-8")
+        )
+        summary = validate_record_layout(payload)
+        self.assertEqual(summary["root_json_count"], 0)
+        self.assertGreaterEqual(summary["iteration_record_count"], 13)
+        self.assertGreaterEqual(summary["evidence_milestone_count"], 9)
+        self.assertGreaterEqual(summary["evidence_hashes_checked"], 26)
 
     def test_current_mtm003_target_evidence_is_fresh(self) -> None:
         if historical_evidence_mode():
@@ -258,10 +270,10 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(summary["final_artifact"], "proof_verified.tex")
 
     def test_mtm013_runtime_hardening_evidence_is_bound_and_redacted(self) -> None:
-        progress = json.loads((ROOT / "project-progress.json").read_text(encoding="utf-8"))
+        progress = json.loads((ROOT / "records/governance/project-progress.json").read_text(encoding="utf-8"))
         if progress.get("current_milestone") != "MTM-013":
             self.skipTest("MTM-013 hardening is not the current source-qualification mode")
-        payload = json.loads((ROOT / "mtm013-runtime-hardening.json").read_text(encoding="utf-8"))
+        payload = json.loads((ROOT / "records/evidence/MTM-013/runtime-hardening.json").read_text(encoding="utf-8"))
         summary = validate_mtm013_runtime_hardening(payload)
         self.assertGreaterEqual(summary["check_count"], 12)
         self.assertEqual(summary["initial_state"], "assess")
@@ -352,7 +364,7 @@ class GovernanceTestCase(unittest.TestCase):
 
     def test_mtm011_cutover_contract_remains_frozen_through_qualification(self) -> None:
         corpus_path = ROOT / "conformance" / "mtm011-math-corpus.json"
-        evaluation_path = ROOT / "mtm011-protocol3-cutover-evaluation.json"
+        evaluation_path = ROOT / "records/evidence/MTM-011/protocol3-cutover-evaluation.json"
         corpus = json.loads(corpus_path.read_text(encoding="utf-8"))
         evaluation = json.loads(evaluation_path.read_text(encoding="utf-8"))
         corpus_summary = validate_mtm011_math_corpus(corpus)
@@ -385,11 +397,13 @@ class GovernanceTestCase(unittest.TestCase):
         if candidate_sha is not None:
             resource = evaluation["resource_evidence"]
             self.assertEqual(resource["status"], "accepted_current_candidate")
-            resource_payload = json.loads((ROOT / resource["path"]).read_text(encoding="utf-8"))
+            resource_payload = json.loads(
+                resolve_repository_record(str(resource["path"])).read_text(encoding="utf-8")
+            )
             self.assertEqual(candidate_sha, resource_payload["implementation_sha256"])
             self.assertEqual(candidate_sha, iteration["current_candidate_a5"]["binary_sha256"])
         self.assertEqual(evaluation["release_gate"]["minimum_strict_structural_primary_improvements"], 2)
-        authority = json.loads((ROOT / "authority-inventory.json").read_text(encoding="utf-8"))
+        authority = json.loads((ROOT / "records/governance/authority-inventory.json").read_text(encoding="utf-8"))
         protocols = authority["preview_policy"]
         if protocols["protocol3_default_cutover_allowed"]:
             self.assertEqual(protocols["production_default_workflow_protocol"], 3)
@@ -459,7 +473,7 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertFalse(gate)
 
     def test_mtm011_recorders_can_use_isolated_evaluation_ledgers(self) -> None:
-        production = ROOT / "mtm011-protocol3-cutover-evaluation.json"
+        production = ROOT / "records/evidence/MTM-011/protocol3-cutover-evaluation.json"
         before = production.read_bytes()
         with tempfile.TemporaryDirectory(prefix="mtm011-ledger-") as raw_root:
             root = Path(raw_root)

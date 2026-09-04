@@ -10,9 +10,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 HOME = Path("/home/lk")
 VERSION = "0.4.0-preview.2"
-REPORT = ROOT / "mtm011-preview-release.json"
-EVALUATION = ROOT / "mtm011-protocol3-cutover-evaluation.json"
-POST_A5 = ROOT / "mtm011-cutover-resource.json"
+REPORT = ROOT / "records/evidence/MTM-011/preview-release.json"
+EVALUATION = ROOT / "records/evidence/MTM-011/protocol3-cutover-evaluation.json"
+POST_A5 = ROOT / "records/evidence/MTM-011/cutover-resource.json"
 DEPLOYMENT = HOME / ".local" / "share" / "mtm" / "deployment" / "deployment-v1.json"
 MTM_BIN = HOME / ".local" / "bin" / "mtm"
 CARGO_MTM_BIN = HOME / ".cargo" / "bin" / "mtm"

@@ -19,7 +19,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT = ROOT / "mtm004-target-validation.json"
+REPORT = ROOT / "records/evidence/MTM-004/target-validation.json"
 SOURCE_DB = Path("/home/lk/.re-ctm/private/state.sqlite3")
 PYTHON_DRIVER = ROOT / "conformance" / "python_storage_shadow.py"
 RUST_BINARY = ROOT / "target" / "debug" / "mtm-storage-shadow"

@@ -49,7 +49,7 @@ REQUIRED = {
 }
 
 ROOT = Path(__file__).resolve().parents[1]
-PREVIEW_REPORT = ROOT / "mtm009-preview-release.json"
+PREVIEW_REPORT = ROOT / "records/evidence/MTM-009/preview-release.json"
 PREVIEW_VERSION = "0.4.0-preview.1"
 MTM011_PREVIEW_VERSION = "0.4.0-preview.2"
 MTM012_PREVIEW_VERSION = "0.4.0-preview.3"
@@ -142,7 +142,7 @@ def validate_mtm011_preview_namespace() -> dict[str, object]:
 
 def validate_mtm013_stable_namespace() -> dict[str, object]:
     summary = validate_mtm013_stable_release(
-        json.loads((ROOT / "mtm013-stable-release.json").read_text(encoding="utf-8"))
+        json.loads((ROOT / "records/evidence/MTM-013/stable-release.json").read_text(encoding="utf-8"))
     )
     if not RE_CTM_BIN.exists() or MTM_BIN.resolve() == RE_CTM_BIN.resolve():
         raise ValueError("MTM and Re-CTM commands are not independently installed")

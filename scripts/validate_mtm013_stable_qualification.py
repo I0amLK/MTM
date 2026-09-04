@@ -8,8 +8,8 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT = ROOT / "mtm013-stable-qualification.json"
-RESOURCE = ROOT / "mtm013-stable-resource.json"
+REPORT = ROOT / "records/evidence/MTM-013/stable-qualification.json"
+RESOURCE = ROOT / "records/evidence/MTM-013/stable-resource.json"
 BINARY = ROOT / "target" / "release" / "mtm"
 SOURCE_COMMIT = "fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3"
 EXPECTED_BINARY_SHA256 = "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3"

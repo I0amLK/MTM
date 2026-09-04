@@ -16,9 +16,9 @@ from scripts.validate_mtm011_math_evaluation import EVALUATION, validate as vali
 from scripts.validate_mtm011_research_resource import REPORT, validate as validate_resource
 
 
-MTM009_EVALUATION = ROOT / "mtm009-research-state-math-evaluation.json"
-AUTHORITY = ROOT / "authority-inventory.json"
-GRAPH = ROOT / "migration-graph.json"
+MTM009_EVALUATION = ROOT / "records/evidence/MTM-009/research-state-math-evaluation.json"
+AUTHORITY = ROOT / "records/governance/authority-inventory.json"
+GRAPH = ROOT / "records/governance/migration-graph.json"
 MTM009_IMMUTABLE_SHA = "e7596fbaed70655228bd1530376ba457153e575ea0b845c4c8e64e2848e7e564"
 
 

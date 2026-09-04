@@ -28,7 +28,7 @@ SOURCE_COMMIT = "fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3"
 BINARY = ROOT / "target" / "release" / "mtm"
 EXPECTED_BINARY_SHA256 = "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3"
 LIVE_DATA_ROOT = Path("/home/lk/.mtm")
-REPORT = ROOT / "mtm013-stable-qualification.json"
+REPORT = ROOT / "records/evidence/MTM-013/stable-qualification.json"
 
 
 def sha256_file(path: Path) -> str:

@@ -11,7 +11,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_BINARY = ROOT / "target" / "debug" / "mtm"
 BINARY = Path(os.environ.get("MTM013_BINARY", DEFAULT_BINARY))
-REPORT = Path(os.environ.get("MTM013_HARDENING_REPORT", ROOT / "mtm013-runtime-hardening.json"))
+REPORT = Path(os.environ.get("MTM013_HARDENING_REPORT", ROOT / "records/evidence/MTM-013/runtime-hardening.json"))
 HARNESS = ROOT / "scripts" / "run_mtm013_runtime_hardening.py"
 
 

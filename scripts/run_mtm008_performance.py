@@ -41,7 +41,7 @@ except ModuleNotFoundError:
     )
 
 
-REPORT = ROOT / "mtm008-performance.json"
+REPORT = ROOT / "records/evidence/MTM-008/performance.json"
 REPETITIONS = 7
 WARMUP_REQUESTS = 96
 MEASURED_REQUESTS = 800

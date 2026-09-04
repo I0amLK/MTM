@@ -33,7 +33,7 @@ except ModuleNotFoundError:
     )
 
 
-REPORT = ROOT / "mtm008-soak.json"
+REPORT = ROOT / "records/evidence/MTM-008/soak.json"
 DURATION_SECONDS = 60.0
 CONCURRENCY = 8
 

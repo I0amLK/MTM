@@ -9,9 +9,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 HOME = Path("/home/lk")
-REPORT = ROOT / "mtm009-preview-release.json"
+REPORT = ROOT / "records/evidence/MTM-009/preview-release.json"
 SIMULATION = ROOT / "conformance" / "mtm009-math-simulation.json"
-EVALUATION = ROOT / "mtm009-research-state-math-evaluation.json"
+EVALUATION = ROOT / "records/evidence/MTM-009/research-state-math-evaluation.json"
 DEPLOYMENT = HOME / ".local" / "share" / "mtm" / "deployment" / "deployment-v1.json"
 MTM_BIN = HOME / ".local" / "bin" / "mtm"
 RE_CTM_BIN = HOME / ".local" / "bin" / "re-ctm"
@@ -116,7 +116,7 @@ def validate() -> dict[str, object]:
     tui = report.get("tui_tool_visibility", {})
     if tui.get("passed") is not True or tui.get("argument_values_hidden") is not True:
         raise ValueError("preview TUI visibility/redaction evidence is incomplete")
-    progress = json.loads((ROOT / "project-progress.json").read_text(encoding="utf-8"))
+    progress = json.loads((ROOT / "records/governance/project-progress.json").read_text(encoding="utf-8"))
     if progress.get("version") != VERSION or progress.get("current_milestone") not in {"MTM-009", "MTM-011"}:
         raise ValueError("project progress does not identify the installed preview")
     return {

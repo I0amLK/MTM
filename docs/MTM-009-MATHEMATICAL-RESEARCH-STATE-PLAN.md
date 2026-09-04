@@ -744,7 +744,7 @@ Proposed artifacts:
 records/iterations/ITER-009.json
 conformance/golden/mtm009-research-state.jsonl
 mtm009-research-state-target.json
-mtm009-research-state-math-evaluation.json
+records/evidence/MTM-009/research-state-math-evaluation.json
 ```
 
 Evidence files contain implementation, harness, corpus, and result hashes. Raw OAuth
@@ -777,7 +777,7 @@ changes.
 Tasks:
 
 - [x] Accept ADR-0009 and this plan.
-- [x] Add proposed MTM-009 to `migration-graph.json` with explicit non-goals.
+- [x] Add proposed MTM-009 to `records/governance/migration-graph.json` with explicit non-goals.
 - [x] Create `records/iterations/ITER-009.json` in `in_progress` state.
 - [x] Record the clean Git/GitHub baseline and accepted release hash.
 - [x] Freeze complexity budgets and graph invariants in validators.

@@ -27,8 +27,8 @@ except ModuleNotFoundError:
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT = ROOT / "mtm008-retirement.json"
-INVENTORY = ROOT / "authority-inventory.json"
+REPORT = ROOT / "records/evidence/MTM-008/retirement.json"
+INVENTORY = ROOT / "records/governance/authority-inventory.json"
 STATE_ROOT = Path("/home/lk/.local/share/re-ctm-rust")
 MANIFEST = STATE_ROOT / "deployment" / "deployment-v1.json"
 BIN_LINK = Path("/home/lk/.local/bin/re-ctm")

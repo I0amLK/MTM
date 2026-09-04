@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE_COMMIT = "fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3"
 VERSION = "0.4.0"
 REPOSITORY = "https://github.com/I0amLK/MTM.git"
-REPORT = ROOT / "mtm013-public-install.json"
+REPORT = ROOT / "records/evidence/MTM-013/public-install.json"
 
 
 def sha256_file(path: Path) -> str:

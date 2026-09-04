@@ -67,7 +67,7 @@
     "interpretation": "A5 resource non-regression passed on a deterministic debug-build shadow workload. No A6 production performance claim is made."
   },
   "target_validation": {
-    "report": "mtm005-target-validation.json",
+    "report": "records/evidence/MTM-005/target-validation.json",
     "implementation_sha256": "0c8888fab850afde593333b408d85feaeaee8c860103371b514b5696a82f5b38",
     "environment": {
       "platform": "Linux",

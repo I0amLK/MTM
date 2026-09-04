@@ -298,8 +298,9 @@ See also:
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 - [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md)
 - [`docs/MIGRATION_PLAN.md`](docs/MIGRATION_PLAN.md)
-- [`migration-graph.json`](migration-graph.json)
-- [`engineering-graph.json`](engineering-graph.json)
+- [`records/governance/migration-graph.json`](records/governance/migration-graph.json)
+- [`records/governance/engineering-graph.json`](records/governance/engineering-graph.json)
+- [`records/README.md`](records/README.md) — governance, iteration, evidence, and validation record layout
 
 ## License
 

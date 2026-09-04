@@ -77,8 +77,8 @@ except ModuleNotFoundError:
     from validate_mtm008_live_evidence import validate as validate_live
 
 
-REPORT = ROOT / "mtm008-retirement.json"
-INVENTORY = ROOT / "authority-inventory.json"
+REPORT = ROOT / "records/evidence/MTM-008/retirement.json"
+INVENTORY = ROOT / "records/governance/authority-inventory.json"
 MANIFEST = STATE_ROOT / "deployment" / "deployment-v1.json"
 HELPER_LINK = Path("/home/lk/.local/bin/re-ctm-native-helper")
 QUALIFICATION_COMMIT = "b1601149d3dd555278bcd26ecda02f39a0600860"
@@ -294,7 +294,7 @@ def main() -> int:
         raise RuntimeError("release inputs changed after qualification commit")
 
     build_release()
-    candidate_payload = json.loads((ROOT / "mtm008-candidate-validation.json").read_text())
+    candidate_payload = json.loads((ROOT / "records/evidence/MTM-008/candidate-validation.json").read_text())
     expected_release_sha = str(candidate_payload["release_binary"]["sha256"])
     if sha256_file(RUST_BINARY) != expected_release_sha:
         raise RuntimeError("rebuilt release does not match the qualified candidate")
@@ -360,8 +360,8 @@ def main() -> int:
     no_python_process = not processes_using(PYTHON_TOOL_ROOT)
     logs_safe = session_logs_are_secret_free(restarted)
 
-    performance = json.loads((ROOT / "mtm008-performance.json").read_text())
-    soak = json.loads((ROOT / "mtm008-soak.json").read_text())
+    performance = json.loads((ROOT / "records/evidence/MTM-008/performance.json").read_text())
+    soak = json.loads((ROOT / "records/evidence/MTM-008/soak.json").read_text())
     inventory = {
         "schema_version": "1.0.0",
         "project": "MTM-reboot",
