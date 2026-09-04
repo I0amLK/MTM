@@ -37,9 +37,10 @@
   ],
   "source_hardening": {
     "status": "accepted",
-    "runtime_binary_sha256": "4e91d4a01628fb616a3bbb660b486aca6469b6a3b9fc26a35ad5f122d9fcb181",
+    "stable_source_version": "0.4.0",
+    "runtime_binary_sha256": "5e3a3dcdad7600b42b3eee201bac19b2b10eb88c5e0eb5da3bedf6860427a8ac",
     "report": "mtm013-runtime-hardening.json",
-    "report_sha256": "15a398dfcea23f8939c3c8c37f27ca1fefbf4a5972988da7954fe5044d9e3780",
+    "report_sha256": "8dfdc7a898e8d90a7d39863ce05db4a608cd8f53b0acfb87e70db7e7b60703bd",
     "harness_sha256": "0e14509d7c259e19af77196a52f3b6142c69ebdca8b445f20888837ff1eade0c",
     "check_count": 12,
     "capability_mutation_refresh_zero_writes": true,

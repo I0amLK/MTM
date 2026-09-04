@@ -99,7 +99,7 @@ def main() -> int:
         in {"MTM-011-in-progress", "MTM-011-completed", "MTM-012-in-progress"}
     )
     mtm012_preview_mode = (
-        progress.get("version") == "0.4.0-preview.3"
+        progress.get("version") in {"0.4.0-preview.3", "0.4.0"}
         and progress.get("current_milestone") in {"MTM-012", "MTM-013"}
         and progress.get("status")
         in {"MTM-012-in-progress", "MTM-012-completed", "MTM-013-in-progress"}

@@ -1,5 +1,5 @@
 {
-  "binary_sha256": "4e91d4a01628fb616a3bbb660b486aca6469b6a3b9fc26a35ad5f122d9fcb181",
+  "binary_sha256": "5e3a3dcdad7600b42b3eee201bac19b2b10eb88c5e0eb5da3bedf6860427a8ac",
   "checks": {
     "cross_run_capability_remains_denied": true,
     "fresh_capability_resubmission_advances": true,

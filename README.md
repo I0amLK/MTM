@@ -83,10 +83,10 @@ mtm check-config
 Expected command identity:
 
 ```text
-mtm 0.4.0-preview.3
+mtm 0.4.0
 ```
 
-MTM 0.4.0-preview.3 uses workflow protocol 3 as the production default for new runs
+MTM 0.4.0 uses workflow protocol 3 as the production default for new runs
 after the accepted MTM-011 cutover qualification. Protocol 2 remains available as an
 explicit rollback selection:
 

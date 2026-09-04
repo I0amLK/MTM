@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "project": "MTM-reboot",
-  "version": "0.4.0-preview.3",
+  "version": "0.4.0",
   "status": "MTM-013-in-progress",
   "updated_at": "2026-09-03T21:26:00-07:00",
   "source_baseline": "source-baseline.json",
@@ -20,6 +20,7 @@
   "completed_milestones": ["MTM-001", "MTM-002", "MTM-003", "MTM-004", "MTM-005", "MTM-006", "MTM-007", "MTM-008", "MTM-009", "MTM-010", "MTM-011", "MTM-012"],
   "next_milestone": null,
   "claims": [
+    "MTM-013 stable source identity is staged at 0.4.0 while the live selector intentionally remains on the accepted preview.3 release until the exact stable artifact passes clean-install, existing-state upgrade, proof finalization, rollback/recutover and soak qualification.",
     "MTM-013 is in progress as the stable 0.4.0 hardening/qualification milestone. Preview.3 remains the selected rollback while capability transport recovery, complete-flow validation metadata consistency, cargo-install command-layout validation and stable release evidence are completed without changing workflow protocol 3, protocol-2 rollback, state schema 2 or finalizer semantics.",
     "MTM-009 lifecycle is now formally completed without changing its immutable v1 result: the research-state implementation is accepted, the frozen v1 paired default-cutover evaluation remains complete/rejected with release_gate_passed=false, and the later MTM-011 prospective qualification remains the sole authority for protocol 3 becoming the default.",
     "MTM-012 is completed and MTM 0.4.0-preview.3 is installed with SHA-256 545ab9ef8cc01edf804581cb52c2b1a4158d03bd8a25ea00c7785039167f3659. The default TUI is compact: tool starts remain visible, routine successful completion/trace/argument-key noise is suppressed, failures remain explicit, and --verbose restores the detailed redacted lifecycle view. Preview.2 remains installed as the selector-level TUI rollback, both shell command paths follow preview.3, and the installed release passed the twenty-check real OAuth/MCP TUI smoke after rollback/recutover.",
