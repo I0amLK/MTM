@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use mtm_contracts::{ErrorCategory, NativeMode, ReCtmError};
+use mtm_contracts::{ErrorCategory, NativeMode, NativePermissionKind, ReCtmError};
 use regex::{Regex, RegexBuilder};
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
@@ -98,6 +98,51 @@ pub fn check_command_policy(
         ));
     }
     Ok(())
+}
+
+/// Classify the permission dimensions exercised by the currently accepted command policy.
+///
+/// This helper is shadow-only for MTM-014 D1. It intentionally does not invent
+/// enforcement semantics for public permission kinds that the accepted Rust policy
+/// does not yet classify (`long_timeout`, `privileged_executable`, and
+/// `write_generated_or_ignored`). `check_command_policy` remains the production
+/// enforcement path until a later MTM-014 delivery explicitly cuts authority over.
+pub fn classify_current_command_permissions(
+    mode: NativeMode,
+    command: &str,
+    environment: &BTreeMap<String, String>,
+) -> Result<Vec<NativePermissionKind>, ReCtmError> {
+    if mode == NativeMode::Dangerous {
+        return Ok(Vec::new());
+    }
+
+    let mut needs = Vec::new();
+    let filtered = environment
+        .iter()
+        .map(|(key, value)| is_filtered_env_var(key, value))
+        .collect::<Result<Vec<_>, _>>()?;
+    if filtered.into_iter().any(|item| item) {
+        needs.push(NativePermissionKind::SensitiveEnv);
+    }
+    if case_insensitive_regex(DESTRUCTIVE_PATTERN)?.is_match(command) {
+        needs.push(NativePermissionKind::DestructiveCommand);
+    }
+    if mode == NativeMode::Trusted {
+        return Ok(needs);
+    }
+    if Regex::new(SHELL_EXPANSION_PATTERN)
+        .map_err(internal_regex_error)?
+        .is_match(command)
+    {
+        needs.push(NativePermissionKind::ShellExpansion);
+    }
+    if inline_script_command(command).is_some() {
+        needs.push(NativePermissionKind::InlineScript);
+    }
+    if case_insensitive_regex(NETWORK_PATTERN)?.is_match(command) {
+        needs.push(NativePermissionKind::Network);
+    }
+    Ok(needs)
 }
 
 pub fn is_filtered_env_var(name: &str, value: &str) -> Result<bool, ReCtmError> {
@@ -263,6 +308,33 @@ mod tests {
             result.map_err(|error| error.details.get("permission").cloned()),
             Err(Some(Value::String("network".to_owned())))
         );
+    }
+
+    #[test]
+    fn shadow_permission_classifier_preserves_current_mode_semantics() -> Result<(), ReCtmError> {
+        let environment = BTreeMap::from([("API_TOKEN".to_owned(), "secret".to_owned())]);
+        let command = "python3 -c 'print(1)' && curl https://example.com && rm -rf build";
+        assert_eq!(
+            classify_current_command_permissions(NativeMode::Safe, command, &environment)?,
+            vec![
+                NativePermissionKind::SensitiveEnv,
+                NativePermissionKind::DestructiveCommand,
+                NativePermissionKind::InlineScript,
+                NativePermissionKind::Network,
+            ]
+        );
+        assert_eq!(
+            classify_current_command_permissions(NativeMode::Trusted, command, &environment)?,
+            vec![
+                NativePermissionKind::SensitiveEnv,
+                NativePermissionKind::DestructiveCommand,
+            ]
+        );
+        assert!(
+            classify_current_command_permissions(NativeMode::Dangerous, command, &environment)?
+                .is_empty()
+        );
+        Ok(())
     }
 
     #[test]

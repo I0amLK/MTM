@@ -5,7 +5,10 @@ mod error;
 
 use serde::{Deserialize, Serialize};
 
-pub use enums::{DomainStatus, LatexPolicy, NativeMode, WorkflowRole, WorkflowState};
+pub use enums::{
+    DomainStatus, LatexPolicy, NativeMode, NativePermissionKind, NativePermissionScope,
+    NativePermissionTool, WorkflowRole, WorkflowState,
+};
 pub use error::{ErrorCategory, ReCtmError, invalid_argument, permission_denied};
 
 /// Number of public CTM-compatible native tools in the source contract.

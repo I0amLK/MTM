@@ -50,7 +50,7 @@
     {
       "id": "D1",
       "name": "typed permission contract and classifier",
-      "status": "in_progress"
+      "status": "accepted"
     },
     {
       "id": "D2",
@@ -73,6 +73,33 @@
       "status": "pending"
     }
   ],
+  "d1_receipt": {
+    "accepted_at": "2026-09-04T06:15:55-07:00",
+    "scope": "pre-authority typed contract and current-policy shadow classification only",
+    "typed_permission_kind_count": 8,
+    "typed_scope_count": 2,
+    "typed_tool_count": 2,
+    "canonical_argument_digest": "sha256 over recursively key-sorted JSON arguments",
+    "plain_request_mints_grant": false,
+    "production_check_command_policy_changed": false,
+    "bubblewrap_changed": false,
+    "workflow_authority_changed": false,
+    "tests": [
+      "Native permission wire enums match the frozen eight-kind/two-scope/two-tool contract.",
+      "Permission request parsing rejects unknown tool/kind/scope, empty reason, non-object arguments and ttl outside 1..=3600.",
+      "Canonical argument digests are invariant under JSON object key order and change when bound arguments change.",
+      "Safe/trusted/dangerous implicit Native profiles are explicit typed data.",
+      "A shadow classifier reports only permission dimensions already enforced by the accepted Rust command policy and deliberately does not invent long_timeout, privileged_executable or write_generated_or_ignored semantics."
+    ],
+    "validation": {
+      "cargo_fmt_check": true,
+      "contracts_tests": "5 passed",
+      "core_tests": "19 passed",
+      "contracts_core_clippy_warnings_denied": true,
+      "full_run_checks": true,
+      "git_diff_check": true
+    }
+  },
   "acceptance": {
     "A0": "Formatting, warnings-denied Clippy, workspace tests, governance, record-layout and unified local gate pass.",
     "A1": "Typed permission wire values, normalization, classifier ordering and current safe/trusted/dangerous compatibility are frozen by golden/adversarial tests.",
