@@ -100,8 +100,9 @@ def main() -> int:
     )
     mtm012_preview_mode = (
         progress.get("version") == "0.4.0-preview.3"
-        and progress.get("current_milestone") == "MTM-012"
-        and progress.get("status") in {"MTM-012-in-progress", "MTM-012-completed"}
+        and progress.get("current_milestone") in {"MTM-012", "MTM-013"}
+        and progress.get("status")
+        in {"MTM-012-in-progress", "MTM-012-completed", "MTM-013-in-progress"}
     )
     current_preview_mode = mtm011_preview_mode or mtm012_preview_mode
     historical_preview_mode = mtm009_preview_mode or current_preview_mode

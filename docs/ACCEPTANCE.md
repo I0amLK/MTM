@@ -79,3 +79,4 @@ the exact function or user-visible path improved.
 | MTM-008 | A0–A6, rollback drill, and Python retirement evidence |
 | MTM-009 | A0–A5 plus protocol-1/2 non-regression, deterministic bounded research-state projection, adversarial graph/firewall tests, copied-state rollback, and paired real web-driven mathematical evaluation with verified `.tex` non-regression |
 | MTM-012 | A0, A1, A3, A4 for compact-by-default TUI information hierarchy, verbose diagnostic fallback, redaction, and a real OAuth/MCP operator-monitor smoke |
+| MTM-013 | A0, A1, A3, A4, A5 for fail-closed capability refresh, validation-metadata consistency, clean public installation, existing-state upgrade, proof finalization, stable rollback/recutover and bounded soak |

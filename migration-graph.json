@@ -434,6 +434,39 @@
       ],
       "rollback": "Restore the preview.2 operator formatting and selector; no run, project, database, capability or proof artifact migration is involved.",
       "dependencies": ["MTM-011"]
+    },
+    {
+      "id": "MTM-013",
+      "title": "Stable 0.4.0 hardening and release qualification",
+      "status": "in_progress",
+      "priority": "P0",
+      "production_authority_before": "rust",
+      "production_authority_after": "rust",
+      "functional_goal": "Remove the remaining stable-release blockers by adding fail-closed recovery for transport-corrupted Rethlas capabilities, making complete-flow validation metadata authoritative and consistent, accepting supported GitHub cargo-install command layouts, then qualifying and deploying MTM 0.4.0 without changing protocol, persistence, verifier/finalizer or tool authority semantics.",
+      "scope": [
+        "On CAPABILITY_INVALID before any logical write, return an owner/run-checked fresh task envelope with writes_applied=0 and no authority granted to the malformed token",
+        "Keep revoked, stale, expired, cross-run and cross-owner capabilities denied rather than silently refreshed",
+        "Expose complete_flow_locally_validated from the RuntimeApplication composition fact instead of hard-coding a conflicting server_info value",
+        "Treat the login-shell cargo-installed mtm executable as valid when it has the accepted release identity even if it is not a selector symlink or byte-identical build",
+        "Freeze preview.3 user-visible behavior except for the two hardening fixes above, then build version 0.4.0 and run clean-clone install, existing-state upgrade, P3 default/P2 rollback, proof finalization, selector rollback/recutover and bounded soak qualification"
+      ],
+      "non_goals": [
+        "No new public tool, hidden alias, workflow state, SQLite schema, capability permission, vault channel, artifact kind, Agent runtime or model API",
+        "No automatic execution of writes/action after receiving an invalid capability; malformed tokens never authorize mutation",
+        "No removal of protocol 2 rollback or preview.3 selector rollback in the 0.4.0 release",
+        "No claim of support for operating systems or deployment layouts not covered by explicit stable release evidence"
+      ],
+      "acceptance_levels": ["A0", "A1", "A3", "A4", "A5"],
+      "validation_commands": [
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets -- -D warnings",
+        "cargo test --workspace",
+        "python3 scripts/validate_migration_graph.py",
+        "python3 scripts/validate_engineering_graph.py",
+        "python3 scripts/run_checks.py"
+      ],
+      "rollback": "Before stable deployment leave preview.3 selected. After stable deployment atomically restore /home/lk/.local/bin/mtm to preview.3; /home/lk/.cargo/bin/mtm may remain an independently installed compatible executable. No database, workflow run, capability, project revision or proof artifact rewrite is required.",
+      "dependencies": ["MTM-009", "MTM-011", "MTM-012"]
     }
   ],
   "edges": [
@@ -452,9 +485,12 @@
     {"source": "MTM-010", "target": "MTM-008"},
     {"source": "MTM-011", "target": "MTM-009"},
     {"source": "MTM-011", "target": "MTM-010"},
-    {"source": "MTM-012", "target": "MTM-011"}
+    {"source": "MTM-012", "target": "MTM-011"},
+    {"source": "MTM-013", "target": "MTM-009"},
+    {"source": "MTM-013", "target": "MTM-011"},
+    {"source": "MTM-013", "target": "MTM-012"}
   ],
-  "todo": [],
+  "todo": ["MTM-013"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -855,6 +891,22 @@
       "status_before": "in_progress",
       "status_after": "completed",
       "summary": "Closed the historical MTM-009 lifecycle without altering its immutable v1 evaluation: the research-state implementation and stabilization work are complete, while the frozen v1 paired mathematical default-cutover evaluation remains complete/rejected and conferred no protocol-3 default authority. The later prospective MTM-011 qualification remains the sole authority for the protocol-3 default cutover."
+    },
+    {
+      "event_id": "MEVT-051",
+      "milestone_id": "MTM-013",
+      "at": "2026-09-03T21:25:30-07:00",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "Approved a narrow stable-release hardening milestone after the user requested all remaining P0/P1 issues be fixed. Scope is limited to capability transport recovery, complete-flow validation metadata consistency, supported cargo-install command layout, and stable 0.4.0 qualification."
+    },
+    {
+      "event_id": "MEVT-052",
+      "milestone_id": "MTM-013",
+      "at": "2026-09-03T21:26:00-07:00",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Began MTM-013 with preview.3 still selected and all prior workflow/protocol/state authority frozen. No malformed capability may authorize writes; stable version promotion is forbidden until source hardening, real install/upgrade/rollback, proof finalization and complete local gates pass."
     }
   ],
   "receipt_contract": {

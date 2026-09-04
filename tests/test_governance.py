@@ -52,8 +52,9 @@ def deployment_mode() -> str:
         return "mtm011_preview"
     if (
         progress.get("version") == "0.4.0-preview.3"
-        and milestone == "MTM-012"
-        and progress.get("status") in {"MTM-012-in-progress", "MTM-012-completed"}
+        and milestone in {"MTM-012", "MTM-013"}
+        and progress.get("status")
+        in {"MTM-012-in-progress", "MTM-012-completed", "MTM-013-in-progress"}
     ):
         return "mtm012_preview"
     return "non_preview"
@@ -75,8 +76,8 @@ def historical_check_count(milestone: str) -> int:
 class GovernanceTestCase(unittest.TestCase):
     def test_repository_migration_graph_is_valid(self) -> None:
         summary = validate_migration(load_graph())
-        self.assertEqual(summary["milestone_count"], 12)
-        self.assertEqual(summary["todo_count"], 0)
+        self.assertEqual(summary["milestone_count"], 13)
+        self.assertEqual(summary["todo_count"], 1)
 
     def test_dependency_cycle_is_rejected(self) -> None:
         payload = copy.deepcopy(load_graph())

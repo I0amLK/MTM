@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "iteration_id": "ITER-013",
+  "milestone_id": "MTM-013",
+  "title": "Stable 0.4.0 hardening and release qualification",
+  "started_at": "2026-09-03T21:26:00-07:00",
+  "authority": {
+    "component_scope": "runtime hardening plus release qualification",
+    "before": "rust",
+    "target_after_acceptance": "rust",
+    "workflow_transition_authority_changed": false,
+    "finalizer_authority_changed": false,
+    "capability_permission_set_changed": false,
+    "state_schema_changed": false
+  },
+  "frozen_contract": {
+    "source_version_before": "0.4.0-preview.3",
+    "target_stable_version": "0.4.0",
+    "workflow_protocol_default": 3,
+    "protocol2_rollback_available": true,
+    "state_schema_version": 2,
+    "public_tool_count": 24,
+    "hidden_alias_count": 11,
+    "final_artifact": "proof_verified.tex",
+    "invalid_capability_never_authorizes_mutation": true,
+    "invalid_capability_recovery_requires_authenticated_owner_and_matching_run": true,
+    "invalid_capability_recovery_writes_applied": 0,
+    "revoked_or_cross_owner_capability_not_refreshable": true,
+    "complete_flow_validation_has_one_composition_source": true
+  },
+  "implementation_plan": [
+    "Add a dedicated CAPABILITY_INVALID recovery path before writes that calls owner-checked next_task(run_id), returns a fresh capability as recoverable correction, applies zero writes and never validates or revokes the malformed token as authority.",
+    "Add negative tests for single-character mutation, truncation, cross-run, cross-owner, revoked/stale/expired capabilities, writes_applied=0 and non-replay semantics.",
+    "Carry complete_flow_locally_validated into RuntimeToolBackend construction and expose the exact same value through server_info and gateway HTTP metadata.",
+    "Relax preview/stable command-layout validation from symlink-only to accepted executable identity for ~/.cargo/bin/mtm while keeping the versioned selector and rollback release hash-bound.",
+    "After source gates pass, freeze version 0.4.0, build the exact stable artifact, validate clean GitHub install and copied existing-state upgrade, run real proof finalization, selector rollback/recutover and bounded soak, then append the final receipt."
+  ],
+  "acceptance": {
+    "A0": "Full format, warnings-denied Clippy, workspace tests, governance and unified local gate pass.",
+    "A1": "Capability error taxonomy remains deterministic and stable; only CAPABILITY_INVALID before writes gets a fresh envelope and no malformed token gains write authority.",
+    "A3": "Cross-owner/run, revoked, stale, expired and verifier/finalizer firewalls remain fail-closed; no secret token is logged or persisted in release evidence.",
+    "A4": "Clean public install, existing-state upgrade, P3 default/P2 override, proof_verified.tex finalization, stable selector rollback and recutover pass on the supported Linux target.",
+    "A5": "Bounded stable-release soak/resource checks pass without unexplained process/thread/fd/state growth; no new performance claim is required."
+  },
+  "rollback": "Keep preview.3 installed and selected until stable qualification passes. After stable deployment, atomically restore preview.3 if needed; no persistent data or verified artifacts are rewritten.",
+  "manual_pending": [
+    "Implement and verify the capability refresh and complete-flow metadata fixes.",
+    "Qualify the exact stable 0.4.0 artifact from a committed source SHA.",
+    "Run clean install, existing-state upgrade, proof finalization, rollback/recutover and soak before completion."
+  ],
+  "decision": "in_progress"
+}
