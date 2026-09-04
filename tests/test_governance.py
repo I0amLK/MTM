@@ -245,6 +245,32 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(summary["initial_state"], "assess")
         self.assertEqual(summary["advanced_state"], "explore")
 
+    def test_mtm013_regression_receipt_does_not_overclaim_stable_live_evidence(self) -> None:
+        iteration = json.loads(
+            (ROOT / "records" / "iterations" / "ITER-013.json").read_text(encoding="utf-8")
+        )
+        receipt = iteration["regression_receipt"]
+        capability = receipt["invalid_capability_edge_corpus"]
+        self.assertEqual(capability["status"], "accepted_stable_candidate")
+        self.assertEqual(capability["integration_checks"], 12)
+        self.assertTrue(capability["single_character_mutation_refresh_zero_writes"])
+        self.assertTrue(capability["truncation_refresh_zero_writes"])
+        self.assertTrue(capability["fresh_resubmission_advances"])
+        self.assertTrue(capability["revoked_remains_denied"])
+        self.assertTrue(capability["cross_run_remains_denied"])
+        self.assertTrue(capability["cross_owner_refresh_remains_denied"])
+        self.assertTrue(capability["stale_not_refreshable"])
+        self.assertTrue(capability["expired_not_refreshable"])
+        self.assertTrue(capability["only_permission_capability_invalid_refreshable"])
+
+        live_math = receipt["live_web_math_semantic_regression"]
+        self.assertEqual(live_math["status"], "accepted_supplemental_not_exact_stable_binary")
+        self.assertEqual(live_math["runtime_version"], "0.4.0-preview.3")
+        self.assertTrue(live_math["exact_stable_live_rerun_pending"])
+        self.assertEqual(live_math["qc_constituent_matching"]["verdict"], "correct")
+        self.assertEqual(live_math["compact_proof"]["verdict"], "correct")
+        self.assertEqual(iteration["decision"], "in_progress")
+
     def test_current_mtm012_preview_release_is_installed_and_tui_qualified(self) -> None:
         if deployment_mode() != "mtm012_preview":
             self.skipTest("MTM-012 preview release is not the current deployment mode")

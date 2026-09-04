@@ -96,6 +96,54 @@
     "selector_changed_by_negative_test": false,
     "reason": "The coding environment has no GitHub write credential. Public-install and stable-deployment tooling both fail closed until the frozen source is present on public main and validated through cargo install --git."
   },
+  "regression_receipt": {
+    "recorded_at": "2026-09-03T22:59:14-07:00",
+    "invalid_capability_edge_corpus": {
+      "status": "accepted_stable_candidate",
+      "integration_report": "mtm013-runtime-hardening.json",
+      "integration_checks": 12,
+      "single_character_mutation_refresh_zero_writes": true,
+      "truncation_refresh_zero_writes": true,
+      "fresh_resubmission_advances": true,
+      "revoked_remains_denied": true,
+      "cross_run_remains_denied": true,
+      "cross_owner_refresh_remains_denied": true,
+      "classifier_unit_test": "cargo test -p mtm-runtime invalid_capability_refresh_classifier_is_narrow -- --nocapture",
+      "classifier_unit_test_passed": true,
+      "stale_not_refreshable": true,
+      "expired_not_refreshable": true,
+      "only_permission_capability_invalid_refreshable": true
+    },
+    "live_web_math_semantic_regression": {
+      "status": "accepted_supplemental_not_exact_stable_binary",
+      "runtime_version": "0.4.0-preview.3",
+      "scope": "These live web-model runs verify the mathematical workflow regression class on the currently connected preview.3 runtime. They supplement, but do not replace, exact stable-binary local proof-finalization evidence or the still-pending post-public-cutover stable live rerun.",
+      "qc_constituent_matching": {
+        "run_id": "run-qc-constituent-matching-regression-v2-d54abdf1ca1c",
+        "state": "done",
+        "verdict": "correct",
+        "final_artifact": "rethlas-output/qc-constituent-matching-regression-v2/proof_verified.tex",
+        "final_artifact_sha256": "95ad17e55f0094604251a7d30da2b9811a28889557b970ad33b475a0bd1318c0",
+        "checks": [
+          "self-reciprocal CRT constituents use the induced Hermitian dual",
+          "reciprocal factor pairs swap opposite-slot Euclidean dual constituents",
+          "the hull uses the matched cross-slot intersections",
+          "the q=2,m=7 reciprocal-cubic diagnostic rejects naive same-slot matching"
+        ]
+      },
+      "compact_proof": {
+        "run_id": "run-sigma-hermitian-complement-3cbe67857ba8",
+        "state": "done",
+        "verdict": "correct",
+        "latex_passed": true,
+        "sealed": true,
+        "final_artifact": "rethlas-output/run-sigma-hermitian-complement-3cbe67857ba8/proof_verified.tex",
+        "final_artifact_sha256": "c565320ed232bbc637447c0328d56fcc9e530377cd43efa24760eb5c2aabda8a"
+      },
+      "exact_stable_live_rerun_pending": true,
+      "pending_reason": "The 0.4.0 stable source is locally qualified but is not yet present on public main or selected in the live connector, so claiming these preview.3 semantic runs as exact stable-binary evidence would be false."
+    }
+  },
   "acceptance": {
     "A0": "Full format, warnings-denied Clippy, workspace tests, governance and unified local gate pass.",
     "A1": "Capability error taxonomy remains deterministic and stable; only CAPABILITY_INVALID before writes gets a fresh envelope and no malformed token gains write authority.",
@@ -105,7 +153,7 @@
   },
   "rollback": "Keep preview.3 installed and selected until stable qualification passes. After stable deployment, atomically restore preview.3 if needed; no persistent data or verified artifacts are rewritten.",
   "manual_pending": [
-    "Push the four MTM-009/013 commits through fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3 to GitHub main from an authenticated interactive shell, then verify cargo install --git from that exact public commit.",
+    "Push the stable-source chain through fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3 plus the subsequent qualification/governance commits to GitHub main from an authenticated interactive shell, then verify cargo install --git from the exact public stable source commit.",
     "After public installation passes, perform the already-prepared stable selector/cargo-command rollback/recutover drill before completing MTM-013."
   ],
   "decision": "in_progress"
