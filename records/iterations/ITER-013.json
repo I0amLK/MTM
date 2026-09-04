@@ -87,6 +87,15 @@
     "login_shell_command_rollback_preserved": true,
     "existing_runs_rewritten": false
   },
+  "public_distribution_gate": {
+    "status": "blocked_by_external_authentication",
+    "observed_public_main": "60883071931501a8700b29a8882587f4250c1ad3",
+    "required_source_commit": "fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3",
+    "public_install_negative_test_passed": true,
+    "stable_deployment_negative_test_passed": true,
+    "selector_changed_by_negative_test": false,
+    "reason": "The coding environment has no GitHub write credential. Public-install and stable-deployment tooling both fail closed until the frozen source is present on public main and validated through cargo install --git."
+  },
   "acceptance": {
     "A0": "Full format, warnings-denied Clippy, workspace tests, governance and unified local gate pass.",
     "A1": "Capability error taxonomy remains deterministic and stable; only CAPABILITY_INVALID before writes gets a fresh envelope and no malformed token gains write authority.",

@@ -156,6 +156,11 @@ def main() -> int:
         raise DeploymentError("stable qualification report drifted")
     if sha256_file(RESOURCE) != RESOURCE_SHA256:
         raise DeploymentError("stable resource report drifted")
+    if not PUBLIC_INSTALL.is_file():
+        raise DeploymentError(
+            "public stable-install evidence is missing; push the frozen source and run "
+            "scripts/run_mtm013_public_install.py before stable cutover"
+        )
     public_payload = json.loads(PUBLIC_INSTALL.read_text(encoding="utf-8"))
     public_summary = validate_public_install(public_payload)
     if public_summary.get("source_commit") != SOURCE_COMMIT:
@@ -251,4 +256,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except (OSError, json.JSONDecodeError, subprocess.SubprocessError, DeploymentError) as error:
+        print(json.dumps({"ok": False, "error": str(error)}, indent=2))
+        raise SystemExit(1)

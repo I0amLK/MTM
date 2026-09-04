@@ -182,4 +182,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except (OSError, subprocess.SubprocessError, RuntimeError, json.JSONDecodeError) as error:
+        print(json.dumps({"ok": False, "error": str(error)}, indent=2))
+        raise SystemExit(1)
