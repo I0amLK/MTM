@@ -270,6 +270,38 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(summary["generic_graph_dependencies"], 0)
         self.assertRegex(summary["graph_golden_digest"], r"^sha256:[0-9a-f]{64}$")
 
+    def test_mtm009_lifecycle_closure_preserves_rejected_delivery6(self) -> None:
+        graph = load_graph()
+        milestone = next(item for item in graph["milestones"] if item["id"] == "MTM-009")
+        self.assertEqual(milestone["status"], "completed")
+
+        iteration = json.loads(
+            (ROOT / "records" / "iterations" / "ITER-009.json").read_text(encoding="utf-8")
+        )
+        deliveries = {item["delivery"]: item for item in iteration["seven_deliveries"]}
+        self.assertEqual(deliveries[6]["status"], "complete_rejected")
+        self.assertEqual(deliveries[7]["status"], "superseded_by_mtm011")
+
+        historical = iteration["delivery_6_stabilization_receipt"]
+        self.assertEqual(
+            historical["status"],
+            "implemented_local_acceptance_passed_live_preview_requalification_pending",
+        )
+        closure = iteration["delivery_6_lifecycle_closure"]
+        self.assertEqual(closure["status"], "closed_complete_rejected")
+        self.assertTrue(closure["historical_stabilization_receipt_preserved"])
+        self.assertFalse(closure["actionable_mtm009_pending"])
+        terminal = closure["terminal_evaluation"]
+        self.assertEqual(terminal["complete_pairs"], 8)
+        self.assertEqual(terminal["protocol2_verified_tex"], 8)
+        self.assertEqual(terminal["protocol3_verified_tex"], 8)
+        self.assertFalse(terminal["release_gate_passed"])
+        self.assertEqual(terminal["decision"], "rejected")
+        self.assertEqual(
+            iteration["decision"],
+            "completed_with_v1_cutover_rejected_and_default_cutover_superseded_by_mtm011",
+        )
+
     def test_mtm011_cutover_contract_remains_frozen_through_qualification(self) -> None:
         corpus_path = ROOT / "conformance" / "mtm011-math-corpus.json"
         evaluation_path = ROOT / "mtm011-protocol3-cutover-evaluation.json"

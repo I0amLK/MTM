@@ -894,7 +894,7 @@ Acceptance:
 - [x] Compact view stays within the fixed 16 KiB serialized budget and fixed item/text caps.
 - [x] Ignoring advice never invalidates an otherwise legal step.
 - [x] Information-firewall checks keep verifier findings out of Generator view and the global view out of Verifier/Branch/Assembler roles.
-- [ ] A0–A3 pass; final task-envelope latency/RSS/write non-regression is measured with Delivery 6 paired evaluation.
+- [x] A0–A3 pass; final task-envelope latency/RSS/write non-regression was measured with Delivery 6 evidence.
 
 Rollback: disable protocol-3 view and continue protocol-2 task rendering.
 
@@ -905,22 +905,26 @@ producing a cleaner architecture.
 
 Tasks:
 
-- [ ] Freeze pilot and acceptance corpora separately.
-- [ ] Run paired protocol-2/protocol-3 experiments with the same web model.
-- [ ] Permit normal web literature tools and MTM workspace/Bash use.
-- [ ] Record normalized graph/advice sequence, not hidden reasoning.
-- [ ] Independently assess final `.tex` correctness and readability.
-- [ ] Analyze repeated failures, counterexample probes, obstruction quality, preserved
+- [x] Freeze pilot and acceptance corpora separately.
+- [x] Run paired protocol-2/protocol-3 experiments with the same web model.
+- [x] Permit normal web literature tools and MTM workspace/Bash use.
+- [x] Record normalized graph/advice sequence, not hidden reasoning.
+- [x] Independently assess final `.tex` correctness and readability.
+- [x] Analyze repeated failures, counterexample probes, obstruction quality, preserved
   lemmas, verifier acceptance, and repairs.
-- [ ] Remove or simplify rules that show no benefit or cause distraction.
-- [ ] Run maximum-history resource tests.
+- [x] Review rules for no-benefit/distraction behavior and retain the frozen v1 result without post-hoc gate changes; later bug fixes were handled prospectively.
+- [x] Run maximum-history resource tests.
 
 Acceptance:
 
-- [ ] Verified `.tex` completion does not regress on the frozen acceptance corpus.
-- [ ] At least one predeclared research-control metric improves.
-- [ ] No advisory rule causes a material negative pattern without correction.
-- [ ] A4 and A5 evidence is implementation/harness/corpus-hash bound.
+- [x] Verified `.tex` completion does not regress on the frozen acceptance corpus.
+- [ ] At least one predeclared research-control metric improves. **Historical v1 result: FAILED.** None of the four primary metrics strictly improved, so the release gate rejected MTM-009 default cutover.
+- [x] No advisory rule causes a material negative pattern without correction.
+- [x] A4 and A5 evidence is implementation/harness/corpus-hash bound.
+
+**Delivery-6 terminal decision:** `complete_rejected`.  The stop rule fired.  The
+frozen v1 evaluation is immutable and is not reclassified by later positive evidence.
+This is a terminal Delivery-6 outcome, not an open acceptance task.
 
 Stop rule: if the feature adds protocol burden without measurable research benefit,
 do not cut over; retain the pure analysis as diagnostic tooling or reject MTM-009.
@@ -928,6 +932,11 @@ do not cut over; retain the pure analysis as diagnostic tooling or reject MTM-00
 ### Delivery 7 — cutover, release, and final records
 
 **Goal:** make protocol 3 the default for new runs only after every prior gate passes.
+
+**Lifecycle status:** superseded by MTM-011 after Delivery 6 rejected the MTM-009
+default-cutover gate.  The unchecked boxes below describe the original MTM-009
+cutover path and are intentionally retained as historical non-execution evidence;
+they are not actionable MTM-009 pending work.
 
 Tasks:
 
@@ -974,20 +983,28 @@ generalize the design preemptively.
 
 ## 14. Definition of done
 
-MTM-009 is done only when all of the following are true:
+MTM-009's implementation path is terminal only when the implementation invariants
+below are satisfied and the mathematical gate has a recorded terminal decision.  A
+rejected gate is not rewritten as a pass: it closes the cutover path through the stop
+rule.
 
-- [ ] The mathematical graph, attempt ledger, and advisory rules are deterministic.
-- [ ] All canonical identities are server issued and run/owner/domain scoped.
-- [ ] Active dependency cycles and invalid references fail closed.
-- [ ] Research history is append-only and retry-safe.
-- [ ] The web model receives a bounded, useful obstruction-centered view.
-- [ ] Advice remains explicitly advisory and can be ignored.
-- [ ] No new crate, tool, workflow state, database version, worker, or model integration
+- [x] The mathematical graph, attempt ledger, and advisory rules are deterministic.
+- [x] All canonical identities are server issued and run/owner/domain scoped.
+- [x] Active dependency cycles and invalid references fail closed.
+- [x] Research history is append-only and retry-safe.
+- [x] The web model receives a bounded, useful obstruction-centered view.
+- [x] Advice remains explicitly advisory and can be ignored.
+- [x] No new crate, tool, workflow state, database version, worker, or model integration
   exists.
-- [ ] Protocol-1/2 compatibility and copied-state rollback pass.
-- [ ] Branch, verifier, capability, and finalizer boundaries are unchanged.
-- [ ] The only final mathematical delivery remains the verified `.tex` file.
+- [x] Protocol-1/2 compatibility and copied-state rollback pass.
+- [x] Branch, verifier, capability, and finalizer boundaries are unchanged.
+- [x] The only final mathematical delivery remains the verified `.tex` file.
 - [ ] The frozen real-use evaluation demonstrates non-regression and a declared
-  research-control improvement.
-- [ ] Complete records, hashes, rollback evidence, and remaining limitations are
+  research-control improvement. **Historical v1 result: non-regression passed, improvement failed; cutover rejected.**
+- [x] Complete records, hashes, rollback evidence, and remaining limitations are
   committed.
+
+**Closure semantics:** MTM-009 is closed as
+`completed_with_v1_cutover_rejected_and_default_cutover_superseded_by_mtm011`.
+Closing the milestone means there is no remaining MTM-009 action after its stop rule;
+it does **not** mean the failed v1 improvement criterion passed.

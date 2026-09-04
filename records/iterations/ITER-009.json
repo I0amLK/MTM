@@ -675,6 +675,24 @@
       "Do not make protocol 3 the production default until the frozen paired real-web A4 evaluation and deterministic release gate pass."
     ]
   },
+  "delivery_6_lifecycle_closure": {
+    "status": "closed_complete_rejected",
+    "recorded_at": "2026-09-03T22:59:14-07:00",
+    "historical_stabilization_receipt_preserved": true,
+    "historical_pending_interpretation": "delivery_6_stabilization_receipt is a point-in-time stabilization snapshot. Its manual_pending list is retained unchanged as historical evidence and is not the current milestone action list.",
+    "terminal_evaluation": {
+      "evaluation_id": "mtm009-web-mathematics-v1",
+      "complete_pairs": 8,
+      "protocol2_verified_tex": 8,
+      "protocol3_verified_tex": 8,
+      "release_gate_passed": false,
+      "decision": "rejected",
+      "reason": "No predeclared primary research-control metric strictly improved, so the Delivery-6 stop rule rejected MTM-009 default cutover."
+    },
+    "cutover_disposition": "MTM-009 Delivery 7 was not executed as an MTM-009 acceptance path and was later superseded by MTM-011. No failed MTM-009 criterion is retroactively rewritten as accepted.",
+    "retrospective_regression_note": "Later live QC constituent-matching and compact proof regressions are supplemental non-regression evidence only; they do not alter the immutable v1 Delivery-6 decision.",
+    "actionable_mtm009_pending": false
+  },
   "preview_release_receipt": {
     "status": "installed_preview_not_milestone_completion",
     "version": "0.4.0-preview.1",
