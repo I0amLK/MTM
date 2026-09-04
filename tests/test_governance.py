@@ -76,7 +76,7 @@ class GovernanceTestCase(unittest.TestCase):
     def test_repository_migration_graph_is_valid(self) -> None:
         summary = validate_migration(load_graph())
         self.assertEqual(summary["milestone_count"], 12)
-        self.assertEqual(summary["todo_count"], 1)
+        self.assertEqual(summary["todo_count"], 0)
 
     def test_dependency_cycle_is_rejected(self) -> None:
         payload = copy.deepcopy(load_graph())

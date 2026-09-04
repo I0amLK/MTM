@@ -3,7 +3,7 @@
   "iteration_id": "ITER-009",
   "milestone_id": "MTM-009",
   "started_at": "2026-09-01T22:44:00-07:00",
-  "completed_at": null,
+  "completed_at": "2026-09-03T21:24:38-07:00",
   "authority_before": "rust",
   "authority_after": "rust",
   "production_authority_changed": false,
@@ -83,14 +83,14 @@
     {
       "delivery": 6,
       "name": "paired_web_driven_mathematical_evaluation",
-      "status": "in_progress",
+      "status": "complete_rejected",
       "production_behavior_changed": false,
       "goal": "Compare protocol 2 and 3 on a frozen real-use corpus with normal web research, workspace Bash/CAS and independent evaluation of final verified .tex outputs."
     },
     {
       "delivery": 7,
       "name": "cutover_release_and_final_receipt",
-      "status": "planned",
+      "status": "superseded_by_mtm011",
       "production_behavior_changed": true,
       "goal": "Make protocol 3 the default only after all engineering and mathematical gates pass, prove rollback on copied state, qualify the release and complete the final receipt."
     }
@@ -970,5 +970,5 @@
     "Other operating systems and site-local research/CAS layouts remain release-specific evidence."
   ],
   "rollback": "Before protocol-3 cutover, delete MTM-009 scaffolding and remain on the accepted MTM-008 release. After cutover, revert the new-run protocol default to 2 or reinstall the accepted MTM-008 release only after copied protocol-3 state has been proven safely resumable; never rewrite existing final artifacts.",
-  "decision": "v1_complete_cutover_rejected_pending_new_qualification"
+  "decision": "completed_with_v1_cutover_rejected_and_default_cutover_superseded_by_mtm011"
 }

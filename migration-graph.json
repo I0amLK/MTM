@@ -291,7 +291,7 @@
     {
       "id": "MTM-009",
       "title": "Mathematical research state and obstruction-centered guidance",
-      "status": "in_progress",
+      "status": "completed",
       "priority": "P0",
       "production_authority_before": "rust",
       "production_authority_after": "rust",
@@ -454,7 +454,7 @@
     {"source": "MTM-011", "target": "MTM-010"},
     {"source": "MTM-012", "target": "MTM-011"}
   ],
-  "todo": ["MTM-009"],
+  "todo": [],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -847,6 +847,14 @@
       "status_before": "in_progress",
       "status_after": "completed",
       "summary": "Completed the compact TUI preview after release preview.3 passed twenty real OAuth/MCP presentation checks, was installed without overwriting preview.2, survived a real preview.3-to-preview.2 rollback and preview.3 recutover, and both supported shell command paths resolved to the accepted preview.3 binary while existing sessions were left running."
+    },
+    {
+      "event_id": "MEVT-050",
+      "milestone_id": "MTM-009",
+      "at": "2026-09-03T21:24:38-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "summary": "Closed the historical MTM-009 lifecycle without altering its immutable v1 evaluation: the research-state implementation and stabilization work are complete, while the frozen v1 paired mathematical default-cutover evaluation remains complete/rejected and conferred no protocol-3 default authority. The later prospective MTM-011 qualification remains the sole authority for the protocol-3 default cutover."
     }
   ],
   "receipt_contract": {
@@ -2524,6 +2532,52 @@
         "Existing long-running sessions may be restarted on preview.3 only when operationally desired."
       ],
       "decision": "accepted"
+    },
+    {
+      "receipt_id": "MREC-009",
+      "milestone_id": "MTM-009",
+      "started_at": "2026-09-01T22:44:00-07:00",
+      "completed_at": "2026-09-03T21:24:38-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "docs(mtm009): close historical research-state milestone [MTM-009]",
+      "files_changed": [
+        "migration-graph.json",
+        "project-progress.json",
+        "records/iterations/ITER-009.json",
+        "tests/test_governance.py",
+        "local-validation.json"
+      ],
+      "commands": [
+        {
+          "command": "python3 scripts/validate_mtm009_math_evaluation.py && python3 scripts/validate_mtm011_math_evaluation.py",
+          "exit_code": 0,
+          "result": "The immutable MTM-009 v1 evaluation remains complete/rejected with release_gate_passed=false, while the separate prospective MTM-011 evaluation remains complete/accepted."
+        },
+        {
+          "command": "python3 scripts/validate_migration_graph.py && python3 -m unittest tests.test_governance",
+          "exit_code": 0,
+          "result": "Lifecycle closure is internally consistent: MTM-009 is completed, no actionable migration TODO remains, and the rejected v1 cutover result is not reclassified as accepted."
+        }
+      ],
+      "acceptance": {
+        "A0": {"passed": true, "evidence": ["Governance, migration and unified local validation remain green after lifecycle closure."]},
+        "A1": {"passed": true, "evidence": ["The MTM-009 research-state contracts and immutable evaluation hashes are unchanged."]},
+        "A2": {"passed": true, "evidence": ["No historical differential, target evidence or implementation authority was rewritten."]},
+        "A3": {"passed": true, "evidence": ["Capability, verifier/finalizer and workflow authority boundaries are unchanged."]},
+        "A4": {"passed": true, "evidence": ["The v1 real-web mathematical evaluation is complete and rejected for protocol-3 default cutover exactly as originally finalized."]},
+        "A5": {"passed": true, "evidence": ["The previously accepted MTM-009 resource evidence remains historical evidence; later release qualification is separately bound to MTM-011/012 artifacts."]}
+      },
+      "behavior_before": "MTM-009 implementation and its v1 evaluation were already finished, but the migration node and Delivery 6 record still said in_progress, leaving a stale P0 TODO after MTM-011 and MTM-012 had completed.",
+      "behavior_after": "MTM-009 is lifecycle-complete. Its research-state implementation is accepted, its frozen v1 default-cutover evaluation remains complete/rejected, and protocol-3 default authority is explicitly attributed only to MTM-011.",
+      "risk_review": "This is a governance-only closure. It does not mutate the frozen MTM-009 v1 corpus, scores, thresholds, evaluation SHA, release decision, source implementation, installed selector, workflow state or artifacts.",
+      "rollback": "Revert only this lifecycle-record closure if governance semantics are disputed; do not modify the immutable MTM-009 v1 evaluation or any later MTM-011/012 evidence.",
+      "manual_pending": [
+        "None for MTM-009 itself. Stable 0.4.0 qualification is tracked separately."
+      ],
+      "decision": "completed_with_v1_cutover_rejected"
     }
   ]
 }
