@@ -1,14 +1,32 @@
+use std::fmt;
+
 use mtm_contracts::{ErrorCategory, ReCtmError};
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PatchOperation {
     pub kind: String,
     pub path: String,
     pub add_content: Option<String>,
     pub hunks: Vec<Vec<String>>,
     pub move_to: Option<String>,
+}
+
+impl fmt::Debug for PatchOperation {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("PatchOperation")
+            .field("kind", &self.kind)
+            .field("path", &self.path)
+            .field(
+                "add_content",
+                &self.add_content.as_ref().map(|_| "[REDACTED]"),
+            )
+            .field("hunk_count", &self.hunks.len())
+            .field("move_to", &self.move_to)
+            .finish()
+    }
 }
 
 impl PatchOperation {
@@ -285,6 +303,16 @@ mod tests {
             apply_update_hunks("line1\r\nline2\r\n", &hunks, "a.txt")?,
             "line1\r\nchanged\r\n"
         );
+        Ok(())
+    }
+
+    #[test]
+    fn operation_debug_redacts_patch_content() -> Result<(), ReCtmError> {
+        let operations = parse_patch(
+            "*** Begin Patch\n*** Add File: out.txt\n+SECRET_PATCH_BODY\n*** End Patch\n",
+        )?;
+        let debug = format!("{:?}", operations[0]);
+        assert!(!debug.contains("SECRET_PATCH_BODY"));
         Ok(())
     }
 }

@@ -1,13 +1,270 @@
 use std::collections::BTreeMap;
 use std::fmt;
+use std::fs;
+use std::os::unix::fs::MetadataExt;
+use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
 use mtm_contracts::{
     ErrorCategory, NativePermissionKind, NativePermissionScope, NativePermissionTool, ReCtmError,
 };
-use mtm_core::{NativePermissionRequest, canonical_arguments_sha256};
+use mtm_core::{
+    EffectiveNativePolicy, ExecInvocation, ExecPermissionFacts, NativeInvocation,
+    NativePermissionRequest, ResolvedExecutableFact, canonical_arguments_sha256,
+};
 use mtm_storage::StoreRuntime;
 use serde_json::{Map, Value};
+
+const SANDBOX_WORKSPACE_ROOT: &str = "/workspace";
+const SYSTEM_SANDBOX_ROOTS: [&str; 9] = [
+    "/usr",
+    "/bin",
+    "/sbin",
+    "/lib",
+    "/lib64",
+    "/etc",
+    "/var/lib/texmf",
+    "/var/cache/fontconfig",
+    "/var/cache/fonts",
+];
+
+/// Collect filesystem-dependent executable facts for the D3 shadow evaluator.
+///
+/// Resolution uses the exact sandbox PATH supplied by the existing toolchain
+/// exposure plan.  It does not consult the caller's login-shell PATH and it
+/// never starts a command.
+pub fn collect_exec_permission_facts(
+    invocation: &ExecInvocation,
+    workspace: &Path,
+    sandbox_path: &str,
+    exposed_read_only_roots: &[PathBuf],
+) -> Result<ExecPermissionFacts, ReCtmError> {
+    let workspace = workspace.canonicalize().map_err(|_| {
+        security(
+            "NATIVE_EXECUTABLE_WORKSPACE_INVALID",
+            "Native executable facts require an existing workspace.",
+        )
+    })?;
+    let workdir = workspace
+        .join(invocation.workdir())
+        .canonicalize()
+        .map_err(|_| {
+            security(
+                "NATIVE_EXECUTABLE_WORKDIR_CHANGED",
+                "Native executable workdir could not be revalidated.",
+            )
+        })?;
+    if !workdir.starts_with(&workspace) || !workdir.is_dir() {
+        return Err(security(
+            "NATIVE_EXECUTABLE_WORKDIR_CHANGED",
+            "Native executable workdir escaped the workspace.",
+        ));
+    }
+    let visible_roots = visible_read_roots(exposed_read_only_roots);
+    let mut resolved = Vec::new();
+    let mut unresolved = Vec::new();
+    for requested in invocation.executable_candidates()? {
+        match resolve_sandbox_executable(
+            &requested,
+            &workspace,
+            &workdir,
+            sandbox_path,
+            &visible_roots,
+        )? {
+            Some(path) => resolved.push(executable_fact(&requested, path)?),
+            None => unresolved.push(requested),
+        }
+    }
+    ExecPermissionFacts::with_unresolved(invocation, resolved, unresolved)
+}
+
+/// Recheck all executable identity and mode facts immediately before a future
+/// command start.  D3 exposes this only to shadow tests; production execution
+/// remains on the accepted pre-cutover path.
+pub fn revalidate_exec_permission_facts(
+    invocation: &ExecInvocation,
+    expected: &ExecPermissionFacts,
+    workspace: &Path,
+    sandbox_path: &str,
+    exposed_read_only_roots: &[PathBuf],
+) -> Result<(), ReCtmError> {
+    let current = collect_exec_permission_facts(
+        invocation,
+        workspace,
+        sandbox_path,
+        exposed_read_only_roots,
+    )?;
+    if &current != expected {
+        return Err(security(
+            "NATIVE_EXECUTABLE_CHANGED",
+            "Command executable metadata changed after permission classification.",
+        ));
+    }
+    Ok(())
+}
+
+fn visible_read_roots(exposed_read_only_roots: &[PathBuf]) -> Vec<PathBuf> {
+    SYSTEM_SANDBOX_ROOTS
+        .iter()
+        .map(PathBuf::from)
+        .chain(exposed_read_only_roots.iter().cloned())
+        .filter_map(|path| path.canonicalize().ok())
+        .collect()
+}
+
+fn resolve_sandbox_executable(
+    requested: &str,
+    workspace: &Path,
+    workdir: &Path,
+    sandbox_path: &str,
+    visible_roots: &[PathBuf],
+) -> Result<Option<PathBuf>, ReCtmError> {
+    let requested_path = Path::new(requested);
+    if requested_path.is_absolute() {
+        if requested_path == Path::new(SANDBOX_WORKSPACE_ROOT)
+            || requested_path.starts_with(SANDBOX_WORKSPACE_ROOT)
+        {
+            let relative = requested_path
+                .strip_prefix(SANDBOX_WORKSPACE_ROOT)
+                .map_err(|_| {
+                    security(
+                        "NATIVE_EXECUTABLE_PATH_DENIED",
+                        "Absolute workspace executable could not be normalized.",
+                    )
+                })?;
+            return inspect_workspace_candidate(&workspace.join(relative), workspace);
+        }
+        return inspect_visible_candidate(requested_path, visible_roots);
+    }
+
+    if requested.contains('/') {
+        return inspect_workspace_candidate(&workdir.join(requested_path), workspace);
+    }
+
+    for entry in sandbox_path.split(':').filter(|entry| !entry.is_empty()) {
+        let entry_path = Path::new(entry);
+        let candidate = if entry_path == Path::new(SANDBOX_WORKSPACE_ROOT)
+            || entry_path.starts_with(SANDBOX_WORKSPACE_ROOT)
+        {
+            let relative = entry_path
+                .strip_prefix(SANDBOX_WORKSPACE_ROOT)
+                .map_err(|_| {
+                    security(
+                        "NATIVE_EXECUTABLE_PATH_DENIED",
+                        "Sandbox PATH workspace entry could not be normalized.",
+                    )
+                })?;
+            workspace.join(relative).join(requested)
+        } else {
+            entry_path.join(requested)
+        };
+        let resolved = match candidate.canonicalize() {
+            Ok(path) => path,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
+            Err(_) => {
+                return Err(security(
+                    "NATIVE_EXECUTABLE_INSPECTION_FAILED",
+                    "A sandbox PATH executable could not be inspected.",
+                ));
+            }
+        };
+        if resolved.starts_with(workspace)
+            || visible_roots
+                .iter()
+                .any(|root| resolved == *root || resolved.starts_with(root))
+        {
+            return Ok(Some(resolved));
+        }
+        return Err(security(
+            "NATIVE_EXECUTABLE_PATH_DENIED",
+            "Sandbox PATH resolved outside the workspace and exposed read-only roots.",
+        ));
+    }
+    Ok(None)
+}
+
+fn inspect_workspace_candidate(
+    candidate: &Path,
+    workspace: &Path,
+) -> Result<Option<PathBuf>, ReCtmError> {
+    let resolved = match candidate.canonicalize() {
+        Ok(path) => path,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(_) => {
+            return Err(security(
+                "NATIVE_EXECUTABLE_INSPECTION_FAILED",
+                "A workspace executable could not be inspected.",
+            ));
+        }
+    };
+    if !resolved.starts_with(workspace) {
+        return Err(security(
+            "NATIVE_EXECUTABLE_PATH_DENIED",
+            "A workspace executable resolved outside the workspace.",
+        ));
+    }
+    Ok(Some(resolved))
+}
+
+fn inspect_visible_candidate(
+    candidate: &Path,
+    visible_roots: &[PathBuf],
+) -> Result<Option<PathBuf>, ReCtmError> {
+    let resolved = match candidate.canonicalize() {
+        Ok(path) => path,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(_) => {
+            return Err(security(
+                "NATIVE_EXECUTABLE_INSPECTION_FAILED",
+                "An exposed executable could not be inspected.",
+            ));
+        }
+    };
+    if !visible_roots
+        .iter()
+        .any(|root| resolved == *root || resolved.starts_with(root))
+    {
+        return Err(security(
+            "NATIVE_EXECUTABLE_PATH_DENIED",
+            "Absolute executable is not visible in the Native sandbox.",
+        ));
+    }
+    Ok(Some(resolved))
+}
+
+fn executable_fact(
+    requested: &str,
+    resolved_path: PathBuf,
+) -> Result<ResolvedExecutableFact, ReCtmError> {
+    let metadata = fs::metadata(&resolved_path).map_err(|_| {
+        security(
+            "NATIVE_EXECUTABLE_INSPECTION_FAILED",
+            "Executable metadata could not be read.",
+        )
+    })?;
+    if !metadata.is_file() || metadata.mode() & 0o111 == 0 {
+        return Err(security(
+            "NATIVE_EXECUTABLE_NOT_EXECUTABLE",
+            "Resolved command executable is not an executable file.",
+        ));
+    }
+    let modified_fingerprint = format!(
+        "{}:{}:{}:{}",
+        metadata.mtime(),
+        metadata.mtime_nsec(),
+        metadata.ctime(),
+        metadata.ctime_nsec()
+    );
+    Ok(ResolvedExecutableFact::new(
+        requested,
+        resolved_path,
+        metadata.dev(),
+        metadata.ino(),
+        metadata.mode(),
+        metadata.size(),
+        Some(modified_fingerprint),
+    ))
+}
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct NativePermissionGrantId(String);
@@ -112,6 +369,50 @@ impl NativePermissionPermit {
         self.scope
     }
 }
+
+/// Invocation-level proof that every permission missing from the Native mode
+/// profile was satisfied atomically by an exact process-local grant.
+///
+/// This type is deliberately non-`Clone`, has no public constructor, and stores
+/// no grant identifiers or raw invocation arguments.
+#[derive(Debug, Eq, PartialEq)]
+pub struct NativeInvocationPermissionPermit {
+    tool: NativePermissionTool,
+    arguments_sha256: String,
+    permissions: Vec<NativePermissionKind>,
+    once_grant_count: usize,
+    session_grant_count: usize,
+}
+
+impl NativeInvocationPermissionPermit {
+    #[must_use]
+    pub const fn tool(&self) -> NativePermissionTool {
+        self.tool
+    }
+
+    #[must_use]
+    pub fn arguments_sha256(&self) -> &str {
+        &self.arguments_sha256
+    }
+
+    #[must_use]
+    pub fn permissions(&self) -> &[NativePermissionKind] {
+        &self.permissions
+    }
+
+    #[must_use]
+    pub const fn once_grant_count(&self) -> usize {
+        self.once_grant_count
+    }
+
+    #[must_use]
+    pub const fn session_grant_count(&self) -> usize {
+        self.session_grant_count
+    }
+}
+
+/// Short compatibility name for the invocation-level permit.
+pub type NativeInvocationPermit = NativeInvocationPermissionPermit;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct GrantRecord {
@@ -260,6 +561,140 @@ impl NativePermissionGrantAuthority {
         })
     }
 
+    /// Atomically locate and consume grants for every permission still missing
+    /// from an effective profile evaluation.
+    pub fn authorize_invocation(
+        &self,
+        owner_id: &str,
+        workspace: &str,
+        policy: &EffectiveNativePolicy,
+    ) -> Result<NativeInvocationPermissionPermit, ReCtmError> {
+        // `EffectiveNativePolicy` is a pure reporting value.  Its explicit set
+        // is intentionally not authority-bearing, so only the profile-derived
+        // implicit set may reduce the grants located in this ledger.
+        let required = policy
+            .required()
+            .iter()
+            .copied()
+            .filter(|kind| !policy.implicitly_granted().contains(kind))
+            .collect::<Vec<_>>();
+        self.authorize_matching_digest(
+            owner_id,
+            workspace,
+            policy.tool(),
+            &required,
+            policy.arguments_sha256(),
+        )
+    }
+
+    /// Compatibility entry point for callers that still hold the complete raw
+    /// public argument map.  The digest is computed exactly once before taking
+    /// the ledger lock; grant IDs are never supplied by the caller.
+    pub fn authorize_matching_grants(
+        &self,
+        owner_id: &str,
+        workspace: &str,
+        tool: NativePermissionTool,
+        required: &[NativePermissionKind],
+        arguments: &Map<String, Value>,
+    ) -> Result<NativeInvocationPermissionPermit, ReCtmError> {
+        let invocation = NativeInvocation::parse(tool, arguments)?;
+        self.authorize_matching_digest(
+            owner_id,
+            workspace,
+            tool,
+            required,
+            invocation.arguments_sha256(),
+        )
+    }
+
+    fn authorize_matching_digest(
+        &self,
+        owner_id: &str,
+        workspace: &str,
+        tool: NativePermissionTool,
+        required: &[NativePermissionKind],
+        arguments_sha256: &str,
+    ) -> Result<NativeInvocationPermissionPermit, ReCtmError> {
+        let mut required_set = std::collections::BTreeSet::new();
+        if required
+            .iter()
+            .any(|kind| !permission_matches_tool(tool, *kind) || !required_set.insert(*kind))
+        {
+            return Err(denied(
+                "NATIVE_PERMISSION_GRANT_SET_AMBIGUOUS",
+                "Permission requirements contain invalid or duplicate coverage.",
+            ));
+        }
+        let ordered_required = match tool {
+            NativePermissionTool::ExecCommand => mtm_core::exec_permission_order()
+                .into_iter()
+                .filter(|kind| required_set.contains(kind))
+                .collect::<Vec<_>>(),
+            NativePermissionTool::ApplyPatch => vec![NativePermissionKind::WriteGeneratedOrIgnored]
+                .into_iter()
+                .filter(|kind| required_set.contains(kind))
+                .collect::<Vec<_>>(),
+        };
+        let mut grants = self.lock_grants()?;
+        let now = self.runtime.clock.unix_seconds()?;
+        let mut selected = Vec::new();
+
+        for kind in &ordered_required {
+            let candidates = grants
+                .iter()
+                .filter(|(_, record)| {
+                    record.owner_id == owner_id
+                        && record.workspace == workspace
+                        && record.tool == tool
+                        && record.kind == *kind
+                        && record.arguments_sha256 == arguments_sha256
+                        && !record.revoked
+                        && now < record.expires_at
+                        && !(record.scope == NativePermissionScope::Once && record.consumed)
+                })
+                .map(|(grant_id, _)| grant_id.clone())
+                .collect::<Vec<_>>();
+            match candidates.as_slice() {
+                [grant_id] => selected.push((grant_id.clone(), *kind)),
+                [] => {
+                    return Err(denied(
+                        "NATIVE_PERMISSION_GRANT_SET_INCOMPLETE",
+                        "No complete exact grant set exists for this Native invocation.",
+                    ));
+                }
+                _ => {
+                    return Err(denied(
+                        "NATIVE_PERMISSION_GRANT_SET_AMBIGUOUS",
+                        "Multiple eligible grants cover one Native permission kind.",
+                    ));
+                }
+            }
+        }
+
+        let mut once_grant_count = 0;
+        let mut session_grant_count = 0;
+        for (grant_id, _) in &selected {
+            let record = grants.get_mut(grant_id).ok_or_else(|| {
+                internal("Selected Native permission grant disappeared while holding the lock")
+            })?;
+            match record.scope {
+                NativePermissionScope::Once => {
+                    record.consumed = true;
+                    once_grant_count += 1;
+                }
+                NativePermissionScope::Session => session_grant_count += 1,
+            }
+        }
+        Ok(NativeInvocationPermissionPermit {
+            tool,
+            arguments_sha256: arguments_sha256.to_owned(),
+            permissions: ordered_required,
+            once_grant_count,
+            session_grant_count,
+        })
+    }
+
     pub fn revoke(
         &self,
         grant_id: &NativePermissionGrantId,
@@ -306,6 +741,17 @@ fn denied(code: &str, message: &str) -> ReCtmError {
     ReCtmError::new(code, message).with_category(ErrorCategory::Permission)
 }
 
+fn permission_matches_tool(tool: NativePermissionTool, kind: NativePermissionKind) -> bool {
+    match tool {
+        NativePermissionTool::ExecCommand => kind != NativePermissionKind::WriteGeneratedOrIgnored,
+        NativePermissionTool::ApplyPatch => kind == NativePermissionKind::WriteGeneratedOrIgnored,
+    }
+}
+
+fn security(code: &str, message: &str) -> ReCtmError {
+    ReCtmError::new(code, message).with_category(ErrorCategory::Security)
+}
+
 fn internal(message: &str) -> ReCtmError {
     ReCtmError::new("NATIVE_PERMISSION_INTERNAL_ERROR", message)
         .with_category(ErrorCategory::Internal)
@@ -313,6 +759,8 @@ fn internal(message: &str) -> ReCtmError {
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
+    use std::os::unix::fs::PermissionsExt;
     use std::sync::atomic::{AtomicI64, AtomicUsize, Ordering};
     use std::sync::{Arc, Barrier};
     use std::thread;
@@ -420,6 +868,22 @@ mod tests {
 
     fn code(error: ReCtmError) -> String {
         error.code
+    }
+
+    fn issue(
+        authority: &NativePermissionGrantAuthority,
+        owner: &str,
+        workspace: &str,
+        kind: NativePermissionKind,
+        scope: NativePermissionScope,
+        arguments: &Map<String, Value>,
+        ttl_seconds: u64,
+    ) -> Result<NativePermissionGrantReceipt, ReCtmError> {
+        authority.issue_verified(consent(
+            owner,
+            workspace,
+            request(kind, scope, Value::Object(arguments.clone()), ttl_seconds)?,
+        ))
     }
 
     #[test]
@@ -706,6 +1170,739 @@ mod tests {
             .map(|record| format!("{record:?}"))
             .ok_or_else(|| internal("test grant record is missing"))?;
         assert!(!record_debug.contains(secret_command));
+        Ok(())
+    }
+
+    #[test]
+    fn multi_grant_authorization_consumes_all_or_none() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(8_000));
+        let authority = NativePermissionGrantAuthority::new(runtime(clock));
+        let args = arguments("curl https://example.com");
+        let network = issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::Network,
+            NativePermissionScope::Once,
+            &args,
+            300,
+        )?;
+        assert_eq!(
+            authority
+                .authorize_matching_grants(
+                    "owner-a",
+                    "/workspace/a",
+                    NativePermissionTool::ExecCommand,
+                    &[
+                        NativePermissionKind::Network,
+                        NativePermissionKind::LongTimeout,
+                    ],
+                    &args,
+                )
+                .map_err(code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        // The failed set lookup did not partially consume the network grant.
+        authority.authorize(
+            network.grant_id(),
+            "owner-a",
+            "/workspace/a",
+            NativePermissionTool::ExecCommand,
+            NativePermissionKind::Network,
+            &args,
+        )?;
+        Ok(())
+    }
+
+    #[test]
+    fn complete_multi_grant_set_is_consumed_in_one_critical_section() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(9_000));
+        let authority = NativePermissionGrantAuthority::new(runtime(clock));
+        let args = arguments("curl https://example.com");
+        for kind in [
+            NativePermissionKind::Network,
+            NativePermissionKind::LongTimeout,
+        ] {
+            issue(
+                &authority,
+                "owner-a",
+                "/workspace/a",
+                kind,
+                NativePermissionScope::Once,
+                &args,
+                300,
+            )?;
+        }
+        let permit = authority.authorize_matching_grants(
+            "owner-a",
+            "/workspace/a",
+            NativePermissionTool::ExecCommand,
+            &[
+                NativePermissionKind::LongTimeout,
+                NativePermissionKind::Network,
+            ],
+            &args,
+        )?;
+        assert_eq!(permit.once_grant_count(), 2);
+        assert_eq!(permit.session_grant_count(), 0);
+        assert_eq!(
+            permit.permissions(),
+            &[
+                NativePermissionKind::Network,
+                NativePermissionKind::LongTimeout,
+            ]
+        );
+        assert_eq!(
+            authority
+                .authorize_matching_grants(
+                    "owner-a",
+                    "/workspace/a",
+                    NativePermissionTool::ExecCommand,
+                    permit.permissions(),
+                    &args,
+                )
+                .map_err(code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn concurrent_multi_grant_set_has_exactly_one_full_winner() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(10_000));
+        let authority = Arc::new(NativePermissionGrantAuthority::new(runtime(clock)));
+        let args = arguments("curl https://example.com");
+        for kind in [
+            NativePermissionKind::Network,
+            NativePermissionKind::LongTimeout,
+        ] {
+            issue(
+                &authority,
+                "owner-a",
+                "/workspace/a",
+                kind,
+                NativePermissionScope::Once,
+                &args,
+                300,
+            )?;
+        }
+        let barrier = Arc::new(Barrier::new(8));
+        let successes = Arc::new(AtomicUsize::new(0));
+        let handles = (0..8)
+            .map(|_| {
+                let authority = Arc::clone(&authority);
+                let barrier = Arc::clone(&barrier);
+                let successes = Arc::clone(&successes);
+                let args = args.clone();
+                thread::spawn(move || {
+                    barrier.wait();
+                    if authority
+                        .authorize_matching_grants(
+                            "owner-a",
+                            "/workspace/a",
+                            NativePermissionTool::ExecCommand,
+                            &[
+                                NativePermissionKind::Network,
+                                NativePermissionKind::LongTimeout,
+                            ],
+                            &args,
+                        )
+                        .is_ok()
+                    {
+                        successes.fetch_add(1, Ordering::SeqCst);
+                    }
+                })
+            })
+            .collect::<Vec<_>>();
+        for handle in handles {
+            assert!(handle.join().is_ok());
+        }
+        assert_eq!(successes.load(Ordering::SeqCst), 1);
+        Ok(())
+    }
+
+    #[test]
+    fn mixed_session_and_once_grants_preserve_scope_semantics() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(11_000));
+        let authority = NativePermissionGrantAuthority::new(runtime(clock));
+        let args = arguments("curl https://example.com");
+        issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::Network,
+            NativePermissionScope::Session,
+            &args,
+            300,
+        )?;
+        issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::LongTimeout,
+            NativePermissionScope::Once,
+            &args,
+            300,
+        )?;
+        let required = [
+            NativePermissionKind::Network,
+            NativePermissionKind::LongTimeout,
+        ];
+        let permit = authority.authorize_matching_grants(
+            "owner-a",
+            "/workspace/a",
+            NativePermissionTool::ExecCommand,
+            &required,
+            &args,
+        )?;
+        assert_eq!(permit.once_grant_count(), 1);
+        assert_eq!(permit.session_grant_count(), 1);
+        assert_eq!(
+            authority
+                .authorize_matching_grants(
+                    "owner-a",
+                    "/workspace/a",
+                    NativePermissionTool::ExecCommand,
+                    &required,
+                    &args,
+                )
+                .map_err(code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        assert!(
+            authority
+                .authorize_matching_grants(
+                    "owner-a",
+                    "/workspace/a",
+                    NativePermissionTool::ExecCommand,
+                    &[NativePermissionKind::Network],
+                    &args,
+                )
+                .is_ok()
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn atomic_lookup_rejects_cross_bindings_without_partial_consumption() -> Result<(), ReCtmError>
+    {
+        let args = arguments("curl https://example.com");
+        let required = [
+            NativePermissionKind::Network,
+            NativePermissionKind::LongTimeout,
+        ];
+
+        for (wrong_owner, wrong_workspace) in
+            [("owner-b", "/workspace/a"), ("owner-a", "/workspace/b")]
+        {
+            let authority =
+                NativePermissionGrantAuthority::new(runtime(Arc::new(ManualClock::new(11_500))));
+            let valid = issue(
+                &authority,
+                "owner-a",
+                "/workspace/a",
+                NativePermissionKind::Network,
+                NativePermissionScope::Once,
+                &args,
+                300,
+            )?;
+            let cross_bound = issue(
+                &authority,
+                wrong_owner,
+                wrong_workspace,
+                NativePermissionKind::LongTimeout,
+                NativePermissionScope::Once,
+                &args,
+                300,
+            )?;
+            assert_eq!(
+                authority
+                    .authorize_matching_grants(
+                        "owner-a",
+                        "/workspace/a",
+                        NativePermissionTool::ExecCommand,
+                        &required,
+                        &args,
+                    )
+                    .map_err(code),
+                Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+            );
+            authority.authorize(
+                valid.grant_id(),
+                "owner-a",
+                "/workspace/a",
+                NativePermissionTool::ExecCommand,
+                NativePermissionKind::Network,
+                &args,
+            )?;
+            authority.authorize(
+                cross_bound.grant_id(),
+                wrong_owner,
+                wrong_workspace,
+                NativePermissionTool::ExecCommand,
+                NativePermissionKind::LongTimeout,
+                &args,
+            )?;
+        }
+
+        let authority =
+            NativePermissionGrantAuthority::new(runtime(Arc::new(ManualClock::new(11_750))));
+        let valid = issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::LongTimeout,
+            NativePermissionScope::Once,
+            &args,
+            300,
+        )?;
+        let patch_arguments = serde_json::json!({
+            "patch":"*** Begin Patch\n*** Add File: out.txt\n+text\n*** End Patch\n"
+        })
+        .as_object()
+        .cloned()
+        .unwrap_or_default();
+        let cross_tool_input = serde_json::json!({
+            "tool_name":"apply_patch",
+            "permission":"write_generated_or_ignored",
+            "reason":"verified test consent",
+            "arguments":patch_arguments,
+            "scope":"once",
+            "ttl_seconds":300,
+        });
+        let cross_tool_request = NativePermissionRequest::parse(
+            cross_tool_input
+                .as_object()
+                .ok_or_else(|| internal("test request must be an object"))?,
+        )?;
+        let cross_tool =
+            authority.issue_verified(consent("owner-a", "/workspace/a", cross_tool_request))?;
+        assert_eq!(
+            authority
+                .authorize_matching_grants(
+                    "owner-a",
+                    "/workspace/a",
+                    NativePermissionTool::ExecCommand,
+                    &required,
+                    &args,
+                )
+                .map_err(code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        authority.authorize(
+            valid.grant_id(),
+            "owner-a",
+            "/workspace/a",
+            NativePermissionTool::ExecCommand,
+            NativePermissionKind::LongTimeout,
+            &args,
+        )?;
+        authority.authorize(
+            cross_tool.grant_id(),
+            "owner-a",
+            "/workspace/a",
+            NativePermissionTool::ApplyPatch,
+            NativePermissionKind::WriteGeneratedOrIgnored,
+            &patch_arguments,
+        )?;
+        assert_eq!(cross_tool.tool(), NativePermissionTool::ApplyPatch);
+
+        let authority =
+            NativePermissionGrantAuthority::new(runtime(Arc::new(ManualClock::new(11_900))));
+        let network = issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::Network,
+            NativePermissionScope::Once,
+            &args,
+            300,
+        )?;
+        let mutated_args = arguments("curl https://other.example.com");
+        let mutated = issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::LongTimeout,
+            NativePermissionScope::Once,
+            &mutated_args,
+            300,
+        )?;
+        assert_eq!(
+            authority
+                .authorize_matching_grants(
+                    "owner-a",
+                    "/workspace/a",
+                    NativePermissionTool::ExecCommand,
+                    &required,
+                    &args,
+                )
+                .map_err(code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        authority.authorize(
+            network.grant_id(),
+            "owner-a",
+            "/workspace/a",
+            NativePermissionTool::ExecCommand,
+            NativePermissionKind::Network,
+            &args,
+        )?;
+        authority.authorize(
+            mutated.grant_id(),
+            "owner-a",
+            "/workspace/a",
+            NativePermissionTool::ExecCommand,
+            NativePermissionKind::LongTimeout,
+            &mutated_args,
+        )?;
+        Ok(())
+    }
+
+    #[test]
+    fn patch_grant_rejects_one_byte_argument_mutation_without_consumption() -> Result<(), ReCtmError>
+    {
+        let authority =
+            NativePermissionGrantAuthority::new(runtime(Arc::new(ManualClock::new(11_950))));
+        let original = serde_json::json!({
+            "patch":"*** Begin Patch\n*** Add File: target/out.txt\n+one\n*** End Patch\n",
+            "dry_run":false,
+        })
+        .as_object()
+        .cloned()
+        .unwrap_or_default();
+        let request_input = serde_json::json!({
+            "tool_name":"apply_patch",
+            "permission":"write_generated_or_ignored",
+            "reason":"verified test consent",
+            "arguments":original,
+            "scope":"once",
+            "ttl_seconds":300,
+        });
+        let permission_request = NativePermissionRequest::parse(
+            request_input
+                .as_object()
+                .ok_or_else(|| internal("test request must be an object"))?,
+        )?;
+        authority.issue_verified(consent("owner-a", "/workspace/a", permission_request))?;
+
+        let mutated = serde_json::json!({
+            "patch":"*** Begin Patch\n*** Add File: target/out.txt\n+two\n*** End Patch\n",
+            "dry_run":false,
+        })
+        .as_object()
+        .cloned()
+        .unwrap_or_default();
+        let required = [NativePermissionKind::WriteGeneratedOrIgnored];
+        assert_eq!(
+            authority
+                .authorize_matching_grants(
+                    "owner-a",
+                    "/workspace/a",
+                    NativePermissionTool::ApplyPatch,
+                    &required,
+                    &mutated,
+                )
+                .map_err(code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        let permit = authority.authorize_matching_grants(
+            "owner-a",
+            "/workspace/a",
+            NativePermissionTool::ApplyPatch,
+            &required,
+            &original,
+        )?;
+        assert_eq!(permit.once_grant_count(), 1);
+        assert_eq!(permit.permissions(), &required);
+        Ok(())
+    }
+
+    #[test]
+    fn invalid_member_never_consumes_another_grant() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(12_000));
+        let authority = NativePermissionGrantAuthority::new(runtime(Arc::clone(&clock)));
+        let args = arguments("curl https://example.com");
+        let expired = issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::Network,
+            NativePermissionScope::Once,
+            &args,
+            1,
+        )?;
+        let valid = issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::LongTimeout,
+            NativePermissionScope::Once,
+            &args,
+            300,
+        )?;
+        clock.set(12_001);
+        assert!(
+            authority
+                .authorize_matching_grants(
+                    "owner-a",
+                    "/workspace/a",
+                    NativePermissionTool::ExecCommand,
+                    &[
+                        NativePermissionKind::Network,
+                        NativePermissionKind::LongTimeout,
+                    ],
+                    &args,
+                )
+                .is_err()
+        );
+        authority.authorize(
+            valid.grant_id(),
+            "owner-a",
+            "/workspace/a",
+            NativePermissionTool::ExecCommand,
+            NativePermissionKind::LongTimeout,
+            &args,
+        )?;
+        assert_eq!(
+            authority
+                .authorize(
+                    expired.grant_id(),
+                    "owner-a",
+                    "/workspace/a",
+                    NativePermissionTool::ExecCommand,
+                    NativePermissionKind::Network,
+                    &args,
+                )
+                .map_err(code),
+            Err("NATIVE_PERMISSION_GRANT_EXPIRED".to_owned())
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn revoked_member_never_consumes_another_grant() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(12_500));
+        let authority = NativePermissionGrantAuthority::new(runtime(clock));
+        let args = arguments("curl https://example.com");
+        let revoked = issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::Network,
+            NativePermissionScope::Once,
+            &args,
+            300,
+        )?;
+        let valid = issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::LongTimeout,
+            NativePermissionScope::Once,
+            &args,
+            300,
+        )?;
+        authority.revoke(revoked.grant_id(), "owner-a", "/workspace/a")?;
+        assert!(
+            authority
+                .authorize_matching_grants(
+                    "owner-a",
+                    "/workspace/a",
+                    NativePermissionTool::ExecCommand,
+                    &[
+                        NativePermissionKind::Network,
+                        NativePermissionKind::LongTimeout,
+                    ],
+                    &args,
+                )
+                .is_err()
+        );
+        authority.authorize(
+            valid.grant_id(),
+            "owner-a",
+            "/workspace/a",
+            NativePermissionTool::ExecCommand,
+            NativePermissionKind::LongTimeout,
+            &args,
+        )?;
+        Ok(())
+    }
+
+    #[test]
+    fn duplicate_grant_coverage_is_ambiguous_and_consumes_none() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(13_000));
+        let authority = NativePermissionGrantAuthority::new(runtime(clock));
+        let args = arguments("curl https://example.com");
+        let left = issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::Network,
+            NativePermissionScope::Once,
+            &args,
+            300,
+        )?;
+        let right = issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::Network,
+            NativePermissionScope::Once,
+            &args,
+            300,
+        )?;
+        assert_eq!(
+            authority
+                .authorize_matching_grants(
+                    "owner-a",
+                    "/workspace/a",
+                    NativePermissionTool::ExecCommand,
+                    &[NativePermissionKind::Network],
+                    &args,
+                )
+                .map_err(code),
+            Err("NATIVE_PERMISSION_GRANT_SET_AMBIGUOUS".to_owned())
+        );
+        for receipt in [&left, &right] {
+            authority.authorize(
+                receipt.grant_id(),
+                "owner-a",
+                "/workspace/a",
+                NativePermissionTool::ExecCommand,
+                NativePermissionKind::Network,
+                &args,
+            )?;
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn effective_policy_drives_automatic_grant_lookup() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(14_000));
+        let authority = NativePermissionGrantAuthority::new(runtime(clock));
+        let args = arguments("curl https://example.com");
+        issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::Network,
+            NativePermissionScope::Once,
+            &args,
+            300,
+        )?;
+        let invocation = mtm_core::NativeInvocation::Exec(ExecInvocation::parse(&args)?);
+        let policy = EffectiveNativePolicy::evaluate(
+            mtm_contracts::NativeMode::Safe,
+            &invocation,
+            &[NativePermissionKind::Network],
+            &std::collections::BTreeSet::new(),
+        )?;
+        let permit = authority.authorize_invocation("owner-a", "/workspace/a", &policy)?;
+        assert_eq!(permit.permissions(), &[NativePermissionKind::Network]);
+        assert_eq!(permit.arguments_sha256(), policy.arguments_sha256());
+        Ok(())
+    }
+
+    #[test]
+    fn pure_policy_explicit_labels_cannot_bypass_grant_authority() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(14_500));
+        let authority = NativePermissionGrantAuthority::new(runtime(clock));
+        let args = arguments("curl https://example.com");
+        let invocation = mtm_core::NativeInvocation::Exec(ExecInvocation::parse(&args)?);
+        let policy = EffectiveNativePolicy::evaluate(
+            mtm_contracts::NativeMode::Safe,
+            &invocation,
+            &[NativePermissionKind::Network],
+            &std::collections::BTreeSet::from([NativePermissionKind::Network]),
+        )?;
+        assert!(policy.is_authorized());
+        assert_eq!(
+            authority
+                .authorize_invocation("owner-a", "/workspace/a", &policy)
+                .map_err(code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+
+        let trusted = EffectiveNativePolicy::evaluate(
+            mtm_contracts::NativeMode::Trusted,
+            &invocation,
+            &[NativePermissionKind::Network],
+            &std::collections::BTreeSet::new(),
+        )?;
+        let implicit = authority.authorize_invocation("owner-a", "/workspace/a", &trusted)?;
+        assert!(implicit.permissions().is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn executable_facts_detect_privileged_bits_and_metadata_mutation() -> Result<(), ReCtmError> {
+        let workspace = tempfile::tempdir().map_err(|error| internal(&error.to_string()))?;
+        let bin = workspace.path().join("bin");
+        fs::create_dir(&bin).map_err(|error| internal(&error.to_string()))?;
+        let executable = bin.join("fixture");
+        fs::write(&executable, "fixture").map_err(|error| internal(&error.to_string()))?;
+        fs::set_permissions(&executable, fs::Permissions::from_mode(0o4755))
+            .map_err(|error| internal(&error.to_string()))?;
+        let args = serde_json::json!({"argv":["fixture"],"workdir":"."})
+            .as_object()
+            .cloned()
+            .unwrap_or_default();
+        let invocation = ExecInvocation::parse(&args)?;
+        let facts =
+            collect_exec_permission_facts(&invocation, workspace.path(), "/workspace/bin", &[])?;
+        assert_eq!(facts.resolved_executables().len(), 1);
+        assert!(facts.resolved_executables()[0].is_privileged());
+        assert_eq!(
+            mtm_core::classify_exec_permissions(&invocation, &facts)?,
+            vec![NativePermissionKind::PrivilegedExecutable]
+        );
+        let relative_args = serde_json::json!({"argv":["./fixture"],"workdir":"bin"})
+            .as_object()
+            .cloned()
+            .unwrap_or_default();
+        let relative_invocation = ExecInvocation::parse(&relative_args)?;
+        let relative_facts =
+            collect_exec_permission_facts(&relative_invocation, workspace.path(), "/usr/bin", &[])?;
+        assert_eq!(relative_facts.resolved_executables().len(), 1);
+        assert_eq!(
+            relative_facts.resolved_executables()[0].resolved_path(),
+            executable
+        );
+        assert!(relative_facts.resolved_executables()[0].is_privileged());
+        fs::set_permissions(&executable, fs::Permissions::from_mode(0o755))
+            .map_err(|error| internal(&error.to_string()))?;
+        assert_eq!(
+            revalidate_exec_permission_facts(
+                &invocation,
+                &facts,
+                workspace.path(),
+                "/workspace/bin",
+                &[],
+            )
+            .map_err(code),
+            Err("NATIVE_EXECUTABLE_CHANGED".to_owned())
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn unresolvable_executable_fails_closed_without_command_text_in_error() -> Result<(), ReCtmError>
+    {
+        let workspace = tempfile::tempdir().map_err(|error| internal(&error.to_string()))?;
+        let secret = "secret-command-that-does-not-exist";
+        let args = serde_json::json!({"argv":[secret]})
+            .as_object()
+            .cloned()
+            .unwrap_or_default();
+        let invocation = ExecInvocation::parse(&args)?;
+        let facts = collect_exec_permission_facts(&invocation, workspace.path(), "/usr/bin", &[])?;
+        let error = mtm_core::classify_exec_permissions(&invocation, &facts)
+            .err()
+            .ok_or_else(|| internal("unresolved test executable unexpectedly classified"))?;
+        assert_eq!(error.code, "NATIVE_EXECUTABLE_UNRESOLVED");
+        assert!(!error.to_string().contains(secret));
+        assert!(!format!("{facts:?}").contains(secret));
         Ok(())
     }
 }

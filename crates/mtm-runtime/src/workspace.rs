@@ -6,7 +6,7 @@ use std::time::UNIX_EPOCH;
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 use mtm_contracts::{ErrorCategory, ReCtmError};
-use mtm_core::{apply_update_hunks, parse_patch};
+use mtm_core::{PatchInvocation, PatchPathFact, apply_update_hunks, parse_patch};
 use mtm_native::{CommandManager, CommandManagerConfig, CommandRequest, PollRequest};
 use regex::{Regex, RegexBuilder};
 use serde_json::{Map, Value};
@@ -504,6 +504,152 @@ impl NativeWorkspace {
             }
         }
         Ok(serde_json::json!({"matches":matches,"total_matches":matches.len(),"truncated":false}))
+    }
+
+    /// Collect the path and Git-ignore facts used by the D3 shadow permission
+    /// evaluator.  This validates every source and destination but performs no
+    /// write and does not affect the authoritative `apply_patch` path.
+    pub fn collect_patch_permission_facts(
+        &self,
+        invocation: &PatchInvocation,
+    ) -> Result<Vec<PatchPathFact>, ReCtmError> {
+        let mut paths = BTreeSet::new();
+        for operation in invocation.operations() {
+            match operation.kind.as_str() {
+                "add" => {
+                    self.resolve_for_write(&operation.path)?;
+                    paths.insert(operation.path.clone());
+                }
+                "delete" => {
+                    let source = self.resolve_existing(&operation.path)?;
+                    if source.path.is_dir() {
+                        return Err(validation_code("PATCH_FAILED", "Cannot patch a directory."));
+                    }
+                    fs::read_to_string(&source.path).map_err(|_| {
+                        validation_code("UNSUPPORTED_ENCODING", "Patch target is not valid UTF-8.")
+                    })?;
+                    paths.insert(operation.path.clone());
+                }
+                "update" => {
+                    let source = self.resolve_existing(&operation.path)?;
+                    if source.path.is_dir() {
+                        return Err(validation_code("PATCH_FAILED", "Cannot patch a directory."));
+                    }
+                    let old = fs::read_to_string(&source.path).map_err(|_| {
+                        validation_code("UNSUPPORTED_ENCODING", "Patch target is not valid UTF-8.")
+                    })?;
+                    apply_update_hunks(&old, &operation.hunks, &operation.path)?;
+                    paths.insert(operation.path.clone());
+                    if let Some(destination) = &operation.move_to {
+                        self.resolve_for_write(destination)?;
+                        paths.insert(destination.clone());
+                    }
+                }
+                _ => return Err(validation_code("PATCH_FAILED", "Unknown patch operation.")),
+            }
+        }
+
+        let repository = self.permission_git_repository()?;
+        paths
+            .into_iter()
+            .map(|path| {
+                let git_ignored = if repository {
+                    self.permission_git_ignored(&path)?
+                } else {
+                    false
+                };
+                PatchPathFact::new(path, git_ignored)
+            })
+            .collect()
+    }
+
+    fn permission_git_repository(&self) -> Result<bool, ReCtmError> {
+        let output = self.run_sync(
+            vec![
+                "git".to_owned(),
+                "-C".to_owned(),
+                self.root.display().to_string(),
+                "rev-parse".to_owned(),
+                "--is-inside-work-tree".to_owned(),
+            ],
+            5_000,
+            16_384,
+        )
+        .map_err(|_| {
+            ReCtmError::new(
+                "NATIVE_GIT_IGNORE_LOOKUP_FAILED",
+                "Git repository detection could not be started during patch permission classification.",
+            )
+            .with_category(ErrorCategory::Security)
+        })?;
+        let declared_repository = self.root.join(".git").exists();
+        match output["exit_code"].as_i64() {
+            Some(0)
+                if output["stdout"]
+                    .as_str()
+                    .is_some_and(|text| text.trim() == "true") =>
+            {
+                Ok(true)
+            }
+            Some(128)
+                if !declared_repository
+                    && output["stderr"]
+                        .as_str()
+                        .is_some_and(|text| text.contains("not a git repository")) =>
+            {
+                Ok(false)
+            }
+            Some(128)
+                if output["stderr"]
+                    .as_str()
+                    .is_some_and(|text| text.contains("not a git repository")) =>
+            {
+                Err(ReCtmError::new(
+                    "NATIVE_GIT_IGNORE_LOOKUP_FAILED",
+                    "A declared Git repository could not be inspected during patch permission classification.",
+                )
+                .with_category(ErrorCategory::Security))
+            }
+            _ => Err(ReCtmError::new(
+                "NATIVE_GIT_IGNORE_LOOKUP_FAILED",
+                "Git repository detection failed during patch permission classification.",
+            )
+            .with_category(ErrorCategory::Security)),
+        }
+    }
+
+    fn permission_git_ignored(&self, path: &str) -> Result<bool, ReCtmError> {
+        let output = self
+            .run_sync(
+                vec![
+                    "git".to_owned(),
+                    "-C".to_owned(),
+                    self.root.display().to_string(),
+                    "check-ignore".to_owned(),
+                    "--quiet".to_owned(),
+                    "--no-index".to_owned(),
+                    "--".to_owned(),
+                    path.to_owned(),
+                ],
+                5_000,
+                16_384,
+            )
+            .map_err(|_| {
+                ReCtmError::new(
+                "NATIVE_GIT_IGNORE_LOOKUP_FAILED",
+                "Git ignore lookup could not be started during patch permission classification.",
+            )
+            .with_category(ErrorCategory::Security)
+            })?;
+        match output["exit_code"].as_i64() {
+            Some(0) => Ok(true),
+            Some(1) => Ok(false),
+            _ => Err(ReCtmError::new(
+                "NATIVE_GIT_IGNORE_LOOKUP_FAILED",
+                "Git ignore lookup failed during patch permission classification.",
+            )
+            .with_category(ErrorCategory::Security)),
+        }
     }
 
     pub fn apply_patch(&self, patch: &str, dry_run: bool) -> Result<Value, ReCtmError> {
@@ -1313,6 +1459,8 @@ fn io_error(error: std::io::Error) -> ReCtmError {
 
 #[cfg(test)]
 mod tests {
+    use std::process::Command;
+
     use super::*;
     #[test]
     fn workspace_rejects_escape_and_reads_text() -> Result<(), ReCtmError> {
@@ -1326,6 +1474,236 @@ mod tests {
             Value::String("a.txt".into()),
         )]))?;
         assert_eq!(result["total_lines"], 2);
+        Ok(())
+    }
+
+    fn run_git(root: &Path, arguments: &[&str]) -> Result<(), ReCtmError> {
+        let status = Command::new("git")
+            .arg("-C")
+            .arg(root)
+            .args(arguments)
+            .status()
+            .map_err(io_error)?;
+        if !status.success() {
+            return Err(internal("test git command failed"));
+        }
+        Ok(())
+    }
+
+    fn patch_invocation(patch: &str, dry_run: bool) -> Result<PatchInvocation, ReCtmError> {
+        let arguments = serde_json::json!({"patch":patch,"dry_run":dry_run})
+            .as_object()
+            .cloned()
+            .unwrap_or_default();
+        PatchInvocation::parse(&arguments)
+    }
+
+    #[test]
+    fn patch_permission_facts_follow_git_ignore_and_component_rules() -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        fs::create_dir(temp.path().join("ignored")).map_err(io_error)?;
+        fs::create_dir(temp.path().join("nested")).map_err(io_error)?;
+        fs::create_dir(temp.path().join("builder")).map_err(io_error)?;
+        fs::create_dir(temp.path().join("target")).map_err(io_error)?;
+        fs::write(temp.path().join(".gitignore"), "ignored/\n").map_err(io_error)?;
+        fs::write(temp.path().join("nested/.gitignore"), "*.tmp\n!keep.tmp\n").map_err(io_error)?;
+        run_git(temp.path(), &["init", "--quiet"])?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let patch = concat!(
+            "*** Begin Patch\n",
+            "*** Add File: ignored/root.txt\n",
+            "+root\n",
+            "*** Add File: nested/drop.tmp\n",
+            "+drop\n",
+            "*** Add File: nested/keep.tmp\n",
+            "+keep\n",
+            "*** Add File: builder/file.txt\n",
+            "+builder\n",
+            "*** Add File: target/file.txt\n",
+            "+target\n",
+            "*** End Patch\n",
+        );
+        let invocation = patch_invocation(patch, false)?;
+        let facts = workspace.collect_patch_permission_facts(&invocation)?;
+        let facts = facts
+            .iter()
+            .map(|fact| (fact.path(), fact))
+            .collect::<BTreeMap<_, _>>();
+        assert!(facts["ignored/root.txt"].git_ignored());
+        assert!(facts["nested/drop.tmp"].git_ignored());
+        assert!(!facts["nested/keep.tmp"].git_ignored());
+        assert!(!facts["builder/file.txt"].canonical_generated_component());
+        assert!(facts["target/file.txt"].canonical_generated_component());
+        Ok(())
+    }
+
+    #[test]
+    fn patch_permission_facts_cover_ignored_updates_deletes_and_moves() -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        fs::create_dir(temp.path().join("ignored")).map_err(io_error)?;
+        fs::create_dir(temp.path().join("ordinary")).map_err(io_error)?;
+        fs::write(temp.path().join(".gitignore"), "ignored/\n").map_err(io_error)?;
+        for path in [
+            "ignored/update.txt",
+            "ignored/delete.txt",
+            "ordinary/move-in.txt",
+            "ignored/move-out.txt",
+        ] {
+            fs::write(temp.path().join(path), "old\n").map_err(io_error)?;
+        }
+        run_git(temp.path(), &["init", "--quiet"])?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+
+        let patches = [
+            concat!(
+                "*** Begin Patch\n",
+                "*** Update File: ignored/update.txt\n",
+                "@@\n",
+                "-old\n",
+                "+new\n",
+                "*** End Patch\n",
+            ),
+            concat!(
+                "*** Begin Patch\n",
+                "*** Delete File: ignored/delete.txt\n",
+                "*** End Patch\n",
+            ),
+            concat!(
+                "*** Begin Patch\n",
+                "*** Update File: ordinary/move-in.txt\n",
+                "*** Move to: ignored/move-in.txt\n",
+                "@@\n",
+                "-old\n",
+                "+new\n",
+                "*** End Patch\n",
+            ),
+            concat!(
+                "*** Begin Patch\n",
+                "*** Update File: ignored/move-out.txt\n",
+                "*** Move to: ordinary/move-out.txt\n",
+                "@@\n",
+                "-old\n",
+                "+new\n",
+                "*** End Patch\n",
+            ),
+        ];
+        for patch in patches {
+            let invocation = patch_invocation(patch, false)?;
+            let facts = workspace.collect_patch_permission_facts(&invocation)?;
+            assert_eq!(
+                mtm_core::classify_patch_permissions(&invocation, &facts)?,
+                vec![mtm_contracts::NativePermissionKind::WriteGeneratedOrIgnored]
+            );
+        }
+
+        let ignored_add = concat!(
+            "*** Begin Patch\n",
+            "*** Add File: ignored/dry-run.txt\n",
+            "+new\n",
+            "*** End Patch\n",
+        );
+        let dry_run = patch_invocation(ignored_add, true)?;
+        let dry_run_facts = workspace.collect_patch_permission_facts(&dry_run)?;
+        assert!(dry_run_facts[0].git_ignored());
+        assert!(mtm_core::classify_patch_permissions(&dry_run, &dry_run_facts)?.is_empty());
+        assert!(!temp.path().join("ignored/dry-run.txt").exists());
+
+        let real = patch_invocation(ignored_add, false)?;
+        let real_facts = workspace.collect_patch_permission_facts(&real)?;
+        assert_eq!(
+            mtm_core::classify_patch_permissions(&real, &real_facts)?,
+            vec![mtm_contracts::NativePermissionKind::WriteGeneratedOrIgnored]
+        );
+        assert!(!temp.path().join("ignored/dry-run.txt").exists());
+        assert_eq!(
+            fs::read_to_string(temp.path().join("ignored/update.txt")).map_err(io_error)?,
+            "old\n"
+        );
+        assert!(temp.path().join("ignored/delete.txt").exists());
+        assert!(!temp.path().join("ignored/move-in.txt").exists());
+        assert!(!temp.path().join("ordinary/move-out.txt").exists());
+        Ok(())
+    }
+
+    #[test]
+    fn patch_permission_fact_collection_denies_symlink_destination() -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        fs::write(temp.path().join("real.txt"), "unchanged\n").map_err(io_error)?;
+        std::os::unix::fs::symlink("real.txt", temp.path().join("link.txt")).map_err(io_error)?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let invocation = patch_invocation(
+            "*** Begin Patch\n*** Add File: link.txt\n+changed\n*** End Patch\n",
+            false,
+        )?;
+        assert_eq!(
+            workspace
+                .collect_patch_permission_facts(&invocation)
+                .map_err(|error| error.code),
+            Err("SYMLINK_WRITE_DENIED".to_owned())
+        );
+        assert_eq!(
+            fs::read_to_string(temp.path().join("real.txt")).map_err(io_error)?,
+            "unchanged\n"
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn patch_permission_facts_support_non_repository_dry_run_without_writes()
+    -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let patch = "*** Begin Patch\n*** Add File: ordinary.txt\n+text\n*** End Patch\n";
+        let invocation = patch_invocation(patch, true)?;
+        let facts = workspace.collect_patch_permission_facts(&invocation)?;
+        assert_eq!(facts.len(), 1);
+        assert!(!facts[0].git_ignored());
+        assert!(!temp.path().join("ordinary.txt").exists());
+        assert!(mtm_core::classify_patch_permissions(&invocation, &facts)?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn patch_permission_facts_fail_closed_on_broken_git_metadata() -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        fs::write(temp.path().join(".git"), "gitdir: /definitely/missing\n").map_err(io_error)?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let invocation = patch_invocation(
+            "*** Begin Patch\n*** Add File: ordinary.txt\n+text\n*** End Patch\n",
+            false,
+        )?;
+        assert_eq!(
+            workspace
+                .collect_patch_permission_facts(&invocation)
+                .map_err(|error| error.code),
+            Err("NATIVE_GIT_IGNORE_LOOKUP_FAILED".to_owned())
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn dry_run_fact_collection_validates_hunks_without_writing() -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        let target = temp.path().join("source.txt");
+        fs::write(&target, "actual\n").map_err(io_error)?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let invalid = patch_invocation(
+            "*** Begin Patch\n*** Update File: source.txt\n@@\n-missing\n+changed\n*** End Patch\n",
+            true,
+        )?;
+        assert_eq!(
+            workspace
+                .collect_patch_permission_facts(&invalid)
+                .map_err(|error| error.code),
+            Err("PATCH_CONTEXT_NOT_FOUND".to_owned())
+        );
+        assert_eq!(fs::read_to_string(target).map_err(io_error)?, "actual\n");
         Ok(())
     }
 }

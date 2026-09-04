@@ -135,7 +135,7 @@ class GovernanceTestCase(unittest.TestCase):
         delivery = {item["id"]: item["status"] for item in iteration["delivery"]}
         self.assertEqual(delivery["D1"], "accepted")
         self.assertEqual(delivery["D2"], "accepted")
-        self.assertEqual(delivery["D3"], "in_progress")
+        self.assertEqual(delivery["D3"], "accepted")
         d3 = iteration["d3_contract"]
         self.assertEqual(
             d3["exec_permission_order"],
@@ -174,6 +174,24 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertFalse(d3["production_exec_command_changed"])
         self.assertFalse(d3["production_apply_patch_changed"])
         self.assertFalse(d3["bubblewrap_changed"])
+        d3_receipt = iteration["d3_receipt"]
+        self.assertEqual(d3_receipt["authority_mode"], "shadow_only_before_d5")
+        self.assertTrue(d3_receipt["complete_original_argument_digest"])
+        self.assertTrue(d3_receipt["cmd_and_argv_remain_distinct"])
+        self.assertTrue(d3_receipt["intrinsic_exec_classification_mode_neutral"])
+        self.assertTrue(d3_receipt["effective_policy_deterministic"])
+        self.assertFalse(d3_receipt["pure_explicit_labels_are_authority_bearing"])
+        self.assertTrue(d3_receipt["ledger_grants_required_for_explicit_authority"])
+        self.assertTrue(d3_receipt["atomic_multi_grant_lookup"])
+        self.assertFalse(d3_receipt["client_supplied_grant_id_required"])
+        self.assertFalse(d3_receipt["atomic_authorization_partial_consumption_possible"])
+        self.assertFalse(d3_receipt["production_request_permissions_changed"])
+        self.assertFalse(d3_receipt["production_check_command_policy_changed"])
+        self.assertFalse(d3_receipt["production_exec_command_changed"])
+        self.assertFalse(d3_receipt["production_apply_patch_changed"])
+        self.assertFalse(d3_receipt["bubblewrap_changed"])
+        self.assertFalse(d3_receipt["workflow_authority_changed"])
+        self.assertFalse(d3_receipt["validation"]["accepted_mtm013_evidence_changed"])
         d2 = iteration["d2_receipt"]
         self.assertTrue(d2["application_resident"])
         self.assertEqual(d2["persistence"], "none")

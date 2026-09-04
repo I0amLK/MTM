@@ -15,8 +15,16 @@ pub use command_policy::{
 };
 pub use evaluator::evaluate_request;
 pub use native_permission::{
-    DEFAULT_PERMISSION_TTL_SECONDS, MAX_PERMISSION_TTL_SECONDS, NativePermissionRequest,
-    canonical_arguments_sha256, native_mode_implicitly_grants,
+    CANONICAL_GENERATED_OR_EXCLUDED_COMPONENTS, DEFAULT_EXEC_MAX_OUTPUT_BYTES,
+    DEFAULT_EXEC_PREVIEW_BYTES, DEFAULT_EXEC_TIMEOUT_MS, DEFAULT_EXEC_YIELD_TIME_MS,
+    DEFAULT_PERMISSION_TTL_SECONDS, EffectiveNativePolicy, ExecInvocation, ExecInvocationForm,
+    ExecPermissionFacts, LONG_TIMEOUT_THRESHOLD_MS_EXCLUSIVE, MAX_EXEC_MAX_OUTPUT_BYTES,
+    MAX_EXEC_PREVIEW_BYTES, MAX_EXEC_TIMEOUT_MS, MAX_EXEC_YIELD_TIME_MS,
+    MAX_PERMISSION_TTL_SECONDS, NativeEffectivePolicy, NativeInvocation, NativePermissionRequest,
+    PatchInvocation, PatchPathFact, ResolvedExecutableFact, canonical_arguments_sha256,
+    classify_exec_permissions, classify_patch_permissions, exec_permission_order,
+    generated_or_excluded_components, has_canonical_generated_component,
+    native_mode_implicitly_grants,
 };
 pub use patch::{PatchOperation, apply_update_hunks, parse_patch};
 pub use path_policy::validate_workspace_path;

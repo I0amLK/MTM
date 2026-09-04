@@ -60,7 +60,7 @@
     {
       "id": "D3",
       "name": "effective Native policy and complete eight-kind enforcement",
-      "status": "in_progress"
+      "status": "accepted"
     },
     {
       "id": "D4",
@@ -183,6 +183,95 @@
     "production_apply_patch_changed": false,
     "bubblewrap_changed": false
   },
+  "d3_receipt": {
+    "accepted_at": "2026-09-05T02:13:50+08:00",
+    "scope": "shadow-only typed exec and patch invocation evaluation, runtime filesystem facts, deterministic effective policy, and atomic invocation-level grant lookup; no production permission or isolation cutover",
+    "authority_mode": "shadow_only_before_d5",
+    "typed_invocation_variants": 2,
+    "complete_original_argument_digest": true,
+    "cmd_and_argv_remain_distinct": true,
+    "filesystem_fact_collection_layer": "mtm-runtime",
+    "intrinsic_exec_classification_mode_neutral": true,
+    "exec_permission_order": [
+      "sensitive_env",
+      "destructive_command",
+      "shell_expansion",
+      "inline_script",
+      "network",
+      "long_timeout",
+      "privileged_executable"
+    ],
+    "patch_permission_order": ["write_generated_or_ignored"],
+    "effective_policy_deterministic": true,
+    "pure_explicit_labels_are_authority_bearing": false,
+    "ledger_grants_required_for_explicit_authority": true,
+    "atomic_multi_grant_lookup": true,
+    "client_supplied_grant_id_required": false,
+    "atomic_authorization_partial_consumption_possible": false,
+    "executable_metadata_revalidation_error": "NATIVE_EXECUTABLE_CHANGED",
+    "production_request_permissions_changed": false,
+    "production_check_command_policy_changed": false,
+    "production_exec_command_changed": false,
+    "production_apply_patch_changed": false,
+    "bubblewrap_changed": false,
+    "workflow_authority_changed": false,
+    "edge_corpus": {
+      "command_risk_ordering": [
+        "one safe-profile command combining sensitive environment, destructive command, shell expansion, inline script, network, 30001 ms timeout, and privileged executable reports all seven kinds in frozen order"
+      ],
+      "boundary_values": [
+        "timeouts 1 and 30000 do not require long_timeout",
+        "timeouts 30001 and 600000 require long_timeout",
+        "timeout 600001 fails schema validation",
+        "yield_time 30000 alone does not require long_timeout"
+      ],
+      "command_parsing": [
+        "cmd and argv parse to distinct typed forms",
+        "env assignment wrapper, pipeline, and && control segments expose every statically selected executable",
+        "quoted metacharacters and heredoc bodies do not become executable candidates",
+        "literal argv metacharacters do not become shell expansion",
+        "relative workspace executable and bare executable through the supplied sandbox PATH resolve without consulting login-shell PATH",
+        "unresolvable executable fails closed without exposing command text",
+        "setuid and setgid fixtures require privileged_executable",
+        "executable metadata mutation fails revalidation with NATIVE_EXECUTABLE_CHANGED"
+      ],
+      "patch_classification": [
+        "dry-run ignored add performs complete validation, requires no permission, and writes nothing",
+        "real ignored add requires write_generated_or_ignored",
+        "ignored update, ignored delete, move into ignored destination, and move out of ignored source all require write_generated_or_ignored",
+        "target is a canonical component while builder is not",
+        "root and nested Git ignore rules plus negation are honored",
+        "non-repository workspace succeeds and broken declared Git metadata fails closed",
+        "symlink destination is denied before authorization and remains unchanged",
+        "one-byte patch argument mutation cannot use or consume the original bound grant"
+      ],
+      "multi_grant_atomicity": [
+        "one of two required grants missing consumes neither",
+        "two once grants are consumed together exactly once",
+        "eight concurrent invocations over the same two once grants produce exactly one full winner",
+        "session plus once scope preserves reuse and one-shot semantics",
+        "expired plus valid and revoked plus valid sets consume no valid member",
+        "duplicate coverage fails closed and consumes none",
+        "cross-owner, cross-workspace, cross-tool, and argument-mutated bindings fail closed without partial consumption"
+      ],
+      "secret_and_debug_behavior": [
+        "typed invocation and patch-operation Debug omit raw command bodies, patch content, stdin, and environment values",
+        "Debug output for grant receipts and permits exposes no raw grant identifier",
+        "ledger records retain only canonical argument digests, not full argument JSON"
+      ]
+    },
+    "validation": {
+      "cargo_fmt_check": true,
+      "core_native_permission_tests": "19 passed",
+      "core_patch_filter_tests": "7 passed",
+      "runtime_native_permission_tests": "19 passed",
+      "runtime_workspace_tests": "7 passed",
+      "core_runtime_clippy_warnings_denied": true,
+      "full_run_checks": true,
+      "git_diff_check": true,
+      "accepted_mtm013_evidence_changed": false
+    }
+  },
   "acceptance": {
     "A0": "Formatting, warnings-denied Clippy, workspace tests, governance, record-layout and unified local gate pass.",
     "A1": "Typed permission wire values, normalization, classifier ordering and current safe/trusted/dangerous compatibility are frozen by golden/adversarial tests.",
@@ -207,6 +296,24 @@
       "stage": "section 6 unified local gate under the default sandbox",
       "failure": "The first required run_checks.py invocation reached the MTM-007 conformance harness but could not create its localhost socket and exited with PermissionError: [Errno 1] Operation not permitted before project conformance executed.",
       "repair": "Reran the unchanged required gate outside the restrictive sandbox with the approved loopback capability; all 24 checks passed and no gate was weakened or skipped."
+    },
+    {
+      "delivery": 3,
+      "stage": "initial mtm-core D3 implementation compile",
+      "failure": "The first focused compile used incorrect reference levels in BTreeMap contains_key/get lookups and did not compile.",
+      "repair": "Corrected the exact key borrowing at the lookup sites, reran the unchanged focused suite, and retained the fail-closed fact coverage checks."
+    },
+    {
+      "delivery": 3,
+      "stage": "non-repository patch fact regression",
+      "failure": "The first non-repository workspace test inherited enclosing /tmp Git metadata in the sandbox and was misclassified during repository failure handling.",
+      "repair": "Distinguished a workspace-root .git declaration from ordinary absence when interpreting Git repository-detection failures; the non-repository and broken-declared-repository cases now both pass without weakening Git lookup errors."
+    },
+    {
+      "delivery": 3,
+      "stage": "initial D3 formatting gate",
+      "failure": "The first cargo fmt --all -- --check after the implementation reported ordinary Rust formatting drift.",
+      "repair": "Applied cargo fmt without changing semantics, then reran focused tests, warnings-denied Clippy, the full local gate, and git diff --check."
     }
   ],
   "decision": "in_progress"

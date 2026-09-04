@@ -3,16 +3,17 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use mtm_contracts::{ErrorCategory, NativeMode, ReCtmError};
-use mtm_core::check_command_policy;
+use mtm_core::{ExecInvocation, ExecPermissionFacts, check_command_policy};
 use mtm_native::{
-    BubblewrapCommandSpec, CommandManager, CommandManagerConfig, CommandRequest, KillRequest,
-    NATIVE_HELPER_PROTOCOL, NativeHelperRequest, NativeHelperResponse, PollRequest,
-    ToolchainExposurePlan, build_bubblewrap_command, build_toolchain_exposure_plan,
-    validate_helper_response,
+    BubblewrapCommandSpec, CommandManager, CommandManagerConfig, CommandRequest,
+    DEFAULT_SANDBOX_PATH, KillRequest, NATIVE_HELPER_PROTOCOL, NativeHelperRequest,
+    NativeHelperResponse, PollRequest, ToolchainExposurePlan, build_bubblewrap_command,
+    build_toolchain_exposure_plan, validate_helper_response,
 };
 use serde_json::{Map, Value};
 
 use crate::helper::invoke_runtime_helper;
+use crate::native_permission::collect_exec_permission_facts;
 use crate::workspace::NativeWorkspace;
 
 #[derive(Clone)]
@@ -272,6 +273,28 @@ impl NativeToolRuntime {
                 .map(str::to_owned),
             preview_bytes: usize_value(arguments, "preview_bytes", 4096)?,
         })
+    }
+
+    /// Collect D3 executable facts without affecting the authoritative command
+    /// policy or starting a process.
+    pub fn collect_shadow_exec_permission_facts(
+        &self,
+        invocation: &ExecInvocation,
+    ) -> Result<ExecPermissionFacts, ReCtmError> {
+        let sandbox_path = self
+            .exposure
+            .as_ref()
+            .map_or(DEFAULT_SANDBOX_PATH, |plan| plan.sandbox_path.as_str());
+        let read_only_roots = self
+            .exposure
+            .as_ref()
+            .map_or(&[][..], |plan| plan.read_only_roots.as_slice());
+        collect_exec_permission_facts(
+            invocation,
+            self.workspace.root(),
+            sandbox_path,
+            read_only_roots,
+        )
     }
 
     pub fn write_stdin(&self, arguments: &Map<String, Value>) -> Result<Value, ReCtmError> {

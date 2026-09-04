@@ -19,8 +19,10 @@ pub use latex::RuntimeLatexGate;
 pub use mtm_core::evaluate_request;
 pub use mtm_native::{QuickTunnel, TunnelEvent, TunnelState};
 pub use native_permission::{
-    NativePermissionGrantAuthority, NativePermissionGrantId, NativePermissionGrantReceipt,
-    NativePermissionPermit, VerifiedNativePermissionConsent,
+    NativeInvocationPermissionPermit, NativeInvocationPermit, NativePermissionGrantAuthority,
+    NativePermissionGrantId, NativePermissionGrantReceipt, NativePermissionPermit,
+    VerifiedNativePermissionConsent, collect_exec_permission_facts,
+    revalidate_exec_permission_facts,
 };
 pub use native_tools::NativeToolRuntime;
 pub use operator::{OperatorSession, RuntimeEventSink};
