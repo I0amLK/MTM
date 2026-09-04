@@ -65,7 +65,7 @@
     {
       "id": "D4",
       "name": "typed SandboxPlan with Bubblewrap as pure actuator",
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "id": "D5",
@@ -272,6 +272,65 @@
       "accepted_mtm013_evidence_changed": false
     }
   },
+  "d4_progress": {
+    "started_at": "2026-09-05T04:15:36+08:00",
+    "authority_mode": "shadow_only_before_d5",
+    "review_unit": "typed SandboxPlan and pure Bubblewrap compilation",
+    "sandbox_plan_fields_private": true,
+    "sandbox_plan_debug_redacted": true,
+    "bubblewrap_compiler_input": "validated SandboxPlan only",
+    "bubblewrap_compiler_receives_native_mode": false,
+    "bubblewrap_compiler_receives_grant_or_permission": false,
+    "bubblewrap_compiler_receives_oauth_or_workflow_authority": false,
+    "network_profile_mapping": {
+      "safe_without_network_grant": "isolated",
+      "trusted": "shared",
+      "dangerous": "shared",
+      "synthetic_safe_with_verified_network_grant": "shared"
+    },
+    "resolver_mount_derived_from_network_plan": true,
+    "network_grant_widens_only_network_and_resolver_dimension": true,
+    "fixed_invariants": [
+      "workspace read-write at /workspace",
+      "system and selected toolchain roots read-only",
+      "/tmp tmpfs",
+      "isolated /proc and /dev",
+      "parent environment cleared",
+      "private vault absent",
+      "Linux capabilities empty",
+      "no-new-privileges true",
+      "nested user namespaces disabled",
+      "broad /run hidden"
+    ],
+    "differential_cases": [
+      "safe normalized command semantics",
+      "trusted normalized command semantics",
+      "dangerous normalized command semantics",
+      "synthetic safe network plan equals other shared-network plans",
+      "explicit read-only toolchain roots",
+      "trusted resolver symlink target without broad /run",
+      "workspace and protected-root overlap",
+      "TTY and non-TTY plan invariance",
+      "fixed LaTeX helper path"
+    ],
+    "production_profile_behavior_changed": false,
+    "production_sandbox_path_behavior": "raw inherited PATH remains unchanged for compatibility before D5; D3 shadow executable facts use the validated ToolchainExposurePlan sandbox path and must be reconciled deliberately at authority cutover",
+    "explicit_grant_authority_cutover": false,
+    "bubblewrap_replaced": false,
+    "workflow_authority_changed": false,
+    "prepared_patch_review_unit": "pending",
+    "sandbox_plan_validation": {
+      "cargo_fmt_check": true,
+      "native_bubblewrap_tests": "8 passed",
+      "runtime_native_tools_tests": "1 passed",
+      "native_runtime_clippy_warnings_denied": true,
+      "governance_tests": "26 passed with 4 deployment-mode skips",
+      "migration_engineering_record_validators": true,
+      "full_run_checks": "24 of 24 passed",
+      "git_diff_check": true,
+      "accepted_mtm013_evidence_changed": false
+    }
+  },
   "acceptance": {
     "A0": "Formatting, warnings-denied Clippy, workspace tests, governance, record-layout and unified local gate pass.",
     "A1": "Typed permission wire values, normalization, classifier ordering and current safe/trusted/dangerous compatibility are frozen by golden/adversarial tests.",
@@ -314,6 +373,30 @@
       "stage": "initial D3 formatting gate",
       "failure": "The first cargo fmt --all -- --check after the implementation reported ordinary Rust formatting drift.",
       "repair": "Applied cargo fmt without changing semantics, then reran focused tests, warnings-denied Clippy, the full local gate, and git diff --check."
+    },
+    {
+      "delivery": 4,
+      "stage": "initial SandboxPlan focused compile",
+      "failure": "The first SandboxPlan comparison test did not compile because the private plan type had not yet implemented structural equality.",
+      "repair": "Added structural Eq and PartialEq to the private-field plan, kept its custom redacted Debug implementation, and reran the focused Bubblewrap suite successfully."
+    },
+    {
+      "delivery": 4,
+      "stage": "standalone historical MTM-003 differential replay",
+      "failure": "The standalone MTM-003 harness reproduced zero Python/Rust exact or process mismatches and passed its resource and side-effect checks, but the current Python reference payload hashed to 96bc3cba7c167f4692aa5fc35801e138c1053d1278c867e3f65f5dd26424587e instead of the immutable historical 5c9e6b661d65d3442a42239018c5b0b8ca2bdd14d15947f604c4f8c625dc6f69 golden.",
+      "repair": "Repeated the unchanged harness with both current and original pinned Python launchers and obtained the same current reference hash with no Rust mismatch. Classified the hash-only result as a host-sensitive replay of frozen historical evidence, did not rewrite the accepted MTM-003 golden, and retained current profile semantics in dedicated D4 differential tests; the stable-deployment full gate continues to validate the immutable MTM-003 target receipt through historical-evidence governance."
+    },
+    {
+      "delivery": 4,
+      "stage": "initial expanded SandboxPlan formatting check",
+      "failure": "The first cargo fmt --all -- --check after adding the exact plan corpus reported ordinary Rust formatting drift in the new test helpers.",
+      "repair": "Applied cargo fmt without semantic changes and reran the focused tests and warnings-denied Clippy."
+    },
+    {
+      "delivery": 4,
+      "stage": "initial expanded SandboxPlan warnings-denied Clippy",
+      "failure": "The first focused Clippy run rejected a panic in a test-only command normalizer and three unnecessary clones in slice comparisons.",
+      "repair": "Made the normalizer return a structured test error, replaced cloned singleton slices with references, and reran the unchanged warnings-denied Clippy command successfully."
     }
   ],
   "decision": "in_progress"

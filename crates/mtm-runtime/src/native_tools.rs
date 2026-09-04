@@ -5,10 +5,11 @@ use std::sync::Arc;
 use mtm_contracts::{ErrorCategory, NativeMode, ReCtmError};
 use mtm_core::{ExecInvocation, ExecPermissionFacts, check_command_policy};
 use mtm_native::{
-    BubblewrapCommandSpec, CommandManager, CommandManagerConfig, CommandRequest,
-    DEFAULT_SANDBOX_PATH, KillRequest, NATIVE_HELPER_PROTOCOL, NativeHelperRequest,
-    NativeHelperResponse, PollRequest, ToolchainExposurePlan, build_bubblewrap_command,
-    build_toolchain_exposure_plan, validate_helper_response,
+    CommandManager, CommandManagerConfig, CommandRequest, DEFAULT_SANDBOX_PATH, KillRequest,
+    NATIVE_HELPER_PROTOCOL, NativeHelperRequest, NativeHelperResponse, PollRequest,
+    SandboxPlanInput, ToolchainExposurePlan, build_bubblewrap_command,
+    build_toolchain_exposure_plan, network_namespace_for_mode, plan_sandbox,
+    validate_helper_response,
 };
 use serde_json::{Map, Value};
 
@@ -237,21 +238,23 @@ impl NativeToolRuntime {
             .transpose()?
             .unwrap_or_default();
         check_command_policy(self.mode, &policy_text, &environment)?;
-        let plan = self
+        let exposure = self
             .exposure
             .as_ref()
             .ok_or_else(|| internal("bubblewrap exposure plan is missing"))?;
-        let command = build_bubblewrap_command(&BubblewrapCommandSpec {
+        let host_path = std::env::var("PATH").ok();
+        let sandbox_plan = plan_sandbox(&SandboxPlanInput {
             workspace: self.workspace.root(),
             workdir: &resolved.display,
-            mode: self.mode,
+            network: network_namespace_for_mode(self.mode),
             argv: &argv,
-            extra_env: &environment,
-            host_path: std::env::var("PATH").ok().as_deref(),
-            extra_read_roots: &plan.read_only_roots,
+            environment: &environment,
+            sandbox_path: host_path.as_deref(),
+            read_only_roots: &exposure.read_only_roots,
             forbidden_paths: &self.forbidden_paths,
             probe_executable: None,
         })?;
+        let command = build_bubblewrap_command(&sandbox_plan)?;
         self.command_manager.start(CommandRequest {
             argv: command,
             env: BTreeMap::new(),

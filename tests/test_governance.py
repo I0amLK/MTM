@@ -136,6 +136,7 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(delivery["D1"], "accepted")
         self.assertEqual(delivery["D2"], "accepted")
         self.assertEqual(delivery["D3"], "accepted")
+        self.assertEqual(delivery["D4"], "in_progress")
         d3 = iteration["d3_contract"]
         self.assertEqual(
             d3["exec_permission_order"],
@@ -192,6 +193,41 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertFalse(d3_receipt["bubblewrap_changed"])
         self.assertFalse(d3_receipt["workflow_authority_changed"])
         self.assertFalse(d3_receipt["validation"]["accepted_mtm013_evidence_changed"])
+        d4 = iteration["d4_progress"]
+        self.assertEqual(d4["authority_mode"], "shadow_only_before_d5")
+        self.assertTrue(d4["sandbox_plan_fields_private"])
+        self.assertTrue(d4["sandbox_plan_debug_redacted"])
+        self.assertEqual(d4["bubblewrap_compiler_input"], "validated SandboxPlan only")
+        self.assertFalse(d4["bubblewrap_compiler_receives_native_mode"])
+        self.assertFalse(d4["bubblewrap_compiler_receives_grant_or_permission"])
+        self.assertFalse(d4["bubblewrap_compiler_receives_oauth_or_workflow_authority"])
+        self.assertTrue(d4["resolver_mount_derived_from_network_plan"])
+        self.assertTrue(d4["network_grant_widens_only_network_and_resolver_dimension"])
+        self.assertFalse(d4["production_profile_behavior_changed"])
+        self.assertFalse(d4["explicit_grant_authority_cutover"])
+        self.assertFalse(d4["bubblewrap_replaced"])
+        self.assertFalse(d4["workflow_authority_changed"])
+        self.assertEqual(d4["prepared_patch_review_unit"], "pending")
+        self.assertEqual(d4["sandbox_plan_validation"]["native_bubblewrap_tests"], "8 passed")
+        self.assertEqual(d4["sandbox_plan_validation"]["full_run_checks"], "24 of 24 passed")
+        self.assertFalse(d4["sandbox_plan_validation"]["accepted_mtm013_evidence_changed"])
+
+        bubblewrap_source = (
+            ROOT / "crates" / "mtm-native" / "src" / "bubblewrap.rs"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("BubblewrapCommandSpec", bubblewrap_source)
+        compiler_start = bubblewrap_source.index("pub fn build_bubblewrap_command")
+        compiler_end = bubblewrap_source.index("\npub fn run_sandbox_probe", compiler_start)
+        compiler = bubblewrap_source[compiler_start:compiler_end]
+        self.assertIn("plan: &SandboxPlan", compiler)
+        for forbidden_authority_input in (
+            "NativeMode",
+            "grant",
+            "OAuth",
+            "workflow",
+            "permission",
+        ):
+            self.assertNotIn(forbidden_authority_input, compiler)
         d2 = iteration["d2_receipt"]
         self.assertTrue(d2["application_resident"])
         self.assertEqual(d2["persistence"], "none")

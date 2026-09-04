@@ -7,8 +7,9 @@ pub mod quick_tunnel;
 pub mod toolchain;
 
 pub use bubblewrap::{
-    BubblewrapCommandSpec, MAX_REQUEST_BYTES, NATIVE_HELPER_PROTOCOL, NativeHelperRequest,
-    NativeHelperResponse, build_bubblewrap_command, invoke_helper_request,
+    EmptyCapabilitySet, MAX_REQUEST_BYTES, NATIVE_HELPER_PROTOCOL, NativeHelperRequest,
+    NativeHelperResponse, NetworkNamespacePlan, SandboxPlan, SandboxPlanInput,
+    build_bubblewrap_command, invoke_helper_request, network_namespace_for_mode, plan_sandbox,
     validate_helper_response,
 };
 pub use capture::{BoundedCapture, CapturePayload};

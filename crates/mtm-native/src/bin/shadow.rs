@@ -9,8 +9,9 @@ use std::time::Duration;
 
 use mtm_contracts::{ErrorCategory, NativeMode, ReCtmError};
 use mtm_native::{
-    BubblewrapCommandSpec, CommandManager, CommandManagerConfig, QuickTunnel, TunnelEvent,
-    build_bubblewrap_command, build_toolchain_exposure_plan,
+    CommandManager, CommandManagerConfig, QuickTunnel, SandboxPlanInput, TunnelEvent,
+    build_bubblewrap_command, build_toolchain_exposure_plan, network_namespace_for_mode,
+    plan_sandbox,
 };
 use serde_json::Value;
 
@@ -195,17 +196,18 @@ fn bubblewrap_command(payload: &Value) -> Result<Value, ReCtmError> {
     let host_path = payload.get("host_path").and_then(Value::as_str);
     let extra_read_roots = path_array(payload, "extra_read_roots")?;
     let forbidden_paths = path_array(payload, "forbidden_paths")?;
-    let command = build_bubblewrap_command(&BubblewrapCommandSpec {
+    let plan = plan_sandbox(&SandboxPlanInput {
         workspace: &workspace,
         workdir,
-        mode,
+        network: network_namespace_for_mode(mode),
         argv: &argv,
-        extra_env: &extra_env,
-        host_path,
-        extra_read_roots: &extra_read_roots,
+        environment: &extra_env,
+        sandbox_path: host_path,
+        read_only_roots: &extra_read_roots,
         forbidden_paths: &forbidden_paths,
         probe_executable: None,
     })?;
+    let command = build_bubblewrap_command(&plan)?;
     Ok(serde_json::json!({"command": command}))
 }
 

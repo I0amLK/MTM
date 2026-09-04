@@ -89,16 +89,147 @@ pub struct SandboxProbe {
     pub toolchain_write_succeeded: Vec<String>,
 }
 
-pub struct BubblewrapCommandSpec<'a> {
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum NetworkNamespacePlan {
+    Isolated,
+    Shared,
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct EmptyCapabilitySet {
+    _private: (),
+}
+
+#[derive(Clone, Eq, PartialEq)]
+pub struct SandboxPlan {
+    workspace: PathBuf,
+    workdir: String,
+    argv: Vec<String>,
+    environment: BTreeMap<String, String>,
+    sandbox_path: String,
+    network: NetworkNamespacePlan,
+    system_read_only_roots: Vec<PathBuf>,
+    read_only_roots: Vec<PathBuf>,
+    forbidden_paths: Vec<PathBuf>,
+    resolver_mount: Option<PathBuf>,
+    probe_executable: Option<PathBuf>,
+    capabilities: EmptyCapabilitySet,
+}
+
+impl std::fmt::Debug for SandboxPlan {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("SandboxPlan")
+            .field("workspace", &"[REDACTED]")
+            .field("workdir", &self.workdir)
+            .field("argv_count", &self.argv.len())
+            .field(
+                "environment_keys",
+                &self.environment.keys().collect::<Vec<_>>(),
+            )
+            .field("sandbox_path", &"[REDACTED]")
+            .field("network", &self.network)
+            .field(
+                "system_read_only_root_count",
+                &self.system_read_only_roots.len(),
+            )
+            .field("read_only_root_count", &self.read_only_roots.len())
+            .field("forbidden_path_count", &self.forbidden_paths.len())
+            .field("resolver_mount_present", &self.resolver_mount.is_some())
+            .field("probe_executable_present", &self.probe_executable.is_some())
+            .field("capabilities", &self.capabilities)
+            .field("no_new_privileges", &true)
+            .field("clear_parent_environment", &true)
+            .field("private_vault_mounted", &false)
+            .finish()
+    }
+}
+
+impl SandboxPlan {
+    #[must_use]
+    pub fn workspace(&self) -> &Path {
+        &self.workspace
+    }
+
+    #[must_use]
+    pub fn workdir(&self) -> &str {
+        &self.workdir
+    }
+
+    #[must_use]
+    pub fn argv(&self) -> &[String] {
+        &self.argv
+    }
+
+    #[must_use]
+    pub fn environment(&self) -> &BTreeMap<String, String> {
+        &self.environment
+    }
+
+    #[must_use]
+    pub fn sandbox_path(&self) -> &str {
+        &self.sandbox_path
+    }
+
+    #[must_use]
+    pub const fn network(&self) -> NetworkNamespacePlan {
+        self.network
+    }
+
+    #[must_use]
+    pub fn read_only_roots(&self) -> &[PathBuf] {
+        &self.read_only_roots
+    }
+
+    #[must_use]
+    pub fn forbidden_paths(&self) -> &[PathBuf] {
+        &self.forbidden_paths
+    }
+
+    #[must_use]
+    pub fn resolver_mount(&self) -> Option<&Path> {
+        self.resolver_mount.as_deref()
+    }
+
+    #[must_use]
+    pub const fn capabilities(&self) -> EmptyCapabilitySet {
+        self.capabilities
+    }
+
+    #[must_use]
+    pub const fn no_new_privileges(&self) -> bool {
+        true
+    }
+
+    #[must_use]
+    pub const fn clear_parent_environment(&self) -> bool {
+        true
+    }
+
+    #[must_use]
+    pub const fn private_vault_mounted(&self) -> bool {
+        false
+    }
+}
+
+pub struct SandboxPlanInput<'a> {
     pub workspace: &'a Path,
     pub workdir: &'a str,
-    pub mode: NativeMode,
+    pub network: NetworkNamespacePlan,
     pub argv: &'a [String],
-    pub extra_env: &'a BTreeMap<String, String>,
-    pub host_path: Option<&'a str>,
-    pub extra_read_roots: &'a [PathBuf],
+    pub environment: &'a BTreeMap<String, String>,
+    pub sandbox_path: Option<&'a str>,
+    pub read_only_roots: &'a [PathBuf],
     pub forbidden_paths: &'a [PathBuf],
     pub probe_executable: Option<&'a Path>,
+}
+
+#[must_use]
+pub const fn network_namespace_for_mode(mode: NativeMode) -> NetworkNamespacePlan {
+    match mode {
+        NativeMode::Safe => NetworkNamespacePlan::Isolated,
+        NativeMode::Trusted | NativeMode::Dangerous => NetworkNamespacePlan::Shared,
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -248,9 +379,75 @@ pub fn validate_helper_response(
     Ok(Value::Object(attestation.clone()))
 }
 
-pub fn build_bubblewrap_command(
-    spec: &BubblewrapCommandSpec<'_>,
-) -> Result<Vec<String>, ReCtmError> {
+pub fn plan_sandbox(input: &SandboxPlanInput<'_>) -> Result<SandboxPlan, ReCtmError> {
+    plan_sandbox_with_resolver(input, host_runtime_resolver_target)
+}
+
+fn plan_sandbox_with_resolver(
+    input: &SandboxPlanInput<'_>,
+    shared_resolver: impl FnOnce() -> Result<Option<PathBuf>, ReCtmError>,
+) -> Result<SandboxPlan, ReCtmError> {
+    let workspace = validate_workspace_path(input.workspace)?;
+    let workdir = validate_workdir(&workspace, input.workdir)?;
+    validate_argv(input.argv)?;
+    validate_environment(input.environment)?;
+    let sandbox_path = input
+        .sandbox_path
+        .filter(|value| !value.is_empty())
+        .unwrap_or(DEFAULT_SANDBOX_PATH);
+    validate_host_path(sandbox_path)?;
+    let forbidden_paths = validate_plan_paths("forbidden_paths", input.forbidden_paths, false)?;
+    if forbidden_paths
+        .iter()
+        .any(|forbidden| overlaps(forbidden, &workspace))
+    {
+        return Err(ReCtmError::new(
+            "NATIVE_HELPER_TRUST_DOMAIN_OVERLAP",
+            "workspace and forbidden path must not overlap",
+        )
+        .with_category(ErrorCategory::Security));
+    }
+    let read_only_roots =
+        validate_helper_roots(&workspace, input.read_only_roots, &forbidden_paths)?;
+    let resolver_mount = match input.network {
+        NetworkNamespacePlan::Isolated => None,
+        NetworkNamespacePlan::Shared => shared_resolver()?,
+    };
+    let probe_executable = input
+        .probe_executable
+        .map(|path| {
+            fs::canonicalize(path).map_err(|error| {
+                ReCtmError::new("NATIVE_HELPER_INTERNAL_ERROR", error.to_string())
+                    .with_category(ErrorCategory::Internal)
+            })
+        })
+        .transpose()?;
+    let system_read_only_roots = SYSTEM_READ_ROOTS
+        .iter()
+        .map(PathBuf::from)
+        .filter(|path| path.exists())
+        .collect();
+    Ok(SandboxPlan {
+        workspace,
+        workdir,
+        argv: input.argv.to_vec(),
+        environment: input.environment.clone(),
+        sandbox_path: sandbox_path.to_owned(),
+        network: input.network,
+        system_read_only_roots,
+        read_only_roots,
+        forbidden_paths,
+        resolver_mount,
+        probe_executable,
+        capabilities: EmptyCapabilitySet::default(),
+    })
+}
+
+/// Compile an already-validated concrete sandbox plan into Bubblewrap argv.
+///
+/// This actuator does not inspect Native mode, permission kinds, grants, OAuth
+/// identity, or workflow authority.
+pub fn build_bubblewrap_command(plan: &SandboxPlan) -> Result<Vec<String>, ReCtmError> {
     let bwrap = find_in_path("bwrap").ok_or_else(|| {
         ReCtmError::new(
             "NATIVE_BWRAP_NOT_FOUND",
@@ -258,24 +455,6 @@ pub fn build_bubblewrap_command(
         )
         .with_category(ErrorCategory::Security)
     })?;
-    let workspace_root = fs::canonicalize(spec.workspace).map_err(|_| {
-        validation_error("NATIVE_HELPER_INVALID_ARGUMENT", "workspace does not exist")
-    })?;
-    let normalized_forbidden = spec
-        .forbidden_paths
-        .iter()
-        .map(|path| canonicalize_lenient(path))
-        .collect::<Vec<_>>();
-    let normalized_extra_roots = validate_helper_roots(
-        &workspace_root,
-        spec.extra_read_roots,
-        &normalized_forbidden,
-    )?;
-    let resolver_target = if matches!(spec.mode, NativeMode::Trusted | NativeMode::Dangerous) {
-        host_runtime_resolver_target()?
-    } else {
-        None
-    };
     let mut command = vec![
         bwrap,
         "--die-with-parent".to_owned(),
@@ -295,7 +474,7 @@ pub fn build_bubblewrap_command(
         "--clearenv".to_owned(),
         "--setenv".to_owned(),
         "PATH".to_owned(),
-        spec.host_path.unwrap_or(DEFAULT_SANDBOX_PATH).to_owned(),
+        plan.sandbox_path.clone(),
         "--setenv".to_owned(),
         "HOME".to_owned(),
         "/home/re-ctm".to_owned(),
@@ -308,22 +487,15 @@ pub fn build_bubblewrap_command(
         "--cap-drop".to_owned(),
         "ALL".to_owned(),
     ];
-    if spec.mode == NativeMode::Safe {
+    if plan.network == NetworkNamespacePlan::Isolated {
         command.push("--unshare-net".to_owned());
     }
-    for (key, value) in spec.extra_env {
-        if key.is_empty() || key.contains('=') || key.contains('\0') || value.contains('\0') {
-            return Err(validation_error(
-                "INVALID_ENVIRONMENT",
-                "Native command environment contains an invalid key or value.",
-            ));
-        }
+    for (key, value) in &plan.environment {
         command.extend(["--setenv".to_owned(), key.clone(), value.clone()]);
     }
-    for root in SYSTEM_READ_ROOTS {
-        if Path::new(root).exists() {
-            command.extend(["--ro-bind".to_owned(), root.to_owned(), root.to_owned()]);
-        }
+    for root in &plan.system_read_only_roots {
+        let root = root.to_string_lossy().into_owned();
+        command.extend(["--ro-bind".to_owned(), root.clone(), root]);
     }
     command.extend([
         "--proc".to_owned(),
@@ -342,10 +514,10 @@ pub fn build_bubblewrap_command(
         PathBuf::from("/home"),
         PathBuf::from("/home/re-ctm"),
     ]);
-    if let Some(target) = resolver_target.as_deref() {
+    if let Some(target) = plan.resolver_mount.as_deref() {
         append_runtime_resolver_mount(target, &mut command, &mut created_dirs);
     }
-    for root in &normalized_extra_roots {
+    for root in &plan.read_only_roots {
         ensure_mount_parents(root, &mut command, &mut created_dirs);
         command.extend([
             "--ro-bind".to_owned(),
@@ -353,11 +525,7 @@ pub fn build_bubblewrap_command(
             root.to_string_lossy().into_owned(),
         ]);
     }
-    if let Some(executable) = spec.probe_executable {
-        let executable = fs::canonicalize(executable).map_err(|error| {
-            ReCtmError::new("NATIVE_HELPER_INTERNAL_ERROR", error.to_string())
-                .with_category(ErrorCategory::Internal)
-        })?;
+    if let Some(executable) = &plan.probe_executable {
         command.extend([
             "--ro-bind".to_owned(),
             executable.to_string_lossy().into_owned(),
@@ -366,17 +534,17 @@ pub fn build_bubblewrap_command(
     }
     command.extend([
         "--bind".to_owned(),
-        workspace_root.to_string_lossy().into_owned(),
+        plan.workspace.to_string_lossy().into_owned(),
         "/workspace".to_owned(),
         "--chdir".to_owned(),
-        if spec.workdir == "." {
+        if plan.workdir == "." {
             "/workspace".to_owned()
         } else {
-            format!("/workspace/{}", spec.workdir)
+            format!("/workspace/{}", plan.workdir)
         },
         "--".to_owned(),
     ]);
-    command.extend(spec.argv.iter().cloned());
+    command.extend(plan.argv.iter().cloned());
     Ok(command)
 }
 
@@ -447,17 +615,18 @@ fn attest(request: &NativeHelperRequest) -> Result<BTreeMap<String, Value>, ReCt
         probe_name,
         encoded_roots,
     ];
-    let command = build_bubblewrap_command(&BubblewrapCommandSpec {
+    let plan = plan_sandbox(&SandboxPlanInput {
         workspace: &workspace,
         workdir: ".",
-        mode: request.mode,
+        network: network_namespace_for_mode(request.mode),
         argv: &argv,
-        extra_env: &BTreeMap::new(),
-        host_path: nonempty(&request.host_path),
-        extra_read_roots: &extra_roots,
+        environment: &BTreeMap::new(),
+        sandbox_path: nonempty(&request.host_path),
+        read_only_roots: &extra_roots,
         forbidden_paths: &forbidden_paths,
         probe_executable: Some(&current_exe),
     })?;
+    let command = build_bubblewrap_command(&plan)?;
     let mut parent_env = helper_child_env();
     parent_env.insert(
         "MTM_ATTEST_PARENT_SECRET".to_owned(),
@@ -507,7 +676,7 @@ fn attest(request: &NativeHelperRequest) -> Result<BTreeMap<String, Value>, ReCt
         .with_category(ErrorCategory::Security)
         .with_details(serde_json::to_value(&probe).unwrap_or_else(|_| serde_json::json!({}))));
     }
-    let attestation = attestation(request.mode, true, extra_roots.len());
+    let attestation = attestation(plan.network(), true, plan.read_only_roots().len());
     Ok(BTreeMap::from([
         ("attestation".to_owned(), attestation),
         (
@@ -536,19 +705,20 @@ fn execute(request: &NativeHelperRequest) -> Result<BTreeMap<String, Value>, ReC
     validate_host_path(&request.host_path)?;
     let extra_roots = validate_path_array("extra_read_roots", &request.extra_read_roots)?;
     let forbidden_paths = validate_path_array("forbidden_paths", &request.forbidden_paths)?;
-    let command = build_bubblewrap_command(&BubblewrapCommandSpec {
+    let plan = plan_sandbox(&SandboxPlanInput {
         workspace: &workspace,
         workdir: &workdir,
-        mode: request.mode,
+        network: network_namespace_for_mode(request.mode),
         argv: &request.argv,
-        extra_env: &BTreeMap::new(),
-        host_path: nonempty(&request.host_path),
-        extra_read_roots: &extra_roots,
+        environment: &BTreeMap::new(),
+        sandbox_path: nonempty(&request.host_path),
+        read_only_roots: &extra_roots,
         forbidden_paths: &forbidden_paths,
         probe_executable: None,
     })?;
+    let command = build_bubblewrap_command(&plan)?;
     let result = run_in_sandbox(&command, &helper_child_env(), request.timeout_ms)?;
-    let attestation = attestation(request.mode, true, extra_roots.len());
+    let attestation = attestation(plan.network(), true, plan.read_only_roots().len());
     let stdout_meta = serde_json::json!({
         "total_bytes": result.stdout.total_bytes,
         "retained_bytes": result.stdout.retained_bytes,
@@ -694,7 +864,7 @@ fn drain_stream<R: Read + Send + 'static>(
     })
 }
 
-fn attestation(mode: NativeMode, forbidden_hidden: bool, root_count: usize) -> Value {
+fn attestation(network: NetworkNamespacePlan, forbidden_hidden: bool, root_count: usize) -> Value {
     let bwrap = find_in_path("bwrap");
     let version = bwrap
         .as_deref()
@@ -723,7 +893,7 @@ fn attestation(mode: NativeMode, forbidden_hidden: bool, root_count: usize) -> V
         "workspace_mount": "/workspace",
         "forbidden_paths_hidden": forbidden_hidden,
         "private_vault_mounted": false,
-        "network_isolated": mode == NativeMode::Safe,
+        "network_isolated": network == NetworkNamespacePlan::Isolated,
         "no_privilege_escalation": true,
         "mount_namespace": true,
         "user_namespace": true,
@@ -752,7 +922,10 @@ fn validate_protocol_request(request: &NativeHelperRequest) -> Result<(), ReCtmE
 
 fn validate_workspace(raw: &str) -> Result<PathBuf, ReCtmError> {
     validate_required_text("workspace", raw, 4096)?;
-    let path = Path::new(raw);
+    validate_workspace_path(Path::new(raw))
+}
+
+fn validate_workspace_path(path: &Path) -> Result<PathBuf, ReCtmError> {
     if !path.is_absolute() {
         return Err(validation_error(
             "NATIVE_HELPER_INVALID_ARGUMENT",
@@ -808,6 +981,41 @@ fn validate_path_array(name: &str, values: &[String]) -> Result<Vec<PathBuf>, Re
         .collect())
 }
 
+fn validate_plan_paths(
+    name: &str,
+    values: &[PathBuf],
+    must_exist: bool,
+) -> Result<Vec<PathBuf>, ReCtmError> {
+    if values.len() > MAX_PATH_ARRAY {
+        return Err(validation_error(
+            "NATIVE_HELPER_INVALID_ARGUMENT",
+            &format!("{name} must be a bounded array of absolute paths"),
+        ));
+    }
+    values
+        .iter()
+        .map(|path| {
+            let text = path.to_string_lossy();
+            if path.as_os_str().is_empty() || text.contains('\0') || !path.is_absolute() {
+                return Err(validation_error(
+                    "NATIVE_HELPER_INVALID_ARGUMENT",
+                    &format!("{name} must be a bounded array of absolute paths"),
+                ));
+            }
+            if must_exist {
+                fs::canonicalize(path).map_err(|_| {
+                    validation_error(
+                        "NATIVE_HELPER_INVALID_ARGUMENT",
+                        &format!("{name} contains a path that does not exist"),
+                    )
+                })
+            } else {
+                Ok(canonicalize_lenient(path))
+            }
+        })
+        .collect()
+}
+
 fn validate_host_path(host_path: &str) -> Result<(), ReCtmError> {
     if host_path.contains('\0') || host_path.len() > 256 * 1024 {
         return Err(validation_error(
@@ -828,6 +1036,18 @@ fn validate_argv(argv: &[String]) -> Result<(), ReCtmError> {
         return Err(validation_error(
             "NATIVE_HELPER_INVALID_ARGUMENT",
             "argv must be a non-empty bounded array of NUL-free strings",
+        ));
+    }
+    Ok(())
+}
+
+fn validate_environment(environment: &BTreeMap<String, String>) -> Result<(), ReCtmError> {
+    if environment.iter().any(|(key, value)| {
+        key.is_empty() || key.contains('=') || key.contains('\0') || value.contains('\0')
+    }) {
+        return Err(validation_error(
+            "INVALID_ENVIRONMENT",
+            "Native command environment contains an invalid key or value.",
         ));
     }
     Ok(())
@@ -1137,6 +1357,346 @@ mod tests {
     use std::os::unix::fs::symlink;
     use tempfile::TempDir;
 
+    #[derive(Debug, Default, Eq, PartialEq)]
+    struct CompiledSandboxSemantics {
+        fixed_flags: BTreeSet<String>,
+        network_isolated: bool,
+        uid: Option<String>,
+        gid: Option<String>,
+        hostname: Option<String>,
+        environment: BTreeMap<String, String>,
+        capability_drops: Vec<String>,
+        read_only_binds: Vec<(String, String)>,
+        writable_binds: Vec<(String, String)>,
+        proc_mount: Option<String>,
+        dev_mount: Option<String>,
+        tmpfs_mounts: Vec<String>,
+        directories: Vec<String>,
+        workdir: Option<String>,
+        argv: Vec<String>,
+    }
+
+    fn compiled_semantics(command: &[String]) -> Result<CompiledSandboxSemantics, ReCtmError> {
+        if command.is_empty() {
+            return Err(ReCtmError::new("TEST", "empty Bubblewrap command"));
+        }
+        let mut semantics = CompiledSandboxSemantics::default();
+        let mut index = 1;
+        while index < command.len() {
+            match command[index].as_str() {
+                "--" => {
+                    semantics.argv = command[index + 1..].to_vec();
+                    break;
+                }
+                "--die-with-parent"
+                | "--new-session"
+                | "--unshare-user"
+                | "--unshare-pid"
+                | "--unshare-ipc"
+                | "--unshare-uts"
+                | "--unshare-cgroup-try"
+                | "--disable-userns"
+                | "--clearenv" => {
+                    semantics.fixed_flags.insert(command[index].clone());
+                    index += 1;
+                }
+                "--unshare-net" => {
+                    semantics.network_isolated = true;
+                    index += 1;
+                }
+                "--uid" => {
+                    semantics.uid = Some(command[index + 1].clone());
+                    index += 2;
+                }
+                "--gid" => {
+                    semantics.gid = Some(command[index + 1].clone());
+                    index += 2;
+                }
+                "--hostname" => {
+                    semantics.hostname = Some(command[index + 1].clone());
+                    index += 2;
+                }
+                "--setenv" => {
+                    semantics
+                        .environment
+                        .insert(command[index + 1].clone(), command[index + 2].clone());
+                    index += 3;
+                }
+                "--cap-drop" => {
+                    semantics.capability_drops.push(command[index + 1].clone());
+                    index += 2;
+                }
+                "--ro-bind" => {
+                    semantics
+                        .read_only_binds
+                        .push((command[index + 1].clone(), command[index + 2].clone()));
+                    index += 3;
+                }
+                "--bind" => {
+                    semantics
+                        .writable_binds
+                        .push((command[index + 1].clone(), command[index + 2].clone()));
+                    index += 3;
+                }
+                "--proc" => {
+                    semantics.proc_mount = Some(command[index + 1].clone());
+                    index += 2;
+                }
+                "--dev" => {
+                    semantics.dev_mount = Some(command[index + 1].clone());
+                    index += 2;
+                }
+                "--tmpfs" => {
+                    semantics.tmpfs_mounts.push(command[index + 1].clone());
+                    index += 2;
+                }
+                "--dir" => {
+                    semantics.directories.push(command[index + 1].clone());
+                    index += 2;
+                }
+                "--chdir" => {
+                    semantics.workdir = Some(command[index + 1].clone());
+                    index += 2;
+                }
+                unexpected => {
+                    return Err(ReCtmError::new(
+                        "TEST",
+                        format!("unexpected Bubblewrap argument in test: {unexpected}"),
+                    ));
+                }
+            }
+        }
+        Ok(semantics)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn test_plan_with_resolver(
+        workspace: &Path,
+        workdir: &str,
+        network: NetworkNamespacePlan,
+        argv: &[String],
+        environment: &BTreeMap<String, String>,
+        read_only_roots: &[PathBuf],
+        forbidden_paths: &[PathBuf],
+        resolver_mount: Option<PathBuf>,
+    ) -> Result<SandboxPlan, ReCtmError> {
+        plan_sandbox_with_resolver(
+            &SandboxPlanInput {
+                workspace,
+                workdir,
+                network,
+                argv,
+                environment,
+                sandbox_path: Some("/usr/bin:/bin"),
+                read_only_roots,
+                forbidden_paths,
+                probe_executable: None,
+            },
+            move || Ok(resolver_mount),
+        )
+    }
+
+    fn assert_only_network_dimension_differs(isolated: &SandboxPlan, shared: &SandboxPlan) {
+        assert_eq!(isolated.workspace, shared.workspace);
+        assert_eq!(isolated.workdir, shared.workdir);
+        assert_eq!(isolated.argv, shared.argv);
+        assert_eq!(isolated.environment, shared.environment);
+        assert_eq!(isolated.sandbox_path, shared.sandbox_path);
+        assert_eq!(
+            isolated.system_read_only_roots,
+            shared.system_read_only_roots
+        );
+        assert_eq!(isolated.read_only_roots, shared.read_only_roots);
+        assert_eq!(isolated.forbidden_paths, shared.forbidden_paths);
+        assert_eq!(isolated.probe_executable, shared.probe_executable);
+        assert_eq!(isolated.capabilities, shared.capabilities);
+        assert_eq!(isolated.network, NetworkNamespacePlan::Isolated);
+        assert_eq!(shared.network, NetworkNamespacePlan::Shared);
+        assert!(isolated.resolver_mount.is_none());
+    }
+
+    #[test]
+    fn typed_plan_preserves_exact_profile_semantics_and_fixed_invariants() -> Result<(), ReCtmError>
+    {
+        let temp = TempDir::new().map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        let workspace = temp.path().join("workspace");
+        let nested_workdir = workspace.join("proofs");
+        let toolchain = temp.path().join("toolchain");
+        let private = temp.path().join("private");
+        let resolver = temp.path().join("run/systemd/resolve/stub-resolv.conf");
+        for path in [&workspace, &nested_workdir, &toolchain, &private] {
+            fs::create_dir_all(path).map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        }
+        fs::create_dir_all(resolver.parent().unwrap_or(temp.path()))
+            .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        fs::write(&resolver, b"nameserver 127.0.0.53\n")
+            .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        let resolver = fs::canonicalize(resolver)
+            .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        let environment = BTreeMap::from([(
+            "VISIBLE_KEY".to_owned(),
+            "secret-environment-value".to_owned(),
+        )]);
+        let read_only_roots = vec![toolchain.clone()];
+        let forbidden_paths = vec![private.clone()];
+        let argv = vec!["/bin/printf".to_owned(), "secret-command-value".to_owned()];
+
+        for (mode, expected) in [
+            (NativeMode::Safe, NetworkNamespacePlan::Isolated),
+            (NativeMode::Trusted, NetworkNamespacePlan::Shared),
+            (NativeMode::Dangerous, NetworkNamespacePlan::Shared),
+        ] {
+            assert_eq!(network_namespace_for_mode(mode), expected);
+        }
+
+        let isolated = test_plan_with_resolver(
+            &workspace,
+            "proofs",
+            NetworkNamespacePlan::Isolated,
+            &argv,
+            &environment,
+            &read_only_roots,
+            &forbidden_paths,
+            Some(resolver.clone()),
+        )?;
+        let trusted = test_plan_with_resolver(
+            &workspace,
+            "proofs",
+            network_namespace_for_mode(NativeMode::Trusted),
+            &argv,
+            &environment,
+            &read_only_roots,
+            &forbidden_paths,
+            Some(resolver.clone()),
+        )?;
+        let dangerous = test_plan_with_resolver(
+            &workspace,
+            "proofs",
+            network_namespace_for_mode(NativeMode::Dangerous),
+            &argv,
+            &environment,
+            &read_only_roots,
+            &forbidden_paths,
+            Some(resolver.clone()),
+        )?;
+        let synthetic_safe_network_grant = test_plan_with_resolver(
+            &workspace,
+            "proofs",
+            NetworkNamespacePlan::Shared,
+            &argv,
+            &environment,
+            &read_only_roots,
+            &forbidden_paths,
+            Some(resolver.clone()),
+        )?;
+
+        assert_eq!(isolated.network(), NetworkNamespacePlan::Isolated);
+        assert_eq!(trusted.network(), NetworkNamespacePlan::Shared);
+        assert!(isolated.resolver_mount().is_none());
+        assert_eq!(trusted.resolver_mount(), Some(resolver.as_path()));
+        assert_eq!(trusted, dangerous);
+        assert_eq!(trusted, synthetic_safe_network_grant);
+        assert_only_network_dimension_differs(&isolated, &trusted);
+
+        for plan in [&isolated, &trusted] {
+            assert_eq!(plan.capabilities(), EmptyCapabilitySet::default());
+            assert!(plan.no_new_privileges());
+            assert!(plan.clear_parent_environment());
+            assert!(!plan.private_vault_mounted());
+            assert_eq!(plan.read_only_roots(), std::slice::from_ref(&toolchain));
+            assert_eq!(plan.forbidden_paths(), std::slice::from_ref(&private));
+            let debug = format!("{plan:?}");
+            assert!(!debug.contains("secret-command-value"));
+            assert!(!debug.contains("secret-environment-value"));
+            assert!(!debug.contains(&workspace.to_string_lossy().into_owned()));
+        }
+
+        let isolated_command = build_bubblewrap_command(&isolated)?;
+        let trusted_command = build_bubblewrap_command(&trusted)?;
+        let isolated_semantics = compiled_semantics(&isolated_command)?;
+        let trusted_semantics = compiled_semantics(&trusted_command)?;
+        assert!(isolated_semantics.network_isolated);
+        assert!(!trusted_semantics.network_isolated);
+
+        let expected_fixed_flags = BTreeSet::from([
+            "--die-with-parent".to_owned(),
+            "--new-session".to_owned(),
+            "--unshare-user".to_owned(),
+            "--unshare-pid".to_owned(),
+            "--unshare-ipc".to_owned(),
+            "--unshare-uts".to_owned(),
+            "--unshare-cgroup-try".to_owned(),
+            "--disable-userns".to_owned(),
+            "--clearenv".to_owned(),
+        ]);
+        let expected_environment = BTreeMap::from([
+            ("PATH".to_owned(), "/usr/bin:/bin".to_owned()),
+            ("HOME".to_owned(), "/home/re-ctm".to_owned()),
+            ("TMPDIR".to_owned(), "/tmp".to_owned()),
+            ("LANG".to_owned(), "C.UTF-8".to_owned()),
+            (
+                "VISIBLE_KEY".to_owned(),
+                "secret-environment-value".to_owned(),
+            ),
+        ]);
+        let workspace_bind = (
+            fs::canonicalize(&workspace)
+                .map_err(|error| ReCtmError::new("TEST", error.to_string()))?
+                .to_string_lossy()
+                .into_owned(),
+            "/workspace".to_owned(),
+        );
+        for semantics in [&isolated_semantics, &trusted_semantics] {
+            assert_eq!(semantics.fixed_flags, expected_fixed_flags);
+            assert_eq!(semantics.uid.as_deref(), Some("0"));
+            assert_eq!(semantics.gid.as_deref(), Some("0"));
+            assert_eq!(semantics.hostname.as_deref(), Some("re-ctm-native"));
+            assert_eq!(semantics.environment, expected_environment);
+            assert_eq!(semantics.capability_drops, ["ALL"]);
+            assert_eq!(semantics.proc_mount.as_deref(), Some("/proc"));
+            assert_eq!(semantics.dev_mount.as_deref(), Some("/dev"));
+            assert_eq!(semantics.tmpfs_mounts, ["/tmp"]);
+            assert_eq!(
+                semantics.writable_binds.as_slice(),
+                std::slice::from_ref(&workspace_bind)
+            );
+            assert_eq!(semantics.workdir.as_deref(), Some("/workspace/proofs"));
+            assert_eq!(semantics.argv, argv);
+            let toolchain = toolchain.to_string_lossy().into_owned();
+            assert!(
+                semantics
+                    .read_only_binds
+                    .contains(&(toolchain.clone(), toolchain))
+            );
+            assert!(
+                !semantics
+                    .read_only_binds
+                    .iter()
+                    .any(|(source, target)| source == &private.to_string_lossy()
+                        || target == &private.to_string_lossy())
+            );
+            assert!(
+                !semantics
+                    .read_only_binds
+                    .iter()
+                    .any(|(source, target)| { source == "/run" || target == "/run" })
+            );
+        }
+        let resolver_bind = (
+            resolver.to_string_lossy().into_owned(),
+            resolver.to_string_lossy().into_owned(),
+        );
+        assert!(!isolated_semantics.read_only_binds.contains(&resolver_bind));
+        assert!(trusted_semantics.read_only_binds.contains(&resolver_bind));
+
+        // The compiler's function type proves that mode, grants, OAuth and
+        // workflow authority cannot be supplied to the actuator.
+        let compiler: fn(&SandboxPlan) -> Result<Vec<String>, ReCtmError> =
+            build_bubblewrap_command;
+        assert_eq!(compiler(&trusted)?, trusted_command);
+        Ok(())
+    }
+
     #[test]
     fn command_rejects_protected_root_overlap() -> Result<(), ReCtmError> {
         let temp = TempDir::new().map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
@@ -1146,20 +1706,77 @@ mod tests {
             .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
         fs::create_dir_all(&private).map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
         let argv = ["/bin/true".to_owned()];
-        let result = build_bubblewrap_command(&BubblewrapCommandSpec {
+        let result = plan_sandbox(&SandboxPlanInput {
             workspace: &workspace,
             workdir: ".",
-            mode: NativeMode::Dangerous,
+            network: NetworkNamespacePlan::Shared,
             argv: &argv,
-            extra_env: &BTreeMap::new(),
-            host_path: None,
-            extra_read_roots: std::slice::from_ref(&private),
+            environment: &BTreeMap::new(),
+            sandbox_path: None,
+            read_only_roots: std::slice::from_ref(&private),
             forbidden_paths: std::slice::from_ref(&private),
             probe_executable: None,
         });
         assert_eq!(
             result.map_err(|error| error.code),
             Err("NATIVE_TOOLCHAIN_ROOT_DENIED".to_owned())
+        );
+
+        let workspace_forbidden = workspace.join("must-not-overlap");
+        let trust_domain_result = plan_sandbox(&SandboxPlanInput {
+            workspace: &workspace,
+            workdir: ".",
+            network: NetworkNamespacePlan::Isolated,
+            argv: &argv,
+            environment: &BTreeMap::new(),
+            sandbox_path: None,
+            read_only_roots: &[],
+            forbidden_paths: std::slice::from_ref(&workspace_forbidden),
+            probe_executable: None,
+        });
+        assert_eq!(
+            trust_domain_result.map_err(|error| error.code),
+            Err("NATIVE_HELPER_TRUST_DOMAIN_OVERLAP".to_owned())
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn fixed_latex_helper_plan_is_safe_and_tty_agnostic() -> Result<(), ReCtmError> {
+        let temp = TempDir::new().map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        let workspace = temp.path().join("workspace");
+        fs::create_dir_all(&workspace)
+            .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        let argv = vec![
+            "/usr/bin/latexmk".to_owned(),
+            "-pdf".to_owned(),
+            "-interaction=nonstopmode".to_owned(),
+            "proof.tex".to_owned(),
+        ];
+        let plan = plan_sandbox(&SandboxPlanInput {
+            workspace: &workspace,
+            workdir: ".",
+            network: NetworkNamespacePlan::Isolated,
+            argv: &argv,
+            environment: &BTreeMap::new(),
+            sandbox_path: Some("/usr/bin:/bin"),
+            read_only_roots: &[],
+            forbidden_paths: &[],
+            probe_executable: None,
+        })?;
+
+        let non_tty_command = build_bubblewrap_command(&plan)?;
+        // TTY ownership remains in CommandRequest after sandbox compilation;
+        // selecting a PTY cannot change any SandboxPlan field or mount.
+        let tty_command = build_bubblewrap_command(&plan.clone())?;
+        assert_eq!(tty_command, non_tty_command);
+        let semantics = compiled_semantics(&non_tty_command)?;
+        assert!(semantics.network_isolated);
+        assert_eq!(semantics.argv, argv);
+        assert_eq!(semantics.workdir.as_deref(), Some("/workspace"));
+        assert_eq!(
+            semantics.environment.get("PATH").map(String::as_str),
+            Some("/usr/bin:/bin")
         );
         Ok(())
     }
@@ -1189,12 +1806,42 @@ mod tests {
         symlink(&target, &resolv_conf)
             .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
 
-        assert_eq!(
-            runtime_resolver_target(&resolv_conf, std::slice::from_ref(&trusted))?,
-            Some(
-                fs::canonicalize(target)
-                    .map_err(|error| { ReCtmError::new("TEST", error.to_string()) })?
-            )
+        let resolver_mount = runtime_resolver_target(&resolv_conf, std::slice::from_ref(&trusted))?;
+        let canonical_target =
+            fs::canonicalize(target).map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        assert_eq!(resolver_mount, Some(canonical_target.clone()));
+
+        let workspace = temp.path().join("workspace");
+        fs::create_dir_all(&workspace)
+            .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+        let argv = ["/bin/true".to_owned()];
+        let shared = plan_sandbox_with_resolver(
+            &SandboxPlanInput {
+                workspace: &workspace,
+                workdir: ".",
+                network: NetworkNamespacePlan::Shared,
+                argv: &argv,
+                environment: &BTreeMap::new(),
+                sandbox_path: None,
+                read_only_roots: &[],
+                forbidden_paths: &[],
+                probe_executable: None,
+            },
+            || Ok(Some(canonical_target.clone())),
+        )?;
+        assert_eq!(shared.resolver_mount(), Some(canonical_target.as_path()));
+        let semantics = compiled_semantics(&build_bubblewrap_command(&shared)?)?;
+        let target_text = canonical_target.to_string_lossy().into_owned();
+        assert!(
+            semantics
+                .read_only_binds
+                .contains(&(target_text.clone(), target_text))
+        );
+        assert!(
+            !semantics
+                .read_only_binds
+                .iter()
+                .any(|(source, target)| { source == "/run" || target == "/run" })
         );
         Ok(())
     }
