@@ -81,6 +81,40 @@ Mode profiles become data, not policy bypasses:
   hard isolation, capability dropping, private-vault absence, workspace scoping, and
   workflow non-inheritance remain enforced.
 
+## D3 frozen permission semantics
+
+The reference Coding Tools contract names all eight permissions, but its current
+implementation only gives direct enforcement semantics for a subset; in particular,
+`long_timeout` and `write_generated_or_ignored` are schema/security-contract names
+without an implementation rule to copy. MTM therefore freezes the missing D3 rules
+explicitly before implementing them rather than inferring authority from the names.
+
+The D3 shadow evaluator uses these rules:
+
+- `sensitive_env`, `destructive_command`, `shell_expansion`, `inline_script`, and
+  `network` preserve the already accepted Rust classifier semantics and ordering;
+- `long_timeout` is required when `exec_command.timeout_ms` is greater than the public
+  default of 30,000 ms; the schema maximum remains 600,000 ms;
+- `privileged_executable` is required when a statically resolvable command executable
+  has a setuid or setgid mode bit (`0o6000`), matching the reference Coding Tools
+  implementation;
+- `write_generated_or_ignored` is required for a non-dry-run `apply_patch` when any
+  source or destination path is Git-ignored or contains one of MTM's canonical
+  generated/excluded path components (`.git`, `.venv`, `venv`, `node_modules`,
+  `dist`, `build`, `__pycache__`, `.pytest_cache`, `.mypy_cache`, `.ruff_cache`,
+  `target`); dry-run patch validation does not require write authority;
+- an `EffectiveNativePolicy` reports required, implicitly granted, explicitly granted,
+  and missing permission kinds without widening any other dimension;
+- D3 is shadow-only. These additional rules do not change production
+  `check_command_policy`, `exec_command`, `apply_patch`, or Bubblewrap behavior before
+  D5 target acceptance and authority cutover.
+
+For an exec request with multiple risks, D3 preserves the accepted Rust order for
+existing dimensions and appends the newly frozen checks: `sensitive_env`,
+`destructive_command`, `shell_expansion`, `inline_script`, `network`, `long_timeout`,
+then `privileged_executable`. This ordering is part of the shadow contract and must be
+covered by adversarial tests before cutover.
+
 ## Sandbox boundary
 
 MTM shall introduce a typed `SandboxPlan` before further expansion of Native

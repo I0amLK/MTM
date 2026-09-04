@@ -135,6 +135,45 @@ class GovernanceTestCase(unittest.TestCase):
         delivery = {item["id"]: item["status"] for item in iteration["delivery"]}
         self.assertEqual(delivery["D1"], "accepted")
         self.assertEqual(delivery["D2"], "accepted")
+        self.assertEqual(delivery["D3"], "in_progress")
+        d3 = iteration["d3_contract"]
+        self.assertEqual(
+            d3["exec_permission_order"],
+            [
+                "sensitive_env",
+                "destructive_command",
+                "shell_expansion",
+                "inline_script",
+                "network",
+                "long_timeout",
+                "privileged_executable",
+            ],
+        )
+        self.assertEqual(d3["long_timeout_threshold_ms_exclusive"], 30_000)
+        self.assertEqual(d3["long_timeout_schema_max_ms"], 600_000)
+        self.assertIn("0o6000", d3["privileged_executable_rule"])
+        self.assertEqual(
+            d3["generated_or_excluded_components"],
+            [
+                ".git",
+                ".venv",
+                "venv",
+                "node_modules",
+                "dist",
+                "build",
+                "__pycache__",
+                ".pytest_cache",
+                ".mypy_cache",
+                ".ruff_cache",
+                "target",
+            ],
+        )
+        self.assertFalse(d3["dry_run_patch_requires_write_permission"])
+        self.assertEqual(d3["authority_mode"], "shadow_only_before_d5")
+        self.assertFalse(d3["production_check_command_policy_changed"])
+        self.assertFalse(d3["production_exec_command_changed"])
+        self.assertFalse(d3["production_apply_patch_changed"])
+        self.assertFalse(d3["bubblewrap_changed"])
         d2 = iteration["d2_receipt"]
         self.assertTrue(d2["application_resident"])
         self.assertEqual(d2["persistence"], "none")

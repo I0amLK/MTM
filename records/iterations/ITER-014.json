@@ -60,7 +60,7 @@
     {
       "id": "D3",
       "name": "effective Native policy and complete eight-kind enforcement",
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "id": "D4",
@@ -148,6 +148,41 @@
       "git_diff_check": true
     }
   },
+  "d3_contract": {
+    "frozen_at": "2026-09-04T07:07:51-07:00",
+    "authority_mode": "shadow_only_before_d5",
+    "exec_permission_order": [
+      "sensitive_env",
+      "destructive_command",
+      "shell_expansion",
+      "inline_script",
+      "network",
+      "long_timeout",
+      "privileged_executable"
+    ],
+    "long_timeout_threshold_ms_exclusive": 30000,
+    "long_timeout_schema_max_ms": 600000,
+    "privileged_executable_rule": "statically resolvable executable with setuid or setgid mode bits 0o6000",
+    "write_generated_or_ignored_rule": "non-dry-run apply_patch touching a Git-ignored path or a canonical generated/excluded path component",
+    "generated_or_excluded_components": [
+      ".git",
+      ".venv",
+      "venv",
+      "node_modules",
+      "dist",
+      "build",
+      "__pycache__",
+      ".pytest_cache",
+      ".mypy_cache",
+      ".ruff_cache",
+      "target"
+    ],
+    "dry_run_patch_requires_write_permission": false,
+    "production_check_command_policy_changed": false,
+    "production_exec_command_changed": false,
+    "production_apply_patch_changed": false,
+    "bubblewrap_changed": false
+  },
   "acceptance": {
     "A0": "Formatting, warnings-denied Clippy, workspace tests, governance, record-layout and unified local gate pass.",
     "A1": "Typed permission wire values, normalization, classifier ordering and current safe/trusted/dangerous compatibility are frozen by golden/adversarial tests.",
@@ -165,6 +200,14 @@
   "manual_pending": [
     "Verified MCP client elicitation support is required before safe/trusted request_permissions may mint an explicit user grant.",
     "Real target A4 is required before any MTM-014 permission-authority cutover."
+  ],
+  "recorded_failures_and_repairs": [
+    {
+      "delivery": 3,
+      "stage": "section 6 unified local gate under the default sandbox",
+      "failure": "The first required run_checks.py invocation reached the MTM-007 conformance harness but could not create its localhost socket and exited with PermissionError: [Errno 1] Operation not permitted before project conformance executed.",
+      "repair": "Reran the unchanged required gate outside the restrictive sandbox with the approved loopback capability; all 24 checks passed and no gate was weakened or skipped."
+    }
   ],
   "decision": "in_progress"
 }
