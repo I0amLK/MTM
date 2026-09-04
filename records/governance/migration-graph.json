@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
-  "title": "MTM-reboot ten-milestone migration graph",
+  "title": "MTM-reboot fourteen-milestone migration graph",
   "updated_at": "2026-09-02T10:00:00-07:00",
   "priority_order": [
     "functionality_compatibility_security",
@@ -467,6 +467,44 @@
       ],
       "rollback": "Before stable deployment leave preview.3 selected. After stable deployment atomically restore /home/lk/.local/bin/mtm to preview.3; /home/lk/.cargo/bin/mtm may remain an independently installed compatible executable. No database, workflow run, capability, project revision or proof artifact rewrite is required.",
       "dependencies": ["MTM-009", "MTM-011", "MTM-012"]
+    },
+    {
+      "id": "MTM-014",
+      "title": "Rust Native permission authority",
+      "status": "in_progress",
+      "priority": "P0",
+      "production_authority_before": "rust",
+      "production_authority_after": "rust",
+      "functional_goal": "Make Native permission classification, grant binding/lifecycle and effective sandbox policy one typed Rust authority while retaining Bubblewrap as the accepted Linux isolation actuator and preserving workflow/project/finalizer non-inheritance.",
+      "scope": [
+        "Define typed Rust permission kinds, scopes and eligible Native tools for the existing eight-kind request_permissions surface",
+        "Validate and canonicalize permission requests, including deterministic argument digests, without treating a request as consent",
+        "Implement a process-local explicit grant ledger with owner/workspace/tool/permission/argument binding, once/session scope, expiry, revocation and atomic once-consumption",
+        "Represent safe/trusted/dangerous behavior as effective Native policy rather than scattered permission bypasses, preserving accepted current behavior unless this milestone explicitly freezes a change",
+        "Complete Rust enforcement coverage for network, destructive_command, long_timeout, sensitive_env, shell_expansion, inline_script, privileged_executable and write_generated_or_ignored",
+        "Introduce a typed SandboxPlan so Bubblewrap compiles an already-authorized plan and contains no OAuth, user-consent, grant-scope or workflow-authority logic",
+        "Run adversarial and real Bubblewrap target validation including replay/concurrency, network/DNS, environment/path, TTY, timeout/kill, Sage, Magma, LaTeX, Git and workflow-authority non-inheritance"
+      ],
+      "non_goals": [
+        "No Bubblewrap replacement, OCI runtime migration or custom Linux namespace implementation",
+        "No new public tool, hidden alias, workflow state, SQLite schema, artifact kind, Agent runtime or model API",
+        "No persistence of temporary Native permission grants in workflow/project SQLite",
+        "No silent user consent inferred from a request_permissions tool call or model intent",
+        "No weakening of private-vault absence, capability dropping, filesystem scoping, verifier/finalizer firewalls or workflow capability checks",
+        "No performance claim"
+      ],
+      "acceptance_levels": ["A0", "A1", "A3", "A4"],
+      "validation_commands": [
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets -- -D warnings",
+        "cargo test --workspace",
+        "python3 scripts/validate_migration_graph.py",
+        "python3 scripts/validate_engineering_graph.py",
+        "python3 scripts/validate_record_layout.py",
+        "python3 scripts/run_checks.py"
+      ],
+      "rollback": "Before permission-authority cutover remove the MTM-014 shadow permission/grant path and retain the accepted 0.4.0 Native policy plus Bubblewrap. After a later cutover restore the frozen pre-cutover Native evaluator and invalidate all process-local MTM-014 grants; no workflow/project/database/proof rewrite is required.",
+      "dependencies": ["MTM-013"]
     }
   ],
   "edges": [
@@ -488,9 +526,10 @@
     {"source": "MTM-012", "target": "MTM-011"},
     {"source": "MTM-013", "target": "MTM-009"},
     {"source": "MTM-013", "target": "MTM-011"},
-    {"source": "MTM-013", "target": "MTM-012"}
+    {"source": "MTM-013", "target": "MTM-012"},
+    {"source": "MTM-014", "target": "MTM-013"}
   ],
-  "todo": ["MTM-013"],
+  "todo": ["MTM-013", "MTM-014"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -907,6 +946,22 @@
       "status_before": "approved",
       "status_after": "in_progress",
       "summary": "Began MTM-013 with preview.3 still selected and all prior workflow/protocol/state authority frozen. No malformed capability may authorize writes; stable version promotion is forbidden until source hardening, real install/upgrade/rollback, proof finalization and complete local gates pass."
+    },
+    {
+      "event_id": "MEVT-053",
+      "milestone_id": "MTM-014",
+      "at": "2026-09-04T05:50:00-07:00",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "User explicitly approved Rust Native permission-authority work after deciding that Bubblewrap has no current replacement requirement. The milestone freezes Bubblewrap as actuator and makes typed Rust permission/grant authority the target."
+    },
+    {
+      "event_id": "MEVT-054",
+      "milestone_id": "MTM-014",
+      "at": "2026-09-04T05:50:01-07:00",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Started MTM-014 D1 in pre-authority shadow mode. MTM-013 remains the current release-closure dependency; no safe/trusted explicit grant, Bubblewrap authority, public tool shape, workflow protocol/state schema, or workflow/finalizer authority changes are allowed by this start event."
     }
   ],
   "receipt_contract": {

@@ -95,8 +95,39 @@ def historical_check_count(milestone: str) -> int:
 class GovernanceTestCase(unittest.TestCase):
     def test_repository_migration_graph_is_valid(self) -> None:
         summary = validate_migration(load_graph())
-        self.assertEqual(summary["milestone_count"], 13)
-        self.assertEqual(summary["todo_count"], 1)
+        self.assertEqual(summary["milestone_count"], 14)
+        self.assertEqual(summary["todo_count"], 2)
+
+    def test_mtm014_native_permission_contract_is_frozen(self) -> None:
+        graph = load_graph()
+        milestone = next(item for item in graph["milestones"] if item["id"] == "MTM-014")
+        self.assertEqual(milestone["status"], "in_progress")
+        self.assertEqual(milestone["dependencies"], ["MTM-013"])
+        self.assertTrue(
+            any(item.startswith("No Bubblewrap replacement") for item in milestone["non_goals"])
+        )
+        iteration = json.loads(
+            (ROOT / "records" / "iterations" / "ITER-014.json").read_text(encoding="utf-8")
+        )
+        frozen = iteration["frozen_contract"]
+        self.assertEqual(
+            frozen["permission_kinds"],
+            [
+                "network",
+                "destructive_command",
+                "long_timeout",
+                "sensitive_env",
+                "shell_expansion",
+                "inline_script",
+                "privileged_executable",
+                "write_generated_or_ignored",
+            ],
+        )
+        self.assertEqual(frozen["permission_scopes"], ["once", "session"])
+        self.assertEqual(frozen["permission_tools"], ["exec_command", "apply_patch"])
+        self.assertTrue(frozen["plain_request_is_not_consent"])
+        self.assertTrue(frozen["bubblewrap_remains_linux_isolation_actuator"])
+        self.assertTrue(frozen["dangerous_native_never_inherits_workflow_authority"])
 
     def test_dependency_cycle_is_rejected(self) -> None:
         payload = copy.deepcopy(load_graph())

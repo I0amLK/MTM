@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-014",
+  "title": "Rust Native permission authority",
+  "status": "in_progress",
+  "started_at": "2026-09-04T05:50:00-07:00",
+  "authority": {
+    "before": "rust",
+    "target_after_acceptance": "rust",
+    "bubblewrap_actuator_changed": false,
+    "workflow_authority_changed": false,
+    "finalizer_authority_changed": false,
+    "state_schema_changed": false
+  },
+  "trigger": {
+    "user_goal": "Make the Native permission system a coherent Rust authority without replacing Bubblewrap merely for implementation-language purity.",
+    "current_fact": "Command policy and Native execution are already Rust, but permission kinds are stringly typed, request_permissions cannot produce a verified safe/trusted grant, mode behavior is partly encoded as bypass control flow, and the full eight-kind permission surface lacks one typed authority model."
+  },
+  "frozen_contract": {
+    "public_tool_count": 24,
+    "hidden_alias_count": 11,
+    "workflow_protocol_version": 3,
+    "state_schema_version": 2,
+    "permission_kinds": [
+      "network",
+      "destructive_command",
+      "long_timeout",
+      "sensitive_env",
+      "shell_expansion",
+      "inline_script",
+      "privileged_executable",
+      "write_generated_or_ignored"
+    ],
+    "permission_scopes": ["once", "session"],
+    "permission_tools": ["exec_command", "apply_patch"],
+    "plain_request_is_not_consent": true,
+    "safe_trusted_elicitation_remains_fail_closed_until_verified_client_support": true,
+    "dangerous_native_never_inherits_workflow_authority": true,
+    "bubblewrap_remains_linux_isolation_actuator": true
+  },
+  "security_invariants": [
+    "Explicit grants bind OAuth owner, workspace, tool, permission kind, canonical argument digest, scope and expiry.",
+    "Once grants are atomically consumed at most once and concurrent replay cannot authorize two executions.",
+    "Session grants are process-local and disappear on restart.",
+    "Cross-owner, cross-workspace, cross-tool, argument-mutated, expired and revoked grants fail closed.",
+    "Network/destructive/environment grants widen only their named policy dimension.",
+    "Private vault absence, dropped Linux capabilities and workflow/project/finalizer non-inheritance remain invariant in every Native mode."
+  ],
+  "delivery": [
+    {
+      "id": "D1",
+      "name": "typed permission contract and classifier",
+      "status": "in_progress"
+    },
+    {
+      "id": "D2",
+      "name": "in-memory grant ledger with once/session binding",
+      "status": "pending"
+    },
+    {
+      "id": "D3",
+      "name": "effective Native policy and complete eight-kind enforcement",
+      "status": "pending"
+    },
+    {
+      "id": "D4",
+      "name": "typed SandboxPlan with Bubblewrap as pure actuator",
+      "status": "pending"
+    },
+    {
+      "id": "D5",
+      "name": "real target permission and isolation qualification",
+      "status": "pending"
+    }
+  ],
+  "acceptance": {
+    "A0": "Formatting, warnings-denied Clippy, workspace tests, governance, record-layout and unified local gate pass.",
+    "A1": "Typed permission wire values, normalization, classifier ordering and current safe/trusted/dangerous compatibility are frozen by golden/adversarial tests.",
+    "A3": "Grant binding, expiry, revocation, replay, concurrency, environment/path isolation and workflow-authority non-inheritance fail closed.",
+    "A4": "Real Bubblewrap target validation covers the complete permission surface plus network/DNS, TTY, timeout/kill, Sage, Magma, LaTeX and Git without new authority leakage."
+  },
+  "non_goals": [
+    "No Bubblewrap replacement.",
+    "No new public tool or workflow capability.",
+    "No permission-grant persistence in workflow/project SQLite.",
+    "No silent consent inferred from request_permissions invocation.",
+    "No performance claim."
+  ],
+  "rollback": "Before permission-authority cutover, remove the MTM-014 shadow types/ledger and retain stable 0.4.0 Native policy plus Bubblewrap. After a later cutover, restore the frozen pre-cutover evaluator and invalidate all process-local grants; no persistent workflow/project/proof data rewrite is required.",
+  "manual_pending": [
+    "MTM-013 exact-stable live QC and compact-proof regressions still gate final 0.4.0 milestone closure; MTM-014 work remains pre-authority/shadow until that closure is recorded.",
+    "Verified MCP client elicitation support is required before safe/trusted request_permissions may mint an explicit user grant.",
+    "Real target A4 is required before any MTM-014 permission-authority cutover."
+  ],
+  "decision": "in_progress"
+}
