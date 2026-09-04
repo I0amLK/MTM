@@ -7,15 +7,17 @@ use mtm_gateway::{
     GatewayHttpConfig, GatewayRuntime, GatewayState, MCPDispatcher, OAuthService, OAuthStore,
     ToolBackend, ToolCatalog,
 };
-use mtm_storage::{CapabilityAuthority, CapabilityEvent, CapabilityObserver, StateStore};
+use mtm_storage::{
+    CapabilityAuthority, CapabilityEvent, CapabilityObserver, StateStore, StoreRuntime,
+};
 use mtm_workflow::{
     PrivateVault, ResearchProvider, TaskCatalog, WorkflowEngine, WorkflowEvent, WorkflowObserver,
 };
 use serde_json::Value;
 
 use crate::{
-    CurlResearchProvider, NativeToolRuntime, NativeWorkspace, RuntimeBackendFacts,
-    RuntimeEventSink, RuntimeLatexGate, RuntimeSettings, RuntimeToolBackend,
+    CurlResearchProvider, NativePermissionGrantAuthority, NativeToolRuntime, NativeWorkspace,
+    RuntimeBackendFacts, RuntimeEventSink, RuntimeLatexGate, RuntimeSettings, RuntimeToolBackend,
 };
 
 #[derive(Clone, Debug)]
@@ -80,6 +82,7 @@ pub struct RuntimeApplication {
     pub oauth_store: Arc<OAuthStore>,
     pub vault: Arc<PrivateVault>,
     pub capabilities: Arc<CapabilityAuthority>,
+    pub native_permissions: Arc<NativePermissionGrantAuthority>,
     pub native: Arc<NativeToolRuntime>,
     pub workflow: Arc<WorkflowEngine>,
     pub backend: Arc<RuntimeToolBackend>,
@@ -158,6 +161,8 @@ impl RuntimeApplication {
             &settings.workspace,
             &settings.private_root,
         )?);
+        let native_permissions =
+            Arc::new(NativePermissionGrantAuthority::new(StoreRuntime::default()));
         let native = Arc::new(NativeToolRuntime::new(
             Arc::clone(&workspace),
             settings.native_mode,
@@ -245,6 +250,7 @@ impl RuntimeApplication {
             oauth_store,
             vault,
             capabilities,
+            native_permissions,
             native,
             workflow,
             backend,

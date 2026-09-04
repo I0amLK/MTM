@@ -4,6 +4,7 @@ pub mod application;
 pub mod config;
 pub mod helper;
 pub mod latex;
+pub mod native_permission;
 pub mod native_tools;
 pub mod operator;
 pub mod research;
@@ -17,6 +18,10 @@ pub use helper::{native_helper_main, native_sandbox_probe_main};
 pub use latex::RuntimeLatexGate;
 pub use mtm_core::evaluate_request;
 pub use mtm_native::{QuickTunnel, TunnelEvent, TunnelState};
+pub use native_permission::{
+    NativePermissionGrantAuthority, NativePermissionGrantId, NativePermissionGrantReceipt,
+    NativePermissionPermit, VerifiedNativePermissionConsent,
+};
 pub use native_tools::NativeToolRuntime;
 pub use operator::{OperatorSession, RuntimeEventSink};
 pub use research::CurlResearchProvider;

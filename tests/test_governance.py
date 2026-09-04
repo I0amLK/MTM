@@ -132,6 +132,23 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(frozen["plain_request_is_not_consent"])
         self.assertTrue(frozen["bubblewrap_remains_linux_isolation_actuator"])
         self.assertTrue(frozen["dangerous_native_never_inherits_workflow_authority"])
+        delivery = {item["id"]: item["status"] for item in iteration["delivery"]}
+        self.assertEqual(delivery["D1"], "accepted")
+        self.assertEqual(delivery["D2"], "accepted")
+        d2 = iteration["d2_receipt"]
+        self.assertTrue(d2["application_resident"])
+        self.assertEqual(d2["persistence"], "none")
+        self.assertTrue(d2["restart_invalidates_all_grants"])
+        self.assertFalse(d2["verified_consent_public_constructor"])
+        self.assertFalse(d2["verified_consent_cloneable"])
+        self.assertFalse(d2["permit_cloneable"])
+        self.assertFalse(d2["raw_arguments_retained_in_ledger"])
+        self.assertFalse(d2["plain_request_mints_grant"])
+        self.assertFalse(d2["production_request_permissions_changed"])
+        self.assertFalse(d2["production_exec_command_changed"])
+        self.assertFalse(d2["production_apply_patch_changed"])
+        self.assertFalse(d2["bubblewrap_changed"])
+        self.assertFalse(d2["workflow_authority_changed"])
 
     def test_dependency_cycle_is_rejected(self) -> None:
         payload = copy.deepcopy(load_graph())

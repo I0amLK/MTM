@@ -55,7 +55,7 @@
     {
       "id": "D2",
       "name": "in-memory grant ledger with once/session binding",
-      "status": "pending"
+      "status": "accepted"
     },
     {
       "id": "D3",
@@ -100,6 +100,54 @@
       "git_diff_check": true
     }
   },
+  "d2_receipt": {
+    "accepted_at": "2026-09-04T06:58:25-07:00",
+    "scope": "process-local explicit-grant ledger and unforgeable permit types; no production consent bridge or execution cutover",
+    "application_resident": true,
+    "persistence": "none",
+    "restart_invalidates_all_grants": true,
+    "verified_consent_public_constructor": false,
+    "verified_consent_cloneable": false,
+    "permit_cloneable": false,
+    "grant_id_debug_redacted": true,
+    "raw_arguments_retained_in_ledger": false,
+    "plain_request_mints_grant": false,
+    "production_request_permissions_changed": false,
+    "production_exec_command_changed": false,
+    "production_apply_patch_changed": false,
+    "bubblewrap_changed": false,
+    "workflow_authority_changed": false,
+    "binding_fields": [
+      "oauth_owner",
+      "workspace",
+      "tool",
+      "permission_kind",
+      "canonical_argument_digest",
+      "scope",
+      "expiry"
+    ],
+    "negative_tests": [
+      "one-shot grant authorizes exactly one matching invocation",
+      "eight concurrent consumers of one once grant produce exactly one successful permit",
+      "session grant is reusable only inside the same process-local ledger",
+      "new authority instance cannot see an earlier session grant",
+      "cross-owner binding fails closed",
+      "cross-workspace binding fails closed",
+      "cross-tool binding fails closed",
+      "permission-kind mutation fails closed",
+      "argument mutation fails closed",
+      "expiry fails closed at expires_at",
+      "revocation fails closed",
+      "grant debug output and stored records do not retain raw command arguments or expose the raw grant id"
+    ],
+    "validation": {
+      "runtime_permission_tests": "6 passed",
+      "runtime_application_tests": "passed",
+      "runtime_clippy_warnings_denied": true,
+      "full_run_checks": true,
+      "git_diff_check": true
+    }
+  },
   "acceptance": {
     "A0": "Formatting, warnings-denied Clippy, workspace tests, governance, record-layout and unified local gate pass.",
     "A1": "Typed permission wire values, normalization, classifier ordering and current safe/trusted/dangerous compatibility are frozen by golden/adversarial tests.",
@@ -115,7 +163,6 @@
   ],
   "rollback": "Before permission-authority cutover, remove the MTM-014 shadow types/ledger and retain stable 0.4.0 Native policy plus Bubblewrap. After a later cutover, restore the frozen pre-cutover evaluator and invalidate all process-local grants; no persistent workflow/project/proof data rewrite is required.",
   "manual_pending": [
-    "MTM-013 exact-stable live QC and compact-proof regressions still gate final 0.4.0 milestone closure; MTM-014 work remains pre-authority/shadow until that closure is recorded.",
     "Verified MCP client elicitation support is required before safe/trusted request_permissions may mint an explicit user grant.",
     "Real target A4 is required before any MTM-014 permission-authority cutover."
   ],
