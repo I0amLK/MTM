@@ -3,7 +3,7 @@
   "project": "MTM-reboot",
   "version": "0.4.0",
   "status": "MTM-013-in-progress",
-  "updated_at": "2026-09-03T21:26:00-07:00",
+  "updated_at": "2026-09-03T23:31:03-07:00",
   "source_baseline": "source-baseline.json",
   "current_production_authority": "rust",
   "rust_production_components": 7,
@@ -20,8 +20,9 @@
   "completed_milestones": ["MTM-001", "MTM-002", "MTM-003", "MTM-004", "MTM-005", "MTM-006", "MTM-007", "MTM-008", "MTM-009", "MTM-010", "MTM-011", "MTM-012"],
   "next_milestone": null,
   "claims": [
-    "MTM-013 stable source identity is staged at 0.4.0 while the live selector intentionally remains on the accepted preview.3 release until the exact stable artifact passes clean-install, existing-state upgrade, proof finalization, rollback/recutover and soak qualification.",
-    "MTM-013 is in progress as the stable 0.4.0 hardening/qualification milestone. Preview.3 remains the selected rollback while capability transport recovery, complete-flow validation metadata consistency, cargo-install command-layout validation and stable release evidence are completed without changing workflow protocol 3, protocol-2 rollback, state schema 2 or finalizer semantics.",
+    "MTM 0.4.0 is now the active stable selector and login-shell command. Public main c6fd8494a3d750784a7d8ffe945f023fb25bbb32 contains the frozen stable source fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3; public cargo install reproduced stable identity and the qualified binary SHA-256 3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3, and the real preview.3 rollback plus stable recutover passed.",
+    "MTM-013 remains in progress only for the exact post-cutover stable live QC constituent-matching/compact-proof regressions and final governance receipt. Capability recovery, complete-flow metadata, clean/public installation, copied-state upgrade, proof finalization, A5 soak/resource qualification, stable selector activation and rollback/recutover have passed without changing state schema 2, verifier/finalizer authority or the explicit protocol-2 rollback.",
+    "Post-cutover governance now distinguishes stable 0.4.0 from preview.3 using the actual selector and stable-release receipt; command namespace validates against stable evidence instead of incorrectly replaying the preview.3 selector validator.",
     "MTM-009 lifecycle is now formally completed without changing its immutable v1 result: the research-state implementation is accepted, the frozen v1 paired default-cutover evaluation remains complete/rejected with release_gate_passed=false, and the later MTM-011 prospective qualification remains the sole authority for protocol 3 becoming the default.",
     "MTM-012 is completed and MTM 0.4.0-preview.3 is installed with SHA-256 545ab9ef8cc01edf804581cb52c2b1a4158d03bd8a25ea00c7785039167f3659. The default TUI is compact: tool starts remain visible, routine successful completion/trace/argument-key noise is suppressed, failures remain explicit, and --verbose restores the detailed redacted lifecycle view. Preview.2 remains installed as the selector-level TUI rollback, both shell command paths follow preview.3, and the installed release passed the twenty-check real OAuth/MCP TUI smoke after rollback/recutover.",
     "MTM-011 is completed and MTM 0.4.0-preview.2 is installed at /home/lk/.local/share/mtm/releases/0.4.0-preview.2/mtm with SHA-256 5ed668d5bf765be2efd1b50933e941cf60dbbd414e3b6daab77745624d5cfa81. Both /home/lk/.local/bin/mtm and the login-shell-preferred /home/lk/.cargo/bin/mtm now follow the same selector. Protocol 3 is the no-override default for new runs, explicit MTM_WORKFLOW_PROTOCOL_VERSION=2 remains the rollback, the formal A4 candidate 5cebde6458f29012f3da72564ad6a940cc319aae162f9695070474b77d83b036 is archived byte-for-byte, and real selector rollback/recutover plus live MCP new-run probes passed.",
@@ -72,8 +73,8 @@
     "authority-inventory.json records every MTM production authority as Rust, with Bubblewrap retained only as the Linux kernel-isolation actuator; release evidence proves MTM uses mtm / MTM_* / ~/.mtm while Re-CTM uses re-ctm / RE_CTM_* / ~/.re-ctm."
   ],
   "manual_pending": [
-    "Stable 0.4.0 remains a separate release decision; preview.3 TUI evidence does not authorize removing the protocol-2 workflow rollback or preview.2 selector rollback.",
-    "Existing 0.3.0 MTM sessions were deliberately left running during preview command cutover; restart them only when operationally desired.",
+    "Reconnect or restart the live MTM MCP session onto stable 0.4.0 and rerun the QC constituent-matching and compact-proof semantic regressions against the exact stable release before completing MTM-013.",
+    "Keep the explicit protocol-2 workflow rollback and preserved preview.3 release rollback after stable completion; neither is removed by 0.4.0 qualification.",
     "Other operating systems and site-local toolchain layouts remain target-specific Native evidence.",
     "Publishing the internal mtm-* crates to a public registry is not required for the accepted single-binary distribution and remains a separate release decision.",
     "Additional browsers, operating systems and reverse-proxy deployments remain release-specific gateway evidence.",

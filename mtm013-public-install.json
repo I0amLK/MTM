@@ -1,0 +1,17 @@
+{
+  "checks": {
+    "public_git_install_identity": true,
+    "public_git_install_version": true,
+    "public_main_contains_frozen_source": true
+  },
+  "installed_binary_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+  "milestone": "MTM-013",
+  "ok": true,
+  "phase": "public_git_install",
+  "public_main": "c6fd8494a3d750784a7d8ffe945f023fb25bbb32",
+  "raw_git_credentials_recorded": false,
+  "repository": "https://github.com/I0amLK/MTM.git",
+  "schema_version": "1.0.0",
+  "source_commit": "fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3",
+  "version": "0.4.0"
+}

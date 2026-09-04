@@ -88,13 +88,31 @@
     "existing_runs_rewritten": false
   },
   "public_distribution_gate": {
-    "status": "blocked_by_external_authentication",
-    "observed_public_main": "60883071931501a8700b29a8882587f4250c1ad3",
+    "status": "passed",
+    "observed_public_main": "c6fd8494a3d750784a7d8ffe945f023fb25bbb32",
     "required_source_commit": "fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3",
     "public_install_negative_test_passed": true,
     "stable_deployment_negative_test_passed": true,
     "selector_changed_by_negative_test": false,
-    "reason": "The coding environment has no GitHub write credential. Public-install and stable-deployment tooling both fail closed until the frozen source is present on public main and validated through cargo install --git."
+    "public_install_report": "mtm013-public-install.json",
+    "public_install_report_sha256": "2ac0d3a4aa3450ffc2898130833901dc831cfca0d9b3ae4d1726a5b32e9dd710",
+    "reason": "Authenticated operator push placed the frozen stable source on public main; cargo install --git --rev fcdc0cd then reproduced the accepted stable identity and binary SHA-256."
+  },
+  "stable_release_activation": {
+    "status": "accepted_pending_exact_live_web_regression",
+    "activated_at": "2026-09-03T23:31:03-07:00",
+    "source_commit": "fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3",
+    "public_main": "c6fd8494a3d750784a7d8ffe945f023fb25bbb32",
+    "version": "0.4.0",
+    "binary_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+    "stable_release_report": "mtm013-stable-release.json",
+    "stable_release_report_sha256": "9244cf7179d8665127fc630d8986e6a205416d1fc0bb910b1e7f58c78d8902c8",
+    "selector_target": "/home/lk/.local/share/mtm/releases/0.4.0/mtm",
+    "shell_command": "/home/lk/.cargo/bin/mtm",
+    "production_default_workflow_protocol": 3,
+    "explicit_protocol2_rollback": true,
+    "real_selector_and_cargo_rollback_recutover_passed": true,
+    "existing_runs_rewritten": false
   },
   "regression_receipt": {
     "recorded_at": "2026-09-03T22:59:14-07:00",
@@ -141,9 +159,16 @@
         "final_artifact_sha256": "c565320ed232bbc637447c0328d56fcc9e530377cd43efa24760eb5c2aabda8a"
       },
       "exact_stable_live_rerun_pending": true,
-      "pending_reason": "The 0.4.0 stable source is locally qualified but is not yet present on public main or selected in the live connector, so claiming these preview.3 semantic runs as exact stable-binary evidence would be false."
+      "pending_reason": "Stable 0.4.0 is now public and selected, but the post-cutover exact stable live web-model QC constituent-matching and compact-proof runs have not yet been collected. The earlier preview.3 runs remain supplemental only."
     }
   },
+  "recorded_failures_and_repairs": [
+    {
+      "stage": "post-cutover unified governance validation",
+      "failure": "After the successful 0.4.0 cutover, command-namespace governance still classified progress.version=0.4.0 under the MTM-012 preview deployment branch. It therefore tried to validate preview.3 against a selector that correctly resolved to stable 0.4.0, producing two stale-evidence errors even though public install and stable rollback/recutover had passed.",
+      "repair": "Introduce an explicit mtm013_stable deployment mode keyed to the actual stable selector and stable-release receipt, validate command namespace through mtm013-stable-release.json, retain historical lower-milestone evidence in stable mode, and make run_checks include public-install plus stable-release validators instead of replaying the preview.3 selector validator."
+    }
+  ],
   "acceptance": {
     "A0": "Full format, warnings-denied Clippy, workspace tests, governance and unified local gate pass.",
     "A1": "Capability error taxonomy remains deterministic and stable; only CAPABILITY_INVALID before writes gets a fresh envelope and no malformed token gains write authority.",
@@ -151,10 +176,10 @@
     "A4": "Clean public install, existing-state upgrade, P3 default/P2 override, proof_verified.tex finalization, stable selector rollback and recutover pass on the supported Linux target.",
     "A5": "Bounded stable-release soak/resource checks pass without unexplained process/thread/fd/state growth; no new performance claim is required."
   },
-  "rollback": "Keep preview.3 installed and selected until stable qualification passes. After stable deployment, atomically restore preview.3 if needed; no persistent data or verified artifacts are rewritten.",
+  "rollback": "Stable 0.4.0 is active. If rollback is required, atomically restore the preserved preview.3 selector and cargo command; the release drill proved rollback and recutover without rewriting persistent state, existing runs or verified artifacts.",
   "manual_pending": [
-    "Push the stable-source chain through fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3 plus the subsequent qualification/governance commits to GitHub main from an authenticated interactive shell, then verify cargo install --git from the exact public stable source commit.",
-    "After public installation passes, perform the already-prepared stable selector/cargo-command rollback/recutover drill before completing MTM-013."
+    "Reconnect or restart the live MTM MCP session onto stable 0.4.0 and rerun the QC constituent-matching plus compact-proof semantic regressions against that exact live release.",
+    "After exact stable live regressions pass, append the final MTM-013 receipt, mark the milestone completed, rerun the unified gate, and push the post-cutover governance/evidence commits."
   ],
   "decision": "in_progress"
 }

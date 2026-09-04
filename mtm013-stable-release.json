@@ -1,0 +1,50 @@
+{
+  "binary_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+  "existing_runs_rewritten": false,
+  "final_artifact": "proof_verified.tex",
+  "milestone": "MTM-013",
+  "passed": true,
+  "phase": "stable_0_4_0_release",
+  "production_command": "/home/lk/.local/bin/mtm",
+  "production_command_target": "/home/lk/.local/share/mtm/releases/0.4.0/mtm",
+  "project": "MTM-reboot",
+  "qualification": {
+    "local_report_sha256": "94b57b08d10f268d9f13b63c32478a5888ec6034ddeae8ef807d06357fa18412",
+    "public_install_report_sha256": "2ac0d3a4aa3450ffc2898130833901dc831cfca0d9b3ae4d1726a5b32e9dd710",
+    "resource_report_sha256": "73629371264f0be12eb8c6cc138d4009483d78ab796487fa56c1596815a8e1d2"
+  },
+  "release_info": {
+    "hidden_alias_count": 11,
+    "implementation": "rust",
+    "name": "mtm",
+    "production_authority": "rust",
+    "public_tool_count": 24,
+    "python_runtime_required": false,
+    "state_schema_version": 2,
+    "target_arch": "x86_64",
+    "target_os": "linux",
+    "version": "0.4.0",
+    "workflow_protocol_version": 3
+  },
+  "rollback": {
+    "cargo_backup": {
+      "path": "/home/lk/.local/share/mtm/rollback/mtm-preview3-cargo",
+      "sha256": "4a13c53e909f1f4dc27ba3a866c7d36b69d5eae54be43d57ee6aefee04f8b574",
+      "version": "mtm 0.4.0-preview.3"
+    },
+    "real_rollback_and_recutover_passed": true,
+    "selector_sha256": "545ab9ef8cc01edf804581cb52c2b1a4158d03bd8a25ea00c7785039167f3659",
+    "selector_target": "/home/lk/.local/share/mtm/releases/0.4.0-preview.3/mtm"
+  },
+  "runtime_probes": {
+    "preview3_default_during_rollback": 3,
+    "stable_default_after_cutover": 3,
+    "stable_default_after_recutover": 3,
+    "stable_explicit_protocol2": 2
+  },
+  "schema_version": "1.0.0",
+  "shell_command": "/home/lk/.cargo/bin/mtm",
+  "shell_command_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+  "source_commit": "fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3",
+  "version": "0.4.0"
+}

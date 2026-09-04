@@ -87,6 +87,15 @@ def resolve_tool_environment() -> tuple[dict[str, str], str | None, str | None]:
 def main() -> int:
     environment, cargo, rustc = resolve_tool_environment()
     progress = json.loads((ROOT / "project-progress.json").read_text(encoding="utf-8"))
+    selector = Path("/home/lk/.local/bin/mtm")
+    mtm013_stable_deployed_mode = (
+        progress.get("version") == "0.4.0"
+        and progress.get("current_milestone") == "MTM-013"
+        and progress.get("status") in {"MTM-013-in-progress", "MTM-013-completed"}
+        and (ROOT / "mtm013-stable-release.json").is_file()
+        and selector.is_symlink()
+        and "/releases/0.4.0/" in str(selector.resolve())
+    )
     mtm009_preview_mode = (
         str(progress.get("version") or "").startswith("0.4.0-preview.")
         and progress.get("current_milestone") == "MTM-009"
@@ -103,10 +112,13 @@ def main() -> int:
         and progress.get("current_milestone") in {"MTM-012", "MTM-013"}
         and progress.get("status")
         in {"MTM-012-in-progress", "MTM-012-completed", "MTM-013-in-progress"}
+        and not mtm013_stable_deployed_mode
     )
     current_preview_mode = mtm011_preview_mode or mtm012_preview_mode
-    historical_preview_mode = mtm009_preview_mode or current_preview_mode
-    mtm011_cutover_mode = current_preview_mode
+    historical_release_mode = (
+        mtm009_preview_mode or current_preview_mode or mtm013_stable_deployed_mode
+    )
+    mtm011_cutover_mode = current_preview_mode or mtm013_stable_deployed_mode
     mtm012_source_mode = (
         progress.get("current_milestone") == "MTM-012"
         and progress.get("status") == "MTM-012-in-progress"
@@ -161,6 +173,26 @@ def main() -> int:
                 run(
                     "mtm013_stable_resource",
                     [sys.executable, "scripts/validate_mtm013_stable_resource.py"],
+                    env=environment,
+                    capture_json=True,
+                )
+            )
+
+        if (ROOT / "mtm013-public-install.json").is_file():
+            checks.append(
+                run(
+                    "mtm013_public_install",
+                    [sys.executable, "scripts/validate_mtm013_public_install.py"],
+                    env=environment,
+                    capture_json=True,
+                )
+            )
+
+        if (ROOT / "mtm013-stable-release.json").is_file():
+            checks.append(
+                run(
+                    "mtm013_stable_release",
+                    [sys.executable, "scripts/validate_mtm013_stable_release.py"],
                     env=environment,
                     capture_json=True,
                 )
@@ -249,6 +281,9 @@ def main() -> int:
                             ]
                             if mtm009_preview_mode
                             else (
+                                []
+                                if mtm013_stable_deployed_mode
+                                else (
                                 [
                                     *(
                                         []
@@ -311,10 +346,11 @@ def main() -> int:
                                         capture_json=True,
                                     ),
                                 ]
+                                )
                             )
                         ),
                     ]
-                    if historical_preview_mode
+                    if historical_release_mode
                     else [
                         run(
                             "mtm003_target_evidence",
@@ -416,15 +452,20 @@ def main() -> int:
         "passed": all(item["passed"] for item in checks),
         "checks": checks,
         "local_claim": (
-            "MTM-001 through MTM-008 remain accepted historical milestones with immutable "
-            "hash-bound evidence. MTM 0.4.0-preview.1 is the current installed command for new "
-            "launches under Rust authority, state schema 2, 24 public tools, 11 hidden aliases, "
-            "and workflow protocol 2 as the production default. MTM-009 protocol 3 is an explicit "
-            "opt-in mathematical research-state workflow with bounded advisory context; it does "
-            "not become the production default until paired real-web A4 passes. The preview has "
-            "current release, A5, rollback/recutover, namespace, TUI tool-visibility/redaction, "
-            "and protocol-1/2 conformance evidence. Existing 0.3.0 sessions were deliberately not "
-            "restarted. The only final mathematical artifact remains proof_verified.tex."
+            (
+                "MTM 0.4.0 is the active stable command for new launches under Rust authority. "
+                "The public Git install, exact stable binary identity, workflow protocol 3 default, "
+                "explicit protocol-2 rollback, selector rollback/recutover, command namespace, "
+                "state schema 2, 24 public tools, 11 hidden aliases, and proof_verified.tex "
+                "finalization path are locally validated. Historical MTM-001 through MTM-012 "
+                "evidence remains immutable; existing runs are not rewritten by the stable cutover."
+            )
+            if mtm013_stable_deployed_mode
+            else (
+                "MTM-001 through MTM-012 remain accepted historical milestones with immutable "
+                "hash-bound evidence while MTM-013 stable qualification is in progress. The only "
+                "final mathematical artifact remains proof_verified.tex."
+            )
         ),
     }
     temporary = REPORT.with_name(REPORT.name + ".tmp")

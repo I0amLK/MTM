@@ -38,6 +38,17 @@ ROOT = Path(__file__).resolve().parents[1]
 def deployment_mode() -> str:
     progress = json.loads((ROOT / "project-progress.json").read_text(encoding="utf-8"))
     milestone = progress.get("current_milestone")
+    stable_report = ROOT / "mtm013-stable-release.json"
+    stable_selector = Path("/home/lk/.local/bin/mtm")
+    if (
+        progress.get("version") == "0.4.0"
+        and milestone == "MTM-013"
+        and progress.get("status") in {"MTM-013-in-progress", "MTM-013-completed"}
+        and stable_report.is_file()
+        and stable_selector.is_symlink()
+        and "/releases/0.4.0/" in str(stable_selector.resolve())
+    ):
+        return "mtm013_stable"
     if (
         str(progress.get("version") or "").startswith("0.4.0-preview.")
         and milestone == "MTM-009"
@@ -62,7 +73,12 @@ def deployment_mode() -> str:
 
 
 def historical_evidence_mode() -> bool:
-    return deployment_mode() in {"mtm009_preview", "mtm011_preview", "mtm012_preview"}
+    return deployment_mode() in {
+        "mtm009_preview",
+        "mtm011_preview",
+        "mtm012_preview",
+        "mtm013_stable",
+    }
 
 
 def historical_check_count(milestone: str) -> int:
@@ -208,6 +224,12 @@ class GovernanceTestCase(unittest.TestCase):
         elif deployment_mode() == "mtm012_preview":
             self.assertEqual(summary["evidence"], "mtm012_preview_release")
             self.assertEqual(summary["mtm_version"], "0.4.0-preview.3")
+            self.assertEqual(summary["production_default_workflow_protocol"], 3)
+            self.assertEqual(summary["rollback_workflow_protocol"], 2)
+            self.assertTrue(summary["real_rollback_and_recutover_passed"])
+        elif deployment_mode() == "mtm013_stable":
+            self.assertEqual(summary["evidence"], "mtm013_stable_release")
+            self.assertEqual(summary["mtm_version"], "0.4.0")
             self.assertEqual(summary["production_default_workflow_protocol"], 3)
             self.assertEqual(summary["rollback_workflow_protocol"], 2)
             self.assertTrue(summary["real_rollback_and_recutover_passed"])

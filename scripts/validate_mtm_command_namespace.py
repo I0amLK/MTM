@@ -18,6 +18,7 @@ try:
     )
     from scripts.validate_mtm011_preview_release import validate as validate_mtm011_preview_release
     from scripts.validate_mtm012_preview_release import validate as validate_mtm012_preview_release
+    from scripts.validate_mtm013_stable_release import validate as validate_mtm013_stable_release
 except ModuleNotFoundError:
     from run_mtm_command_namespace_cutover import (
         LEGACY_SHARED_DATA_ROOT,
@@ -31,6 +32,7 @@ except ModuleNotFoundError:
     )
     from validate_mtm011_preview_release import validate as validate_mtm011_preview_release
     from validate_mtm012_preview_release import validate as validate_mtm012_preview_release
+    from validate_mtm013_stable_release import validate as validate_mtm013_stable_release
 
 
 REQUIRED = {
@@ -51,6 +53,7 @@ PREVIEW_REPORT = ROOT / "mtm009-preview-release.json"
 PREVIEW_VERSION = "0.4.0-preview.1"
 MTM011_PREVIEW_VERSION = "0.4.0-preview.2"
 MTM012_PREVIEW_VERSION = "0.4.0-preview.3"
+MTM013_STABLE_VERSION = "0.4.0"
 
 
 def sha256_file(path: Path) -> str:
@@ -137,7 +140,38 @@ def validate_mtm011_preview_namespace() -> dict[str, object]:
     }
 
 
+def validate_mtm013_stable_namespace() -> dict[str, object]:
+    summary = validate_mtm013_stable_release(
+        json.loads((ROOT / "mtm013-stable-release.json").read_text(encoding="utf-8"))
+    )
+    if not RE_CTM_BIN.exists() or MTM_BIN.resolve() == RE_CTM_BIN.resolve():
+        raise ValueError("MTM and Re-CTM commands are not independently installed")
+    if MTM_STATE_ROOT.resolve() == RE_CTM_TOOL_ROOT.resolve():
+        raise ValueError("MTM and Re-CTM share an installation root")
+    if not MTM_DATA_ROOT.is_dir() or MTM_DATA_ROOT.is_symlink():
+        raise ValueError("MTM runtime data root is missing or unsafe")
+    if MTM_DATA_ROOT.resolve() == LEGACY_SHARED_DATA_ROOT.resolve():
+        raise ValueError("MTM and Re-CTM share a runtime data root")
+    return {
+        "evidence": "mtm013_stable_release",
+        "mtm_version": MTM013_STABLE_VERSION,
+        "mtm_target": str(MTM_BIN.resolve()),
+        "mtm_sha256": summary["binary_sha256"],
+        "production_default_workflow_protocol": summary[
+            "production_default_workflow_protocol"
+        ],
+        "rollback_workflow_protocol": summary["rollback_workflow_protocol"],
+        "real_rollback_and_recutover_passed": summary[
+            "real_rollback_and_recutover_passed"
+        ],
+        "re_ctm_target": str(RE_CTM_BIN.resolve()),
+        "mtm_data_root": str(MTM_DATA_ROOT.resolve()),
+    }
+
+
 def validate() -> dict[str, object]:
+    if MTM_BIN.is_symlink() and f"/releases/{MTM013_STABLE_VERSION}/" in str(MTM_BIN.resolve()):
+        return validate_mtm013_stable_namespace()
     if MTM_BIN.is_symlink() and f"/releases/{MTM012_PREVIEW_VERSION}/" in str(MTM_BIN.resolve()):
         summary = validate_mtm012_preview_release()
         if not RE_CTM_BIN.exists() or MTM_BIN.resolve() == RE_CTM_BIN.resolve():
