@@ -32,6 +32,9 @@ from scripts.validate_mtm011_math_evaluation import (
 from scripts.validate_mtm011_preview_release import validate as validate_mtm011_preview_release
 from scripts.validate_mtm012_preview_release import validate as validate_mtm012_preview_release
 from scripts.validate_mtm013_runtime_hardening import validate as validate_mtm013_runtime_hardening
+from scripts.validate_mtm013_exact_stable_semantic_regression import (
+    validate as validate_mtm013_exact_stable_semantic_regression,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,8 +47,9 @@ def deployment_mode() -> str:
     stable_selector = Path("/home/lk/.local/bin/mtm")
     if (
         progress.get("version") == "0.4.0"
-        and milestone == "MTM-013"
-        and progress.get("status") in {"MTM-013-in-progress", "MTM-013-completed"}
+        and milestone in {"MTM-013", "MTM-014"}
+        and progress.get("status")
+        in {"MTM-013-in-progress", "MTM-013-completed", "MTM-014-in-progress", "MTM-014-completed"}
         and stable_report.is_file()
         and stable_selector.is_symlink()
         and "/releases/0.4.0/" in str(stable_selector.resolve())
@@ -96,7 +100,7 @@ class GovernanceTestCase(unittest.TestCase):
     def test_repository_migration_graph_is_valid(self) -> None:
         summary = validate_migration(load_graph())
         self.assertEqual(summary["milestone_count"], 14)
-        self.assertEqual(summary["todo_count"], 2)
+        self.assertEqual(summary["todo_count"], 1)
 
     def test_mtm014_native_permission_contract_is_frozen(self) -> None:
         graph = load_graph()
@@ -310,7 +314,7 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(summary["initial_state"], "assess")
         self.assertEqual(summary["advanced_state"], "explore")
 
-    def test_mtm013_regression_receipt_does_not_overclaim_stable_live_evidence(self) -> None:
+    def test_mtm013_regression_receipt_preserves_preview_history_and_binds_exact_stable(self) -> None:
         iteration = json.loads(
             (ROOT / "records" / "iterations" / "ITER-013.json").read_text(encoding="utf-8")
         )
@@ -334,7 +338,23 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(live_math["exact_stable_live_rerun_pending"])
         self.assertEqual(live_math["qc_constituent_matching"]["verdict"], "correct")
         self.assertEqual(live_math["compact_proof"]["verdict"], "correct")
-        self.assertEqual(iteration["decision"], "in_progress")
+        exact = receipt["exact_stable_mcp_semantic_regression"]
+        self.assertEqual(exact["status"], "accepted")
+        self.assertEqual(exact["runtime_version"], "0.4.0")
+        self.assertEqual(
+            exact["binary_sha256"],
+            "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+        )
+        payload = json.loads(
+            (ROOT / "records/evidence/MTM-013/exact-stable-semantic-regression.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        summary = validate_mtm013_exact_stable_semantic_regression(payload)
+        self.assertEqual(summary["check_count"], 9)
+        self.assertEqual(exact["qc_constituent_matching"]["verdict"], "correct")
+        self.assertEqual(exact["compact_proof"]["verdict"], "correct")
+        self.assertEqual(iteration["decision"], "completed")
 
     def test_current_mtm012_preview_release_is_installed_and_tui_qualified(self) -> None:
         if deployment_mode() != "mtm012_preview":

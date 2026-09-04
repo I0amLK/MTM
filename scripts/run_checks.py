@@ -90,8 +90,9 @@ def main() -> int:
     selector = Path("/home/lk/.local/bin/mtm")
     mtm013_stable_deployed_mode = (
         progress.get("version") == "0.4.0"
-        and progress.get("current_milestone") == "MTM-013"
-        and progress.get("status") in {"MTM-013-in-progress", "MTM-013-completed"}
+        and progress.get("current_milestone") in {"MTM-013", "MTM-014"}
+        and progress.get("status")
+        in {"MTM-013-in-progress", "MTM-013-completed", "MTM-014-in-progress", "MTM-014-completed"}
         and (ROOT / "records/evidence/MTM-013/stable-release.json").is_file()
         and selector.is_symlink()
         and "/releases/0.4.0/" in str(selector.resolve())
@@ -157,6 +158,15 @@ def main() -> int:
             env=environment,
         ),
     ]
+    if (ROOT / "records/evidence/MTM-013/exact-stable-semantic-regression.json").is_file():
+        checks.append(
+            run(
+                "mtm013_exact_stable_semantic_regression",
+                [sys.executable, "scripts/validate_mtm013_exact_stable_semantic_regression.py"],
+                env=environment,
+                capture_json=True,
+            )
+        )
     if progress.get("current_milestone") == "MTM-013":
         checks.append(
             run(

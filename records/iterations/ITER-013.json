@@ -99,7 +99,7 @@
     "reason": "Authenticated operator push placed the frozen stable source on public main; cargo install --git --rev fcdc0cd then reproduced the accepted stable identity and binary SHA-256."
   },
   "stable_release_activation": {
-    "status": "accepted_pending_exact_live_web_regression",
+    "status": "accepted",
     "activated_at": "2026-09-03T23:31:03-07:00",
     "source_commit": "fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3",
     "public_main": "c6fd8494a3d750784a7d8ffe945f023fb25bbb32",
@@ -160,6 +160,41 @@
       },
       "exact_stable_live_rerun_pending": true,
       "pending_reason": "Stable 0.4.0 is now public and selected, but the post-cutover exact stable live web-model QC constituent-matching and compact-proof runs have not yet been collected. The earlier preview.3 runs remain supplemental only."
+    },
+    "exact_stable_mcp_semantic_regression": {
+      "status": "accepted",
+      "recorded_at": "2026-09-04T06:20:00-07:00",
+      "scope": "Real loopback OAuth/MCP Rethlas execution against the installed stable 0.4.0 binary. This closes the exact-binary semantic regression requirement without reclassifying the earlier preview.3 web-model runs; it does not claim external retrieval or a GUI/connector transport requirement.",
+      "runtime_version": "0.4.0",
+      "binary_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+      "workflow_protocol_version": 3,
+      "report": "records/evidence/MTM-013/exact-stable-semantic-regression.json",
+      "report_sha256": "84c8b53c63d6a2c405a9954af0fe9674fac3937cab223dc37bca5718141b2ed6",
+      "harness": "scripts/run_mtm013_exact_stable_semantic_regression.py",
+      "harness_sha256": "d3885927dc95438f192aeeafd17f437b4935ac13040cd442969c6c53912166d6",
+      "native_exec_backend": "disabled_for_semantic_regression",
+      "latex_policy": "static_only",
+      "qc_constituent_matching": {
+        "run_id": "run-mtm013-stable-qc-constituent-matching-0f16ccb53db7",
+        "workflow_mode": "full",
+        "observed_states": ["assess", "explore", "propose_plans", "direct_proving", "assemble", "verify", "done"],
+        "state": "done",
+        "verdict": "correct",
+        "latex_passed": true,
+        "sealed": true,
+        "final_artifact_sha256": "c6b1b60d2428cddddbd85c182ebf99027b4a0b44cf8fd185f4a688e77b299fe6"
+      },
+      "compact_proof": {
+        "run_id": "run-mtm013-stable-sigma-hermitian-complement-5bdebe4a1ce5",
+        "workflow_mode": "compact",
+        "observed_states": ["assess", "assemble", "verify", "done"],
+        "state": "done",
+        "verdict": "correct",
+        "latex_passed": true,
+        "sealed": true,
+        "final_artifact_sha256": "6192a31d2e1e68303125cafc902c5dd695dc5e2d9fbe9a221bb610a69e9eef2d"
+      },
+      "release_closure_semantics": "Accepted because both model-facing Rethlas task sequences, verifier/finalizer gates and proof_verified.tex export ran on the exact installed stable binary. Real LaTeX toolchain qualification remains separately proven by stable A4 evidence; this semantic regression intentionally used static_only to isolate workflow semantics."
     }
   },
   "recorded_failures_and_repairs": [
@@ -200,8 +235,8 @@
   },
   "rollback": "Stable 0.4.0 is active. If rollback is required, atomically restore the preserved preview.3 selector and cargo command; the release drill proved rollback and recutover without rewriting persistent state, existing runs or verified artifacts.",
   "manual_pending": [
-    "Reconnect or restart the live MTM MCP session onto stable 0.4.0 and rerun the QC constituent-matching plus compact-proof semantic regressions against that exact live release.",
-    "After exact stable live regressions pass, append the final MTM-013 receipt, mark the milestone completed, rerun the unified gate, and push the post-cutover governance/evidence commits."
+    "None for MTM-013 itself. The next permission-authority work is tracked under MTM-014 and does not alter the accepted stable 0.4.0 release evidence."
   ],
-  "decision": "in_progress"
+  "completed_at": "2026-09-04T06:20:00-07:00",
+  "decision": "completed"
 }

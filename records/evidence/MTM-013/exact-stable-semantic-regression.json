@@ -1,0 +1,67 @@
+{
+  "binary": "/home/lk/.local/bin/mtm",
+  "binary_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+  "checks": {
+    "compact_done_correct": true,
+    "compact_latex_and_sealed": true,
+    "complete_flow_locally_validated": true,
+    "exact_stable_binary": true,
+    "qc_done_correct": true,
+    "qc_latex_and_sealed": true,
+    "server_exits_cleanly": true,
+    "server_version_0_4_0": true,
+    "workflow_protocol_3": true
+  },
+  "compact_sigma_hermitian": {
+    "artifact_bytes": 1597,
+    "artifact_sha256": "6192a31d2e1e68303125cafc902c5dd695dc5e2d9fbe9a221bb610a69e9eef2d",
+    "latex_passed": true,
+    "observed_states": [
+      "assess",
+      "assemble",
+      "verify",
+      "done"
+    ],
+    "problem_id": "mtm013-stable-sigma-hermitian-complement",
+    "run_id": "run-mtm013-stable-sigma-hermitian-complement-5bdebe4a1ce5",
+    "sealed": true,
+    "state": "done",
+    "status": "done",
+    "verdict": "correct",
+    "workflow_mode": "compact",
+    "workspace_export_path": "rethlas-output/mtm013-stable-sigma-hermitian-complement/proof_verified.tex"
+  },
+  "harness_sha256": "d3885927dc95438f192aeeafd17f437b4935ac13040cd442969c6c53912166d6",
+  "latex_policy": "static_only",
+  "milestone": "MTM-013",
+  "native_exec_backend": "disabled_for_semantic_regression",
+  "ok": true,
+  "phase": "exact_stable_semantic_regression",
+  "qc_constituent_matching": {
+    "artifact_bytes": 2648,
+    "artifact_sha256": "c6b1b60d2428cddddbd85c182ebf99027b4a0b44cf8fd185f4a688e77b299fe6",
+    "latex_passed": true,
+    "observed_states": [
+      "assess",
+      "explore",
+      "propose_plans",
+      "direct_proving",
+      "assemble",
+      "verify",
+      "done"
+    ],
+    "problem_id": "mtm013-stable-qc-constituent-matching",
+    "run_id": "run-mtm013-stable-qc-constituent-matching-0f16ccb53db7",
+    "sealed": true,
+    "state": "done",
+    "status": "done",
+    "verdict": "correct",
+    "workflow_mode": "full",
+    "workspace_export_path": "rethlas-output/mtm013-stable-qc-constituent-matching/proof_verified.tex"
+  },
+  "raw_capability_recorded": false,
+  "raw_oauth_token_recorded": false,
+  "schema_version": "1.0.0",
+  "server_version": "0.4.0",
+  "workflow_protocol_version": 3
+}

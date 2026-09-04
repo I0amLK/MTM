@@ -438,7 +438,7 @@
     {
       "id": "MTM-013",
       "title": "Stable 0.4.0 hardening and release qualification",
-      "status": "in_progress",
+      "status": "completed",
       "priority": "P0",
       "production_authority_before": "rust",
       "production_authority_after": "rust",
@@ -529,7 +529,7 @@
     {"source": "MTM-013", "target": "MTM-012"},
     {"source": "MTM-014", "target": "MTM-013"}
   ],
-  "todo": ["MTM-013", "MTM-014"],
+  "todo": ["MTM-014"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -962,6 +962,14 @@
       "status_before": "approved",
       "status_after": "in_progress",
       "summary": "Started MTM-014 D1 in pre-authority shadow mode. MTM-013 remains the current release-closure dependency; no safe/trusted explicit grant, Bubblewrap authority, public tool shape, workflow protocol/state schema, or workflow/finalizer authority changes are allowed by this start event."
+    },
+    {
+      "event_id": "MEVT-055",
+      "milestone_id": "MTM-013",
+      "at": "2026-09-04T06:20:00-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "summary": "Completed stable 0.4.0 qualification after the frozen source passed public cargo-install identity, existing-state upgrade, protocol-3/default and protocol-2 rollback probes, proof finalization, bounded A5 resource/soak checks, stable selector rollback/recutover, post-cutover namespace governance, capability-invalid fail-closed recovery, and exact installed-binary QC full-flow plus compact sigma-Hermitian semantic regressions."
     }
   ],
   "receipt_contract": {
@@ -2685,6 +2693,64 @@
         "None for MTM-009 itself. Stable 0.4.0 qualification is tracked separately."
       ],
       "decision": "completed_with_v1_cutover_rejected"
+    },
+    {
+      "receipt_id": "MREC-013",
+      "milestone_id": "MTM-013",
+      "started_at": "2026-09-03T21:26:00-07:00",
+      "completed_at": "2026-09-04T06:20:00-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "docs(mtm013): complete stable zero-four release qualification [MTM-013]",
+      "files_changed": [
+        "records/governance/migration-graph.json",
+        "records/governance/project-progress.json",
+        "records/iterations/ITER-013.json",
+        "records/evidence/MTM-013/exact-stable-semantic-regression.json",
+        "scripts/run_mtm013_exact_stable_semantic_regression.py",
+        "scripts/validate_mtm013_exact_stable_semantic_regression.py",
+        "scripts/run_checks.py",
+        "tests/test_governance.py"
+      ],
+      "commands": [
+        {
+          "command": "python3 scripts/validate_mtm013_public_install.py && python3 scripts/validate_mtm013_stable_release.py && python3 scripts/validate_mtm013_stable_qualification.py && python3 scripts/validate_mtm013_stable_resource.py",
+          "exit_code": 0,
+          "result": "Public installation is bound to frozen source fcdc0cd09bb0852e46bb8cdc37de3b81ccff27e3; the installed stable selector/cargo command use the qualified 0.4.0 binary; real preview.3 rollback/recutover, local qualification and A5 resource evidence remain accepted."
+        },
+        {
+          "command": "MTM013_BINARY=/home/lk/.local/bin/mtm python3 scripts/run_mtm013_runtime_hardening.py",
+          "exit_code": 0,
+          "result": "The exact installed stable binary repeated all twelve capability-invalid hardening checks: malformed/truncated capabilities applied zero writes and returned fresh envelopes, fresh resubmission advanced, while revoked/cross-run/cross-owner authority remained denied."
+        },
+        {
+          "command": "python3 scripts/run_mtm013_exact_stable_semantic_regression.py && python3 scripts/validate_mtm013_exact_stable_semantic_regression.py",
+          "exit_code": 0,
+          "result": "The exact installed stable SHA-256 3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3 completed the QC constituent-matching full protocol-3 flow and the sigma-Hermitian compact flow with correct verdict, passed LaTeX/finalizer gates, sealed runs and proof_verified.tex hashes bound in the evidence report."
+        },
+        {
+          "command": "python3 scripts/run_checks.py && git diff --check",
+          "exit_code": 0,
+          "result": "The unified repository gate passes with MTM-013 closed and MTM-014 as the current pre-authority development milestone; historical stable evidence is no longer rebound to MTM-014 build products."
+        }
+      ],
+      "acceptance": {
+        "A0": {"passed": true, "evidence": ["Full formatting, warnings-denied Clippy, workspace tests, governance, record-layout and unified local checks pass after closure."]},
+        "A1": {"passed": true, "evidence": ["CAPABILITY_INVALID remains the only pre-write capability class eligible for safe fresh-envelope recovery; malformed tokens never authorize mutation and the exact stable binary repeated the twelve-check edge corpus."]},
+        "A3": {"passed": true, "evidence": ["Cross-owner/run, revoked/stale/expired capability boundaries, OAuth separation, private-vault and verifier/finalizer authority remain fail-closed; no raw OAuth token or capability is stored in release evidence."]},
+        "A4": {"passed": true, "evidence": ["Public cargo install, copied existing-state upgrade, protocol-3 default/protocol-2 override, proof finalization, stable rollback/recutover and exact stable QC full-flow plus compact semantic regressions passed on the supported Linux target."]},
+        "A5": {"passed": true, "evidence": ["The frozen stable resource report passed all eight bounded checks and the qualification soak completed 23,513 requests without an unexplained resource regression; no new performance claim is made."]}
+      },
+      "behavior_before": "Stable 0.4.0 had been publicly installed and selected with rollback/recutover proven, but MTM-013 remained in_progress because the earlier QC and compact semantic regressions had been collected on preview.3 rather than the exact installed stable binary.",
+      "behavior_after": "Stable MTM 0.4.0 is fully qualified and MTM-013 is completed. Exact installed-binary loopback OAuth/MCP Rethlas runs now cover both the full QC constituent-matching workflow and compact sigma-Hermitian lane through verifier/finalizer completion, while the earlier preview.3 web-model evidence remains immutable supplemental history.",
+      "risk_review": "The closure does not rebuild or reinterpret the frozen stable artifact, alter workflow protocol 3, remove protocol-2 or preview.3 rollback, rewrite existing runs/projects/proofs, or infer any new Native permission authority. The semantic regression used static-only LaTeX deliberately; real LaTeX toolchain finalization remains independently covered by the frozen stable A4 qualification.",
+      "rollback": "Atomically restore /home/lk/.local/bin/mtm and /home/lk/.cargo/bin/mtm to the preserved 0.4.0-preview.3 rollback binary if stable runtime rollback is required. No persistent workflow/project/proof rewrite is required; MTM-014 permission work is a separate later milestone.",
+      "manual_pending": [
+        "None for MTM-013 itself. Rust Native permission-authority work is tracked under MTM-014."
+      ],
+      "decision": "accepted_stable_0_4_0"
     }
   ]
 }
