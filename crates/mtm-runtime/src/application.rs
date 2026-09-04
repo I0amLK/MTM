@@ -14,8 +14,8 @@ use mtm_workflow::{
 use serde_json::Value;
 
 use crate::{
-    CurlResearchProvider, NativeToolRuntime, NativeWorkspace, RuntimeEventSink, RuntimeLatexGate,
-    RuntimeSettings, RuntimeToolBackend,
+    CurlResearchProvider, NativeToolRuntime, NativeWorkspace, RuntimeBackendFacts,
+    RuntimeEventSink, RuntimeLatexGate, RuntimeSettings, RuntimeToolBackend,
 };
 
 #[derive(Clone, Debug)]
@@ -196,7 +196,10 @@ impl RuntimeApplication {
             Arc::clone(&workflow),
             Arc::clone(&state_store),
             Arc::clone(&capabilities),
-            settings.workflow_protocol_version,
+            RuntimeBackendFacts {
+                workflow_protocol_version: settings.workflow_protocol_version,
+                complete_flow_locally_validated,
+            },
             observer.clone(),
         ));
 

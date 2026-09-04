@@ -21,5 +21,5 @@ pub use native_tools::NativeToolRuntime;
 pub use operator::{OperatorSession, RuntimeEventSink};
 pub use research::CurlResearchProvider;
 pub use server::serve_bound;
-pub use tool_backend::RuntimeToolBackend;
+pub use tool_backend::{RuntimeBackendFacts, RuntimeToolBackend};
 pub use workspace::NativeWorkspace;

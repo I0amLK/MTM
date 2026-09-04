@@ -32,6 +32,12 @@ const CONTROL_ACTIONS: [&str; 5] = [
 ];
 const PROJECT_ARTIFACTS: [&str; 2] = ["project_manifest", "project_summary_tex"];
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct RuntimeBackendFacts {
+    pub workflow_protocol_version: i64,
+    pub complete_flow_locally_validated: bool,
+}
+
 pub struct RuntimeToolBackend {
     native: Arc<NativeToolRuntime>,
     workspace: Arc<NativeWorkspace>,
@@ -39,6 +45,7 @@ pub struct RuntimeToolBackend {
     store: Arc<StateStore>,
     capabilities: Arc<CapabilityAuthority>,
     workflow_protocol_version: i64,
+    complete_flow_locally_validated: bool,
     observer: Option<RuntimeEventSink>,
 }
 
@@ -56,7 +63,10 @@ impl RuntimeToolBackend {
             workflow,
             store,
             capabilities,
-            2,
+            RuntimeBackendFacts {
+                workflow_protocol_version: 2,
+                complete_flow_locally_validated: false,
+            },
             None,
         )
     }
@@ -75,7 +85,10 @@ impl RuntimeToolBackend {
             workflow,
             store,
             capabilities,
-            2,
+            RuntimeBackendFacts {
+                workflow_protocol_version: 2,
+                complete_flow_locally_validated: false,
+            },
             observer,
         )
     }
@@ -86,7 +99,7 @@ impl RuntimeToolBackend {
         workflow: Arc<WorkflowEngine>,
         store: Arc<StateStore>,
         capabilities: Arc<CapabilityAuthority>,
-        workflow_protocol_version: i64,
+        facts: RuntimeBackendFacts,
         observer: Option<RuntimeEventSink>,
     ) -> Self {
         Self {
@@ -95,7 +108,8 @@ impl RuntimeToolBackend {
             workflow,
             store,
             capabilities,
-            workflow_protocol_version,
+            workflow_protocol_version: facts.workflow_protocol_version,
+            complete_flow_locally_validated: facts.complete_flow_locally_validated,
             observer,
         }
     }
@@ -256,7 +270,7 @@ impl RuntimeToolBackend {
             "research_workspace":{"state_schema_version":state_schema_version,"workflow_protocol_version":self.workflow_protocol_version,"production_default_workflow_protocol_version":PRODUCTION_WORKFLOW_PROTOCOL_VERSION,"project_registry":true,"compact_verified_lane":true,"proof_manifest":true,"reference_audit":true,"paper_search_provider":"https://api.openalex.org/works","verified_promotion_is_finalizer_only":true},
             "native":native_info,
             "authorization_axioms":{"native":"OAuth identity AND native mode","workflow":"OAuth identity AND signed run capability AND role ACL AND workflow state","non_inheritance":"native dangerous never implies workflow authority"},
-            "complete_flow_locally_validated":false,
+            "complete_flow_locally_validated":self.complete_flow_locally_validated,
             "trace_id":trace_id
         });
         let Value::Object(workflow_facts) = workflow_facts else {
@@ -452,14 +466,20 @@ impl RuntimeToolBackend {
                 "capability is required when submitting a Rethlas step",
             ));
         }
-        self.capabilities.validate(
+        match self.capabilities.validate(
             capability,
             &principal.client_id,
             "commit",
             "workflow",
             trace_id,
             Some(run_id),
-        )?;
+        ) {
+            Ok(_) => {}
+            Err(error) if invalid_capability_error(&error) => {
+                return self.refresh_invalid_capability_step(principal, run_id, error, trace_id);
+            }
+            Err(error) => return Err(error),
+        }
         if !writes.is_empty() && action.is_empty() {
             return Err(validation("action is required when writes are submitted"));
         }
@@ -567,6 +587,36 @@ impl RuntimeToolBackend {
             .ok_or_else(|| internal("workflow next_task result must be an object"))?;
         object.insert("submission".to_owned(), submission);
         object.insert("writes_applied".to_owned(), Value::from(writes.len()));
+        Ok(current)
+    }
+
+    fn refresh_invalid_capability_step(
+        &self,
+        principal: &OAuthPrincipal,
+        run_id: &str,
+        mut error: ReCtmError,
+        trace_id: &str,
+    ) -> Result<Value, ReCtmError> {
+        let next = self
+            .workflow
+            .next_task(&principal.client_id, run_id, Some(trace_id))?;
+        let mut current = self.attach_done_export_if_needed(principal, next, trace_id)?;
+        error.retryable = true;
+        let submission = serde_json::json!({
+            "ok":false,
+            "complete":false,
+            "recoverable":true,
+            "retryable":true,
+            "capability_refreshed":true,
+            "error":error.to_payload(),
+            "writes_retained":false,
+            "correction":"The submitted capability was rejected before any logical write. Use the fresh capability in this response and resubmit the current task once. The malformed capability granted no authority and no writes were applied."
+        });
+        let object = current
+            .as_object_mut()
+            .ok_or_else(|| internal("workflow next_task result must be an object"))?;
+        object.insert("submission".to_owned(), submission);
+        object.insert("writes_applied".to_owned(), Value::from(0));
         Ok(current)
     }
 
@@ -1137,6 +1187,13 @@ fn render_summary(name: &str, payload: &Map<String, Value>) -> String {
         if name == "rethlas_step" {
             if let Some(sub) = payload.get("submission").and_then(Value::as_object) {
                 if let Some(error) = sub.get("error").and_then(Value::as_object) {
+                    if sub.get("capability_refreshed").and_then(Value::as_bool) == Some(true) {
+                        return format!(
+                            "Run {} remains in {}; the task capability was refreshed before any writes. Resubmit once with the fresh capability returned in this task envelope.",
+                            json_text(payload, "run_id"),
+                            json_text(payload, "state")
+                        );
+                    }
                     let retained =
                         if sub.get("writes_retained").and_then(Value::as_bool) == Some(true) {
                             " Successful logical writes were retained; do not replay them."
@@ -1312,6 +1369,10 @@ fn recoverable_error(error: &ReCtmError) -> bool {
         ErrorCategory::Validation | ErrorCategory::Conflict
     )
 }
+
+fn invalid_capability_error(error: &ReCtmError) -> bool {
+    error.category == ErrorCategory::Permission && error.code == "CAPABILITY_INVALID"
+}
 fn required_text<'a>(map: &'a Map<String, Value>, key: &str) -> Result<&'a str, ReCtmError> {
     map.get(key)
         .and_then(Value::as_str)
@@ -1377,6 +1438,30 @@ fn json_error(error: serde_json::Error) -> ReCtmError {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn invalid_capability_refresh_classifier_is_narrow() {
+        let invalid = ReCtmError::new("CAPABILITY_INVALID", "bad signature")
+            .with_category(ErrorCategory::Permission);
+        assert!(invalid_capability_error(&invalid));
+
+        let revoked = ReCtmError::new("CAPABILITY_REVOKED", "revoked")
+            .with_category(ErrorCategory::Permission);
+        assert!(!invalid_capability_error(&revoked));
+
+        let stale =
+            ReCtmError::new("CAPABILITY_STALE", "stale").with_category(ErrorCategory::Permission);
+        assert!(!invalid_capability_error(&stale));
+
+        let expired = ReCtmError::new("CAPABILITY_EXPIRED", "expired")
+            .with_category(ErrorCategory::Permission);
+        assert!(!invalid_capability_error(&expired));
+
+        let validation =
+            ReCtmError::new("CAPABILITY_INVALID", "shape").with_category(ErrorCategory::Validation);
+        assert!(!invalid_capability_error(&validation));
+    }
+
     #[test]
     fn tool_result_matches_mcp_shape() {
         let result = tool_result(

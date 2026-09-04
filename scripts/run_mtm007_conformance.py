@@ -363,7 +363,7 @@ def normalize(value: Any, *, server: Server, run_id: str | None = None) -> Any:
 
 
 def normalize_release_branding(value: Any) -> Any:
-    """Canonicalize intentional product-identity and additive preview metadata divergence."""
+    """Canonicalize intentional product-identity and later additive observability metadata."""
     if isinstance(value, dict):
         name = value.get("name")
         server = value.get("server")
@@ -374,7 +374,10 @@ def normalize_release_branding(value: Any) -> Any:
         ) and isinstance(title, str) and title in {"Re-CTM", "MTM"}
         normalized: dict[str, Any] = {}
         for key, item in value.items():
-            if key == "production_default_workflow_protocol_version":
+            if key in {
+                "production_default_workflow_protocol_version",
+                "complete_flow_locally_validated",
+            }:
                 continue
             if key in {"name", "service", "server"} and item == "re-ctm":
                 normalized[key] = "mtm"
@@ -620,7 +623,7 @@ def main() -> int:
         "release_sha256": release_digest,
         "recorded_sha256": recorded,
         "golden_match": golden_match,
-        "release_branding_normalization": "re-ctm/Re-CTM identity plus product version and additive production-default workflow-protocol metadata",
+        "release_branding_normalization": "re-ctm/Re-CTM identity plus product version and later additive production-default/complete-flow observability metadata",
         "mismatches": mismatches,
         "shutdown": shutdown,
         "authority": {

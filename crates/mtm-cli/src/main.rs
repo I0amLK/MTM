@@ -282,7 +282,7 @@ fn serve(arguments: &[String], tui: bool) -> Result<(), ReCtmError> {
         &assets,
         &host,
         bound.port(),
-        false,
+        true,
         observer,
     )?);
     if tui && !verbose_tui_requested {

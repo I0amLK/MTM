@@ -29,6 +29,7 @@ from scripts.validate_mtm011_math_evaluation import (
 )
 from scripts.validate_mtm011_preview_release import validate as validate_mtm011_preview_release
 from scripts.validate_mtm012_preview_release import validate as validate_mtm012_preview_release
+from scripts.validate_mtm013_runtime_hardening import validate as validate_mtm013_runtime_hardening
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -233,6 +234,16 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(summary["rollback_workflow_protocol"], 2)
         self.assertTrue(summary["real_rollback_and_recutover_passed"])
         self.assertEqual(summary["final_artifact"], "proof_verified.tex")
+
+    def test_mtm013_runtime_hardening_evidence_is_bound_and_redacted(self) -> None:
+        progress = json.loads((ROOT / "project-progress.json").read_text(encoding="utf-8"))
+        if progress.get("current_milestone") != "MTM-013":
+            self.skipTest("MTM-013 hardening is not the current source-qualification mode")
+        payload = json.loads((ROOT / "mtm013-runtime-hardening.json").read_text(encoding="utf-8"))
+        summary = validate_mtm013_runtime_hardening(payload)
+        self.assertGreaterEqual(summary["check_count"], 12)
+        self.assertEqual(summary["initial_state"], "assess")
+        self.assertEqual(summary["advanced_state"], "explore")
 
     def test_current_mtm012_preview_release_is_installed_and_tui_qualified(self) -> None:
         if deployment_mode() != "mtm012_preview":

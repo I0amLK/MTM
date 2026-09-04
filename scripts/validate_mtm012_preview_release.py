@@ -52,8 +52,6 @@ def validate() -> dict[str, object]:
     target = Path(str(report.get("production_command_target") or ""))
     if not MTM_BIN.is_symlink() or MTM_BIN.resolve() != target.resolve(strict=True):
         raise ValueError("installed mtm selector does not select preview.3")
-    if not CARGO_ALIAS.is_symlink() or CARGO_ALIAS.resolve() != target.resolve(strict=True):
-        raise ValueError("login-shell-preferred mtm path does not select preview.3")
     expected_sha = str(report.get("binary_sha256") or "")
     if sha256_file(target) != expected_sha:
         raise ValueError("installed preview.3 binary hash mismatch")
@@ -72,6 +70,12 @@ def validate() -> dict[str, object]:
     for key, expected in required.items():
         if info.get(key) != expected:
             raise ValueError(f"preview.3 release-info drifted: {key}")
+    if not CARGO_ALIAS.is_file():
+        raise ValueError("login-shell-preferred mtm executable is missing")
+    cargo_info = release_info(CARGO_ALIAS)
+    for key, expected in required.items():
+        if cargo_info.get(key) != expected:
+            raise ValueError(f"login-shell-preferred mtm identity drifted: {key}")
 
     tui = report.get("tui_a4", {})
     if (

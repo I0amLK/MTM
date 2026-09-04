@@ -35,6 +35,24 @@
     "Relax preview/stable command-layout validation from symlink-only to accepted executable identity for ~/.cargo/bin/mtm while keeping the versioned selector and rollback release hash-bound.",
     "After source gates pass, freeze version 0.4.0, build the exact stable artifact, validate clean GitHub install and copied existing-state upgrade, run real proof finalization, selector rollback/recutover and bounded soak, then append the final receipt."
   ],
+  "source_hardening": {
+    "status": "accepted",
+    "runtime_binary_sha256": "4e91d4a01628fb616a3bbb660b486aca6469b6a3b9fc26a35ad5f122d9fcb181",
+    "report": "mtm013-runtime-hardening.json",
+    "report_sha256": "15a398dfcea23f8939c3c8c37f27ca1fefbf4a5972988da7954fe5044d9e3780",
+    "harness_sha256": "0e14509d7c259e19af77196a52f3b6142c69ebdca8b445f20888837ff1eade0c",
+    "check_count": 12,
+    "capability_mutation_refresh_zero_writes": true,
+    "capability_truncation_refresh_zero_writes": true,
+    "fresh_resubmission_advances": true,
+    "revoked_denied": true,
+    "cross_run_denied": true,
+    "cross_owner_invalid_refresh_denied": true,
+    "complete_flow_locally_validated": true,
+    "production_default_workflow_protocol": 3,
+    "raw_capability_recorded": false,
+    "raw_oauth_token_recorded": false
+  },
   "acceptance": {
     "A0": "Full format, warnings-denied Clippy, workspace tests, governance and unified local gate pass.",
     "A1": "Capability error taxonomy remains deterministic and stable; only CAPABILITY_INVALID before writes gets a fresh envelope and no malformed token gains write authority.",
@@ -44,7 +62,6 @@
   },
   "rollback": "Keep preview.3 installed and selected until stable qualification passes. After stable deployment, atomically restore preview.3 if needed; no persistent data or verified artifacts are rewritten.",
   "manual_pending": [
-    "Implement and verify the capability refresh and complete-flow metadata fixes.",
     "Qualify the exact stable 0.4.0 artifact from a committed source SHA.",
     "Run clean install, existing-state upgrade, proof finalization, rollback/recutover and soak before completion."
   ],

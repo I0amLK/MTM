@@ -134,6 +134,15 @@ def main() -> int:
             env=environment,
         ),
     ]
+    if progress.get("current_milestone") == "MTM-013":
+        checks.append(
+            run(
+                "mtm013_runtime_hardening",
+                [sys.executable, "scripts/validate_mtm013_runtime_hardening.py"],
+                env=environment,
+                capture_json=True,
+            )
+        )
 
     if cargo is None or rustc is None:
         checks.append(
