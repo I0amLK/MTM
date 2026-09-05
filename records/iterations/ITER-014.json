@@ -1041,6 +1041,12 @@
   "recorded_failures_and_repairs": [
     {
       "delivery": 5,
+      "stage": "fresh-source preview installation after watchdog repair",
+      "failure": "Cargo install metadata named b1e6693 and its Git checkout contained the watchdog repair, but reuse of the earlier target directory produced the same e13a7592 binary as the rejected preview and the unchanged soak rejected it again. A successful install exit code and provenance metadata were not sufficient artifact validation.",
+      "repair": "Require an unused full-commit-keyed release build directory and explicitly reject the known failed binary hash. Preserve the original failed-soak evidence and rerun exact artifact qualification; no acceptance threshold changes."
+    },
+    {
+      "delivery": 5,
       "stage": "preview exact-binary Native permission soak",
       "failure": "The e043220 preview failed the unchanged 60-second RSS/thread growth bounds. A diagnostic repetition completed 503 iterations but retained 52 threads (baseline 10) and reached 47212 KiB RSS (baseline 14132). Watchdogs slept until timeout despite terminal commands and held command buffers alive.",
       "repair": "Replace the unconditional watchdog sleep with bounded terminal-state observation that exits and releases ownership on completion while preserving deadline enforcement. Freeze this as the sole narrow runtime delta for the new preview, add long-timeout-release, unpolled-exit and live-timeout regressions, and rerun all exact-binary qualification without relaxing resource thresholds.",

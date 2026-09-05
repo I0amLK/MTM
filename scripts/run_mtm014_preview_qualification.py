@@ -58,16 +58,22 @@ def main() -> int:
         env, cargo, _ = resolve_tool_environment()
         s.require(cargo is not None, "pinned_cargo")
         env["CARGO_INCREMENTAL"] = "0"
+        build_directory = s.ROOT / "target/mtm014-preview-build" / commit
+        # A fresh checkout alone is insufficient when Cargo shares old install
+        # artifacts. Qualification uses an unused per-revision build directory.
+        s.require(not build_directory.exists(), "fresh_build_directory_required")
         result = subprocess.run([
             str(cargo), "install", "--git", s.ROOT.as_uri(), "--rev", commit,
             "--locked", "--bin", "mtm", "mtm-cli", "--force",
             "--root", str(s.STAGED.parents[1]),
-            "--target-dir", str(s.ROOT / "target/mtm014-preview-build"),
+            "--target-dir", str(build_directory),
         ], cwd=s.ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             timeout=480, check=False)
         s.require(result.returncode == 0, "clean_git_install")
         s.identity(s.STAGED, s.VERSION)
         binary_sha = s.digest(s.STAGED)
+        rejected = json.loads((s.ROOT / "records/evidence/MTM-014/preview-soak-rejected.json").read_text())
+        s.require(binary_sha != rejected["binary_sha256"], "rejected_artifact_reused")
         checks = {"versioned_identity": True, "clean_git_install": True,
                   "runtime_source_scope_verified": True, "required_tools_present": True}
         with tempfile.TemporaryDirectory(prefix="mtm014-preview-") as directory:
