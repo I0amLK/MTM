@@ -1,0 +1,193 @@
+{
+  "binary_sha256": "2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036",
+  "check_count": 18,
+  "checks": {
+    "all_mode_attestation": true,
+    "clean_git_install": true,
+    "compact_required_latex": true,
+    "copied_existing_state": true,
+    "dangerous_public_suite": true,
+    "old_run_upgrade_rollback": true,
+    "permission_soak": true,
+    "protocol2_override": true,
+    "qc_required_latex": true,
+    "required_tools_present": true,
+    "resource_non_regression": true,
+    "runtime_source_scope_verified": true,
+    "safe_public_suite": true,
+    "stable_entries_unchanged": true,
+    "trusted_public_suite": true,
+    "tui_display_contract": true,
+    "tui_native_permission_flow": true,
+    "versioned_identity": true
+  },
+  "evidence_hygiene": {
+    "raw_command_or_proof_recorded": false,
+    "raw_credentials_recorded": false,
+    "raw_grant_or_capability_recorded": false,
+    "raw_logs_recorded": false
+  },
+  "harness_sha256": {
+    "scripts/mtm008_deployment.py": "aeab6c7f8856f4ae0b596e5b264b4c6a01c463634a585af5281a59d0f6a322d7",
+    "scripts/mtm008_runtime_harness.py": "481c5bbf95a6a21a7608e1b5f6d9c5174a17934c460d3c26e60d9f4910759f73",
+    "scripts/mtm014_release_support.py": "f041f5a089cff2437b3fb40c99d4f1b2b4841ce4988c93273d76d6eef070da03",
+    "scripts/release_mtm014_preview.py": "1a146625e2dae502195f28b873162266a633408c253537e968a3924e96f6a063",
+    "scripts/run_mtm007_http_smoke.py": "fd116bcbd5d08a56ed64570177de3c5d5234cadf196c79fa1cd5e2e4b5e3d8fd",
+    "scripts/run_mtm007_target_validation.py": "ef6d4f8b0e4b70943a4608e81567ac4d305bc63224764fb1ab78eccc8785e1b8",
+    "scripts/run_mtm012_tui_validation.py": "f5489f12ef4d2302f8d87a55acf9e06497c99a9543fdd9c2360ef82d9a10978b",
+    "scripts/run_mtm013_exact_stable_semantic_regression.py": "d3885927dc95438f192aeeafd17f437b4935ac13040cd442969c6c53912166d6",
+    "scripts/run_mtm013_stable_qualification.py": "0c5299edab08868f0b54f2779d30710c551db7209e87caf65e0ab7b1f5108b21",
+    "scripts/run_mtm014_mrtr_permission_validation.py": "711f94b628a7e8a0a8688c76d795c80550ea3ad510dd70465302901461726d2a",
+    "scripts/run_mtm014_preview_qualification.py": "18955e4fa50b43e74627a88a38d784d06c7ff45aac4891753280945f6570d05f",
+    "scripts/run_mtm014_public_authority_target.py": "bc3d46cb5db09720cbddf6ac785af86febee65fd54aa1b3cb5a4fc345b769340",
+    "scripts/validate_mtm014_preview_release.py": "c1a1d1ebc6f527e71fb467f690fd71875787c483193160d50a425daeacd511d9"
+  },
+  "implementation_commit": "2f11750c07317d879f1bedfd2198c36786b8ca74",
+  "magma_host_status": "blocked_host_license",
+  "milestone": "MTM-014",
+  "new_human_consent_claimed": false,
+  "ok": true,
+  "performance_claim": false,
+  "phase": "preview_qualification",
+  "prerequisite_sha256": {
+    "records/evidence/MTM-014/elicitation-capability.json": "4e20ef416d0d799323b2a6714d98a879a8bdfebdebc344d07d21bb587254a582",
+    "records/evidence/MTM-014/native-permission-target.json": "e1f9b5350977dd8d21dd2b29a89a895aee1eda38589da226e0c04bda91f05bf3",
+    "records/evidence/MTM-014/public-authority-target.json": "f868c3334cfe74be734be0caef07b4ae62c621c3a2b69584733049f54352f147"
+  },
+  "production_state_rewritten": false,
+  "proof_facts": {
+    "compact": {
+      "artifact_bytes": 1597,
+      "artifact_sha256": "6192a31d2e1e68303125cafc902c5dd695dc5e2d9fbe9a221bb610a69e9eef2d",
+      "latex_passed": true,
+      "sealed": true,
+      "state": "done",
+      "verdict": "correct"
+    },
+    "qc": {
+      "artifact_bytes": 2648,
+      "artifact_sha256": "c6b1b60d2428cddddbd85c182ebf99027b4a0b44cf8fd185f4a688e77b299fe6",
+      "latex_passed": true,
+      "sealed": true,
+      "state": "done",
+      "verdict": "correct"
+    }
+  },
+  "public_suites": {
+    "dangerous": {
+      "complete_implicit_profile": true,
+      "generated_patch_no_grant": true,
+      "git_latex_sage": true,
+      "privileged_no_grant": true,
+      "real_network": true,
+      "workflow_non_inheritance": true
+    },
+    "safe": {
+      "all_seven_exec_permissions": true,
+      "argument_mutation": true,
+      "concurrent_one_winner": true,
+      "cross_owner": true,
+      "descendant_cleanup": true,
+      "multi_risk_atomicity": true,
+      "once_replay": true,
+      "patch_normal_dry_ignored_mutation": true,
+      "patch_symlink_escape": true,
+      "real_dns_https": true,
+      "session_reuse_restart_invalidation": true,
+      "tool_contract": true,
+      "tty_stdin_kill": true
+    },
+    "trusted": {
+      "explicit_boundaries": true,
+      "generated_patch_gated": true,
+      "implicit_profile": true
+    }
+  },
+  "recorded_at": "2026-09-05T08:02:33.284322+00:00",
+  "required_tools": {
+    "bwrap": true,
+    "curl": true,
+    "git": true,
+    "latexmk": true,
+    "magma": true,
+    "pdflatex": true,
+    "sage": true
+  },
+  "resource": {
+    "preview": {
+      "max_fds": 16,
+      "max_rss_kib": 14552,
+      "max_shutdown_ms": 64.329,
+      "max_threads": 9,
+      "request_p95_ms": 62.899,
+      "request_samples": 180,
+      "startup_p50_ms": 46.817,
+      "startup_p95_ms": 47.101,
+      "startup_samples": 3
+    },
+    "stable": {
+      "max_fds": 16,
+      "max_rss_kib": 19288,
+      "max_shutdown_ms": 114.45,
+      "max_threads": 44,
+      "request_p95_ms": 62.882,
+      "request_samples": 180,
+      "startup_p50_ms": 48.59,
+      "startup_p95_ms": 49.099,
+      "startup_samples": 3
+    }
+  },
+  "runtime_repair_sha256": {
+    "crates/mtm-native/src/process.rs": "3d7b5465a8b532aba3e7aa414898cb4ebe91fd6c48ea6e6be3925a3690422413"
+  },
+  "schema_version": "1.0.0",
+  "selector_changed": false,
+  "soak": {
+    "after": {
+      "children": 0,
+      "fds": 16,
+      "rss_kib": 15104,
+      "threads": 9
+    },
+    "before": {
+      "children": 0,
+      "fds": 16,
+      "rss_kib": 14016,
+      "threads": 9
+    },
+    "duration_seconds": 60.215,
+    "iterations": 506,
+    "peak": {
+      "children": 0,
+      "fds": 16,
+      "rss_kib": 15104,
+      "threads": 9
+    },
+    "shutdown_ms": 64.79
+  },
+  "source_commit": "2bee460643f8109e1e3dc58e2d4d719885b8a413",
+  "stable_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+  "tui_checks": {
+    "compact_argument_keys_hidden": true,
+    "compact_external_password_status_silent": true,
+    "compact_failure_visible": true,
+    "compact_header_is_short": true,
+    "compact_mcp_endpoint_visible": true,
+    "compact_process_exits_cleanly": true,
+    "compact_secrets_redacted": true,
+    "compact_success_completion_silent": true,
+    "compact_tool_identity_visible": true,
+    "compact_tool_lines_are_not_duplicated": true,
+    "compact_trace_hidden": true,
+    "generated_key_process_exits_cleanly": true,
+    "generated_operator_key_shown_once": true,
+    "verbose_argument_keys_visible": true,
+    "verbose_failure_visible": true,
+    "verbose_mode_announced": true,
+    "verbose_process_exits_cleanly": true,
+    "verbose_secrets_redacted": true,
+    "verbose_start_and_done_visible": true,
+    "verbose_trace_visible": true
+  },
+  "version": "0.5.0-preview.1"
+}

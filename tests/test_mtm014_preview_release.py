@@ -87,6 +87,13 @@ class PreviewReleaseTests(unittest.TestCase):
             with self.subTest(bad=bad), patch.object(s, "git", git):
                 self.assertEqual(s.source_scope_verified("test-commit"), bad is None)
 
+    def test_accepted_preview_qualification_is_bound_to_iteration(self) -> None:
+        receipt = json.loads((s.ROOT / "records/iterations/ITER-014.json").read_text())["preview_qualification_receipt"]
+        self.assertEqual(s.digest(s.QUALIFICATION), receipt["report_sha256"])
+        summary = validate_qualification(json.loads(s.QUALIFICATION.read_text()))
+        self.assertEqual(summary["binary_sha256"], receipt["binary_sha256"])
+        self.assertEqual(summary["checks"], 18)
+
     def test_rollout_failures_restore_both_selectors_and_manifest(self) -> None:
         for failure in (1, 2, 3, 4):
             with self.subTest(failure=failure), tempfile.TemporaryDirectory() as directory:

@@ -988,6 +988,32 @@
     "requires_fresh_exact_binary_qualification": true,
     "rejected_evidence_sha256": "ae3087cd559caecc47502cb701fca0c4540874086820bdc64f7794b3f762cc29"
   },
+  "preview_qualification_receipt": {
+    "accepted_at": "2026-09-05T16:03:19+08:00",
+    "report": "records/evidence/MTM-014/preview-qualification.json",
+    "report_sha256": "13f657d3e27895c32703500d5096c33c0fdbabfd61633f91354b58e45178d440",
+    "source_commit": "2bee460643f8109e1e3dc58e2d4d719885b8a413",
+    "binary_sha256": "2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036",
+    "version": "0.5.0-preview.1",
+    "checks_passed": 18,
+    "exact_clean_git_install": true,
+    "qc_and_compact_required_latex_passed": true,
+    "copied_production_state_and_disposable_run_roundtrip_passed": true,
+    "all_public_permission_suites_and_attestations_passed": true,
+    "resource_bounds_unchanged": true,
+    "soak_seconds": 60.215,
+    "soak_iterations": 506,
+    "soak_threads_before_peak_after": [9, 9, 9],
+    "soak_fds_before_peak_after": [16, 16, 16],
+    "soak_rss_kib_before_after": [14016, 15104],
+    "soak_remaining_children": 0,
+    "magma_direct_host_status": "blocked_host_license",
+    "magma_functional_pass_claimed": false,
+    "new_human_consent_claimed": false,
+    "selector_changed": false,
+    "rejected_soak_receipts_preserved": true,
+    "next_gate": "Actual side-by-side install and stable rollback/preview recutover with post-recutover soak."
+  },
   "d5_capacity_hardening": {
     "accepted_at": "2026-09-04T21:48:37-07:00",
     "scope": "A3 bounded process-local consent/grant storage; not human acceptance or cutover",
@@ -1037,7 +1063,7 @@
   ],
   "rollback": "Before permission-authority cutover, remove the MTM-014 shadow types/ledger and retain stable 0.4.0 Native policy plus Bubblewrap. After a later cutover, restore the frozen pre-cutover evaluator and invalidate all process-local grants; no persistent workflow/project/proof data rewrite is required.",
   "manual_pending": [
-    "D5A, pre-cutover A4 and the 30-check post-cutover public OAuth/MCP A4 are accepted. Preview release qualification remains mandatory before selector changes.",
+    "D5A, pre-cutover A4, public A4 and the exact 0.5.0-preview.1 release qualification are accepted. Side-by-side installation, rollback/recutover and post-recutover soak remain mandatory before closure.",
     "Preview install, rollback/recutover and bounded soak remain required before MTM-014 completion; Magma functional validation remains host-license dependent."
   ],
   "recorded_failures_and_repairs": [
