@@ -88,6 +88,11 @@ def main() -> int:
     environment, cargo, rustc = resolve_tool_environment()
     progress = json.loads((ROOT / "records/governance/project-progress.json").read_text(encoding="utf-8"))
     selector = Path("/home/lk/.local/bin/mtm")
+    mtm014_source_mode = progress.get("current_milestone") == "MTM-014"
+    mtm014_preview_selected = (
+        mtm014_source_mode and selector.is_symlink()
+        and "/releases/0.5.0-preview.1/" in str(selector.resolve())
+    )
     mtm013_stable_deployed_mode = (
         progress.get("version") == "0.4.0"
         and progress.get("current_milestone") in {"MTM-013", "MTM-014"}
@@ -117,9 +122,9 @@ def main() -> int:
     )
     current_preview_mode = mtm011_preview_mode or mtm012_preview_mode
     historical_release_mode = (
-        mtm009_preview_mode or current_preview_mode or mtm013_stable_deployed_mode
+        mtm009_preview_mode or current_preview_mode or mtm013_stable_deployed_mode or mtm014_source_mode
     )
-    mtm011_cutover_mode = current_preview_mode or mtm013_stable_deployed_mode
+    mtm011_cutover_mode = current_preview_mode or mtm013_stable_deployed_mode or mtm014_source_mode
     mtm012_source_mode = (
         progress.get("current_milestone") == "MTM-012"
         and progress.get("status") == "MTM-012-in-progress"
@@ -194,6 +199,16 @@ def main() -> int:
                 capture_json=True,
             )
         )
+    if (ROOT / "records/evidence/MTM-014/preview-qualification.json").is_file():
+        checks.append(run(
+            "mtm014_preview_qualification", [sys.executable, "scripts/validate_mtm014_preview_release.py"],
+            env=environment, capture_json=True,
+        ))
+    if (ROOT / "records/evidence/MTM-014/preview-release.json").is_file() or mtm014_preview_selected:
+        checks.append(run(
+            "mtm014_preview_deployment", [sys.executable, "scripts/validate_mtm014_preview_release.py", "--deployed"],
+            env=environment, capture_json=True,
+        ))
     if progress.get("current_milestone") == "MTM-013":
         checks.append(
             run(
@@ -325,7 +340,7 @@ def main() -> int:
                             if mtm009_preview_mode
                             else (
                                 []
-                                if mtm013_stable_deployed_mode
+                                if mtm013_stable_deployed_mode or mtm014_source_mode
                                 else (
                                 [
                                     *(
@@ -495,6 +510,10 @@ def main() -> int:
         "passed": all(item["passed"] for item in checks),
         "checks": checks,
         "local_claim": (
+            "MTM-014 preview is selected for new launches. Its separate release and deployment "
+            "gates bind exact Native authority, rollback/recutover and bounded soak evidence; "
+            "stable 0.4.0 is preserved. Existing sessions are not restarted by selector changes."
+            if mtm014_preview_selected else
             (
                 "MTM 0.4.0 is the active stable command for new launches under Rust authority. "
                 "The public Git install, exact stable binary identity, workflow protocol 3 default, "

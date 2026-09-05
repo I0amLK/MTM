@@ -955,6 +955,26 @@
     "workflow_or_finalizer_authority_changed": false,
     "manual_pending": "Public-path A4 is accepted. Freeze and qualify a separately versioned preview, perform side-by-side install, rollback/recutover and bounded resource soak before deployment completion."
   },
+  "preview_release_contract": {
+    "frozen_at": "2026-09-05T15:21:42+08:00",
+    "version": "0.5.0-preview.1",
+    "status": "tooling_prepared_not_qualified",
+    "runtime_unchanged_from": "2f11750c07317d879f1bedfd2198c36786b8ca74",
+    "only_package_version_metadata_changes": true,
+    "stable_artifact_overwrite_allowed": false,
+    "existing_sessions_restart_allowed": false,
+    "qualification_runner": "scripts/run_mtm014_preview_qualification.py",
+    "deployment_runner": "scripts/release_mtm014_preview.py",
+    "validator": "scripts/validate_mtm014_preview_release.py",
+    "contract_document": "docs/releases/0.5.0-preview.1.md",
+    "qualification_report": "records/evidence/MTM-014/preview-qualification.json",
+    "release_report": "records/evidence/MTM-014/preview-release.json",
+    "resource_comparison": "3 startups per version, 10 warmups then 60 equivalent calls per startup",
+    "soak_seconds": 60,
+    "rollback_on_any_rollout_failure": true,
+    "raw_credentials_in_evidence": false,
+    "performance_claim": false
+  },
   "d5_capacity_hardening": {
     "accepted_at": "2026-09-04T21:48:37-07:00",
     "scope": "A3 bounded process-local consent/grant storage; not human acceptance or cutover",

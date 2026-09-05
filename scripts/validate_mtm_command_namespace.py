@@ -170,6 +170,30 @@ def validate_mtm013_stable_namespace() -> dict[str, object]:
 
 
 def validate() -> dict[str, object]:
+    preview_receipt = ROOT / "records/evidence/MTM-014/preview-release.json"
+    if preview_receipt.is_file():
+        try:
+            from scripts.validate_mtm014_preview_release import validate_release
+            from scripts.mtm014_release_support import QUALIFICATION, STABLE, VERSION, identity
+        except ModuleNotFoundError:
+            from validate_mtm014_preview_release import validate_release
+            from mtm014_release_support import QUALIFICATION, STABLE, VERSION, identity
+        payload = json.loads(preview_receipt.read_text(encoding="utf-8"))
+        validate_release(payload, json.loads(QUALIFICATION.read_text(encoding="utf-8")), deployed=True)
+        active_version = "0.4.0" if MTM_BIN.resolve() == STABLE else VERSION
+        identity(MTM_BIN, active_version)
+        if not RE_CTM_BIN.exists() or MTM_BIN.resolve() == RE_CTM_BIN.resolve():
+            raise ValueError("MTM and Re-CTM commands are not independently installed")
+        if MTM_STATE_ROOT.resolve() == RE_CTM_TOOL_ROOT.resolve():
+            raise ValueError("MTM and Re-CTM share an installation root")
+        if not MTM_DATA_ROOT.is_dir() or MTM_DATA_ROOT.is_symlink():
+            raise ValueError("MTM runtime data root is missing or unsafe")
+        if MTM_DATA_ROOT.resolve() == LEGACY_SHARED_DATA_ROOT.resolve():
+            raise ValueError("MTM and Re-CTM share a runtime data root")
+        return {"evidence": "mtm014_preview_release", "mtm_version": active_version,
+                "mtm_target": str(MTM_BIN.resolve()), "re_ctm_target": str(RE_CTM_BIN.resolve()),
+                "mtm_data_root": str(MTM_DATA_ROOT.resolve()), "production_default_workflow_protocol": 3,
+                "rollback_workflow_protocol": 2, "real_rollback_and_recutover_passed": True}
     if MTM_BIN.is_symlink() and f"/releases/{MTM013_STABLE_VERSION}/" in str(MTM_BIN.resolve()):
         return validate_mtm013_stable_namespace()
     if MTM_BIN.is_symlink() and f"/releases/{MTM012_PREVIEW_VERSION}/" in str(MTM_BIN.resolve()):

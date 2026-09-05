@@ -44,6 +44,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def deployment_mode() -> str:
     progress = json.loads((ROOT / "records/governance/project-progress.json").read_text(encoding="utf-8"))
     milestone = progress.get("current_milestone")
+    if milestone == "MTM-014" and (ROOT / "records/evidence/MTM-014/preview-release.json").is_file():
+        return "mtm014_preview"
     stable_report = ROOT / "records/evidence/MTM-013/stable-release.json"
     stable_selector = Path("/home/lk/.local/bin/mtm")
     if (
@@ -85,6 +87,7 @@ def historical_evidence_mode() -> bool:
         "mtm011_preview",
         "mtm012_preview",
         "mtm013_stable",
+        "mtm014_preview",
     }
 
 
@@ -830,7 +833,12 @@ class GovernanceTestCase(unittest.TestCase):
 
     def test_current_mtm_and_re_ctm_command_namespaces_are_separate(self) -> None:
         summary = validate_mtm_command_namespace()
-        if deployment_mode() == "mtm009_preview":
+        if deployment_mode() == "mtm014_preview":
+            self.assertEqual(summary["evidence"], "mtm014_preview_release")
+            self.assertIn(summary["mtm_version"], {"0.4.0", "0.5.0-preview.1"})
+            self.assertEqual(summary["production_default_workflow_protocol"], 3)
+            self.assertTrue(summary["real_rollback_and_recutover_passed"])
+        elif deployment_mode() == "mtm009_preview":
             self.assertEqual(summary["evidence"], "mtm009_preview_release")
             self.assertEqual(summary["mtm_version"], "0.4.0-preview.1")
             self.assertFalse(summary["existing_sessions_restarted_for_preview"])

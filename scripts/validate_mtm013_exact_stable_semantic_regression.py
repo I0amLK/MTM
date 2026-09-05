@@ -10,7 +10,9 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / "records/evidence/MTM-013/exact-stable-semantic-regression.json"
 HARNESS = ROOT / "scripts/run_mtm013_exact_stable_semantic_regression.py"
-STABLE_BINARY = Path("/home/lk/.local/bin/mtm")
+# Validate the immutable historical artifact, not whichever release is selected today.
+# Current command selection has its own strict deployment/namespace gate.
+STABLE_BINARY = Path("/home/lk/.local/share/mtm/releases/0.4.0/mtm")
 EXPECTED_STABLE_SHA256 = "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3"
 
 
