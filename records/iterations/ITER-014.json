@@ -978,8 +978,10 @@
   "preview_runtime_repair_contract": {
     "trigger": "The unchanged preview A5 soak rejected retained completed-command watchdogs.",
     "permitted_runtime_file": "crates/mtm-native/src/process.rs",
-    "permitted_runtime_file_sha256": "678d147503a9ff60006e63e9b3e671c620bee818fddc6295dcad42ba1a3de36a",
-    "behavior": "Watchdogs observe terminal state at bounded 20ms intervals and release completed runs before their original timeout; live command deadlines remain enforced.",
+    "watchdog_only_revision_sha256": "678d147503a9ff60006e63e9b3e671c620bee818fddc6295dcad42ba1a3de36a",
+    "permitted_runtime_file_sha256": "3d7b5465a8b532aba3e7aa414898cb4ebe91fd6c48ea6e6be3925a3690422413",
+    "behavior": "Watchdogs observe terminal state at bounded 20ms intervals and release completed runs before their original timeout; live deadlines remain enforced. Empty/short stream buffers allocate on demand while all existing logical output bounds and retention semantics remain fixed.",
+    "buffer_failure_evidence_sha256": "867c36045a233d6783858eaecd5988751ba0cecb931fac44c47ce054980829b7",
     "supersedes_version_only_runtime_scope": true,
     "other_runtime_and_assets_unchanged": true,
     "resource_thresholds_relaxed": false,
@@ -1039,6 +1041,13 @@
     "Preview install, rollback/recutover and bounded soak remain required before MTM-014 completion; Magma functional validation remains host-license dependent."
   ],
   "recorded_failures_and_repairs": [
+    {
+      "delivery": 5,
+      "stage": "preview soak after fresh watchdog-repaired build",
+      "failure": "The fresh f4e10255 artifact fixed thread retention (9 before/peak/after) but a 506-iteration diagnostic still grew RSS from 14228 to 37024 KiB, above the unchanged 16 MiB allowance. Each short/empty output stream eagerly reserved its complete head/tail output budget.",
+      "repair": "Allocate StreamBuffer vectors on demand while keeping the existing logical head/tail limits, retention count and output-eviction contract. Add allocation and overflow regression assertions. Hash-pin the combined repair in the same single process module and repeat exact-binary qualification.",
+      "failure_evidence": "records/evidence/MTM-014/preview-buffer-soak-rejected.json"
+    },
     {
       "delivery": 5,
       "stage": "fresh-source preview installation after watchdog repair",

@@ -72,8 +72,9 @@ def main() -> int:
         s.require(result.returncode == 0, "clean_git_install")
         s.identity(s.STAGED, s.VERSION)
         binary_sha = s.digest(s.STAGED)
-        rejected = json.loads((s.ROOT / "records/evidence/MTM-014/preview-soak-rejected.json").read_text())
-        s.require(binary_sha != rejected["binary_sha256"], "rejected_artifact_reused")
+        for name in ("preview-soak-rejected.json", "preview-buffer-soak-rejected.json"):
+            rejected = json.loads((s.ROOT / "records/evidence/MTM-014" / name).read_text())
+            s.require(binary_sha != rejected["binary_sha256"], "rejected_artifact_reused")
         checks = {"versioned_identity": True, "clean_git_install": True,
                   "runtime_source_scope_verified": True, "required_tools_present": True}
         with tempfile.TemporaryDirectory(prefix="mtm014-preview-") as directory:

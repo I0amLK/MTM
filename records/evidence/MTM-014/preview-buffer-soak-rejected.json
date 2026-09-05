@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-014",
+  "phase": "preview_soak_after_watchdog_repair",
+  "decision": "rejected",
+  "source_commit_prefix": "68665e2",
+  "binary_sha256": "f4e102556165dfbb28f9deaeb50e28ee315d02a7a520f98ece396f0e6436b3bd",
+  "duration_seconds": 60.215,
+  "iterations": 506,
+  "before": {"rss_kib": 14228, "threads": 9, "fds": 16, "children": 0},
+  "peak": {"rss_kib": 37024, "threads": 9, "fds": 16, "children": 0},
+  "after": {"rss_kib": 37024, "threads": 9, "fds": 16, "children": 0},
+  "shutdown_ms": 64.495,
+  "watchdog_thread_growth_resolved": true,
+  "unchanged_gate_result": false,
+  "remaining_issue": "Retained short command streams eagerly allocate their full output budgets; the unchanged 16 MiB RSS growth bound still fails.",
+  "raw_credentials_recorded": false,
+  "raw_grant_or_capability_recorded": false,
+  "raw_command_or_proof_recorded": false,
+  "selector_changed": false
+}

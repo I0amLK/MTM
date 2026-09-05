@@ -150,8 +150,10 @@ impl StreamBuffer {
         Self {
             buffer_limit,
             head_limit,
-            head: Vec::with_capacity(head_limit),
-            tail: Vec::with_capacity(buffer_limit.saturating_sub(head_limit)),
+            // Limits are enforced on append. Empty/short command streams must
+            // not reserve the full output budget in every retained run.
+            head: Vec::new(),
+            tail: Vec::new(),
             start_offset: 0,
             cursor: 0,
             total_bytes: 0,
@@ -1102,6 +1104,23 @@ const fn default_kill_wait_ms() -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn short_command_buffers_allocate_on_demand_and_keep_output_bounds() {
+        let mut buffer = StreamBuffer::new(COMMAND_BUFFER_BYTES);
+        assert_eq!(buffer.head.capacity(), 0);
+        assert_eq!(buffer.tail.capacity(), 0);
+        buffer.append(b"short");
+        assert!(buffer.head.capacity() < buffer.head_limit);
+        assert!(buffer.tail.capacity() < buffer.buffer_limit - buffer.head_limit);
+        assert_eq!(buffer.head, b"short");
+        assert_eq!(buffer.tail, b"short");
+        buffer.append(&vec![b'x'; COMMAND_BUFFER_BYTES * 2]);
+        assert_eq!(buffer.head.len(), buffer.head_limit);
+        assert_eq!(buffer.tail.len(), buffer.buffer_limit - buffer.head_limit);
+        assert!(buffer.head.starts_with(b"short"));
+        assert!(buffer.dropped_bytes > 0);
+    }
 
     fn watchdog_request(argv: Vec<String>, timeout_ms: u64) -> CommandRequest {
         CommandRequest {
