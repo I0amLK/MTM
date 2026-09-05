@@ -125,6 +125,16 @@ impl ToolCallContext {
     }
 
     #[must_use]
+    pub fn has_input_responses(&self) -> bool {
+        !self.input_responses.is_empty()
+    }
+
+    #[must_use]
+    pub fn input_response_count(&self) -> usize {
+        self.input_responses.len()
+    }
+
+    #[must_use]
     pub fn request_state(&self) -> Option<&str> {
         self.request_state.as_deref()
     }

@@ -2,16 +2,23 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 
 use mtm_contracts::{ErrorCategory, PRODUCTION_WORKFLOW_PROTOCOL_VERSION, ReCtmError};
-use mtm_gateway::{
-    HIDDEN_TOOL_NAMES, OAuthPrincipal, PUBLIC_TOOL_NAMES, SUPPORTED_PROTOCOL_VERSIONS, ToolBackend,
-    ToolBackendResult, ToolCallContext,
+use mtm_core::{
+    NativeInvocation, NativePermissionRequest, classify_exec_permissions,
+    classify_patch_permissions, native_mode_implicitly_grants,
 };
-use mtm_storage::{CapabilityAuthority, StateStore};
+use mtm_gateway::{
+    HIDDEN_TOOL_NAMES, InputRequiredResult, OAuthPrincipal, PUBLIC_TOOL_NAMES,
+    SUPPORTED_PROTOCOL_VERSIONS, ToolBackend, ToolBackendResult, ToolCallContext,
+};
+use mtm_storage::{CapabilityAuthority, StateStore, StoreRuntime};
 use mtm_workflow::WorkflowEngine;
 use serde_json::{Map, Value};
 
 use crate::latex::static_latex_errors;
-use crate::{NativeToolRuntime, NativeWorkspace, RuntimeEventSink};
+use crate::{
+    NativePermissionConsentAuthority, NativePermissionConsentOutcome,
+    NativePermissionGrantAuthority, NativeToolRuntime, NativeWorkspace, RuntimeEventSink,
+};
 
 const INSPECT_OPERATIONS: [&str; 9] = [
     "status",
@@ -45,6 +52,8 @@ pub struct RuntimeToolBackend {
     workflow: Arc<WorkflowEngine>,
     store: Arc<StateStore>,
     capabilities: Arc<CapabilityAuthority>,
+    native_permissions: Arc<NativePermissionGrantAuthority>,
+    native_consents: Arc<NativePermissionConsentAuthority>,
     workflow_protocol_version: i64,
     complete_flow_locally_validated: bool,
     observer: Option<RuntimeEventSink>,
@@ -103,12 +112,42 @@ impl RuntimeToolBackend {
         facts: RuntimeBackendFacts,
         observer: Option<RuntimeEventSink>,
     ) -> Self {
+        let permission_runtime = StoreRuntime::default();
+        Self::new_with_protocol_observer_and_native_permissions(
+            native,
+            workspace,
+            workflow,
+            store,
+            capabilities,
+            Arc::new(NativePermissionGrantAuthority::new(
+                permission_runtime.clone(),
+            )),
+            Arc::new(NativePermissionConsentAuthority::new(permission_runtime)),
+            facts,
+            observer,
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn new_with_protocol_observer_and_native_permissions(
+        native: Arc<NativeToolRuntime>,
+        workspace: Arc<NativeWorkspace>,
+        workflow: Arc<WorkflowEngine>,
+        store: Arc<StateStore>,
+        capabilities: Arc<CapabilityAuthority>,
+        native_permissions: Arc<NativePermissionGrantAuthority>,
+        native_consents: Arc<NativePermissionConsentAuthority>,
+        facts: RuntimeBackendFacts,
+        observer: Option<RuntimeEventSink>,
+    ) -> Self {
         Self {
             native,
             workspace,
             workflow,
             store,
             capabilities,
+            native_permissions,
+            native_consents,
             workflow_protocol_version: facts.workflow_protocol_version,
             complete_flow_locally_validated: facts.complete_flow_locally_validated,
             observer,
@@ -1103,6 +1142,188 @@ impl RuntimeToolBackend {
         }
         Ok(result)
     }
+
+    fn request_permissions_with_context(
+        &self,
+        arguments: &Map<String, Value>,
+        principal: &OAuthPrincipal,
+        context: &ToolCallContext,
+    ) -> Result<ToolBackendResult, ReCtmError> {
+        if self.native.mode() == mtm_contracts::NativeMode::Dangerous {
+            return Ok(ToolBackendResult::Complete(
+                self.native.request_permissions(arguments),
+            ));
+        }
+        if !context.is_modern() || !context.supports_form_elicitation() {
+            return Ok(ToolBackendResult::Complete(
+                self.native.request_permissions(arguments),
+            ));
+        }
+
+        let request = NativePermissionRequest::parse(arguments)?;
+        let invocation_arguments = arguments
+            .get("arguments")
+            .and_then(Value::as_object)
+            .ok_or_else(|| validation("request_permissions arguments must be an object"))?;
+        let required = self.required_permissions_for_request(&request, invocation_arguments)?;
+        if !required.contains(&request.kind()) {
+            return Ok(ToolBackendResult::Complete(permission_not_required(
+                self.native.mode().as_str(),
+                self.workspace.root(),
+                &request,
+                "permission_not_intrinsic_to_invocation",
+            )));
+        }
+        if native_mode_implicitly_grants(self.native.mode(), request.kind()) {
+            return Ok(ToolBackendResult::Complete(permission_not_required(
+                self.native.mode().as_str(),
+                self.workspace.root(),
+                &request,
+                "native_mode_profile",
+            )));
+        }
+
+        let state = context.request_state();
+        let response = context.input_response("native_permission_consent");
+        match (state, response, context.input_response_count()) {
+            (None, None, 0) => {
+                let workspace = self.workspace.root().display().to_string();
+                let prompt =
+                    self.native_consents
+                        .begin(&principal.client_id, &workspace, request)?;
+                Ok(ToolBackendResult::InputRequired(
+                    InputRequiredResult::form_elicitation(
+                        "native_permission_consent",
+                        prompt.message(),
+                        prompt.requested_schema().clone(),
+                        prompt.request_state().to_owned(),
+                    )?,
+                ))
+            }
+            (Some(state), Some(response), 1) => {
+                let workspace = self.workspace.root().display().to_string();
+                let outcome = self.native_consents.complete(
+                    state,
+                    &principal.client_id,
+                    &workspace,
+                    &request,
+                    response,
+                )?;
+                match outcome {
+                    NativePermissionConsentOutcome::Accepted(consent) => {
+                        let receipt = self.native_permissions.issue_verified(consent)?;
+                        Ok(ToolBackendResult::Complete(permission_granted(
+                            self.native.mode().as_str(),
+                            self.workspace.root(),
+                            &request,
+                            &receipt,
+                        )))
+                    }
+                    NativePermissionConsentOutcome::Declined => Ok(ToolBackendResult::Complete(
+                        permission_denied("decline"),
+                    )),
+                    NativePermissionConsentOutcome::Cancelled => Ok(ToolBackendResult::Complete(
+                        permission_denied("cancel"),
+                    )),
+                }
+            }
+            _ => Err(ReCtmError::new(
+                "ELICITATION_RESPONSE_INVALID",
+                "Native permission MRTR retry requires exactly one consent response and requestState.",
+            )
+            .with_category(ErrorCategory::Permission)),
+        }
+    }
+
+    fn required_permissions_for_request(
+        &self,
+        request: &NativePermissionRequest,
+        arguments: &Map<String, Value>,
+    ) -> Result<Vec<mtm_contracts::NativePermissionKind>, ReCtmError> {
+        let invocation = NativeInvocation::parse(request.tool(), arguments)?;
+        if invocation.arguments_sha256() != request.arguments_sha256() {
+            return Err(ReCtmError::new(
+                "NATIVE_PERMISSION_REQUEST_ARGUMENT_MISMATCH",
+                "Permission request does not match the exact nested tool arguments.",
+            )
+            .with_category(ErrorCategory::Security));
+        }
+        match invocation {
+            NativeInvocation::Exec(exec) => {
+                let facts = self.native.collect_shadow_exec_permission_facts(&exec)?;
+                classify_exec_permissions(&exec, &facts)
+            }
+            NativeInvocation::Patch(patch) => {
+                let facts = self.workspace.collect_patch_permission_facts(&patch)?;
+                classify_patch_permissions(&patch, &facts)
+            }
+        }
+    }
+}
+
+fn permission_not_required(
+    mode: &str,
+    workspace: &std::path::Path,
+    request: &NativePermissionRequest,
+    source: &str,
+) -> Value {
+    serde_json::json!({
+        "ok":true,
+        "status":"not_required",
+        "grant_id":Value::Null,
+        "expires_at":Value::Null,
+        "constraints":{
+            "mode":mode,
+            "workspace":workspace,
+            "tool_name":request.tool().as_str(),
+            "permission":request.kind().as_str(),
+            "scope":request.scope().as_str(),
+            "source":source,
+            "argument_fingerprint":request.arguments_sha256().chars().take(12).collect::<String>()
+        },
+        "warnings":[]
+    })
+}
+
+fn permission_granted(
+    mode: &str,
+    workspace: &std::path::Path,
+    request: &NativePermissionRequest,
+    receipt: &crate::NativePermissionGrantReceipt,
+) -> Value {
+    serde_json::json!({
+        "ok":true,
+        "status":"granted",
+        "grant_id":receipt.grant_id().as_str(),
+        "expires_at":receipt.expires_at(),
+        "constraints":{
+            "mode":mode,
+            "workspace":workspace,
+            "tool_name":request.tool().as_str(),
+            "permission":request.kind().as_str(),
+            "scope":request.scope().as_str(),
+            "source":"verified_mcp_mrtr_form_elicitation",
+            "argument_fingerprint":request.arguments_sha256().chars().take(12).collect::<String>(),
+            "workflow_authority_inherited":false
+        },
+        "warnings":[]
+    })
+}
+
+fn permission_denied(action: &str) -> Value {
+    serde_json::json!({
+        "ok":false,
+        "status":"denied",
+        "grant_id":Value::Null,
+        "expires_at":Value::Null,
+        "error":{
+            "code":"ELICITATION_DENIED",
+            "message":"Native permission request was not approved by the user.",
+            "category":"permission",
+            "retryable":false,
+            "details":{"action":action}
+        }
+    })
 }
 
 impl ToolBackend for RuntimeToolBackend {
@@ -1112,7 +1333,7 @@ impl ToolBackend for RuntimeToolBackend {
         arguments: &Map<String, Value>,
         principal: &OAuthPrincipal,
         trace_id: &str,
-        _context: &ToolCallContext,
+        context: &ToolCallContext,
     ) -> Result<ToolBackendResult, ReCtmError> {
         self.emit(serde_json::json!({
             "event_type":"tool.call_started",
@@ -1121,23 +1342,51 @@ impl ToolBackend for RuntimeToolBackend {
             "reason":"oauth_principal_and_registered_tool",
             "details":{"tool":name,"argument_keys":arguments.keys().collect::<Vec<_>>()}
         }));
-        let (payload, is_error) = match self.dispatch(name, arguments, principal, trace_id) {
-            Ok(value) => (ensure_ok(value), false),
-            Err(error) => (
-                serde_json::json!({"ok":false,"error":error.to_payload(),"trace_id":trace_id}),
-                true,
-            ),
+        let result = if name == "request_permissions" {
+            self.request_permissions_with_context(arguments, principal, context)
+        } else {
+            self.dispatch(name, arguments, principal, trace_id)
+                .map(|value| ToolBackendResult::Complete(ensure_ok(value)))
         };
-        self.emit(serde_json::json!({
-            "event_type":if is_error {"tool.call_failed"} else {"tool.call_finished"},
-            "trace_id":trace_id,
-            "decision":if is_error {"error"} else {"allow"},
-            "reason":if is_error {"tool_reported_error"} else {"tool_completed"},
-            "details":{"tool":name}
-        }));
-        Ok(ToolBackendResult::Complete(tool_result(
-            name, payload, is_error,
-        )))
+        match result {
+            Ok(ToolBackendResult::InputRequired(required)) => {
+                self.emit(serde_json::json!({
+                    "event_type":"tool.call_input_required",
+                    "trace_id":trace_id,
+                    "decision":"defer",
+                    "reason":"verified_client_input_required",
+                    "details":{"tool":name}
+                }));
+                Ok(ToolBackendResult::InputRequired(required))
+            }
+            Ok(ToolBackendResult::Complete(value)) => {
+                let payload = ensure_ok(value);
+                self.emit(serde_json::json!({
+                    "event_type":"tool.call_finished",
+                    "trace_id":trace_id,
+                    "decision":"allow",
+                    "reason":"tool_completed",
+                    "details":{"tool":name}
+                }));
+                Ok(ToolBackendResult::Complete(tool_result(
+                    name, payload, false,
+                )))
+            }
+            Err(error) => {
+                let payload =
+                    serde_json::json!({"ok":false,"error":error.to_payload(),"trace_id":trace_id});
+                self.emit(serde_json::json!({
+                    "event_type":"tool.call_failed",
+                    "trace_id":trace_id,
+                    "decision":"error",
+                    "reason":"tool_reported_error",
+                    "details":{"tool":name}
+                }));
+                Ok(ToolBackendResult::Complete(tool_result(
+                    name, payload, true,
+                )))
+            }
+        }
     }
 }
 

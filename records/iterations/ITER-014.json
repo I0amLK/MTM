@@ -467,7 +467,7 @@
   },
   "d5a_progress": {
     "started_at": "2026-09-04T20:14:39-07:00",
-    "phase": "mrtr_protocol_plumbing",
+    "phase": "mrtr_permission_bridge_integration",
     "gateway_request_scoped_context": true,
     "client_capabilities_preserved_per_request": true,
     "form_elicitation_capability_rules": {
@@ -486,14 +486,18 @@
     "modern_input_required_result_type_preserved": true,
     "legacy_tool_schema_changed": false,
     "public_tool_schema_changed": false,
-    "runtime_request_permissions_changed": false,
-    "verified_consent_constructor_connected": false,
-    "grant_minting_from_mrtr_enabled": false,
+    "runtime_request_permissions_changed": true,
+    "verified_consent_constructor_connected": true,
+    "grant_minting_from_mrtr_enabled": true,
     "production_exec_or_patch_authority_changed": false,
     "real_human_consent_evidence_collected": false,
     "validation": {
       "gateway_mcp_tests": "6 passed",
-      "gateway_runtime_clippy_warnings_denied": true
+      "gateway_runtime_clippy_warnings_denied": true,
+      "consent_challenge_tests": "4 passed",
+      "mrtr_bridge_integration_checks": "21 passed",
+      "full_run_checks": "24 of 24 passed",
+      "git_diff_check": true
     },
     "consent_challenge_authority": {
       "implemented": true,
@@ -522,11 +526,38 @@
       "prompt_contains_argument_fingerprint": true,
       "prompt_challenge_id_debug_redacted": true,
       "challenge_raw_arguments_retained": false,
-      "runtime_application_connected": false,
-      "request_permissions_connected": false,
+      "runtime_application_connected": true,
+      "request_permissions_connected": true,
       "real_human_consent_evidence_collected": false,
       "tests": "4 passed",
       "clippy_warnings_denied": true
+    },
+    "bridge_integration": {
+      "runner": "scripts/run_mtm014_mrtr_permission_validation.py",
+      "check_count": 21,
+      "all_checks_passed": true,
+      "binary_sha256": "307c27aefd90c919cc4dc45c4de73b3abec60ad016a9c2aafdf1ee8712f016ef",
+      "real_oauth_http_mcp": true,
+      "modern_two_round_accept": true,
+      "accepted_state_replay_denied": true,
+      "argument_mutation_denied_without_challenge_consumption": true,
+      "extra_input_response_denied_without_challenge_consumption": true,
+      "legacy_unsupported_preserved": true,
+      "modern_without_form_elicitation_unsupported_preserved": true,
+      "trusted_implicit_permission_requires_no_prompt": true,
+      "non_intrinsic_permission_requires_no_prompt": true,
+      "dangerous_compatibility_preserved": true,
+      "decline_mints_grant": false,
+      "prompt_contains_raw_command": false,
+      "grant_response_contains_raw_command": false,
+      "workflow_authority_inherited": false,
+      "safe_trusted_dangerous_servers_exit_cleanly": true,
+      "raw_oauth_token_recorded": false,
+      "raw_request_state_recorded": false,
+      "raw_grant_id_recorded": false,
+      "raw_tool_arguments_recorded": false,
+      "production_exec_or_patch_authority_cutover": false,
+      "real_human_consent_evidence": false
     }
   },
   "acceptance": {
@@ -544,10 +575,17 @@
   ],
   "rollback": "Before permission-authority cutover, remove the MTM-014 shadow types/ledger and retain stable 0.4.0 Native policy plus Bubblewrap. After a later cutover, restore the frozen pre-cutover evaluator and invalidate all process-local grants; no persistent workflow/project/proof data rewrite is required.",
   "manual_pending": [
-    "Verified MCP client elicitation support is required before safe/trusted request_permissions may mint an explicit user grant.",
+    "A real MCP client must demonstrate independent human MRTR form elicitation before D5A can be accepted; scripted inputResponses are integration evidence only.",
+    "Production exec_command/apply_patch permission enforcement must remain pre-cutover until D5A human evidence and the complete real-target A4 corpus pass.",
     "Real target A4 is required before any MTM-014 permission-authority cutover."
   ],
   "recorded_failures_and_repairs": [
+    {
+      "delivery": 5,
+      "stage": "D5A unified gate after MRTR permission bridge integration",
+      "failure": "The first full run_checks.py after advancing D5A passed the 21-check OAuth/HTTP/MCP bridge integration but the governance test still expected the earlier mrtr_protocol_plumbing phase string.",
+      "repair": "Updated only the frozen governance assertion to mrtr_permission_bridge_integration, reran the unchanged runtime plus unified gate, and obtained all 24 repository checks passing."
+    },
     {
       "delivery": 3,
       "stage": "section 6 unified local gate under the default sandbox",
