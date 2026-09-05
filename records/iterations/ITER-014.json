@@ -1004,6 +1004,12 @@
   "recorded_failures_and_repairs": [
     {
       "delivery": 5,
+      "stage": "post-cutover public A4 dangerous non-inheritance assertion",
+      "failure": "The second public A4 run checked workflow_authority_inherited inside the frozen Dangerous request_permissions compatibility constraints, but that legacy compatibility payload intentionally contains only mode, workspace, and requested arguments. The runner therefore failed even though the public Native server-info contract still reports workflow_authority_inherited=false.",
+      "repair": "Kept the Dangerous compatibility response unchanged, asserted its granted dangerous-mode compatibility shape separately, and moved workflow non-inheritance validation to the public server_info.native.workflow_authority_inherited field. No production authority or response schema was changed."
+    },
+    {
+      "delivery": 5,
       "stage": "initial post-cutover public A4 classifier fixtures",
       "failure": "The first committed public A4 runner expected printf \"$HOME\" to require shell_expansion and rm -f of a missing file to require destructive_command. Both commands are outside the frozen classifier patterns, so the new public authority correctly allowed them and the runner failed rather than widening production policy.",
       "repair": "Kept the frozen production classifier unchanged and replaced only the isolated A4 inputs with printf \"${HOME}\" and rm -rf of nonexistent temporary-workspace directories. These inputs match the frozen shell-expansion and destructive-command rules while remaining harmless target fixtures."

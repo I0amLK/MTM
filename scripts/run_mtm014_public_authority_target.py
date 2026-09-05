@@ -771,7 +771,14 @@ def dangerous_public_case(root: Path) -> tuple[dict[str, bool], str]:
             capabilities=CAPABILITIES,
         )
         permission_value = structured(permission_reply)
-        if permission_value.get("constraints", {}).get("workflow_authority_inherited") is not False:
+        if permission_value.get("status") != "granted":
+            fail("dangerous_permission_compatibility")
+        constraints = permission_value.get("constraints")
+        if not isinstance(constraints, dict) or constraints.get("mode") != "dangerously_skip_all_permissions":
+            fail("dangerous_permission_compatibility")
+        server_info = assert_tool_success(call_tool(port, token, "server_info", {}))
+        native = server_info.get("native")
+        if not isinstance(native, dict) or native.get("workflow_authority_inherited") is not False:
             fail("dangerous_workflow_non_inheritance")
 
         magma = assert_tool_success(
