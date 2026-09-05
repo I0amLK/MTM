@@ -65,7 +65,7 @@
     {
       "id": "D4",
       "name": "typed SandboxPlan with Bubblewrap as pure actuator",
-      "status": "in_progress"
+      "status": "accepted"
     },
     {
       "id": "D5",
@@ -275,7 +275,7 @@
   "d4_progress": {
     "started_at": "2026-09-05T04:15:36+08:00",
     "authority_mode": "shadow_only_before_d5",
-    "review_unit": "typed SandboxPlan and pure Bubblewrap compilation",
+    "review_unit": "typed SandboxPlan, pure Bubblewrap compilation, and authority-ready PreparedPatch",
     "sandbox_plan_fields_private": true,
     "sandbox_plan_debug_redacted": true,
     "bubblewrap_compiler_input": "validated SandboxPlan only",
@@ -318,7 +318,51 @@
     "explicit_grant_authority_cutover": false,
     "bubblewrap_replaced": false,
     "workflow_authority_changed": false,
-    "prepared_patch_review_unit": "pending",
+    "prepared_patch_review_unit": "accepted",
+    "prepared_patch": {
+      "fields_private": true,
+      "serializable": false,
+      "debug_redacted": true,
+      "arguments_bound_by_sha256": true,
+      "workspace_root_identity_bound": true,
+      "file_baseline_fingerprint_fields": [
+        "device",
+        "inode",
+        "mode",
+        "size",
+        "mtime",
+        "sha256"
+      ],
+      "zero_workspace_writes_before_final_authorization": true,
+      "dry_run_authorization_calls": 0,
+      "dry_run_workspace_writes": 0,
+      "commit_lock_shared_across_workspace_clones": true,
+      "bounded_revalidation_attempts": 3,
+      "stale_fact_error": "NATIVE_PATCH_AUTHORITY_FACTS_CHANGED",
+      "git_commands_held_under_commit_lock": false,
+      "git_metadata_fingerprints": [
+        "repository markers",
+        "system, global, included, repository, and worktree configuration",
+        "HEAD",
+        "index",
+        "info/exclude and configured global excludes",
+        "relevant root and nested .gitignore files",
+        "symlink nodes and resolved referents"
+      ],
+      "maximum_git_metadata_file_bytes": 67108864,
+      "authority_path_rejects_any_symlink_component": true,
+      "post_authorization_baseline_revalidation": true,
+      "multi_file_rollback": true,
+      "rollback_failure_retains_recovery_backups": true,
+      "production_compatibility_path": {
+        "collects_git_authority_facts": false,
+        "successful_result_shape_changed": false,
+        "empty_patch_behavior_preserved": true,
+        "repeated_path_behavior_preserved": true,
+        "move_over_existing_target_behavior_preserved": true,
+        "internal_source_symlink_behavior_preserved_before_d5": true
+      }
+    },
     "sandbox_plan_validation": {
       "cargo_fmt_check": true,
       "native_bubblewrap_tests": "8 passed",
@@ -329,7 +373,50 @@
       "full_run_checks": "24 of 24 passed",
       "git_diff_check": true,
       "accepted_mtm013_evidence_changed": false
+    },
+    "prepared_patch_validation": {
+      "cargo_fmt_check": true,
+      "prepared_patch_tests": "12 passed",
+      "workspace_tests": "22 passed",
+      "runtime_tests": "50 passed",
+      "runtime_clippy_warnings_denied": true,
+      "full_run_checks": "24 of 24 passed",
+      "git_diff_check": true,
+      "accepted_mtm013_evidence_changed": false
     }
+  },
+  "d4_receipt": {
+    "accepted_at": "2026-09-05T07:27:52+08:00",
+    "scope": "pre-authority typed SandboxPlan/Bubblewrap actuation boundary plus no-write PreparedPatch preparation, final authorization seam, stale-fact revalidation, and rollback-capable patch commit",
+    "authority_mode": "shadow_only_before_d5",
+    "sandbox_plan_and_prepared_patch_complete": true,
+    "bubblewrap_compiler_accepts_only_validated_plan": true,
+    "prepared_patch_constructor_public": false,
+    "prepared_patch_serializable": false,
+    "raw_patch_debug_output": false,
+    "writes_before_final_authorization": false,
+    "dry_run_consumes_authorization": false,
+    "git_process_under_patch_commit_lock": false,
+    "atomic_multi_file_rollback_tested": true,
+    "concurrent_prepared_baseline_winners": 1,
+    "production_permission_authority_changed": false,
+    "production_git_permission_dependency_added": false,
+    "production_profile_behavior_changed": false,
+    "explicit_grant_authority_cutover": false,
+    "bubblewrap_replaced": false,
+    "workflow_authority_changed": false,
+    "validation": {
+      "sandbox_plan_tests": "8 passed",
+      "prepared_patch_tests": "12 passed",
+      "workspace_tests": "22 passed",
+      "runtime_tests": "50 passed",
+      "warnings_denied_clippy": true,
+      "governance_tests": "26 passed with 4 deployment-mode skips",
+      "full_run_checks": "24 of 24 passed",
+      "git_diff_check": true,
+      "accepted_mtm013_evidence_changed": false
+    },
+    "manual_pending": "Verified human consent, production permission enforcement, and real target A4 remain D5 work."
   },
   "acceptance": {
     "A0": "Formatting, warnings-denied Clippy, workspace tests, governance, record-layout and unified local gate pass.",
@@ -397,6 +484,36 @@
       "stage": "initial expanded SandboxPlan warnings-denied Clippy",
       "failure": "The first focused Clippy run rejected a panic in a test-only command normalizer and three unnecessary clones in slice comparisons.",
       "repair": "Made the normalizer return a structured test error, replaced cloned singleton slices with references, and reran the unchanged warnings-denied Clippy command successfully."
+    },
+    {
+      "delivery": 4,
+      "stage": "initial PreparedPatch implementation compile",
+      "failure": "The first PreparedPatch compile found an ambiguous File::by_ref call between the Read and Write traits and one intentionally unread destination-content binding.",
+      "repair": "Selected Read::by_ref explicitly, renamed the content binding to _content, and reran the focused compile successfully."
+    },
+    {
+      "delivery": 4,
+      "stage": "initial PreparedPatch test compile",
+      "failure": "The first negative test compared Result<PreparedPatch, String> with assert_eq!, which required the deliberately non-comparable authority object to implement PartialEq.",
+      "repair": "Mapped the success variant to unit before comparing the stable error code, preserving private non-serializable PreparedPatch semantics."
+    },
+    {
+      "delivery": 4,
+      "stage": "pre-cutover compatibility split compile",
+      "failure": "The first focused cargo check after separating authority and production-compatibility preparation retained one obsolete invocation variable, inferred one move destination at the wrong reference type, and left tests using the former direct fact fields.",
+      "repair": "Routed the loop through typed operations, corrected the move value ownership, and made tests unwrap the explicit classified authority snapshot; the unchanged focused check then passed."
+    },
+    {
+      "delivery": 4,
+      "stage": "ctime baseline hardening experiment",
+      "failure": "The first PreparedPatch test run after adding ctime to file identity rejected two valid commits because creating the required hard-link rollback backup legitimately changes the source inode ctime.",
+      "repair": "Rejected ctime as a stable hard-link-compatible baseline field, retained device/inode/mode/size/mtime plus SHA-256, and reran all PreparedPatch tests successfully."
+    },
+    {
+      "delivery": 4,
+      "stage": "initial PreparedPatch formatting check",
+      "failure": "The first cargo fmt --all -- --check after the compatibility and revalidation edits reported ordinary Rust formatting drift.",
+      "repair": "Applied cargo fmt without semantic changes and reran the focused tests, warnings-denied Clippy, and unified local gate successfully."
     }
   ],
   "decision": "in_progress"

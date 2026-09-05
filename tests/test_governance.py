@@ -136,7 +136,7 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(delivery["D1"], "accepted")
         self.assertEqual(delivery["D2"], "accepted")
         self.assertEqual(delivery["D3"], "accepted")
-        self.assertEqual(delivery["D4"], "in_progress")
+        self.assertEqual(delivery["D4"], "accepted")
         d3 = iteration["d3_contract"]
         self.assertEqual(
             d3["exec_permission_order"],
@@ -207,10 +207,41 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertFalse(d4["explicit_grant_authority_cutover"])
         self.assertFalse(d4["bubblewrap_replaced"])
         self.assertFalse(d4["workflow_authority_changed"])
-        self.assertEqual(d4["prepared_patch_review_unit"], "pending")
+        self.assertEqual(d4["prepared_patch_review_unit"], "accepted")
+        prepared = d4["prepared_patch"]
+        self.assertTrue(prepared["fields_private"])
+        self.assertFalse(prepared["serializable"])
+        self.assertTrue(prepared["debug_redacted"])
+        self.assertTrue(prepared["zero_workspace_writes_before_final_authorization"])
+        self.assertEqual(prepared["dry_run_authorization_calls"], 0)
+        self.assertEqual(prepared["bounded_revalidation_attempts"], 3)
+        self.assertEqual(
+            prepared["stale_fact_error"], "NATIVE_PATCH_AUTHORITY_FACTS_CHANGED"
+        )
+        self.assertFalse(prepared["git_commands_held_under_commit_lock"])
+        self.assertTrue(prepared["multi_file_rollback"])
+        self.assertTrue(prepared["rollback_failure_retains_recovery_backups"])
+        self.assertFalse(
+            prepared["production_compatibility_path"]["collects_git_authority_facts"]
+        )
+        self.assertFalse(
+            prepared["production_compatibility_path"]["successful_result_shape_changed"]
+        )
         self.assertEqual(d4["sandbox_plan_validation"]["native_bubblewrap_tests"], "8 passed")
         self.assertEqual(d4["sandbox_plan_validation"]["full_run_checks"], "24 of 24 passed")
         self.assertFalse(d4["sandbox_plan_validation"]["accepted_mtm013_evidence_changed"])
+        d4_receipt = iteration["d4_receipt"]
+        self.assertEqual(d4_receipt["authority_mode"], "shadow_only_before_d5")
+        self.assertTrue(d4_receipt["sandbox_plan_and_prepared_patch_complete"])
+        self.assertTrue(d4_receipt["bubblewrap_compiler_accepts_only_validated_plan"])
+        self.assertFalse(d4_receipt["prepared_patch_constructor_public"])
+        self.assertFalse(d4_receipt["prepared_patch_serializable"])
+        self.assertFalse(d4_receipt["writes_before_final_authorization"])
+        self.assertFalse(d4_receipt["dry_run_consumes_authorization"])
+        self.assertFalse(d4_receipt["production_permission_authority_changed"])
+        self.assertFalse(d4_receipt["production_git_permission_dependency_added"])
+        self.assertFalse(d4_receipt["explicit_grant_authority_cutover"])
+        self.assertFalse(d4_receipt["validation"]["accepted_mtm013_evidence_changed"])
 
         bubblewrap_source = (
             ROOT / "crates" / "mtm-native" / "src" / "bubblewrap.rs"

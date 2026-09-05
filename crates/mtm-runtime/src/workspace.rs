@@ -1,12 +1,19 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::fs;
+use std::fmt;
+use std::fs::{self, OpenOptions};
+use std::io::{Read, Write};
+use std::os::unix::fs::MetadataExt;
 use std::path::{Component, Path, PathBuf};
+use std::sync::{Arc, Mutex};
 use std::time::UNIX_EPOCH;
 
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 use mtm_contracts::{ErrorCategory, ReCtmError};
-use mtm_core::{PatchInvocation, PatchPathFact, apply_update_hunks, parse_patch};
+use mtm_core::{
+    PatchInvocation, PatchOperation, PatchPathFact, apply_update_hunks, canonical_arguments_sha256,
+    parse_patch,
+};
 use mtm_native::{CommandManager, CommandManagerConfig, CommandRequest, PollRequest};
 use regex::{Regex, RegexBuilder};
 use serde_json::{Map, Value};
@@ -25,6 +32,9 @@ const DEFAULT_EXCLUDED: [&str; 11] = [
     ".ruff_cache",
     "target",
 ];
+const PATCH_REVALIDATION_ATTEMPTS: usize = 3;
+const PATCH_TEMP_NAME_ATTEMPTS: usize = 8;
+const MAX_GIT_METADATA_BYTES: u64 = 64 * 1024 * 1024;
 
 #[derive(Clone, Debug)]
 pub struct ResolvedPath {
@@ -33,11 +43,172 @@ pub struct ResolvedPath {
     pub existed: bool,
 }
 
+#[derive(Clone, Eq, PartialEq)]
+struct FileIdentity {
+    device: u64,
+    inode: u64,
+    mode: u32,
+    size: u64,
+    modified_seconds: i64,
+    modified_nanoseconds: i64,
+}
+
+#[derive(Clone, Eq, PartialEq)]
+struct FileFingerprint {
+    identity: FileIdentity,
+    sha256: String,
+}
+
+#[derive(Eq, PartialEq)]
+enum PatchBaseline {
+    Missing,
+    File { fingerprint: FileFingerprint },
+}
+
+struct PreparedPathChange {
+    relative_path: String,
+    resolution: PatchPathResolution,
+    resolved: ResolvedPath,
+    baseline: PatchBaseline,
+    final_content: Option<Vec<u8>>,
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum PatchPathResolution {
+    ExistingCompatibility,
+    ForWrite,
+}
+
+struct PreparedAffectedFile {
+    operation: String,
+    path: String,
+}
+
+enum PatchAuthoritySnapshot {
+    /// The accepted 0.4.0 production path has no Git-based permission
+    /// authority. Keeping that state explicit prevents D4 from silently
+    /// introducing a new production dependency on Git before D5 cutover.
+    ProductionCompatibility,
+    Classified {
+        path_facts: Vec<PatchPathFact>,
+        git_metadata: GitMetadataSnapshot,
+    },
+}
+
+#[derive(Clone, Copy)]
+enum PatchPreparationSemantics {
+    ProductionCompatibility,
+    Authority,
+}
+
+#[derive(Clone, Eq, PartialEq)]
+enum MetadataNodeFingerprint {
+    Missing,
+    Regular(FileFingerprint),
+    Directory(FileIdentity),
+    Symlink {
+        identity: FileIdentity,
+        target: PathBuf,
+    },
+    Other(FileIdentity),
+}
+
+#[derive(Eq, PartialEq)]
+struct GitMetadataSnapshot {
+    entries: Vec<(PathBuf, MetadataNodeFingerprint)>,
+}
+
+/// A fully parsed and validated patch whose file contents and authority facts
+/// have been prepared without writing to the workspace.
+pub(crate) struct PreparedPatch {
+    workspace_root: PathBuf,
+    workspace_identity: FileIdentity,
+    arguments_sha256: String,
+    dry_run: bool,
+    changes: Vec<PreparedPathChange>,
+    authority: PatchAuthoritySnapshot,
+    summary: Vec<String>,
+    additions: usize,
+    removals: usize,
+    affected_files: Vec<PreparedAffectedFile>,
+}
+
+impl fmt::Debug for PreparedPatch {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let (authority_state, path_fact_count, git_metadata_fingerprint_count) = match &self
+            .authority
+        {
+            PatchAuthoritySnapshot::ProductionCompatibility => ("production_compatibility", 0, 0),
+            PatchAuthoritySnapshot::Classified {
+                path_facts,
+                git_metadata,
+            } => ("classified", path_facts.len(), git_metadata.entries.len()),
+        };
+        formatter
+            .debug_struct("PreparedPatch")
+            .field("workspace_root", &"[REDACTED]")
+            .field("arguments_sha256", &self.arguments_sha256)
+            .field("dry_run", &self.dry_run)
+            .field("change_count", &self.changes.len())
+            .field("authority_state", &authority_state)
+            .field("path_fact_count", &path_fact_count)
+            .field(
+                "git_metadata_fingerprint_count",
+                &git_metadata_fingerprint_count,
+            )
+            .field("patch_content", &"[REDACTED]")
+            .finish()
+    }
+}
+
+impl PreparedPatch {
+    #[must_use]
+    pub(crate) const fn dry_run(&self) -> bool {
+        self.dry_run
+    }
+
+    #[must_use]
+    pub(crate) fn arguments_sha256(&self) -> &str {
+        &self.arguments_sha256
+    }
+
+    #[must_use]
+    pub(crate) fn path_facts(&self) -> Option<&[PatchPathFact]> {
+        match &self.authority {
+            PatchAuthoritySnapshot::ProductionCompatibility => None,
+            PatchAuthoritySnapshot::Classified { path_facts, .. } => Some(path_facts),
+        }
+    }
+
+    fn git_metadata(&self) -> Option<&GitMetadataSnapshot> {
+        match &self.authority {
+            PatchAuthoritySnapshot::ProductionCompatibility => None,
+            PatchAuthoritySnapshot::Classified { git_metadata, .. } => Some(git_metadata),
+        }
+    }
+
+    fn result(&self, warnings: Vec<String>) -> Value {
+        serde_json::json!({
+            "clean":true,
+            "dry_run":self.dry_run,
+            "summary":self.summary.join("\n"),
+            "additions":self.additions,
+            "removals":self.removals,
+            "affected_files":self.affected_files.iter().map(|affected|serde_json::json!({
+                "operation":affected.operation,
+                "path":affected.path,
+            })).collect::<Vec<_>>(),
+            "warnings":warnings,
+        })
+    }
+}
+
 #[derive(Clone)]
 pub struct NativeWorkspace {
     root: PathBuf,
     private_root: PathBuf,
     commands: CommandManager,
+    patch_commit_lock: Arc<Mutex<()>>,
 }
 
 impl NativeWorkspace {
@@ -69,6 +240,7 @@ impl NativeWorkspace {
             root,
             private_root,
             commands: CommandManager::new(CommandManagerConfig::default()),
+            patch_commit_lock: Arc::new(Mutex::new(())),
         })
     }
 
@@ -506,61 +678,584 @@ impl NativeWorkspace {
         Ok(serde_json::json!({"matches":matches,"total_matches":matches.len(),"truncated":false}))
     }
 
-    /// Collect the path and Git-ignore facts used by the D3 shadow permission
-    /// evaluator.  This validates every source and destination but performs no
-    /// write and does not affect the authoritative `apply_patch` path.
+    /// Collect path and Git-ignore facts with the authority-ready no-write
+    /// preparation path. Production keeps its explicit compatibility variant
+    /// until the D5 permission cutover.
     pub fn collect_patch_permission_facts(
         &self,
         invocation: &PatchInvocation,
     ) -> Result<Vec<PatchPathFact>, ReCtmError> {
-        let mut paths = BTreeSet::new();
-        for operation in invocation.operations() {
+        self.prepare_patch(invocation)?
+            .path_facts()
+            .map(<[PatchPathFact]>::to_vec)
+            .ok_or_else(|| internal("authority patch preparation omitted path facts"))
+    }
+
+    /// Prepare an already parsed typed invocation without a workspace write.
+    pub(crate) fn prepare_patch(
+        &self,
+        invocation: &PatchInvocation,
+    ) -> Result<PreparedPatch, ReCtmError> {
+        self.prepare_patch_operations(
+            invocation.operations(),
+            invocation.dry_run(),
+            invocation.arguments_sha256(),
+            PatchPreparationSemantics::Authority,
+        )
+    }
+
+    fn prepare_patch_operations(
+        &self,
+        operations: &[PatchOperation],
+        dry_run: bool,
+        arguments_sha256: &str,
+        semantics: PatchPreparationSemantics,
+    ) -> Result<PreparedPatch, ReCtmError> {
+        let workspace_identity = stable_directory_identity(&self.root)?;
+        let mut changes = BTreeMap::new();
+        let mut virtual_existence = BTreeMap::new();
+        let mut affected_paths = BTreeSet::new();
+        let mut additions = 0_usize;
+        let mut removals = 0_usize;
+        let mut summary = Vec::new();
+        let mut affected_files = Vec::new();
+
+        for operation in operations {
+            if matches!(semantics, PatchPreparationSemantics::Authority) {
+                self.deny_patch_symlink_components(&operation.path)?;
+                if let Some(destination) = &operation.move_to {
+                    self.deny_patch_symlink_components(destination)?;
+                }
+            }
             match operation.kind.as_str() {
                 "add" => {
-                    self.resolve_for_write(&operation.path)?;
-                    paths.insert(operation.path.clone());
+                    let target = self.resolve_for_write(&operation.path)?;
+                    if target.existed {
+                        return Err(
+                            ReCtmError::new("PATCH_FAILED", "Add target already exists.")
+                                .with_category(ErrorCategory::Conflict),
+                        );
+                    }
+                    let content = operation.add_content.clone().unwrap_or_default();
+                    additions += content.lines().count();
+                    summary.push(format!("A {}", operation.path));
+                    affected_files.push(PreparedAffectedFile {
+                        operation: "add".to_owned(),
+                        path: target.display.clone(),
+                    });
+                    affected_paths.insert(operation.path.clone());
+                    set_prepared_virtual_existence(&mut virtual_existence, &target.path, true);
+                    insert_prepared_change(
+                        &mut changes,
+                        PreparedPathChange {
+                            relative_path: operation.path.clone(),
+                            resolution: PatchPathResolution::ForWrite,
+                            resolved: target,
+                            baseline: PatchBaseline::Missing,
+                            final_content: Some(content.into_bytes()),
+                        },
+                    )?;
                 }
                 "delete" => {
-                    let source = self.resolve_existing(&operation.path)?;
-                    if source.path.is_dir() {
-                        return Err(validation_code("PATCH_FAILED", "Cannot patch a directory."));
-                    }
-                    fs::read_to_string(&source.path).map_err(|_| {
-                        validation_code("UNSUPPORTED_ENCODING", "Patch target is not valid UTF-8.")
-                    })?;
-                    paths.insert(operation.path.clone());
+                    let (source, baseline, old) =
+                        self.capture_existing_patch_file(&operation.path, semantics)?;
+                    removals += old.lines().count();
+                    summary.push(format!("D {}", operation.path));
+                    affected_files.push(PreparedAffectedFile {
+                        operation: "delete".to_owned(),
+                        path: source.display.clone(),
+                    });
+                    affected_paths.insert(operation.path.clone());
+                    remove_prepared_virtual_path(&mut virtual_existence, &source.path, &baseline)?;
+                    insert_prepared_change(
+                        &mut changes,
+                        PreparedPathChange {
+                            relative_path: operation.path.clone(),
+                            resolution: patch_source_resolution(semantics),
+                            resolved: source,
+                            baseline,
+                            final_content: None,
+                        },
+                    )?;
                 }
                 "update" => {
-                    let source = self.resolve_existing(&operation.path)?;
-                    if source.path.is_dir() {
-                        return Err(validation_code("PATCH_FAILED", "Cannot patch a directory."));
-                    }
-                    let old = fs::read_to_string(&source.path).map_err(|_| {
-                        validation_code("UNSUPPORTED_ENCODING", "Patch target is not valid UTF-8.")
-                    })?;
-                    apply_update_hunks(&old, &operation.hunks, &operation.path)?;
-                    paths.insert(operation.path.clone());
+                    let (source, baseline, old) =
+                        self.capture_existing_patch_file(&operation.path, semantics)?;
+                    let updated = apply_update_hunks(&old, &operation.hunks, &operation.path)?;
+                    additions += updated.lines().count().saturating_sub(old.lines().count());
+                    removals += old.lines().count().saturating_sub(updated.lines().count());
+                    affected_paths.insert(operation.path.clone());
                     if let Some(destination) = &operation.move_to {
-                        self.resolve_for_write(destination)?;
-                        paths.insert(destination.clone());
+                        let (target, target_baseline) =
+                            self.capture_patch_destination(destination)?;
+                        summary.push(format!("R {} -> {destination}", operation.path));
+                        affected_files.push(PreparedAffectedFile {
+                            operation: "update".to_owned(),
+                            path: target.display.clone(),
+                        });
+                        affected_paths.insert(destination.clone());
+                        set_prepared_virtual_existence(&mut virtual_existence, &target.path, true);
+                        insert_prepared_change(
+                            &mut changes,
+                            PreparedPathChange {
+                                relative_path: destination.clone(),
+                                resolution: PatchPathResolution::ForWrite,
+                                resolved: target,
+                                baseline: target_baseline,
+                                final_content: Some(updated.into_bytes()),
+                            },
+                        )?;
+                        remove_prepared_virtual_path(
+                            &mut virtual_existence,
+                            &source.path,
+                            &baseline,
+                        )?;
+                        insert_prepared_change(
+                            &mut changes,
+                            PreparedPathChange {
+                                relative_path: operation.path.clone(),
+                                resolution: patch_source_resolution(semantics),
+                                resolved: source,
+                                baseline,
+                                final_content: None,
+                            },
+                        )?;
+                    } else {
+                        summary.push(format!("M {}", operation.path));
+                        affected_files.push(PreparedAffectedFile {
+                            operation: "update".to_owned(),
+                            path: source.display.clone(),
+                        });
+                        set_prepared_virtual_existence(&mut virtual_existence, &source.path, true);
+                        insert_prepared_change(
+                            &mut changes,
+                            PreparedPathChange {
+                                relative_path: operation.path.clone(),
+                                resolution: patch_source_resolution(semantics),
+                                resolved: source,
+                                baseline,
+                                final_content: Some(updated.into_bytes()),
+                            },
+                        )?;
                     }
                 }
                 _ => return Err(validation_code("PATCH_FAILED", "Unknown patch operation.")),
             }
         }
 
-        let repository = self.permission_git_repository()?;
-        paths
-            .into_iter()
-            .map(|path| {
-                let git_ignored = if repository {
-                    self.permission_git_ignored(&path)?
+        let authority = match semantics {
+            PatchPreparationSemantics::ProductionCompatibility => {
+                PatchAuthoritySnapshot::ProductionCompatibility
+            }
+            PatchPreparationSemantics::Authority => {
+                let (path_facts, git_metadata) =
+                    self.collect_patch_authority_facts(&affected_paths)?;
+                PatchAuthoritySnapshot::Classified {
+                    path_facts,
+                    git_metadata,
+                }
+            }
+        };
+        if stable_directory_identity(&self.root)? != workspace_identity {
+            return Err(patch_authority_facts_changed(
+                "The Native workspace root changed during patch preparation.",
+            ));
+        }
+        Ok(PreparedPatch {
+            workspace_root: self.root.clone(),
+            workspace_identity,
+            arguments_sha256: arguments_sha256.to_owned(),
+            dry_run,
+            changes: changes.into_values().collect(),
+            authority,
+            summary,
+            additions,
+            removals,
+            affected_files,
+        })
+    }
+
+    fn capture_existing_patch_file(
+        &self,
+        path: &str,
+        semantics: PatchPreparationSemantics,
+    ) -> Result<(ResolvedPath, PatchBaseline, String), ReCtmError> {
+        let resolved = match semantics {
+            PatchPreparationSemantics::ProductionCompatibility => self.resolve_existing(path)?,
+            PatchPreparationSemantics::Authority => {
+                let resolved = self.resolve_for_write(path)?;
+                if !resolved.existed {
+                    return Err(
+                        ReCtmError::new("NOT_FOUND", format!("Path not found: {path}"))
+                            .with_category(ErrorCategory::NotFound),
+                    );
+                }
+                resolved
+            }
+        };
+        if resolved.path.is_dir() {
+            return Err(validation_code("PATCH_FAILED", "Cannot patch a directory."));
+        }
+        let (content, fingerprint) = read_stable_regular_file(&resolved.path)?;
+        let text = String::from_utf8(content).map_err(|_| {
+            validation_code("UNSUPPORTED_ENCODING", "Patch target is not valid UTF-8.")
+        })?;
+        Ok((resolved, PatchBaseline::File { fingerprint }, text))
+    }
+
+    fn deny_patch_symlink_components(&self, path: &str) -> Result<(), ReCtmError> {
+        let relative = validate_relative_path(path)?;
+        let mut current = self.root.clone();
+        for component in relative.components() {
+            current.push(component.as_os_str());
+            match fs::symlink_metadata(&current) {
+                Ok(metadata) if metadata.file_type().is_symlink() => {
+                    return Err(ReCtmError::new(
+                        "SYMLINK_WRITE_DENIED",
+                        "Writing through symlinks is denied.",
+                    )
+                    .with_category(ErrorCategory::Security));
+                }
+                Ok(_) => {}
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => break,
+                Err(error) => return Err(io_error(error)),
+            }
+        }
+        Ok(())
+    }
+
+    fn capture_patch_destination(
+        &self,
+        path: &str,
+    ) -> Result<(ResolvedPath, PatchBaseline), ReCtmError> {
+        let resolved = self.resolve_for_write(path)?;
+        if !resolved.existed {
+            return Ok((resolved, PatchBaseline::Missing));
+        }
+        if resolved.path.is_dir() {
+            return Err(validation_code("PATCH_FAILED", "Cannot patch a directory."));
+        }
+        let (_content, fingerprint) = read_stable_regular_file(&resolved.path)?;
+        Ok((resolved, PatchBaseline::File { fingerprint }))
+    }
+
+    fn collect_patch_authority_facts(
+        &self,
+        paths: &BTreeSet<String>,
+    ) -> Result<(Vec<PatchPathFact>, GitMetadataSnapshot), ReCtmError> {
+        for _ in 0..PATCH_REVALIDATION_ATTEMPTS {
+            let repository = self.permission_git_repository()?;
+            let metadata_paths = self.git_metadata_paths(paths, repository)?;
+            let before = GitMetadataSnapshot::capture(&metadata_paths)?;
+            let path_facts = paths
+                .iter()
+                .map(|path| {
+                    let git_ignored = if repository {
+                        self.permission_git_ignored(path)?
+                    } else {
+                        false
+                    };
+                    PatchPathFact::new(path.clone(), git_ignored)
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+            let repository_after = self.permission_git_repository()?;
+            let metadata_paths_after = self.git_metadata_paths(paths, repository_after)?;
+            if repository_after != repository || metadata_paths_after != metadata_paths {
+                continue;
+            }
+            let after = GitMetadataSnapshot::capture(&metadata_paths_after)?;
+            if before == after {
+                return Ok((path_facts, after));
+            }
+        }
+        Err(patch_authority_facts_changed(
+            "Git ignore metadata changed during patch preparation.",
+        ))
+    }
+
+    fn git_metadata_paths(
+        &self,
+        paths: &BTreeSet<String>,
+        repository: bool,
+    ) -> Result<Vec<PathBuf>, ReCtmError> {
+        let mut metadata = git_default_config_paths(&self.root);
+        for ancestor in self.root.ancestors() {
+            metadata.insert(ancestor.join(".git"));
+        }
+        if !repository {
+            return expand_git_metadata_referents(metadata);
+        }
+
+        let repository_root = self.permission_git_required_path("--show-toplevel")?;
+        let git_directory = self.permission_git_required_path("--absolute-git-dir")?;
+        let git_common_directory = self.permission_git_required_path("--git-common-dir")?;
+        if !self.root.starts_with(&repository_root) {
+            return Err(git_ignore_lookup_failed(
+                "Git reported a worktree that does not contain the Native workspace.",
+            ));
+        }
+        metadata.extend([
+            repository_root.join(".git"),
+            git_directory.join("config"),
+            git_directory.join("config.worktree"),
+            git_directory.join("HEAD"),
+            git_directory.join("index"),
+            git_common_directory.join("config"),
+            git_common_directory.join("info/exclude"),
+        ]);
+        metadata.extend(self.permission_git_config_paths()?);
+        metadata.extend(self.permission_git_include_paths()?);
+        if let Some(global_excludes) = self.permission_git_optional_config_path()? {
+            metadata.insert(global_excludes);
+        }
+        for path in paths {
+            let relative = validate_relative_path(path)?;
+            let target = self.root.join(relative);
+            let mut directory = target.parent();
+            while let Some(current) = directory {
+                if !current.starts_with(&repository_root) {
+                    break;
+                }
+                metadata.insert(current.join(".gitignore"));
+                if current == repository_root {
+                    break;
+                }
+                directory = current.parent();
+            }
+        }
+        expand_git_metadata_referents(metadata)
+    }
+
+    fn permission_git_config_paths(&self) -> Result<Vec<PathBuf>, ReCtmError> {
+        const MAX_CONFIG_ORIGIN_BYTES: usize = 524_288;
+        let output = self
+            .run_sync(
+                vec![
+                    "git".to_owned(),
+                    "-C".to_owned(),
+                    self.root.display().to_string(),
+                    "config".to_owned(),
+                    "--null".to_owned(),
+                    "--show-origin".to_owned(),
+                    "--name-only".to_owned(),
+                    "--list".to_owned(),
+                ],
+                5_000,
+                MAX_CONFIG_ORIGIN_BYTES,
+            )
+            .map_err(|_| {
+                git_ignore_lookup_failed(
+                    "Git configuration origins could not be inspected during patch preparation.",
+                )
+            })?;
+        if output["exit_code"].as_i64() != Some(0) || output["truncated"].as_bool() != Some(false) {
+            return Err(git_ignore_lookup_failed(
+                "Git configuration origin lookup failed or exceeded its bounded output.",
+            ));
+        }
+        let stdout = output["stdout"].as_str().ok_or_else(|| {
+            git_ignore_lookup_failed(
+                "Git configuration origin lookup returned invalid text output.",
+            )
+        })?;
+        if stdout.contains('\u{fffd}') {
+            return Err(git_ignore_lookup_failed(
+                "Git configuration origin paths are not valid UTF-8.",
+            ));
+        }
+
+        let mut fields = stdout.split_terminator('\0');
+        let mut paths = BTreeSet::new();
+        while let Some(origin) = fields.next() {
+            let Some(_key) = fields.next() else {
+                return Err(git_ignore_lookup_failed(
+                    "Git configuration origin lookup returned a malformed record.",
+                ));
+            };
+            if let Some(raw_path) = origin.strip_prefix("file:") {
+                paths.insert(self.absolute_git_config_path(raw_path));
+            }
+        }
+
+        paths.extend(git_default_config_paths(&self.root));
+        Ok(paths.into_iter().collect())
+    }
+
+    fn permission_git_include_paths(&self) -> Result<Vec<PathBuf>, ReCtmError> {
+        const MAX_CONFIG_INCLUDE_BYTES: usize = 524_288;
+        let output = self
+            .run_sync(
+                vec![
+                    "git".to_owned(),
+                    "-C".to_owned(),
+                    self.root.display().to_string(),
+                    "config".to_owned(),
+                    "--null".to_owned(),
+                    "--show-origin".to_owned(),
+                    "--path".to_owned(),
+                    "--get-regexp".to_owned(),
+                    "^include(\\..*)?\\.path$".to_owned(),
+                ],
+                5_000,
+                MAX_CONFIG_INCLUDE_BYTES,
+            )
+            .map_err(|_| {
+                git_ignore_lookup_failed(
+                    "Git configuration includes could not be inspected during patch preparation.",
+                )
+            })?;
+        match output["exit_code"].as_i64() {
+            Some(1) => return Ok(Vec::new()),
+            Some(0) if output["truncated"].as_bool() == Some(false) => {}
+            _ => {
+                return Err(git_ignore_lookup_failed(
+                    "Git configuration include lookup failed or exceeded its bounded output.",
+                ));
+            }
+        }
+        let stdout = output["stdout"].as_str().ok_or_else(|| {
+            git_ignore_lookup_failed(
+                "Git configuration include lookup returned invalid text output.",
+            )
+        })?;
+        if stdout.contains('\u{fffd}') {
+            return Err(git_ignore_lookup_failed(
+                "Git configuration include paths are not valid UTF-8.",
+            ));
+        }
+
+        let mut fields = stdout.split_terminator('\0');
+        let mut paths = BTreeSet::new();
+        while let Some(origin) = fields.next() {
+            let Some(record) = fields.next() else {
+                return Err(git_ignore_lookup_failed(
+                    "Git configuration include lookup returned a malformed record.",
+                ));
+            };
+            let Some((_key, raw_path)) = record.split_once('\n') else {
+                return Err(git_ignore_lookup_failed(
+                    "Git configuration include lookup returned a malformed path.",
+                ));
+            };
+            if raw_path.is_empty() {
+                return Err(git_ignore_lookup_failed(
+                    "Git configuration include lookup returned an empty path.",
+                ));
+            }
+            let include_path = PathBuf::from(raw_path);
+            if include_path.is_absolute() {
+                paths.insert(include_path);
+                continue;
+            }
+            let origin_path = origin
+                .strip_prefix("file:")
+                .map(|path| self.absolute_git_config_path(path));
+            let base = origin_path
+                .as_deref()
+                .and_then(Path::parent)
+                .unwrap_or(&self.root);
+            paths.insert(base.join(include_path));
+        }
+        Ok(paths.into_iter().collect())
+    }
+
+    fn absolute_git_config_path(&self, raw_path: &str) -> PathBuf {
+        let path = PathBuf::from(raw_path);
+        if path.is_absolute() {
+            path
+        } else {
+            self.root.join(path)
+        }
+    }
+
+    fn permission_git_required_path(&self, argument: &str) -> Result<PathBuf, ReCtmError> {
+        let output = self
+            .run_sync(
+                vec![
+                    "git".to_owned(),
+                    "-C".to_owned(),
+                    self.root.display().to_string(),
+                    "rev-parse".to_owned(),
+                    argument.to_owned(),
+                ],
+                5_000,
+                16_384,
+            )
+            .map_err(|_| {
+                git_ignore_lookup_failed(
+                    "Git metadata location could not be inspected during patch preparation.",
+                )
+            })?;
+        if output["exit_code"].as_i64() != Some(0) {
+            return Err(git_ignore_lookup_failed(
+                "Git metadata location lookup failed during patch preparation.",
+            ));
+        }
+        let raw = output["stdout"]
+            .as_str()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .ok_or_else(|| {
+                git_ignore_lookup_failed(
+                    "Git metadata location lookup returned an empty path during patch preparation.",
+                )
+            })?;
+        let path = PathBuf::from(raw);
+        let absolute = if path.is_absolute() {
+            path
+        } else {
+            self.root.join(path)
+        };
+        absolute.canonicalize().map_err(|_| {
+            git_ignore_lookup_failed(
+                "Git metadata location could not be canonicalized during patch preparation.",
+            )
+        })
+    }
+
+    fn permission_git_optional_config_path(&self) -> Result<Option<PathBuf>, ReCtmError> {
+        let output = self
+            .run_sync(
+                vec![
+                    "git".to_owned(),
+                    "-C".to_owned(),
+                    self.root.display().to_string(),
+                    "config".to_owned(),
+                    "--path".to_owned(),
+                    "--get".to_owned(),
+                    "core.excludesFile".to_owned(),
+                ],
+                5_000,
+                16_384,
+            )
+            .map_err(|_| {
+                git_ignore_lookup_failed(
+                    "Git excludes configuration could not be inspected during patch preparation.",
+                )
+            })?;
+        match output["exit_code"].as_i64() {
+            Some(1) => Ok(None),
+            Some(0) => {
+                let raw = output["stdout"]
+                    .as_str()
+                    .map(str::trim)
+                    .filter(|value| !value.is_empty())
+                    .ok_or_else(|| {
+                        git_ignore_lookup_failed(
+                            "Git excludes configuration returned an empty path during patch preparation.",
+                        )
+                    })?;
+                let path = PathBuf::from(raw);
+                Ok(Some(if path.is_absolute() {
+                    path
                 } else {
-                    false
-                };
-                PatchPathFact::new(path, git_ignored)
-            })
-            .collect()
+                    self.root.join(path)
+                }))
+            }
+            _ => Err(git_ignore_lookup_failed(
+                "Git excludes configuration lookup failed during patch preparation.",
+            )),
+        }
     }
 
     fn permission_git_repository(&self) -> Result<bool, ReCtmError> {
@@ -652,88 +1347,137 @@ impl NativeWorkspace {
         }
     }
 
+    pub(crate) fn commit_prepared_patch_with_authorization<Authorize>(
+        &self,
+        prepared: PreparedPatch,
+        authorize: Authorize,
+    ) -> Result<Value, ReCtmError>
+    where
+        Authorize: FnOnce() -> Result<(), ReCtmError>,
+    {
+        self.commit_prepared_patch_with_hook(prepared, authorize, |_| Ok(()))
+    }
+
+    fn commit_prepared_patch_with_hook<Authorize, Hook>(
+        &self,
+        prepared: PreparedPatch,
+        authorize: Authorize,
+        mut before_change: Hook,
+    ) -> Result<Value, ReCtmError>
+    where
+        Authorize: FnOnce() -> Result<(), ReCtmError>,
+        Hook: FnMut(usize) -> Result<(), ReCtmError>,
+    {
+        if prepared.dry_run() {
+            return Ok(prepared.result(Vec::new()));
+        }
+        if prepared.workspace_root != self.root || prepared.arguments_sha256().len() != 64 {
+            return Err(patch_authority_facts_changed(
+                "Prepared patch binding does not match this Native workspace.",
+            ));
+        }
+        let _commit_guard = self.patch_commit_lock.lock().map_err(|_| {
+            ReCtmError::new(
+                "INTERNAL_LOCK_POISONED",
+                "Native patch commit lock was poisoned.",
+            )
+            .with_category(ErrorCategory::Internal)
+        })?;
+        self.revalidate_prepared_patch(&prepared)?;
+        authorize()?;
+        let cleanup_failures = apply_prepared_patch_transaction(&prepared, &mut before_change)?;
+        let warnings = if cleanup_failures == 0 {
+            Vec::new()
+        } else {
+            vec!["Patch committed, but temporary-file cleanup was incomplete.".to_owned()]
+        };
+        Ok(prepared.result(warnings))
+    }
+
+    fn revalidate_prepared_patch(&self, prepared: &PreparedPatch) -> Result<(), ReCtmError> {
+        revalidate_workspace_identity(prepared)?;
+        if let Some(git_metadata) = prepared.git_metadata() {
+            git_metadata.revalidate()?;
+        }
+        for change in &prepared.changes {
+            let current = match change.resolution {
+                PatchPathResolution::ExistingCompatibility => {
+                    self.resolve_existing(&change.relative_path)
+                }
+                PatchPathResolution::ForWrite => self.resolve_for_write(&change.relative_path),
+            }
+            .map_err(|_| {
+                patch_authority_facts_changed(
+                    "A patch path changed after preparation and before commit.",
+                )
+            })?;
+            if current.path != change.resolved.path
+                || current.display != change.resolved.display
+                || current.existed != change.resolved.existed
+            {
+                return Err(patch_authority_facts_changed(
+                    "A patch path changed after preparation and before commit.",
+                ));
+            }
+            match &change.baseline {
+                PatchBaseline::Missing if current.existed => {
+                    return Err(patch_authority_facts_changed(
+                        "A patch target was created after preparation.",
+                    ));
+                }
+                PatchBaseline::Missing => {}
+                PatchBaseline::File { fingerprint } => {
+                    if !current.existed
+                        || read_stable_regular_file(&current.path)
+                            .map(|(_, current)| current != *fingerprint)
+                            .unwrap_or(true)
+                    {
+                        return Err(patch_authority_facts_changed(
+                            "A patch source baseline changed after preparation.",
+                        ));
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
     pub fn apply_patch(&self, patch: &str, dry_run: bool) -> Result<Value, ReCtmError> {
+        // Preserve the accepted production parser/path behavior until D5. The
+        // authority-ready path above intentionally performs stricter typed
+        // validation and Git fact collection, but D4 is not an authority
+        // cutover.
         let operations = parse_patch(patch)?;
-        let mut prepared = Vec::new();
-        let mut additions = 0_usize;
-        let mut removals = 0_usize;
-        let mut summaries = Vec::new();
-        for operation in operations {
-            match operation.kind.as_str() {
-                "add" => {
-                    let target = self.resolve_for_write(&operation.path)?;
-                    if target.existed {
-                        return Err(
-                            ReCtmError::new("PATCH_FAILED", "Add target already exists.")
-                                .with_category(ErrorCategory::Conflict),
-                        );
-                    }
-                    let content = operation.add_content.unwrap_or_default();
-                    additions += content.lines().count();
-                    summaries.push(format!("A {}", operation.path));
-                    prepared.push(("add".to_owned(), target, content, None::<ResolvedPath>));
+        let arguments = Map::from_iter([
+            ("patch".to_owned(), Value::String(patch.to_owned())),
+            ("dry_run".to_owned(), Value::Bool(dry_run)),
+        ]);
+        let arguments_sha256 = canonical_arguments_sha256(&arguments)?;
+        let attempts = if dry_run {
+            1
+        } else {
+            PATCH_REVALIDATION_ATTEMPTS
+        };
+        for attempt in 0..attempts {
+            let prepared = self.prepare_patch_operations(
+                &operations,
+                dry_run,
+                &arguments_sha256,
+                PatchPreparationSemantics::ProductionCompatibility,
+            )?;
+            match self.commit_prepared_patch_with_authorization(prepared, || Ok(())) {
+                Err(error)
+                    if error.code == "NATIVE_PATCH_AUTHORITY_FACTS_CHANGED"
+                        && attempt + 1 < attempts =>
+                {
+                    continue;
                 }
-                "delete" => {
-                    let source = self.resolve_existing(&operation.path)?;
-                    if source.path.is_dir() {
-                        return Err(validation_code("PATCH_FAILED", "Cannot patch a directory."));
-                    }
-                    let old = fs::read_to_string(&source.path).map_err(|_| {
-                        validation_code("UNSUPPORTED_ENCODING", "Patch target is not valid UTF-8.")
-                    })?;
-                    removals += old.lines().count();
-                    summaries.push(format!("D {}", operation.path));
-                    prepared.push(("delete".to_owned(), source, String::new(), None));
-                }
-                "update" => {
-                    let source = self.resolve_existing(&operation.path)?;
-                    if source.path.is_dir() {
-                        return Err(validation_code("PATCH_FAILED", "Cannot patch a directory."));
-                    }
-                    let old = fs::read_to_string(&source.path).map_err(|_| {
-                        validation_code("UNSUPPORTED_ENCODING", "Patch target is not valid UTF-8.")
-                    })?;
-                    let updated = apply_update_hunks(&old, &operation.hunks, &operation.path)?;
-                    additions += updated.lines().count().saturating_sub(old.lines().count());
-                    removals += old.lines().count().saturating_sub(updated.lines().count());
-                    let move_target = operation
-                        .move_to
-                        .as_deref()
-                        .map(|target| self.resolve_for_write(target))
-                        .transpose()?;
-                    summaries.push(if let Some(target) = &operation.move_to {
-                        format!("R {} -> {target}", operation.path)
-                    } else {
-                        format!("M {}", operation.path)
-                    });
-                    prepared.push(("update".to_owned(), source, updated, move_target));
-                }
-                _ => return Err(validation_code("PATCH_FAILED", "Unknown patch operation.")),
+                result => return result,
             }
         }
-        if !dry_run {
-            for (kind, source, content, move_target) in &prepared {
-                match kind.as_str() {
-                    "add" => atomic_write(&source.path, content.as_bytes())?,
-                    "delete" => fs::remove_file(&source.path).map_err(io_error)?,
-                    "update" => {
-                        if let Some(target) = move_target {
-                            atomic_write(&target.path, content.as_bytes())?;
-                            fs::remove_file(&source.path).map_err(io_error)?;
-                        } else {
-                            atomic_write(&source.path, content.as_bytes())?;
-                        }
-                    }
-                    _ => {}
-                }
-            }
-        }
-        Ok(serde_json::json!({
-            "clean":true,"dry_run":dry_run,"summary":summaries.join("\n"),"additions":additions,"removals":removals,
-            "affected_files":prepared.iter().map(|(kind,source,_,target)|serde_json::json!({
-                "operation":kind,"path":target.as_ref().map_or(source.display.as_str(),|value|value.display.as_str())
-            })).collect::<Vec<_>>(),"warnings":[]
-        }))
+        Err(patch_authority_facts_changed(
+            "Patch facts did not stabilize within the bounded retry limit.",
+        ))
     }
 
     pub fn git_status(&self, arguments: &Map<String, Value>) -> Result<Value, ReCtmError> {
@@ -1115,6 +1859,677 @@ impl NativeWorkspace {
     }
 }
 
+impl GitMetadataSnapshot {
+    fn capture(paths: &[PathBuf]) -> Result<Self, ReCtmError> {
+        let entries = paths
+            .iter()
+            .map(|path| {
+                fingerprint_metadata_node(path)
+                    .map(|fingerprint| (path.clone(), fingerprint))
+                    .map_err(|_| {
+                        git_ignore_lookup_failed(
+                            "Git ignore metadata could not be fingerprinted during patch preparation.",
+                        )
+                    })
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(Self { entries })
+    }
+
+    fn revalidate(&self) -> Result<(), ReCtmError> {
+        for (path, expected) in &self.entries {
+            let current = fingerprint_metadata_node(path).map_err(|_| {
+                patch_authority_facts_changed(
+                    "Git ignore metadata could not be revalidated before patch commit.",
+                )
+            })?;
+            if current != *expected {
+                return Err(patch_authority_facts_changed(
+                    "Git ignore metadata changed after patch preparation.",
+                ));
+            }
+        }
+        Ok(())
+    }
+}
+
+const fn patch_source_resolution(semantics: PatchPreparationSemantics) -> PatchPathResolution {
+    match semantics {
+        PatchPreparationSemantics::ProductionCompatibility => {
+            PatchPathResolution::ExistingCompatibility
+        }
+        PatchPreparationSemantics::Authority => PatchPathResolution::ForWrite,
+    }
+}
+
+fn insert_prepared_change(
+    changes: &mut BTreeMap<PathBuf, PreparedPathChange>,
+    change: PreparedPathChange,
+) -> Result<(), ReCtmError> {
+    match changes.entry(change.resolved.path.clone()) {
+        std::collections::btree_map::Entry::Vacant(entry) => {
+            entry.insert(change);
+            Ok(())
+        }
+        std::collections::btree_map::Entry::Occupied(mut entry) => {
+            let existing = entry.get_mut();
+            if existing.baseline != change.baseline
+                || existing.resolved.path != change.resolved.path
+                || existing.resolved.existed != change.resolved.existed
+            {
+                return Err(patch_authority_facts_changed(
+                    "Repeated patch paths did not share one stable baseline.",
+                ));
+            }
+            if change.resolution == PatchPathResolution::ForWrite {
+                existing.relative_path = change.relative_path;
+                existing.resolution = PatchPathResolution::ForWrite;
+            }
+            existing.final_content = change.final_content;
+            Ok(())
+        }
+    }
+}
+
+fn set_prepared_virtual_existence(
+    virtual_existence: &mut BTreeMap<PathBuf, bool>,
+    path: &Path,
+    exists: bool,
+) {
+    virtual_existence.insert(path.to_path_buf(), exists);
+}
+
+fn remove_prepared_virtual_path(
+    virtual_existence: &mut BTreeMap<PathBuf, bool>,
+    path: &Path,
+    baseline: &PatchBaseline,
+) -> Result<(), ReCtmError> {
+    let baseline_exists = matches!(baseline, PatchBaseline::File { .. });
+    let exists = virtual_existence
+        .entry(path.to_path_buf())
+        .or_insert(baseline_exists);
+    if !*exists {
+        return Err(io_error(std::io::Error::from(std::io::ErrorKind::NotFound)));
+    }
+    *exists = false;
+    Ok(())
+}
+
+fn file_identity(metadata: &fs::Metadata) -> FileIdentity {
+    FileIdentity {
+        device: metadata.dev(),
+        inode: metadata.ino(),
+        mode: metadata.mode(),
+        size: metadata.size(),
+        modified_seconds: metadata.mtime(),
+        modified_nanoseconds: metadata.mtime_nsec(),
+    }
+}
+
+fn stable_directory_identity(path: &Path) -> Result<FileIdentity, ReCtmError> {
+    let metadata = fs::symlink_metadata(path).map_err(|_| {
+        patch_authority_facts_changed("The Native workspace root could not be inspected.")
+    })?;
+    if metadata.file_type().is_symlink() || !metadata.is_dir() {
+        return Err(patch_authority_facts_changed(
+            "The Native workspace root changed during patch preparation.",
+        ));
+    }
+    Ok(FileIdentity {
+        size: 0,
+        modified_seconds: 0,
+        modified_nanoseconds: 0,
+        ..file_identity(&metadata)
+    })
+}
+
+fn revalidate_workspace_identity(prepared: &PreparedPatch) -> Result<(), ReCtmError> {
+    if stable_directory_identity(&prepared.workspace_root)? == prepared.workspace_identity {
+        Ok(())
+    } else {
+        Err(patch_authority_facts_changed(
+            "The Native workspace root changed after patch preparation.",
+        ))
+    }
+}
+
+fn read_stable_regular_file(path: &Path) -> Result<(Vec<u8>, FileFingerprint), ReCtmError> {
+    for _ in 0..PATCH_REVALIDATION_ATTEMPTS {
+        let before = fs::symlink_metadata(path).map_err(io_error)?;
+        if before.file_type().is_symlink() {
+            return Err(ReCtmError::new(
+                "SYMLINK_WRITE_DENIED",
+                "Writing through symlinks is denied.",
+            )
+            .with_category(ErrorCategory::Security));
+        }
+        if !before.is_file() {
+            return Err(validation_code("PATCH_FAILED", "Cannot patch a directory."));
+        }
+        let before_identity = file_identity(&before);
+        let mut file = fs::File::open(path).map_err(io_error)?;
+        let opened_identity = file
+            .metadata()
+            .map(|metadata| file_identity(&metadata))
+            .map_err(io_error)?;
+        if opened_identity != before_identity {
+            continue;
+        }
+        let mut content = Vec::new();
+        file.read_to_end(&mut content).map_err(io_error)?;
+        let read_identity = file
+            .metadata()
+            .map(|metadata| file_identity(&metadata))
+            .map_err(io_error)?;
+        let after = fs::symlink_metadata(path).map_err(io_error)?;
+        let after_identity = file_identity(&after);
+        if before_identity == read_identity && before_identity == after_identity {
+            let sha256 = sha256_bytes(&content);
+            return Ok((
+                content,
+                FileFingerprint {
+                    identity: after_identity,
+                    sha256,
+                },
+            ));
+        }
+    }
+    Err(patch_authority_facts_changed(
+        "A patch source changed while its baseline was being read.",
+    ))
+}
+
+fn expand_git_metadata_referents(mut paths: BTreeSet<PathBuf>) -> Result<Vec<PathBuf>, ReCtmError> {
+    let symlink_paths = paths.iter().cloned().collect::<Vec<_>>();
+    for path in symlink_paths {
+        let metadata = match fs::symlink_metadata(&path) {
+            Ok(metadata) => metadata,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
+            Err(_) => {
+                return Err(git_ignore_lookup_failed(
+                    "Git metadata symlinks could not be inspected during patch preparation.",
+                ));
+            }
+        };
+        if metadata.file_type().is_symlink() {
+            let referent = path.canonicalize().map_err(|_| {
+                git_ignore_lookup_failed(
+                    "A Git metadata symlink referent could not be resolved during patch preparation.",
+                )
+            })?;
+            paths.insert(referent);
+        }
+    }
+    Ok(paths.into_iter().collect())
+}
+
+fn fingerprint_metadata_node(path: &Path) -> Result<MetadataNodeFingerprint, ReCtmError> {
+    let metadata = match fs::symlink_metadata(path) {
+        Ok(metadata) => metadata,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            return Ok(MetadataNodeFingerprint::Missing);
+        }
+        Err(error) => return Err(io_error(error)),
+    };
+    let identity = file_identity(&metadata);
+    if metadata.file_type().is_symlink() {
+        return fs::read_link(path)
+            .map(|target| MetadataNodeFingerprint::Symlink { identity, target })
+            .map_err(io_error);
+    }
+    if metadata.is_dir() {
+        return Ok(MetadataNodeFingerprint::Directory(FileIdentity {
+            size: 0,
+            modified_seconds: 0,
+            modified_nanoseconds: 0,
+            ..identity
+        }));
+    }
+    if !metadata.is_file() {
+        return Ok(MetadataNodeFingerprint::Other(identity));
+    }
+    if metadata.len() > MAX_GIT_METADATA_BYTES {
+        return Err(ReCtmError::new(
+            "NATIVE_GIT_IGNORE_LOOKUP_FAILED",
+            "Git ignore metadata exceeds the bounded fingerprint size.",
+        )
+        .with_category(ErrorCategory::Security));
+    }
+    let mut file = fs::File::open(path).map_err(io_error)?;
+    let opened_identity = file
+        .metadata()
+        .map(|value| file_identity(&value))
+        .map_err(io_error)?;
+    if opened_identity != identity {
+        return Err(patch_authority_facts_changed(
+            "Git ignore metadata changed while it was being fingerprinted.",
+        ));
+    }
+    let mut content = Vec::new();
+    Read::by_ref(&mut file)
+        .take(MAX_GIT_METADATA_BYTES + 1)
+        .read_to_end(&mut content)
+        .map_err(io_error)?;
+    if u64::try_from(content.len()).unwrap_or(u64::MAX) > MAX_GIT_METADATA_BYTES {
+        return Err(ReCtmError::new(
+            "NATIVE_GIT_IGNORE_LOOKUP_FAILED",
+            "Git ignore metadata exceeds the bounded fingerprint size.",
+        )
+        .with_category(ErrorCategory::Security));
+    }
+    let after = fs::symlink_metadata(path).map_err(io_error)?;
+    if file_identity(&after) != identity {
+        return Err(patch_authority_facts_changed(
+            "Git ignore metadata changed while it was being fingerprinted.",
+        ));
+    }
+    Ok(MetadataNodeFingerprint::Regular(FileFingerprint {
+        identity,
+        sha256: sha256_bytes(&content),
+    }))
+}
+
+struct StagedPatchChange {
+    target: PathBuf,
+    baseline_existed: bool,
+    expected_fingerprint: Option<FileFingerprint>,
+    stage: Option<PathBuf>,
+    backup: Option<PathBuf>,
+}
+
+struct PatchTransactionCleanup {
+    temporary_paths: Vec<PathBuf>,
+    created_directories: Vec<PathBuf>,
+    remove_created_directories: bool,
+}
+
+impl PatchTransactionCleanup {
+    fn new() -> Self {
+        Self {
+            temporary_paths: Vec::new(),
+            created_directories: Vec::new(),
+            remove_created_directories: true,
+        }
+    }
+
+    fn track_temporary(&mut self, path: PathBuf) {
+        self.temporary_paths.push(path);
+    }
+
+    fn track_directory(&mut self, path: PathBuf) {
+        self.created_directories.push(path);
+    }
+
+    fn preserve_temporary(&mut self, path: &Path) {
+        self.temporary_paths.retain(|temporary| temporary != path);
+    }
+
+    fn finish_success(mut self) -> usize {
+        self.remove_created_directories = false;
+        let mut failures = 0;
+        self.temporary_paths
+            .retain(|path| match fs::remove_file(path) {
+                Ok(()) => false,
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => false,
+                Err(_) => {
+                    failures += 1;
+                    true
+                }
+            });
+        failures
+    }
+}
+
+impl Drop for PatchTransactionCleanup {
+    fn drop(&mut self) {
+        for path in self.temporary_paths.iter().rev() {
+            let _ = fs::remove_file(path);
+        }
+        if self.remove_created_directories {
+            for path in self.created_directories.iter().rev() {
+                let _ = fs::remove_dir(path);
+            }
+        }
+    }
+}
+
+fn apply_prepared_patch_transaction<Hook>(
+    prepared: &PreparedPatch,
+    before_change: &mut Hook,
+) -> Result<usize, ReCtmError>
+where
+    Hook: FnMut(usize) -> Result<(), ReCtmError>,
+{
+    revalidate_workspace_identity(prepared)?;
+    let mut cleanup = PatchTransactionCleanup::new();
+    let mut staged = Vec::with_capacity(prepared.changes.len());
+    for (index, change) in prepared.changes.iter().enumerate() {
+        revalidate_patch_target(&change.resolved.path, &change.baseline)?;
+        ensure_patch_parent_directories(
+            &prepared.workspace_root,
+            &change.resolved.path,
+            &mut cleanup,
+        )?;
+        let parent = change
+            .resolved
+            .path
+            .parent()
+            .ok_or_else(|| validation("Invalid patch target."))?;
+        let stage = change
+            .final_content
+            .as_deref()
+            .map(|content| create_patch_stage_file(parent, index, content))
+            .transpose()?;
+        if let Some(path) = &stage {
+            cleanup.track_temporary(path.clone());
+        }
+        let (baseline_existed, expected_fingerprint, backup) = match &change.baseline {
+            PatchBaseline::Missing => {
+                if change.final_content.is_none() {
+                    return Err(internal("prepared patch has an empty missing-path change"));
+                }
+                (false, None, None)
+            }
+            PatchBaseline::File { fingerprint } => {
+                let backup = create_patch_backup(&change.resolved.path, parent, index)?;
+                cleanup.track_temporary(backup.clone());
+                let (_, backup_fingerprint) = read_stable_regular_file(&backup)?;
+                if backup_fingerprint != *fingerprint {
+                    return Err(patch_authority_facts_changed(
+                        "A patch source changed while its rollback link was being created.",
+                    ));
+                }
+                (true, Some(fingerprint.clone()), Some(backup))
+            }
+        };
+        staged.push(StagedPatchChange {
+            target: change.resolved.path.clone(),
+            baseline_existed,
+            expected_fingerprint,
+            stage,
+            backup,
+        });
+    }
+
+    if let Some(git_metadata) = prepared.git_metadata() {
+        git_metadata.revalidate()?;
+    }
+    for change in &staged {
+        revalidate_staged_patch_target(change)?;
+        if let (Some(backup), Some(expected)) = (&change.backup, &change.expected_fingerprint)
+            && read_stable_regular_file(backup)
+                .map(|(_, current)| current != *expected)
+                .unwrap_or(true)
+        {
+            return Err(patch_authority_facts_changed(
+                "A patch source changed after authorization and before commit.",
+            ));
+        }
+    }
+
+    let mut committed = Vec::new();
+    for (index, change) in staged.iter().enumerate() {
+        if let Err(error) = before_change(index) {
+            rollback_patch_changes(&staged, &committed, &mut cleanup)?;
+            return Err(error);
+        }
+        if let Err(error) = revalidate_staged_patch_target(change) {
+            rollback_patch_changes(&staged, &committed, &mut cleanup)?;
+            return Err(error);
+        }
+        let result = if let Some(stage) = &change.stage {
+            if change.baseline_existed {
+                fs::rename(stage, &change.target)
+            } else {
+                // Unlike rename, hard_link has create-new semantics for the
+                // destination. A target created in the final race window is
+                // therefore preserved and the patch fails closed.
+                fs::hard_link(stage, &change.target)
+            }
+        } else {
+            fs::remove_file(&change.target)
+        };
+        if let Err(error) = result {
+            rollback_patch_changes(&staged, &committed, &mut cleanup)?;
+            return Err(io_error(error));
+        }
+        committed.push(index);
+    }
+    Ok(cleanup.finish_success())
+}
+
+fn revalidate_patch_target(target: &Path, baseline: &PatchBaseline) -> Result<(), ReCtmError> {
+    match baseline {
+        PatchBaseline::Missing => match fs::symlink_metadata(target) {
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+            Ok(_) => Err(patch_authority_facts_changed(
+                "A patch target was created after preparation.",
+            )),
+            Err(_) => Err(patch_authority_facts_changed(
+                "A patch target could not be revalidated before commit.",
+            )),
+        },
+        PatchBaseline::File { fingerprint } => {
+            if read_stable_regular_file(target)
+                .map(|(_, current)| current == *fingerprint)
+                .unwrap_or(false)
+            {
+                Ok(())
+            } else {
+                Err(patch_authority_facts_changed(
+                    "A patch source baseline changed after preparation.",
+                ))
+            }
+        }
+    }
+}
+
+fn revalidate_staged_patch_target(change: &StagedPatchChange) -> Result<(), ReCtmError> {
+    match &change.expected_fingerprint {
+        Some(expected) => {
+            if read_stable_regular_file(&change.target)
+                .map(|(_, current)| current == *expected)
+                .unwrap_or(false)
+            {
+                Ok(())
+            } else {
+                Err(patch_authority_facts_changed(
+                    "A patch source changed after authorization and before commit.",
+                ))
+            }
+        }
+        None => match fs::symlink_metadata(&change.target) {
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+            Ok(_) => Err(patch_authority_facts_changed(
+                "A patch target was created after authorization and before commit.",
+            )),
+            Err(_) => Err(patch_authority_facts_changed(
+                "A patch target could not be revalidated before commit.",
+            )),
+        },
+    }
+}
+
+fn rollback_patch_changes(
+    staged: &[StagedPatchChange],
+    committed: &[usize],
+    cleanup: &mut PatchTransactionCleanup,
+) -> Result<(), ReCtmError> {
+    let mut failures = 0_usize;
+    for index in committed.iter().rev() {
+        let change = &staged[*index];
+        let result = if change.baseline_existed {
+            change.backup.as_ref().map_or_else(
+                || Err(std::io::Error::other("patch rollback backup is missing")),
+                |backup| fs::rename(backup, &change.target),
+            )
+        } else {
+            match fs::remove_file(&change.target) {
+                Ok(()) => Ok(()),
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+                Err(error) => Err(error),
+            }
+        };
+        if result.is_err() {
+            failures += 1;
+            if let Some(backup) = &change.backup {
+                cleanup.preserve_temporary(backup);
+            }
+        }
+    }
+    if failures == 0 {
+        Ok(())
+    } else {
+        Err(ReCtmError::new(
+            "NATIVE_PATCH_ROLLBACK_FAILED",
+            "Patch rollback could not restore every target; recovery backups were retained.",
+        )
+        .with_category(ErrorCategory::Internal)
+        .with_details(serde_json::json!({"failed_restore_count":failures})))
+    }
+}
+
+fn ensure_patch_parent_directories(
+    workspace_root: &Path,
+    target: &Path,
+    cleanup: &mut PatchTransactionCleanup,
+) -> Result<(), ReCtmError> {
+    let parent = target
+        .parent()
+        .ok_or_else(|| validation("Invalid patch target."))?;
+    let relative = parent.strip_prefix(workspace_root).map_err(|_| {
+        patch_authority_facts_changed("A patch target escaped its prepared workspace.")
+    })?;
+    let mut current = workspace_root.to_path_buf();
+    for component in relative.components() {
+        if !matches!(component, Component::Normal(_)) {
+            return Err(patch_authority_facts_changed(
+                "A patch parent directory changed before commit.",
+            ));
+        }
+        current.push(component.as_os_str());
+        match fs::create_dir(&current) {
+            Ok(()) => cleanup.track_directory(current.clone()),
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {}
+            Err(error) => return Err(io_error(error)),
+        }
+        let metadata = fs::symlink_metadata(&current).map_err(|_| {
+            patch_authority_facts_changed("A patch parent directory changed before commit.")
+        })?;
+        let resolved = current.canonicalize().map_err(|_| {
+            patch_authority_facts_changed("A patch parent directory changed before commit.")
+        })?;
+        if metadata.file_type().is_symlink() || !metadata.is_dir() || resolved != current {
+            return Err(patch_authority_facts_changed(
+                "A patch parent directory changed before commit.",
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn create_patch_stage_file(
+    parent: &Path,
+    index: usize,
+    content: &[u8],
+) -> Result<PathBuf, ReCtmError> {
+    for _ in 0..PATCH_TEMP_NAME_ATTEMPTS {
+        let path = patch_temporary_path(parent, "stage", index)?;
+        match OpenOptions::new().write(true).create_new(true).open(&path) {
+            Ok(mut file) => {
+                let result = file.write_all(content).and_then(|()| file.sync_all());
+                if let Err(error) = result {
+                    let _ = fs::remove_file(&path);
+                    return Err(io_error(error));
+                }
+                return Ok(path);
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
+            Err(error) => return Err(io_error(error)),
+        }
+    }
+    Err(ReCtmError::new(
+        "PATCH_TEMPORARY_FILE_FAILED",
+        "Unable to reserve a unique patch staging file.",
+    )
+    .with_category(ErrorCategory::Runtime))
+}
+
+fn create_patch_backup(source: &Path, parent: &Path, index: usize) -> Result<PathBuf, ReCtmError> {
+    for _ in 0..PATCH_TEMP_NAME_ATTEMPTS {
+        let path = patch_temporary_path(parent, "backup", index)?;
+        match fs::hard_link(source, &path) {
+            Ok(()) => return Ok(path),
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
+            Err(error) => return Err(io_error(error)),
+        }
+    }
+    Err(ReCtmError::new(
+        "PATCH_TEMPORARY_FILE_FAILED",
+        "Unable to reserve a unique patch rollback file.",
+    )
+    .with_category(ErrorCategory::Runtime))
+}
+
+fn patch_temporary_path(parent: &Path, kind: &str, index: usize) -> Result<PathBuf, ReCtmError> {
+    let mut random = [0_u8; 12];
+    getrandom::fill(&mut random).map_err(|_| {
+        ReCtmError::new(
+            "PATCH_TEMPORARY_FILE_FAILED",
+            "Secure randomness is unavailable for patch staging.",
+        )
+        .with_category(ErrorCategory::Internal)
+    })?;
+    let suffix = random
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>();
+    Ok(parent.join(format!(
+        ".mtm-patch-{}-{kind}-{index}-{suffix}",
+        std::process::id()
+    )))
+}
+
+fn git_default_config_paths(base: &Path) -> BTreeSet<PathBuf> {
+    let mut paths = BTreeSet::new();
+    if let Some(path) = std::env::var_os("GIT_CONFIG_SYSTEM") {
+        paths.insert(absolute_from(base, PathBuf::from(path)));
+    } else {
+        paths.insert(PathBuf::from("/etc/gitconfig"));
+    }
+    if let Some(path) = std::env::var_os("GIT_CONFIG_GLOBAL") {
+        paths.insert(absolute_from(base, PathBuf::from(path)));
+        return paths;
+    }
+    if let Some(home) = std::env::var_os("HOME").map(PathBuf::from) {
+        paths.insert(home.join(".gitconfig"));
+        paths.insert(home.join(".config/git/config"));
+    }
+    if let Some(xdg_config) = std::env::var_os("XDG_CONFIG_HOME").map(PathBuf::from) {
+        paths.insert(xdg_config.join("git/config"));
+    }
+    paths
+}
+
+fn absolute_from(base: &Path, path: PathBuf) -> PathBuf {
+    if path.is_absolute() {
+        path
+    } else {
+        base.join(path)
+    }
+}
+
+fn git_ignore_lookup_failed(message: &str) -> ReCtmError {
+    ReCtmError::new("NATIVE_GIT_IGNORE_LOOKUP_FAILED", message)
+        .with_category(ErrorCategory::Security)
+}
+
+fn patch_authority_facts_changed(message: &str) -> ReCtmError {
+    ReCtmError::new("NATIVE_PATCH_AUTHORITY_FACTS_CHANGED", message)
+        .with_category(ErrorCategory::Security)
+        .with_retryable(true)
+}
+
 fn validate_relative_path(raw: &str) -> Result<PathBuf, ReCtmError> {
     if raw.is_empty() || raw.contains('\0') {
         return Err(validation("Path must be a non-empty string."));
@@ -1459,7 +2874,11 @@ fn io_error(error: std::io::Error) -> ReCtmError {
 
 #[cfg(test)]
 mod tests {
+    use std::cell::Cell;
     use std::process::Command;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    use std::sync::{Arc, Barrier};
+    use std::thread;
 
     use super::*;
     #[test]
@@ -1496,6 +2915,736 @@ mod tests {
             .cloned()
             .unwrap_or_default();
         PatchInvocation::parse(&arguments)
+    }
+
+    fn snapshot_tree(root: &Path) -> Result<BTreeMap<String, Vec<u8>>, ReCtmError> {
+        fn visit(
+            root: &Path,
+            directory: &Path,
+            snapshot: &mut BTreeMap<String, Vec<u8>>,
+        ) -> Result<(), ReCtmError> {
+            let mut entries = fs::read_dir(directory)
+                .map_err(io_error)?
+                .collect::<Result<Vec<_>, _>>()
+                .map_err(io_error)?;
+            entries.sort_by_key(std::fs::DirEntry::file_name);
+            for entry in entries {
+                let path = entry.path();
+                let relative = path
+                    .strip_prefix(root)
+                    .map_err(|_| internal("test snapshot escaped root"))?
+                    .to_string_lossy()
+                    .into_owned();
+                let metadata = fs::symlink_metadata(&path).map_err(io_error)?;
+                if metadata.file_type().is_symlink() {
+                    snapshot.insert(
+                        format!("L:{relative}"),
+                        fs::read_link(&path)
+                            .map_err(io_error)?
+                            .to_string_lossy()
+                            .as_bytes()
+                            .to_vec(),
+                    );
+                } else if metadata.is_dir() {
+                    snapshot.insert(format!("D:{relative}"), Vec::new());
+                    visit(root, &path, snapshot)?;
+                } else {
+                    snapshot.insert(format!("F:{relative}"), fs::read(&path).map_err(io_error)?);
+                }
+            }
+            Ok(())
+        }
+
+        let mut snapshot = BTreeMap::new();
+        visit(root, root, &mut snapshot)?;
+        Ok(snapshot)
+    }
+
+    fn patch_temporary_files(root: &Path) -> Result<Vec<PathBuf>, ReCtmError> {
+        fn visit(root: &Path, found: &mut Vec<PathBuf>) -> Result<(), ReCtmError> {
+            for entry in fs::read_dir(root).map_err(io_error)? {
+                let entry = entry.map_err(io_error)?;
+                let path = entry.path();
+                let metadata = fs::symlink_metadata(&path).map_err(io_error)?;
+                if entry
+                    .file_name()
+                    .to_string_lossy()
+                    .starts_with(".mtm-patch-")
+                {
+                    found.push(path.clone());
+                }
+                if metadata.is_dir() && !metadata.file_type().is_symlink() {
+                    visit(&path, found)?;
+                }
+            }
+            Ok(())
+        }
+
+        let mut found = Vec::new();
+        visit(root, &mut found)?;
+        Ok(found)
+    }
+
+    #[test]
+    fn prepared_patch_writes_nothing_before_authorization_and_commits_every_change()
+    -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        fs::write(temp.path().join("update.txt"), "old\n").map_err(io_error)?;
+        fs::write(temp.path().join("delete.txt"), "gone\n").map_err(io_error)?;
+        fs::write(temp.path().join("move.txt"), "move-old\n").map_err(io_error)?;
+        run_git(temp.path(), &["init", "--quiet"])?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let patch = concat!(
+            "*** Begin Patch\n",
+            "*** Add File: nested/added.txt\n",
+            "+secret-added-content\n",
+            "*** Update File: update.txt\n",
+            "@@\n",
+            "-old\n",
+            "+new\n",
+            "*** Delete File: delete.txt\n",
+            "*** Update File: move.txt\n",
+            "*** Move to: nested/moved.txt\n",
+            "@@\n",
+            "-move-old\n",
+            "+move-new\n",
+            "*** End Patch\n",
+        );
+        let invocation = patch_invocation(patch, false)?;
+        let before = snapshot_tree(temp.path())?;
+        let prepared = workspace.prepare_patch(&invocation)?;
+        let after_preparation = snapshot_tree(temp.path())?;
+        assert_eq!(before, after_preparation);
+        assert_eq!(prepared.arguments_sha256(), invocation.arguments_sha256());
+        assert_eq!(
+            prepared
+                .path_facts()
+                .ok_or_else(|| internal("prepared test patch omitted authority facts"))?
+                .len(),
+            5
+        );
+        let debug = format!("{prepared:?}");
+        assert!(!debug.contains("secret-added-content"));
+        assert!(!debug.contains(&temp.path().to_string_lossy().into_owned()));
+
+        let authorized = Cell::new(0_usize);
+        let result = workspace.commit_prepared_patch_with_authorization(prepared, || {
+            authorized.set(authorized.get() + 1);
+            Ok(())
+        })?;
+        assert_eq!(authorized.get(), 1);
+        assert_eq!(result["dry_run"], false);
+        assert_eq!(result["affected_files"].as_array().map(Vec::len), Some(4));
+        assert_eq!(
+            fs::read_to_string(temp.path().join("nested/added.txt")).map_err(io_error)?,
+            "secret-added-content\n"
+        );
+        assert_eq!(
+            fs::read_to_string(temp.path().join("update.txt")).map_err(io_error)?,
+            "new\n"
+        );
+        assert!(!temp.path().join("delete.txt").exists());
+        assert!(!temp.path().join("move.txt").exists());
+        assert_eq!(
+            fs::read_to_string(temp.path().join("nested/moved.txt")).map_err(io_error)?,
+            "move-new\n"
+        );
+        assert!(patch_temporary_files(temp.path())?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn prepared_patch_dry_run_never_invokes_authorization_or_writes() -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let invocation = patch_invocation(
+            "*** Begin Patch\n*** Add File: target/dry.txt\n+dry-secret\n*** End Patch\n",
+            true,
+        )?;
+        let before = snapshot_tree(temp.path())?;
+        let prepared = workspace.prepare_patch(&invocation)?;
+        let authorization_calls = Cell::new(0_usize);
+        let result = workspace.commit_prepared_patch_with_authorization(prepared, || {
+            authorization_calls.set(authorization_calls.get() + 1);
+            Err(internal("dry-run authorization must not be called"))
+        })?;
+        assert_eq!(authorization_calls.get(), 0);
+        assert_eq!(result["dry_run"], true);
+        assert_eq!(snapshot_tree(temp.path())?, before);
+        assert!(!temp.path().join("target/dry.txt").exists());
+        assert!(patch_temporary_files(temp.path())?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn prepared_patch_authorization_failure_leaves_no_workspace_artifacts() -> Result<(), ReCtmError>
+    {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let invocation = patch_invocation(
+            "*** Begin Patch\n*** Add File: nested/denied.txt\n+denied\n*** End Patch\n",
+            false,
+        )?;
+        let before = snapshot_tree(temp.path())?;
+        let prepared = workspace.prepare_patch(&invocation)?;
+        let error = workspace
+            .commit_prepared_patch_with_authorization(prepared, || {
+                if snapshot_tree(temp.path())? != before {
+                    return Err(internal("patch wrote before final authorization"));
+                }
+                Err(ReCtmError::new(
+                    "TEST_AUTHORIZATION_DENIED",
+                    "injected authorization denial",
+                ))
+            })
+            .map_err(|error| error.code);
+        assert_eq!(error, Err("TEST_AUTHORIZATION_DENIED".to_owned()));
+        assert_eq!(snapshot_tree(temp.path())?, before);
+        assert!(patch_temporary_files(temp.path())?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn prepared_patch_revalidates_new_target_after_authorization() -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        let target = temp.path().join("target.txt");
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let invocation = patch_invocation(
+            "*** Begin Patch\n*** Add File: target.txt\n+prepared\n*** End Patch\n",
+            false,
+        )?;
+        let prepared = workspace.prepare_patch(&invocation)?;
+        let error = workspace
+            .commit_prepared_patch_with_authorization(prepared, || {
+                fs::write(&target, "external\n").map_err(io_error)
+            })
+            .map_err(|error| error.code);
+        assert_eq!(
+            error,
+            Err("NATIVE_PATCH_AUTHORITY_FACTS_CHANGED".to_owned())
+        );
+        assert_eq!(fs::read_to_string(&target).map_err(io_error)?, "external\n");
+        assert!(patch_temporary_files(temp.path())?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn prepared_patch_rejects_parent_symlink_created_during_authorization() -> Result<(), ReCtmError>
+    {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let outside = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let invocation = patch_invocation(
+            "*** Begin Patch\n*** Add File: nested/target.txt\n+prepared\n*** End Patch\n",
+            false,
+        )?;
+        let prepared = workspace.prepare_patch(&invocation)?;
+        let error = workspace
+            .commit_prepared_patch_with_authorization(prepared, || {
+                std::os::unix::fs::symlink(outside.path(), temp.path().join("nested"))
+                    .map_err(io_error)
+            })
+            .map_err(|error| error.code);
+        assert_eq!(
+            error,
+            Err("NATIVE_PATCH_AUTHORITY_FACTS_CHANGED".to_owned())
+        );
+        assert!(!outside.path().join("target.txt").exists());
+        assert!(patch_temporary_files(temp.path())?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn prepared_patch_rejects_stale_file_baseline_before_authorization() -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        fs::write(temp.path().join("source.txt"), "old\n").map_err(io_error)?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let invocation = patch_invocation(
+            concat!(
+                "*** Begin Patch\n",
+                "*** Update File: source.txt\n",
+                "@@\n",
+                "-old\n",
+                "+new\n",
+                "*** Add File: added.txt\n",
+                "+added\n",
+                "*** End Patch\n",
+            ),
+            false,
+        )?;
+        let prepared = workspace.prepare_patch(&invocation)?;
+        fs::write(temp.path().join("source.txt"), "external-change\n").map_err(io_error)?;
+        let authorization_calls = Cell::new(0_usize);
+        let error = workspace
+            .commit_prepared_patch_with_authorization(prepared, || {
+                authorization_calls.set(authorization_calls.get() + 1);
+                Ok(())
+            })
+            .map_err(|error| error.code);
+        assert_eq!(
+            error,
+            Err("NATIVE_PATCH_AUTHORITY_FACTS_CHANGED".to_owned())
+        );
+        assert_eq!(authorization_calls.get(), 0);
+        assert_eq!(
+            fs::read_to_string(temp.path().join("source.txt")).map_err(io_error)?,
+            "external-change\n"
+        );
+        assert!(!temp.path().join("added.txt").exists());
+        assert!(patch_temporary_files(temp.path())?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn prepared_patch_rejects_changed_git_ignore_metadata_before_authorization()
+    -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        fs::create_dir(temp.path().join("ignored")).map_err(io_error)?;
+        fs::write(temp.path().join(".gitignore"), "ignored/\n").map_err(io_error)?;
+        run_git(temp.path(), &["init", "--quiet"])?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let invocation = patch_invocation(
+            "*** Begin Patch\n*** Add File: ignored/new.txt\n+new\n*** End Patch\n",
+            false,
+        )?;
+        let prepared = workspace.prepare_patch(&invocation)?;
+        assert!(
+            prepared
+                .path_facts()
+                .ok_or_else(|| internal("prepared test patch omitted authority facts"))?[0]
+                .git_ignored()
+        );
+        assert!(
+            prepared
+                .git_metadata()
+                .ok_or_else(|| internal("prepared test patch omitted Git metadata"))?
+                .entries
+                .iter()
+                .any(|(path, _)| path.ends_with("index"))
+        );
+        fs::write(temp.path().join(".gitignore"), "different/\n").map_err(io_error)?;
+        let authorization_calls = Cell::new(0_usize);
+        let error = workspace
+            .commit_prepared_patch_with_authorization(prepared, || {
+                authorization_calls.set(authorization_calls.get() + 1);
+                Ok(())
+            })
+            .map_err(|error| error.code);
+        assert_eq!(
+            error,
+            Err("NATIVE_PATCH_AUTHORITY_FACTS_CHANGED".to_owned())
+        );
+        assert_eq!(authorization_calls.get(), 0);
+        assert!(!temp.path().join("ignored/new.txt").exists());
+        assert!(patch_temporary_files(temp.path())?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn prepared_patch_tracks_included_git_configuration_before_authorization()
+    -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let metadata = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        let include = metadata.path().join("included.config");
+        let first_excludes = metadata.path().join("first.excludes");
+        let second_excludes = metadata.path().join("second.excludes");
+        fs::write(&first_excludes, "ignored.txt\n").map_err(io_error)?;
+        fs::write(&second_excludes, "different.txt\n").map_err(io_error)?;
+        fs::write(
+            &include,
+            format!("[core]\n\texcludesFile = {}\n", first_excludes.display()),
+        )
+        .map_err(io_error)?;
+        run_git(temp.path(), &["init", "--quiet"])?;
+        run_git(
+            temp.path(),
+            &[
+                "config",
+                "--local",
+                "include.path",
+                &include.display().to_string(),
+            ],
+        )?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let invocation = patch_invocation(
+            "*** Begin Patch\n*** Add File: ignored.txt\n+new\n*** End Patch\n",
+            false,
+        )?;
+        let prepared = workspace.prepare_patch(&invocation)?;
+        assert!(
+            prepared
+                .path_facts()
+                .ok_or_else(|| internal("prepared test patch omitted authority facts"))?[0]
+                .git_ignored()
+        );
+
+        fs::write(
+            &include,
+            format!("[core]\n\texcludesFile = {}\n", second_excludes.display()),
+        )
+        .map_err(io_error)?;
+        let authorization_calls = Cell::new(0_usize);
+        let error = workspace
+            .commit_prepared_patch_with_authorization(prepared, || {
+                authorization_calls.set(authorization_calls.get() + 1);
+                Ok(())
+            })
+            .map_err(|error| error.code);
+        assert_eq!(
+            error,
+            Err("NATIVE_PATCH_AUTHORITY_FACTS_CHANGED".to_owned())
+        );
+        assert_eq!(authorization_calls.get(), 0);
+        assert!(!temp.path().join("ignored.txt").exists());
+        assert!(patch_temporary_files(temp.path())?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn prepared_patch_rolls_back_every_file_after_mid_commit_failure() -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        fs::write(temp.path().join("a.txt"), "a-old\n").map_err(io_error)?;
+        fs::write(temp.path().join("b.txt"), "b-old\n").map_err(io_error)?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let invocation = patch_invocation(
+            concat!(
+                "*** Begin Patch\n",
+                "*** Update File: a.txt\n",
+                "@@\n",
+                "-a-old\n",
+                "+a-new\n",
+                "*** Update File: b.txt\n",
+                "@@\n",
+                "-b-old\n",
+                "+b-new\n",
+                "*** End Patch\n",
+            ),
+            false,
+        )?;
+        let prepared = workspace.prepare_patch(&invocation)?;
+        let authorization_calls = Cell::new(0_usize);
+        let error = workspace
+            .commit_prepared_patch_with_hook(
+                prepared,
+                || {
+                    authorization_calls.set(authorization_calls.get() + 1);
+                    Ok(())
+                },
+                |index| {
+                    if index == 1 {
+                        Err(ReCtmError::new("TEST_COMMIT_FAILURE", "injected failure"))
+                    } else {
+                        Ok(())
+                    }
+                },
+            )
+            .map_err(|error| error.code);
+        assert_eq!(error, Err("TEST_COMMIT_FAILURE".to_owned()));
+        assert_eq!(authorization_calls.get(), 1);
+        assert_eq!(
+            fs::read_to_string(temp.path().join("a.txt")).map_err(io_error)?,
+            "a-old\n"
+        );
+        assert_eq!(
+            fs::read_to_string(temp.path().join("b.txt")).map_err(io_error)?,
+            "b-old\n"
+        );
+        assert!(patch_temporary_files(temp.path())?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn prepared_patch_retains_recovery_backup_when_rollback_is_obstructed() -> Result<(), ReCtmError>
+    {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        let first = temp.path().join("a.txt");
+        fs::write(&first, "a-old\n").map_err(io_error)?;
+        fs::write(temp.path().join("b.txt"), "b-old\n").map_err(io_error)?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let invocation = patch_invocation(
+            concat!(
+                "*** Begin Patch\n",
+                "*** Update File: a.txt\n",
+                "@@\n",
+                "-a-old\n",
+                "+a-new\n",
+                "*** Update File: b.txt\n",
+                "@@\n",
+                "-b-old\n",
+                "+b-new\n",
+                "*** End Patch\n",
+            ),
+            false,
+        )?;
+        let prepared = workspace.prepare_patch(&invocation)?;
+        let error = workspace
+            .commit_prepared_patch_with_hook(
+                prepared,
+                || Ok(()),
+                |index| {
+                    if index == 1 {
+                        fs::remove_file(&first).map_err(io_error)?;
+                        fs::create_dir(&first).map_err(io_error)?;
+                        Err(ReCtmError::new("TEST_COMMIT_FAILURE", "injected failure"))
+                    } else {
+                        Ok(())
+                    }
+                },
+            )
+            .map_err(|error| error.code);
+        assert_eq!(error, Err("NATIVE_PATCH_ROLLBACK_FAILED".to_owned()));
+        let recovery = patch_temporary_files(temp.path())?;
+        assert_eq!(recovery.len(), 1);
+        assert!(
+            recovery[0]
+                .file_name()
+                .is_some_and(|name| name.to_string_lossy().contains("backup-0"))
+        );
+        assert_eq!(
+            fs::read_to_string(&recovery[0]).map_err(io_error)?,
+            "a-old\n"
+        );
+        assert_eq!(
+            fs::read_to_string(temp.path().join("b.txt")).map_err(io_error)?,
+            "b-old\n"
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn prepared_patch_commit_lock_allows_one_concurrent_baseline_winner() -> Result<(), ReCtmError>
+    {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let invocation = patch_invocation(
+            "*** Begin Patch\n*** Add File: winner.txt\n+winner\n*** End Patch\n",
+            false,
+        )?;
+        let first = workspace.prepare_patch(&invocation)?;
+        let second = workspace.prepare_patch(&invocation)?;
+        let barrier = Arc::new(Barrier::new(3));
+        let authorization_calls = Arc::new(AtomicUsize::new(0));
+        let mut handles = Vec::new();
+        for (copy, prepared) in [(workspace.clone(), first), (workspace.clone(), second)] {
+            let barrier = Arc::clone(&barrier);
+            let authorization_calls = Arc::clone(&authorization_calls);
+            handles.push(thread::spawn(move || {
+                barrier.wait();
+                copy.commit_prepared_patch_with_authorization(prepared, || {
+                    authorization_calls.fetch_add(1, Ordering::SeqCst);
+                    Ok(())
+                })
+            }));
+        }
+        barrier.wait();
+        let results = handles
+            .into_iter()
+            .map(|handle| {
+                handle
+                    .join()
+                    .map_err(|_| internal("prepared patch test thread panicked"))?
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(results.iter().filter(|result| result.is_ok()).count(), 1);
+        assert_eq!(
+            results
+                .iter()
+                .filter_map(|result| result.as_ref().err())
+                .filter(|error| error.code == "NATIVE_PATCH_AUTHORITY_FACTS_CHANGED")
+                .count(),
+            1
+        );
+        assert_eq!(authorization_calls.load(Ordering::SeqCst), 1);
+        assert_eq!(
+            fs::read_to_string(temp.path().join("winner.txt")).map_err(io_error)?,
+            "winner\n"
+        );
+        assert!(patch_temporary_files(temp.path())?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn prepared_patch_rejects_symlink_sources_without_writing() -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        fs::write(temp.path().join("real.txt"), "unchanged\n").map_err(io_error)?;
+        std::os::unix::fs::symlink("real.txt", temp.path().join("link.txt")).map_err(io_error)?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let invocation = patch_invocation(
+            "*** Begin Patch\n*** Update File: link.txt\n@@\n-unchanged\n+changed\n*** End Patch\n",
+            false,
+        )?;
+        assert_eq!(
+            workspace
+                .prepare_patch(&invocation)
+                .map(|_| ())
+                .map_err(|error| error.code),
+            Err("SYMLINK_WRITE_DENIED".to_owned())
+        );
+        assert_eq!(
+            fs::read_to_string(temp.path().join("real.txt")).map_err(io_error)?,
+            "unchanged\n"
+        );
+        fs::create_dir(temp.path().join("real-directory")).map_err(io_error)?;
+        std::os::unix::fs::symlink("real-directory", temp.path().join("directory-link"))
+            .map_err(io_error)?;
+        let parent_symlink = patch_invocation(
+            "*** Begin Patch\n*** Add File: directory-link/new.txt\n+changed\n*** End Patch\n",
+            false,
+        )?;
+        assert_eq!(
+            workspace
+                .prepare_patch(&parent_symlink)
+                .map(|_| ())
+                .map_err(|error| error.code),
+            Err("SYMLINK_WRITE_DENIED".to_owned())
+        );
+        assert!(!temp.path().join("real-directory/new.txt").exists());
+        assert!(patch_temporary_files(temp.path())?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn public_apply_patch_preserves_pre_cutover_results_without_git_facts() -> Result<(), ReCtmError>
+    {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        fs::write(temp.path().join(".git"), "gitdir: /definitely/missing\n").map_err(io_error)?;
+        fs::write(temp.path().join("update.txt"), "update-old\n").map_err(io_error)?;
+        fs::write(temp.path().join("delete.txt"), "delete-old\n").map_err(io_error)?;
+        fs::write(temp.path().join("move-source.txt"), "move-old\n").map_err(io_error)?;
+        fs::write(temp.path().join("move-target.txt"), "overwritten\n").map_err(io_error)?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let patch = concat!(
+            "*** Begin Patch\n",
+            "*** Add File: nested/added.txt\n",
+            "+added\n",
+            "*** Update File: update.txt\n",
+            "@@\n",
+            "-update-old\n",
+            "+update-new\n",
+            "*** Delete File: delete.txt\n",
+            "*** Update File: move-source.txt\n",
+            "*** Move to: move-target.txt\n",
+            "@@\n",
+            "-move-old\n",
+            "+move-new\n",
+            "*** End Patch\n",
+        );
+
+        let result = workspace.apply_patch(patch, false)?;
+        assert_eq!(
+            result,
+            serde_json::json!({
+                "clean": true,
+                "dry_run": false,
+                "summary": concat!(
+                    "A nested/added.txt\n",
+                    "M update.txt\n",
+                    "D delete.txt\n",
+                    "R move-source.txt -> move-target.txt"
+                ),
+                "additions": 1,
+                "removals": 1,
+                "affected_files": [
+                    {"operation": "add", "path": "nested/added.txt"},
+                    {"operation": "update", "path": "update.txt"},
+                    {"operation": "delete", "path": "delete.txt"},
+                    {"operation": "update", "path": "move-target.txt"},
+                ],
+                "warnings": [],
+            })
+        );
+        assert_eq!(
+            fs::read_to_string(temp.path().join("nested/added.txt")).map_err(io_error)?,
+            "added\n"
+        );
+        assert_eq!(
+            fs::read_to_string(temp.path().join("update.txt")).map_err(io_error)?,
+            "update-new\n"
+        );
+        assert!(!temp.path().join("delete.txt").exists());
+        assert!(!temp.path().join("move-source.txt").exists());
+        assert_eq!(
+            fs::read_to_string(temp.path().join("move-target.txt")).map_err(io_error)?,
+            "move-new\n"
+        );
+        assert!(patch_temporary_files(temp.path())?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn public_apply_patch_preserves_empty_and_repeated_path_semantics() -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        fs::write(temp.path().join("source.txt"), "original\n").map_err(io_error)?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+
+        assert_eq!(
+            workspace.apply_patch("*** Begin Patch\n*** End Patch\n", false)?,
+            serde_json::json!({
+                "clean": true,
+                "dry_run": false,
+                "summary": "",
+                "additions": 0,
+                "removals": 0,
+                "affected_files": [],
+                "warnings": [],
+            })
+        );
+
+        let repeated = concat!(
+            "*** Begin Patch\n",
+            "*** Update File: source.txt\n",
+            "@@\n",
+            "-original\n",
+            "+first\n",
+            "*** Update File: source.txt\n",
+            "@@\n",
+            "-original\n",
+            "+second\n",
+            "*** End Patch\n",
+        );
+        let result = workspace.apply_patch(repeated, false)?;
+        assert_eq!(result["summary"], "M source.txt\nM source.txt");
+        assert_eq!(result["affected_files"].as_array().map(Vec::len), Some(2));
+        assert_eq!(
+            fs::read_to_string(temp.path().join("source.txt")).map_err(io_error)?,
+            "second\n"
+        );
+        assert!(patch_temporary_files(temp.path())?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn public_apply_patch_keeps_internal_source_symlink_compatibility() -> Result<(), ReCtmError> {
+        let temp = tempfile::tempdir().map_err(io_error)?;
+        let private = tempfile::tempdir().map_err(io_error)?;
+        fs::write(temp.path().join("real.txt"), "old\n").map_err(io_error)?;
+        std::os::unix::fs::symlink("real.txt", temp.path().join("link.txt")).map_err(io_error)?;
+        let workspace = NativeWorkspace::new(temp.path(), private.path())?;
+        let result = workspace.apply_patch(
+            "*** Begin Patch\n*** Update File: link.txt\n@@\n-old\n+new\n*** End Patch\n",
+            false,
+        )?;
+        assert_eq!(result["affected_files"][0]["path"], "real.txt");
+        assert!(temp.path().join("link.txt").is_symlink());
+        assert_eq!(
+            fs::read_to_string(temp.path().join("real.txt")).map_err(io_error)?,
+            "new\n"
+        );
+        Ok(())
     }
 
     #[test]
