@@ -16,6 +16,7 @@ pub const MODERN_PROTOCOL_VERSIONS: [&str; 1] = ["2026-07-28"];
 pub const SUPPORTED_PROTOCOL_VERSIONS: [&str; 3] = ["2026-07-28", "2025-11-25", "2025-06-18"];
 pub const LATEST_LEGACY_PROTOCOL_VERSION: &str = "2025-11-25";
 pub const HEADER_MISMATCH: i64 = -32020;
+pub const MISSING_REQUIRED_CLIENT_CAPABILITY: i64 = -32021;
 pub const UNSUPPORTED_PROTOCOL_VERSION: i64 = -32022;
 pub const META_PROTOCOL_VERSION: &str = "io.modelcontextprotocol/protocolVersion";
 pub const META_CLIENT_CAPABILITIES: &str = "io.modelcontextprotocol/clientCapabilities";
@@ -36,7 +37,8 @@ pub trait ToolBackend: Send + Sync {
         arguments: &Map<String, Value>,
         principal: &OAuthPrincipal,
         trace_id: &str,
-    ) -> Result<Value, ReCtmError>;
+        context: &ToolCallContext,
+    ) -> Result<ToolBackendResult, ReCtmError>;
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -44,6 +46,158 @@ pub struct RequestContext {
     era: String,
     protocol_version: String,
     client_info: Option<BTreeMap<String, String>>,
+    client_capabilities: Map<String, Value>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ToolCallContext {
+    protocol_version: String,
+    modern: bool,
+    client_capabilities: Map<String, Value>,
+    input_responses: Map<String, Value>,
+    request_state: Option<String>,
+}
+
+impl ToolCallContext {
+    fn legacy(protocol_version: &str) -> Self {
+        Self {
+            protocol_version: protocol_version.to_owned(),
+            modern: false,
+            client_capabilities: Map::new(),
+            input_responses: Map::new(),
+            request_state: None,
+        }
+    }
+
+    fn modern(context: &RequestContext, params: &Map<String, Value>) -> Result<Self, JSONRPCError> {
+        let input_responses = match params.get("inputResponses") {
+            None | Some(Value::Null) => Map::new(),
+            Some(Value::Object(value)) => value.clone(),
+            Some(_) => return Err(rpc(-32602, "inputResponses must be an object when present")),
+        };
+        let request_state = match params.get("requestState") {
+            None | Some(Value::Null) => None,
+            Some(Value::String(value)) if !value.is_empty() && value.len() <= 8192 => {
+                Some(value.clone())
+            }
+            Some(Value::String(_)) => {
+                return Err(rpc(
+                    -32602,
+                    "requestState must be a non-empty string of at most 8192 bytes",
+                ));
+            }
+            Some(_) => return Err(rpc(-32602, "requestState must be a string when present")),
+        };
+        Ok(Self {
+            protocol_version: context.protocol_version.clone(),
+            modern: true,
+            client_capabilities: context.client_capabilities.clone(),
+            input_responses,
+            request_state,
+        })
+    }
+
+    #[must_use]
+    pub fn protocol_version(&self) -> &str {
+        &self.protocol_version
+    }
+
+    #[must_use]
+    pub const fn is_modern(&self) -> bool {
+        self.modern
+    }
+
+    #[must_use]
+    pub fn supports_form_elicitation(&self) -> bool {
+        let Some(elicitation) = self
+            .client_capabilities
+            .get("elicitation")
+            .and_then(Value::as_object)
+        else {
+            return false;
+        };
+        elicitation.is_empty() || elicitation.get("form").is_some_and(Value::is_object)
+    }
+
+    #[must_use]
+    pub fn input_response(&self, key: &str) -> Option<&Value> {
+        self.input_responses.get(key)
+    }
+
+    #[must_use]
+    pub fn request_state(&self) -> Option<&str> {
+        self.request_state.as_deref()
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct InputRequiredResult {
+    input_requests: Map<String, Value>,
+    request_state: String,
+    required_capabilities: Value,
+}
+
+impl InputRequiredResult {
+    pub fn form_elicitation(
+        key: &str,
+        message: &str,
+        requested_schema: Value,
+        request_state: String,
+    ) -> Result<Self, ReCtmError> {
+        if key.is_empty()
+            || key.len() > 128
+            || request_state.is_empty()
+            || request_state.len() > 8192
+        {
+            return Err(ReCtmError::new(
+                "MRTR_INPUT_REQUIRED_INVALID",
+                "Invalid MRTR input-required envelope.",
+            )
+            .with_category(ErrorCategory::Validation));
+        }
+        if message.trim().is_empty() || !requested_schema.is_object() {
+            return Err(ReCtmError::new(
+                "MRTR_INPUT_REQUIRED_INVALID",
+                "Invalid MRTR elicitation request.",
+            )
+            .with_category(ErrorCategory::Validation));
+        }
+        let mut input_requests = Map::new();
+        input_requests.insert(
+            key.to_owned(),
+            serde_json::json!({
+                "method":"elicitation/create",
+                "params":{
+                    "mode":"form",
+                    "message":message,
+                    "requestedSchema":requested_schema
+                }
+            }),
+        );
+        Ok(Self {
+            input_requests,
+            request_state,
+            required_capabilities: serde_json::json!({"elicitation":{"form":{}}}),
+        })
+    }
+
+    fn to_wire(&self) -> Value {
+        serde_json::json!({
+            "resultType":"input_required",
+            "inputRequests":self.input_requests,
+            "requestState":self.request_state
+        })
+    }
+
+    fn required_capabilities(&self) -> &Value {
+        &self.required_capabilities
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum ToolBackendResult {
+    Complete(Value),
+    InputRequired(InputRequiredResult),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -114,18 +268,23 @@ impl MCPDispatcher {
             let era = request_era(method, &params);
             if era == MODERN_ERA {
                 let context = modern_request_context(&params)?;
-                let result = self.dispatch_modern(method, &params, principal, &trace)?;
+                let tool_context = ToolCallContext::modern(&context, &params)?;
+                let result =
+                    self.dispatch_modern(method, &params, principal, &trace, &tool_context)?;
                 Ok((context, result))
             } else {
+                let protocol_version = transport_protocol_version
+                    .filter(|version| LEGACY_PROTOCOL_VERSIONS.contains(version))
+                    .unwrap_or(LATEST_LEGACY_PROTOCOL_VERSION);
                 let context = RequestContext {
                     era: LEGACY_ERA.to_owned(),
-                    protocol_version: transport_protocol_version
-                        .filter(|version| LEGACY_PROTOCOL_VERSIONS.contains(version))
-                        .unwrap_or(LATEST_LEGACY_PROTOCOL_VERSION)
-                        .to_owned(),
+                    protocol_version: protocol_version.to_owned(),
                     client_info: None,
+                    client_capabilities: Map::new(),
                 };
-                let result = self.dispatch_legacy(method, &params, principal, &trace)?;
+                let tool_context = ToolCallContext::legacy(protocol_version);
+                let result =
+                    self.dispatch_legacy(method, &params, principal, &trace, &tool_context)?;
                 Ok((context, result))
             }
         })();
@@ -158,6 +317,7 @@ impl MCPDispatcher {
         params: &Map<String, Value>,
         principal: &OAuthPrincipal,
         trace_id: &str,
+        tool_context: &ToolCallContext,
     ) -> Result<Option<Value>, JSONRPCError> {
         if !matches!(
             method,
@@ -172,7 +332,9 @@ impl MCPDispatcher {
             "tools/list" => Ok(Some(serde_json::json!({
                 "tools": self.catalog.list_public(),
             }))),
-            "tools/call" => self.call_tool(params, principal, trace_id).map(Some),
+            "tools/call" => self
+                .call_tool(params, principal, trace_id, tool_context)
+                .map(Some),
             _ => Err(rpc(-32601, &format!("Method not found: {method}"))),
         }
     }
@@ -183,6 +345,7 @@ impl MCPDispatcher {
         params: &Map<String, Value>,
         principal: &OAuthPrincipal,
         trace_id: &str,
+        tool_context: &ToolCallContext,
     ) -> Result<Option<Value>, JSONRPCError> {
         match method {
             "initialize" => {
@@ -202,7 +365,9 @@ impl MCPDispatcher {
             "tools/list" => Ok(Some(serde_json::json!({
                 "tools": self.catalog.list_public(),
             }))),
-            "tools/call" => self.call_tool(params, principal, trace_id).map(Some),
+            "tools/call" => self
+                .call_tool(params, principal, trace_id, tool_context)
+                .map(Some),
             _ => Err(rpc(-32601, &format!("Method not found: {method}"))),
         }
     }
@@ -212,6 +377,7 @@ impl MCPDispatcher {
         params: &Map<String, Value>,
         principal: &OAuthPrincipal,
         trace_id: &str,
+        tool_context: &ToolCallContext,
     ) -> Result<Value, JSONRPCError> {
         let name = params
             .get("name")
@@ -246,7 +412,7 @@ impl MCPDispatcher {
             ));
         }
         self.backend
-            .call(name, &arguments, principal, trace_id)
+            .call(name, &arguments, principal, trace_id, tool_context)
             .map_err(|error| {
                 JSONRPCError::new(
                     -32603,
@@ -257,6 +423,29 @@ impl MCPDispatcher {
                     })),
                 )
             })
+            .and_then(|result| resolve_backend_result(tool_context, result))
+    }
+}
+
+fn resolve_backend_result(
+    context: &ToolCallContext,
+    result: ToolBackendResult,
+) -> Result<Value, JSONRPCError> {
+    match result {
+        ToolBackendResult::Complete(value) => Ok(value),
+        ToolBackendResult::InputRequired(required) => {
+            if context.supports_form_elicitation() {
+                Ok(required.to_wire())
+            } else {
+                Err(JSONRPCError::new(
+                    MISSING_REQUIRED_CLIENT_CAPABILITY,
+                    "Client does not declare the capability required for this input round.",
+                    Some(serde_json::json!({
+                        "requiredCapabilities":required.required_capabilities()
+                    })),
+                ))
+            }
+        }
     }
 }
 
@@ -398,10 +587,16 @@ pub fn modern_request_context(params: &Map<String, Value>) -> Result<RequestCont
             })
             .collect()
     });
+    let client_capabilities = meta
+        .get(META_CLIENT_CAPABILITIES)
+        .and_then(Value::as_object)
+        .cloned()
+        .unwrap_or_default();
     Ok(RequestContext {
         era: MODERN_ERA.to_owned(),
         protocol_version: version.to_owned(),
         client_info,
+        client_capabilities,
     })
 }
 
@@ -411,10 +606,9 @@ pub fn shape_result(context: &RequestContext, method: &str, result: Value) -> Va
         return result;
     }
     let mut shaped = result.as_object().cloned().unwrap_or_default();
-    shaped.insert(
-        "resultType".to_owned(),
-        Value::String(MODERN_RESULT_TYPE.to_owned()),
-    );
+    shaped
+        .entry("resultType".to_owned())
+        .or_insert_with(|| Value::String(MODERN_RESULT_TYPE.to_owned()));
     let mut meta = shaped
         .get("_meta")
         .and_then(Value::as_object)
@@ -558,7 +752,12 @@ pub fn modern_http_status(request: &Value, response: &Value) -> u16 {
         .and_then(Value::as_i64);
     match code {
         Some(-32601) => 404,
-        Some(-32602 | HEADER_MISMATCH | UNSUPPORTED_PROTOCOL_VERSION) => 400,
+        Some(
+            -32602
+            | HEADER_MISMATCH
+            | MISSING_REQUIRED_CLIENT_CAPABILITY
+            | UNSUPPORTED_PROTOCOL_VERSION,
+        ) => 400,
         _ => 200,
     }
 }
@@ -625,6 +824,13 @@ mod tests {
         })
     }
 
+    fn modern_meta_with_capabilities(capabilities: Value) -> Value {
+        serde_json::json!({
+            "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+            "io.modelcontextprotocol/clientCapabilities": capabilities,
+        })
+    }
+
     #[test]
     fn envelope_and_modern_mirror_rules_are_fail_closed() {
         let invalid = serde_json::json!({"jsonrpc": "2.0", "id": true, "method": "ping"});
@@ -666,6 +872,142 @@ mod tests {
         });
         let response = jsonrpc_error(Value::from(1), -32601, "missing", None);
         assert_eq!(modern_http_status(&request, &response), 404);
+        let missing_capability = jsonrpc_error(
+            Value::from(1),
+            MISSING_REQUIRED_CLIENT_CAPABILITY,
+            "capability",
+            None,
+        );
+        assert_eq!(modern_http_status(&request, &missing_capability), 400);
+        Ok(())
+    }
+
+    #[test]
+    fn modern_mrtr_context_requires_request_scoped_form_elicitation() -> Result<(), JSONRPCError> {
+        for (capabilities, expected) in [
+            (serde_json::json!({"elicitation":{}}), true),
+            (serde_json::json!({"elicitation":{"form":{}}}), true),
+            (serde_json::json!({"elicitation":{"url":{}}}), false),
+            (serde_json::json!({}), false),
+        ] {
+            let params = serde_json::json!({
+                "_meta": modern_meta_with_capabilities(capabilities),
+            })
+            .as_object()
+            .cloned()
+            .unwrap_or_default();
+            let request = modern_request_context(&params)?;
+            let context = ToolCallContext::modern(&request, &params)?;
+            assert_eq!(context.protocol_version(), "2026-07-28");
+            assert!(context.is_modern());
+            assert_eq!(context.supports_form_elicitation(), expected);
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn modern_mrtr_retry_fields_are_typed_and_bounded() -> Result<(), JSONRPCError> {
+        let params = serde_json::json!({
+            "_meta": modern_meta_with_capabilities(serde_json::json!({"elicitation":{}})),
+            "inputResponses": {
+                "native_permission_consent": {
+                    "action":"accept",
+                    "content":{"approved":true}
+                }
+            },
+            "requestState":"challenge-1"
+        })
+        .as_object()
+        .cloned()
+        .unwrap_or_default();
+        let request = modern_request_context(&params)?;
+        let context = ToolCallContext::modern(&request, &params)?;
+        assert_eq!(context.request_state(), Some("challenge-1"));
+        assert_eq!(
+            context
+                .input_response("native_permission_consent")
+                .and_then(|value| value.get("action"))
+                .and_then(Value::as_str),
+            Some("accept")
+        );
+
+        let invalid_responses = serde_json::json!({
+            "_meta": modern_meta(),
+            "inputResponses":"invalid"
+        })
+        .as_object()
+        .cloned()
+        .unwrap_or_default();
+        let request = modern_request_context(&invalid_responses)?;
+        assert_eq!(
+            ToolCallContext::modern(&request, &invalid_responses).map_err(|error| error.code),
+            Err(-32602)
+        );
+
+        let oversized_state = serde_json::json!({
+            "_meta": modern_meta(),
+            "requestState":"x".repeat(8193)
+        })
+        .as_object()
+        .cloned()
+        .unwrap_or_default();
+        let request = modern_request_context(&oversized_state)?;
+        assert_eq!(
+            ToolCallContext::modern(&request, &oversized_state).map_err(|error| error.code),
+            Err(-32602)
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn input_required_requires_capability_and_preserves_modern_result_type()
+    -> Result<(), ReCtmError> {
+        let schema = serde_json::json!({
+            "type":"object",
+            "properties":{"approved":{"type":"boolean"}},
+            "required":["approved"]
+        });
+        let required = InputRequiredResult::form_elicitation(
+            "native_permission_consent",
+            "Approve Native permission?",
+            schema.clone(),
+            "challenge-1".to_owned(),
+        )?;
+        let no_capability = ToolCallContext::legacy("2025-11-25");
+        let denied = resolve_backend_result(
+            &no_capability,
+            ToolBackendResult::InputRequired(required.clone()),
+        )
+        .map_err(|error| error.code);
+        assert_eq!(denied, Err(MISSING_REQUIRED_CLIENT_CAPABILITY));
+
+        let params = serde_json::json!({
+            "_meta": modern_meta_with_capabilities(serde_json::json!({
+                "elicitation":{"form":{}}
+            }))
+        })
+        .as_object()
+        .cloned()
+        .unwrap_or_default();
+        let request = modern_request_context(&params)
+            .map_err(|error| ReCtmError::new("TEST", error.message))?;
+        let context = ToolCallContext::modern(&request, &params)
+            .map_err(|error| ReCtmError::new("TEST", error.message))?;
+        let wire = resolve_backend_result(&context, ToolBackendResult::InputRequired(required))
+            .map_err(|error| ReCtmError::new("TEST", error.message))?;
+        assert_eq!(wire["resultType"], "input_required");
+        assert_eq!(wire["requestState"], "challenge-1");
+        assert_eq!(
+            wire["inputRequests"]["native_permission_consent"]["method"],
+            "elicitation/create"
+        );
+        assert_eq!(
+            wire["inputRequests"]["native_permission_consent"]["params"]["requestedSchema"],
+            schema
+        );
+        let shaped = shape_result(&request, "tools/call", wire);
+        assert_eq!(shaped["resultType"], "input_required");
+        assert_eq!(shaped["_meta"][META_SERVER_INFO]["name"], "mtm");
         Ok(())
     }
 }

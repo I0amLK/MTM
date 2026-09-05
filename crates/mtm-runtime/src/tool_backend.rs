@@ -4,6 +4,7 @@ use std::sync::Arc;
 use mtm_contracts::{ErrorCategory, PRODUCTION_WORKFLOW_PROTOCOL_VERSION, ReCtmError};
 use mtm_gateway::{
     HIDDEN_TOOL_NAMES, OAuthPrincipal, PUBLIC_TOOL_NAMES, SUPPORTED_PROTOCOL_VERSIONS, ToolBackend,
+    ToolBackendResult, ToolCallContext,
 };
 use mtm_storage::{CapabilityAuthority, StateStore};
 use mtm_workflow::WorkflowEngine;
@@ -1111,7 +1112,8 @@ impl ToolBackend for RuntimeToolBackend {
         arguments: &Map<String, Value>,
         principal: &OAuthPrincipal,
         trace_id: &str,
-    ) -> Result<Value, ReCtmError> {
+        _context: &ToolCallContext,
+    ) -> Result<ToolBackendResult, ReCtmError> {
         self.emit(serde_json::json!({
             "event_type":"tool.call_started",
             "trace_id":trace_id,
@@ -1133,7 +1135,9 @@ impl ToolBackend for RuntimeToolBackend {
             "reason":if is_error {"tool_reported_error"} else {"tool_completed"},
             "details":{"tool":name}
         }));
-        Ok(tool_result(name, payload, is_error))
+        Ok(ToolBackendResult::Complete(tool_result(
+            name, payload, is_error,
+        )))
     }
 }
 

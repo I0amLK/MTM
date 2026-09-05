@@ -12,7 +12,7 @@ use base64::engine::general_purpose::STANDARD;
 use mtm_contracts::{ErrorCategory, ReCtmError};
 use mtm_gateway::{
     GatewayHttpConfig, GatewayRuntime, GatewayState, MCPDispatcher, OAuthPrincipal, OAuthService,
-    OAuthStore, ToolBackend, ToolCatalog, build_router,
+    OAuthStore, ToolBackend, ToolBackendResult, ToolCallContext, ToolCatalog, build_router,
 };
 use serde_json::{Map, Value};
 
@@ -27,13 +27,14 @@ impl ToolBackend for EchoBackend {
         arguments: &Map<String, Value>,
         principal: &OAuthPrincipal,
         trace_id: &str,
-    ) -> Result<Value, ReCtmError> {
+        _context: &ToolCallContext,
+    ) -> Result<ToolBackendResult, ReCtmError> {
         let mut calls = self.calls.lock().map_err(|_| {
             ReCtmError::new("BACKEND_LOCK_ERROR", "Gateway backend lock was poisoned.")
                 .with_category(ErrorCategory::Internal)
         })?;
         *calls += 1;
-        Ok(serde_json::json!({
+        Ok(ToolBackendResult::Complete(serde_json::json!({
             "content": [{"type": "text", "text": format!("tool {name} completed")}],
             "structuredContent": {
                 "ok": true,
@@ -45,7 +46,7 @@ impl ToolBackend for EchoBackend {
                 "call_index": *calls,
             },
             "isError": false,
-        }))
+        })))
     }
 }
 

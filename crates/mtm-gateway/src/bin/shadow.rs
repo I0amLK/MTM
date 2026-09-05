@@ -11,7 +11,7 @@ use mtm_contracts::{ErrorCategory, ReCtmError};
 use mtm_gateway::mcp::{decode_mirror_header, modern_http_status, validate_http_mirror_headers};
 use mtm_gateway::{
     FixedClock, GatewayRuntime, MCPDispatcher, OAuthPrincipal, OAuthService, OAuthStore,
-    SequenceIdSource, ToolBackend, ToolCatalog,
+    SequenceIdSource, ToolBackend, ToolBackendResult, ToolCallContext, ToolCatalog,
 };
 use rusqlite::Connection;
 use serde_json::{Map, Value};
@@ -27,7 +27,8 @@ impl ToolBackend for EchoBackend {
         arguments: &Map<String, Value>,
         principal: &OAuthPrincipal,
         trace_id: &str,
-    ) -> Result<Value, ReCtmError> {
+        _context: &ToolCallContext,
+    ) -> Result<ToolBackendResult, ReCtmError> {
         let call = serde_json::json!({
             "tool": name,
             "arguments": arguments,
@@ -38,7 +39,7 @@ impl ToolBackend for EchoBackend {
             .lock()
             .map_err(|_| internal("echo backend lock was poisoned"))?
             .push(call.clone());
-        Ok(serde_json::json!({
+        Ok(ToolBackendResult::Complete(serde_json::json!({
             "content": [{"type": "text", "text": format!("tool {name} completed")}],
             "structuredContent": {
                 "ok": true,
@@ -47,7 +48,7 @@ impl ToolBackend for EchoBackend {
                 "client_id": principal.client_id,
             },
             "isError": false,
-        }))
+        })))
     }
 }
 

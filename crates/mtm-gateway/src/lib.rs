@@ -12,8 +12,9 @@ pub use catalog::{
 };
 pub use http::{GatewayHttpConfig, GatewayState, build_router, serve};
 pub use mcp::{
-    HEADER_MISMATCH, LEGACY_PROTOCOL_VERSIONS, MCPDispatcher, MODERN_PROTOCOL_VERSIONS,
-    SUPPORTED_PROTOCOL_VERSIONS, ToolBackend,
+    HEADER_MISMATCH, InputRequiredResult, LEGACY_PROTOCOL_VERSIONS, MCPDispatcher,
+    MISSING_REQUIRED_CLIENT_CAPABILITY, MODERN_PROTOCOL_VERSIONS, SUPPORTED_PROTOCOL_VERSIONS,
+    ToolBackend, ToolBackendResult, ToolCallContext,
 };
 pub use oauth::{OAuthPrincipal, OAuthService, OAuthStore};
 pub use runtime::{

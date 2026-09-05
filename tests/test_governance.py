@@ -267,6 +267,20 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertFalse(d5a["public_tool_schema_changed"])
         self.assertFalse(d5a["production_exec_or_patch_authority_changed"])
         self.assertFalse(d5a["workflow_authority_changed"])
+        d5a_progress = iteration["d5a_progress"]
+        self.assertEqual(d5a_progress["phase"], "mrtr_protocol_plumbing")
+        self.assertTrue(d5a_progress["gateway_request_scoped_context"])
+        self.assertTrue(d5a_progress["client_capabilities_preserved_per_request"])
+        self.assertTrue(d5a_progress["input_responses_parsed_outside_tool_arguments"])
+        self.assertTrue(d5a_progress["request_state_parsed_outside_tool_arguments"])
+        self.assertEqual(d5a_progress["input_required_capability_gate_error"], -32021)
+        self.assertEqual(d5a_progress["input_required_missing_capability_http_status"], 400)
+        self.assertFalse(d5a_progress["public_tool_schema_changed"])
+        self.assertFalse(d5a_progress["runtime_request_permissions_changed"])
+        self.assertFalse(d5a_progress["verified_consent_constructor_connected"])
+        self.assertFalse(d5a_progress["grant_minting_from_mrtr_enabled"])
+        self.assertFalse(d5a_progress["production_exec_or_patch_authority_changed"])
+        self.assertFalse(d5a_progress["real_human_consent_evidence_collected"])
 
         bubblewrap_source = (
             ROOT / "crates" / "mtm-native" / "src" / "bubblewrap.rs"

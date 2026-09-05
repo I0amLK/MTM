@@ -465,6 +465,37 @@
     "workflow_authority_changed": false,
     "go_no_go_rule": "Do not cut production permission authority over until a real MCP client declares form elicitation, presents an independent human approval UI, and the complete redacted D5A evidence passes."
   },
+  "d5a_progress": {
+    "started_at": "2026-09-04T20:14:39-07:00",
+    "phase": "mrtr_protocol_plumbing",
+    "gateway_request_scoped_context": true,
+    "client_capabilities_preserved_per_request": true,
+    "form_elicitation_capability_rules": {
+      "empty_elicitation_object": true,
+      "explicit_form_object": true,
+      "url_only_object": false,
+      "missing_elicitation": false
+    },
+    "input_responses_parsed_outside_tool_arguments": true,
+    "request_state_parsed_outside_tool_arguments": true,
+    "request_state_max_bytes": 8192,
+    "typed_backend_result_variants": ["complete", "input_required"],
+    "input_required_capability_gate_error": -32021,
+    "input_required_missing_capability_http_status": 400,
+    "modern_complete_result_behavior_preserved": true,
+    "modern_input_required_result_type_preserved": true,
+    "legacy_tool_schema_changed": false,
+    "public_tool_schema_changed": false,
+    "runtime_request_permissions_changed": false,
+    "verified_consent_constructor_connected": false,
+    "grant_minting_from_mrtr_enabled": false,
+    "production_exec_or_patch_authority_changed": false,
+    "real_human_consent_evidence_collected": false,
+    "validation": {
+      "gateway_mcp_tests": "6 passed",
+      "gateway_runtime_clippy_warnings_denied": true
+    }
+  },
   "acceptance": {
     "A0": "Formatting, warnings-denied Clippy, workspace tests, governance, record-layout and unified local gate pass.",
     "A1": "Typed permission wire values, normalization, classifier ordering and current safe/trusted/dangerous compatibility are frozen by golden/adversarial tests.",
