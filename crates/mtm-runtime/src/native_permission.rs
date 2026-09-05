@@ -17,6 +17,12 @@ use serde_json::{Map, Value};
 
 const SANDBOX_WORKSPACE_ROOT: &str = "/workspace";
 pub const NATIVE_PERMISSION_CONSENT_CHALLENGE_TTL_SECONDS: i64 = 300;
+const MAX_PENDING_CONSENT_CHALLENGES: usize = 256;
+const MAX_PENDING_CONSENT_CHALLENGES_PER_OWNER: usize = 32;
+const MAX_NATIVE_GRANT_RECORDS: usize = 2_048;
+const MAX_NATIVE_GRANT_RECORDS_PER_OWNER: usize = 256;
+const MAX_PERMISSION_BINDING_BYTES: usize = 4_096;
+const MAX_CONSENT_REASON_BYTES: usize = 1_024;
 const SYSTEM_SANDBOX_ROOTS: [&str; 9] = [
     "/usr",
     "/bin",
@@ -403,18 +409,35 @@ impl NativePermissionConsentAuthority {
                 "Native permission consent requires an authenticated owner and workspace.",
             ));
         }
+        validate_permission_storage_bounds(owner_id, workspace, &request)?;
+        // Render before insertion: a failing prompt must not leave unreachable state.
+        let message = consent_prompt_message(workspace, &request)?;
+        let challenge_id = format!("npc-{}", self.runtime.ids.token_urlsafe(18)?);
+        let mut challenges = self.lock_challenges()?;
         let issued_at = self.runtime.clock.unix_seconds()?;
         let expires_at = issued_at
             .checked_add(NATIVE_PERMISSION_CONSENT_CHALLENGE_TTL_SECONDS)
             .ok_or_else(|| internal("Native permission consent challenge expiry overflowed"))?;
-        let challenge_id = format!("npc-{}", self.runtime.ids.token_urlsafe(18)?);
+        challenges.retain(|_, record| issued_at < record.expires_at);
+        if challenges.len() >= MAX_PENDING_CONSENT_CHALLENGES
+            || challenges
+                .values()
+                .filter(|record| record.owner_id == owner_id)
+                .count()
+                >= MAX_PENDING_CONSENT_CHALLENGES_PER_OWNER
+        {
+            return Err(denied(
+                "ELICITATION_CAPACITY_EXCEEDED",
+                "Pending Native consent capacity is full; complete or let earlier requests expire.",
+            )
+            .with_retryable(true));
+        }
         let record = ConsentChallengeRecord {
             owner_id: owner_id.to_owned(),
             workspace: workspace.to_owned(),
             request: request.clone(),
             expires_at,
         };
-        let mut challenges = self.lock_challenges()?;
         if challenges.contains_key(&challenge_id) {
             return Err(internal("Native permission consent challenge id collision"));
         }
@@ -423,7 +446,7 @@ impl NativePermissionConsentAuthority {
 
         Ok(NativePermissionConsentPrompt {
             challenge_id: NativePermissionConsentChallengeId(challenge_id),
-            message: consent_prompt_message(workspace, &request)?,
+            message,
             requested_schema: consent_requested_schema(),
             expires_at,
         })
@@ -744,6 +767,11 @@ impl NativePermissionGrantAuthority {
         &self,
         consent: VerifiedNativePermissionConsent,
     ) -> Result<NativePermissionGrantReceipt, ReCtmError> {
+        validate_permission_storage_bounds(
+            &consent.owner_id,
+            &consent.workspace,
+            &consent.request,
+        )?;
         let now = self.runtime.clock.unix_seconds()?;
         let ttl = i64::try_from(consent.request.ttl_seconds()).map_err(|_| {
             internal("validated Native permission TTL did not fit the runtime clock")
@@ -773,6 +801,9 @@ impl NativePermissionGrantAuthority {
             expires_at: record.expires_at,
         };
         let mut grants = self.lock_grants()?;
+        // Retain consumed/revoked tombstones until expiry for replay diagnostics.
+        // Pruning, duplicate detection, capacity admission and insertion are atomic.
+        grants.retain(|_, existing| now < existing.expires_at);
         if grants.values().any(|existing| {
             active_grant(existing, now)
                 && existing.owner_id == record.owner_id
@@ -785,6 +816,19 @@ impl NativePermissionGrantAuthority {
                 "NATIVE_PERMISSION_GRANT_ALREADY_EXISTS",
                 "An active exact Native permission grant already covers this invocation.",
             ));
+        }
+        if grants.len() >= MAX_NATIVE_GRANT_RECORDS
+            || grants
+                .values()
+                .filter(|existing| existing.owner_id == record.owner_id)
+                .count()
+                >= MAX_NATIVE_GRANT_RECORDS_PER_OWNER
+        {
+            return Err(denied(
+                "NATIVE_PERMISSION_GRANT_CAPACITY_EXCEEDED",
+                "Native grant capacity is full; wait for retained records to expire.",
+            )
+            .with_retryable(true));
         }
         if grants.contains_key(&raw_id) {
             return Err(internal("Native permission grant id collision"));
@@ -1087,6 +1131,30 @@ fn denied(code: &str, message: &str) -> ReCtmError {
     ReCtmError::new(code, message).with_category(ErrorCategory::Permission)
 }
 
+fn validate_permission_storage_bounds(
+    owner_id: &str,
+    workspace: &str,
+    request: &NativePermissionRequest,
+) -> Result<(), ReCtmError> {
+    if owner_id.is_empty() || workspace.is_empty() {
+        return Err(permission_error(
+            "ELICITATION_BINDING_INVALID",
+            "Native permission requires an authenticated owner and workspace.",
+        ));
+    }
+    if owner_id.len() > MAX_PERMISSION_BINDING_BYTES
+        || workspace.len() > MAX_PERMISSION_BINDING_BYTES
+        || request.reason().len() > MAX_CONSENT_REASON_BYTES
+    {
+        return Err(ReCtmError::new(
+            "NATIVE_PERMISSION_REQUEST_TOO_LARGE",
+            "Native permission binding or reason exceeds its bounded storage limit.",
+        )
+        .with_category(ErrorCategory::Validation));
+    }
+    Ok(())
+}
+
 fn permission_error(code: &str, message: &str) -> ReCtmError {
     denied(code, message)
 }
@@ -1240,6 +1308,327 @@ mod tests {
             workspace,
             request(kind, scope, Value::Object(arguments.clone()), ttl_seconds)?,
         ))
+    }
+
+    fn capacity_request(index: usize) -> Result<NativePermissionRequest, ReCtmError> {
+        request(
+            NativePermissionKind::Network,
+            NativePermissionScope::Session,
+            serde_json::json!({"cmd":format!("curl https://example.test/{index}")}),
+            10,
+        )
+    }
+
+    #[test]
+    fn consent_capacity_is_owner_scoped_without_live_eviction() -> Result<(), ReCtmError> {
+        let authority =
+            NativePermissionConsentAuthority::new(runtime(Arc::new(ManualClock::new(1000))));
+        let request = capacity_request(0)?;
+        let first = authority.begin("owner-a", "/workspace", request.clone())?;
+        for _ in 1..MAX_PENDING_CONSENT_CHALLENGES_PER_OWNER {
+            authority.begin("owner-a", "/workspace", request.clone())?;
+        }
+        let error = authority
+            .begin("owner-a", "/another-workspace", request.clone())
+            .err()
+            .ok_or_else(|| internal("capacity must deny another owner-a challenge"))?;
+        assert_eq!(error.code, "ELICITATION_CAPACITY_EXCEEDED");
+        assert!(error.retryable);
+        assert!(error.details.is_empty());
+        authority.begin("owner-b", "/workspace", request.clone())?;
+        assert!(matches!(
+            authority.complete(
+                first.request_state(),
+                "owner-a",
+                "/workspace",
+                &request,
+                &serde_json::json!({"action":"decline"})
+            )?,
+            NativePermissionConsentOutcome::Declined
+        ));
+        authority.begin("owner-a", "/workspace", request)?;
+        assert_eq!(
+            authority.process_local_challenge_count()?,
+            MAX_PENDING_CONSENT_CHALLENGES_PER_OWNER + 1
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn consent_capacity_global_bound_and_expiry_reclaim_abandoned_requests()
+    -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(1000));
+        let authority = NativePermissionConsentAuthority::new(runtime(Arc::clone(&clock)));
+        let request = capacity_request(0)?;
+        let mut original = String::new();
+        for index in 0..MAX_PENDING_CONSENT_CHALLENGES {
+            let prompt = authority.begin(
+                &format!("owner-{}", index / MAX_PENDING_CONSENT_CHALLENGES_PER_OWNER),
+                "/workspace",
+                request.clone(),
+            )?;
+            if index == 0 {
+                original = prompt.request_state().to_owned();
+            }
+        }
+        assert_eq!(
+            authority
+                .begin("new-owner", "/workspace", request.clone())
+                .map(|_| ())
+                .map_err(code),
+            Err("ELICITATION_CAPACITY_EXCEEDED".to_owned())
+        );
+        assert_eq!(
+            authority.process_local_challenge_count()?,
+            MAX_PENDING_CONSENT_CHALLENGES
+        );
+        clock.set(1300);
+        authority.begin("new-owner", "/workspace", request.clone())?;
+        assert_eq!(authority.process_local_challenge_count()?, 1);
+        assert_eq!(
+            completion_code(authority.complete(
+                &original,
+                "owner-0",
+                "/workspace",
+                &request,
+                &serde_json::json!({"action":"accept","content":{"approved":true}})
+            )),
+            Err("ELICITATION_STATE_INVALID".to_owned())
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn consent_capacity_last_slot_has_one_concurrent_winner() -> Result<(), ReCtmError> {
+        let authority =
+            NativePermissionConsentAuthority::new(runtime(Arc::new(ManualClock::new(1000))));
+        let request = capacity_request(0)?;
+        for _ in 1..MAX_PENDING_CONSENT_CHALLENGES_PER_OWNER {
+            authority.begin("owner-a", "/workspace", request.clone())?;
+        }
+        let barrier = Arc::new(Barrier::new(8));
+        let handles = (0..8)
+            .map(|_| {
+                let authority = authority.clone();
+                let request = request.clone();
+                let barrier = Arc::clone(&barrier);
+                thread::spawn(move || {
+                    barrier.wait();
+                    authority
+                        .begin("owner-a", "/workspace", request)
+                        .map(|_| ())
+                        .map_err(code)
+                })
+            })
+            .collect::<Vec<_>>();
+        let mut winners = 0;
+        for handle in handles {
+            match handle
+                .join()
+                .map_err(|_| internal("capacity worker panicked"))?
+            {
+                Ok(()) => winners += 1,
+                Err(code) => assert_eq!(code, "ELICITATION_CAPACITY_EXCEEDED"),
+            }
+        }
+        assert_eq!(winners, 1);
+        assert_eq!(
+            authority.process_local_challenge_count()?,
+            MAX_PENDING_CONSENT_CHALLENGES_PER_OWNER
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn permission_capacity_rejects_oversized_bindings_and_utf8_reasons_without_writes()
+    -> Result<(), ReCtmError> {
+        let runtime = runtime(Arc::new(ManualClock::new(1000)));
+        let authority = NativePermissionConsentAuthority::new(runtime.clone());
+        let grants = NativePermissionGrantAuthority::new(runtime);
+        let request = capacity_request(0)?;
+        let oversized = "x".repeat(MAX_PERMISSION_BINDING_BYTES + 1);
+        for (owner, workspace) in [(&oversized[..], "/workspace"), ("owner", &oversized[..])] {
+            assert_eq!(
+                authority
+                    .begin(owner, workspace, request.clone())
+                    .map(|_| ())
+                    .map_err(code),
+                Err("NATIVE_PERMISSION_REQUEST_TOO_LARGE".to_owned())
+            );
+            assert_eq!(
+                grants
+                    .issue_verified(consent(owner, workspace, request.clone()))
+                    .map(|_| ())
+                    .map_err(code),
+                Err("NATIVE_PERMISSION_REQUEST_TOO_LARGE".to_owned())
+            );
+        }
+        let mut input = serde_json::json!({
+            "tool_name":"exec_command","permission":"network",
+            "reason":"x".repeat(MAX_CONSENT_REASON_BYTES),"arguments":{}
+        })
+        .as_object()
+        .cloned()
+        .unwrap_or_default();
+        authority.begin(
+            "owner",
+            "/workspace",
+            NativePermissionRequest::parse(&input)?,
+        )?;
+        for reason in ["x".repeat(MAX_CONSENT_REASON_BYTES + 1), "界".repeat(342)] {
+            input.insert("reason".to_owned(), Value::String(reason));
+            assert_eq!(
+                authority
+                    .begin(
+                        "owner",
+                        "/workspace",
+                        NativePermissionRequest::parse(&input)?
+                    )
+                    .map(|_| ())
+                    .map_err(code),
+                Err("NATIVE_PERMISSION_REQUEST_TOO_LARGE".to_owned())
+            );
+        }
+        assert_eq!(authority.process_local_challenge_count()?, 1);
+        assert_eq!(grants.process_local_grant_count()?, 0);
+        Ok(())
+    }
+
+    #[test]
+    fn grant_capacity_preserves_live_and_revoked_records_until_expiry() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(1000));
+        let authority = NativePermissionGrantAuthority::new(runtime(Arc::clone(&clock)));
+        let first =
+            authority.issue_verified(consent("owner-a", "/workspace", capacity_request(0)?))?;
+        for index in 1..MAX_NATIVE_GRANT_RECORDS_PER_OWNER {
+            authority.issue_verified(consent("owner-a", "/workspace", capacity_request(index)?))?;
+        }
+        let extra = capacity_request(MAX_NATIVE_GRANT_RECORDS_PER_OWNER)?;
+        assert_eq!(
+            authority
+                .issue_verified(consent("owner-a", "/other-workspace", extra.clone()))
+                .map(|_| ())
+                .map_err(code),
+            Err("NATIVE_PERMISSION_GRANT_CAPACITY_EXCEEDED".to_owned())
+        );
+        let original = arguments("curl https://example.test/0");
+        authority.authorize(
+            first.grant_id(),
+            "owner-a",
+            "/workspace",
+            NativePermissionTool::ExecCommand,
+            NativePermissionKind::Network,
+            &original,
+        )?;
+        authority.revoke(first.grant_id(), "owner-a", "/workspace")?;
+        assert_eq!(
+            authority
+                .authorize(
+                    first.grant_id(),
+                    "owner-a",
+                    "/workspace",
+                    NativePermissionTool::ExecCommand,
+                    NativePermissionKind::Network,
+                    &original
+                )
+                .map(|_| ())
+                .map_err(code),
+            Err("NATIVE_PERMISSION_GRANT_REVOKED".to_owned())
+        );
+        assert_eq!(
+            authority
+                .issue_verified(consent("owner-a", "/workspace", extra.clone()))
+                .map(|_| ())
+                .map_err(code),
+            Err("NATIVE_PERMISSION_GRANT_CAPACITY_EXCEEDED".to_owned())
+        );
+        authority.issue_verified(consent("owner-b", "/workspace", extra.clone()))?;
+        clock.set(1010);
+        authority.issue_verified(consent("owner-a", "/workspace", extra))?;
+        assert_eq!(authority.process_local_grant_count()?, 1);
+        assert_eq!(
+            authority
+                .authorize(
+                    first.grant_id(),
+                    "owner-a",
+                    "/workspace",
+                    NativePermissionTool::ExecCommand,
+                    NativePermissionKind::Network,
+                    &original
+                )
+                .map(|_| ())
+                .map_err(code),
+            Err("NATIVE_PERMISSION_GRANT_NOT_FOUND".to_owned())
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn grant_capacity_global_bound_and_expiry_cleanup() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(1000));
+        let authority = NativePermissionGrantAuthority::new(runtime(Arc::clone(&clock)));
+        for index in 0..MAX_NATIVE_GRANT_RECORDS {
+            authority.issue_verified(consent(
+                &format!("owner-{}", index / MAX_NATIVE_GRANT_RECORDS_PER_OWNER),
+                "/workspace",
+                capacity_request(index)?,
+            ))?;
+        }
+        let request = capacity_request(MAX_NATIVE_GRANT_RECORDS)?;
+        let error = authority
+            .issue_verified(consent("new-owner", "/workspace", request.clone()))
+            .err()
+            .ok_or_else(|| internal("full grant ledger must deny new issuance"))?;
+        assert_eq!(error.code, "NATIVE_PERMISSION_GRANT_CAPACITY_EXCEEDED");
+        assert!(error.retryable);
+        assert!(error.details.is_empty());
+        assert_eq!(
+            authority.process_local_grant_count()?,
+            MAX_NATIVE_GRANT_RECORDS
+        );
+        clock.set(1010);
+        authority.issue_verified(consent("new-owner", "/workspace", request))?;
+        assert_eq!(authority.process_local_grant_count()?, 1);
+        Ok(())
+    }
+
+    #[test]
+    fn grant_capacity_last_slot_has_one_concurrent_winner() -> Result<(), ReCtmError> {
+        let authority =
+            NativePermissionGrantAuthority::new(runtime(Arc::new(ManualClock::new(1000))));
+        for index in 1..MAX_NATIVE_GRANT_RECORDS_PER_OWNER {
+            authority.issue_verified(consent("owner-a", "/workspace", capacity_request(index)?))?;
+        }
+        let barrier = Arc::new(Barrier::new(8));
+        let handles = (0..8)
+            .map(|index| {
+                let authority = authority.clone();
+                let barrier = Arc::clone(&barrier);
+                thread::spawn(move || {
+                    barrier.wait();
+                    let request = capacity_request(MAX_NATIVE_GRANT_RECORDS_PER_OWNER + index)?;
+                    authority
+                        .issue_verified(consent("owner-a", "/workspace", request))
+                        .map(|_| ())
+                })
+            })
+            .collect::<Vec<_>>();
+        let mut winners = 0;
+        for handle in handles {
+            match handle
+                .join()
+                .map_err(|_| internal("capacity worker panicked"))?
+            {
+                Ok(()) => winners += 1,
+                Err(error) => assert_eq!(error.code, "NATIVE_PERMISSION_GRANT_CAPACITY_EXCEEDED"),
+            }
+        }
+        assert_eq!(winners, 1);
+        assert_eq!(
+            authority.process_local_grant_count()?,
+            MAX_NATIVE_GRANT_RECORDS_PER_OWNER
+        );
+        Ok(())
     }
 
     #[test]

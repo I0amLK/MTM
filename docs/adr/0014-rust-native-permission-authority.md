@@ -159,6 +159,25 @@ the independent human interaction end to end and the redacted D5A evidence is
 accepted. Failure to obtain that real capability evidence blocks D5 rather than
 weakening the consent invariant.
 
+## D5 bounded in-memory consent and grant records
+
+Before public authority cutover, both process-local ledgers have fixed storage
+bounds: at most 256 pending challenges globally and 32 per OAuth owner; at most
+2,048 grant records globally and 256 per OAuth owner. Owner limits span workspaces.
+Owner/workspace strings are limited to 4,096 UTF-8 bytes each, and a stored consent
+reason to 1,024 bytes. Oversized binding/consent input is rejected before insertion.
+These are internal resource bounds, not new public schema fields or permissions.
+
+Issuance prunes expired records on demand under the same mutex used for the capacity
+check and insertion. No background thread or persistent store is introduced, and no
+live record is evicted to make room. Capacity denial is retryable and carries no raw
+owner, arguments, challenge, or grant identifier. It never means approval.
+Consumed/revoked grant tombstones count toward the bound until their original expiry
+to preserve replay diagnostics; afterwards, a removed handle fails as not found.
+Cross-owner completion must not consume another owner's pending challenge. Cleanup
+after abandonment is bounded by the fixed table size and occurs on the next issuance,
+not by an implied background timer. Synthetic capacity tests are A3 evidence only.
+
 ## Sandbox boundary
 
 MTM shall introduce a typed `SandboxPlan` before further expansion of Native

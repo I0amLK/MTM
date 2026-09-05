@@ -3,7 +3,7 @@
   "project": "MTM-reboot",
   "version": "0.4.0",
   "status": "MTM-014-in-progress",
-  "updated_at": "2026-09-05T12:25:23+08:00",
+  "updated_at": "2026-09-04T21:48:37-07:00",
   "source_baseline": "records/governance/source-baseline.json",
   "current_production_authority": "rust",
   "rust_production_components": 7,
@@ -20,6 +20,7 @@
   "completed_milestones": ["MTM-001", "MTM-002", "MTM-003", "MTM-004", "MTM-005", "MTM-006", "MTM-007", "MTM-008", "MTM-009", "MTM-010", "MTM-011", "MTM-012", "MTM-013"],
   "next_milestone": null,
   "claims": [
+    "MTM-014 D5 resource hardening bounds pending consent to 256 global/32 per owner and retained grants to 2048 global/256 per owner, with on-issuance expired-record pruning, byte-bounded bindings/reasons and no live eviction or new workers. All 33 permission unit tests, six evidence-validator tests, 13 real OAuth/MCP capacity checks and the existing 22 MRTR checks pass. This is A3 with scripted consent only; independent human client evidence, complete target A4 and production cutover remain pending. The operator runbook is docs/MTM-014-D5-HUMAN-ACCEPTANCE.md.",
     "MTM-013 is completed and stable MTM 0.4.0 remains the active release. Exact-binary loopback OAuth/MCP semantic regressions now bind the installed SHA-256 3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3: the QC constituent-matching case completed the full protocol-3 flow through direct_proving and the sigma-Hermitian case completed the compact lane; both reached done with server-computed correct verdict, passed LaTeX/finalizer gates and exported proof_verified.tex. The earlier preview.3 web-model runs remain historical supplemental evidence rather than being rewritten.",
     "MTM-014 D1 is accepted in pre-authority shadow: Rust now has typed eight-kind Native permission, once/session scope and exec_command/apply_patch tool enums; validated permission requests retain no raw nested arguments and bind a canonical SHA-256 argument digest; safe/trusted/dangerous implicit Native profiles are typed data; and a shadow classifier exposes only permission dimensions already enforced by the accepted command policy. Production request_permissions, check_command_policy, Bubblewrap and workflow/finalizer authority are unchanged.",
     "MTM-014 D2 is accepted in pre-authority shadow: RuntimeApplication now owns an empty process-local Native permission grant authority; explicit grants require an unforgeable VerifiedNativePermissionConsent with no public constructor, bind OAuth owner/workspace/tool/permission/argument digest/scope/expiry, atomically consume once grants, permit reusable session grants only inside the same process, fail closed on owner/workspace/tool/kind/argument/expiry/revocation mismatch, redact grant ids in Debug, and retain no raw command arguments. No production request_permissions, exec_command, apply_patch, Bubblewrap, workflow or finalizer path consumes these grants yet.",

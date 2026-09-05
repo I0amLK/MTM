@@ -1,0 +1,32 @@
+{
+  "binary_sha256": "c4cd6061f354ec83e0718a34c6a887311ee12f6f21a3ea60cb18218b7ae9ca60",
+  "check_count": 13,
+  "checks": {
+    "capacity_error_redacted": true,
+    "capacity_retryable": true,
+    "cross_owner_rejected": true,
+    "decline_releases_slot": true,
+    "denied_request_can_prompt_again": true,
+    "false_confirmation_mints_no_grant": true,
+    "form_challenge_returned": true,
+    "original_challenge_survives_cross_owner_attempt": true,
+    "other_owner_not_blocked": true,
+    "oversized_error_redacted": true,
+    "oversized_reason_rejected": true,
+    "owner_capacity_enforced": true,
+    "server_exits_cleanly": true
+  },
+  "consent_source": "scripted_test_responses",
+  "implementation_and_harness_sha256": "772268a4312f6a08d6c63610e56ec8a7e303904700c330c2441b3fc219dcfb80",
+  "milestone": "MTM-014",
+  "native_exec_backend": "disabled",
+  "ok": true,
+  "phase": "bounded_permission_ledger_integration",
+  "production_exec_or_patch_authority_cutover": false,
+  "raw_grant_id_recorded": false,
+  "raw_oauth_token_recorded": false,
+  "raw_request_state_recorded": false,
+  "raw_tool_arguments_recorded": false,
+  "real_human_consent_evidence": false,
+  "schema_version": "1.0.0"
+}

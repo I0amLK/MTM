@@ -663,6 +663,40 @@
       "authority_cutover_allowed": false
     }
   },
+  "d5_capacity_hardening": {
+    "accepted_at": "2026-09-04T21:48:37-07:00",
+    "scope": "A3 bounded process-local consent/grant storage; not human acceptance or cutover",
+    "limits": {
+      "pending_global": 256,
+      "pending_per_owner": 32,
+      "grant_records_global": 2048,
+      "grant_records_per_owner": 256,
+      "binding_max_utf8_bytes": 4096,
+      "reason_max_utf8_bytes": 1024
+    },
+    "owner_limits_span_workspaces": true,
+    "expiry_cleanup": "on_next_issuance_under_the_admission_mutex",
+    "live_records_evicted": false,
+    "consumed_and_revoked_tombstones_retained_until_expiry": true,
+    "new_background_workers": 0,
+    "capacity_denial_retryable": true,
+    "capacity_denial_grants_authority": false,
+    "permission_unit_tests": "33 passed including 7 new capacity tests",
+    "evidence_validator_tests": "6 passed",
+    "real_oauth_mcp_capacity_checks": "13 passed",
+    "existing_mrtr_checks_on_current_candidate": "22 passed",
+    "evidence_report": "records/evidence/MTM-014/capacity-validation.json",
+    "evidence_report_sha256": "aaac1bf155857376003bc2ee3aca56e40ee52cf107ca2f5b040a0167f6095d95",
+    "evidence_validator": "scripts/validate_mtm014_capacity_validation.py",
+    "full_run_checks": "24 of 24 passed",
+    "git_diff_check": true,
+    "binary_sha256": "c4cd6061f354ec83e0718a34c6a887311ee12f6f21a3ea60cb18218b7ae9ca60",
+    "implementation_and_harness_sha256": "772268a4312f6a08d6c63610e56ec8a7e303904700c330c2441b3fc219dcfb80",
+    "real_human_consent_evidence": false,
+    "authority_cutover_allowed": false,
+    "human_acceptance_runbook": "docs/MTM-014-D5-HUMAN-ACCEPTANCE.md",
+    "lifecycle_evidence_limit": "bbcbb94 qualifies candidate TTY output, timeout and explicit kill; candidate stdin round-trip and direct descendant assertions are not claimed by that test."
+  },
   "acceptance": {
     "A0": "Formatting, warnings-denied Clippy, workspace tests, governance, record-layout and unified local gate pass.",
     "A1": "Typed permission wire values, normalization, classifier ordering and current safe/trusted/dangerous compatibility are frozen by golden/adversarial tests.",
@@ -683,6 +717,12 @@
     "Real target A4 is required before any MTM-014 permission-authority cutover."
   ],
   "recorded_failures_and_repairs": [
+    {
+      "delivery": 5,
+      "stage": "pre-cutover resource-bound review",
+      "failure": "Pending consent challenges had no table capacity or proactive-on-issuance expiry pruning, and grant records accumulated indefinitely. An authenticated client could leave unanswered requests and grow process-local state without a fixed bound.",
+      "repair": "Freeze global/per-owner and UTF-8 byte limits, prune expired records in the admission critical section, retain live and unexpired replay tombstones, reject capacity exhaustion without authority, and validate concurrent admission plus two real OAuth clients. No background worker or public exec/patch cutover was added."
+    },
     {
       "delivery": 5,
       "stage": "candidate TTY lifecycle test command selection",

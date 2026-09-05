@@ -432,6 +432,32 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertFalse(d2["bubblewrap_changed"])
         self.assertFalse(d2["workflow_authority_changed"])
 
+    def test_mtm014_capacity_bounds_and_evidence_scope(self) -> None:
+        from scripts.validate_mtm014_capacity_validation import sha256_file
+
+        iteration = json.loads((ROOT / "records/iterations/ITER-014.json").read_text(encoding="utf-8"))
+        record = iteration["d5_capacity_hardening"]
+        self.assertEqual(sha256_file(ROOT / record["evidence_report"]), record["evidence_report_sha256"])
+        self.assertEqual(record["limits"], {
+            "pending_global": 256, "pending_per_owner": 32,
+            "grant_records_global": 2048, "grant_records_per_owner": 256,
+            "binding_max_utf8_bytes": 4096, "reason_max_utf8_bytes": 1024,
+        })
+        self.assertFalse(record["live_records_evicted"])
+        self.assertFalse(record["real_human_consent_evidence"])
+        self.assertFalse(record["authority_cutover_allowed"])
+        self.assertEqual(record["new_background_workers"], 0)
+        source = (ROOT / "crates/mtm-runtime/src/native_permission.rs").read_text(encoding="utf-8")
+        for declaration in (
+            "MAX_PENDING_CONSENT_CHALLENGES: usize = 256;",
+            "MAX_PENDING_CONSENT_CHALLENGES_PER_OWNER: usize = 32;",
+            "MAX_NATIVE_GRANT_RECORDS: usize = 2_048;",
+            "MAX_NATIVE_GRANT_RECORDS_PER_OWNER: usize = 256;",
+            "MAX_PERMISSION_BINDING_BYTES: usize = 4_096;",
+            "MAX_CONSENT_REASON_BYTES: usize = 1_024;",
+        ):
+            self.assertIn(declaration, source)
+
     def test_dependency_cycle_is_rejected(self) -> None:
         payload = copy.deepcopy(load_graph())
         payload["edges"].append({"source": "MTM-001", "target": "MTM-008"})
