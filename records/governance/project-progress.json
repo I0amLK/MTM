@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0.0",
   "project": "MTM-reboot",
-  "version": "0.4.0",
-  "status": "MTM-014-in-progress",
-  "updated_at": "2026-09-05T14:49:33+08:00",
+  "version": "0.5.0-preview.1",
+  "status": "MTM-014-completed",
+  "updated_at": "2026-09-05T16:06:32+08:00",
   "source_baseline": "records/governance/source-baseline.json",
   "current_production_authority": "rust",
   "rust_production_components": 7,
@@ -17,9 +17,10 @@
   "re_ctm_separate_project_installed": true,
   "milestone_count": 14,
   "current_milestone": "MTM-014",
-  "completed_milestones": ["MTM-001", "MTM-002", "MTM-003", "MTM-004", "MTM-005", "MTM-006", "MTM-007", "MTM-008", "MTM-009", "MTM-010", "MTM-011", "MTM-012", "MTM-013"],
+  "completed_milestones": ["MTM-001", "MTM-002", "MTM-003", "MTM-004", "MTM-005", "MTM-006", "MTM-007", "MTM-008", "MTM-009", "MTM-010", "MTM-011", "MTM-012", "MTM-013", "MTM-014"],
   "next_milestone": null,
   "claims": [
+    "CURRENT: MTM-014 is completed with 0.5.0-preview.1 selected for new launches at both ordinary mtm command entries. Exact binary 2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036 passed 18 release qualification checks and eight actual deployment checks, including stable 0.4.0 rollback, preview recutover and a second 60.198-second/506-iteration permission soak. Thread/descriptor counts stayed at 9/16 and no children remained. Immutable stable 0.4.0 and rejected preview resource receipts remain preserved. Earlier claims below are chronological stage records, not current deployment selectors.",
     "The final 0.5.0-preview.1 candidate from 2bee460643f8109e1e3dc58e2d4d719885b8a413 is release-qualified with SHA-256 2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036. All 18 exact-binary release checks passed, including public permissions, all-mode attestation, required-LaTeX QC/compact flows, copied state and stable/preview run roundtrip, TUI and frozen A5 bounds. The 60.215-second soak completed 506 iterations with 9 threads and 16 descriptors throughout, 1088 KiB RSS growth and no remaining children. Previous failed soaks remain immutable; stable is still selected pending the deployment drill.",
     "The watchdog-only preview kept thread count flat but still exceeded the frozen RSS growth limit due to eager allocation of empty/short command-output budgets. This second rejected receipt is preserved; the same hash-pinned process module now allocates stream vectors on demand without changing output caps or retention behavior. Fresh qualification under unchanged limits is required.",
     "The first MTM-014 preview soak was rejected for retained completed-command watchdog threads and buffers. Its failure report is preserved. A single hash-pinned process.rs repair now releases watchdog ownership when the command exits; deadline enforcement and all authority boundaries remain unchanged. This supersedes the version-only runtime scope and requires a fresh exact-binary A4/A5 pass under the original thresholds before deployment.",
@@ -100,7 +101,8 @@
     "records/governance/authority-inventory.json records every MTM production authority as Rust, with Bubblewrap retained only as the Linux kernel-isolation actuator; release evidence proves MTM uses mtm / MTM_* / ~/.mtm while Re-CTM uses re-ctm / RE_CTM_* / ~/.re-ctm."
   ],
   "manual_pending": [
-    "MTM-014 public Native authority is implemented and its 30-check public A4 is accepted; preview release identity, installation, rollback/recutover and bounded soak remain required for deployment completion.",
+    "Already running MTM TUI/serve processes are not restarted by selector rollout. Restart the desired session manually to adopt 0.5.0-preview.1; the ordinary command entries already select it.",
+    "Magma remains blocked by the host license and is not counted as functional validation. Other clients/platforms and long-duration soak remain separately qualified; explicit grants require a modern form-capable client.",
     "Keep the explicit protocol-2 workflow rollback and preserved preview.3 release rollback after stable completion; neither is removed by 0.4.0 qualification.",
     "Other operating systems and site-local toolchain layouts remain target-specific Native evidence.",
     "Publishing the internal mtm-* crates to a public registry is not required for the accepted single-binary distribution and remains a separate release decision.",

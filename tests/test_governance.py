@@ -104,12 +104,12 @@ class GovernanceTestCase(unittest.TestCase):
     def test_repository_migration_graph_is_valid(self) -> None:
         summary = validate_migration(load_graph())
         self.assertEqual(summary["milestone_count"], 14)
-        self.assertEqual(summary["todo_count"], 1)
+        self.assertEqual(summary["todo_count"], 0)
 
     def test_mtm014_native_permission_contract_is_frozen(self) -> None:
         graph = load_graph()
         milestone = next(item for item in graph["milestones"] if item["id"] == "MTM-014")
-        self.assertEqual(milestone["status"], "in_progress")
+        self.assertEqual(milestone["status"], "completed")
         self.assertEqual(milestone["dependencies"], ["MTM-013"])
         self.assertTrue(
             any(item.startswith("No Bubblewrap replacement") for item in milestone["non_goals"])
@@ -141,7 +141,26 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(delivery["D2"], "accepted")
         self.assertEqual(delivery["D3"], "accepted")
         self.assertEqual(delivery["D4"], "accepted")
-        self.assertEqual(delivery["D5"], "in_progress")
+        self.assertEqual(delivery["D5"], "accepted")
+        self.assertEqual(iteration["status"], "completed")
+        final_receipt = iteration["d5_receipt"]
+        repair = iteration["preview_runtime_repair_contract"]
+        for filename, key in (("preview-soak-rejected.json", "rejected_evidence_sha256"),
+                               ("preview-buffer-soak-rejected.json", "buffer_failure_evidence_sha256")):
+            evidence = ROOT / "records/evidence/MTM-014" / filename
+            self.assertEqual(hashlib.sha256(evidence.read_bytes()).hexdigest(), repair[key])
+            self.assertEqual(json.loads(evidence.read_text())["decision"], "rejected")
+        self.assertEqual(final_receipt["decision"], "accepted_0_5_0_preview_1")
+        self.assertTrue(final_receipt["real_rollback_recutover_passed"])
+        self.assertTrue(final_receipt["source_and_selected_command_authority_cutover"])
+        self.assertFalse(final_receipt["existing_sessions_restarted"])
+        self.assertFalse(final_receipt["production_state_rewritten"])
+        self.assertFalse(final_receipt["performance_claim"])
+        self.assertEqual(final_receipt["actual_deployment_checks"], 8)
+        for report_key, digest_key in (("release_report", "release_sha256"),
+                                       ("qualification_report", "qualification_sha256")):
+            self.assertEqual(hashlib.sha256((ROOT / final_receipt[report_key]).read_bytes()).hexdigest(),
+                             final_receipt[digest_key])
         d3 = iteration["d3_contract"]
         self.assertEqual(
             d3["exec_permission_order"],
@@ -556,7 +575,7 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(smoke["second_ignored_patch_without_grant"], "PERMISSION_REQUIRED")
         self.assertFalse(d5b_progress["stable_deployment"]["changed"])
         self.assertEqual(d5b_progress["post_cutover_public_path_a4"], "accepted")
-        self.assertFalse(d5b_progress["release_or_selector_cutover"])
+        self.assertTrue(d5b_progress["release_or_selector_cutover"])
         self.assertFalse(d5b_progress["workflow_or_finalizer_authority_changed"])
         post_runner = d5b_progress["formal_post_cutover_target_runner"]
         self.assertEqual(post_runner["status"], "accepted_post_cutover")

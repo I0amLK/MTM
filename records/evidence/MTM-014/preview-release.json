@@ -1,0 +1,55 @@
+{
+  "binary_sha256": "2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036",
+  "check_count": 8,
+  "checks": {
+    "both_entries_agree": true,
+    "candidate_recutover_smoke": true,
+    "candidate_selector_smoke": true,
+    "deployment_manifest_consistent": true,
+    "post_recutover_soak": true,
+    "qualified_binary_installed": true,
+    "stable_artifact_preserved": true,
+    "stable_rollback_smoke": true
+  },
+  "evidence_hygiene": {
+    "raw_command_or_proof_recorded": false,
+    "raw_credentials_recorded": false,
+    "raw_grant_or_capability_recorded": false,
+    "raw_logs_recorded": false
+  },
+  "existing_sessions_restarted": false,
+  "milestone": "MTM-014",
+  "ok": true,
+  "performance_claim": false,
+  "phase": "preview_release",
+  "post_recutover_soak": {
+    "after": {
+      "children": 0,
+      "fds": 16,
+      "rss_kib": 15212,
+      "threads": 9
+    },
+    "before": {
+      "children": 0,
+      "fds": 16,
+      "rss_kib": 14348,
+      "threads": 9
+    },
+    "duration_seconds": 60.198,
+    "iterations": 506,
+    "peak": {
+      "children": 0,
+      "fds": 16,
+      "rss_kib": 15480,
+      "threads": 9
+    },
+    "shutdown_ms": 64.344
+  },
+  "production_state_rewritten": false,
+  "qualification_sha256": "13f657d3e27895c32703500d5096c33c0fdbabfd61633f91354b58e45178d440",
+  "recorded_at": "2026-09-05T08:06:18.340199+00:00",
+  "schema_version": "1.0.0",
+  "source_commit": "2bee460643f8109e1e3dc58e2d4d719885b8a413",
+  "stable_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+  "version": "0.5.0-preview.1"
+}

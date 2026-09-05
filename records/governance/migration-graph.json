@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM-reboot fourteen-milestone migration graph",
-  "updated_at": "2026-09-02T10:00:00-07:00",
+  "updated_at": "2026-09-05T16:06:32+08:00",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -471,7 +471,7 @@
     {
       "id": "MTM-014",
       "title": "Rust Native permission authority",
-      "status": "in_progress",
+      "status": "completed",
       "priority": "P0",
       "production_authority_before": "rust",
       "production_authority_after": "rust",
@@ -529,7 +529,7 @@
     {"source": "MTM-013", "target": "MTM-012"},
     {"source": "MTM-014", "target": "MTM-013"}
   ],
-  "todo": ["MTM-014"],
+  "todo": [],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -970,6 +970,14 @@
       "status_before": "in_progress",
       "status_after": "completed",
       "summary": "Completed stable 0.4.0 qualification after the frozen source passed public cargo-install identity, existing-state upgrade, protocol-3/default and protocol-2 rollback probes, proof finalization, bounded A5 resource/soak checks, stable selector rollback/recutover, post-cutover namespace governance, capability-invalid fail-closed recovery, and exact installed-binary QC full-flow plus compact sigma-Hermitian semantic regressions."
+    },
+    {
+      "event_id": "MEVT-056",
+      "milestone_id": "MTM-014",
+      "at": "2026-09-05T16:06:32+08:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "summary": "Completed typed Rust Native permission authority and selected qualified 0.5.0-preview.1 for new launches. Human MRTR consent, pre/post-cutover A4, exact Git-installed preview qualification, required-LaTeX QC/compact and copied-state compatibility passed. Rejected watchdog/buffer resource results were retained and repaired without relaxed thresholds. Actual stable rollback, preview recutover and bounded permission soak passed; immutable stable 0.4.0 and existing sessions were preserved."
     }
   ],
   "receipt_contract": {
@@ -2751,6 +2759,67 @@
         "None for MTM-013 itself. Rust Native permission-authority work is tracked under MTM-014."
       ],
       "decision": "accepted_stable_0_4_0"
+    },
+    {
+      "receipt_id": "MREC-014",
+      "milestone_id": "MTM-014",
+      "started_at": "2026-09-04T05:50:00-07:00",
+      "completed_at": "2026-09-05T16:06:32+08:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "docs(mtm014): complete qualified native permission preview [MTM-014]",
+      "files_changed": [
+        "records/iterations/ITER-014.json",
+        "records/evidence/MTM-014/elicitation-capability.json",
+        "records/evidence/MTM-014/public-authority-target.json",
+        "records/evidence/MTM-014/preview-qualification.json",
+        "records/evidence/MTM-014/preview-release.json",
+        "scripts/validate_mtm014_preview_release.py",
+        "scripts/release_mtm014_preview.py",
+        "crates/mtm-runtime/src/native_permission.rs",
+        "crates/mtm-runtime/src/native_authority.rs",
+        "crates/mtm-native/src/process.rs"
+      ],
+      "commands": [
+        {
+          "command": "python3 scripts/validate_mtm014_public_authority_target.py",
+          "exit_code": 0,
+          "result": "Thirty post-cutover public OAuth/MCP checks passed and the immutable receipt was accepted."
+        },
+        {
+          "command": "python3 scripts/run_mtm014_preview_qualification.py",
+          "exit_code": 0,
+          "result": "Eighteen exact-binary checks passed for source 2bee460643f8109e1e3dc58e2d4d719885b8a413 and binary 2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036; two failed resource variants remain archived rather than relabelled as passes."
+        },
+        {
+          "command": "python3 scripts/release_mtm014_preview.py",
+          "exit_code": 0,
+          "result": "Side-by-side install, candidate selector smoke, stable rollback smoke, preview recutover smoke and a second 60-second permission soak passed through the actual installed command entry."
+        },
+        {
+          "command": "python3 scripts/validate_mtm014_preview_release.py --deployed && python3 scripts/run_checks.py && git diff --check",
+          "exit_code": 0,
+          "result": "Current installation and immutable receipt bindings are verified by the unified gate; no historical stable evidence was overwritten."
+        }
+      ],
+      "acceptance": {
+        "A0": {"passed": true, "evidence": ["Formatting, warnings-denied Clippy, Rust/Python tests and unified governance/conformance gates pass."]},
+        "A1": {"passed": true, "evidence": ["Eight-kind typed permission contracts, exact argument binding, public PERMISSION_REQUIRED compatibility and fixed Bubblewrap/Native profiles are preserved."]},
+        "A3": {"passed": true, "evidence": ["Human client-owned MRTR consent, denial/cancel, once/session/expiry/replay/cross-owner/concurrency tests and no workflow-authority inheritance are qualified; failed release/resource inputs fail closed."]},
+        "A4": {"passed": true, "evidence": ["All-mode real Bubblewrap public execution, generated/ignored patches, network/DNS, TTY/stdin/kill/descendants, required-LaTeX QC/compact and copied-state roundtrips pass on the installed Linux target; Magma licensing remains explicitly host-blocked."]},
+        "A5": {"passed": true, "evidence": ["Three equivalent startup samples and 180 calls per version met predeclared non-regression bounds. Both 60-second permission soaks completed 506 iterations with fixed 9 threads/16 descriptors and no remaining children. No A6 performance or long-term soak claim is made."]}
+      },
+      "behavior_before": "Stable 0.4.0 Native permission requests could not produce verified Safe/Trusted explicit authorization and public execution used the earlier mode-dependent policy path.",
+      "behavior_after": "The selected 0.5.0-preview.1 routes public exec/apply_patch through typed Rust policy, process-local exact grants and validated SandboxPlan/PreparedPatch. Bubblewrap remains the actuator; workflow and finalizer authority remain separate.",
+      "risk_review": "Release is a qualified preview, not a stable 0.5.0 claim. Source changes after public A4 are limited to version metadata and the explicitly hash-pinned watchdog/output-allocation repair, followed by fresh complete release tests. Existing production data was not rewritten, running sessions were not restarted, and Magma's host license block is not counted as a functional pass.",
+      "rollback": "Run python3 scripts/release_mtm014_preview.py --rollback, then restart only the desired session. Both ordinary command entries return to the preserved stable 0.4.0 artifact; original deployment metadata is backed up and no workflow data migration is required.",
+      "manual_pending": [
+        "Restart already running sessions to adopt the new selection; push local commits to GitHub as the operator.",
+        "Restore a valid Magma host license for functional algebra validation. Other clients/platforms and long-duration operation remain outside this measured preview scope."
+      ],
+      "decision": "accepted_0_5_0_preview_1"
     }
   ]
 }

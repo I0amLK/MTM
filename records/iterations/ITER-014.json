@@ -2,7 +2,8 @@
   "schema_version": "1.0.0",
   "milestone": "MTM-014",
   "title": "Rust Native permission authority",
-  "status": "in_progress",
+  "status": "completed",
+  "completed_at": "2026-09-05T16:06:32+08:00",
   "started_at": "2026-09-04T05:50:00-07:00",
   "authority": {
     "before": "rust",
@@ -70,7 +71,7 @@
     {
       "id": "D5",
       "name": "real target permission and isolation qualification",
-      "status": "in_progress"
+      "status": "accepted"
     }
   ],
   "d1_receipt": {
@@ -951,9 +952,9 @@
       "release_cutover_allowed_before_report_acceptance": false
     },
     "post_cutover_public_path_a4": "accepted",
-    "release_or_selector_cutover": false,
+    "release_or_selector_cutover": true,
     "workflow_or_finalizer_authority_changed": false,
-    "manual_pending": "Public-path A4 is accepted. Freeze and qualify a separately versioned preview, perform side-by-side install, rollback/recutover and bounded resource soak before deployment completion."
+    "manual_pending": "Versioned preview qualification and deployment rollback/recutover are accepted in d5_receipt. Existing sessions require an operator restart to adopt the new selection; Magma remains host-license dependent."
   },
   "preview_release_contract": {
     "frozen_at": "2026-09-05T15:21:42+08:00",
@@ -1014,6 +1015,51 @@
     "rejected_soak_receipts_preserved": true,
     "next_gate": "Actual side-by-side install and stable rollback/preview recutover with post-recutover soak."
   },
+  "d5_receipt": {
+    "accepted_at": "2026-09-05T16:06:32+08:00",
+    "decision": "accepted_0_5_0_preview_1",
+    "version": "0.5.0-preview.1",
+    "source_commit": "2bee460643f8109e1e3dc58e2d4d719885b8a413",
+    "binary_sha256": "2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036",
+    "qualification_report": "records/evidence/MTM-014/preview-qualification.json",
+    "qualification_sha256": "13f657d3e27895c32703500d5096c33c0fdbabfd61633f91354b58e45178d440",
+    "release_report": "records/evidence/MTM-014/preview-release.json",
+    "release_sha256": "97ecae64d4154479fe0e6125caf67e663f18bfd621b13ba73752e09badca4ab5",
+    "accepted_public_a4_checks": 30,
+    "exact_preview_qualification_checks": 18,
+    "actual_deployment_checks": 8,
+    "source_and_selected_command_authority_cutover": true,
+    "stable_rollback_version": "0.4.0",
+    "stable_rollback_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+    "real_rollback_recutover_passed": true,
+    "post_recutover_soak_seconds": 60.198,
+    "post_recutover_soak_iterations": 506,
+    "post_recutover_threads_before_peak_after": [9, 9, 9],
+    "post_recutover_fds_before_peak_after": [16, 16, 16],
+    "post_recutover_rss_kib_before_peak_after": [14348, 15480, 15212],
+    "post_recutover_remaining_children": 0,
+    "existing_sessions_restarted": false,
+    "production_state_rewritten": false,
+    "new_human_consent_claimed": false,
+    "performance_claim": false,
+    "rejected_resource_evidence_preserved": true,
+    "magma_host_status": "blocked_host_license",
+    "rollback_command": "python3 scripts/release_mtm014_preview.py --rollback",
+    "validation": {
+      "unified_gate": "29 of 29 passed",
+      "python_tests_run": 66,
+      "python_deployment_mode_skips": 4,
+      "cargo_fmt_clippy_workspace_tests": "passed",
+      "deployed_release_and_namespace_validators": "passed",
+      "migration_graph_completed_milestones": 14,
+      "migration_graph_remaining_todo": 0
+    },
+    "manual_pending": [
+      "Operator restart is required for already running TUI/serve sessions to adopt the selected preview.",
+      "Magma functional use requires a valid host license; executable visibility and license failure classification are tested, not claimed as successful algebra execution.",
+      "Other clients/platforms and long-duration operation remain outside the measured target scope. Explicit consent requires a modern form-capable client."
+    ]
+  },
   "d5_capacity_hardening": {
     "accepted_at": "2026-09-04T21:48:37-07:00",
     "scope": "A3 bounded process-local consent/grant storage; not human acceptance or cutover",
@@ -1063,8 +1109,8 @@
   ],
   "rollback": "Before permission-authority cutover, remove the MTM-014 shadow types/ledger and retain stable 0.4.0 Native policy plus Bubblewrap. After a later cutover, restore the frozen pre-cutover evaluator and invalidate all process-local grants; no persistent workflow/project/proof data rewrite is required.",
   "manual_pending": [
-    "D5A, pre-cutover A4, public A4 and the exact 0.5.0-preview.1 release qualification are accepted. Side-by-side installation, rollback/recutover and post-recutover soak remain mandatory before closure.",
-    "Preview install, rollback/recutover and bounded soak remain required before MTM-014 completion; Magma functional validation remains host-license dependent."
+    "The selected 0.5.0-preview.1 has passed exact qualification, real stable rollback/preview recutover and bounded soak; existing sessions are intentionally not restarted.",
+    "Magma functional validation remains host-license dependent. Additional clients, platforms and longer soak durations require separate evidence."
   ],
   "recorded_failures_and_repairs": [
     {
@@ -1220,5 +1266,5 @@
       "repair": "Applied cargo fmt without semantic changes and reran the focused tests, warnings-denied Clippy, and unified local gate successfully."
     }
   ],
-  "decision": "in_progress"
+  "decision": "accepted_0_5_0_preview_1"
 }

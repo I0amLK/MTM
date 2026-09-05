@@ -9,6 +9,26 @@ separate project with its own executable, configuration namespace, and runtime d
 
 Repository: <https://github.com/I0amLK/MTM>
 
+## Current release
+
+MTM-014 is qualified as **0.5.0-preview.1**, with Rust Native permission authority
+and Bubblewrap retained as the Linux isolation actuator. The immutable **0.4.0**
+stable binary remains the rollback release. This is a preview, not a new stable cut.
+
+The preview passed real client-owned MRTR consent, public permission regressions,
+required-LaTeX QC/compact workflows, copied-state compatibility, actual selector
+rollback/recutover and bounded resource soak. Magma functional use remains blocked
+by the validation host's license; it is not counted as a functional pass. Explicit
+permission approval requires a modern form-capable MCP client; legacy clients do
+not silently gain approval support.
+
+See [the preview release contract](docs/releases/0.5.0-preview.1.md) and the exact
+qualification/deployment receipts under `records/evidence/MTM-014/`. Existing
+running sessions are not restarted by selector changes. On the qualified target,
+restart the desired TUI with `mtm tui --quick-tunnel --native-mode dangerous` to
+use the new selection. Restore stable selection with
+`python3 scripts/release_mtm014_preview.py --rollback` from this repository.
+
 ## Highlights
 
 - Single Rust executable: `mtm`.
