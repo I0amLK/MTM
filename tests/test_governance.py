@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import subprocess
 import sys
@@ -551,11 +552,14 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(smoke["ignored_patch_execution"], "passed")
         self.assertEqual(smoke["second_ignored_patch_without_grant"], "PERMISSION_REQUIRED")
         self.assertFalse(d5b_progress["stable_deployment"]["changed"])
-        self.assertEqual(d5b_progress["post_cutover_public_path_a4"], "pending")
+        self.assertEqual(d5b_progress["post_cutover_public_path_a4"], "accepted")
         self.assertFalse(d5b_progress["release_or_selector_cutover"])
         self.assertFalse(d5b_progress["workflow_or_finalizer_authority_changed"])
         post_runner = d5b_progress["formal_post_cutover_target_runner"]
-        self.assertEqual(post_runner["status"], "prepared_not_yet_accepted")
+        self.assertEqual(post_runner["status"], "accepted_post_cutover")
+        post_report = ROOT / post_runner["report"]
+        self.assertEqual(hashlib.sha256(post_report.read_bytes()).hexdigest(), post_runner["report_sha256"])
+        self.assertEqual(post_runner["target_checks_passed"], 30)
         self.assertEqual(
             post_runner["implementation_commit"],
             "2f11750c07317d879f1bedfd2198c36786b8ca74",

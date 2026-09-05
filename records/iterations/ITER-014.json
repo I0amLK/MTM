@@ -920,7 +920,13 @@
       "changed": false
     },
     "formal_post_cutover_target_runner": {
-      "status": "prepared_not_yet_accepted",
+      "status": "accepted_post_cutover",
+      "accepted_at": "2026-09-05T15:21:42+08:00",
+      "qualification_commit": "bdceba653966fa35386120cd61a8728dfe18d4c3",
+      "report_sha256": "f868c3334cfe74be734be0caef07b4ae62c621c3a2b69584733049f54352f147",
+      "candidate_binary_sha256": "30d84ba6c47c107a2d74b5e56ae7c4fc9da5401425a1f261b44fb68a572133d2",
+      "target_checks_passed": 30,
+      "magma_host_status": "blocked_host_license",
       "prepared_at": "2026-09-05T14:57:25+08:00",
       "implementation_commit": "2f11750c07317d879f1bedfd2198c36786b8ca74",
       "runner": "scripts/run_mtm014_public_authority_target.py",
@@ -944,10 +950,10 @@
       "allows_missing_required_tool": false,
       "release_cutover_allowed_before_report_acceptance": false
     },
-    "post_cutover_public_path_a4": "pending",
+    "post_cutover_public_path_a4": "accepted",
     "release_or_selector_cutover": false,
     "workflow_or_finalizer_authority_changed": false,
-    "manual_pending": "Run hash-bound post-cutover public OAuth/MCP A4 before any preview install or selector change."
+    "manual_pending": "Public-path A4 is accepted. Freeze and qualify a separately versioned preview, perform side-by-side install, rollback/recutover and bounded resource soak before deployment completion."
   },
   "d5_capacity_hardening": {
     "accepted_at": "2026-09-04T21:48:37-07:00",
@@ -998,10 +1004,16 @@
   ],
   "rollback": "Before permission-authority cutover, remove the MTM-014 shadow types/ledger and retain stable 0.4.0 Native policy plus Bubblewrap. After a later cutover, restore the frozen pre-cutover evaluator and invalidate all process-local grants; no persistent workflow/project/proof data rewrite is required.",
   "manual_pending": [
-    "D5A human MRTR form elicitation and pre-cutover A4 are accepted, and the source-level public exec_command/apply_patch Native authority cutover is committed. Post-cutover public OAuth/MCP A4 remains mandatory before any preview install or selector change.",
+    "D5A, pre-cutover A4 and the 30-check post-cutover public OAuth/MCP A4 are accepted. Preview release qualification remains mandatory before selector changes.",
     "Preview install, rollback/recutover and bounded soak remain required before MTM-014 completion; Magma functional validation remains host-license dependent."
   ],
   "recorded_failures_and_repairs": [
+    {
+      "delivery": 5,
+      "stage": "post-cutover A4 receipt integration gate",
+      "failure": "The receipt hash assertion initially omitted the hashlib import; Python governance failed with NameError while the other 26 gates passed.",
+      "repair": "Added the missing standard-library import and reran the complete unchanged gate before acceptance."
+    },
     {
       "delivery": 5,
       "stage": "post-cutover public A4 dangerous non-inheritance assertion",
