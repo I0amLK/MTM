@@ -760,6 +760,21 @@
       "full_run_checks": "25 of 25 passed",
       "git_diff_check": true
     },
+    "formal_target_runner": {
+      "status": "prepared_not_yet_accepted",
+      "runner": "scripts/run_mtm014_native_permission_target.py",
+      "validator": "scripts/validate_mtm014_native_permission_target.py",
+      "validator_regression_tests": "tests/test_mtm014_target_evidence.py",
+      "report": "records/evidence/MTM-014/native-permission-target.json",
+      "expected_check_count": 22,
+      "binds_exact_human_tested_candidate": true,
+      "requires_stable_selector_unchanged": true,
+      "requires_production_source_compatibility": true,
+      "requires_safe_trusted_dangerous_attestation": true,
+      "requires_explicit_real_dns_https": true,
+      "allows_skipped_required_tools": false,
+      "production_cutover_allowed_before_report_acceptance": false
+    },
     "manual_pending": "Complete the formal hash-bound A4 target runner and evidence receipt before public exec/apply_patch authority cutover."
   },
   "d5_capacity_hardening": {

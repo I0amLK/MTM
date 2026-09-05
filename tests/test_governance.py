@@ -421,6 +421,22 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertFalse(target["authority_boundary"]["stable_selector_changed"])
         self.assertFalse(target["authority_boundary"]["workflow_authority_inherited"])
         self.assertEqual(target["validation"]["full_run_checks"], "25 of 25 passed")
+        formal = target["formal_target_runner"]
+        self.assertEqual(formal["status"], "prepared_not_yet_accepted")
+        self.assertEqual(
+            formal["runner"], "scripts/run_mtm014_native_permission_target.py"
+        )
+        self.assertEqual(
+            formal["validator"], "scripts/validate_mtm014_native_permission_target.py"
+        )
+        self.assertEqual(formal["expected_check_count"], 22)
+        self.assertTrue(formal["binds_exact_human_tested_candidate"])
+        self.assertTrue(formal["requires_stable_selector_unchanged"])
+        self.assertTrue(formal["requires_production_source_compatibility"])
+        self.assertTrue(formal["requires_safe_trusted_dangerous_attestation"])
+        self.assertTrue(formal["requires_explicit_real_dns_https"])
+        self.assertFalse(formal["allows_skipped_required_tools"])
+        self.assertFalse(formal["production_cutover_allowed_before_report_acceptance"])
 
         human = d5a_progress["human_acceptance"]
         self.assertEqual(human["client"], "MCP Inspector 2.5.0")
