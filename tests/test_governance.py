@@ -354,6 +354,30 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(candidate["tests"]["real_bubblewrap_once_grant_exec"])
         self.assertEqual(candidate["tests"]["patch_candidate"], "3 passed")
         self.assertEqual(candidate["tests"]["exec_candidate"], "2 passed")
+        self.assertEqual(
+            candidate["tests"]["all_seven_exec_permission_kinds_real_bubblewrap"],
+            "passed",
+        )
+        self.assertEqual(
+            candidate["real_bubblewrap_permission_matrix"],
+            [
+                "network",
+                "destructive_command",
+                "long_timeout",
+                "sensitive_env",
+                "shell_expansion",
+                "inline_script",
+                "privileged_executable",
+            ],
+        )
+        toolchains = candidate["toolchain_prequalification"]
+        self.assertEqual(toolchains["mode"], "dangerous_auto_discovery")
+        self.assertEqual(toolchains["git"], "passed")
+        self.assertEqual(toolchains["pdflatex"], "passed")
+        self.assertEqual(toolchains["sage"], "passed")
+        self.assertTrue(toolchains["magma_executable_reached"])
+        self.assertEqual(toolchains["magma_functional_status"], "blocked_host_license")
+        self.assertFalse(toolchains["magma_failure_attributed_to_mtm"])
         self.assertFalse(candidate["production_exec_command_changed"])
         self.assertFalse(candidate["production_apply_patch_changed"])
         self.assertFalse(candidate["real_human_consent_evidence"])

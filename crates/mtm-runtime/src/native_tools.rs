@@ -172,6 +172,31 @@ impl NativeToolRuntime {
         })
     }
 
+    #[cfg(test)]
+    pub(crate) fn test_attested_bubblewrap(
+        workspace: Arc<NativeWorkspace>,
+        mode: NativeMode,
+        forbidden_paths: &[PathBuf],
+    ) -> Result<Self, ReCtmError> {
+        let host_path = std::env::var("PATH").ok();
+        let exposure = build_toolchain_exposure_plan(
+            mode,
+            workspace.root(),
+            forbidden_paths,
+            &[],
+            host_path.as_deref(),
+        )?;
+        Ok(Self {
+            workspace,
+            mode,
+            command_manager: CommandManager::new(CommandManagerConfig::default()),
+            backend: "bubblewrap".to_owned(),
+            exposure: Some(exposure),
+            forbidden_paths: forbidden_paths.to_vec(),
+            attestation: Some(serde_json::json!({"hard_isolation":true})),
+        })
+    }
+
     #[must_use]
     pub fn mode(&self) -> NativeMode {
         self.mode

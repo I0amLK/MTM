@@ -1,6 +1,9 @@
-#![expect(
-    dead_code,
-    reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
+#![cfg_attr(
+    not(test),
+    expect(
+        dead_code,
+        reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
+    )
 )]
 
 use std::collections::BTreeSet;
@@ -122,6 +125,11 @@ fn internal(message: &str) -> ReCtmError {
 #[cfg(test)]
 mod tests {
     use std::fs;
+    use std::io::{Read, Write};
+    use std::net::TcpListener;
+    #[cfg(target_os = "linux")]
+    use std::os::unix::fs::PermissionsExt;
+    use std::thread;
 
     use mtm_contracts::{NativeMode, NativePermissionScope};
     use mtm_core::NativePermissionRequest;
@@ -177,6 +185,41 @@ mod tests {
         Ok(())
     }
 
+    fn issue_exec_grant(
+        grants: &NativePermissionGrantAuthority,
+        consents: &NativePermissionConsentAuthority,
+        owner: &str,
+        workspace: &str,
+        kind: NativePermissionKind,
+        arguments: &Map<String, Value>,
+    ) -> Result<(), ReCtmError> {
+        let request = NativePermissionRequest::parse(
+            serde_json::json!({
+                "tool_name":"exec_command",
+                "permission":kind.as_str(),
+                "reason":"candidate exec matrix test",
+                "arguments":arguments,
+                "scope":NativePermissionScope::Once.as_str(),
+                "ttl_seconds":300
+            })
+            .as_object()
+            .ok_or_else(|| internal("test permission request must be an object"))?,
+        )?;
+        let prompt = consents.begin(owner, workspace, request.clone())?;
+        let outcome = consents.complete(
+            prompt.request_state(),
+            owner,
+            workspace,
+            &request,
+            &serde_json::json!({"action":"accept","content":{"approved":true}}),
+        )?;
+        let NativePermissionConsentOutcome::Accepted(consent) = outcome else {
+            return Err(internal("test consent was not accepted"));
+        };
+        grants.issue_verified(consent)?;
+        Ok(())
+    }
+
     struct CandidateFixture {
         _root: tempfile::TempDir,
         workspace: Arc<NativeWorkspace>,
@@ -210,6 +253,111 @@ mod tests {
             grants,
             consents,
             executor,
+        })
+    }
+
+    #[cfg(target_os = "linux")]
+    fn bubblewrap_candidate_fixture(mode: NativeMode) -> Result<CandidateFixture, ReCtmError> {
+        let root = tempfile::tempdir().map_err(|error| internal(&error.to_string()))?;
+        let private = root.path().join("private-outside-workspace");
+        let workspace_root = root.path().join("workspace");
+        fs::create_dir_all(&private).map_err(|error| internal(&error.to_string()))?;
+        fs::create_dir_all(&workspace_root).map_err(|error| internal(&error.to_string()))?;
+        let workspace = Arc::new(NativeWorkspace::new(&workspace_root, &private)?);
+        let native = Arc::new(NativeToolRuntime::test_attested_bubblewrap(
+            Arc::clone(&workspace),
+            mode,
+            std::slice::from_ref(&private),
+        )?);
+        let runtime = StoreRuntime::default();
+        let grants = Arc::new(NativePermissionGrantAuthority::new(runtime.clone()));
+        let consents = NativePermissionConsentAuthority::new(runtime);
+        let executor =
+            NativeAuthorityExecutor::new(native, Arc::clone(&workspace), Arc::clone(&grants));
+        Ok(CandidateFixture {
+            _root: root,
+            workspace,
+            grants,
+            consents,
+            executor,
+        })
+    }
+
+    #[cfg(target_os = "linux")]
+    fn command_exists(name: &str) -> bool {
+        std::process::Command::new("sh")
+            .args(["-c", &format!("command -v {name} >/dev/null 2>&1")])
+            .status()
+            .is_ok_and(|status| status.success())
+    }
+
+    #[cfg(target_os = "linux")]
+    fn run_exact_once_exec(
+        fixture: &CandidateFixture,
+        kind: NativePermissionKind,
+        arguments: &Map<String, Value>,
+    ) -> Result<Value, ReCtmError> {
+        let owner = "owner-a";
+        let workspace = fixture.workspace.root().display().to_string();
+        assert_eq!(
+            fixture
+                .executor
+                .exec_command_candidate(owner, arguments)
+                .map_err(|error| error.code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        issue_exec_grant(
+            &fixture.grants,
+            &fixture.consents,
+            owner,
+            &workspace,
+            kind,
+            arguments,
+        )?;
+        let result = fixture.executor.exec_command_candidate(owner, arguments)?;
+        assert_eq!(result["status"], "exited");
+        assert_eq!(result["exit_code"], 0);
+        assert_eq!(
+            fixture
+                .executor
+                .exec_command_candidate(owner, arguments)
+                .map_err(|error| error.code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        Ok(result)
+    }
+
+    #[cfg(target_os = "linux")]
+    fn run_unprivileged_exec(
+        fixture: &CandidateFixture,
+        arguments: &Map<String, Value>,
+    ) -> Result<Value, ReCtmError> {
+        let result = fixture
+            .executor
+            .exec_command_candidate("owner-a", arguments)?;
+        if result["status"] != "exited" || result["exit_code"] != 0 {
+            return Err(ReCtmError::new(
+                "TEST_TOOLCHAIN_EXECUTION_FAILED",
+                "Candidate toolchain command did not exit successfully.",
+            )
+            .with_category(ErrorCategory::Runtime)
+            .with_details(serde_json::json!({
+                "status":result["status"],
+                "exit_code":result["exit_code"]
+            })));
+        }
+        Ok(result)
+    }
+
+    #[cfg(target_os = "linux")]
+    fn run_named_unprivileged_exec(
+        fixture: &CandidateFixture,
+        label: &str,
+        arguments: &Map<String, Value>,
+    ) -> Result<Value, ReCtmError> {
+        run_unprivileged_exec(fixture, arguments).map_err(|mut error| {
+            error.message = format!("{label}: {}", error.message);
+            error
         })
     }
 
@@ -322,6 +470,220 @@ mod tests {
                 .join("build/original.txt")
                 .is_file()
         );
+        Ok(())
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn exec_candidate_covers_all_seven_permission_kinds_on_real_bubblewrap()
+    -> Result<(), ReCtmError> {
+        if !command_exists("bwrap") || !command_exists("curl") {
+            return Ok(());
+        }
+        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
+
+        let inline = Map::from_iter([
+            (
+                "argv".to_owned(),
+                serde_json::json!(["sh", "-c", "printf inline"]),
+            ),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        assert_eq!(
+            run_exact_once_exec(&fixture, NativePermissionKind::InlineScript, &inline)?["stdout"],
+            "inline"
+        );
+
+        let shell_expansion = Map::from_iter([
+            ("cmd".to_owned(), Value::String("printf ${HOME}".to_owned())),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        assert!(
+            run_exact_once_exec(
+                &fixture,
+                NativePermissionKind::ShellExpansion,
+                &shell_expansion,
+            )?["stdout"]
+                .as_str()
+                .is_some_and(|value| !value.is_empty())
+        );
+
+        let sensitive_env = Map::from_iter([
+            ("argv".to_owned(), serde_json::json!(["env"])),
+            (
+                "env".to_owned(),
+                serde_json::json!({"API_TOKEN":"candidate-value"}),
+            ),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        assert!(
+            run_exact_once_exec(
+                &fixture,
+                NativePermissionKind::SensitiveEnv,
+                &sensitive_env,
+            )?["stdout"]
+                .as_str()
+                .is_some_and(|value| value.contains("API_TOKEN=candidate-value"))
+        );
+
+        let long_timeout = Map::from_iter([
+            (
+                "argv".to_owned(),
+                serde_json::json!(["printf", "long-timeout"]),
+            ),
+            ("timeout_ms".to_owned(), Value::from(30_001)),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        assert_eq!(
+            run_exact_once_exec(&fixture, NativePermissionKind::LongTimeout, &long_timeout)?["stdout"],
+            "long-timeout"
+        );
+
+        let victim = fixture.workspace.root().join("victim");
+        fs::create_dir_all(&victim).map_err(|error| internal(&error.to_string()))?;
+        fs::write(victim.join("file.txt"), "delete-me")
+            .map_err(|error| internal(&error.to_string()))?;
+        let destructive = Map::from_iter([
+            (
+                "argv".to_owned(),
+                serde_json::json!(["rm", "-rf", "victim"]),
+            ),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        run_exact_once_exec(
+            &fixture,
+            NativePermissionKind::DestructiveCommand,
+            &destructive,
+        )?;
+        assert!(!victim.exists());
+
+        let privileged_path = fixture.workspace.root().join("suid-script");
+        fs::write(&privileged_path, "#!/bin/sh\nprintf privileged\n")
+            .map_err(|error| internal(&error.to_string()))?;
+        fs::set_permissions(&privileged_path, fs::Permissions::from_mode(0o4755))
+            .map_err(|error| internal(&error.to_string()))?;
+        let privileged = Map::from_iter([
+            ("argv".to_owned(), serde_json::json!(["./suid-script"])),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        assert_eq!(
+            run_exact_once_exec(
+                &fixture,
+                NativePermissionKind::PrivilegedExecutable,
+                &privileged,
+            )?["stdout"],
+            "privileged"
+        );
+
+        let listener =
+            TcpListener::bind("127.0.0.1:0").map_err(|error| internal(&error.to_string()))?;
+        listener
+            .set_nonblocking(true)
+            .map_err(|error| internal(&error.to_string()))?;
+        let address = listener
+            .local_addr()
+            .map_err(|error| internal(&error.to_string()))?;
+        let server = thread::spawn(move || -> std::io::Result<()> {
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(3);
+            loop {
+                match listener.accept() {
+                    Ok((mut stream, _)) => {
+                        let mut buffer = [0_u8; 4096];
+                        let _ = stream.read(&mut buffer)?;
+                        stream.write_all(
+                            b"HTTP/1.1 200 OK\r\nContent-Length: 10\r\nConnection: close\r\n\r\nnetwork-ok",
+                        )?;
+                        return Ok(());
+                    }
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                        if std::time::Instant::now() >= deadline {
+                            return Err(std::io::Error::new(
+                                std::io::ErrorKind::TimedOut,
+                                "network candidate never connected",
+                            ));
+                        }
+                        thread::sleep(std::time::Duration::from_millis(10));
+                    }
+                    Err(error) => return Err(error),
+                }
+            }
+        });
+        let network = Map::from_iter([
+            (
+                "argv".to_owned(),
+                serde_json::json!(["curl", "--fail", "--silent", format!("http://{address}")]),
+            ),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        assert_eq!(
+            run_exact_once_exec(&fixture, NativePermissionKind::Network, &network)?["stdout"],
+            "network-ok"
+        );
+        server
+            .join()
+            .map_err(|_| internal("network test server panicked"))?
+            .map_err(|error| internal(&error.to_string()))?;
+        Ok(())
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn exec_candidate_preserves_git_latex_sage_and_exposes_magma() -> Result<(), ReCtmError> {
+        if !command_exists("bwrap") {
+            return Ok(());
+        }
+        let fixture = bubblewrap_candidate_fixture(NativeMode::Dangerous)?;
+
+        if command_exists("git") {
+            let git =
+                Map::from_iter([("argv".to_owned(), serde_json::json!(["git", "--version"]))]);
+            assert!(
+                run_named_unprivileged_exec(&fixture, "git", &git)?["stdout"]
+                    .as_str()
+                    .is_some_and(|value| value.starts_with("git version "))
+            );
+        }
+
+        if command_exists("pdflatex") {
+            let latex = Map::from_iter([(
+                "argv".to_owned(),
+                serde_json::json!(["pdflatex", "--version"]),
+            )]);
+            assert!(
+                run_named_unprivileged_exec(&fixture, "pdflatex", &latex)?["stdout"]
+                    .as_str()
+                    .is_some_and(|value| value.contains("pdfTeX"))
+            );
+        }
+
+        if command_exists("sage") {
+            let sage =
+                Map::from_iter([("argv".to_owned(), serde_json::json!(["sage", "--version"]))]);
+            assert!(
+                run_named_unprivileged_exec(&fixture, "sage", &sage)?["stdout"]
+                    .as_str()
+                    .is_some_and(|value| !value.trim().is_empty())
+            );
+        }
+
+        if command_exists("magma") {
+            let magma = Map::from_iter([
+                ("argv".to_owned(), serde_json::json!(["magma", "-b"])),
+                ("stdin".to_owned(), Value::String("quit;\n".to_owned())),
+            ]);
+            let result = fixture.executor.exec_command_candidate("owner-a", &magma)?;
+            assert_eq!(result["status"], "exited");
+            let combined = format!(
+                "{}\n{}",
+                result["stdout"].as_str().unwrap_or_default(),
+                result["stderr"].as_str().unwrap_or_default()
+            );
+            assert!(
+                combined.contains("Magma")
+                    || combined.to_ascii_lowercase().contains("authorised")
+                    || combined.to_ascii_lowercase().contains("authorized")
+            );
+        }
         Ok(())
     }
 }

@@ -623,10 +623,33 @@
       "tests": {
         "patch_candidate": "3 passed",
         "exec_candidate": "2 passed",
+        "all_seven_exec_permission_kinds_real_bubblewrap": "passed",
+        "git_latex_sage_candidate_non_regression": "passed",
+        "magma_executable_exposed_in_candidate": true,
+        "magma_functional_execution": "blocked_by_current_host_license",
         "real_bubblewrap_once_grant_exec": true,
         "clippy_warnings_denied": true,
         "full_run_checks": "24 of 24 passed",
         "git_diff_check": true
+      },
+      "real_bubblewrap_permission_matrix": [
+        "network",
+        "destructive_command",
+        "long_timeout",
+        "sensitive_env",
+        "shell_expansion",
+        "inline_script",
+        "privileged_executable"
+      ],
+      "toolchain_prequalification": {
+        "mode": "dangerous_auto_discovery",
+        "git": "passed",
+        "pdflatex": "passed",
+        "sage": "passed",
+        "magma_executable_reached": true,
+        "magma_functional_status": "blocked_host_license",
+        "magma_host_direct_probe": "not_authorised",
+        "magma_failure_attributed_to_mtm": false
       },
       "real_human_consent_evidence": false,
       "authority_cutover_allowed": false
@@ -652,6 +675,12 @@
     "Real target A4 is required before any MTM-014 permission-authority cutover."
   ],
   "recorded_failures_and_repairs": [
+    {
+      "delivery": 5,
+      "stage": "candidate toolchain prequalification",
+      "failure": "The first Dangerous-mode candidate toolchain test incorrectly used a test-only runtime constructor whose exposure plan was hard-coded to DEFAULT_SANDBOX_PATH, causing Sage to fail closed as unresolved even though production NativeToolRuntime::new uses the real host PATH.",
+      "repair": "Aligned the test-only constructor with production PATH discovery without changing production code; Git, pdfLaTeX and Sage then passed through the candidate Bubblewrap path. Magma was separately identified as host-license blocked rather than an MTM resolution failure."
+    },
     {
       "delivery": 5,
       "stage": "MRTR repeated-approval grant issuance review",
