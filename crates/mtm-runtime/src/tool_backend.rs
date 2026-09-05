@@ -1183,11 +1183,23 @@ impl RuntimeToolBackend {
             )));
         }
 
+        let workspace = self.workspace.root().display().to_string();
         let state = context.request_state();
         let response = context.input_response("native_permission_consent");
         match (state, response, context.input_response_count()) {
             (None, None, 0) => {
-                let workspace = self.workspace.root().display().to_string();
+                if let Some(scope) = self.native_permissions.active_exact_grant_scope(
+                    &principal.client_id,
+                    &workspace,
+                    &request,
+                )? {
+                    return Ok(ToolBackendResult::Complete(permission_already_granted(
+                        self.native.mode().as_str(),
+                        self.workspace.root(),
+                        &request,
+                        scope,
+                    )));
+                }
                 let prompt =
                     self.native_consents
                         .begin(&principal.client_id, &workspace, request)?;
@@ -1201,7 +1213,6 @@ impl RuntimeToolBackend {
                 ))
             }
             (Some(state), Some(response), 1) => {
-                let workspace = self.workspace.root().display().to_string();
                 let outcome = self.native_consents.complete(
                     state,
                     &principal.client_id,
@@ -1211,13 +1222,33 @@ impl RuntimeToolBackend {
                 )?;
                 match outcome {
                     NativePermissionConsentOutcome::Accepted(consent) => {
-                        let receipt = self.native_permissions.issue_verified(consent)?;
-                        Ok(ToolBackendResult::Complete(permission_granted(
-                            self.native.mode().as_str(),
-                            self.workspace.root(),
-                            &request,
-                            &receipt,
-                        )))
+                        match self.native_permissions.issue_verified(consent) {
+                            Ok(receipt) => Ok(ToolBackendResult::Complete(permission_granted(
+                                self.native.mode().as_str(),
+                                self.workspace.root(),
+                                &request,
+                                &receipt,
+                            ))),
+                            Err(error)
+                                if error.code == "NATIVE_PERMISSION_GRANT_ALREADY_EXISTS" =>
+                            {
+                                let scope = self
+                                    .native_permissions
+                                    .active_exact_grant_scope(
+                                        &principal.client_id,
+                                        &workspace,
+                                        &request,
+                                    )?
+                                    .ok_or(error)?;
+                                Ok(ToolBackendResult::Complete(permission_already_granted(
+                                    self.native.mode().as_str(),
+                                    self.workspace.root(),
+                                    &request,
+                                    scope,
+                                )))
+                            }
+                            Err(error) => Err(error),
+                        }
                     }
                     NativePermissionConsentOutcome::Declined => Ok(ToolBackendResult::Complete(
                         permission_denied("decline"),
@@ -1303,6 +1334,32 @@ fn permission_granted(
             "permission":request.kind().as_str(),
             "scope":request.scope().as_str(),
             "source":"verified_mcp_mrtr_form_elicitation",
+            "argument_fingerprint":request.arguments_sha256().chars().take(12).collect::<String>(),
+            "workflow_authority_inherited":false
+        },
+        "warnings":[]
+    })
+}
+
+fn permission_already_granted(
+    mode: &str,
+    workspace: &std::path::Path,
+    request: &NativePermissionRequest,
+    existing_scope: mtm_contracts::NativePermissionScope,
+) -> Value {
+    serde_json::json!({
+        "ok":true,
+        "status":"already_granted",
+        "grant_id":Value::Null,
+        "expires_at":Value::Null,
+        "constraints":{
+            "mode":mode,
+            "workspace":workspace,
+            "tool_name":request.tool().as_str(),
+            "permission":request.kind().as_str(),
+            "requested_scope":request.scope().as_str(),
+            "existing_scope":existing_scope.as_str(),
+            "source":"process_local_exact_grant",
             "argument_fingerprint":request.arguments_sha256().chars().take(12).collect::<String>(),
             "workflow_authority_inherited":false
         },

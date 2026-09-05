@@ -773,11 +773,54 @@ impl NativePermissionGrantAuthority {
             expires_at: record.expires_at,
         };
         let mut grants = self.lock_grants()?;
+        if grants.values().any(|existing| {
+            active_grant(existing, now)
+                && existing.owner_id == record.owner_id
+                && existing.workspace == record.workspace
+                && existing.tool == record.tool
+                && existing.kind == record.kind
+                && existing.arguments_sha256 == record.arguments_sha256
+        }) {
+            return Err(denied(
+                "NATIVE_PERMISSION_GRANT_ALREADY_EXISTS",
+                "An active exact Native permission grant already covers this invocation.",
+            ));
+        }
         if grants.contains_key(&raw_id) {
             return Err(internal("Native permission grant id collision"));
         }
         grants.insert(raw_id, record);
         Ok(receipt)
+    }
+
+    pub fn active_exact_grant_scope(
+        &self,
+        owner_id: &str,
+        workspace: &str,
+        request: &NativePermissionRequest,
+    ) -> Result<Option<NativePermissionScope>, ReCtmError> {
+        let now = self.runtime.clock.unix_seconds()?;
+        let grants = self.lock_grants()?;
+        let candidates = grants
+            .values()
+            .filter(|record| {
+                active_grant(record, now)
+                    && record.owner_id == owner_id
+                    && record.workspace == workspace
+                    && record.tool == request.tool()
+                    && record.kind == request.kind()
+                    && record.arguments_sha256 == request.arguments_sha256()
+            })
+            .map(|record| record.scope)
+            .collect::<Vec<_>>();
+        match candidates.as_slice() {
+            [] => Ok(None),
+            [scope] => Ok(Some(*scope)),
+            _ => Err(denied(
+                "NATIVE_PERMISSION_GRANT_SET_AMBIGUOUS",
+                "Multiple active grants cover the same Native permission request.",
+            )),
+        }
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -1032,6 +1075,12 @@ impl NativePermissionGrantAuthority {
             .lock()
             .map_err(|_| internal("Native permission grant ledger lock is poisoned"))
     }
+}
+
+fn active_grant(record: &GrantRecord, now: i64) -> bool {
+    !record.revoked
+        && now < record.expires_at
+        && !(record.scope == NativePermissionScope::Once && record.consumed)
 }
 
 fn denied(code: &str, message: &str) -> ReCtmError {
@@ -2241,7 +2290,8 @@ mod tests {
     }
 
     #[test]
-    fn duplicate_grant_coverage_is_ambiguous_and_consumes_none() -> Result<(), ReCtmError> {
+    fn duplicate_active_grant_issue_is_rejected_without_consuming_existing()
+    -> Result<(), ReCtmError> {
         let clock = Arc::new(ManualClock::new(13_000));
         let authority = NativePermissionGrantAuthority::new(runtime(clock));
         let args = arguments("curl https://example.com");
@@ -2254,7 +2304,37 @@ mod tests {
             &args,
             300,
         )?;
-        let right = issue(
+        assert_eq!(
+            issue(
+                &authority,
+                "owner-a",
+                "/workspace/a",
+                NativePermissionKind::Network,
+                NativePermissionScope::Session,
+                &args,
+                300,
+            )
+            .map_err(code),
+            Err("NATIVE_PERMISSION_GRANT_ALREADY_EXISTS".to_owned())
+        );
+        authority.authorize(
+            left.grant_id(),
+            "owner-a",
+            "/workspace/a",
+            NativePermissionTool::ExecCommand,
+            NativePermissionKind::Network,
+            &args,
+        )?;
+        Ok(())
+    }
+
+    #[test]
+    fn consumed_revoked_and_expired_grants_allow_exact_replacement() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(13_250));
+        let authority = NativePermissionGrantAuthority::new(runtime(Arc::clone(&clock)));
+        let args = arguments("curl https://example.com");
+
+        let consumed = issue(
             &authority,
             "owner-a",
             "/workspace/a",
@@ -2263,6 +2343,141 @@ mod tests {
             &args,
             300,
         )?;
+        authority.authorize(
+            consumed.grant_id(),
+            "owner-a",
+            "/workspace/a",
+            NativePermissionTool::ExecCommand,
+            NativePermissionKind::Network,
+            &args,
+        )?;
+
+        let revoked = issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::Network,
+            NativePermissionScope::Session,
+            &args,
+            300,
+        )?;
+        authority.revoke(revoked.grant_id(), "owner-a", "/workspace/a")?;
+
+        let expiring = issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::Network,
+            NativePermissionScope::Once,
+            &args,
+            10,
+        )?;
+        assert_eq!(expiring.expires_at(), 13_260);
+        clock.set(13_260);
+
+        let replacement = issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::Network,
+            NativePermissionScope::Once,
+            &args,
+            300,
+        )?;
+        assert_eq!(
+            authority.active_exact_grant_scope(
+                "owner-a",
+                "/workspace/a",
+                &request(
+                    NativePermissionKind::Network,
+                    NativePermissionScope::Once,
+                    Value::Object(args.clone()),
+                    300,
+                )?,
+            )?,
+            Some(NativePermissionScope::Once)
+        );
+        authority.authorize(
+            replacement.grant_id(),
+            "owner-a",
+            "/workspace/a",
+            NativePermissionTool::ExecCommand,
+            NativePermissionKind::Network,
+            &args,
+        )?;
+        Ok(())
+    }
+
+    #[test]
+    fn concurrent_exact_grant_issue_has_one_winner() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(13_400));
+        let authority = Arc::new(NativePermissionGrantAuthority::new(runtime(clock)));
+        let request = request(
+            NativePermissionKind::Network,
+            NativePermissionScope::Once,
+            Value::Object(arguments("curl https://example.com")),
+            300,
+        )?;
+        let barrier = Arc::new(Barrier::new(3));
+        let mut handles = Vec::new();
+        for _ in 0..2 {
+            let authority = Arc::clone(&authority);
+            let barrier = Arc::clone(&barrier);
+            let request = request.clone();
+            handles.push(thread::spawn(move || {
+                barrier.wait();
+                authority
+                    .issue_verified(consent("owner-a", "/workspace/a", request))
+                    .map(|_| ())
+                    .map_err(code)
+            }));
+        }
+        barrier.wait();
+        let results = handles
+            .into_iter()
+            .map(|handle| {
+                handle
+                    .join()
+                    .map_err(|_| internal("grant issue thread panicked"))
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        assert_eq!(results.iter().filter(|result| result.is_ok()).count(), 1);
+        assert_eq!(
+            results
+                .iter()
+                .filter(|result| {
+                    matches!(result, Err(code) if code == "NATIVE_PERMISSION_GRANT_ALREADY_EXISTS")
+                })
+                .count(),
+            1
+        );
+        assert_eq!(authority.process_local_grant_count()?, 1);
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_duplicate_grant_coverage_is_ambiguous_and_consumes_none() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(13_500));
+        let authority = NativePermissionGrantAuthority::new(runtime(clock));
+        let args = arguments("curl https://example.com");
+        let left = issue(
+            &authority,
+            "owner-a",
+            "/workspace/a",
+            NativePermissionKind::Network,
+            NativePermissionScope::Once,
+            &args,
+            300,
+        )?;
+        let duplicate_id = "npg-legacy-duplicate".to_owned();
+        {
+            let mut grants = authority.lock_grants()?;
+            let record = grants
+                .get(left.grant_id().as_str())
+                .cloned()
+                .ok_or_else(|| internal("test grant record is missing"))?;
+            grants.insert(duplicate_id.clone(), record);
+        }
         assert_eq!(
             authority
                 .authorize_matching_grants(
@@ -2275,9 +2490,12 @@ mod tests {
                 .map_err(code),
             Err("NATIVE_PERMISSION_GRANT_SET_AMBIGUOUS".to_owned())
         );
-        for receipt in [&left, &right] {
+        for grant_id in [
+            left.grant_id().clone(),
+            NativePermissionGrantId(duplicate_id),
+        ] {
             authority.authorize(
-                receipt.grant_id(),
+                &grant_id,
                 "owner-a",
                 "/workspace/a",
                 NativePermissionTool::ExecCommand,

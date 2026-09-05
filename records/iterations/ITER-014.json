@@ -495,7 +495,7 @@
       "gateway_mcp_tests": "6 passed",
       "gateway_runtime_clippy_warnings_denied": true,
       "consent_challenge_tests": "4 passed",
-      "mrtr_bridge_integration_checks": "21 passed",
+      "mrtr_bridge_integration_checks": "22 passed",
       "full_run_checks": "24 of 24 passed",
       "git_diff_check": true
     },
@@ -534,11 +534,12 @@
     },
     "bridge_integration": {
       "runner": "scripts/run_mtm014_mrtr_permission_validation.py",
-      "check_count": 21,
+      "check_count": 22,
       "all_checks_passed": true,
-      "binary_sha256": "307c27aefd90c919cc4dc45c4de73b3abec60ad016a9c2aafdf1ee8712f016ef",
+      "binary_sha256": "0fcd129a2f595976b71a9579ffe9102137dc5d6bc968dade3a2d4b5e21beea83",
       "real_oauth_http_mcp": true,
       "modern_two_round_accept": true,
+      "active_exact_grant_suppresses_duplicate_prompt": true,
       "accepted_state_replay_denied": true,
       "argument_mutation_denied_without_challenge_consumption": true,
       "extra_input_response_denied_without_challenge_consumption": true,
@@ -558,6 +559,33 @@
       "raw_tool_arguments_recorded": false,
       "production_exec_or_patch_authority_cutover": false,
       "real_human_consent_evidence": false
+    },
+    "grant_issuance_hardening": {
+      "active_exact_overlap_rejected_at_issuance": true,
+      "overlap_binding": [
+        "oauth_owner",
+        "workspace",
+        "tool",
+        "permission_kind",
+        "canonical_argument_digest"
+      ],
+      "scope_difference_does_not_allow_overlap": true,
+      "consumed_once_grant_blocks_new_issue": false,
+      "expired_or_revoked_grant_blocks_new_issue": false,
+      "fresh_request_with_active_exact_grant_returns": "already_granted",
+      "fresh_duplicate_request_starts_new_challenge": false,
+      "stale_request_state_replay_returns_already_granted": false,
+      "stale_request_state_replay_remains_denied": true,
+      "concurrent_second_issue_error": "NATIVE_PERMISSION_GRANT_ALREADY_EXISTS",
+      "legacy_or_corrupt_duplicate_ledger_authorization": "NATIVE_PERMISSION_GRANT_SET_AMBIGUOUS",
+      "legacy_ambiguity_consumes_grants": false,
+      "unit_tests": [
+        "duplicate_active_grant_issue_is_rejected_without_consuming_existing",
+        "consumed_revoked_and_expired_grants_allow_exact_replacement",
+        "concurrent_exact_grant_issue_has_one_winner",
+        "legacy_duplicate_grant_coverage_is_ambiguous_and_consumes_none"
+      ],
+      "mrtr_integration_check_count": 22
     },
     "pre_cutover_candidate": {
       "validated_at": "2026-09-05T11:56:30+08:00",
@@ -624,6 +652,12 @@
     "Real target A4 is required before any MTM-014 permission-authority cutover."
   ],
   "recorded_failures_and_repairs": [
+    {
+      "delivery": 5,
+      "stage": "MRTR repeated-approval grant issuance review",
+      "failure": "Review found that two independently accepted challenges for the same owner/workspace/tool/permission/argument digest could both mint active grants. Authorization would then correctly fail as ambiguous, but a normal repeated user approval could therefore make an otherwise valid invocation unusable.",
+      "repair": "Made active exact grant issuance unique inside the grant-ledger mutex, added already_granted short-circuiting only for fresh first-round permission requests, preserved stale requestState replay denial, retained the ambiguous-ledger fail-closed path for legacy/corrupt state, and added lifecycle plus concurrent issuance tests. The MRTR corpus now passes 22 checks."
+    },
     {
       "delivery": 5,
       "stage": "pre-cutover candidate dead-code tripwire under all-target test build",

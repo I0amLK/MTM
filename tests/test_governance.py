@@ -301,10 +301,11 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(challenge["runtime_application_connected"])
         self.assertTrue(challenge["request_permissions_connected"])
         bridge = d5a_progress["bridge_integration"]
-        self.assertEqual(bridge["check_count"], 21)
+        self.assertEqual(bridge["check_count"], 22)
         self.assertTrue(bridge["all_checks_passed"])
         self.assertTrue(bridge["real_oauth_http_mcp"])
         self.assertTrue(bridge["modern_two_round_accept"])
+        self.assertTrue(bridge["active_exact_grant_suppresses_duplicate_prompt"])
         self.assertTrue(bridge["accepted_state_replay_denied"])
         self.assertTrue(bridge["argument_mutation_denied_without_challenge_consumption"])
         self.assertTrue(bridge["extra_input_response_denied_without_challenge_consumption"])
@@ -324,6 +325,28 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertFalse(bridge["raw_tool_arguments_recorded"])
         self.assertFalse(bridge["production_exec_or_patch_authority_cutover"])
         self.assertFalse(bridge["real_human_consent_evidence"])
+        grant_hardening = d5a_progress["grant_issuance_hardening"]
+        self.assertTrue(grant_hardening["active_exact_overlap_rejected_at_issuance"])
+        self.assertTrue(grant_hardening["scope_difference_does_not_allow_overlap"])
+        self.assertFalse(grant_hardening["consumed_once_grant_blocks_new_issue"])
+        self.assertFalse(grant_hardening["expired_or_revoked_grant_blocks_new_issue"])
+        self.assertEqual(
+            grant_hardening["fresh_request_with_active_exact_grant_returns"],
+            "already_granted",
+        )
+        self.assertFalse(grant_hardening["fresh_duplicate_request_starts_new_challenge"])
+        self.assertFalse(grant_hardening["stale_request_state_replay_returns_already_granted"])
+        self.assertTrue(grant_hardening["stale_request_state_replay_remains_denied"])
+        self.assertEqual(
+            grant_hardening["concurrent_second_issue_error"],
+            "NATIVE_PERMISSION_GRANT_ALREADY_EXISTS",
+        )
+        self.assertEqual(
+            grant_hardening["legacy_or_corrupt_duplicate_ledger_authorization"],
+            "NATIVE_PERMISSION_GRANT_SET_AMBIGUOUS",
+        )
+        self.assertFalse(grant_hardening["legacy_ambiguity_consumes_grants"])
+        self.assertEqual(grant_hardening["mrtr_integration_check_count"], 22)
         candidate = d5a_progress["pre_cutover_candidate"]
         self.assertFalse(candidate["public_dispatch_reachable"])
         self.assertTrue(candidate["production_dead_code_tripwire"])

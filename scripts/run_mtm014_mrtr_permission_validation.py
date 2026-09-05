@@ -246,6 +246,20 @@ def run_safe(root: Path) -> tuple[dict[str, bool], dict[str, Any]]:
             accepted_payload.get("constraints", {}).get("workflow_authority_inherited") is False
         )
 
+        duplicate_status, duplicate = modern_tool_call(
+            port,
+            token,
+            "request_permissions",
+            request,
+            capabilities={"elicitation": {"form": {}}},
+        )
+        checks["active_exact_grant_suppresses_duplicate_prompt"] = (
+            duplicate_status == 200
+            and result(duplicate).get("resultType") == "complete"
+            and structured(duplicate).get("status") == "already_granted"
+            and structured(duplicate).get("grant_id") is None
+        )
+
         replay_status, replay = modern_tool_call(
             port,
             token,
@@ -261,11 +275,12 @@ def run_safe(root: Path) -> tuple[dict[str, bool], dict[str, Any]]:
             and tool_error_code(replay) == "ELICITATION_STATE_INVALID"
         )
 
+        mutation_request = permission_request(command="sh -c 'printf mutation-base'")
         mutation_first_status, mutation_first = modern_tool_call(
             port,
             token,
             "request_permissions",
-            request,
+            mutation_request,
             capabilities={"elicitation": {}},
         )
         mutation_state, _ = input_required(mutation_first)
@@ -289,7 +304,7 @@ def run_safe(root: Path) -> tuple[dict[str, bool], dict[str, Any]]:
             port,
             token,
             "request_permissions",
-            request,
+            mutation_request,
             capabilities={"elicitation": {}},
             input_responses=consent_response(True),
             request_state=mutation_state,
@@ -298,11 +313,12 @@ def run_safe(root: Path) -> tuple[dict[str, bool], dict[str, Any]]:
             recovery_status == 200 and structured(recovery).get("status") == "granted"
         )
 
+        extra_request = permission_request(command="sh -c 'printf extra-base'")
         extra_first_status, extra_first = modern_tool_call(
             port,
             token,
             "request_permissions",
-            request,
+            extra_request,
             capabilities={"elicitation": {}},
         )
         extra_state, _ = input_required(extra_first)
@@ -312,7 +328,7 @@ def run_safe(root: Path) -> tuple[dict[str, bool], dict[str, Any]]:
             port,
             token,
             "request_permissions",
-            request,
+            extra_request,
             capabilities={"elicitation": {}},
             input_responses=extra_responses,
             request_state=extra_state,
@@ -327,7 +343,7 @@ def run_safe(root: Path) -> tuple[dict[str, bool], dict[str, Any]]:
             port,
             token,
             "request_permissions",
-            request,
+            extra_request,
             capabilities={"elicitation": {}},
             input_responses=consent_response(True),
             request_state=extra_state,
@@ -350,11 +366,12 @@ def run_safe(root: Path) -> tuple[dict[str, bool], dict[str, Any]]:
             and structured(non_intrinsic).get("status") == "not_required"
         )
 
+        decline_request = permission_request(command="sh -c 'printf decline-base'")
         decline_first_status, decline_first = modern_tool_call(
             port,
             token,
             "request_permissions",
-            request,
+            decline_request,
             capabilities={"elicitation": {}},
         )
         decline_state, _ = input_required(decline_first)
@@ -362,7 +379,7 @@ def run_safe(root: Path) -> tuple[dict[str, bool], dict[str, Any]]:
             port,
             token,
             "request_permissions",
-            request,
+            decline_request,
             capabilities={"elicitation": {}},
             input_responses={CONSENT_KEY: {"action": "decline"}},
             request_state=decline_state,
