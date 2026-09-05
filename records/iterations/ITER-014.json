@@ -70,7 +70,7 @@
     {
       "id": "D5",
       "name": "real target permission and isolation qualification",
-      "status": "pending"
+      "status": "in_progress"
     }
   ],
   "d1_receipt": {
@@ -417,6 +417,53 @@
       "accepted_mtm013_evidence_changed": false
     },
     "manual_pending": "Verified human consent, production permission enforcement, and real target A4 remain D5 work."
+  },
+  "d5a_contract": {
+    "frozen_at": "2026-09-04T20:14:39-07:00",
+    "phase": "verified_consent_feasibility",
+    "selected_provider": "mcp_2026_07_28_mrtr_form_elicitation",
+    "selection_reason": "MCP 2026-07-28 standardizes user confirmation during tools/call through input_required/inputResponses and keeps the user interaction owned by the client rather than by the model or Native runtime.",
+    "required_protocol_version": "2026-07-28",
+    "required_client_capability": "elicitation.form",
+    "empty_elicitation_capability_means_form": true,
+    "url_only_elicitation_supported_for_native_permission_consent": false,
+    "legacy_protocol_behavior": "unsupported",
+    "modern_without_form_elicitation_behavior": "unsupported",
+    "headless_behavior_without_verified_mrtr_client": "unsupported",
+    "input_required_rounds": 1,
+    "input_request_key": "native_permission_consent",
+    "input_request_method": "elicitation/create",
+    "input_request_mode": "form",
+    "response_actions": ["accept", "decline", "cancel"],
+    "accept_requires_boolean_confirmation": true,
+    "request_state_trust": "opaque_untrusted_handle_verified_server_side",
+    "request_state_binding": [
+      "oauth_owner",
+      "workspace",
+      "tool",
+      "permission_kind",
+      "canonical_argument_digest",
+      "scope",
+      "permission_ttl",
+      "challenge_expiry"
+    ],
+    "challenge_store": "process_local",
+    "challenge_single_use": true,
+    "challenge_restart_behavior": "invalidated",
+    "challenge_timeout_seconds": 300,
+    "plain_request_is_consent": false,
+    "client_info_is_authority": false,
+    "oauth_authentication_alone_is_consent": false,
+    "model_generated_boolean_is_consent": false,
+    "accepted_response_revalidated_server_side": true,
+    "raw_arguments_in_prompt": false,
+    "prompt_contains_argument_fingerprint": true,
+    "prompt_contains_tool_permission_scope_ttl": true,
+    "public_tool_schema_changed": false,
+    "production_exec_or_patch_authority_changed": false,
+    "bubblewrap_changed": false,
+    "workflow_authority_changed": false,
+    "go_no_go_rule": "Do not cut production permission authority over until a real MCP client declares form elicitation, presents an independent human approval UI, and the complete redacted D5A evidence passes."
   },
   "acceptance": {
     "A0": "Formatting, warnings-denied Clippy, workspace tests, governance, record-layout and unified local gate pass.",

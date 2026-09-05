@@ -137,6 +137,7 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(delivery["D2"], "accepted")
         self.assertEqual(delivery["D3"], "accepted")
         self.assertEqual(delivery["D4"], "accepted")
+        self.assertEqual(delivery["D5"], "in_progress")
         d3 = iteration["d3_contract"]
         self.assertEqual(
             d3["exec_permission_order"],
@@ -242,6 +243,30 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertFalse(d4_receipt["production_git_permission_dependency_added"])
         self.assertFalse(d4_receipt["explicit_grant_authority_cutover"])
         self.assertFalse(d4_receipt["validation"]["accepted_mtm013_evidence_changed"])
+
+        d5a = iteration["d5a_contract"]
+        self.assertEqual(
+            d5a["selected_provider"], "mcp_2026_07_28_mrtr_form_elicitation"
+        )
+        self.assertEqual(d5a["required_protocol_version"], "2026-07-28")
+        self.assertEqual(d5a["required_client_capability"], "elicitation.form")
+        self.assertTrue(d5a["empty_elicitation_capability_means_form"])
+        self.assertFalse(d5a["url_only_elicitation_supported_for_native_permission_consent"])
+        self.assertEqual(d5a["legacy_protocol_behavior"], "unsupported")
+        self.assertEqual(d5a["modern_without_form_elicitation_behavior"], "unsupported")
+        self.assertEqual(d5a["input_required_rounds"], 1)
+        self.assertEqual(d5a["input_request_method"], "elicitation/create")
+        self.assertTrue(d5a["challenge_single_use"])
+        self.assertEqual(d5a["challenge_store"], "process_local")
+        self.assertTrue(d5a["accepted_response_revalidated_server_side"])
+        self.assertFalse(d5a["plain_request_is_consent"])
+        self.assertFalse(d5a["client_info_is_authority"])
+        self.assertFalse(d5a["oauth_authentication_alone_is_consent"])
+        self.assertFalse(d5a["model_generated_boolean_is_consent"])
+        self.assertFalse(d5a["raw_arguments_in_prompt"])
+        self.assertFalse(d5a["public_tool_schema_changed"])
+        self.assertFalse(d5a["production_exec_or_patch_authority_changed"])
+        self.assertFalse(d5a["workflow_authority_changed"])
 
         bubblewrap_source = (
             ROOT / "crates" / "mtm-native" / "src" / "bubblewrap.rs"

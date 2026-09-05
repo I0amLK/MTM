@@ -115,6 +115,50 @@ existing dimensions and appends the newly frozen checks: `sensitive_env`,
 then `privileged_executable`. This ordering is part of the shadow contract and must be
 covered by adversarial tests before cutover.
 
+## D5A verified consent provider
+
+MTM selects the MCP `2026-07-28` Multi Round-Trip Request (MRTR) form-elicitation
+mechanism as the first production consent provider to qualify. This mechanism keeps
+the approval UI in the MCP client and associates it with the originating
+`tools/call`; a model-authored `request_permissions` call is therefore still only a
+request for approval, never approval itself.
+
+The provider is available only when the current request is modern MCP
+`2026-07-28` and that same request declares
+`_meta.io.modelcontextprotocol/clientCapabilities.elicitation` with form support. An
+empty `elicitation` object counts as form support for MCP compatibility. URL-only
+elicitation is not used for Native permission confirmation. Legacy MCP requests and
+modern requests without form elicitation continue to return the existing unsupported
+permission result and mint no challenge or grant.
+
+The first `request_permissions` round may return an MCP `input_required` result with
+one embedded `elicitation/create` form request. The prompt contains only the tool,
+permission kind, requested scope/TTL, a safe workspace label, reason, and an argument
+fingerprint; raw command text, patch bodies, environment values, OAuth tokens,
+capabilities, and grant identifiers are never included. The response schema requires
+an explicit boolean confirmation.
+
+`requestState` is an opaque untrusted handle. MTM verifies it against process-local
+server state bound to the authenticated OAuth owner, workspace, tool, permission
+kind, canonical argument digest, requested scope/TTL, and a short challenge expiry.
+Challenges are single-use, expire after at most five minutes, and disappear on server
+restart. A retry with a missing, unknown, expired, already-used, owner-mismatched, or
+argument-mismatched state fails closed. Client `clientInfo` is display metadata only
+and is never an authority input.
+
+On the retry, MTM accepts only an elicitation response with `action=accept` and a
+server-validated `approved=true` form value. `decline`, `cancel`, malformed content,
+or false confirmation mint no grant. A successful verified response is the only D5A
+path allowed to construct `VerifiedNativePermissionConsent`; OAuth authentication by
+itself, repeated identical calls, reason text, model-generated booleans, environment
+variables, and workspace files remain non-authoritative.
+
+D5A is not itself a production permission cutover. `exec_command` and `apply_patch`
+remain on the accepted pre-cutover authority until an actual MCP client demonstrates
+the independent human interaction end to end and the redacted D5A evidence is
+accepted. Failure to obtain that real capability evidence blocks D5 rather than
+weakening the consent invariant.
+
 ## Sandbox boundary
 
 MTM shall introduce a typed `SandboxPlan` before further expansion of Native
