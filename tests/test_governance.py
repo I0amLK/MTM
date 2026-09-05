@@ -554,6 +554,37 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(d5b_progress["post_cutover_public_path_a4"], "pending")
         self.assertFalse(d5b_progress["release_or_selector_cutover"])
         self.assertFalse(d5b_progress["workflow_or_finalizer_authority_changed"])
+        post_runner = d5b_progress["formal_post_cutover_target_runner"]
+        self.assertEqual(post_runner["status"], "prepared_not_yet_accepted")
+        self.assertEqual(
+            post_runner["implementation_commit"],
+            "2f11750c07317d879f1bedfd2198c36786b8ca74",
+        )
+        self.assertEqual(
+            post_runner["runner"], "scripts/run_mtm014_public_authority_target.py"
+        )
+        self.assertEqual(
+            post_runner["validator"],
+            "scripts/validate_mtm014_public_authority_target.py",
+        )
+        self.assertEqual(post_runner["expected_check_count"], 30)
+        self.assertTrue(post_runner["requires_clean_committed_tree"])
+        self.assertTrue(post_runner["builds_candidate_from_qualification_source"])
+        self.assertTrue(post_runner["requires_no_production_drift_after_cutover_commit"])
+        self.assertTrue(post_runner["uses_public_oauth_mcp_tools"])
+        self.assertTrue(post_runner["reuses_human_consent_only_from_accepted_d5a"])
+        self.assertFalse(post_runner["scripted_mrtr_response_is_human_evidence"])
+        self.assertTrue(post_runner["requires_all_seven_safe_exec_permissions"])
+        self.assertTrue(
+            post_runner["requires_once_session_restart_cross_owner_mutation_concurrency"]
+        )
+        self.assertTrue(post_runner["requires_public_patch_authority_and_path_firewalls"])
+        self.assertTrue(post_runner["requires_real_dns_https_and_tty_lifecycle"])
+        self.assertTrue(post_runner["requires_trusted_dangerous_profile_compatibility"])
+        self.assertTrue(post_runner["requires_safe_trusted_dangerous_attestation"])
+        self.assertTrue(post_runner["requires_stable_selector_unchanged"])
+        self.assertFalse(post_runner["allows_missing_required_tool"])
+        self.assertFalse(post_runner["release_cutover_allowed_before_report_acceptance"])
 
         human = d5a_progress["human_acceptance"]
         self.assertEqual(human["client"], "MCP Inspector 2.5.0")
