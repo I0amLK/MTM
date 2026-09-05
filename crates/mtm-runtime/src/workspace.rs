@@ -10,10 +10,9 @@ use std::time::UNIX_EPOCH;
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 use mtm_contracts::{ErrorCategory, ReCtmError};
-use mtm_core::{
-    PatchInvocation, PatchOperation, PatchPathFact, apply_update_hunks, canonical_arguments_sha256,
-    parse_patch,
-};
+use mtm_core::{PatchInvocation, PatchOperation, PatchPathFact, apply_update_hunks};
+#[cfg(test)]
+use mtm_core::{canonical_arguments_sha256, parse_patch};
 use mtm_native::{CommandManager, CommandManagerConfig, CommandRequest, PollRequest};
 use regex::{Regex, RegexBuilder};
 use serde_json::{Map, Value};
@@ -75,6 +74,7 @@ struct PreparedPathChange {
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum PatchPathResolution {
+    #[cfg(test)]
     ExistingCompatibility,
     ForWrite,
 }
@@ -88,6 +88,7 @@ enum PatchAuthoritySnapshot {
     /// The accepted 0.4.0 production path has no Git-based permission
     /// authority. Keeping that state explicit prevents D4 from silently
     /// introducing a new production dependency on Git before D5 cutover.
+    #[cfg(test)]
     ProductionCompatibility,
     Classified {
         path_facts: Vec<PatchPathFact>,
@@ -97,6 +98,7 @@ enum PatchAuthoritySnapshot {
 
 #[derive(Clone, Copy)]
 enum PatchPreparationSemantics {
+    #[cfg(test)]
     ProductionCompatibility,
     Authority,
 }
@@ -138,6 +140,7 @@ impl fmt::Debug for PreparedPatch {
         let (authority_state, path_fact_count, git_metadata_fingerprint_count) = match &self
             .authority
         {
+            #[cfg(test)]
             PatchAuthoritySnapshot::ProductionCompatibility => ("production_compatibility", 0, 0),
             PatchAuthoritySnapshot::Classified {
                 path_facts,
@@ -175,6 +178,7 @@ impl PreparedPatch {
     #[must_use]
     pub(crate) fn path_facts(&self) -> Option<&[PatchPathFact]> {
         match &self.authority {
+            #[cfg(test)]
             PatchAuthoritySnapshot::ProductionCompatibility => None,
             PatchAuthoritySnapshot::Classified { path_facts, .. } => Some(path_facts),
         }
@@ -182,6 +186,7 @@ impl PreparedPatch {
 
     fn git_metadata(&self) -> Option<&GitMetadataSnapshot> {
         match &self.authority {
+            #[cfg(test)]
             PatchAuthoritySnapshot::ProductionCompatibility => None,
             PatchAuthoritySnapshot::Classified { git_metadata, .. } => Some(git_metadata),
         }
@@ -844,6 +849,7 @@ impl NativeWorkspace {
         }
 
         let authority = match semantics {
+            #[cfg(test)]
             PatchPreparationSemantics::ProductionCompatibility => {
                 PatchAuthoritySnapshot::ProductionCompatibility
             }
@@ -881,6 +887,7 @@ impl NativeWorkspace {
         semantics: PatchPreparationSemantics,
     ) -> Result<(ResolvedPath, PatchBaseline, String), ReCtmError> {
         let resolved = match semantics {
+            #[cfg(test)]
             PatchPreparationSemantics::ProductionCompatibility => self.resolve_existing(path)?,
             PatchPreparationSemantics::Authority => {
                 let resolved = self.resolve_for_write(path)?;
@@ -1401,6 +1408,7 @@ impl NativeWorkspace {
         }
         for change in &prepared.changes {
             let current = match change.resolution {
+                #[cfg(test)]
                 PatchPathResolution::ExistingCompatibility => {
                     self.resolve_existing(&change.relative_path)
                 }
@@ -1442,11 +1450,11 @@ impl NativeWorkspace {
         Ok(())
     }
 
-    pub fn apply_patch(&self, patch: &str, dry_run: bool) -> Result<Value, ReCtmError> {
-        // Preserve the accepted production parser/path behavior until D5. The
-        // authority-ready path above intentionally performs stricter typed
-        // validation and Git fact collection, but D4 is not an authority
-        // cutover.
+    #[cfg(test)]
+    pub(crate) fn apply_patch(&self, patch: &str, dry_run: bool) -> Result<Value, ReCtmError> {
+        // Historical D4 compatibility path retained only for regression tests.
+        // Production apply_patch authority is the PreparedPatch path composed by
+        // NativeAuthorityExecutor.
         let operations = parse_patch(patch)?;
         let arguments = Map::from_iter([
             ("patch".to_owned(), Value::String(patch.to_owned())),
@@ -1895,6 +1903,7 @@ impl GitMetadataSnapshot {
 
 const fn patch_source_resolution(semantics: PatchPreparationSemantics) -> PatchPathResolution {
     match semantics {
+        #[cfg(test)]
         PatchPreparationSemantics::ProductionCompatibility => {
             PatchPathResolution::ExistingCompatibility
         }

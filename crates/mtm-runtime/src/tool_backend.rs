@@ -15,6 +15,7 @@ use mtm_workflow::WorkflowEngine;
 use serde_json::{Map, Value};
 
 use crate::latex::static_latex_errors;
+use crate::native_authority::NativeAuthorityExecutor;
 use crate::{
     NativePermissionConsentAuthority, NativePermissionConsentOutcome,
     NativePermissionGrantAuthority, NativeToolRuntime, NativeWorkspace, RuntimeEventSink,
@@ -54,6 +55,7 @@ pub struct RuntimeToolBackend {
     capabilities: Arc<CapabilityAuthority>,
     native_permissions: Arc<NativePermissionGrantAuthority>,
     native_consents: Arc<NativePermissionConsentAuthority>,
+    native_authority: NativeAuthorityExecutor,
     workflow_protocol_version: i64,
     complete_flow_locally_validated: bool,
     observer: Option<RuntimeEventSink>,
@@ -140,6 +142,11 @@ impl RuntimeToolBackend {
         facts: RuntimeBackendFacts,
         observer: Option<RuntimeEventSink>,
     ) -> Self {
+        let native_authority = NativeAuthorityExecutor::new(
+            Arc::clone(&native),
+            Arc::clone(&workspace),
+            Arc::clone(&native_permissions),
+        );
         Self {
             native,
             workspace,
@@ -148,6 +155,7 @@ impl RuntimeToolBackend {
             capabilities,
             native_permissions,
             native_consents,
+            native_authority,
             workflow_protocol_version: facts.workflow_protocol_version,
             complete_flow_locally_validated: facts.complete_flow_locally_validated,
             observer,
@@ -174,14 +182,14 @@ impl RuntimeToolBackend {
             "list_dir" => self.workspace.list_dir(arguments),
             "list_files" => self.workspace.list_files(arguments),
             "search_text" => self.workspace.search_text(arguments),
-            "apply_patch" => self.workspace.apply_patch(
-                required_text(arguments, "patch")?,
-                arguments
-                    .get("dry_run")
-                    .and_then(Value::as_bool)
-                    .unwrap_or(false),
-            ),
-            "exec_command" => self.native.exec_command(arguments),
+            "apply_patch" => self
+                .native_authority
+                .apply_patch(&principal.client_id, arguments)
+                .map_err(public_native_authority_error),
+            "exec_command" => self
+                .native_authority
+                .exec_command(&principal.client_id, arguments)
+                .map_err(public_native_authority_error),
             "write_stdin" => self.native.write_stdin(arguments),
             "kill_command" => self.native.kill_command(arguments),
             "read_output" => self.native.read_output(arguments),
@@ -1383,6 +1391,72 @@ fn permission_denied(action: &str) -> Value {
     })
 }
 
+fn public_native_authority_error(error: ReCtmError) -> ReCtmError {
+    if error.code != "NATIVE_PERMISSION_GRANT_SET_INCOMPLETE" {
+        return error;
+    }
+    let expected_keys = ["permission", "permissions", "tool_name"];
+    if error.details.len() != expected_keys.len()
+        || expected_keys
+            .iter()
+            .any(|key| !error.details.contains_key(*key))
+    {
+        return native_authority_mapping_error();
+    }
+    let Some(permission) = error.details.get("permission").and_then(Value::as_str) else {
+        return native_authority_mapping_error();
+    };
+    let Some(tool_name) = error.details.get("tool_name").and_then(Value::as_str) else {
+        return native_authority_mapping_error();
+    };
+    let Some(permissions) = error.details.get("permissions").and_then(Value::as_array) else {
+        return native_authority_mapping_error();
+    };
+    let ordered = permissions
+        .iter()
+        .map(Value::as_str)
+        .collect::<Option<Vec<_>>>();
+    let Some(ordered) = ordered else {
+        return native_authority_mapping_error();
+    };
+    if permission.is_empty()
+        || tool_name.is_empty()
+        || ordered.is_empty()
+        || ordered.first().copied() != Some(permission)
+    {
+        return native_authority_mapping_error();
+    }
+    ReCtmError::new(
+        "PERMISSION_REQUIRED",
+        "Native permission is required before this operation can run.",
+    )
+    .with_category(ErrorCategory::Permission)
+    .with_details(Map::from_iter([
+        (
+            "permission".to_owned(),
+            Value::String(permission.to_owned()),
+        ),
+        (
+            "permissions".to_owned(),
+            Value::Array(
+                ordered
+                    .into_iter()
+                    .map(|value| Value::String(value.to_owned()))
+                    .collect(),
+            ),
+        ),
+        ("tool_name".to_owned(), Value::String(tool_name.to_owned())),
+    ]))
+}
+
+fn native_authority_mapping_error() -> ReCtmError {
+    ReCtmError::new(
+        "NATIVE_PERMISSION_INTERNAL_ERROR",
+        "Native permission denial metadata failed internal validation.",
+    )
+    .with_category(ErrorCategory::Internal)
+}
+
 impl ToolBackend for RuntimeToolBackend {
     fn call(
         &self,
@@ -1683,12 +1757,6 @@ fn recoverable_error(error: &ReCtmError) -> bool {
 fn invalid_capability_error(error: &ReCtmError) -> bool {
     error.category == ErrorCategory::Permission && error.code == "CAPABILITY_INVALID"
 }
-fn required_text<'a>(map: &'a Map<String, Value>, key: &str) -> Result<&'a str, ReCtmError> {
-    map.get(key)
-        .and_then(Value::as_str)
-        .filter(|v| !v.is_empty())
-        .ok_or_else(|| validation(&format!("{key} is required")))
-}
 fn text_or<'a>(map: &'a Map<String, Value>, key: &str, default: &'a str) -> &'a str {
     map.get(key).and_then(Value::as_str).unwrap_or(default)
 }
@@ -1782,5 +1850,81 @@ mod tests {
         assert_eq!(result["isError"], false);
         assert!(result["content"].is_array());
         assert_eq!(result["structuredContent"]["tool_count"], 24);
+    }
+
+    #[test]
+    fn missing_exact_grants_map_to_redacted_public_permission_required() {
+        let internal = ReCtmError::new(
+            "NATIVE_PERMISSION_GRANT_SET_INCOMPLETE",
+            "internal ledger diagnostic",
+        )
+        .with_category(ErrorCategory::Permission)
+        .with_details(Map::from_iter([
+            (
+                "permission".to_owned(),
+                Value::String("inline_script".to_owned()),
+            ),
+            (
+                "permissions".to_owned(),
+                serde_json::json!(["inline_script", "long_timeout"]),
+            ),
+            (
+                "tool_name".to_owned(),
+                Value::String("exec_command".to_owned()),
+            ),
+        ]));
+        let public = public_native_authority_error(internal);
+        assert_eq!(public.code, "PERMISSION_REQUIRED");
+        assert_eq!(public.category, ErrorCategory::Permission);
+        assert_eq!(public.details.len(), 3);
+        assert_eq!(public.details["permission"], "inline_script");
+        assert_eq!(
+            public.details["permissions"],
+            serde_json::json!(["inline_script", "long_timeout"])
+        );
+        assert_eq!(public.details["tool_name"], "exec_command");
+        assert!(!public.details.contains_key("grant_id"));
+        assert!(!public.details.contains_key("arguments_sha256"));
+    }
+
+    #[test]
+    fn native_authority_mapper_preserves_security_errors() {
+        let error = ReCtmError::new("NATIVE_PERMISSION_GRANT_SET_AMBIGUOUS", "ambiguous")
+            .with_category(ErrorCategory::Permission);
+        let mapped = public_native_authority_error(error);
+        assert_eq!(mapped.code, "NATIVE_PERMISSION_GRANT_SET_AMBIGUOUS");
+    }
+
+    #[test]
+    fn malformed_missing_grant_metadata_fails_closed() {
+        for details in [
+            Map::new(),
+            Map::from_iter([(
+                "permission".to_owned(),
+                Value::String("inline_script".to_owned()),
+            )]),
+            Map::from_iter([
+                (
+                    "permission".to_owned(),
+                    Value::String("long_timeout".to_owned()),
+                ),
+                (
+                    "permissions".to_owned(),
+                    serde_json::json!(["inline_script", "long_timeout"]),
+                ),
+                (
+                    "tool_name".to_owned(),
+                    Value::String("exec_command".to_owned()),
+                ),
+            ]),
+        ] {
+            let error = ReCtmError::new("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE", "internal")
+                .with_category(ErrorCategory::Permission)
+                .with_details(details);
+            let mapped = public_native_authority_error(error);
+            assert_eq!(mapped.code, "NATIVE_PERMISSION_INTERNAL_ERROR");
+            assert_eq!(mapped.category, ErrorCategory::Internal);
+            assert!(mapped.details.is_empty());
+        }
     }
 }

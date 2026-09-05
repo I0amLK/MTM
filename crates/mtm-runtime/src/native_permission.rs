@@ -1023,6 +1023,7 @@ impl NativePermissionGrantAuthority {
         let mut grants = self.lock_grants()?;
         let now = self.runtime.clock.unix_seconds()?;
         let mut selected = Vec::new();
+        let mut missing = Vec::new();
 
         for kind in &ordered_required {
             let candidates = grants
@@ -1041,12 +1042,7 @@ impl NativePermissionGrantAuthority {
                 .collect::<Vec<_>>();
             match candidates.as_slice() {
                 [grant_id] => selected.push((grant_id.clone(), *kind)),
-                [] => {
-                    return Err(denied(
-                        "NATIVE_PERMISSION_GRANT_SET_INCOMPLETE",
-                        "No complete exact grant set exists for this Native invocation.",
-                    ));
-                }
+                [] => missing.push(*kind),
                 _ => {
                     return Err(denied(
                         "NATIVE_PERMISSION_GRANT_SET_AMBIGUOUS",
@@ -1054,6 +1050,32 @@ impl NativePermissionGrantAuthority {
                     ));
                 }
             }
+        }
+        if let Some(first) = missing.first() {
+            let details = Map::from_iter([
+                (
+                    "permission".to_owned(),
+                    Value::String(first.as_str().to_owned()),
+                ),
+                (
+                    "permissions".to_owned(),
+                    Value::Array(
+                        missing
+                            .iter()
+                            .map(|kind| Value::String(kind.as_str().to_owned()))
+                            .collect(),
+                    ),
+                ),
+                (
+                    "tool_name".to_owned(),
+                    Value::String(tool.as_str().to_owned()),
+                ),
+            ]);
+            return Err(denied(
+                "NATIVE_PERMISSION_GRANT_SET_INCOMPLETE",
+                "No complete exact grant set exists for this Native invocation.",
+            )
+            .with_details(details));
         }
 
         let mut once_grant_count = 0;
@@ -2136,21 +2158,29 @@ mod tests {
             &args,
             300,
         )?;
+        let incomplete = authority
+            .authorize_matching_grants(
+                "owner-a",
+                "/workspace/a",
+                NativePermissionTool::ExecCommand,
+                &[
+                    NativePermissionKind::Network,
+                    NativePermissionKind::LongTimeout,
+                ],
+                &args,
+            )
+            .err()
+            .ok_or_else(|| internal("incomplete grant set unexpectedly authorized"))?;
+        assert_eq!(incomplete.code, "NATIVE_PERMISSION_GRANT_SET_INCOMPLETE");
+        assert_eq!(incomplete.details.len(), 3);
+        assert_eq!(incomplete.details["permission"], "long_timeout");
         assert_eq!(
-            authority
-                .authorize_matching_grants(
-                    "owner-a",
-                    "/workspace/a",
-                    NativePermissionTool::ExecCommand,
-                    &[
-                        NativePermissionKind::Network,
-                        NativePermissionKind::LongTimeout,
-                    ],
-                    &args,
-                )
-                .map_err(code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+            incomplete.details["permissions"],
+            serde_json::json!(["long_timeout"])
         );
+        assert_eq!(incomplete.details["tool_name"], "exec_command");
+        assert!(!incomplete.details.contains_key("grant_id"));
+        assert!(!incomplete.details.contains_key("arguments_sha256"));
         // The failed set lookup did not partially consume the network grant.
         authority.authorize(
             network.grant_id(),
@@ -2160,6 +2190,26 @@ mod tests {
             NativePermissionKind::Network,
             &args,
         )?;
+
+        let empty = NativePermissionGrantAuthority::new(runtime(Arc::new(ManualClock::new(8_001))));
+        let all_missing = empty
+            .authorize_matching_grants(
+                "owner-a",
+                "/workspace/a",
+                NativePermissionTool::ExecCommand,
+                &[
+                    NativePermissionKind::LongTimeout,
+                    NativePermissionKind::Network,
+                ],
+                &args,
+            )
+            .err()
+            .ok_or_else(|| internal("empty grant set unexpectedly authorized"))?;
+        assert_eq!(all_missing.details["permission"], "network");
+        assert_eq!(
+            all_missing.details["permissions"],
+            serde_json::json!(["network", "long_timeout"])
+        );
         Ok(())
     }
 

@@ -5,29 +5,25 @@ use std::sync::Arc;
 use mtm_contracts::{
     ErrorCategory, NativeMode, NativePermissionKind, NativePermissionTool, ReCtmError,
 };
+#[cfg(test)]
+use mtm_core::check_command_policy;
 use mtm_core::{
     EffectiveNativePolicy, ExecInvocation, ExecPermissionFacts, NativeInvocation,
-    check_command_policy, classify_exec_permissions,
+    classify_exec_permissions,
 };
+#[cfg(test)]
+use mtm_native::network_namespace_for_mode;
 use mtm_native::{
     CommandManager, CommandManagerConfig, CommandRequest, DEFAULT_SANDBOX_PATH, KillRequest,
     NATIVE_HELPER_PROTOCOL, NativeHelperRequest, NativeHelperResponse, NetworkNamespacePlan,
     PollRequest, SandboxPlan, SandboxPlanInput, ToolchainExposurePlan, build_bubblewrap_command,
-    build_toolchain_exposure_plan, network_namespace_for_mode, plan_sandbox,
-    validate_helper_response,
+    build_toolchain_exposure_plan, plan_sandbox, validate_helper_response,
 };
 use serde_json::{Map, Value};
 
 use crate::helper::invoke_runtime_helper;
 use crate::{NativeInvocationPermissionPermit, revalidate_exec_permission_facts};
 
-#[cfg_attr(
-    not(test),
-    expect(
-        dead_code,
-        reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
-    )
-)]
 pub(crate) struct PreparedAuthorityExec {
     invocation: ExecInvocation,
     facts: ExecPermissionFacts,
@@ -51,15 +47,9 @@ impl std::fmt::Debug for PreparedAuthorityExec {
     }
 }
 
-#[cfg_attr(
-    not(test),
-    expect(
-        dead_code,
-        reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
-    )
-)]
 impl PreparedAuthorityExec {
     #[must_use]
+    #[cfg(test)]
     pub(crate) fn invocation(&self) -> &ExecInvocation {
         &self.invocation
     }
@@ -70,27 +60,14 @@ impl PreparedAuthorityExec {
     }
 
     #[must_use]
+    #[cfg(test)]
     pub(crate) fn network(&self) -> NetworkNamespacePlan {
         self.sandbox_plan.network()
     }
 }
 
-#[cfg_attr(
-    not(test),
-    expect(
-        dead_code,
-        reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
-    )
-)]
 pub(crate) struct RevalidatedAuthorityExec(PreparedAuthorityExec);
 
-#[cfg_attr(
-    not(test),
-    expect(
-        dead_code,
-        reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
-    )
-)]
 impl RevalidatedAuthorityExec {
     #[must_use]
     pub(crate) fn policy(&self) -> &EffectiveNativePolicy {
@@ -265,6 +242,7 @@ impl NativeToolRuntime {
         })
     }
 
+    #[cfg(test)]
     pub fn exec_command(&self, arguments: &Map<String, Value>) -> Result<Value, ReCtmError> {
         if self.backend != "bubblewrap" {
             return Err(ReCtmError::new(
@@ -408,16 +386,8 @@ impl NativeToolRuntime {
         )
     }
 
-    /// Prepare the future Native permission-authority execution path without
-    /// consuming a grant or starting a process. Public dispatch remains on the
-    /// accepted pre-D5 path until the independent human-consent gate passes.
-    #[cfg_attr(
-        not(test),
-        expect(
-            dead_code,
-            reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
-        )
-    )]
+    /// Prepare the authoritative Native permission execution path without
+    /// consuming a grant or starting a process.
     pub(crate) fn prepare_authority_exec(
         &self,
         arguments: &Map<String, Value>,
@@ -425,7 +395,7 @@ impl NativeToolRuntime {
         if self.backend != "bubblewrap" || self.attestation.is_none() {
             return Err(ReCtmError::new(
                 "NATIVE_ISOLATION_REQUIRED",
-                "The Native authority candidate requires an attested Bubblewrap backend.",
+                "Native permission authority requires an attested Bubblewrap backend.",
             )
             .with_category(ErrorCategory::Security));
         }
@@ -484,13 +454,6 @@ impl NativeToolRuntime {
         })
     }
 
-    #[cfg_attr(
-        not(test),
-        expect(
-            dead_code,
-            reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
-        )
-    )]
     pub(crate) fn revalidate_authority_exec(
         &self,
         prepared: PreparedAuthorityExec,
@@ -509,13 +472,6 @@ impl NativeToolRuntime {
         Ok(RevalidatedAuthorityExec(prepared))
     }
 
-    #[cfg_attr(
-        not(test),
-        expect(
-            dead_code,
-            reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
-        )
-    )]
     pub(crate) fn start_authority_exec(
         &self,
         prepared: RevalidatedAuthorityExec,

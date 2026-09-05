@@ -1,11 +1,3 @@
-#![cfg_attr(
-    not(test),
-    expect(
-        dead_code,
-        reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
-    )
-)]
-
 use std::collections::BTreeSet;
 use std::sync::Arc;
 
@@ -17,12 +9,12 @@ use serde_json::{Map, Value};
 
 use crate::{NativePermissionGrantAuthority, NativeToolRuntime, NativeWorkspace};
 
-/// Pre-cutover execution seam for MTM-014 D5.
+/// Production Native permission-authority execution seam for MTM-014 D5B.
 ///
-/// This type is intentionally crate-private and is not reachable from MCP
-/// dispatch. It exists so the complete grant -> SandboxPlan/PreparedPatch ->
-/// execution path can be qualified before the independent human-consent gate
-/// authorizes the final public cutover.
+/// The type remains crate-private so the public MCP backend is the only production
+/// caller. It consumes an authenticated owner identity plus already-validated public
+/// tool arguments, then enforces exact grants before any command start or patch
+/// mutation.
 pub(crate) struct NativeAuthorityExecutor {
     native: Arc<NativeToolRuntime>,
     workspace: Arc<NativeWorkspace>,
@@ -40,6 +32,22 @@ impl NativeAuthorityExecutor {
             workspace,
             grants,
         }
+    }
+
+    pub(crate) fn exec_command(
+        &self,
+        owner_id: &str,
+        arguments: &Map<String, Value>,
+    ) -> Result<Value, ReCtmError> {
+        self.exec_command_candidate(owner_id, arguments)
+    }
+
+    pub(crate) fn apply_patch(
+        &self,
+        owner_id: &str,
+        arguments: &Map<String, Value>,
+    ) -> Result<Value, ReCtmError> {
+        self.apply_patch_candidate(owner_id, arguments)
     }
 
     pub(crate) fn exec_command_candidate(

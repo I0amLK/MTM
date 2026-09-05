@@ -504,6 +504,57 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(d5b["post_cutover_public_path_a4_required"])
         self.assertFalse(d5b["release_or_selector_cutover_in_same_commit"])
 
+        d5b_progress = iteration["d5b_progress"]
+        self.assertEqual(
+            d5b_progress["phase"], "source_public_native_permission_authority_cutover"
+        )
+        self.assertTrue(d5b_progress["source_authority_cutover_performed"])
+        self.assertFalse(d5b_progress["deployment_selector_cutover_performed"])
+        self.assertEqual(
+            d5b_progress["public_dispatch"]["exec_command"], "NativeAuthorityExecutor"
+        )
+        self.assertEqual(
+            d5b_progress["public_dispatch"]["apply_patch"], "NativeAuthorityExecutor"
+        )
+        self.assertEqual(
+            d5b_progress["public_dispatch"]["grant_owner_binding"],
+            "oauth_principal.client_id",
+        )
+        self.assertFalse(d5b_progress["public_dispatch"]["client_supplied_grant_id"])
+        self.assertFalse(
+            d5b_progress["public_dispatch"]["legacy_native_exec_authority_in_production_build"]
+        )
+        self.assertFalse(
+            d5b_progress["public_dispatch"][
+                "legacy_patch_compatibility_authority_in_production_build"
+            ]
+        )
+        self.assertEqual(
+            d5b_progress["public_error_compatibility"]["missing_exact_grant"],
+            "PERMISSION_REQUIRED",
+        )
+        self.assertEqual(
+            d5b_progress["public_error_compatibility"]["safe_detail_keys"],
+            ["permission", "permissions", "tool_name"],
+        )
+        self.assertFalse(d5b_progress["public_error_compatibility"]["raw_grant_id_exposed"])
+        self.assertFalse(d5b_progress["public_error_compatibility"]["argument_digest_exposed"])
+        self.assertFalse(d5b_progress["public_error_compatibility"]["raw_arguments_exposed"])
+        smoke = d5b_progress["public_loopback_smoke"]
+        self.assertEqual(smoke["safe_exec_before_grant"], "PERMISSION_REQUIRED")
+        self.assertTrue(smoke["safe_exec_mrtr_granted"])
+        self.assertEqual(smoke["safe_exec_once_execution"], "passed")
+        self.assertEqual(smoke["safe_exec_once_replay"], "PERMISSION_REQUIRED")
+        self.assertEqual(smoke["ignored_patch_before_grant"], "PERMISSION_REQUIRED")
+        self.assertTrue(smoke["ignored_patch_zero_writes_before_grant"])
+        self.assertTrue(smoke["ignored_patch_mrtr_granted"])
+        self.assertEqual(smoke["ignored_patch_execution"], "passed")
+        self.assertEqual(smoke["second_ignored_patch_without_grant"], "PERMISSION_REQUIRED")
+        self.assertFalse(d5b_progress["stable_deployment"]["changed"])
+        self.assertEqual(d5b_progress["post_cutover_public_path_a4"], "pending")
+        self.assertFalse(d5b_progress["release_or_selector_cutover"])
+        self.assertFalse(d5b_progress["workflow_or_finalizer_authority_changed"])
+
         human = d5a_progress["human_acceptance"]
         self.assertEqual(human["client"], "MCP Inspector 2.5.0")
         self.assertEqual(human["protocol"], "2026-07-28 modern")
@@ -543,14 +594,24 @@ class GovernanceTestCase(unittest.TestCase):
         tool_backend_source = (
             ROOT / "crates" / "mtm-runtime" / "src" / "tool_backend.rs"
         ).read_text(encoding="utf-8")
-        self.assertNotIn("exec_command_candidate(", tool_backend_source)
-        self.assertNotIn("apply_patch_candidate(", tool_backend_source)
+        self.assertIn(".exec_command(&principal.client_id, arguments)", tool_backend_source)
+        self.assertIn(".apply_patch(&principal.client_id, arguments)", tool_backend_source)
+        self.assertNotIn("self.native.exec_command(arguments)", tool_backend_source)
+        self.assertNotIn("self.workspace.apply_patch(", tool_backend_source)
         authority_source = (
             ROOT / "crates" / "mtm-runtime" / "src" / "native_authority.rs"
         ).read_text(encoding="utf-8")
-        self.assertIn("expect(", authority_source)
-        self.assertIn("dead_code", authority_source)
-        self.assertIn("real human MRTR evidence", authority_source)
+        self.assertNotIn("cutover candidate must remain unreachable", authority_source)
+        self.assertIn("pub(crate) fn exec_command(", authority_source)
+        self.assertIn("pub(crate) fn apply_patch(", authority_source)
+        native_tools_source = (
+            ROOT / "crates" / "mtm-runtime" / "src" / "native_tools.rs"
+        ).read_text(encoding="utf-8")
+        self.assertIn("#[cfg(test)]\n    pub fn exec_command(", native_tools_source)
+        workspace_source = (
+            ROOT / "crates" / "mtm-runtime" / "src" / "workspace.rs"
+        ).read_text(encoding="utf-8")
+        self.assertIn("#[cfg(test)]\n    pub(crate) fn apply_patch(", workspace_source)
 
         bubblewrap_source = (
             ROOT / "crates" / "mtm-native" / "src" / "bubblewrap.rs"

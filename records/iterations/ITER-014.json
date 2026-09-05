@@ -866,6 +866,64 @@
     "post_cutover_public_path_a4_required": true,
     "release_or_selector_cutover_in_same_commit": false
   },
+  "d5b_progress": {
+    "implemented_at": "2026-09-05T14:49:33+08:00",
+    "phase": "source_public_native_permission_authority_cutover",
+    "source_authority_cutover_performed": true,
+    "deployment_selector_cutover_performed": false,
+    "public_dispatch": {
+      "exec_command": "NativeAuthorityExecutor",
+      "apply_patch": "NativeAuthorityExecutor",
+      "grant_owner_binding": "oauth_principal.client_id",
+      "client_supplied_grant_id": false,
+      "legacy_native_exec_authority_in_production_build": false,
+      "legacy_patch_compatibility_authority_in_production_build": false,
+      "write_stdin_read_output_kill_changed": false
+    },
+    "public_error_compatibility": {
+      "missing_exact_grant": "PERMISSION_REQUIRED",
+      "internal_missing_grant_code_retained": "NATIVE_PERMISSION_GRANT_SET_INCOMPLETE",
+      "safe_detail_keys": [
+        "permission",
+        "permissions",
+        "tool_name"
+      ],
+      "raw_grant_id_exposed": false,
+      "argument_digest_exposed": false,
+      "raw_arguments_exposed": false,
+      "ambiguous_and_toctou_errors_preserved": true
+    },
+    "public_loopback_smoke": {
+      "binary_sha256": "697dc4a0b007c539b6bc154b95ab44d1b88b4094ac8c60978a3a9cb5e1d258df",
+      "safe_exec_before_grant": "PERMISSION_REQUIRED",
+      "safe_exec_permission": "inline_script",
+      "safe_exec_mrtr_granted": true,
+      "safe_exec_once_execution": "passed",
+      "safe_exec_once_replay": "PERMISSION_REQUIRED",
+      "ignored_patch_before_grant": "PERMISSION_REQUIRED",
+      "ignored_patch_zero_writes_before_grant": true,
+      "ignored_patch_mrtr_granted": true,
+      "ignored_patch_execution": "passed",
+      "second_ignored_patch_without_grant": "PERMISSION_REQUIRED",
+      "server_shutdown_clean": true
+    },
+    "validation": {
+      "missing_grant_detail_test": "passed",
+      "public_error_mapper_tests": "5 passed",
+      "runtime_clippy_warnings_denied": true,
+      "full_run_checks": "26 of 26 passed",
+      "git_diff_check": true
+    },
+    "stable_deployment": {
+      "cargo_command_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+      "selector_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+      "changed": false
+    },
+    "post_cutover_public_path_a4": "pending",
+    "release_or_selector_cutover": false,
+    "workflow_or_finalizer_authority_changed": false,
+    "manual_pending": "Run hash-bound post-cutover public OAuth/MCP A4 before any preview install or selector change."
+  },
   "d5_capacity_hardening": {
     "accepted_at": "2026-09-04T21:48:37-07:00",
     "scope": "A3 bounded process-local consent/grant storage; not human acceptance or cutover",
