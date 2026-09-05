@@ -377,13 +377,13 @@ def safe_public_case(root: Path) -> dict[str, bool]:
             port,
             token_a,
             "shell_expansion",
-            {"cmd": 'printf "$HOME"'},
+            {"cmd": 'printf "${HOME}"'},
         )
         exercise_once(
             port,
             token_a,
             "destructive_command",
-            {"cmd": "rm -f harmless-public-missing.txt"},
+            {"cmd": "rm -rf harmless-public-missing-dir"},
         )
         exercise_once(
             port,
@@ -662,7 +662,7 @@ def trusted_public_case(root: Path) -> dict[str, bool]:
         token = oauth_token(port, base, "MTM-014 D5B trusted")
         for arguments in (
             {"cmd": 'sh -c "printf trusted-inline"'},
-            {"cmd": 'printf "$HOME"'},
+            {"cmd": 'printf "${HOME}"'},
             {"cmd": "curl --fail --silent --show-error --max-time 15 https://example.com/", "yield_time_ms": 30_000},
         ):
             value = assert_tool_success(call_tool(port, token, "exec_command", arguments))
@@ -670,7 +670,7 @@ def trusted_public_case(root: Path) -> dict[str, bool]:
                 fail("trusted_implicit_profile")
         gated = (
             ({"cmd": "env", "env": {"API_TOKEN": "trusted-secret"}}, ["sensitive_env"]),
-            ({"cmd": "rm -f trusted-missing.txt"}, ["destructive_command"]),
+            ({"cmd": "rm -rf trusted-missing-dir"}, ["destructive_command"]),
             ({"cmd": "printf trusted-long", "timeout_ms": 30_001}, ["long_timeout"]),
         )
         for arguments, permissions in gated:
@@ -732,7 +732,7 @@ def dangerous_public_case(root: Path) -> tuple[dict[str, bool], str]:
             fail("dangerous_complete_profile")
         for command in (
             'sh -c "printf dangerous-inline"',
-            "rm -f dangerous-missing.txt",
+            "rm -rf dangerous-missing-dir",
             "curl --fail --silent --show-error --max-time 15 https://example.com/",
             "git --version",
             "pdflatex --version",

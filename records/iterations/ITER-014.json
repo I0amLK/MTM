@@ -998,10 +998,16 @@
   ],
   "rollback": "Before permission-authority cutover, remove the MTM-014 shadow types/ledger and retain stable 0.4.0 Native policy plus Bubblewrap. After a later cutover, restore the frozen pre-cutover evaluator and invalidate all process-local grants; no persistent workflow/project/proof data rewrite is required.",
   "manual_pending": [
-    "D5A human MRTR form elicitation is accepted on MCP Inspector 2.5.0; production exec_command/apply_patch permission enforcement must remain pre-cutover until the complete real-target A4 corpus passes.",
-    "Real target A4 is required before any MTM-014 permission-authority cutover."
+    "D5A human MRTR form elicitation and pre-cutover A4 are accepted, and the source-level public exec_command/apply_patch Native authority cutover is committed. Post-cutover public OAuth/MCP A4 remains mandatory before any preview install or selector change.",
+    "Preview install, rollback/recutover and bounded soak remain required before MTM-014 completion; Magma functional validation remains host-license dependent."
   ],
   "recorded_failures_and_repairs": [
+    {
+      "delivery": 5,
+      "stage": "initial post-cutover public A4 classifier fixtures",
+      "failure": "The first committed public A4 runner expected printf \"$HOME\" to require shell_expansion and rm -f of a missing file to require destructive_command. Both commands are outside the frozen classifier patterns, so the new public authority correctly allowed them and the runner failed rather than widening production policy.",
+      "repair": "Kept the frozen production classifier unchanged and replaced only the isolated A4 inputs with printf \"${HOME}\" and rm -rf of nonexistent temporary-workspace directories. These inputs match the frozen shell-expansion and destructive-command rules while remaining harmless target fixtures."
+    },
     {
       "delivery": 5,
       "stage": "pre-cutover resource-bound review",
