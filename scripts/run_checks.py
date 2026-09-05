@@ -167,6 +167,15 @@ def main() -> int:
                 capture_json=True,
             )
         )
+    if (ROOT / "records/evidence/MTM-014/elicitation-capability.json").is_file():
+        checks.append(
+            run(
+                "mtm014_elicitation_capability",
+                [sys.executable, "scripts/validate_mtm014_elicitation_capability.py"],
+                env=environment,
+                capture_json=True,
+            )
+        )
     if progress.get("current_milestone") == "MTM-013":
         checks.append(
             run(

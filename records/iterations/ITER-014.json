@@ -467,7 +467,7 @@
   },
   "d5a_progress": {
     "started_at": "2026-09-04T20:14:39-07:00",
-    "phase": "mrtr_permission_bridge_integration",
+    "phase": "verified_human_consent_accepted",
     "gateway_request_scoped_context": true,
     "client_capabilities_preserved_per_request": true,
     "form_elicitation_capability_rules": {
@@ -490,13 +490,13 @@
     "verified_consent_constructor_connected": true,
     "grant_minting_from_mrtr_enabled": true,
     "production_exec_or_patch_authority_changed": false,
-    "real_human_consent_evidence_collected": false,
+    "real_human_consent_evidence_collected": true,
     "validation": {
       "gateway_mcp_tests": "6 passed",
       "gateway_runtime_clippy_warnings_denied": true,
       "consent_challenge_tests": "4 passed",
       "mrtr_bridge_integration_checks": "22 passed",
-      "full_run_checks": "24 of 24 passed",
+      "full_run_checks": "25 of 25 passed",
       "git_diff_check": true
     },
     "consent_challenge_authority": {
@@ -528,7 +528,7 @@
       "challenge_raw_arguments_retained": false,
       "runtime_application_connected": true,
       "request_permissions_connected": true,
-      "real_human_consent_evidence_collected": false,
+      "real_human_consent_evidence_collected": true,
       "tests": "4 passed",
       "clippy_warnings_denied": true
     },
@@ -586,6 +586,29 @@
         "legacy_duplicate_grant_coverage_is_ambiguous_and_consumes_none"
       ],
       "mrtr_integration_check_count": 22
+    },
+    "human_acceptance": {
+      "accepted_at": "2026-09-05T13:47:09+08:00",
+      "evidence": "records/evidence/MTM-014/elicitation-capability.json",
+      "evidence_sha256": "4e20ef416d0d799323b2a6714d98a879a8bdfebdebc344d07d21bb587254a582",
+      "source_commit": "a46beb73472c2e480c0a2a9bd2bde9abe8d64d4b",
+      "candidate_binary_sha256": "e48a63ca218e73a5cc0cda31fa6e28cc46b89812fa6bf26b1532fc39b9a88564",
+      "client": "MCP Inspector 2.5.0",
+      "protocol": "2026-07-28 modern",
+      "transport": "streamable HTTP over Cloudflare Quick Tunnel",
+      "client_owned_form_observed": true,
+      "accept_status": "granted",
+      "decline_status": "denied",
+      "cancel_status": "denied",
+      "decline_error": "ELICITATION_DENIED",
+      "cancel_error": "ELICITATION_DENIED",
+      "workflow_authority_inherited": false,
+      "raw_oauth_key_recorded": false,
+      "raw_access_token_recorded": false,
+      "raw_request_state_recorded": false,
+      "raw_grant_id_recorded": false,
+      "raw_tool_arguments_recorded": false,
+      "production_exec_or_patch_authority_cutover": false
     },
     "pre_cutover_candidate": {
       "validated_at": "2026-09-05T11:56:30+08:00",
@@ -659,9 +682,37 @@
         "candidate_uses_existing_command_manager": true,
         "descendant_process_group_semantics_reused_from_mtm_native": true
       },
-      "real_human_consent_evidence": false,
+      "real_human_consent_evidence": true,
       "authority_cutover_allowed": false
     }
+  },
+  "d5a_receipt": {
+    "accepted_at": "2026-09-05T13:47:09+08:00",
+    "scope": "Verified MCP 2026-07-28 MRTR form consent only; production exec/apply_patch authority remains pre-cutover",
+    "provider": "mcp_2026_07_28_mrtr_form_elicitation",
+    "client": "MCP Inspector 2.5.0",
+    "source_commit": "a46beb73472c2e480c0a2a9bd2bde9abe8d64d4b",
+    "candidate_binary_sha256": "e48a63ca218e73a5cc0cda31fa6e28cc46b89812fa6bf26b1532fc39b9a88564",
+    "evidence": "records/evidence/MTM-014/elicitation-capability.json",
+    "evidence_sha256": "4e20ef416d0d799323b2a6714d98a879a8bdfebdebc344d07d21bb587254a582",
+    "independent_human_action_observed": true,
+    "client_owned_form_observed": true,
+    "accept_granted": true,
+    "decline_denied": true,
+    "cancel_denied": true,
+    "automated_replay_and_mutation_checks_passed": true,
+    "workflow_authority_inherited": false,
+    "raw_authority_material_recorded": false,
+    "production_exec_or_patch_authority_cutover": false,
+    "authority_cutover_allowed": false,
+    "validation": {
+      "elicitation_evidence_validator": "passed",
+      "human_evidence_tests": "5 passed",
+      "governance_tests": "27 passed with 4 deployment-mode skips",
+      "full_run_checks": "25 of 25 passed",
+      "git_diff_check": true
+    },
+    "manual_pending": "Complete real-target A4, public exec/apply_patch authority cutover qualification, Magma functional validation when host licensing is available, preview release rollback/recutover and soak."
   },
   "d5_capacity_hardening": {
     "accepted_at": "2026-09-04T21:48:37-07:00",
@@ -712,8 +763,7 @@
   ],
   "rollback": "Before permission-authority cutover, remove the MTM-014 shadow types/ledger and retain stable 0.4.0 Native policy plus Bubblewrap. After a later cutover, restore the frozen pre-cutover evaluator and invalidate all process-local grants; no persistent workflow/project/proof data rewrite is required.",
   "manual_pending": [
-    "A real MCP client must demonstrate independent human MRTR form elicitation before D5A can be accepted; scripted inputResponses are integration evidence only.",
-    "Production exec_command/apply_patch permission enforcement must remain pre-cutover until D5A human evidence and the complete real-target A4 corpus pass.",
+    "D5A human MRTR form elicitation is accepted on MCP Inspector 2.5.0; production exec_command/apply_patch permission enforcement must remain pre-cutover until the complete real-target A4 corpus passes.",
     "Real target A4 is required before any MTM-014 permission-authority cutover."
   ],
   "recorded_failures_and_repairs": [

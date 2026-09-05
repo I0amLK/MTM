@@ -268,7 +268,7 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertFalse(d5a["production_exec_or_patch_authority_changed"])
         self.assertFalse(d5a["workflow_authority_changed"])
         d5a_progress = iteration["d5a_progress"]
-        self.assertEqual(d5a_progress["phase"], "mrtr_permission_bridge_integration")
+        self.assertEqual(d5a_progress["phase"], "verified_human_consent_accepted")
         self.assertTrue(d5a_progress["gateway_request_scoped_context"])
         self.assertTrue(d5a_progress["client_capabilities_preserved_per_request"])
         self.assertTrue(d5a_progress["input_responses_parsed_outside_tool_arguments"])
@@ -280,7 +280,8 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(d5a_progress["verified_consent_constructor_connected"])
         self.assertTrue(d5a_progress["grant_minting_from_mrtr_enabled"])
         self.assertFalse(d5a_progress["production_exec_or_patch_authority_changed"])
-        self.assertFalse(d5a_progress["real_human_consent_evidence_collected"])
+        self.assertTrue(d5a_progress["real_human_consent_evidence_collected"])
+        self.assertEqual(d5a_progress["validation"]["full_run_checks"], "25 of 25 passed")
         challenge = d5a_progress["consent_challenge_authority"]
         self.assertTrue(challenge["implemented"])
         self.assertEqual(challenge["store"], "process_local")
@@ -300,6 +301,7 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertFalse(challenge["challenge_raw_arguments_retained"])
         self.assertTrue(challenge["runtime_application_connected"])
         self.assertTrue(challenge["request_permissions_connected"])
+        self.assertTrue(challenge["real_human_consent_evidence_collected"])
         bridge = d5a_progress["bridge_integration"]
         self.assertEqual(bridge["check_count"], 22)
         self.assertTrue(bridge["all_checks_passed"])
@@ -386,8 +388,44 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(lifecycle["descendant_process_group_semantics_reused_from_mtm_native"])
         self.assertFalse(candidate["production_exec_command_changed"])
         self.assertFalse(candidate["production_apply_patch_changed"])
-        self.assertFalse(candidate["real_human_consent_evidence"])
+        self.assertTrue(candidate["real_human_consent_evidence"])
         self.assertFalse(candidate["authority_cutover_allowed"])
+
+        human = d5a_progress["human_acceptance"]
+        self.assertEqual(human["client"], "MCP Inspector 2.5.0")
+        self.assertEqual(human["protocol"], "2026-07-28 modern")
+        self.assertTrue(human["client_owned_form_observed"])
+        self.assertEqual(human["accept_status"], "granted")
+        self.assertEqual(human["decline_status"], "denied")
+        self.assertEqual(human["cancel_status"], "denied")
+        self.assertFalse(human["workflow_authority_inherited"])
+        self.assertFalse(human["raw_oauth_key_recorded"])
+        self.assertFalse(human["raw_access_token_recorded"])
+        self.assertFalse(human["raw_request_state_recorded"])
+        self.assertFalse(human["raw_grant_id_recorded"])
+        self.assertFalse(human["raw_tool_arguments_recorded"])
+        d5a_receipt = iteration["d5a_receipt"]
+        self.assertFalse(d5a_receipt["production_exec_or_patch_authority_cutover"])
+        self.assertFalse(d5a_receipt["authority_cutover_allowed"])
+        self.assertEqual(d5a_receipt["validation"]["elicitation_evidence_validator"], "passed")
+        self.assertEqual(d5a_receipt["validation"]["human_evidence_tests"], "5 passed")
+        self.assertEqual(
+            d5a_receipt["validation"]["governance_tests"],
+            "27 passed with 4 deployment-mode skips",
+        )
+        self.assertEqual(d5a_receipt["validation"]["full_run_checks"], "25 of 25 passed")
+        self.assertFalse(human["production_exec_or_patch_authority_cutover"])
+        d5a_receipt = iteration["d5a_receipt"]
+        self.assertTrue(d5a_receipt["independent_human_action_observed"])
+        self.assertTrue(d5a_receipt["client_owned_form_observed"])
+        self.assertTrue(d5a_receipt["accept_granted"])
+        self.assertTrue(d5a_receipt["decline_denied"])
+        self.assertTrue(d5a_receipt["cancel_denied"])
+        self.assertTrue(d5a_receipt["automated_replay_and_mutation_checks_passed"])
+        self.assertFalse(d5a_receipt["workflow_authority_inherited"])
+        self.assertFalse(d5a_receipt["raw_authority_material_recorded"])
+        self.assertFalse(d5a_receipt["production_exec_or_patch_authority_cutover"])
+        self.assertFalse(d5a_receipt["authority_cutover_allowed"])
 
         tool_backend_source = (
             ROOT / "crates" / "mtm-runtime" / "src" / "tool_backend.rs"

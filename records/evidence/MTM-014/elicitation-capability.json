@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-014",
+  "phase": "verified_human_mrtr_consent",
+  "accepted_scope": "D5A_only",
+  "recorded_at": "2026-09-05T13:47:09+08:00",
+  "source_commit": "a46beb73472c2e480c0a2a9bd2bde9abe8d64d4b",
+  "candidate_binary_sha256": "e48a63ca218e73a5cc0cda31fa6e28cc46b89812fa6bf26b1532fc39b9a88564",
+  "candidate_version": "0.4.0",
+  "client": {
+    "name": "MCP Inspector",
+    "version": "2.5.0",
+    "protocol_era": "modern",
+    "protocol_version": "2026-07-28",
+    "transport": "streamable_http_over_cloudflare_quick_tunnel"
+  },
+  "independent_human_action_observed": true,
+  "client_owned_form_observed": true,
+  "model_supplied_input_responses": false,
+  "form": {
+    "method": "elicitation/create",
+    "mode": "form",
+    "fields": [
+      "approved"
+    ],
+    "displayed_context": [
+      "permission",
+      "tool_name",
+      "workspace_label",
+      "scope",
+      "ttl_seconds",
+      "reason",
+      "argument_fingerprint"
+    ],
+    "argument_fingerprint": "83f6ff54ee6a",
+    "raw_arguments_displayed": false,
+    "edit_as_json_used": false
+  },
+  "observations": {
+    "accept": {
+      "human_action": "checked_approved_and_submitted",
+      "status": "granted",
+      "source": "verified_mcp_mrtr_form_elicitation",
+      "scope": "once",
+      "workflow_authority_inherited": false
+    },
+    "decline": {
+      "human_action": "decline",
+      "status": "denied",
+      "error_code": "ELICITATION_DENIED",
+      "grant_minted": false
+    },
+    "cancel": {
+      "human_action": "cancel",
+      "status": "denied",
+      "error_code": "ELICITATION_DENIED",
+      "grant_minted": false
+    }
+  },
+  "supporting_automated_evidence": {
+    "mrtr_bridge_check_count": 22,
+    "capacity_check_count": 13,
+    "replay_denied": true,
+    "argument_mutation_denied": true,
+    "cross_owner_denied": true
+  },
+  "trust_limitations": {
+    "human_click_is_not_cryptographically_attested": true,
+    "client_info_is_not_authority": true,
+    "oauth_authentication_alone_is_not_consent": true,
+    "plain_request_is_not_consent": true
+  },
+  "evidence_hygiene": {
+    "raw_oauth_key_recorded": false,
+    "raw_access_token_recorded": false,
+    "raw_request_state_recorded": false,
+    "raw_grant_id_recorded": false,
+    "raw_tool_arguments_recorded": false,
+    "raw_ui_screenshot_recorded": false
+  },
+  "production_exec_or_patch_authority_cutover": false,
+  "d5a_accepted": true,
+  "d5_authority_cutover_allowed": false
+}

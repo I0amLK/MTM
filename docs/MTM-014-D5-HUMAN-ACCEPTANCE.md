@@ -1,8 +1,11 @@
 # MTM-014 D5A: independent client consent acceptance
 
-This is a runbook, not an accepted human-consent receipt. The current MRTR and
-capacity runners use scripted responses and establish A3 only. Neither a green
-local gate nor a `granted` response proves that a person saw an approval form.
+This remains the reproducible operator runbook. D5A human consent was accepted on
+2026-09-05 using MCP Inspector 2.5.0 in modern MCP 2026-07-28 mode over a real
+Cloudflare Quick Tunnel. The redacted accepted receipt is
+`records/evidence/MTM-014/elicitation-capability.json`. The MRTR and capacity runners
+still use scripted responses and establish A3 only; neither runner can replace the
+accepted human-UI observation.
 
 ## Current boundary
 
