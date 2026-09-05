@@ -467,6 +467,43 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(target_receipt["validation"]["full_run_checks"], "26 of 26 passed")
         self.assertTrue(target_receipt["validation"]["git_diff_check"])
 
+        d5b = iteration["d5b_contract"]
+        self.assertEqual(d5b["phase"], "production_native_permission_authority_cutover")
+        self.assertTrue(d5b["preconditions"]["d5a_human_consent_accepted"])
+        self.assertTrue(d5b["preconditions"]["pre_cutover_a4_target_accepted"])
+        self.assertTrue(d5b["preconditions"]["stable_selector_unchanged"])
+        self.assertEqual(d5b["public_dispatch_cutover_tools"], ["exec_command", "apply_patch"])
+        self.assertEqual(d5b["grant_owner_binding"], "oauth_principal.client_id")
+        self.assertFalse(d5b["client_supplied_grant_id"])
+        self.assertEqual(d5b["missing_exact_grant_public_error"], "PERMISSION_REQUIRED")
+        self.assertEqual(
+            d5b["missing_exact_grant_internal_error"],
+            "NATIVE_PERMISSION_GRANT_SET_INCOMPLETE",
+        )
+        self.assertEqual(
+            d5b["permission_required_safe_details"],
+            ["permission", "permissions", "tool_name"],
+        )
+        self.assertFalse(d5b["permission_required_reveals_grant_id"])
+        self.assertFalse(d5b["permission_required_reveals_other_owner_grant_existence"])
+        self.assertFalse(d5b["permission_required_reveals_argument_digest"])
+        self.assertFalse(d5b["permission_required_reveals_raw_arguments"])
+        self.assertEqual(d5b["safe_implicit_permissions"], [])
+        self.assertEqual(
+            d5b["trusted_implicit_permissions"],
+            ["network", "shell_expansion", "inline_script"],
+        )
+        self.assertEqual(d5b["dangerous_implicit_permission_count"], 8)
+        self.assertTrue(d5b["spawn_failure_consumes_once_grant"])
+        self.assertFalse(d5b["dry_run_patch_consumes_write_grant"])
+        self.assertFalse(d5b["write_stdin_read_output_kill_changed"])
+        self.assertFalse(d5b["public_tool_schema_changed"])
+        self.assertFalse(d5b["bubblewrap_authority_changed"])
+        self.assertFalse(d5b["workflow_or_finalizer_authority_changed"])
+        self.assertFalse(d5b["stable_selector_changed_by_cutover_commit"])
+        self.assertTrue(d5b["post_cutover_public_path_a4_required"])
+        self.assertFalse(d5b["release_or_selector_cutover_in_same_commit"])
+
         human = d5a_progress["human_acceptance"]
         self.assertEqual(human["client"], "MCP Inspector 2.5.0")
         self.assertEqual(human["protocol"], "2026-07-28 modern")

@@ -817,6 +817,55 @@
     },
     "manual_pending": "Public exec/apply_patch authority cutover, post-cutover public-path A4, Magma functional validation if host licensing becomes available, preview rollback/recutover and soak."
   },
+  "d5b_contract": {
+    "frozen_at": "2026-09-05T14:29:58+08:00",
+    "phase": "production_native_permission_authority_cutover",
+    "preconditions": {
+      "d5a_human_consent_accepted": true,
+      "pre_cutover_a4_target_accepted": true,
+      "stable_selector_unchanged": true
+    },
+    "public_dispatch_cutover_tools": [
+      "exec_command",
+      "apply_patch"
+    ],
+    "grant_owner_binding": "oauth_principal.client_id",
+    "client_supplied_grant_id": false,
+    "missing_exact_grant_public_error": "PERMISSION_REQUIRED",
+    "missing_exact_grant_internal_error": "NATIVE_PERMISSION_GRANT_SET_INCOMPLETE",
+    "permission_required_safe_details": [
+      "permission",
+      "permissions",
+      "tool_name"
+    ],
+    "permission_required_reveals_grant_id": false,
+    "permission_required_reveals_other_owner_grant_existence": false,
+    "permission_required_reveals_argument_digest": false,
+    "permission_required_reveals_raw_arguments": false,
+    "special_security_errors_preserved": [
+      "NATIVE_PERMISSION_GRANT_SET_AMBIGUOUS",
+      "NATIVE_EXECUTABLE_CHANGED",
+      "NATIVE_PATCH_AUTHORITY_FACTS_CHANGED",
+      "NATIVE_PERMISSION_PERMIT_MISMATCH"
+    ],
+    "safe_implicit_permissions": [],
+    "trusted_implicit_permissions": [
+      "network",
+      "shell_expansion",
+      "inline_script"
+    ],
+    "dangerous_implicit_permission_count": 8,
+    "once_consumption_timing": "after_final_fact_revalidation_immediately_before_process_start_or_patch_mutation",
+    "spawn_failure_consumes_once_grant": true,
+    "dry_run_patch_consumes_write_grant": false,
+    "write_stdin_read_output_kill_changed": false,
+    "public_tool_schema_changed": false,
+    "bubblewrap_authority_changed": false,
+    "workflow_or_finalizer_authority_changed": false,
+    "stable_selector_changed_by_cutover_commit": false,
+    "post_cutover_public_path_a4_required": true,
+    "release_or_selector_cutover_in_same_commit": false
+  },
   "d5_capacity_hardening": {
     "accepted_at": "2026-09-04T21:48:37-07:00",
     "scope": "A3 bounded process-local consent/grant storage; not human acceptance or cutover",

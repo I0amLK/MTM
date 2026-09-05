@@ -159,6 +159,48 @@ the independent human interaction end to end and the redacted D5A evidence is
 accepted. Failure to obtain that real capability evidence blocks D5 rather than
 weakening the consent invariant.
 
+## D5B production authority cutover contract
+
+D5B may begin only after both the verified-human D5A receipt and the hash-bound
+pre-cutover A4 target receipt are accepted. The production cutover is intentionally
+narrow: the public `RuntimeToolBackend` routes only `exec_command` and `apply_patch`
+through the already-qualified typed Native authority executor, using the authenticated
+`OAuthPrincipal.client_id` as the grant owner. `write_stdin`, `read_output`,
+`kill_command`, every workflow/finalizer operation, the public 24-tool schemas, and
+Bubblewrap compilation remain unchanged.
+
+No `grant_id` field is added to `exec_command` or `apply_patch`. Exact grant lookup
+remains automatic by owner, workspace, tool, permission kind, and canonical complete
+argument digest. A missing exact grant is an expected public permission denial and is
+reported with the existing `PERMISSION_REQUIRED` code rather than exposing the
+internal `NATIVE_PERMISSION_GRANT_SET_INCOMPLETE` ledger diagnostic. Its safe details
+contain the first required permission, the complete ordered missing-permission list,
+and the target tool only; they reveal no grant ID, grant existence for another owner,
+argument digest, raw argument, or secret value. Ambiguous-grant, executable-change,
+patch-fact-change, and other security/integrity errors keep their dedicated fail-closed
+codes.
+
+After cutover, Safe requires verified explicit grants for every intrinsic risky
+dimension. Trusted retains only its frozen implicit Network, ShellExpansion, and
+InlineScript profile; SensitiveEnv, DestructiveCommand, LongTimeout,
+PrivilegedExecutable, and generated/ignored patch writes remain explicitly gated.
+Dangerous retains the complete Native implicit profile but still uses the same
+Bubblewrap hard-isolation plan, empty capabilities, private-vault absence, and no
+workflow/project/verifier/finalizer inheritance.
+
+Grant consumption remains after final executable or patch fact revalidation and
+immediately before process start or patch mutation. A spawn failure after final
+authorization consumes a once grant; invalid input, failed preparation, stale facts,
+or missing authority consume none. Dry-run patch validation never consumes write
+authority. The legacy `NativeToolRuntime::exec_command` and compatibility
+`NativeWorkspace::apply_patch` helpers may remain for internal tests/rollback, but
+they are no longer reachable as the public MCP authority for those two tools after
+the D5B cutover commit.
+
+The cutover commit does not install, select, publish, or restart a release. The
+qualified stable `0.4.0` selectors remain untouched. Post-cutover public-path A4 is a
+separate mandatory gate before MTM-014 completion or preview rollout.
+
 ## D5 bounded in-memory consent and grant records
 
 Before public authority cutover, both process-local ledgers have fixed storage
