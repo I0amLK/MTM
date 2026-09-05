@@ -1182,6 +1182,159 @@ mod tests {
 
     #[cfg(target_os = "linux")]
     #[test]
+    fn exec_candidate_multi_risk_is_atomic_and_has_one_concurrent_winner() -> Result<(), ReCtmError>
+    {
+        if !command_exists("bwrap") {
+            return Ok(());
+        }
+        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
+        let owner = "owner-a";
+        let workspace = fixture.workspace.root().display().to_string();
+
+        let all_or_none = Map::from_iter([
+            (
+                "argv".to_owned(),
+                serde_json::json!(["sh", "-c", "printf multi-ok"]),
+            ),
+            ("timeout_ms".to_owned(), Value::from(30_001)),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        issue_exec_grant(
+            &fixture.grants,
+            &fixture.consents,
+            owner,
+            &workspace,
+            NativePermissionKind::InlineScript,
+            &all_or_none,
+        )?;
+        assert_eq!(
+            fixture
+                .executor
+                .exec_command_candidate(owner, &all_or_none)
+                .map_err(|error| error.code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        issue_exec_grant(
+            &fixture.grants,
+            &fixture.consents,
+            owner,
+            &workspace,
+            NativePermissionKind::LongTimeout,
+            &all_or_none,
+        )?;
+        assert_eq!(
+            fixture
+                .executor
+                .exec_command_candidate(owner, &all_or_none)?["stdout"],
+            "multi-ok"
+        );
+
+        let concurrent = Map::from_iter([
+            (
+                "argv".to_owned(),
+                serde_json::json!(["sh", "-c", "printf concurrent-ok"]),
+            ),
+            ("timeout_ms".to_owned(), Value::from(30_002)),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        for kind in [
+            NativePermissionKind::InlineScript,
+            NativePermissionKind::LongTimeout,
+        ] {
+            issue_exec_grant(
+                &fixture.grants,
+                &fixture.consents,
+                owner,
+                &workspace,
+                kind,
+                &concurrent,
+            )?;
+        }
+        let barrier = Arc::new(std::sync::Barrier::new(2));
+        let handles = (0..2)
+            .map(|_| {
+                let executor = NativeAuthorityExecutor::new(
+                    Arc::clone(&fixture.native),
+                    Arc::clone(&fixture.workspace),
+                    Arc::clone(&fixture.grants),
+                );
+                let barrier = Arc::clone(&barrier);
+                let arguments = concurrent.clone();
+                thread::spawn(move || {
+                    barrier.wait();
+                    executor.exec_command_candidate("owner-a", &arguments)
+                })
+            })
+            .collect::<Vec<_>>();
+        let mut winners = 0_u8;
+        let mut losers = 0_u8;
+        for handle in handles {
+            match handle
+                .join()
+                .map_err(|_| internal("candidate multi-risk worker panicked"))?
+            {
+                Ok(result) => {
+                    winners += 1;
+                    assert_eq!(result["stdout"], "concurrent-ok");
+                }
+                Err(error) => {
+                    losers += 1;
+                    assert_eq!(error.code, "NATIVE_PERMISSION_GRANT_SET_INCOMPLETE");
+                }
+            }
+        }
+        assert_eq!(winners, 1);
+        assert_eq!(losers, 1);
+        fixture.native.close()?;
+        Ok(())
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn patch_candidate_git_ignored_path_requires_exact_once_grant() -> Result<(), ReCtmError> {
+        if !command_exists("git") {
+            return Ok(());
+        }
+        let fixture = candidate_fixture()?;
+        let workspace_text = fixture.workspace.root().display().to_string();
+        let status = std::process::Command::new("git")
+            .args(["-C", &workspace_text, "init", "-q"])
+            .status()
+            .map_err(|error| internal(&error.to_string()))?;
+        if !status.success() {
+            return Err(internal("git init failed in ignored-patch candidate test"));
+        }
+        fs::write(fixture.workspace.root().join(".gitignore"), "ignored.txt\n")
+            .map_err(|error| internal(&error.to_string()))?;
+        let owner = "owner-a";
+        let arguments = patch_arguments("ignored.txt", "approved-ignored", false);
+        assert_eq!(
+            fixture
+                .executor
+                .apply_patch_candidate(owner, &arguments)
+                .map_err(|error| error.code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        assert!(!fixture.workspace.root().join("ignored.txt").exists());
+        issue_patch_grant(
+            &fixture.grants,
+            &fixture.consents,
+            owner,
+            &workspace_text,
+            &arguments,
+        )?;
+        let result = fixture.executor.apply_patch_candidate(owner, &arguments)?;
+        assert_eq!(result["dry_run"], false);
+        assert_eq!(
+            fs::read_to_string(fixture.workspace.root().join("ignored.txt"))
+                .map_err(|error| internal(&error.to_string()))?,
+            "approved-ignored\n"
+        );
+        Ok(())
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
     #[ignore = "MTM-014 A4 target-only real DNS/HTTPS check"]
     fn exec_candidate_real_dns_https_target() -> Result<(), ReCtmError> {
         for command in ["bwrap", "curl"] {

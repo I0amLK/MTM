@@ -409,6 +409,10 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertFalse(direct["dangerous_private_vault_visible"])
         self.assertEqual(direct["long_timeout_boundary_30000_30001"], "passed")
         self.assertEqual(direct["sensitive_env_exact_argument_binding"], "passed")
+        self.assertEqual(direct["multi_risk_missing_grant_consumes_none"], "passed")
+        self.assertEqual(direct["multi_risk_concurrent_once_full_winners"], 1)
+        self.assertEqual(direct["multi_risk_concurrent_once_losers"], 1)
+        self.assertEqual(direct["git_ignored_patch_requires_exact_once_grant"], "passed")
         self.assertEqual(
             direct["real_dns_https_normal_gate_behavior"],
             "ignored_until_explicit_A4_target_run",
