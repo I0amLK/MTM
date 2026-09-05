@@ -558,6 +558,50 @@
       "raw_tool_arguments_recorded": false,
       "production_exec_or_patch_authority_cutover": false,
       "real_human_consent_evidence": false
+    },
+    "pre_cutover_candidate": {
+      "validated_at": "2026-09-05T11:56:30+08:00",
+      "public_dispatch_reachable": false,
+      "production_dead_code_tripwire": true,
+      "tripwire_semantics": "Non-test builds expect the candidate executor and prepared command types to remain dead code. The eventual authority-cutover commit must make that expectation unfulfilled and remove it explicitly.",
+      "candidate_executor": "crates/mtm-runtime/src/native_authority.rs::NativeAuthorityExecutor",
+      "exec_sequence": [
+        "typed invocation parse",
+        "intrinsic fact collection and EffectiveNativePolicy",
+        "SandboxPlan construction before grant consumption",
+        "executable fact revalidation",
+        "atomic exact grant-set authorization",
+        "unforgeable permit validation",
+        "Bubblewrap command start"
+      ],
+      "patch_sequence": [
+        "typed PatchInvocation parse",
+        "PreparedPatch no-write preparation",
+        "Git/generated path classification",
+        "EffectiveNativePolicy",
+        "PreparedPatch final revalidation under commit lock",
+        "atomic exact grant-set authorization inside the commit seam",
+        "rollback-capable patch commit"
+      ],
+      "grant_consumption_timing": "after final executable/patch fact revalidation and immediately before process start or patch mutation",
+      "spawn_failure_after_authorization_consumes_once_grant": true,
+      "patch_authorization_failure_writes_zero_files": true,
+      "safe_network_grant_changes_network_plan_only": true,
+      "production_sandbox_path_candidate": "validated ToolchainExposurePlan sandbox_path",
+      "production_exec_command_changed": false,
+      "production_apply_patch_changed": false,
+      "real_bubblewrap_available": true,
+      "real_bubblewrap_version": "0.9.0",
+      "tests": {
+        "patch_candidate": "3 passed",
+        "exec_candidate": "2 passed",
+        "real_bubblewrap_once_grant_exec": true,
+        "clippy_warnings_denied": true,
+        "full_run_checks": "24 of 24 passed",
+        "git_diff_check": true
+      },
+      "real_human_consent_evidence": false,
+      "authority_cutover_allowed": false
     }
   },
   "acceptance": {
@@ -580,6 +624,12 @@
     "Real target A4 is required before any MTM-014 permission-authority cutover."
   ],
   "recorded_failures_and_repairs": [
+    {
+      "delivery": 5,
+      "stage": "pre-cutover candidate dead-code tripwire under all-target test build",
+      "failure": "After candidate tests began exercising the previously unreachable prepared-command symbols, warnings-denied Clippy correctly reported their unconditional expect(dead_code) annotations as unfulfilled in the test build.",
+      "repair": "Scoped the dead-code expectations to non-test builds with cfg_attr(not(test), expect(dead_code)); production compilation still proves the candidate is unreachable while test compilation must exercise it without suppressing warnings."
+    },
     {
       "delivery": 5,
       "stage": "D5A unified gate after MRTR permission bridge integration",

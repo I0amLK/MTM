@@ -324,6 +324,29 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertFalse(bridge["raw_tool_arguments_recorded"])
         self.assertFalse(bridge["production_exec_or_patch_authority_cutover"])
         self.assertFalse(bridge["real_human_consent_evidence"])
+        candidate = d5a_progress["pre_cutover_candidate"]
+        self.assertFalse(candidate["public_dispatch_reachable"])
+        self.assertTrue(candidate["production_dead_code_tripwire"])
+        self.assertEqual(candidate["real_bubblewrap_version"], "0.9.0")
+        self.assertTrue(candidate["tests"]["real_bubblewrap_once_grant_exec"])
+        self.assertEqual(candidate["tests"]["patch_candidate"], "3 passed")
+        self.assertEqual(candidate["tests"]["exec_candidate"], "2 passed")
+        self.assertFalse(candidate["production_exec_command_changed"])
+        self.assertFalse(candidate["production_apply_patch_changed"])
+        self.assertFalse(candidate["real_human_consent_evidence"])
+        self.assertFalse(candidate["authority_cutover_allowed"])
+
+        tool_backend_source = (
+            ROOT / "crates" / "mtm-runtime" / "src" / "tool_backend.rs"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("exec_command_candidate(", tool_backend_source)
+        self.assertNotIn("apply_patch_candidate(", tool_backend_source)
+        authority_source = (
+            ROOT / "crates" / "mtm-runtime" / "src" / "native_authority.rs"
+        ).read_text(encoding="utf-8")
+        self.assertIn("expect(", authority_source)
+        self.assertIn("dead_code", authority_source)
+        self.assertIn("real human MRTR evidence", authority_source)
 
         bubblewrap_source = (
             ROOT / "crates" / "mtm-native" / "src" / "bubblewrap.rs"

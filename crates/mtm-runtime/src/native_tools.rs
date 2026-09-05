@@ -2,18 +2,101 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use mtm_contracts::{ErrorCategory, NativeMode, ReCtmError};
-use mtm_core::{ExecInvocation, ExecPermissionFacts, check_command_policy};
+use mtm_contracts::{
+    ErrorCategory, NativeMode, NativePermissionKind, NativePermissionTool, ReCtmError,
+};
+use mtm_core::{
+    EffectiveNativePolicy, ExecInvocation, ExecPermissionFacts, NativeInvocation,
+    check_command_policy, classify_exec_permissions,
+};
 use mtm_native::{
     CommandManager, CommandManagerConfig, CommandRequest, DEFAULT_SANDBOX_PATH, KillRequest,
-    NATIVE_HELPER_PROTOCOL, NativeHelperRequest, NativeHelperResponse, PollRequest,
-    SandboxPlanInput, ToolchainExposurePlan, build_bubblewrap_command,
+    NATIVE_HELPER_PROTOCOL, NativeHelperRequest, NativeHelperResponse, NetworkNamespacePlan,
+    PollRequest, SandboxPlan, SandboxPlanInput, ToolchainExposurePlan, build_bubblewrap_command,
     build_toolchain_exposure_plan, network_namespace_for_mode, plan_sandbox,
     validate_helper_response,
 };
 use serde_json::{Map, Value};
 
 use crate::helper::invoke_runtime_helper;
+use crate::{NativeInvocationPermissionPermit, revalidate_exec_permission_facts};
+
+#[cfg_attr(
+    not(test),
+    expect(
+        dead_code,
+        reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
+    )
+)]
+pub(crate) struct PreparedAuthorityExec {
+    invocation: ExecInvocation,
+    facts: ExecPermissionFacts,
+    policy: EffectiveNativePolicy,
+    sandbox_plan: SandboxPlan,
+    command: Vec<String>,
+    stdin: String,
+}
+
+impl std::fmt::Debug for PreparedAuthorityExec {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("PreparedAuthorityExec")
+            .field("invocation", &self.invocation)
+            .field("facts", &self.facts)
+            .field("policy", &self.policy)
+            .field("sandbox_plan", &self.sandbox_plan)
+            .field("command_argv_count", &self.command.len())
+            .field("stdin_present", &!self.stdin.is_empty())
+            .finish()
+    }
+}
+
+#[cfg_attr(
+    not(test),
+    expect(
+        dead_code,
+        reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
+    )
+)]
+impl PreparedAuthorityExec {
+    #[must_use]
+    pub(crate) fn invocation(&self) -> &ExecInvocation {
+        &self.invocation
+    }
+
+    #[must_use]
+    pub(crate) fn policy(&self) -> &EffectiveNativePolicy {
+        &self.policy
+    }
+
+    #[must_use]
+    pub(crate) fn network(&self) -> NetworkNamespacePlan {
+        self.sandbox_plan.network()
+    }
+}
+
+#[cfg_attr(
+    not(test),
+    expect(
+        dead_code,
+        reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
+    )
+)]
+pub(crate) struct RevalidatedAuthorityExec(PreparedAuthorityExec);
+
+#[cfg_attr(
+    not(test),
+    expect(
+        dead_code,
+        reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
+    )
+)]
+impl RevalidatedAuthorityExec {
+    #[must_use]
+    pub(crate) fn policy(&self) -> &EffectiveNativePolicy {
+        self.0.policy()
+    }
+}
 use crate::native_permission::collect_exec_permission_facts;
 use crate::workspace::NativeWorkspace;
 
@@ -300,6 +383,156 @@ impl NativeToolRuntime {
         )
     }
 
+    /// Prepare the future Native permission-authority execution path without
+    /// consuming a grant or starting a process. Public dispatch remains on the
+    /// accepted pre-D5 path until the independent human-consent gate passes.
+    #[cfg_attr(
+        not(test),
+        expect(
+            dead_code,
+            reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
+        )
+    )]
+    pub(crate) fn prepare_authority_exec(
+        &self,
+        arguments: &Map<String, Value>,
+    ) -> Result<PreparedAuthorityExec, ReCtmError> {
+        if self.backend != "bubblewrap" || self.attestation.is_none() {
+            return Err(ReCtmError::new(
+                "NATIVE_ISOLATION_REQUIRED",
+                "The Native authority candidate requires an attested Bubblewrap backend.",
+            )
+            .with_category(ErrorCategory::Security));
+        }
+        let invocation = ExecInvocation::parse(arguments)?;
+        let facts = self.collect_shadow_exec_permission_facts(&invocation)?;
+        let required = classify_exec_permissions(&invocation, &facts)?;
+        let native_invocation = NativeInvocation::Exec(invocation.clone());
+        let policy = EffectiveNativePolicy::evaluate(
+            self.mode,
+            &native_invocation,
+            &required,
+            &std::collections::BTreeSet::new(),
+        )?;
+        let exposure = self
+            .exposure
+            .as_ref()
+            .ok_or_else(|| internal("bubblewrap exposure plan is missing"))?;
+        let resolved = self.workspace.resolve_existing(invocation.workdir())?;
+        if !resolved.path.is_dir() {
+            return Err(validation_code(
+                "NOT_A_DIRECTORY",
+                "workdir is not a directory.",
+            ));
+        }
+        let network = if self.mode == NativeMode::Safe
+            && !required.contains(&NativePermissionKind::Network)
+        {
+            NetworkNamespacePlan::Isolated
+        } else {
+            NetworkNamespacePlan::Shared
+        };
+        let sandbox_plan = plan_sandbox(&SandboxPlanInput {
+            workspace: self.workspace.root(),
+            workdir: &resolved.display,
+            network,
+            argv: invocation.argv(),
+            environment: invocation.environment(),
+            sandbox_path: Some(exposure.sandbox_path.as_str()),
+            read_only_roots: &exposure.read_only_roots,
+            forbidden_paths: &self.forbidden_paths,
+            probe_executable: None,
+        })?;
+        let command = build_bubblewrap_command(&sandbox_plan)?;
+        let stdin = arguments
+            .get("stdin")
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .to_owned();
+        Ok(PreparedAuthorityExec {
+            invocation,
+            facts,
+            policy,
+            sandbox_plan,
+            command,
+            stdin,
+        })
+    }
+
+    #[cfg_attr(
+        not(test),
+        expect(
+            dead_code,
+            reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
+        )
+    )]
+    pub(crate) fn revalidate_authority_exec(
+        &self,
+        prepared: PreparedAuthorityExec,
+    ) -> Result<RevalidatedAuthorityExec, ReCtmError> {
+        let exposure = self
+            .exposure
+            .as_ref()
+            .ok_or_else(|| internal("bubblewrap exposure plan is missing"))?;
+        revalidate_exec_permission_facts(
+            &prepared.invocation,
+            &prepared.facts,
+            self.workspace.root(),
+            &exposure.sandbox_path,
+            &exposure.read_only_roots,
+        )?;
+        Ok(RevalidatedAuthorityExec(prepared))
+    }
+
+    #[cfg_attr(
+        not(test),
+        expect(
+            dead_code,
+            reason = "MTM-014 D5 cutover candidate must remain unreachable until real human MRTR evidence is accepted"
+        )
+    )]
+    pub(crate) fn start_authority_exec(
+        &self,
+        prepared: RevalidatedAuthorityExec,
+        permit: NativeInvocationPermissionPermit,
+    ) -> Result<Value, ReCtmError> {
+        let prepared = prepared.0;
+        if permit.tool() != NativePermissionTool::ExecCommand
+            || permit.arguments_sha256() != prepared.invocation.arguments_sha256()
+        {
+            return Err(ReCtmError::new(
+                "NATIVE_PERMISSION_PERMIT_MISMATCH",
+                "Native invocation permit does not match the prepared command.",
+            )
+            .with_category(ErrorCategory::Security));
+        }
+        let expected = prepared
+            .policy
+            .required()
+            .iter()
+            .copied()
+            .filter(|kind| !prepared.policy.implicitly_granted().contains(kind))
+            .collect::<Vec<_>>();
+        if permit.permissions() != expected.as_slice() {
+            return Err(ReCtmError::new(
+                "NATIVE_PERMISSION_PERMIT_MISMATCH",
+                "Native invocation permit does not cover the prepared command exactly.",
+            )
+            .with_category(ErrorCategory::Security));
+        }
+        self.command_manager.start(CommandRequest {
+            argv: prepared.command,
+            env: BTreeMap::new(),
+            timeout_ms: prepared.invocation.timeout_ms(),
+            yield_time_ms: prepared.invocation.yield_time_ms(),
+            max_output_bytes: prepared.invocation.max_output_bytes(),
+            stdin: prepared.stdin,
+            tty: prepared.invocation.tty(),
+            verbosity: prepared.invocation.verbosity().map(str::to_owned),
+            preview_bytes: prepared.invocation.preview_bytes(),
+        })
+    }
+
     pub fn write_stdin(&self, arguments: &Map<String, Value>) -> Result<Value, ReCtmError> {
         self.command_manager.poll(PollRequest {
             command_id: required_text(arguments, "command_id")?.to_owned(),
@@ -472,7 +705,81 @@ fn internal(message: &str) -> ReCtmError {
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
+
+    use mtm_contracts::{NativePermissionScope, NativePermissionTool};
+    use mtm_core::NativePermissionRequest;
+    use mtm_storage::StoreRuntime;
+
+    use crate::{
+        NativePermissionConsentAuthority, NativePermissionConsentOutcome,
+        NativePermissionGrantAuthority,
+    };
+
     use super::*;
+
+    fn authority_test_runtime(
+        mode: NativeMode,
+    ) -> Result<(tempfile::TempDir, Arc<NativeToolRuntime>), ReCtmError> {
+        let root = tempfile::tempdir().map_err(|error| internal(&error.to_string()))?;
+        let workspace_root = root.path().join("workspace");
+        let private_root = root.path().join("private");
+        fs::create_dir_all(&workspace_root).map_err(|error| internal(&error.to_string()))?;
+        fs::create_dir_all(&private_root).map_err(|error| internal(&error.to_string()))?;
+        let workspace = Arc::new(NativeWorkspace::new(&workspace_root, &private_root)?);
+        let exposure = build_toolchain_exposure_plan(
+            mode,
+            workspace.root(),
+            std::slice::from_ref(&private_root),
+            &[],
+            Some(DEFAULT_SANDBOX_PATH),
+        )?;
+        let runtime = NativeToolRuntime {
+            workspace,
+            mode,
+            command_manager: CommandManager::new(CommandManagerConfig::default()),
+            backend: "bubblewrap".to_owned(),
+            exposure: Some(exposure),
+            forbidden_paths: vec![private_root],
+            attestation: Some(serde_json::json!({"hard_isolation":true})),
+        };
+        Ok((root, Arc::new(runtime)))
+    }
+
+    fn issue_exec_grant(
+        grants: &NativePermissionGrantAuthority,
+        consents: &NativePermissionConsentAuthority,
+        owner: &str,
+        workspace: &str,
+        kind: NativePermissionKind,
+        arguments: &Map<String, Value>,
+    ) -> Result<(), ReCtmError> {
+        let request = NativePermissionRequest::parse(
+            serde_json::json!({
+                "tool_name":"exec_command",
+                "permission":kind.as_str(),
+                "reason":"authority candidate exec test",
+                "arguments":arguments,
+                "scope":NativePermissionScope::Once.as_str(),
+                "ttl_seconds":300
+            })
+            .as_object()
+            .ok_or_else(|| internal("test permission request must be an object"))?,
+        )?;
+        let prompt = consents.begin(owner, workspace, request.clone())?;
+        let outcome = consents.complete(
+            prompt.request_state(),
+            owner,
+            workspace,
+            &request,
+            &serde_json::json!({"action":"accept","content":{"approved":true}}),
+        )?;
+        let NativePermissionConsentOutcome::Accepted(consent) = outcome else {
+            return Err(internal("test consent was not accepted"));
+        };
+        grants.issue_verified(consent)?;
+        Ok(())
+    }
 
     #[test]
     fn validated_execution_response_preserves_execution_fields() -> Result<(), ReCtmError> {
@@ -528,6 +835,98 @@ mod tests {
         let payload = validated_execution_response(response, &request, true, 0)?;
         assert_eq!(payload.get("exit_code"), Some(&Value::from(0)));
         assert_eq!(payload.get("stdout"), Some(&Value::String("ok".to_owned())));
+        Ok(())
+    }
+
+    #[test]
+    fn authority_exec_plan_changes_only_network_dimension_for_safe_network_risk()
+    -> Result<(), ReCtmError> {
+        let (_root, runtime) = authority_test_runtime(NativeMode::Safe)?;
+        let local = Map::from_iter([("argv".to_owned(), serde_json::json!(["printf", "local"]))]);
+        let network = Map::from_iter([(
+            "argv".to_owned(),
+            serde_json::json!(["curl", "https://example.com"]),
+        )]);
+        let local_prepared = runtime.prepare_authority_exec(&local)?;
+        let network_prepared = runtime.prepare_authority_exec(&network)?;
+        assert_eq!(local_prepared.network(), NetworkNamespacePlan::Isolated);
+        assert_eq!(network_prepared.network(), NetworkNamespacePlan::Shared);
+        assert!(
+            !local_prepared
+                .policy()
+                .required()
+                .contains(&NativePermissionKind::Network)
+        );
+        assert!(
+            network_prepared
+                .policy()
+                .required()
+                .contains(&NativePermissionKind::Network)
+        );
+        assert_eq!(local_prepared.invocation().workdir(), ".");
+        assert_eq!(network_prepared.invocation().workdir(), ".");
+        Ok(())
+    }
+
+    #[test]
+    fn authority_exec_exact_once_grant_runs_once_when_bubblewrap_is_available()
+    -> Result<(), ReCtmError> {
+        if std::process::Command::new("sh")
+            .args(["-c", "command -v bwrap >/dev/null 2>&1"])
+            .status()
+            .map_or(true, |status| !status.success())
+        {
+            return Ok(());
+        }
+        let (_root, runtime) = authority_test_runtime(NativeMode::Safe)?;
+        let arguments = Map::from_iter([
+            (
+                "argv".to_owned(),
+                serde_json::json!(["sh", "-c", "printf candidate"]),
+            ),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        let owner = "owner-a";
+        let workspace = runtime.workspace().root().display().to_string();
+        let store_runtime = StoreRuntime::default();
+        let grants = NativePermissionGrantAuthority::new(store_runtime.clone());
+        let consents = NativePermissionConsentAuthority::new(store_runtime);
+
+        let first = runtime.prepare_authority_exec(&arguments)?;
+        let first = runtime.revalidate_authority_exec(first)?;
+        assert_eq!(
+            grants
+                .authorize_invocation(owner, &workspace, first.policy())
+                .map_err(|error| error.code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+
+        issue_exec_grant(
+            &grants,
+            &consents,
+            owner,
+            &workspace,
+            NativePermissionKind::InlineScript,
+            &arguments,
+        )?;
+        let prepared = runtime.prepare_authority_exec(&arguments)?;
+        let revalidated = runtime.revalidate_authority_exec(prepared)?;
+        let permit = grants.authorize_invocation(owner, &workspace, revalidated.policy())?;
+        assert_eq!(permit.tool(), NativePermissionTool::ExecCommand);
+        let result = runtime.start_authority_exec(revalidated, permit)?;
+        assert_eq!(result["status"], "exited");
+        assert_eq!(result["exit_code"], 0);
+        assert_eq!(result["stdout"], "candidate");
+
+        let second = runtime.prepare_authority_exec(&arguments)?;
+        let second = runtime.revalidate_authority_exec(second)?;
+        assert_eq!(
+            grants
+                .authorize_invocation(owner, &workspace, second.policy())
+                .map_err(|error| error.code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        runtime.close()?;
         Ok(())
     }
 }

@@ -4,6 +4,7 @@ pub mod application;
 pub mod config;
 pub mod helper;
 pub mod latex;
+mod native_authority;
 pub mod native_permission;
 pub mod native_tools;
 pub mod operator;
