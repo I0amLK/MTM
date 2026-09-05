@@ -398,6 +398,17 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(direct["tty_stdin_round_trip"], "passed")
         self.assertEqual(direct["descendant_cleanup"], "passed")
         self.assertEqual(direct["real_dns_https"], "passed")
+        self.assertEqual(direct["session_grant_reuse_same_process"], "passed")
+        self.assertEqual(direct["session_grant_restart_invalidation"], "passed")
+        self.assertEqual(direct["cross_owner_does_not_consume"], "passed")
+        self.assertEqual(direct["cross_workspace_does_not_consume"], "passed")
+        self.assertEqual(direct["trusted_implicit_profile"], "passed")
+        self.assertEqual(direct["trusted_sensitive_env_remains_gated"], "passed")
+        self.assertEqual(direct["dangerous_complete_implicit_profile"], "passed")
+        self.assertFalse(direct["dangerous_workflow_authority_inherited"])
+        self.assertFalse(direct["dangerous_private_vault_visible"])
+        self.assertEqual(direct["long_timeout_boundary_30000_30001"], "passed")
+        self.assertEqual(direct["sensitive_env_exact_argument_binding"], "passed")
         self.assertEqual(
             direct["real_dns_https_normal_gate_behavior"],
             "ignored_until_explicit_A4_target_run",

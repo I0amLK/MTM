@@ -193,13 +193,33 @@ mod tests {
         kind: NativePermissionKind,
         arguments: &Map<String, Value>,
     ) -> Result<(), ReCtmError> {
+        issue_exec_grant_with_scope(
+            grants,
+            consents,
+            owner,
+            workspace,
+            kind,
+            NativePermissionScope::Once,
+            arguments,
+        )
+    }
+
+    fn issue_exec_grant_with_scope(
+        grants: &NativePermissionGrantAuthority,
+        consents: &NativePermissionConsentAuthority,
+        owner: &str,
+        workspace: &str,
+        kind: NativePermissionKind,
+        scope: NativePermissionScope,
+        arguments: &Map<String, Value>,
+    ) -> Result<(), ReCtmError> {
         let request = NativePermissionRequest::parse(
             serde_json::json!({
                 "tool_name":"exec_command",
                 "permission":kind.as_str(),
                 "reason":"candidate exec matrix test",
                 "arguments":arguments,
-                "scope":NativePermissionScope::Once.as_str(),
+                "scope":scope.as_str(),
                 "ttl_seconds":300
             })
             .as_object()
@@ -863,6 +883,298 @@ mod tests {
                 .join("descendant-leak.txt")
                 .exists(),
             "a descendant survived command-group termination and wrote after kill"
+        );
+        fixture.native.close()?;
+        Ok(())
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn exec_candidate_session_grant_reuses_in_process_and_restart_invalidates()
+    -> Result<(), ReCtmError> {
+        if !command_exists("bwrap") || !command_exists("curl") {
+            return Ok(());
+        }
+        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
+        let owner = "owner-a";
+        let workspace = fixture.workspace.root().display().to_string();
+        let listener =
+            TcpListener::bind("127.0.0.1:0").map_err(|error| internal(&error.to_string()))?;
+        listener
+            .set_nonblocking(true)
+            .map_err(|error| internal(&error.to_string()))?;
+        let address = listener
+            .local_addr()
+            .map_err(|error| internal(&error.to_string()))?;
+        let server = thread::spawn(move || -> std::io::Result<()> {
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+            let mut accepted = 0_u8;
+            while accepted < 2 {
+                match listener.accept() {
+                    Ok((mut stream, _)) => {
+                        let mut buffer = [0_u8; 4096];
+                        let _ = stream.read(&mut buffer)?;
+                        stream.write_all(
+                            b"HTTP/1.1 200 OK\r\nContent-Length: 10\r\nConnection: close\r\n\r\nsession-ok",
+                        )?;
+                        accepted += 1;
+                    }
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                        if std::time::Instant::now() >= deadline {
+                            return Err(std::io::Error::new(
+                                std::io::ErrorKind::TimedOut,
+                                "session candidate did not make two network requests",
+                            ));
+                        }
+                        thread::sleep(std::time::Duration::from_millis(10));
+                    }
+                    Err(error) => return Err(error),
+                }
+            }
+            Ok(())
+        });
+        let arguments = Map::from_iter([
+            (
+                "argv".to_owned(),
+                serde_json::json!(["curl", "--fail", "--silent", format!("http://{address}")]),
+            ),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        issue_exec_grant_with_scope(
+            &fixture.grants,
+            &fixture.consents,
+            owner,
+            &workspace,
+            NativePermissionKind::Network,
+            NativePermissionScope::Session,
+            &arguments,
+        )?;
+        for _ in 0..2 {
+            let result = fixture.executor.exec_command_candidate(owner, &arguments)?;
+            assert_eq!(result["status"], "exited");
+            assert_eq!(result["stdout"], "session-ok");
+        }
+        server
+            .join()
+            .map_err(|_| internal("session network test server panicked"))?
+            .map_err(|error| internal(&error.to_string()))?;
+
+        let restarted_grants =
+            Arc::new(NativePermissionGrantAuthority::new(StoreRuntime::default()));
+        let restarted = NativeAuthorityExecutor::new(
+            Arc::clone(&fixture.native),
+            Arc::clone(&fixture.workspace),
+            restarted_grants,
+        );
+        assert_eq!(
+            restarted
+                .exec_command_candidate(owner, &arguments)
+                .map_err(|error| error.code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        fixture.native.close()?;
+        Ok(())
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn exec_candidate_cross_owner_and_workspace_fail_without_consuming_grant()
+    -> Result<(), ReCtmError> {
+        if !command_exists("bwrap") {
+            return Ok(());
+        }
+        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
+        let owner = "owner-a";
+        let workspace = fixture.workspace.root().display().to_string();
+        let arguments = Map::from_iter([
+            (
+                "argv".to_owned(),
+                serde_json::json!(["sh", "-c", "printf binding-ok"]),
+            ),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        issue_exec_grant(
+            &fixture.grants,
+            &fixture.consents,
+            owner,
+            &workspace,
+            NativePermissionKind::InlineScript,
+            &arguments,
+        )?;
+        assert_eq!(
+            fixture
+                .executor
+                .exec_command_candidate("owner-b", &arguments)
+                .map_err(|error| error.code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+
+        let second_root = fixture._root.path().join("workspace-second");
+        let second_private = fixture._root.path().join("private-second");
+        fs::create_dir_all(&second_root).map_err(|error| internal(&error.to_string()))?;
+        fs::create_dir_all(&second_private).map_err(|error| internal(&error.to_string()))?;
+        let second_workspace = Arc::new(NativeWorkspace::new(&second_root, &second_private)?);
+        let second_native = Arc::new(NativeToolRuntime::test_attested_bubblewrap(
+            Arc::clone(&second_workspace),
+            NativeMode::Safe,
+            std::slice::from_ref(&second_private),
+        )?);
+        let second_executor = NativeAuthorityExecutor::new(
+            Arc::clone(&second_native),
+            second_workspace,
+            Arc::clone(&fixture.grants),
+        );
+        assert_eq!(
+            second_executor
+                .exec_command_candidate(owner, &arguments)
+                .map_err(|error| error.code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        second_native.close()?;
+
+        let result = fixture.executor.exec_command_candidate(owner, &arguments)?;
+        assert_eq!(result["stdout"], "binding-ok");
+        fixture.native.close()?;
+        Ok(())
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn exec_candidate_preserves_trusted_and_dangerous_profiles() -> Result<(), ReCtmError> {
+        if !command_exists("bwrap") {
+            return Ok(());
+        }
+        let trusted = bubblewrap_candidate_fixture(NativeMode::Trusted)?;
+        let implicit_inline = Map::from_iter([(
+            "argv".to_owned(),
+            serde_json::json!(["sh", "-c", "printf trusted-inline"]),
+        )]);
+        assert_eq!(
+            trusted
+                .executor
+                .exec_command_candidate("owner-a", &implicit_inline)?["stdout"],
+            "trusted-inline"
+        );
+        let sensitive = Map::from_iter([
+            ("argv".to_owned(), serde_json::json!(["env"])),
+            (
+                "env".to_owned(),
+                serde_json::json!({"API_TOKEN":"trusted-secret"}),
+            ),
+        ]);
+        assert_eq!(
+            trusted
+                .executor
+                .exec_command_candidate("owner-a", &sensitive)
+                .map_err(|error| error.code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        trusted.native.close()?;
+
+        let dangerous = bubblewrap_candidate_fixture(NativeMode::Dangerous)?;
+        let all_implicit = Map::from_iter([
+            (
+                "argv".to_owned(),
+                serde_json::json!(["sh", "-c", "printf \"$API_TOKEN\""]),
+            ),
+            (
+                "env".to_owned(),
+                serde_json::json!({"API_TOKEN":"dangerous-value"}),
+            ),
+            ("timeout_ms".to_owned(), Value::from(30_001)),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        let result = dangerous
+            .executor
+            .exec_command_candidate("owner-a", &all_implicit)?;
+        assert_eq!(result["stdout"], "dangerous-value");
+        assert_eq!(
+            dangerous.native.server_info()["workflow_authority_inherited"],
+            false
+        );
+        assert_eq!(
+            dangerous.native.server_info()["private_vault_visible"],
+            false
+        );
+        dangerous.native.close()?;
+        Ok(())
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn exec_candidate_enforces_timeout_boundary_and_sensitive_env_binding() -> Result<(), ReCtmError>
+    {
+        if !command_exists("bwrap") {
+            return Ok(());
+        }
+        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
+        let owner = "owner-a";
+        let workspace = fixture.workspace.root().display().to_string();
+        let boundary = Map::from_iter([
+            ("argv".to_owned(), serde_json::json!(["printf", "boundary"])),
+            ("timeout_ms".to_owned(), Value::from(30_000)),
+        ]);
+        assert_eq!(
+            fixture.executor.exec_command_candidate(owner, &boundary)?["stdout"],
+            "boundary"
+        );
+        let over = Map::from_iter([
+            ("argv".to_owned(), serde_json::json!(["printf", "over"])),
+            ("timeout_ms".to_owned(), Value::from(30_001)),
+        ]);
+        assert_eq!(
+            fixture
+                .executor
+                .exec_command_candidate(owner, &over)
+                .map_err(|error| error.code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        issue_exec_grant(
+            &fixture.grants,
+            &fixture.consents,
+            owner,
+            &workspace,
+            NativePermissionKind::LongTimeout,
+            &over,
+        )?;
+        assert_eq!(
+            fixture.executor.exec_command_candidate(owner, &over)?["stdout"],
+            "over"
+        );
+
+        let original = Map::from_iter([
+            ("argv".to_owned(), serde_json::json!(["env"])),
+            (
+                "env".to_owned(),
+                serde_json::json!({"API_TOKEN":"exact-one"}),
+            ),
+        ]);
+        let mutated = Map::from_iter([
+            ("argv".to_owned(), serde_json::json!(["env"])),
+            (
+                "env".to_owned(),
+                serde_json::json!({"API_TOKEN":"exact-two"}),
+            ),
+        ]);
+        issue_exec_grant(
+            &fixture.grants,
+            &fixture.consents,
+            owner,
+            &workspace,
+            NativePermissionKind::SensitiveEnv,
+            &original,
+        )?;
+        assert_eq!(
+            fixture
+                .executor
+                .exec_command_candidate(owner, &mutated)
+                .map_err(|error| error.code),
+            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
+        );
+        assert!(
+            fixture.executor.exec_command_candidate(owner, &original)?["stdout"]
+                .as_str()
+                .is_some_and(|value| value.contains("API_TOKEN=exact-one"))
         );
         fixture.native.close()?;
         Ok(())
