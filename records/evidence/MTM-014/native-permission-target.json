@@ -1,0 +1,118 @@
+{
+  "attestations": {
+    "dangerous": {
+      "capabilities_dropped": true,
+      "forbidden_paths_hidden": true,
+      "hard_isolation": true,
+      "nested_user_namespaces_disabled": true,
+      "network_isolated": false,
+      "no_privilege_escalation": true,
+      "parent_environment_cleared": true,
+      "private_vault_mounted": false,
+      "toolchain_roots_validated": true,
+      "workspace_mounted": true
+    },
+    "safe": {
+      "capabilities_dropped": true,
+      "forbidden_paths_hidden": true,
+      "hard_isolation": true,
+      "nested_user_namespaces_disabled": true,
+      "network_isolated": true,
+      "no_privilege_escalation": true,
+      "parent_environment_cleared": true,
+      "private_vault_mounted": false,
+      "toolchain_roots_validated": true,
+      "workspace_mounted": true
+    },
+    "trusted": {
+      "capabilities_dropped": true,
+      "forbidden_paths_hidden": true,
+      "hard_isolation": true,
+      "nested_user_namespaces_disabled": true,
+      "network_isolated": false,
+      "no_privilege_escalation": true,
+      "parent_environment_cleared": true,
+      "private_vault_mounted": false,
+      "toolchain_roots_validated": true,
+      "workspace_mounted": true
+    }
+  },
+  "candidate_binary_sha256": "e48a63ca218e73a5cc0cda31fa6e28cc46b89812fa6bf26b1532fc39b9a88564",
+  "candidate_source_commit": "a46beb73472c2e480c0a2a9bd2bde9abe8d64d4b",
+  "capacity_check_count": 13,
+  "check_count": 22,
+  "checks": {
+    "bubblewrap_profile_invariants": true,
+    "candidate_authority_tests": true,
+    "candidate_binary_exact": true,
+    "candidate_version": true,
+    "capacity_candidate_13_checks": true,
+    "command_lifecycle": true,
+    "dangerous_attestation": true,
+    "grant_ledger_adversarial": true,
+    "human_receipt_validated": true,
+    "magma_host_probe_classified": true,
+    "mrtr_candidate_22_checks": true,
+    "prepared_patch_adversarial": true,
+    "production_source_compatible": true,
+    "public_cutover_not_performed": true,
+    "real_dns_https": true,
+    "required_tools_available": true,
+    "safe_attestation": true,
+    "safe_network_plan_dimension": true,
+    "stable_cargo_command_unchanged": true,
+    "stable_selector_unchanged": true,
+    "trusted_attestation": true,
+    "workflow_authority_not_inherited": true
+  },
+  "evidence_hygiene": {
+    "raw_access_token_recorded": false,
+    "raw_command_output_recorded": false,
+    "raw_grant_id_recorded": false,
+    "raw_oauth_key_recorded": false,
+    "raw_request_state_recorded": false,
+    "raw_tool_arguments_recorded": false
+  },
+  "human_client": {
+    "name": "MCP Inspector",
+    "protocol_version": "2026-07-28",
+    "transport": "streamable_http_over_cloudflare_quick_tunnel",
+    "version": "2.5.0"
+  },
+  "human_evidence_sha256": "4e20ef416d0d799323b2a6714d98a879a8bdfebdebc344d07d21bb587254a582",
+  "magma": {
+    "candidate_reached": true,
+    "executable_available": true,
+    "failure_attributed_to_mtm": false,
+    "host_status": "blocked_host_license"
+  },
+  "milestone": "MTM-014",
+  "mrtr_check_count": 22,
+  "ok": true,
+  "phase": "pre_cutover_native_permission_target",
+  "pre_cutover_target_corpus_passed": true,
+  "production_cutover_allowed_by_this_report": false,
+  "production_exec_or_patch_authority_cutover": false,
+  "qualification_commit": "1a35a931a9491698b0e57de00b39bfa85e2bb18b",
+  "required_tools": {
+    "bwrap": true,
+    "curl": true,
+    "git": true,
+    "latexmk": true,
+    "magma": true,
+    "pdflatex": true,
+    "sage": true
+  },
+  "runner_sha256": "4a558c8376f184a794da290d0402ef0486b53dec90884c2e1d61bb0ca5ea3771",
+  "schema_version": "1.0.0",
+  "source_compatibility": {
+    "candidate_is_ancestor": true,
+    "changed_crate_files": [
+      "crates/mtm-runtime/src/native_authority.rs"
+    ],
+    "native_authority_production_prefix_equal": true,
+    "packaging_inputs_equal": true
+  },
+  "stable_selector_changed": false,
+  "workflow_authority_inherited": false
+}

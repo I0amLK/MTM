@@ -761,7 +761,7 @@
       "git_diff_check": true
     },
     "formal_target_runner": {
-      "status": "prepared_not_yet_accepted",
+      "status": "accepted_pre_cutover",
       "runner": "scripts/run_mtm014_native_permission_target.py",
       "validator": "scripts/validate_mtm014_native_permission_target.py",
       "validator_regression_tests": "tests/test_mtm014_target_evidence.py",
@@ -773,9 +773,49 @@
       "requires_safe_trusted_dangerous_attestation": true,
       "requires_explicit_real_dns_https": true,
       "allows_skipped_required_tools": false,
-      "production_cutover_allowed_before_report_acceptance": false
+      "production_cutover_allowed_before_report_acceptance": false,
+      "accepted_at": "2026-09-05T14:22:00+08:00",
+      "qualification_commit": "1a35a931a9491698b0e57de00b39bfa85e2bb18b",
+      "runner_sha256": "4a558c8376f184a794da290d0402ef0486b53dec90884c2e1d61bb0ca5ea3771",
+      "report_sha256": "e1f9b5350977dd8d21dd2b29a89a895aee1eda38589da226e0c04bda91f05bf3",
+      "target_check_count": 22,
+      "magma_host_status": "blocked_host_license",
+      "cutover_preconditions_satisfied": true,
+      "authority_cutover_performed": false
     },
-    "manual_pending": "Complete the formal hash-bound A4 target runner and evidence receipt before public exec/apply_patch authority cutover."
+    "manual_pending": "D5A and pre-cutover A4 are accepted. Public exec/apply_patch authority cutover may now proceed as a separate review unit; final D5 completion still requires post-cutover public-path A4, preview rollback/recutover and soak."
+  },
+  "d5_target_receipt": {
+    "accepted_at": "2026-09-05T14:22:00+08:00",
+    "scope": "Hash-bound complete pre-cutover Native permission A4 target qualification; no public exec/apply_patch authority change",
+    "evidence": "records/evidence/MTM-014/native-permission-target.json",
+    "evidence_sha256": "e1f9b5350977dd8d21dd2b29a89a895aee1eda38589da226e0c04bda91f05bf3",
+    "qualification_commit": "1a35a931a9491698b0e57de00b39bfa85e2bb18b",
+    "candidate_source_commit": "a46beb73472c2e480c0a2a9bd2bde9abe8d64d4b",
+    "candidate_binary_sha256": "e48a63ca218e73a5cc0cda31fa6e28cc46b89812fa6bf26b1532fc39b9a88564",
+    "human_evidence_sha256": "4e20ef416d0d799323b2a6714d98a879a8bdfebdebc344d07d21bb587254a582",
+    "target_check_count": 22,
+    "safe_trusted_dangerous_attestation": true,
+    "real_dns_https": true,
+    "grant_replay_mutation_concurrency": true,
+    "session_restart_and_cross_binding": true,
+    "git_ignored_patch_authority": true,
+    "tty_stdin_timeout_kill_descendant_cleanup": true,
+    "git_latex_sage_candidate_non_regression": true,
+    "magma_host_status": "blocked_host_license",
+    "magma_failure_attributed_to_mtm": false,
+    "workflow_authority_inherited": false,
+    "stable_selector_changed": false,
+    "production_exec_or_patch_authority_cutover": false,
+    "cutover_preconditions_satisfied": true,
+    "authority_cutover_performed": false,
+    "validation": {
+      "target_evidence_validator": "passed",
+      "target_evidence_tests": "7 passed",
+      "full_run_checks": "26 of 26 passed",
+      "git_diff_check": true
+    },
+    "manual_pending": "Public exec/apply_patch authority cutover, post-cutover public-path A4, Magma functional validation if host licensing becomes available, preview rollback/recutover and soak."
   },
   "d5_capacity_hardening": {
     "accepted_at": "2026-09-04T21:48:37-07:00",

@@ -422,7 +422,7 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertFalse(target["authority_boundary"]["workflow_authority_inherited"])
         self.assertEqual(target["validation"]["full_run_checks"], "25 of 25 passed")
         formal = target["formal_target_runner"]
-        self.assertEqual(formal["status"], "prepared_not_yet_accepted")
+        self.assertEqual(formal["status"], "accepted_pre_cutover")
         self.assertEqual(
             formal["runner"], "scripts/run_mtm014_native_permission_target.py"
         )
@@ -437,6 +437,35 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(formal["requires_explicit_real_dns_https"])
         self.assertFalse(formal["allows_skipped_required_tools"])
         self.assertFalse(formal["production_cutover_allowed_before_report_acceptance"])
+        self.assertEqual(formal["target_check_count"], 22)
+        self.assertEqual(formal["magma_host_status"], "blocked_host_license")
+        self.assertTrue(formal["cutover_preconditions_satisfied"])
+        self.assertFalse(formal["authority_cutover_performed"])
+
+        target_receipt = iteration["d5_target_receipt"]
+        self.assertEqual(
+            target_receipt["evidence"],
+            "records/evidence/MTM-014/native-permission-target.json",
+        )
+        self.assertEqual(target_receipt["target_check_count"], 22)
+        self.assertTrue(target_receipt["safe_trusted_dangerous_attestation"])
+        self.assertTrue(target_receipt["real_dns_https"])
+        self.assertTrue(target_receipt["grant_replay_mutation_concurrency"])
+        self.assertTrue(target_receipt["session_restart_and_cross_binding"])
+        self.assertTrue(target_receipt["git_ignored_patch_authority"])
+        self.assertTrue(target_receipt["tty_stdin_timeout_kill_descendant_cleanup"])
+        self.assertTrue(target_receipt["git_latex_sage_candidate_non_regression"])
+        self.assertEqual(target_receipt["magma_host_status"], "blocked_host_license")
+        self.assertFalse(target_receipt["magma_failure_attributed_to_mtm"])
+        self.assertFalse(target_receipt["workflow_authority_inherited"])
+        self.assertFalse(target_receipt["stable_selector_changed"])
+        self.assertFalse(target_receipt["production_exec_or_patch_authority_cutover"])
+        self.assertTrue(target_receipt["cutover_preconditions_satisfied"])
+        self.assertFalse(target_receipt["authority_cutover_performed"])
+        self.assertEqual(target_receipt["validation"]["target_evidence_validator"], "passed")
+        self.assertEqual(target_receipt["validation"]["target_evidence_tests"], "7 passed")
+        self.assertEqual(target_receipt["validation"]["full_run_checks"], "26 of 26 passed")
+        self.assertTrue(target_receipt["validation"]["git_diff_check"])
 
         human = d5a_progress["human_acceptance"]
         self.assertEqual(human["client"], "MCP Inspector 2.5.0")

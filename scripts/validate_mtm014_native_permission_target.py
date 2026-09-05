@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -62,12 +63,49 @@ def require_bool(value: Any, expected: bool, message: str) -> None:
         raise ValueError(message)
 
 
+def verify_qualification_binding(payload: dict[str, Any]) -> bool:
+    qualification_commit = str(payload["qualification_commit"])
+    candidate_source = str(payload["candidate_source_commit"])
+    commands = (
+        ["git", "cat-file", "-e", f"{qualification_commit}^{{commit}}"],
+        ["git", "merge-base", "--is-ancestor", qualification_commit, "HEAD"],
+        ["git", "merge-base", "--is-ancestor", candidate_source, qualification_commit],
+    )
+    for command in commands:
+        completed = subprocess.run(
+            command,
+            cwd=ROOT,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=30,
+            check=False,
+        )
+        if completed.returncode != 0:
+            return False
+    completed = subprocess.run(
+        [
+            "git",
+            "show",
+            f"{qualification_commit}:scripts/run_mtm014_native_permission_target.py",
+        ],
+        cwd=ROOT,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        timeout=30,
+        check=False,
+    )
+    if completed.returncode != 0:
+        return False
+    return hashlib.sha256(completed.stdout).hexdigest() == payload["runner_sha256"]
+
+
 def validate(
     payload: Any,
     *,
     human_payload: dict[str, Any] | None = None,
     human_sha256: str | None = None,
     runner_sha256: str | None = None,
+    qualification_binding_verified: bool | None = None,
 ) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError("target evidence must be an object")
@@ -150,6 +188,12 @@ def validate(
         raise ValueError("target human evidence binding is stale")
     if payload["runner_sha256"] != expected_runner_sha256:
         raise ValueError("target runner binding is stale")
+    binding_verified = (
+        verify_qualification_binding(payload)
+        if qualification_binding_verified is None
+        else qualification_binding_verified
+    )
+    require_bool(binding_verified, True, "target qualification commit binding is invalid")
 
     checks = payload["checks"]
     if not isinstance(checks, dict) or set(checks) != CHECKS:

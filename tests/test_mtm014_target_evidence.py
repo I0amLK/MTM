@@ -83,6 +83,7 @@ class TargetEvidenceTests(unittest.TestCase):
             human_payload=self.human,
             human_sha256="d" * 64,
             runner_sha256="e" * 64,
+            qualification_binding_verified=True,
         )
 
     def test_valid_fixture_is_pre_cutover_only(self) -> None:
@@ -118,6 +119,16 @@ class TargetEvidenceTests(unittest.TestCase):
             payload["source_compatibility"].update(update)
             with self.subTest(update=update), self.assertRaises(ValueError):
                 self.validate_fixture(payload)
+
+    def test_qualification_commit_binding_cannot_be_skipped(self) -> None:
+        with self.assertRaises(ValueError):
+            validate(
+                self.payload,
+                human_payload=self.human,
+                human_sha256="d" * 64,
+                runner_sha256="e" * 64,
+                qualification_binding_verified=False,
+            )
 
     def test_attestation_and_hygiene_fail_closed(self) -> None:
         payload = copy.deepcopy(self.payload)

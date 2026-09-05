@@ -176,6 +176,15 @@ def main() -> int:
                 capture_json=True,
             )
         )
+    if (ROOT / "records/evidence/MTM-014/native-permission-target.json").is_file():
+        checks.append(
+            run(
+                "mtm014_native_permission_target",
+                [sys.executable, "scripts/validate_mtm014_native_permission_target.py"],
+                env=environment,
+                capture_json=True,
+            )
+        )
     if progress.get("current_milestone") == "MTM-013":
         checks.append(
             run(
