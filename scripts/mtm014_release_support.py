@@ -30,6 +30,8 @@ HOME = Path("/home/lk")
 VERSION = "0.5.0-preview.1"
 STABLE_SHA = "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3"
 IMPLEMENTATION = "2f11750c07317d879f1bedfd2198c36786b8ca74"
+RUNTIME_REPAIR_FILE = "crates/mtm-native/src/process.rs"
+RUNTIME_REPAIR_SHA = "678d147503a9ff60006e63e9b3e671c620bee818fddc6295dcad42ba1a3de36a"
 SELECTOR = HOME / ".local/bin/mtm"
 CARGO_ENTRY = HOME / ".cargo/bin/mtm"
 STATE_ROOT = HOME / ".local/share/mtm"
@@ -59,7 +61,7 @@ HARNESS_FILES = (
     "scripts/run_mtm012_tui_validation.py",
 )
 QUALIFICATION_CHECKS = {
-    "versioned_identity", "clean_git_install", "runtime_source_unchanged",
+    "versioned_identity", "clean_git_install", "runtime_source_scope_verified",
     "safe_public_suite", "trusted_public_suite", "dangerous_public_suite",
     "all_mode_attestation", "qc_required_latex", "compact_required_latex",
     "copied_existing_state", "old_run_upgrade_rollback", "tui_display_contract",
@@ -141,7 +143,8 @@ def stable_pair() -> bool:
                     for path in (SELECTOR, CARGO_ENTRY, STABLE)))
 
 
-def source_unchanged(commit: str) -> bool:
+def source_scope_verified(commit: str) -> bool:
+    """Allow only version metadata and the explicitly hash-frozen watchdog repair."""
     try:
         git("merge-base", "--is-ancestor", IMPLEMENTATION, commit)
         files = git("ls-tree", "-r", "--name-only", commit, "crates").decode().splitlines()
@@ -149,6 +152,10 @@ def source_unchanged(commit: str) -> bool:
         if set(files) != set(old_files):
             return False
         for name in files:
+            if name == RUNTIME_REPAIR_FILE:
+                if hashlib.sha256(git("show", f"{commit}:{name}")).hexdigest() != RUNTIME_REPAIR_SHA:
+                    return False
+                continue
             if name.endswith(".rs") or "/assets/" in name:
                 if git("show", f"{commit}:{name}") != git("show", f"{IMPLEMENTATION}:{name}"):
                     return False

@@ -46,7 +46,7 @@ def main() -> int:
     try:
         s.require(not s.git("status", "--porcelain").strip(), "clean_committed_source")
         commit = s.git("rev-parse", "HEAD").decode().strip()
-        s.require(s.source_unchanged(commit), "runtime_source_unchanged")
+        s.require(s.source_scope_verified(commit), "runtime_source_scope_verified")
         s.require(s.stable_pair(), "stable_entries")
         s.require(not s.QUALIFICATION.exists(), "qualification_already_exists")
         tools = {name: shutil.which(name) is not None for name in
@@ -69,7 +69,7 @@ def main() -> int:
         s.identity(s.STAGED, s.VERSION)
         binary_sha = s.digest(s.STAGED)
         checks = {"versioned_identity": True, "clean_git_install": True,
-                  "runtime_source_unchanged": True, "required_tools_present": True}
+                  "runtime_source_scope_verified": True, "required_tools_present": True}
         with tempfile.TemporaryDirectory(prefix="mtm014-preview-") as directory:
             root = Path(directory)
             public.BINARY = s.STAGED
@@ -135,6 +135,7 @@ def main() -> int:
             "version": s.VERSION, "ok": True, "recorded_at": datetime.now(timezone.utc).isoformat(),
             "source_commit": commit, "binary_sha256": binary_sha, "stable_sha256": s.STABLE_SHA,
             "implementation_commit": s.IMPLEMENTATION,
+            "runtime_repair_sha256": {s.RUNTIME_REPAIR_FILE: s.RUNTIME_REPAIR_SHA},
             "harness_sha256": {path: s.digest(s.ROOT / path) for path in s.HARNESS_FILES},
             "prerequisite_sha256": {path: s.digest(s.ROOT / path) for path in s.PREREQUISITES},
             "checks": checks, "check_count": len(checks), "public_suites": {

@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-014",
+  "phase": "preview_soak_diagnostic",
+  "decision": "rejected",
+  "source_commit_prefix": "e043220",
+  "binary_sha256": "e13a7592029e936594b9913e5b325267260255edf134c4ed09540c441a1c6ef7",
+  "scope": "Diagnostic repetition after initial preview qualification failed permission_soak_bounds; original acceptance limits unchanged.",
+  "duration_seconds": 60.212,
+  "iterations": 503,
+  "before": {"rss_kib": 14132, "threads": 10, "fds": 16, "children": 0},
+  "peak": {"rss_kib": 47212, "threads": 52, "fds": 16, "children": 0},
+  "after": {"rss_kib": 47212, "threads": 50, "fds": 16, "children": 0},
+  "shutdown_ms": 64.541,
+  "unchanged_gate_result": false,
+  "cause": "Completed commands retained watchdog threads and Arc-owned command buffers until their configured timeout; no production selector change occurred.",
+  "raw_credentials_recorded": false,
+  "raw_grant_or_capability_recorded": false,
+  "raw_command_or_proof_recorded": false,
+  "selector_changed": false
+}

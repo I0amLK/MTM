@@ -64,7 +64,7 @@ def validate_resources(value: Any) -> None:
 def validate_qualification(payload: Any, *, binding_verified: bool | None = None) -> dict[str, Any]:
     required = {"schema_version", "milestone", "phase", "version", "ok", "recorded_at",
                 "source_commit", "binary_sha256", "stable_sha256", "implementation_commit",
-                "harness_sha256", "prerequisite_sha256", "checks", "check_count", "public_suites",
+                "harness_sha256", "prerequisite_sha256", "checks", "check_count", "public_suites", "runtime_repair_sha256",
                 "proof_facts", "tui_checks", "required_tools", "magma_host_status", "resource", "soak",
                 "new_human_consent_claimed", "performance_claim", "production_state_rewritten",
                 "selector_changed", "evidence_hygiene"}
@@ -73,6 +73,7 @@ def validate_qualification(payload: Any, *, binding_verified: bool | None = None
         "schema_version": "1.0.0", "milestone": "MTM-014", "phase": "preview_qualification",
         "version": s.VERSION, "ok": True, "stable_sha256": s.STABLE_SHA,
         "implementation_commit": s.IMPLEMENTATION, "new_human_consent_claimed": False,
+        "runtime_repair_sha256": {s.RUNTIME_REPAIR_FILE: s.RUNTIME_REPAIR_SHA},
         "performance_claim": False, "production_state_rewritten": False, "selector_changed": False,
         "evidence_hygiene": s.HYGIENE,
     }.items():
@@ -111,7 +112,7 @@ def validate_qualification(payload: Any, *, binding_verified: bool | None = None
     if binding_verified is None:
         commit = payload["source_commit"]
         s.git("merge-base", "--is-ancestor", commit, "HEAD")
-        s.require(s.source_unchanged(commit), "source_binding")
+        s.require(s.source_scope_verified(commit), "source_binding")
         for path, value in payload["harness_sha256"].items():
             exact(hashlib.sha256(s.git("show", f"{commit}:{path}")).hexdigest(), value)
         for path, value in payload["prerequisite_sha256"].items():

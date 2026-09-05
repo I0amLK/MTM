@@ -744,8 +744,19 @@ fn start_watchdog(run: Arc<CommandRun>) {
         return;
     };
     thread::spawn(move || {
-        let delay = timeout_at.saturating_duration_since(Instant::now());
-        thread::sleep(delay);
+        // Completed commands must not keep a thread and their output buffers
+        // alive until a potentially ten-minute timeout. This observer also
+        // reaps a naturally exited child when nobody polls the command again.
+        loop {
+            if is_terminal(&run).unwrap_or(true) {
+                return;
+            }
+            let remaining = timeout_at.saturating_duration_since(Instant::now());
+            if remaining.is_zero() {
+                break;
+            }
+            thread::sleep(remaining.min(Duration::from_millis(20)));
+        }
         if is_terminal(&run).unwrap_or(true) {
             return;
         }
@@ -1091,6 +1102,75 @@ const fn default_kill_wait_ms() -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn watchdog_request(argv: Vec<String>, timeout_ms: u64) -> CommandRequest {
+        CommandRequest {
+            argv,
+            env: minimal_env(),
+            timeout_ms,
+            yield_time_ms: 3_000,
+            max_output_bytes: 65_536,
+            stdin: String::new(),
+            tty: false,
+            verbosity: None,
+            preview_bytes: 4096,
+        }
+    }
+
+    #[test]
+    fn completed_watchdogs_release_owned_runs_before_long_timeouts() -> Result<(), ReCtmError> {
+        let manager = CommandManager::new(CommandManagerConfig::default());
+        let mut runs = Vec::new();
+        for _ in 0..40 {
+            let reply = manager.start(watchdog_request(vec!["/bin/true".to_owned()], 600_000))?;
+            assert_eq!(reply["status"], "exited");
+            let id = reply["command_id"]
+                .as_str()
+                .ok_or_else(|| runtime_error("TEST", "missing command id"))?;
+            runs.push(Arc::downgrade(&manager.get(id, false)?));
+        }
+        manager.close()?;
+        drop(manager);
+        let deadline = Instant::now() + Duration::from_secs(2);
+        while runs.iter().any(|run| run.strong_count() != 0) && Instant::now() < deadline {
+            thread::sleep(Duration::from_millis(10));
+        }
+        assert!(runs.iter().all(|run| run.strong_count() == 0));
+        Ok(())
+    }
+
+    #[test]
+    fn watchdog_still_enforces_a_live_command_deadline() -> Result<(), ReCtmError> {
+        let manager = CommandManager::new(CommandManagerConfig::default());
+        let reply = manager.start(watchdog_request(
+            vec!["/bin/sleep".to_owned(), "20".to_owned()],
+            50,
+        ))?;
+        assert_eq!(reply["status"], "timeout");
+        assert_eq!(reply["timed_out"], true);
+        manager.close()?;
+        Ok(())
+    }
+
+    #[test]
+    fn watchdog_reaps_unpolled_short_commands() -> Result<(), ReCtmError> {
+        let manager = CommandManager::new(CommandManagerConfig::default());
+        let mut request =
+            watchdog_request(vec!["/bin/sleep".to_owned(), "0.1".to_owned()], 600_000);
+        request.yield_time_ms = 0;
+        let reply = manager.start(request)?;
+        let id = reply["command_id"]
+            .as_str()
+            .ok_or_else(|| runtime_error("TEST", "missing command id"))?;
+        let run = manager.get(id, false)?;
+        let deadline = Instant::now() + Duration::from_secs(2);
+        while lock(&run.status)?.completed_at.is_none() && Instant::now() < deadline {
+            thread::sleep(Duration::from_millis(10));
+        }
+        assert!(lock(&run.status)?.completed_at.is_some());
+        manager.close()?;
+        Ok(())
+    }
 
     #[test]
     fn command_lifecycle_poll_read_and_kill() -> Result<(), ReCtmError> {

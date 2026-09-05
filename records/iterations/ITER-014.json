@@ -975,6 +975,17 @@
     "raw_credentials_in_evidence": false,
     "performance_claim": false
   },
+  "preview_runtime_repair_contract": {
+    "trigger": "The unchanged preview A5 soak rejected retained completed-command watchdogs.",
+    "permitted_runtime_file": "crates/mtm-native/src/process.rs",
+    "permitted_runtime_file_sha256": "678d147503a9ff60006e63e9b3e671c620bee818fddc6295dcad42ba1a3de36a",
+    "behavior": "Watchdogs observe terminal state at bounded 20ms intervals and release completed runs before their original timeout; live command deadlines remain enforced.",
+    "supersedes_version_only_runtime_scope": true,
+    "other_runtime_and_assets_unchanged": true,
+    "resource_thresholds_relaxed": false,
+    "requires_fresh_exact_binary_qualification": true,
+    "rejected_evidence_sha256": "ae3087cd559caecc47502cb701fca0c4540874086820bdc64f7794b3f762cc29"
+  },
   "d5_capacity_hardening": {
     "accepted_at": "2026-09-04T21:48:37-07:00",
     "scope": "A3 bounded process-local consent/grant storage; not human acceptance or cutover",
@@ -1028,6 +1039,13 @@
     "Preview install, rollback/recutover and bounded soak remain required before MTM-014 completion; Magma functional validation remains host-license dependent."
   ],
   "recorded_failures_and_repairs": [
+    {
+      "delivery": 5,
+      "stage": "preview exact-binary Native permission soak",
+      "failure": "The e043220 preview failed the unchanged 60-second RSS/thread growth bounds. A diagnostic repetition completed 503 iterations but retained 52 threads (baseline 10) and reached 47212 KiB RSS (baseline 14132). Watchdogs slept until timeout despite terminal commands and held command buffers alive.",
+      "repair": "Replace the unconditional watchdog sleep with bounded terminal-state observation that exits and releases ownership on completion while preserving deadline enforcement. Freeze this as the sole narrow runtime delta for the new preview, add long-timeout-release, unpolled-exit and live-timeout regressions, and rerun all exact-binary qualification without relaxing resource thresholds.",
+      "failure_evidence": "records/evidence/MTM-014/preview-soak-rejected.json"
+    },
     {
       "delivery": 5,
       "stage": "post-cutover A4 receipt integration gate",

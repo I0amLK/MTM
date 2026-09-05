@@ -6,6 +6,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import mtm014_release_support as s
@@ -27,6 +28,7 @@ class PreviewReleaseTests(unittest.TestCase):
             "version": s.VERSION, "ok": True, "recorded_at": "2026-09-05T00:00:00+00:00",
             "source_commit": "a" * 40, "binary_sha256": "b" * 64, "stable_sha256": s.STABLE_SHA,
             "implementation_commit": s.IMPLEMENTATION,
+            "runtime_repair_sha256": {s.RUNTIME_REPAIR_FILE: s.RUNTIME_REPAIR_SHA},
             "harness_sha256": dict.fromkeys(s.HARNESS_FILES, "a" * 64),
             "prerequisite_sha256": dict.fromkeys(s.PREREQUISITES, "a" * 64),
             "checks": dict.fromkeys(s.QUALIFICATION_CHECKS, True), "check_count": len(s.QUALIFICATION_CHECKS),
@@ -64,6 +66,26 @@ class PreviewReleaseTests(unittest.TestCase):
                 value[field]["raw_access_token"] = "synthetic-test-sentinel"
             with self.subTest(field=field), self.assertRaises(s.ReleaseFailure):
                 validate_qualification(value, binding_verified=True)
+
+    def test_source_scope_rejects_unpinned_runtime_changes(self) -> None:
+        fixed = (s.ROOT / s.RUNTIME_REPAIR_FILE).read_bytes()
+        files = (s.RUNTIME_REPAIR_FILE + "\ncrates/mtm-core/src/lib.rs\n").encode()
+        for bad in (None, s.RUNTIME_REPAIR_FILE, "crates/mtm-core/src/lib.rs"):
+            def git(*args: str) -> bytes:
+                if args[0] == "merge-base":
+                    return b""
+                if args[0] == "ls-tree":
+                    return files
+                ref, path = args[1].split(":", 1)
+                if ref != s.IMPLEMENTATION and path == bad:
+                    return b"unexpected runtime modification"
+                if path == s.RUNTIME_REPAIR_FILE:
+                    return fixed if ref != s.IMPLEMENTATION else b"old watchdog"
+                if path.endswith(".rs"):
+                    return b"unchanged runtime"
+                return b"0.4.0" if ref == s.IMPLEMENTATION else s.VERSION.encode()
+            with self.subTest(bad=bad), patch.object(s, "git", git):
+                self.assertEqual(s.source_scope_verified("test-commit"), bad is None)
 
     def test_rollout_failures_restore_both_selectors_and_manifest(self) -> None:
         for failure in (1, 2, 3, 4):
