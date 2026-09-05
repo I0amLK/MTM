@@ -10,12 +10,13 @@ use mtm_contracts::{
 };
 use mtm_core::{
     EffectiveNativePolicy, ExecInvocation, ExecPermissionFacts, NativeInvocation,
-    NativePermissionRequest, ResolvedExecutableFact, canonical_arguments_sha256,
+    NativePermissionRequest, ResolvedExecutableFact, canonical_arguments_sha256, redact_json,
 };
 use mtm_storage::StoreRuntime;
 use serde_json::{Map, Value};
 
 const SANDBOX_WORKSPACE_ROOT: &str = "/workspace";
+pub const NATIVE_PERMISSION_CONSENT_CHALLENGE_TTL_SECONDS: i64 = 300;
 const SYSTEM_SANDBOX_ROOTS: [&str; 9] = [
     "/usr",
     "/bin",
@@ -292,6 +293,302 @@ pub struct VerifiedNativePermissionConsent {
     owner_id: String,
     workspace: String,
     request: NativePermissionRequest,
+}
+
+#[derive(Clone, Eq, PartialEq)]
+pub struct NativePermissionConsentChallengeId(String);
+
+impl NativePermissionConsentChallengeId {
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl fmt::Debug for NativePermissionConsentChallengeId {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("NativePermissionConsentChallengeId([REDACTED])")
+    }
+}
+
+#[derive(Clone, Eq, PartialEq)]
+struct ConsentChallengeRecord {
+    owner_id: String,
+    workspace: String,
+    request: NativePermissionRequest,
+    expires_at: i64,
+}
+
+pub struct NativePermissionConsentPrompt {
+    challenge_id: NativePermissionConsentChallengeId,
+    message: String,
+    requested_schema: Value,
+    expires_at: i64,
+}
+
+impl fmt::Debug for NativePermissionConsentPrompt {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("NativePermissionConsentPrompt")
+            .field("challenge_id", &"[REDACTED]")
+            .field("message", &self.message)
+            .field("requested_schema", &self.requested_schema)
+            .field("expires_at", &self.expires_at)
+            .finish()
+    }
+}
+
+impl NativePermissionConsentPrompt {
+    #[must_use]
+    pub fn request_state(&self) -> &str {
+        self.challenge_id.as_str()
+    }
+
+    #[must_use]
+    pub fn message(&self) -> &str {
+        &self.message
+    }
+
+    #[must_use]
+    pub fn requested_schema(&self) -> &Value {
+        &self.requested_schema
+    }
+
+    #[must_use]
+    pub const fn expires_at(&self) -> i64 {
+        self.expires_at
+    }
+}
+
+pub enum NativePermissionConsentOutcome {
+    Accepted(VerifiedNativePermissionConsent),
+    Declined,
+    Cancelled,
+}
+
+impl fmt::Debug for NativePermissionConsentOutcome {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Accepted(_) => formatter.write_str("NativePermissionConsentOutcome::Accepted"),
+            Self::Declined => formatter.write_str("NativePermissionConsentOutcome::Declined"),
+            Self::Cancelled => formatter.write_str("NativePermissionConsentOutcome::Cancelled"),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct NativePermissionConsentAuthority {
+    runtime: StoreRuntime,
+    challenges: Arc<Mutex<BTreeMap<String, ConsentChallengeRecord>>>,
+}
+
+impl NativePermissionConsentAuthority {
+    #[must_use]
+    pub fn new(runtime: StoreRuntime) -> Self {
+        Self {
+            runtime,
+            challenges: Arc::new(Mutex::new(BTreeMap::new())),
+        }
+    }
+
+    pub fn begin(
+        &self,
+        owner_id: &str,
+        workspace: &str,
+        request: NativePermissionRequest,
+    ) -> Result<NativePermissionConsentPrompt, ReCtmError> {
+        if owner_id.is_empty() || workspace.is_empty() {
+            return Err(permission_error(
+                "ELICITATION_BINDING_INVALID",
+                "Native permission consent requires an authenticated owner and workspace.",
+            ));
+        }
+        let issued_at = self.runtime.clock.unix_seconds()?;
+        let expires_at = issued_at
+            .checked_add(NATIVE_PERMISSION_CONSENT_CHALLENGE_TTL_SECONDS)
+            .ok_or_else(|| internal("Native permission consent challenge expiry overflowed"))?;
+        let challenge_id = format!("npc-{}", self.runtime.ids.token_urlsafe(18)?);
+        let record = ConsentChallengeRecord {
+            owner_id: owner_id.to_owned(),
+            workspace: workspace.to_owned(),
+            request: request.clone(),
+            expires_at,
+        };
+        let mut challenges = self.lock_challenges()?;
+        if challenges.contains_key(&challenge_id) {
+            return Err(internal("Native permission consent challenge id collision"));
+        }
+        challenges.insert(challenge_id.clone(), record);
+        drop(challenges);
+
+        Ok(NativePermissionConsentPrompt {
+            challenge_id: NativePermissionConsentChallengeId(challenge_id),
+            message: consent_prompt_message(workspace, &request)?,
+            requested_schema: consent_requested_schema(),
+            expires_at,
+        })
+    }
+
+    pub fn complete(
+        &self,
+        request_state: &str,
+        owner_id: &str,
+        workspace: &str,
+        request: &NativePermissionRequest,
+        response: &Value,
+    ) -> Result<NativePermissionConsentOutcome, ReCtmError> {
+        if request_state.is_empty() {
+            return Err(permission_error(
+                "ELICITATION_STATE_INVALID",
+                "Native permission consent state is missing.",
+            ));
+        }
+        let now = self.runtime.clock.unix_seconds()?;
+        let mut challenges = self.lock_challenges()?;
+        let record = challenges.get(request_state).cloned().ok_or_else(|| {
+            permission_error(
+                "ELICITATION_STATE_INVALID",
+                "Native permission consent state is unknown or no longer valid.",
+            )
+        })?;
+        if record.owner_id != owner_id {
+            return Err(permission_error(
+                "ELICITATION_OWNER_MISMATCH",
+                "Native permission consent belongs to a different OAuth owner.",
+            ));
+        }
+        if record.workspace != workspace {
+            return Err(permission_error(
+                "ELICITATION_WORKSPACE_MISMATCH",
+                "Native permission consent belongs to a different workspace.",
+            ));
+        }
+        if &record.request != request {
+            return Err(permission_error(
+                "ELICITATION_REQUEST_MISMATCH",
+                "Native permission consent is bound to a different permission request.",
+            ));
+        }
+        if now >= record.expires_at {
+            challenges.remove(request_state);
+            return Err(permission_error(
+                "ELICITATION_TIMEOUT",
+                "Native permission consent challenge expired.",
+            ));
+        }
+
+        let response = response.as_object().ok_or_else(|| {
+            permission_error(
+                "ELICITATION_RESPONSE_INVALID",
+                "Native permission consent response must be an object.",
+            )
+        })?;
+        let action = response
+            .get("action")
+            .and_then(Value::as_str)
+            .ok_or_else(|| {
+                permission_error(
+                    "ELICITATION_RESPONSE_INVALID",
+                    "Native permission consent response is missing an action.",
+                )
+            })?;
+        let outcome = match action {
+            "accept" => {
+                let content = response
+                    .get("content")
+                    .and_then(Value::as_object)
+                    .ok_or_else(|| {
+                        permission_error(
+                            "ELICITATION_RESPONSE_INVALID",
+                            "Accepted Native permission consent requires form content.",
+                        )
+                    })?;
+                if content.len() != 1 || content.get("approved").and_then(Value::as_bool).is_none()
+                {
+                    return Err(permission_error(
+                        "ELICITATION_RESPONSE_INVALID",
+                        "Native permission consent content does not match the approved boolean schema.",
+                    ));
+                }
+                if content.get("approved").and_then(Value::as_bool) == Some(true) {
+                    NativePermissionConsentOutcome::Accepted(VerifiedNativePermissionConsent {
+                        owner_id: record.owner_id.clone(),
+                        workspace: record.workspace.clone(),
+                        request: record.request.clone(),
+                    })
+                } else {
+                    NativePermissionConsentOutcome::Declined
+                }
+            }
+            "decline" => NativePermissionConsentOutcome::Declined,
+            "cancel" => NativePermissionConsentOutcome::Cancelled,
+            _ => {
+                return Err(permission_error(
+                    "ELICITATION_RESPONSE_INVALID",
+                    "Native permission consent response action is invalid.",
+                ));
+            }
+        };
+        challenges.remove(request_state);
+        Ok(outcome)
+    }
+
+    pub fn process_local_challenge_count(&self) -> Result<usize, ReCtmError> {
+        Ok(self.lock_challenges()?.len())
+    }
+
+    fn lock_challenges(
+        &self,
+    ) -> Result<std::sync::MutexGuard<'_, BTreeMap<String, ConsentChallengeRecord>>, ReCtmError>
+    {
+        self.challenges
+            .lock()
+            .map_err(|_| internal("Native permission consent challenge lock is poisoned"))
+    }
+}
+
+fn consent_prompt_message(
+    workspace: &str,
+    request: &NativePermissionRequest,
+) -> Result<String, ReCtmError> {
+    let workspace_label = Path::new(workspace)
+        .file_name()
+        .and_then(|value| value.to_str())
+        .filter(|value| !value.is_empty())
+        .unwrap_or("workspace");
+    let redacted_reason = redact_json(&Value::String(request.reason().to_owned()))?
+        .as_str()
+        .unwrap_or("permission requested")
+        .chars()
+        .take(240)
+        .collect::<String>();
+    let fingerprint = request
+        .arguments_sha256()
+        .chars()
+        .take(12)
+        .collect::<String>();
+    Ok(format!(
+        "MTM requests {} for {} in workspace {workspace_label}. Scope: {}; TTL: {}s. Reason: {redacted_reason}. Arguments fingerprint: {fingerprint}. Approve only if you expect this exact action.",
+        request.kind().as_str(),
+        request.tool().as_str(),
+        request.scope().as_str(),
+        request.ttl_seconds(),
+    ))
+}
+
+fn consent_requested_schema() -> Value {
+    serde_json::json!({
+        "type":"object",
+        "properties":{
+            "approved":{
+                "type":"boolean",
+                "title":"Approve Native permission",
+                "description":"Approve this exact permission request.",
+                "default":false
+            }
+        },
+        "required":["approved"]
+    })
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -741,6 +1038,10 @@ fn denied(code: &str, message: &str) -> ReCtmError {
     ReCtmError::new(code, message).with_category(ErrorCategory::Permission)
 }
 
+fn permission_error(code: &str, message: &str) -> ReCtmError {
+    denied(code, message)
+}
+
 fn permission_matches_tool(tool: NativePermissionTool, kind: NativePermissionKind) -> bool {
     match tool {
         NativePermissionTool::ExecCommand => kind != NativePermissionKind::WriteGeneratedOrIgnored,
@@ -870,6 +1171,12 @@ mod tests {
         error.code
     }
 
+    fn completion_code(
+        result: Result<NativePermissionConsentOutcome, ReCtmError>,
+    ) -> Result<(), String> {
+        result.map(|_| ()).map_err(code)
+    }
+
     fn issue(
         authority: &NativePermissionGrantAuthority,
         owner: &str,
@@ -884,6 +1191,210 @@ mod tests {
             workspace,
             request(kind, scope, Value::Object(arguments.clone()), ttl_seconds)?,
         ))
+    }
+
+    #[test]
+    fn consent_challenge_accepts_exact_request_once_and_can_mint_grant() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(900));
+        let runtime = runtime(Arc::clone(&clock));
+        let consent_authority = NativePermissionConsentAuthority::new(runtime.clone());
+        let grant_authority = NativePermissionGrantAuthority::new(runtime);
+        let args = arguments("curl https://example.com");
+        let request = request(
+            NativePermissionKind::Network,
+            NativePermissionScope::Once,
+            Value::Object(args.clone()),
+            300,
+        )?;
+        let prompt = consent_authority.begin("owner-a", "/workspace/a", request.clone())?;
+        assert_eq!(consent_authority.process_local_challenge_count()?, 1);
+        assert_eq!(
+            prompt.expires_at(),
+            900 + NATIVE_PERMISSION_CONSENT_CHALLENGE_TTL_SECONDS
+        );
+        let state = prompt.request_state().to_owned();
+        let outcome = consent_authority.complete(
+            &state,
+            "owner-a",
+            "/workspace/a",
+            &request,
+            &serde_json::json!({"action":"accept","content":{"approved":true}}),
+        )?;
+        let NativePermissionConsentOutcome::Accepted(consent) = outcome else {
+            return Err(internal("test consent was not accepted"));
+        };
+        assert_eq!(consent_authority.process_local_challenge_count()?, 0);
+        let receipt = grant_authority.issue_verified(consent)?;
+        let permit = grant_authority.authorize(
+            receipt.grant_id(),
+            "owner-a",
+            "/workspace/a",
+            NativePermissionTool::ExecCommand,
+            NativePermissionKind::Network,
+            &args,
+        )?;
+        assert_eq!(permit.kind(), NativePermissionKind::Network);
+        assert_eq!(
+            completion_code(consent_authority.complete(
+                &state,
+                "owner-a",
+                "/workspace/a",
+                &request,
+                &serde_json::json!({"action":"accept","content":{"approved":true}}),
+            )),
+            Err("ELICITATION_STATE_INVALID".to_owned())
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn consent_challenge_decline_cancel_and_false_confirmation_mint_nothing()
+    -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(1_000));
+        let authority = NativePermissionConsentAuthority::new(runtime(clock));
+        let args = Value::Object(arguments("curl https://example.com"));
+        for response in [
+            serde_json::json!({"action":"decline"}),
+            serde_json::json!({"action":"cancel"}),
+            serde_json::json!({"action":"accept","content":{"approved":false}}),
+        ] {
+            let request = request(
+                NativePermissionKind::Network,
+                NativePermissionScope::Once,
+                args.clone(),
+                300,
+            )?;
+            let prompt = authority.begin("owner-a", "/workspace/a", request.clone())?;
+            let outcome = authority.complete(
+                prompt.request_state(),
+                "owner-a",
+                "/workspace/a",
+                &request,
+                &response,
+            )?;
+            match response.get("action").and_then(Value::as_str) {
+                Some("cancel") => {
+                    assert!(matches!(outcome, NativePermissionConsentOutcome::Cancelled))
+                }
+                _ => assert!(matches!(outcome, NativePermissionConsentOutcome::Declined)),
+            }
+        }
+        assert_eq!(authority.process_local_challenge_count()?, 0);
+        Ok(())
+    }
+
+    #[test]
+    fn consent_challenge_binding_mutation_and_expiry_fail_closed_without_cross_owner_dos()
+    -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(2_000));
+        let authority = NativePermissionConsentAuthority::new(runtime(Arc::clone(&clock)));
+        let original_request = request(
+            NativePermissionKind::Network,
+            NativePermissionScope::Session,
+            Value::Object(arguments("curl https://example.com")),
+            600,
+        )?;
+        let prompt = authority.begin("owner-a", "/workspace/a", original_request.clone())?;
+        let state = prompt.request_state().to_owned();
+        let accepted = serde_json::json!({"action":"accept","content":{"approved":true}});
+        assert_eq!(
+            completion_code(authority.complete(
+                &state,
+                "owner-b",
+                "/workspace/a",
+                &original_request,
+                &accepted,
+            )),
+            Err("ELICITATION_OWNER_MISMATCH".to_owned())
+        );
+        assert_eq!(authority.process_local_challenge_count()?, 1);
+        assert_eq!(
+            completion_code(authority.complete(
+                &state,
+                "owner-a",
+                "/workspace/b",
+                &original_request,
+                &accepted,
+            )),
+            Err("ELICITATION_WORKSPACE_MISMATCH".to_owned())
+        );
+        let mutated = request(
+            NativePermissionKind::Network,
+            NativePermissionScope::Session,
+            Value::Object(arguments("curl https://other.example")),
+            600,
+        )?;
+        assert_eq!(
+            completion_code(authority.complete(
+                &state,
+                "owner-a",
+                "/workspace/a",
+                &mutated,
+                &accepted,
+            )),
+            Err("ELICITATION_REQUEST_MISMATCH".to_owned())
+        );
+        assert_eq!(authority.process_local_challenge_count()?, 1);
+        clock.set(2_000 + NATIVE_PERMISSION_CONSENT_CHALLENGE_TTL_SECONDS);
+        assert_eq!(
+            completion_code(authority.complete(
+                &state,
+                "owner-a",
+                "/workspace/a",
+                &original_request,
+                &accepted,
+            )),
+            Err("ELICITATION_TIMEOUT".to_owned())
+        );
+        assert_eq!(authority.process_local_challenge_count()?, 0);
+        Ok(())
+    }
+
+    #[test]
+    fn consent_challenge_is_process_local_and_prompt_is_redacted() -> Result<(), ReCtmError> {
+        let clock = Arc::new(ManualClock::new(3_000));
+        let runtime = runtime(Arc::clone(&clock));
+        let first = NativePermissionConsentAuthority::new(runtime.clone());
+        let input = serde_json::json!({
+            "tool_name":"exec_command",
+            "permission":"network",
+            "reason":"download with Bearer abc.def-123",
+            "arguments":{"cmd":"curl https://secret.example/private"},
+            "scope":"once",
+            "ttl_seconds":300
+        });
+        let request = NativePermissionRequest::parse(
+            input
+                .as_object()
+                .ok_or_else(|| internal("test permission request must be an object"))?,
+        )?;
+        let prompt = first.begin("owner-a", "/home/user/project-alpha", request.clone())?;
+        let state = prompt.request_state().to_owned();
+        assert!(prompt.message().contains("project-alpha"));
+        assert!(prompt.message().contains("network"));
+        assert!(prompt.message().contains("exec_command"));
+        assert!(prompt.message().contains(&request.arguments_sha256()[..12]));
+        assert!(!prompt.message().contains("secret.example"));
+        assert!(!prompt.message().contains("abc.def-123"));
+        assert!(!format!("{prompt:?}").contains(&state));
+        assert_eq!(
+            prompt.requested_schema()["properties"]["approved"]["type"],
+            "boolean"
+        );
+
+        let restarted = NativePermissionConsentAuthority::new(runtime);
+        assert_eq!(
+            completion_code(restarted.complete(
+                &state,
+                "owner-a",
+                "/home/user/project-alpha",
+                &request,
+                &serde_json::json!({"action":"accept","content":{"approved":true}}),
+            )),
+            Err("ELICITATION_STATE_INVALID".to_owned())
+        );
+        assert_eq!(first.process_local_challenge_count()?, 1);
+        Ok(())
     }
 
     #[test]

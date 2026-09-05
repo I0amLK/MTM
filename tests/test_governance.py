@@ -281,6 +281,25 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertFalse(d5a_progress["grant_minting_from_mrtr_enabled"])
         self.assertFalse(d5a_progress["production_exec_or_patch_authority_changed"])
         self.assertFalse(d5a_progress["real_human_consent_evidence_collected"])
+        challenge = d5a_progress["consent_challenge_authority"]
+        self.assertTrue(challenge["implemented"])
+        self.assertEqual(challenge["store"], "process_local")
+        self.assertEqual(challenge["ttl_seconds"], 300)
+        self.assertTrue(challenge["single_use"])
+        self.assertTrue(challenge["restart_invalidates"])
+        self.assertFalse(challenge["cross_owner_attempt_consumes_challenge"])
+        self.assertFalse(challenge["cross_workspace_attempt_consumes_challenge"])
+        self.assertFalse(challenge["request_mutation_consumes_challenge"])
+        self.assertFalse(challenge["decline_mints_grant"])
+        self.assertFalse(challenge["cancel_mints_grant"])
+        self.assertFalse(challenge["approved_false_mints_grant"])
+        self.assertTrue(challenge["accepted_true_can_construct_verified_consent"])
+        self.assertFalse(challenge["prompt_contains_raw_arguments"])
+        self.assertTrue(challenge["prompt_contains_argument_fingerprint"])
+        self.assertTrue(challenge["prompt_challenge_id_debug_redacted"])
+        self.assertFalse(challenge["challenge_raw_arguments_retained"])
+        self.assertFalse(challenge["runtime_application_connected"])
+        self.assertFalse(challenge["request_permissions_connected"])
 
         bubblewrap_source = (
             ROOT / "crates" / "mtm-native" / "src" / "bubblewrap.rs"

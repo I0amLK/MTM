@@ -494,6 +494,39 @@
     "validation": {
       "gateway_mcp_tests": "6 passed",
       "gateway_runtime_clippy_warnings_denied": true
+    },
+    "consent_challenge_authority": {
+      "implemented": true,
+      "store": "process_local",
+      "ttl_seconds": 300,
+      "single_use": true,
+      "restart_invalidates": true,
+      "binding_fields": [
+        "oauth_owner",
+        "workspace",
+        "tool",
+        "permission_kind",
+        "canonical_argument_digest",
+        "scope",
+        "permission_ttl"
+      ],
+      "cross_owner_attempt_consumes_challenge": false,
+      "cross_workspace_attempt_consumes_challenge": false,
+      "request_mutation_consumes_challenge": false,
+      "expiry_removes_challenge": true,
+      "decline_mints_grant": false,
+      "cancel_mints_grant": false,
+      "approved_false_mints_grant": false,
+      "accepted_true_can_construct_verified_consent": true,
+      "prompt_contains_raw_arguments": false,
+      "prompt_contains_argument_fingerprint": true,
+      "prompt_challenge_id_debug_redacted": true,
+      "challenge_raw_arguments_retained": false,
+      "runtime_application_connected": false,
+      "request_permissions_connected": false,
+      "real_human_consent_evidence_collected": false,
+      "tests": "4 passed",
+      "clippy_warnings_denied": true
     }
   },
   "acceptance": {

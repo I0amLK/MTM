@@ -19,7 +19,9 @@ pub use latex::RuntimeLatexGate;
 pub use mtm_core::evaluate_request;
 pub use mtm_native::{QuickTunnel, TunnelEvent, TunnelState};
 pub use native_permission::{
-    NativeInvocationPermissionPermit, NativeInvocationPermit, NativePermissionGrantAuthority,
+    NATIVE_PERMISSION_CONSENT_CHALLENGE_TTL_SECONDS, NativeInvocationPermissionPermit,
+    NativeInvocationPermit, NativePermissionConsentAuthority, NativePermissionConsentChallengeId,
+    NativePermissionConsentOutcome, NativePermissionConsentPrompt, NativePermissionGrantAuthority,
     NativePermissionGrantId, NativePermissionGrantReceipt, NativePermissionPermit,
     VerifiedNativePermissionConsent, collect_exec_permission_facts,
     revalidate_exec_permission_facts,
