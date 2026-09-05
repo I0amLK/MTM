@@ -391,6 +391,22 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(candidate["real_human_consent_evidence"])
         self.assertFalse(candidate["authority_cutover_allowed"])
 
+        target = iteration["d5_target_progress"]
+        self.assertEqual(target["phase"], "pre_cutover_real_target_completion")
+        self.assertFalse(target["production_exec_or_patch_authority_cutover"])
+        direct = target["new_direct_candidate_checks"]
+        self.assertEqual(direct["tty_stdin_round_trip"], "passed")
+        self.assertEqual(direct["descendant_cleanup"], "passed")
+        self.assertEqual(direct["real_dns_https"], "passed")
+        self.assertEqual(
+            direct["real_dns_https_normal_gate_behavior"],
+            "ignored_until_explicit_A4_target_run",
+        )
+        self.assertFalse(target["authority_boundary"]["public_dispatch_reachable"])
+        self.assertFalse(target["authority_boundary"]["stable_selector_changed"])
+        self.assertFalse(target["authority_boundary"]["workflow_authority_inherited"])
+        self.assertEqual(target["validation"]["full_run_checks"], "25 of 25 passed")
+
         human = d5a_progress["human_acceptance"]
         self.assertEqual(human["client"], "MCP Inspector 2.5.0")
         self.assertEqual(human["protocol"], "2026-07-28 modern")

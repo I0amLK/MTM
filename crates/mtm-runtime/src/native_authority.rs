@@ -779,4 +779,141 @@ mod tests {
         fixture.native.close()?;
         Ok(())
     }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn exec_candidate_preserves_tty_stdin_and_descendant_cleanup() -> Result<(), ReCtmError> {
+        if !command_exists("bwrap") || !command_exists("cat") {
+            return Ok(());
+        }
+        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
+
+        let tty = Map::from_iter([
+            ("argv".to_owned(), serde_json::json!(["cat"])),
+            ("tty".to_owned(), Value::Bool(true)),
+            ("yield_time_ms".to_owned(), Value::from(0)),
+            ("timeout_ms".to_owned(), Value::from(10_000)),
+        ]);
+        let started = fixture.executor.exec_command_candidate("owner-a", &tty)?;
+        assert_eq!(started["status"], "running");
+        let command_id = started["command_id"]
+            .as_str()
+            .ok_or_else(|| internal("candidate TTY command omitted command_id"))?
+            .to_owned();
+        let reply = fixture.native.write_stdin(&Map::from_iter([
+            ("command_id".to_owned(), Value::String(command_id.clone())),
+            (
+                "chars".to_owned(),
+                Value::String("candidate-stdin-round-trip\n".to_owned()),
+            ),
+            ("yield_time_ms".to_owned(), Value::from(1_000)),
+        ]))?;
+        assert!(
+            reply["stdout"]
+                .as_str()
+                .is_some_and(|value| value.contains("candidate-stdin-round-trip"))
+        );
+        fixture.native.kill_command(&Map::from_iter([
+            ("command_id".to_owned(), Value::String(command_id)),
+            ("signal".to_owned(), Value::String("TERM".to_owned())),
+            ("wait_ms".to_owned(), Value::from(5_000)),
+        ]))?;
+
+        let descendant_script = fixture.workspace.root().join("spawn-descendant.sh");
+        fs::write(
+            &descendant_script,
+            "#!/bin/sh\n(sleep 1; printf leaked > descendant-leak.txt) &\nprintf ready\nwait\n",
+        )
+        .map_err(|error| internal(&error.to_string()))?;
+        fs::set_permissions(&descendant_script, fs::Permissions::from_mode(0o755))
+            .map_err(|error| internal(&error.to_string()))?;
+        let descendant = Map::from_iter([
+            (
+                "argv".to_owned(),
+                serde_json::json!(["./spawn-descendant.sh"]),
+            ),
+            ("yield_time_ms".to_owned(), Value::from(100)),
+            ("timeout_ms".to_owned(), Value::from(10_000)),
+        ]);
+        let running = fixture
+            .executor
+            .exec_command_candidate("owner-a", &descendant)?;
+        assert_eq!(running["status"], "running");
+        assert!(
+            running["stdout"]
+                .as_str()
+                .is_some_and(|value| value.contains("ready"))
+        );
+        let descendant_command_id = running["command_id"]
+            .as_str()
+            .ok_or_else(|| internal("descendant candidate omitted command_id"))?;
+        fixture.native.kill_command(&Map::from_iter([
+            (
+                "command_id".to_owned(),
+                Value::String(descendant_command_id.to_owned()),
+            ),
+            ("signal".to_owned(), Value::String("TERM".to_owned())),
+            ("wait_ms".to_owned(), Value::from(5_000)),
+        ]))?;
+        thread::sleep(std::time::Duration::from_millis(1_300));
+        assert!(
+            !fixture
+                .workspace
+                .root()
+                .join("descendant-leak.txt")
+                .exists(),
+            "a descendant survived command-group termination and wrote after kill"
+        );
+        fixture.native.close()?;
+        Ok(())
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    #[ignore = "MTM-014 A4 target-only real DNS/HTTPS check"]
+    fn exec_candidate_real_dns_https_target() -> Result<(), ReCtmError> {
+        for command in ["bwrap", "curl"] {
+            if !command_exists(command) {
+                return Err(internal(&format!(
+                    "required MTM-014 A4 target command is missing: {command}"
+                )));
+            }
+        }
+        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
+        let owner = "owner-a";
+        let workspace = fixture.workspace.root().display().to_string();
+        let arguments = Map::from_iter([
+            (
+                "argv".to_owned(),
+                serde_json::json!([
+                    "curl",
+                    "--fail",
+                    "--silent",
+                    "--show-error",
+                    "--max-time",
+                    "15",
+                    "https://example.com/"
+                ]),
+            ),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        issue_exec_grant(
+            &fixture.grants,
+            &fixture.consents,
+            owner,
+            &workspace,
+            NativePermissionKind::Network,
+            &arguments,
+        )?;
+        let result = fixture.executor.exec_command_candidate(owner, &arguments)?;
+        assert_eq!(result["status"], "exited");
+        assert_eq!(result["exit_code"], 0);
+        assert!(
+            result["stdout"]
+                .as_str()
+                .is_some_and(|value| value.contains("Example Domain"))
+        );
+        fixture.native.close()?;
+        Ok(())
+    }
 }

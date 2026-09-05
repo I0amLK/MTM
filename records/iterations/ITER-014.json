@@ -714,6 +714,33 @@
     },
     "manual_pending": "Complete real-target A4, public exec/apply_patch authority cutover qualification, Magma functional validation when host licensing is available, preview release rollback/recutover and soak."
   },
+  "d5_target_progress": {
+    "started_at": "2026-09-05T14:10:00+08:00",
+    "phase": "pre_cutover_real_target_completion",
+    "production_exec_or_patch_authority_cutover": false,
+    "candidate_source_commit": "a46beb73472c2e480c0a2a9bd2bde9abe8d64d4b",
+    "candidate_binary_sha256": "e48a63ca218e73a5cc0cda31fa6e28cc46b89812fa6bf26b1532fc39b9a88564",
+    "new_direct_candidate_checks": {
+      "tty_stdin_round_trip": "passed",
+      "descendant_cleanup": "passed",
+      "real_dns_https": "passed",
+      "real_dns_https_test": "native_authority::tests::exec_candidate_real_dns_https_target",
+      "real_dns_https_normal_gate_behavior": "ignored_until_explicit_A4_target_run"
+    },
+    "authority_boundary": {
+      "public_dispatch_reachable": false,
+      "stable_selector_changed": false,
+      "workflow_authority_inherited": false
+    },
+    "validation": {
+      "focused_tty_stdin_descendant_test": "passed",
+      "explicit_real_dns_https_target_test": "passed",
+      "runtime_clippy_warnings_denied": true,
+      "full_run_checks": "25 of 25 passed",
+      "git_diff_check": true
+    },
+    "manual_pending": "Complete the formal hash-bound A4 target runner and evidence receipt before public exec/apply_patch authority cutover."
+  },
   "d5_capacity_hardening": {
     "accepted_at": "2026-09-04T21:48:37-07:00",
     "scope": "A3 bounded process-local consent/grant storage; not human acceptance or cutover",
