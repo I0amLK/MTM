@@ -625,6 +625,7 @@
         "exec_candidate": "2 passed",
         "all_seven_exec_permission_kinds_real_bubblewrap": "passed",
         "git_latex_sage_candidate_non_regression": "passed",
+        "tty_timeout_kill_candidate_lifecycle": "passed",
         "magma_executable_exposed_in_candidate": true,
         "magma_functional_execution": "blocked_by_current_host_license",
         "real_bubblewrap_once_grant_exec": true,
@@ -651,6 +652,13 @@
         "magma_host_direct_probe": "not_authorised",
         "magma_failure_attributed_to_mtm": false
       },
+      "lifecycle_prequalification": {
+        "tty": "passed",
+        "timeout": "passed",
+        "running_command_kill": "passed",
+        "candidate_uses_existing_command_manager": true,
+        "descendant_process_group_semantics_reused_from_mtm_native": true
+      },
       "real_human_consent_evidence": false,
       "authority_cutover_allowed": false
     }
@@ -675,6 +683,12 @@
     "Real target A4 is required before any MTM-014 permission-authority cutover."
   ],
   "recorded_failures_and_repairs": [
+    {
+      "delivery": 5,
+      "stage": "candidate TTY lifecycle test command selection",
+      "failure": "The first TTY test used sh -c with the shell builtin read; executable-fact collection treated that builtin as an unresolved statically inspectable executable and correctly failed closed before process start.",
+      "repair": "Kept the resolver fail-closed and changed only the test command to the already-supported sh -c printf form with tty=true. TTY transport then passed; stdin round-trip and descendant process-group behavior remain covered by the existing mtm-native lifecycle tests."
+    },
     {
       "delivery": 5,
       "stage": "candidate toolchain prequalification",

@@ -378,6 +378,12 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(toolchains["magma_executable_reached"])
         self.assertEqual(toolchains["magma_functional_status"], "blocked_host_license")
         self.assertFalse(toolchains["magma_failure_attributed_to_mtm"])
+        lifecycle = candidate["lifecycle_prequalification"]
+        self.assertEqual(lifecycle["tty"], "passed")
+        self.assertEqual(lifecycle["timeout"], "passed")
+        self.assertEqual(lifecycle["running_command_kill"], "passed")
+        self.assertTrue(lifecycle["candidate_uses_existing_command_manager"])
+        self.assertTrue(lifecycle["descendant_process_group_semantics_reused_from_mtm_native"])
         self.assertFalse(candidate["production_exec_command_changed"])
         self.assertFalse(candidate["production_apply_patch_changed"])
         self.assertFalse(candidate["real_human_consent_evidence"])

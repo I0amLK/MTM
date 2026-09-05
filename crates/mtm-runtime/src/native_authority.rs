@@ -223,6 +223,7 @@ mod tests {
     struct CandidateFixture {
         _root: tempfile::TempDir,
         workspace: Arc<NativeWorkspace>,
+        native: Arc<NativeToolRuntime>,
         grants: Arc<NativePermissionGrantAuthority>,
         consents: NativePermissionConsentAuthority,
         executor: NativeAuthorityExecutor,
@@ -245,11 +246,15 @@ mod tests {
         let runtime = StoreRuntime::default();
         let grants = Arc::new(NativePermissionGrantAuthority::new(runtime.clone()));
         let consents = NativePermissionConsentAuthority::new(runtime);
-        let executor =
-            NativeAuthorityExecutor::new(native, Arc::clone(&workspace), Arc::clone(&grants));
+        let executor = NativeAuthorityExecutor::new(
+            Arc::clone(&native),
+            Arc::clone(&workspace),
+            Arc::clone(&grants),
+        );
         Ok(CandidateFixture {
             _root: root,
             workspace,
+            native,
             grants,
             consents,
             executor,
@@ -272,11 +277,15 @@ mod tests {
         let runtime = StoreRuntime::default();
         let grants = Arc::new(NativePermissionGrantAuthority::new(runtime.clone()));
         let consents = NativePermissionConsentAuthority::new(runtime);
-        let executor =
-            NativeAuthorityExecutor::new(native, Arc::clone(&workspace), Arc::clone(&grants));
+        let executor = NativeAuthorityExecutor::new(
+            Arc::clone(&native),
+            Arc::clone(&workspace),
+            Arc::clone(&grants),
+        );
         Ok(CandidateFixture {
             _root: root,
             workspace,
+            native,
             grants,
             consents,
             executor,
@@ -684,6 +693,90 @@ mod tests {
                     || combined.to_ascii_lowercase().contains("authorized")
             );
         }
+        Ok(())
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn exec_candidate_preserves_tty_timeout_and_kill_lifecycle() -> Result<(), ReCtmError> {
+        if !command_exists("bwrap") {
+            return Ok(());
+        }
+        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
+        let owner = "owner-a";
+        let workspace = fixture.workspace.root().display().to_string();
+
+        let tty = Map::from_iter([
+            (
+                "argv".to_owned(),
+                serde_json::json!(["sh", "-c", "printf tty-ok"]),
+            ),
+            ("tty".to_owned(), Value::Bool(true)),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        issue_exec_grant(
+            &fixture.grants,
+            &fixture.consents,
+            owner,
+            &workspace,
+            NativePermissionKind::InlineScript,
+            &tty,
+        )?;
+        let tty_result = fixture
+            .executor
+            .exec_command_candidate(owner, &tty)
+            .map_err(|mut error| {
+                error.message = format!("tty: {}", error.message);
+                error
+            })?;
+        assert_eq!(tty_result["status"], "exited");
+        assert_eq!(tty_result["exit_code"], 0);
+        assert!(
+            tty_result["stdout"]
+                .as_str()
+                .is_some_and(|value| value.contains("tty-ok"))
+        );
+
+        let timeout = Map::from_iter([
+            ("argv".to_owned(), serde_json::json!(["sleep", "1"])),
+            ("timeout_ms".to_owned(), Value::from(10)),
+            ("yield_time_ms".to_owned(), Value::from(30_000)),
+        ]);
+        let timeout_result = fixture
+            .executor
+            .exec_command_candidate(owner, &timeout)
+            .map_err(|mut error| {
+                error.message = format!("timeout: {}", error.message);
+                error
+            })?;
+        assert_eq!(timeout_result["status"], "timeout");
+        assert_eq!(timeout_result["timed_out"], true);
+
+        let running = Map::from_iter([
+            ("argv".to_owned(), serde_json::json!(["sleep", "30"])),
+            ("yield_time_ms".to_owned(), Value::from(0)),
+        ]);
+        let running_result = fixture
+            .executor
+            .exec_command_candidate(owner, &running)
+            .map_err(|mut error| {
+                error.message = format!("running: {}", error.message);
+                error
+            })?;
+        assert_eq!(running_result["status"], "running");
+        let command_id = running_result["command_id"]
+            .as_str()
+            .ok_or_else(|| internal("candidate running command omitted command_id"))?;
+        let killed = fixture.native.kill_command(&Map::from_iter([
+            (
+                "command_id".to_owned(),
+                Value::String(command_id.to_owned()),
+            ),
+            ("signal".to_owned(), Value::String("TERM".to_owned())),
+            ("wait_ms".to_owned(), Value::from(5_000)),
+        ]))?;
+        assert_ne!(killed["status"], "running");
+        fixture.native.close()?;
         Ok(())
     }
 }
