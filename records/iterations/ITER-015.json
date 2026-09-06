@@ -70,7 +70,7 @@
     {
       "id": "R7",
       "name": "RFC 9728 MCP protected-resource OAuth discovery interoperability",
-      "status": "implemented_loopback_qualified_pending_exact_target_requalification",
+      "status": "implemented_exact_target_qualified_pending_candidate_stage",
       "implementation_commit": "46a587fa2bc5f58c3be03c23d95a302313e04013",
       "legacy_origin_metadata_preserved": true,
       "mcp_resource_path": "/mcp",
@@ -107,41 +107,43 @@
     "stable_0_4_0_archive_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3"
   },
   "release_identity": {
-    "status": "oauth_interop_repair_pending_exact_requalification",
+    "status": "oauth_interop_repair_exact_target_qualified_stage_pending",
     "candidate_version": "0.5.0-preview.2",
     "base_version": "0.5.0-preview.1",
     "functional_implementation_commit": "46a587fa2bc5f58c3be03c23d95a302313e04013",
     "allowed_delta_after_implementation": "none under Cargo.toml, Cargo.lock, rust-toolchain.toml, or crates before exact qualification",
     "overwrite_existing_release_path": false,
     "selector_cutover_permitted": false,
+    "qualification_commit": "3890edc0ba6dd1d4424493ac7ef8e9d8d99318c6",
+    "candidate_binary_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+    "target_evidence_sha256": "6155b14f9e5c365b0049dd2436b5f6888f403ab4d2685eb45e5e5e8079e05da5",
     "previous_qualified_candidate_binary_sha256": "3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707",
-    "requalification_required": true
+    "requalification_required": false
   },
   "target_harness": {
-    "status": "previous_evidence_superseded_requalification_required",
+    "status": "executed_accepted",
     "runner": "scripts/run_mtm015_target_qualification.py",
     "validator": "scripts/validate_mtm015_target_qualification.py",
     "evidence": "records/evidence/MTM-015/target-qualification.json",
-    "implementation_commit": "94e7bde4a9a0db30fe6459ce4352e3d6661c7384",
-    "required_implementation_commit": "46a587fa2bc5f58c3be03c23d95a302313e04013",
-    "qualification_commit": "2bd31f87cd6d309d7feef2d08d593c0454f5af21",
-    "evidence_sha256": "9e895f89e282e58b4b824b24fdf872c79ac82184c736b2b42fd8ff18b505b5e5",
-    "candidate_binary_sha256": "3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707",
-    "check_count": 14,
-    "next_check_count": 15,
+    "implementation_commit": "46a587fa2bc5f58c3be03c23d95a302313e04013",
+    "qualification_commit": "3890edc0ba6dd1d4424493ac7ef8e9d8d99318c6",
+    "evidence_sha256": "6155b14f9e5c365b0049dd2436b5f6888f403ab4d2685eb45e5e5e8079e05da5",
+    "candidate_binary_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+    "check_count": 15,
+    "mcp_oauth_resource_discovery_passed": true,
     "same_key_restart_passed": true,
     "changed_key_same_owner_rejection_passed": true,
     "required_latex_full_and_compact_passed": true,
     "copied_state_passed": true,
     "resource_non_regression_passed": true,
-    "permission_soak_seconds": 60.169,
+    "permission_soak_seconds": 60.197,
     "permission_soak_iterations": 506,
     "selector_cutover_permitted": false,
     "raw_capability_or_secret_evidence_permitted": false,
     "web_client_claim_permitted": false
   },
   "candidate_stage": {
-    "status": "previous_evidence_superseded_requalification_required",
+    "status": "previous_evidence_superseded_new_stage_required",
     "runner": "scripts/run_mtm015_candidate_stage.py",
     "validator": "scripts/validate_mtm015_candidate_stage.py",
     "evidence": "records/evidence/MTM-015/candidate-stage.json",
@@ -162,7 +164,7 @@
     "repair": "Validate the actual public server_info contract: server/version/tool counts, hidden alias count, complete-flow flag, research-workspace schema/protocol and workflow-authority non-inheritance. No product code or acceptance threshold changed."
   },
   "web_client_harness": {
-    "status": "prepared_new_exact_candidate_pending",
+    "status": "prepared_new_exact_stage_pending",
     "launcher": "scripts/launch_mtm015_web_candidate.py",
     "recorder": "scripts/record_mtm015_web_client_evidence.py",
     "validator": "scripts/validate_mtm015_web_client.py",
@@ -186,5 +188,5 @@
     "Exercise the actual web client and compare correctly paired issued/submitted fingerprints without storing raw capabilities.",
     "After web-client and installed-endpoint acceptance, perform an explicit selector rollback/recutover drill before considering MTM-015 complete."
   ],
-  "decision": "oauth_interop_repair_implemented_exact_requalification_pending"
+  "decision": "oauth_interop_repair_exact_target_qualified_candidate_stage_pending"
 }

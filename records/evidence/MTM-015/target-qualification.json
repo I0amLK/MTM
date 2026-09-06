@@ -1,6 +1,6 @@
 {
-  "binary_sha256": "3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707",
-  "check_count": 14,
+  "binary_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+  "check_count": 15,
   "checks": {
     "candidate_release_identity": true,
     "changed_key_same_owner_rejects_old_capability": true,
@@ -8,6 +8,7 @@
     "compact_required_latex": true,
     "copied_existing_state": true,
     "diagnostic_signature_stage_redacted": true,
+    "mcp_oauth_resource_discovery": true,
     "permanent_capability_gate": true,
     "permission_soak": true,
     "persisted_secret_owner_only": true,
@@ -34,10 +35,10 @@
   },
   "harness_sha256": {
     "scripts/check_capability_current.py": "28da710cc6660825b3e7bd00182576ae06875bd8661ca86d6e59ae76fa6a9c41",
-    "scripts/run_mtm015_target_qualification.py": "57692c54ed93ae15521503f9521ee52868933638230bbdb028293b60dbc2ad55",
-    "scripts/validate_mtm015_target_qualification.py": "55e929f7f61567fe170f71a15c3a0ff9835f64b53762d5d790ea2089be22ad09"
+    "scripts/run_mtm015_target_qualification.py": "dcd2634bda7188df8aa04fdaeb2b52fbf22b7df272bd1025e2cc7c8e406b44c2",
+    "scripts/validate_mtm015_target_qualification.py": "28d26927029afcb97c3647db1f553840ff8c2e02b5caeca15537d2cd14902069"
   },
-  "implementation_commit": "94e7bde4a9a0db30fe6459ce4352e3d6661c7384",
+  "implementation_commit": "46a587fa2bc5f58c3be03c23d95a302313e04013",
   "installed_running_endpoint_tested": false,
   "milestone": "MTM-015",
   "ok": true,
@@ -62,8 +63,8 @@
       "verdict": "correct"
     }
   },
-  "qualification_commit": "2bd31f87cd6d309d7feef2d08d593c0454f5af21",
-  "recorded_at": "2026-09-06T11:42:47.040502+00:00",
+  "qualification_commit": "3890edc0ba6dd1d4424493ac7ef8e9d8d99318c6",
+  "recorded_at": "2026-09-06T12:55:34.942508+00:00",
   "required_tools": {
     "bwrap": true,
     "git": true,
@@ -73,24 +74,24 @@
   "resource": {
     "baseline": {
       "max_fds": 16,
-      "max_rss_kib": 14572,
-      "max_shutdown_ms": 64.12,
+      "max_rss_kib": 14640,
+      "max_shutdown_ms": 31.803,
       "max_threads": 9,
-      "request_p95_ms": 62.886,
+      "request_p95_ms": 62.847,
       "request_samples": 180,
-      "startup_p50_ms": 48.056,
-      "startup_p95_ms": 90.553,
+      "startup_p50_ms": 49.565,
+      "startup_p95_ms": 49.968,
       "startup_samples": 3
     },
     "candidate": {
       "max_fds": 16,
-      "max_rss_kib": 14480,
-      "max_shutdown_ms": 15.568,
+      "max_rss_kib": 14608,
+      "max_shutdown_ms": 63.833,
       "max_threads": 9,
-      "request_p95_ms": 62.846,
+      "request_p95_ms": 62.882,
       "request_samples": 180,
-      "startup_p50_ms": 47.971,
-      "startup_p95_ms": 48.442,
+      "startup_p50_ms": 48.801,
+      "startup_p95_ms": 51.111,
       "startup_samples": 3
     }
   },
@@ -107,24 +108,24 @@
     "after": {
       "children": 0,
       "fds": 16,
-      "rss_kib": 15524,
+      "rss_kib": 15448,
       "threads": 9
     },
     "before": {
       "children": 0,
       "fds": 16,
-      "rss_kib": 14204,
+      "rss_kib": 14076,
       "threads": 9
     },
-    "duration_seconds": 60.169,
+    "duration_seconds": 60.197,
     "iterations": 506,
     "peak": {
       "children": 0,
       "fds": 16,
-      "rss_kib": 15524,
+      "rss_kib": 15448,
       "threads": 9
     },
-    "shutdown_ms": 63.864
+    "shutdown_ms": 64.404
   },
   "stable_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
   "version": "0.5.0-preview.2",
