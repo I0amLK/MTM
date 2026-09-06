@@ -1,11 +1,12 @@
 {
-  "candidate_binary_sha256": "3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707",
-  "candidate_path": "/home/lk/.local/share/mtm/candidates/MTM-015/3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707/mtm",
-  "check_count": 8,
+  "candidate_binary_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+  "candidate_path": "/home/lk/.local/share/mtm/candidates/MTM-015/2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a/mtm",
+  "check_count": 9,
   "checks": {
     "content_addressed_install_exact": true,
     "installed_endpoint_capability_roundtrip": true,
     "installed_endpoint_identity": true,
+    "installed_endpoint_mcp_oauth_discovery": true,
     "installed_persisted_secret_owner_only": true,
     "rebuilt_candidate_matches_target": true,
     "selectors_unchanged": true,
@@ -25,21 +26,21 @@
     "raw_secret_recorded": false
   },
   "harness_sha256": {
-    "scripts/run_mtm015_candidate_stage.py": "5fbb1b7d331e823a18486cfccae27152e16a3ec946f1539eebf131880072550b",
-    "scripts/validate_mtm015_candidate_stage.py": "1f1a7a19698d68cb15a993537e824b27d5145616fff298be641a1c1dd6641ae7"
+    "scripts/run_mtm015_candidate_stage.py": "fa99930c89de301a1b4ed93f479d8c5112d2d247e5bdf27939ee8542c3542c4b",
+    "scripts/validate_mtm015_candidate_stage.py": "658b508b0ad784e0d64ddffb59436137596738d8b124d70004ea8d51da5b3758"
   },
-  "implementation_commit": "94e7bde4a9a0db30fe6459ce4352e3d6661c7384",
+  "implementation_commit": "46a587fa2bc5f58c3be03c23d95a302313e04013",
   "installed_endpoint_tested": true,
   "milestone": "MTM-015",
   "ok": true,
   "phase": "candidate_stage",
   "production_state_rewritten": false,
-  "recorded_at": "2026-09-06T11:45:30.296358+00:00",
+  "recorded_at": "2026-09-06T12:57:57.330098+00:00",
   "schema_version": "1.0.0",
   "selector_changed": false,
-  "stage_commit": "8c97861d6eddbbb6b3b5513dcc8facfd49ce37b6",
-  "target_evidence_sha256": "9e895f89e282e58b4b824b24fdf872c79ac82184c736b2b42fd8ff18b505b5e5",
-  "target_qualification_commit": "2bd31f87cd6d309d7feef2d08d593c0454f5af21",
+  "stage_commit": "2b906fb51afad54292132d1915ab5c8f104fe8e3",
+  "target_evidence_sha256": "6155b14f9e5c365b0049dd2436b5f6888f403ab4d2685eb45e5e5e8079e05da5",
+  "target_qualification_commit": "3890edc0ba6dd1d4424493ac7ef8e9d8d99318c6",
   "version": "0.5.0-preview.2",
   "web_client_tested": false
 }
