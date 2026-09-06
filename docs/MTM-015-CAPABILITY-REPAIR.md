@@ -7,6 +7,15 @@ Target qualification is intentionally two-phase. The source repair is frozen at
 validator must execute from a clean tree before `records/evidence/MTM-015/target-qualification.json`
 may exist. The runner builds into an isolated target directory and does not install or
 select the candidate binary.
+
+The committed target harness at `e4bc7d447eb4e2d3c0b0a14c1f3f4bf08b2ccb36`
+has now passed 14/14 checks for candidate SHA-256
+`7f869fc867a7c2575ad68d65956bc34f2cda26bc42b4878c20ff0d75cc42decd`.
+This includes same-key restart continuity, deliberate changed-key rejection for the same
+OAuth owner with zero writes, redacted signature-stage diagnostics, required-LaTeX full
+and compact workflows, copied-state compatibility, bounded resource non-regression, and
+a 60-second permission soak. It still does not claim a real web client, an installed
+MTM-015 endpoint, or selector cutover.
 Base: `3254e54465f9f10a449f3a6d5877c846a4319773` (`0.5.0-preview.1`).
 
 ## Scope and invariants
