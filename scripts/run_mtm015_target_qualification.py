@@ -28,7 +28,8 @@ from run_checks import resolve_tool_environment
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / "records/evidence/MTM-015/target-qualification.json"
 IMPLEMENTATION_COMMIT = "94e7bde4a9a0db30fe6459ce4352e3d6661c7384"
-VERSION = "0.5.0-preview.1"
+BASE_VERSION = "0.5.0-preview.1"
+VERSION = "0.5.0-preview.2"
 CHECK_NAMES = {
     "committed_rust_scope",
     "candidate_release_identity",
@@ -76,14 +77,24 @@ def git(*arguments: str) -> str:
 
 
 def rust_scope_unchanged(qualification_commit: str) -> bool:
-    return subprocess.run(
+    changed = subprocess.check_output(
         [
-            "git", "diff", "--quiet", IMPLEMENTATION_COMMIT, qualification_commit, "--",
+            "git", "diff", "--name-only", IMPLEMENTATION_COMMIT, qualification_commit, "--",
             "Cargo.toml", "Cargo.lock", "rust-toolchain.toml", "crates",
         ],
         cwd=ROOT,
-        check=False,
-    ).returncode == 0
+        text=True,
+    ).splitlines()
+    allowed = {"Cargo.toml", "Cargo.lock"}
+    allowed.update(str(path.relative_to(ROOT)) for path in ROOT.glob("crates/*/Cargo.toml"))
+    if not set(changed).issubset(allowed):
+        return False
+    for path in changed:
+        before = subprocess.check_output(["git", "show", f"{IMPLEMENTATION_COMMIT}:{path}"], cwd=ROOT)
+        after = subprocess.check_output(["git", "show", f"{qualification_commit}:{path}"], cwd=ROOT)
+        if after != before.replace(BASE_VERSION.encode(), VERSION.encode()):
+            return False
+    return True
 
 
 def jwt_client_id(token: str) -> str:

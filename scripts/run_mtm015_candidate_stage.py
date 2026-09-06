@@ -118,7 +118,7 @@ def endpoint_smoke(binary: Path, root: Path) -> dict[str, Any]:
         return {
             "identity": (
                 info.get("server") == "mtm"
-                and info.get("version") == "0.5.0-preview.1"
+                and info.get("version") == "0.5.0-preview.2"
                 and info.get("tool_count") == 24
                 and info.get("rethlas_tool_count") == 6
                 and len(info.get("hidden_legacy_rethlas_aliases", [])) == 11
@@ -201,7 +201,7 @@ def main() -> int:
             "schema_version": "1.0.0",
             "milestone": "MTM-015",
             "phase": "candidate_stage",
-            "version": "0.5.0-preview.1",
+            "version": "0.5.0-preview.2",
             "ok": True,
             "recorded_at": datetime.now(timezone.utc).isoformat(),
             "implementation_commit": target["implementation_commit"],
@@ -213,7 +213,7 @@ def main() -> int:
             "checks": checks,
             "check_count": len(checks),
             "endpoint": {
-                "version": "0.5.0-preview.1",
+                "version": "0.5.0-preview.2",
                 "transport": "loopback_oauth_mcp",
                 "disposable_state": True,
                 "persisted_secret_path_exercised": True,

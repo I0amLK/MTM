@@ -54,7 +54,7 @@ def validate(payload: dict[str, Any] | None = None) -> dict[str, Any]:
     require(payload["schema_version"] == "1.0.0", "schema_version")
     require(payload["milestone"] == "MTM-015" and payload["phase"] == "candidate_stage",
             "candidate_stage_identity")
-    require(payload["ok"] is True and payload["version"] == "0.5.0-preview.1",
+    require(payload["ok"] is True and payload["version"] == "0.5.0-preview.2",
             "candidate_stage_version")
     require(payload["candidate_binary_sha256"] == target["binary_sha256"],
             "target_binary_binding")

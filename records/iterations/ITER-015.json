@@ -96,6 +96,15 @@
     "stable_0_4_0_archive_restored": true,
     "stable_0_4_0_archive_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3"
   },
+  "release_identity": {
+    "status": "frozen_pending_exact_requalification",
+    "candidate_version": "0.5.0-preview.2",
+    "base_version": "0.5.0-preview.1",
+    "functional_implementation_commit": "94e7bde4a9a0db30fe6459ce4352e3d6661c7384",
+    "allowed_delta": "Cargo package/dependency/lockfile version metadata only",
+    "overwrite_existing_release_path": false,
+    "selector_cutover_permitted": false
+  },
   "target_harness": {
     "status": "executed_accepted",
     "runner": "scripts/run_mtm015_target_qualification.py",
