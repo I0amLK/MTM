@@ -217,6 +217,12 @@ def main() -> int:
             [sys.executable, "scripts/validate_mtm015_target_qualification.py"],
             env=environment, capture_json=True,
         ))
+    if (ROOT / "records/evidence/MTM-015/candidate-stage.json").is_file():
+        checks.append(run(
+            "mtm015_candidate_stage",
+            [sys.executable, "scripts/validate_mtm015_candidate_stage.py"],
+            env=environment, capture_json=True,
+        ))
     if progress.get("current_milestone") == "MTM-013":
         checks.append(
             run(
