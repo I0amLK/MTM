@@ -1,5 +1,5 @@
 {
-  "binary_sha256": "7f869fc867a7c2575ad68d65956bc34f2cda26bc42b4878c20ff0d75cc42decd",
+  "binary_sha256": "3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707",
   "check_count": 14,
   "checks": {
     "candidate_release_identity": true,
@@ -21,7 +21,7 @@
     "complete_flow_locally_validated": true,
     "production_default": 3,
     "projects_query_ok": true,
-    "server_version": "0.5.0-preview.1",
+    "server_version": "0.5.0-preview.2",
     "state_schema_version": 2,
     "workflow_protocol_version": 3
   },
@@ -34,8 +34,8 @@
   },
   "harness_sha256": {
     "scripts/check_capability_current.py": "28da710cc6660825b3e7bd00182576ae06875bd8661ca86d6e59ae76fa6a9c41",
-    "scripts/run_mtm015_target_qualification.py": "392d18c87b2846bb4de3dedff51bee1e37fa3ae4554aa809e177c44d58a42883",
-    "scripts/validate_mtm015_target_qualification.py": "549c6915d4a657d26ae0301612ead43f125fc93e26a2644b1011c4eeafc615ef"
+    "scripts/run_mtm015_target_qualification.py": "57692c54ed93ae15521503f9521ee52868933638230bbdb028293b60dbc2ad55",
+    "scripts/validate_mtm015_target_qualification.py": "55e929f7f61567fe170f71a15c3a0ff9835f64b53762d5d790ea2089be22ad09"
   },
   "implementation_commit": "94e7bde4a9a0db30fe6459ce4352e3d6661c7384",
   "installed_running_endpoint_tested": false,
@@ -62,8 +62,8 @@
       "verdict": "correct"
     }
   },
-  "qualification_commit": "e4bc7d447eb4e2d3c0b0a14c1f3f4bf08b2ccb36",
-  "recorded_at": "2026-09-06T09:53:37.678035+00:00",
+  "qualification_commit": "2bd31f87cd6d309d7feef2d08d593c0454f5af21",
+  "recorded_at": "2026-09-06T11:42:47.040502+00:00",
   "required_tools": {
     "bwrap": true,
     "git": true,
@@ -73,24 +73,24 @@
   "resource": {
     "baseline": {
       "max_fds": 16,
-      "max_rss_kib": 14632,
-      "max_shutdown_ms": 63.995,
+      "max_rss_kib": 14572,
+      "max_shutdown_ms": 64.12,
       "max_threads": 9,
-      "request_p95_ms": 62.856,
+      "request_p95_ms": 62.886,
       "request_samples": 180,
-      "startup_p50_ms": 49.283,
-      "startup_p95_ms": 53.36,
+      "startup_p50_ms": 48.056,
+      "startup_p95_ms": 90.553,
       "startup_samples": 3
     },
     "candidate": {
       "max_fds": 16,
-      "max_rss_kib": 15116,
-      "max_shutdown_ms": 64.206,
+      "max_rss_kib": 14480,
+      "max_shutdown_ms": 15.568,
       "max_threads": 9,
-      "request_p95_ms": 62.938,
+      "request_p95_ms": 62.846,
       "request_samples": 180,
-      "startup_p50_ms": 46.869,
-      "startup_p95_ms": 47.089,
+      "startup_p50_ms": 47.971,
+      "startup_p95_ms": 48.442,
       "startup_samples": 3
     }
   },
@@ -107,26 +107,26 @@
     "after": {
       "children": 0,
       "fds": 16,
-      "rss_kib": 15364,
+      "rss_kib": 15524,
       "threads": 9
     },
     "before": {
       "children": 0,
       "fds": 16,
-      "rss_kib": 14352,
+      "rss_kib": 14204,
       "threads": 9
     },
-    "duration_seconds": 60.191,
+    "duration_seconds": 60.169,
     "iterations": 506,
     "peak": {
       "children": 0,
       "fds": 16,
-      "rss_kib": 15372,
+      "rss_kib": 15524,
       "threads": 9
     },
-    "shutdown_ms": 15.751
+    "shutdown_ms": 63.864
   },
   "stable_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
-  "version": "0.5.0-preview.1",
+  "version": "0.5.0-preview.2",
   "web_client_tested": false
 }
