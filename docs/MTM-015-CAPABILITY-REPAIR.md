@@ -1,6 +1,12 @@
 # MTM-015 capability reliability repair candidate
 
 Status: registered MTM-015 source candidate in progress; locally qualified, but not a qualified release, deployment, or completed milestone.
+
+Target qualification is intentionally two-phase. The source repair is frozen at
+`94e7bde4a9a0db30fe6459ce4352e3d6661c7384`; a separately committed runner and
+validator must execute from a clean tree before `records/evidence/MTM-015/target-qualification.json`
+may exist. The runner builds into an isolated target directory and does not install or
+select the candidate binary.
 Base: `3254e54465f9f10a449f3a6d5877c846a4319773` (`0.5.0-preview.1`).
 
 ## Scope and invariants
