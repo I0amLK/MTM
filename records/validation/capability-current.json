@@ -1,0 +1,33 @@
+{
+  "binary_sha256": "3f7565600e7d2e08b0e83410c82c1b519dc6ea225a58fec96055bd9e4bf7d6b1",
+  "checks": {
+    "bounded_server_shutdown": true,
+    "cross_run_capability_remains_denied": true,
+    "fresh_capability_resubmission_advances": true,
+    "invalid_capability_cannot_cross_owner_refresh": true,
+    "mutated_capability_applies_zero_writes": true,
+    "mutated_capability_is_recoverable_not_error": true,
+    "mutated_capability_refreshes_fresh_envelope": true,
+    "mutated_capability_reports_invalid": true,
+    "revoked_capability_remains_denied": true,
+    "server_exits_cleanly": true,
+    "server_info_complete_flow_validated": true,
+    "server_info_protocol_default_unchanged": true,
+    "truncated_capability_refreshes_without_writes": true,
+    "verbatim_roundtrips_without_refresh": true
+  },
+  "frozen_harness_sha256": "0e14509d7c259e19af77196a52f3b6142c69ebdca8b445f20888837ff1eade0c",
+  "harness_sha256": "28da710cc6660825b3e7bd00182576ae06875bd8661ca86d6e59ae76fa6a9c41",
+  "introduced_in": "MTM-015",
+  "kind": "current_binary_loopback_capability_regression",
+  "normal_invalid": 0,
+  "normal_roundtrips": 500,
+  "ok": true,
+  "production_state_modified": false,
+  "raw_capability_recorded": false,
+  "raw_oauth_token_recorded": false,
+  "samples_requested": 500,
+  "schema_version": "1.0.0",
+  "source_sha256": "14948357b4c01f0c9beae13b7692bfbe70eb02d3b3b8b9449566cbe50a6159d5",
+  "web_client_tested": false
+}

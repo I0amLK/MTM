@@ -153,12 +153,15 @@ impl RuntimeApplication {
                 }
             }) as CapabilityObserver
         });
-        let capabilities = Arc::new(CapabilityAuthority::new(
-            &settings.capability_secret,
-            Arc::clone(&state_store),
-            600,
-            capability_observer,
-        )?);
+        let capabilities = Arc::new(
+            CapabilityAuthority::new(
+                &settings.capability_secret,
+                Arc::clone(&state_store),
+                600,
+                capability_observer,
+            )?
+            .with_diagnostics(settings.debug_enabled)?,
+        );
         let workspace = Arc::new(NativeWorkspace::new(
             &settings.workspace,
             &settings.private_root,

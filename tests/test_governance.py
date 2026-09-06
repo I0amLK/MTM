@@ -44,7 +44,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def deployment_mode() -> str:
     progress = json.loads((ROOT / "records/governance/project-progress.json").read_text(encoding="utf-8"))
     milestone = progress.get("current_milestone")
-    if milestone == "MTM-014" and (ROOT / "records/evidence/MTM-014/preview-release.json").is_file():
+    if milestone in {"MTM-014", "MTM-015"} and (ROOT / "records/evidence/MTM-014/preview-release.json").is_file():
         return "mtm014_preview"
     stable_report = ROOT / "records/evidence/MTM-013/stable-release.json"
     stable_selector = Path("/home/lk/.local/bin/mtm")
@@ -103,8 +103,24 @@ def historical_check_count(milestone: str) -> int:
 class GovernanceTestCase(unittest.TestCase):
     def test_repository_migration_graph_is_valid(self) -> None:
         summary = validate_migration(load_graph())
-        self.assertEqual(summary["milestone_count"], 14)
-        self.assertEqual(summary["todo_count"], 0)
+        self.assertEqual(summary["milestone_count"], 15)
+        self.assertEqual(summary["todo_count"], 1)
+
+    def test_mtm015_capability_repair_scope_is_registered_without_cutover(self) -> None:
+        graph = load_graph()
+        milestone = next(item for item in graph["milestones"] if item["id"] == "MTM-015")
+        self.assertEqual(milestone["status"], "in_progress")
+        self.assertEqual(milestone["dependencies"], ["MTM-014"])
+        self.assertEqual(milestone["production_authority_before"], "rust")
+        self.assertEqual(milestone["production_authority_after"], "rust")
+        self.assertTrue(any("No automatic server-side replay" in item for item in milestone["non_goals"]))
+        iteration = json.loads(
+            (ROOT / "records" / "iterations" / "ITER-015.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(iteration["status"], "in_progress")
+        self.assertEqual(iteration["base_commit"], "3254e54465f9f10a449f3a6d5877c846a4319773")
+        self.assertFalse(iteration["release_state"]["selector_changed_by_mtm015"])
+        self.assertFalse(iteration["release_state"]["production_state_rewritten"])
 
     def test_mtm014_native_permission_contract_is_frozen(self) -> None:
         graph = load_graph()

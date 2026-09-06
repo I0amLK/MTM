@@ -1492,13 +1492,9 @@ impl ToolBackend for RuntimeToolBackend {
             }
             Ok(ToolBackendResult::Complete(value)) => {
                 let payload = ensure_ok(value);
-                self.emit(serde_json::json!({
-                    "event_type":"tool.call_finished",
-                    "trace_id":trace_id,
-                    "decision":"allow",
-                    "reason":"tool_completed",
-                    "details":{"tool":name}
-                }));
+                self.emit(crate::submission_events::completion_event(
+                    name, trace_id, &payload,
+                ));
                 Ok(ToolBackendResult::Complete(tool_result(
                     name, payload, false,
                 )))
@@ -1511,7 +1507,7 @@ impl ToolBackend for RuntimeToolBackend {
                     "trace_id":trace_id,
                     "decision":"error",
                     "reason":"tool_reported_error",
-                    "details":{"tool":name}
+                    "details":{"tool":name,"error_code":error.code}
                 }));
                 Ok(ToolBackendResult::Complete(tool_result(
                     name, payload, true,
@@ -1557,7 +1553,12 @@ fn tool_result(name: &str, mut payload: Value, is_error: bool) -> Value {
             }
         }
     }
-    serde_json::json!({"content":content,"structuredContent":Value::Object(object.clone()),"isError":is_error})
+    // Move the owned payload into the envelope; do not deep-clone task/proof JSON.
+    let mut envelope = Map::new();
+    envelope.insert("content".to_owned(), Value::Array(content));
+    envelope.insert("structuredContent".to_owned(), payload);
+    envelope.insert("isError".to_owned(), Value::Bool(is_error));
+    Value::Object(envelope)
 }
 fn render_summary(name: &str, payload: &Map<String, Value>) -> String {
     if name == "rethlas_start" {
@@ -1812,6 +1813,10 @@ fn internal(message: &str) -> ReCtmError {
 fn json_error(error: serde_json::Error) -> ReCtmError {
     ReCtmError::new("JSON_ERROR", error.to_string()).with_category(ErrorCategory::Internal)
 }
+
+#[cfg(test)]
+#[path = "tool_result_tests.rs"]
+mod tool_result_tests;
 
 #[cfg(test)]
 mod tests {

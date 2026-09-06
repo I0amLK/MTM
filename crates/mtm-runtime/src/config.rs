@@ -265,24 +265,103 @@ fn validate_https_endpoint(value: &str) -> Result<(), ReCtmError> {
 }
 
 fn load_or_create_secret(path: &Path) -> Result<Vec<u8>, ReCtmError> {
-    if path.exists() {
-        let raw = fs::read_to_string(path).map_err(io_error)?;
-        return decode_secret(raw.trim(), &path.display().to_string());
+    if let Some(secret) = read_persisted_secret(path)? {
+        return Ok(secret);
     }
     let mut secret = vec![0_u8; 32];
     getrandom::fill(&mut secret).map_err(|error| {
         ReCtmError::new("RANDOM_SOURCE_ERROR", error.to_string())
             .with_category(ErrorCategory::Internal)
     })?;
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).map_err(io_error)?;
+    publish_secret_candidate(path, &secret)
+}
+
+// The parent is MTM's owner-only data directory. Never replace an existing key:
+// simultaneous first starts must all use the winning persisted bytes, not each
+// process's locally generated candidate. No workflow or OAuth semantics change.
+fn publish_secret_candidate(path: &Path, secret: &[u8]) -> Result<Vec<u8>, ReCtmError> {
+    use std::fs::OpenOptions;
+    use std::io::Write;
+
+    let parent = path
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+        .unwrap_or_else(|| Path::new("."));
+    fs::create_dir_all(parent).map_err(io_error)?;
+    let mut nonce = [0_u8; 16];
+    getrandom::fill(&mut nonce).map_err(|error| {
+        ReCtmError::new("RANDOM_SOURCE_ERROR", error.to_string())
+            .with_category(ErrorCategory::Internal)
+    })?;
+    // Same-directory + create_new makes the staging name private to this attempt.
+    // hard_link then publishes the fully synced inode only if the destination name
+    // is still absent; unlike rename, it can never replace another process's key.
+    let temporary = parent.join(format!(
+        ".mtm-secret-{}-{}.tmp",
+        std::process::id(),
+        encode_hex(&nonce)
+    ));
+    let operation = (|| -> Result<(), ReCtmError> {
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&temporary)
+            .map_err(io_error)?;
+        set_owner_only_file(&temporary)?;
+        file.write_all(format!("{}\n", encode_hex(secret)).as_bytes())
+            .map_err(io_error)?;
+        file.sync_all().map_err(io_error)?;
+        match fs::hard_link(&temporary, path) {
+            Ok(()) => fs::File::open(path)
+                .and_then(|published| published.sync_all())
+                .map_err(io_error)?,
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {}
+            Err(error) => return Err(io_error(error)),
+        }
+        Ok(())
+    })();
+    let cleanup = match fs::remove_file(&temporary) {
+        Ok(()) => Ok(()),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(error) => Err(io_error(error)),
+    };
+    operation?;
+    cleanup?;
+    #[cfg(unix)]
+    fs::File::open(parent)
+        .and_then(|directory| directory.sync_all())
+        .map_err(io_error)?;
+    read_persisted_secret(path)?.ok_or_else(|| {
+        ReCtmError::new(
+            "INVALID_SECRET",
+            "Persisted secret disappeared during initialization.",
+        )
+        .with_category(ErrorCategory::Security)
+    })
+}
+
+fn read_persisted_secret(path: &Path) -> Result<Option<Vec<u8>>, ReCtmError> {
+    let metadata = match fs::symlink_metadata(path) {
+        Ok(metadata) => metadata,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(error) => return Err(io_error(error)),
+    };
+    if !metadata.file_type().is_file() {
+        return Err(
+            ReCtmError::new("INVALID_SECRET", "Persisted secret must be a regular file.")
+                .with_category(ErrorCategory::Security),
+        );
     }
-    let temporary = path.with_extension(format!("{}.tmp", std::process::id()));
-    fs::write(&temporary, format!("{}\n", encode_hex(&secret))).map_err(io_error)?;
-    set_owner_only_file(&temporary)?;
-    fs::rename(&temporary, path).map_err(io_error)?;
-    set_owner_only_file(path)?;
-    Ok(secret)
+    let raw = fs::read_to_string(path).map_err(io_error)?;
+    let secret = decode_secret(raw.trim(), "persisted OAuth secret")?;
+    if secret.is_empty() {
+        // Empty environment values mean unconfigured; empty persisted keys do not.
+        return Err(
+            ReCtmError::new("INVALID_SECRET", "Persisted secret must not be empty.")
+                .with_category(ErrorCategory::Security),
+        );
+    }
+    Ok(Some(secret))
 }
 
 fn parse_allow_roots(value: &str) -> Result<Vec<PathBuf>, ReCtmError> {
@@ -445,6 +524,10 @@ fn validation(message: &str) -> ReCtmError {
 fn io_error(error: std::io::Error) -> ReCtmError {
     ReCtmError::new("RUNTIME_IO_ERROR", error.to_string()).with_category(ErrorCategory::Runtime)
 }
+
+#[cfg(test)]
+#[path = "config_secret_tests.rs"]
+mod config_secret_tests;
 
 #[cfg(test)]
 mod tests {

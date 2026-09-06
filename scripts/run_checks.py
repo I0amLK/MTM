@@ -88,16 +88,18 @@ def main() -> int:
     environment, cargo, rustc = resolve_tool_environment()
     progress = json.loads((ROOT / "records/governance/project-progress.json").read_text(encoding="utf-8"))
     selector = Path("/home/lk/.local/bin/mtm")
-    mtm014_source_mode = progress.get("current_milestone") == "MTM-014"
+    current_milestone = progress.get("current_milestone")
+    mtm015_source_mode = current_milestone == "MTM-015"
+    mtm014_release_context = current_milestone in {"MTM-014", "MTM-015"}
     mtm014_preview_selected = (
-        mtm014_source_mode and selector.is_symlink()
+        mtm014_release_context and selector.is_symlink()
         and "/releases/0.5.0-preview.1/" in str(selector.resolve())
     )
     mtm013_stable_deployed_mode = (
         progress.get("version") == "0.4.0"
-        and progress.get("current_milestone") in {"MTM-013", "MTM-014"}
+        and current_milestone in {"MTM-013", "MTM-014", "MTM-015"}
         and progress.get("status")
-        in {"MTM-013-in-progress", "MTM-013-completed", "MTM-014-in-progress", "MTM-014-completed"}
+        in {"MTM-013-in-progress", "MTM-013-completed", "MTM-014-in-progress", "MTM-014-completed", "MTM-015-in-progress"}
         and (ROOT / "records/evidence/MTM-013/stable-release.json").is_file()
         and selector.is_symlink()
         and "/releases/0.4.0/" in str(selector.resolve())
@@ -122,9 +124,9 @@ def main() -> int:
     )
     current_preview_mode = mtm011_preview_mode or mtm012_preview_mode
     historical_release_mode = (
-        mtm009_preview_mode or current_preview_mode or mtm013_stable_deployed_mode or mtm014_source_mode
+        mtm009_preview_mode or current_preview_mode or mtm013_stable_deployed_mode or mtm014_release_context
     )
-    mtm011_cutover_mode = current_preview_mode or mtm013_stable_deployed_mode or mtm014_source_mode
+    mtm011_cutover_mode = current_preview_mode or mtm013_stable_deployed_mode or mtm014_release_context
     mtm012_source_mode = (
         progress.get("current_milestone") == "MTM-012"
         and progress.get("status") == "MTM-012-in-progress"
@@ -279,6 +281,12 @@ def main() -> int:
                 ),
                 run("cargo_test", [cargo, "test", "--workspace"], env=environment),
                 run(
+                    "capability_runtime_current",
+                    [sys.executable, "scripts/check_capability_current.py", "--build", "--samples", "500"],
+                    env=environment,
+                    capture_json=True,
+                ),
+                run(
                     "mtm002_conformance",
                     [sys.executable, "scripts/run_mtm002_conformance.py"],
                     env=environment,
@@ -340,7 +348,7 @@ def main() -> int:
                             if mtm009_preview_mode
                             else (
                                 []
-                                if mtm013_stable_deployed_mode or mtm014_source_mode
+                                if mtm013_stable_deployed_mode or mtm014_release_context
                                 else (
                                 [
                                     *(
@@ -510,9 +518,16 @@ def main() -> int:
         "passed": all(item["passed"] for item in checks),
         "checks": checks,
         "local_claim": (
-            "MTM-014 preview is selected for new launches. Its separate release and deployment "
-            "gates bind exact Native authority, rollback/recutover and bounded soak evidence; "
-            "stable 0.4.0 is preserved. Existing sessions are not restarted by selector changes."
+            (
+                "MTM-015 source reliability repair is in progress while the qualified MTM-014 "
+                "0.5.0-preview.1 binary remains selected for new launches. Current-source capability "
+                "regression is mandatory; no release selector or production state is changed by this gate."
+                if mtm015_source_mode
+                else
+                "MTM-014 preview is selected for new launches. Its separate release and deployment "
+                "gates bind exact Native authority, rollback/recutover and bounded soak evidence; "
+                "stable 0.4.0 is preserved. Existing sessions are not restarted by selector changes."
+            )
             if mtm014_preview_selected else
             (
                 "MTM 0.4.0 is the active stable command for new launches under Rust authority. "

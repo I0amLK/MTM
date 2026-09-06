@@ -505,6 +505,44 @@
       ],
       "rollback": "Before permission-authority cutover remove the MTM-014 shadow permission/grant path and retain the accepted 0.4.0 Native policy plus Bubblewrap. After a later cutover restore the frozen pre-cutover Native evaluator and invalidate all process-local MTM-014 grants; no workflow/project/database/proof rewrite is required.",
       "dependencies": ["MTM-013"]
+    },
+    {
+      "id": "MTM-015",
+      "title": "Capability reliability and recovery hardening",
+      "status": "in_progress",
+      "priority": "P0",
+      "production_authority_before": "rust",
+      "production_authority_after": "rust",
+      "functional_goal": "Repair capability-key initialization races, improve redacted capability diagnostics and operator outcome classification, add bounded caller recovery, and make current-source capability regression a permanent local gate without changing capability authority semantics or automatically replaying rejected writes.",
+      "scope": [
+        "Publish first-created OAuth/capability secrets atomically without overwriting a concurrent winner and always return the persisted winning bytes",
+        "Add opt-in redacted capability diagnostics that distinguish token shape, signature and payload/claim failures without exposing token, key, proof or raw tool arguments",
+        "Classify authorization denial, rejected logical submission and genuine tool failure as distinct operator events with trace-safe correlation",
+        "Provide a bounded same-run caller recovery helper that retries at most once only after the existing recoverable INVALID zero-write contract returns a fresh task envelope",
+        "Run the frozen mutation/truncation/cross-run/cross-owner/revocation corpus plus 500 fresh normal envelope roundtrips against a binary rebuilt from current source on every local gate",
+        "Preserve wire behavior while removing the unnecessary structured-content deep clone in tool_result"
+      ],
+      "non_goals": [
+        "No new public tool, hidden alias, workflow state, SQLite schema, capability permission, model provider, scheduler or background Agent runtime",
+        "No automatic server-side replay of a rejected submission and no write authorization from an invalid, expired, revoked, cross-owner or cross-run capability",
+        "No deletion, regeneration or migration of production capability/OAuth keys as a diagnostic shortcut",
+        "No weakening or relabeling of historical MTM-013/MTM-014 release receipts, verifier/finalizer gates, Native permission authority or Bubblewrap isolation",
+        "No performance or population-wide reliability claim from the bounded local regression sample"
+      ],
+      "acceptance_levels": ["A0", "A1", "A3", "A4", "A5"],
+      "validation_commands": [
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets -- -D warnings",
+        "cargo test --workspace",
+        "python3 -m unittest tests/test_capability_recovery.py -v",
+        "python3 scripts/check_capability_current.py --build --samples 500",
+        "python3 scripts/validate_migration_graph.py",
+        "python3 scripts/validate_engineering_graph.py",
+        "python3 scripts/validate_record_layout.py",
+        "python3 scripts/run_checks.py"
+      ],
+      "rollback": "Revert the dedicated MTM-015 source commit and keep the already qualified 0.5.0-preview.1 selector and immutable stable 0.4.0 rollback artifact. Do not delete/regenerate live OAuth or capability keys, rewrite run state, or relabel historical receipts.",
+      "dependencies": ["MTM-014"]
     }
   ],
   "edges": [
@@ -527,9 +565,10 @@
     {"source": "MTM-013", "target": "MTM-009"},
     {"source": "MTM-013", "target": "MTM-011"},
     {"source": "MTM-013", "target": "MTM-012"},
-    {"source": "MTM-014", "target": "MTM-013"}
+    {"source": "MTM-014", "target": "MTM-013"},
+    {"source": "MTM-015", "target": "MTM-014"}
   ],
-  "todo": [],
+  "todo": ["MTM-015"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -978,6 +1017,22 @@
       "status_before": "in_progress",
       "status_after": "completed",
       "summary": "Completed typed Rust Native permission authority and selected qualified 0.5.0-preview.1 for new launches. Human MRTR consent, pre/post-cutover A4, exact Git-installed preview qualification, required-LaTeX QC/compact and copied-state compatibility passed. Rejected watchdog/buffer resource results were retained and repaired without relaxed thresholds. Actual stable rollback, preview recutover and bounded permission soak passed; immutable stable 0.4.0 and existing sessions were preserved."
+    },
+    {
+      "event_id": "MEVT-057",
+      "milestone_id": "MTM-015",
+      "at": "2026-09-06T02:29:30-07:00",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "User supplied and asked to apply the MTM-015 capability-repair candidate based on 3254e54465f9f10a449f3a6d5877c846a4319773, then explicitly requested continued progress after local qualification. Scope is reliability repair only; no release or authority cutover is implied."
+    },
+    {
+      "event_id": "MEVT-058",
+      "milestone_id": "MTM-015",
+      "at": "2026-09-06T02:30:00-07:00",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Registered MTM-015 after applying the source candidate, repairing its runtime dependency-boundary drift, restoring the exact immutable stable 0.4.0 rollback artifact, and passing the complete local gate. Target/web-client/restart/copied-state release acceptance remains outstanding."
     }
   ],
   "receipt_contract": {

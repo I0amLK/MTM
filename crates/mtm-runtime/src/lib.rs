@@ -10,6 +10,7 @@ pub mod native_tools;
 pub mod operator;
 pub mod research;
 pub mod server;
+mod submission_events;
 pub mod tool_backend;
 pub mod workspace;
 

@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-015",
+  "title": "Capability reliability and recovery hardening",
+  "status": "in_progress",
+  "started_at": "2026-09-06T02:30:00-07:00",
+  "base_commit": "3254e54465f9f10a449f3a6d5877c846a4319773",
+  "authority": {
+    "before": "rust",
+    "target_after_acceptance": "rust",
+    "workflow_authority_changed": false,
+    "native_permission_authority_changed": false,
+    "finalizer_authority_changed": false,
+    "state_schema_changed": false,
+    "public_tool_surface_changed": false
+  },
+  "trigger": {
+    "user_goal": "Apply and continue the MTM-015 capability-repair candidate in the working repository, preserving the accepted MTM-014 deployment while fixing capability reliability issues.",
+    "candidate_base": "3254e54465f9f10a449f3a6d5877c846a4319773",
+    "candidate_file_scope": "8 existing files plus 9 added files before governance registration"
+  },
+  "frozen_contract": {
+    "selected_release_before": "0.5.0-preview.1",
+    "selected_release_sha256": "2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036",
+    "stable_rollback_version": "0.4.0",
+    "stable_rollback_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+    "invalid_capability_authorizes_writes": false,
+    "automatic_server_submission_replay": false,
+    "raw_capabilities_in_evidence": false,
+    "raw_oauth_tokens_in_evidence": false,
+    "workflow_protocol_changed": false,
+    "state_schema_changed": false
+  },
+  "repairs": [
+    {
+      "id": "R1",
+      "name": "non-overwriting secret initialization",
+      "status": "implemented_local_qualified",
+      "implementation": "same-directory create_new staging file, owner-only permissions, full write and fsync, non-overwriting hard_link publication, staging cleanup, then read persisted winner"
+    },
+    {
+      "id": "R2",
+      "name": "redacted capability diagnostics",
+      "status": "implemented_local_qualified"
+    },
+    {
+      "id": "R3",
+      "name": "authorization/submission/transport outcome classification",
+      "status": "implemented_local_qualified"
+    },
+    {
+      "id": "R4",
+      "name": "bounded same-run caller recovery helper",
+      "status": "implemented_local_qualified",
+      "maximum_automatic_retry_count": 1
+    },
+    {
+      "id": "R5",
+      "name": "permanent current-source capability regression gate",
+      "status": "implemented_local_qualified",
+      "normal_roundtrip_samples": 500,
+      "normal_invalid": 0
+    },
+    {
+      "id": "R6",
+      "name": "structured JSON ownership optimization",
+      "status": "implemented_local_qualified",
+      "performance_claim": false
+    }
+  ],
+  "local_qualification": {
+    "candidate_archive_manifest_verified": true,
+    "candidate_installer_tests": "9 passed",
+    "candidate_atomic_publish_tests": "2 passed",
+    "recovery_helper_tests": "11 passed",
+    "cargo_fmt_check": true,
+    "cargo_clippy_warnings_denied": true,
+    "cargo_test_workspace": true,
+    "engineering_graph": true,
+    "current_binary_gate_samples": 500,
+    "current_binary_gate_normal_invalid": 0,
+    "current_binary_gate_production_state_modified": false,
+    "current_source_sha256": "14948357b4c01f0c9beae13b7692bfbe70eb02d3b3b8b9449566cbe50a6159d5",
+    "current_binary_sha256": "3f7565600e7d2e08b0e83410c82c1b519dc6ea225a58fec96055bd9e4bf7d6b1",
+    "current_capability_record": "records/validation/capability-current.json",
+    "unified_validation_record": "records/validation/local-validation.json",
+    "unified_local_gate": true,
+    "git_diff_check": true
+  },
+  "release_state": {
+    "selected_version": "0.5.0-preview.1",
+    "selected_binary_sha256": "2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036",
+    "selector_changed_by_mtm015": false,
+    "production_state_rewritten": false,
+    "new_mtm015_release_installed": false,
+    "stable_0_4_0_archive_restored": true,
+    "stable_0_4_0_archive_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3"
+  },
+  "remaining_acceptance": [
+    "Bind diagnostics to the actual running MTM-015 candidate binary and endpoint rather than only the disposable loopback current-source build.",
+    "Exercise the actual web client and compare correctly paired issued/submitted fingerprints without storing raw capabilities.",
+    "Qualify same-key restart, deliberate changed-key rejection, independent instances, expired/stale/revoked tokens, cross-run/cross-owner requests and concurrent interleaved logs.",
+    "Run compact and full mathematical workflows with required LaTeX/finalizer acceptance on the versioned candidate.",
+    "Perform copied-state rollback and recutover and retain the previous qualified 0.5.0-preview.1 selector until all release gates pass.",
+    "Collect fresh versioned candidate evidence; do not relabel MTM-013 or MTM-014 historical receipts."
+  ],
+  "decision": "source_candidate_in_progress"
+}

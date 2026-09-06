@@ -23,6 +23,7 @@ tokio.workspace = true
 url.workspace = true
 
 [dev-dependencies]
+# Production secret publication is std-only; tempfile remains test-only.
 tempfile.workspace = true
 
 [lints]

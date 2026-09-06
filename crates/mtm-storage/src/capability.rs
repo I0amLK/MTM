@@ -11,6 +11,9 @@ use sha2::{Digest, Sha256};
 
 use crate::store::{Clock, IdSource, StateStore};
 
+#[path = "capability_diagnostics.rs"]
+mod diagnostics;
+
 const CAPABILITY_TOKEN_MIN_LENGTH: usize = 80;
 const CAPABILITY_TOKEN_MAX_LENGTH: usize = 8192;
 
@@ -118,6 +121,7 @@ pub struct CapabilityAuthority {
     ids: Arc<dyn IdSource>,
     default_ttl_seconds: i64,
     observer: Option<CapabilityObserver>,
+    diagnostics: Option<diagnostics::CapabilityDiagnostics>,
 }
 
 impl CapabilityAuthority {
@@ -142,7 +146,18 @@ impl CapabilityAuthority {
             ids: runtime.ids,
             default_ttl_seconds,
             observer,
+            diagnostics: None,
         })
+    }
+
+    /// Opt-in, redacted diagnostics only. This never changes capability authority.
+    pub fn with_diagnostics(mut self, enabled: bool) -> Result<Self, ReCtmError> {
+        self.diagnostics = if enabled && self.observer.is_some() {
+            Some(diagnostics::CapabilityDiagnostics::new(&self.secret)?)
+        } else {
+            None
+        };
+        Ok(self)
     }
 
     pub fn issue(
@@ -233,6 +248,7 @@ impl CapabilityAuthority {
                 "expires_at": claims.expires_at,
             }),
         });
+        self.emit_token_diagnostic(&token, "issued", trace_id, Some(run_id), None);
         Ok(token)
     }
 
@@ -248,6 +264,13 @@ impl CapabilityAuthority {
     ) -> Result<CapabilityClaims, ReCtmError> {
         let fingerprint = token_fingerprint(token);
         let result = self.validate_inner(token, owner_id, action, resource, expected_run_id);
+        self.emit_token_diagnostic(
+            token,
+            "submitted",
+            trace_id,
+            expected_run_id,
+            result.as_ref().err().map(|error| error.code.as_str()),
+        );
         match result {
             Ok(claims) => {
                 self.emit(CapabilityEvent {
@@ -480,6 +503,19 @@ impl CapabilityAuthority {
             .decode(body)
             .map_err(|_| capability_invalid())?;
         serde_json::from_slice(&payload).map_err(|_| capability_invalid())
+    }
+
+    fn emit_token_diagnostic(
+        &self,
+        token: &str,
+        phase: &str,
+        trace_id: &str,
+        run_id: Option<&str>,
+        error_code: Option<&str>,
+    ) {
+        if let Some(diagnostics) = &self.diagnostics {
+            self.emit(diagnostics.event(self, token, phase, trace_id, run_id, error_code));
+        }
     }
 
     fn emit(&self, event: CapabilityEvent) {

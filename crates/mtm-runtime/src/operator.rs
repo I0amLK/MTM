@@ -65,11 +65,64 @@ fn format_event_line(event: &Value, verbose: bool) -> Option<String> {
         .and_then(|details| details.get("tool"))
         .and_then(Value::as_str);
 
+    if event_type == "capability.diagnostic" && verbose {
+        let details = &event["details"];
+        return Some(format!(
+            "[capability:{}] trace={} token_sha256={} bytes={} signer={} instance={} stage={}",
+            log_atom(reason, 16),
+            log_atom(trace, 96),
+            hex_identifier(details.get("token_sha256"), 64),
+            details
+                .get("token_bytes")
+                .and_then(Value::as_u64)
+                .unwrap_or(0),
+            hex_identifier(details.get("signer_id"), 64),
+            hex_identifier(details.get("instance_id"), 32),
+            log_atom(
+                details
+                    .get("validation_stage")
+                    .and_then(Value::as_str)
+                    .unwrap_or("unknown"),
+                64
+            ),
+        ));
+    }
     if !verbose {
         return match (event_type, tool) {
+            ("tool.call_submission_rejected", Some(tool)) => {
+                let fresh = event["details"]["fresh_task_available"].as_bool() == Some(true);
+                let hint = if fresh {
+                    "fresh task returned; no logical writes; resubmit once"
+                } else {
+                    "inspect current task and retained writes before resubmitting"
+                };
+                Some(format!(
+                    "submission rejected: {} ({}) trace={}; {}",
+                    log_atom(tool, 64),
+                    event_code(event),
+                    log_atom(trace, 96),
+                    hint
+                ))
+            }
+            ("capability.denied", _) => Some(format!(
+                "authorization check denied: {} trace={} (see final tool outcome)",
+                log_atom(reason, 64),
+                log_atom(trace, 96)
+            )),
             ("tool.call_started", Some(tool)) => Some(format!("tool: {tool}")),
             ("tool.call_finished", Some(_)) => None,
-            ("tool.call_failed", Some(tool)) => Some(format!("tool failed: {tool}")),
+            ("tool.call_failed", Some(tool)) => {
+                if event["details"]["error_code"].is_string() {
+                    Some(format!(
+                        "tool failed: {} ({}) trace={}",
+                        log_atom(tool, 64),
+                        event_code(event),
+                        log_atom(trace, 96)
+                    ))
+                } else {
+                    Some(format!("tool failed: {tool}"))
+                }
+            }
             _ if matches!(decision, "deny" | "error") => {
                 if reason.is_empty() {
                     Some(format!("runtime error: {event_type}"))
@@ -110,6 +163,40 @@ fn format_event_line(event: &Value, verbose: bool) -> Option<String> {
     }
 }
 
+// Format only bounded identifiers, never arbitrary error messages or arguments.
+fn log_atom(value: &str, limit: usize) -> String {
+    value
+        .chars()
+        .take(limit)
+        .filter(|character| {
+            character.is_ascii_alphanumeric() || matches!(character, '_' | '-' | '.' | ':')
+        })
+        .collect()
+}
+
+fn event_code(event: &Value) -> String {
+    let value = event["details"]["error_code"]
+        .as_str()
+        .unwrap_or("TOOL_ERROR");
+    if value.is_empty()
+        || value.len() > 64
+        || !value
+            .bytes()
+            .all(|byte| byte.is_ascii_uppercase() || byte.is_ascii_digit() || byte == b'_')
+    {
+        "TOOL_ERROR".to_owned()
+    } else {
+        value.to_owned()
+    }
+}
+
+fn hex_identifier(value: Option<&Value>, length: usize) -> &str {
+    value
+        .and_then(Value::as_str)
+        .filter(|value| value.len() == length && value.bytes().all(|byte| byte.is_ascii_hexdigit()))
+        .unwrap_or("-")
+}
+
 fn format_tunnel_line(event: &TunnelEvent, verbose: bool) -> Option<String> {
     if verbose {
         return if let Some(url) = &event.public_mcp_url {
@@ -130,6 +217,10 @@ fn format_tunnel_line(event: &TunnelEvent, verbose: bool) -> Option<String> {
         TunnelState::Starting | TunnelState::Connected | TunnelState::Closed => None,
     }
 }
+
+#[cfg(test)]
+#[path = "operator_capability_tests.rs"]
+mod operator_capability_tests;
 
 #[cfg(test)]
 mod tests {
