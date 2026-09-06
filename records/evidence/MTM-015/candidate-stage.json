@@ -1,0 +1,45 @@
+{
+  "candidate_binary_sha256": "7f869fc867a7c2575ad68d65956bc34f2cda26bc42b4878c20ff0d75cc42decd",
+  "candidate_path": "/home/lk/.local/share/mtm/candidates/MTM-015/7f869fc867a7c2575ad68d65956bc34f2cda26bc42b4878c20ff0d75cc42decd/mtm",
+  "check_count": 8,
+  "checks": {
+    "content_addressed_install_exact": true,
+    "installed_endpoint_capability_roundtrip": true,
+    "installed_endpoint_identity": true,
+    "installed_persisted_secret_owner_only": true,
+    "rebuilt_candidate_matches_target": true,
+    "selectors_unchanged": true,
+    "stable_rollback_artifact_preserved": true,
+    "target_evidence_valid": true
+  },
+  "endpoint": {
+    "disposable_state": true,
+    "persisted_secret_path_exercised": true,
+    "transport": "loopback_oauth_mcp",
+    "version": "0.5.0-preview.1"
+  },
+  "evidence_hygiene": {
+    "raw_capability_recorded": false,
+    "raw_logs_recorded": false,
+    "raw_oauth_token_recorded": false,
+    "raw_secret_recorded": false
+  },
+  "harness_sha256": {
+    "scripts/run_mtm015_candidate_stage.py": "95b69f6290c5a89d53971dc83004ac8934c1c5967f3ce0b608c562ec7bc67b92",
+    "scripts/validate_mtm015_candidate_stage.py": "0e3ed7a5270ce42ce6950b3fad1c2d924cbc9ad8f790339d6b1af3a8adb8b6e2"
+  },
+  "implementation_commit": "94e7bde4a9a0db30fe6459ce4352e3d6661c7384",
+  "installed_endpoint_tested": true,
+  "milestone": "MTM-015",
+  "ok": true,
+  "phase": "candidate_stage",
+  "production_state_rewritten": false,
+  "recorded_at": "2026-09-06T10:04:27.208293+00:00",
+  "schema_version": "1.0.0",
+  "selector_changed": false,
+  "stage_commit": "11c3f09473c3a90e3dc2e0519d1f56e6d4cb8696",
+  "target_evidence_sha256": "a642705bb20b17ac38dbfd7673ecb4ba515c3c16a383c0206e7e6d40d600bf5f",
+  "target_qualification_commit": "e4bc7d447eb4e2d3c0b0a14c1f3f4bf08b2ccb36",
+  "version": "0.5.0-preview.1",
+  "web_client_tested": false
+}

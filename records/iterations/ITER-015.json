@@ -118,12 +118,19 @@
     "web_client_claim_permitted": false
   },
   "candidate_stage": {
-    "status": "prepared_pending_execution",
+    "status": "executed_accepted",
     "runner": "scripts/run_mtm015_candidate_stage.py",
     "validator": "scripts/validate_mtm015_candidate_stage.py",
     "evidence": "records/evidence/MTM-015/candidate-stage.json",
-    "install_root": "/home/lk/.local/share/mtm/candidates/MTM-015/<binary-sha256>/mtm",
+    "install_root": "/home/lk/.local/share/mtm/candidates/MTM-015/7f869fc867a7c2575ad68d65956bc34f2cda26bc42b4878c20ff0d75cc42decd/mtm",
     "content_addressed": true,
+    "stage_commit": "11c3f09473c3a90e3dc2e0519d1f56e6d4cb8696",
+    "evidence_sha256": "f2b30363eb35c91ee515fb8a2bcac23da9ecc495dd14b3906b8eca93b50ca372",
+    "candidate_binary_sha256": "7f869fc867a7c2575ad68d65956bc34f2cda26bc42b4878c20ff0d75cc42decd",
+    "check_count": 8,
+    "installed_endpoint_tested": true,
+    "installed_endpoint_transport": "loopback_oauth_mcp",
+    "persisted_secret_path_exercised": true,
     "selector_cutover_permitted": false,
     "production_state_rewrite_permitted": false,
     "web_client_claim_permitted": false,
@@ -132,9 +139,8 @@
   },
   "remaining_acceptance": [
     "Exercise the actual web client and compare correctly paired issued/submitted fingerprints without storing raw capabilities.",
-    "Install the exact qualified candidate side by side under a content-addressed MTM-015 candidate path and run an installed-endpoint smoke without changing either current mtm selector.",
     "Choose a new release identity before any selector cutover; never overwrite the immutable qualified 0.5.0-preview.1 release path with different bytes.",
     "After web-client and installed-endpoint acceptance, perform an explicit selector rollback/recutover drill before considering MTM-015 complete."
   ],
-  "decision": "target_qualified_web_client_pending"
+  "decision": "target_and_installed_candidate_qualified_web_client_pending"
 }

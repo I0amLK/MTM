@@ -16,6 +16,12 @@ OAuth owner with zero writes, redacted signature-stage diagnostics, required-LaT
 and compact workflows, copied-state compatibility, bounded resource non-regression, and
 a 60-second permission soak. It still does not claim a real web client, an installed
 MTM-015 endpoint, or selector cutover.
+
+The exact qualified bytes are now also installed side by side at
+`/home/lk/.local/share/mtm/candidates/MTM-015/7f869fc867a7c2575ad68d65956bc34f2cda26bc42b4878c20ff0d75cc42decd/mtm`.
+The installed candidate passed its own loopback OAuth/MCP identity and capability smoke
+with the persisted-secret path enabled. This candidate directory is content-addressed;
+it is not a release directory and neither ordinary `mtm` selector points to it.
 Base: `3254e54465f9f10a449f3a6d5877c846a4319773` (`0.5.0-preview.1`).
 
 ## Scope and invariants
