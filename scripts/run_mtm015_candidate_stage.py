@@ -14,7 +14,7 @@ from typing import Any
 
 import run_mtm013_runtime_hardening as capability
 from run_checks import resolve_tool_environment
-from run_mtm015_target_qualification import PersistedServer
+from run_mtm015_target_qualification import PersistedServer, mcp_oauth_resource_discovery
 from validate_mtm015_target_qualification import validate as validate_target
 
 
@@ -32,6 +32,7 @@ CHECK_NAMES = {
     "content_addressed_install_exact",
     "installed_endpoint_identity",
     "installed_endpoint_capability_roundtrip",
+    "installed_endpoint_mcp_oauth_discovery",
     "installed_persisted_secret_owner_only",
     "selectors_unchanged",
     "stable_rollback_artifact_preserved",
@@ -179,7 +180,9 @@ def main() -> int:
 
         stage = "installed_endpoint"
         with tempfile.TemporaryDirectory(prefix="mtm015-installed-endpoint-") as directory:
-            endpoint = endpoint_smoke(candidate, Path(directory))
+            endpoint_root = Path(directory)
+            endpoint = endpoint_smoke(candidate, endpoint_root / "smoke")
+            endpoint_oauth = mcp_oauth_resource_discovery(candidate, endpoint_root / "oauth-resource")
 
         checks = {
             "target_evidence_valid": bool(target_summary),
@@ -187,6 +190,7 @@ def main() -> int:
             "content_addressed_install_exact": candidate.is_file() and digest(candidate) == expected_sha,
             "installed_endpoint_identity": endpoint["identity"],
             "installed_endpoint_capability_roundtrip": endpoint["roundtrip"],
+            "installed_endpoint_mcp_oauth_discovery": endpoint_oauth,
             "installed_persisted_secret_owner_only": endpoint["owner_only"],
             "selectors_unchanged": (
                 SELECTOR.resolve() == INSTALLED

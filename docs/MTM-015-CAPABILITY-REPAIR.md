@@ -129,6 +129,34 @@ same. Added tests cover a large nested payload, image output, error output, and
 nonobject normalization. No speedup, RSS improvement, or research-efficiency result is
 claimed until parity and measured A5/A6 evidence exist.
 
+## R7: MCP protected-resource OAuth discovery interoperability
+
+Real web-client acceptance exposed a separate release blocker before any Rethlas
+capability was issued: clients that derive RFC 9728 protected-resource metadata from
+the configured `.../mcp` resource request
+`/.well-known/oauth-protected-resource/mcp`. The gateway previously exposed only the
+historical origin-level `/.well-known/oauth-protected-resource` document and bound the
+OAuth `resource` parameter only to the origin. A standards-conforming client could
+therefore report that the MCP endpoint did not implement OAuth even though the older
+authorization-server metadata endpoint was reachable.
+
+The repair retains the origin-level metadata route for compatibility while adding a
+path-aware MCP document whose `resource` is the exact `.../mcp` URL and whose
+`authorization_servers` entry remains the existing origin-level issuer. Public MCP
+authorization-code and token exchange accept the exact MCP resource and bind newly
+issued access-token audience to that resource; the MCP bearer validator accepts both
+the new resource audience and the historical origin audience during compatibility.
+Unauthenticated MCP responses advertise the path-aware metadata URL in
+`WWW-Authenticate`. The shadow/golden OAuth service methods keep their historical
+origin-only semantics so this transport interoperability repair does not silently
+rewrite the accepted gateway differential corpus.
+
+MTM-015 target qualification must exercise both metadata routes, the path-aware 401
+challenge, DCR/PKCE with `resource=.../mcp`, token exchange and an authenticated MCP
+ping. The content-addressed staged candidate must repeat the same check, and the real
+Quick Tunnel launcher must refuse to announce a usable session until both the
+authorization-server metadata and the path-aware protected-resource metadata validate.
+
 ## Required validation before any deployment
 
 Run format, warnings-denied Clippy, complete workspace tests, the current-binary gate,

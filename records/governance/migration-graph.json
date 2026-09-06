@@ -513,20 +513,22 @@
       "priority": "P0",
       "production_authority_before": "rust",
       "production_authority_after": "rust",
-      "functional_goal": "Repair capability-key initialization races, improve redacted capability diagnostics and operator outcome classification, add bounded caller recovery, and make current-source capability regression a permanent local gate without changing capability authority semantics or automatically replaying rejected writes.",
+      "functional_goal": "Repair capability-key initialization races, improve redacted capability diagnostics and operator outcome classification, add bounded caller recovery, make current-source capability regression a permanent local gate, and close the RFC 9728 MCP protected-resource discovery interoperability blocker found during real web-client acceptance without changing capability authority semantics or automatically replaying rejected writes.",
       "scope": [
         "Publish first-created OAuth/capability secrets atomically without overwriting a concurrent winner and always return the persisted winning bytes",
         "Add opt-in redacted capability diagnostics that distinguish token shape, signature and payload/claim failures without exposing token, key, proof or raw tool arguments",
         "Classify authorization denial, rejected logical submission and genuine tool failure as distinct operator events with trace-safe correlation",
         "Provide a bounded same-run caller recovery helper that retries at most once only after the existing recoverable INVALID zero-write contract returns a fresh task envelope",
         "Run the frozen mutation/truncation/cross-run/cross-owner/revocation corpus plus 500 fresh normal envelope roundtrips against a binary rebuilt from current source on every local gate",
-        "Preserve wire behavior while removing the unnecessary structured-content deep clone in tool_result"
+        "Preserve wire behavior while removing the unnecessary structured-content deep clone in tool_result",
+        "Expose RFC 9728 protected-resource metadata for the actual /mcp resource, bind MCP authorization-code/token resource values to that resource, advertise the path-aware metadata URL in WWW-Authenticate, and retain the historical origin-level metadata path for compatibility"
       ],
       "non_goals": [
         "No new public tool, hidden alias, workflow state, SQLite schema, capability permission, model provider, scheduler or background Agent runtime",
         "No automatic server-side replay of a rejected submission and no write authorization from an invalid, expired, revoked, cross-owner or cross-run capability",
         "No deletion, regeneration or migration of production capability/OAuth keys as a diagnostic shortcut",
         "No weakening or relabeling of historical MTM-013/MTM-014 release receipts, verifier/finalizer gates, Native permission authority or Bubblewrap isolation",
+        "No replacement of the existing OAuth authorization-server authority model or removal of the legacy origin-level protected-resource metadata compatibility path",
         "No performance or population-wide reliability claim from the bounded local regression sample"
       ],
       "acceptance_levels": ["A0", "A1", "A3", "A4", "A5"],

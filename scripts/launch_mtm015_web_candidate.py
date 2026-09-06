@@ -27,13 +27,20 @@ PUBLIC_RE = re.compile(r"Quick Tunnel: (https://[a-z0-9-]+\.trycloudflare\.com/m
 
 def metadata_ok(public_mcp: str) -> bool:
     origin = public_mcp.removesuffix("/mcp")
-    url = origin + "/.well-known/oauth-authorization-server"
+    authorization_url = origin + "/.well-known/oauth-authorization-server"
+    protected_url = origin + "/.well-known/oauth-protected-resource/mcp"
     deadline = time.monotonic() + 30
     while time.monotonic() < deadline:
         try:
-            with urllib.request.urlopen(url, timeout=5) as response:
-                payload = json.loads(response.read())
-            if payload.get("issuer") == origin:
+            with urllib.request.urlopen(authorization_url, timeout=5) as response:
+                authorization = json.loads(response.read())
+            with urllib.request.urlopen(protected_url, timeout=5) as response:
+                protected = json.loads(response.read())
+            if (
+                authorization.get("issuer") == origin
+                and protected.get("resource") == public_mcp
+                and protected.get("authorization_servers") == [origin]
+            ):
                 return True
         except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError):
             pass

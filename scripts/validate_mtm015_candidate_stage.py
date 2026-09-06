@@ -24,6 +24,7 @@ CHECK_NAMES = {
     "content_addressed_install_exact",
     "installed_endpoint_identity",
     "installed_endpoint_capability_roundtrip",
+    "installed_endpoint_mcp_oauth_discovery",
     "installed_persisted_secret_owner_only",
     "selectors_unchanged",
     "stable_rollback_artifact_preserved",

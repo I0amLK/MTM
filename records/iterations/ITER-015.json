@@ -66,6 +66,16 @@
       "name": "structured JSON ownership optimization",
       "status": "implemented_local_qualified",
       "performance_claim": false
+    },
+    {
+      "id": "R7",
+      "name": "RFC 9728 MCP protected-resource OAuth discovery interoperability",
+      "status": "implemented_loopback_qualified_pending_exact_target_requalification",
+      "implementation_commit": "46a587fa2bc5f58c3be03c23d95a302313e04013",
+      "legacy_origin_metadata_preserved": true,
+      "mcp_resource_path": "/mcp",
+      "mcp_protected_resource_metadata_path": "/.well-known/oauth-protected-resource/mcp",
+      "loopback_dcr_pkce_resource_flow_passed": true
     }
   ],
   "local_qualification": {
@@ -97,27 +107,28 @@
     "stable_0_4_0_archive_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3"
   },
   "release_identity": {
-    "status": "exact_target_qualified",
+    "status": "oauth_interop_repair_pending_exact_requalification",
     "candidate_version": "0.5.0-preview.2",
     "base_version": "0.5.0-preview.1",
-    "functional_implementation_commit": "94e7bde4a9a0db30fe6459ce4352e3d6661c7384",
-    "allowed_delta": "Cargo package/dependency/lockfile version metadata only",
+    "functional_implementation_commit": "46a587fa2bc5f58c3be03c23d95a302313e04013",
+    "allowed_delta_after_implementation": "none under Cargo.toml, Cargo.lock, rust-toolchain.toml, or crates before exact qualification",
     "overwrite_existing_release_path": false,
     "selector_cutover_permitted": false,
-    "qualification_commit": "2bd31f87cd6d309d7feef2d08d593c0454f5af21",
-    "candidate_binary_sha256": "3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707",
-    "target_evidence_sha256": "9e895f89e282e58b4b824b24fdf872c79ac82184c736b2b42fd8ff18b505b5e5"
+    "previous_qualified_candidate_binary_sha256": "3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707",
+    "requalification_required": true
   },
   "target_harness": {
-    "status": "executed_accepted",
+    "status": "previous_evidence_superseded_requalification_required",
     "runner": "scripts/run_mtm015_target_qualification.py",
     "validator": "scripts/validate_mtm015_target_qualification.py",
     "evidence": "records/evidence/MTM-015/target-qualification.json",
     "implementation_commit": "94e7bde4a9a0db30fe6459ce4352e3d6661c7384",
+    "required_implementation_commit": "46a587fa2bc5f58c3be03c23d95a302313e04013",
     "qualification_commit": "2bd31f87cd6d309d7feef2d08d593c0454f5af21",
     "evidence_sha256": "9e895f89e282e58b4b824b24fdf872c79ac82184c736b2b42fd8ff18b505b5e5",
     "candidate_binary_sha256": "3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707",
     "check_count": 14,
+    "next_check_count": 15,
     "same_key_restart_passed": true,
     "changed_key_same_owner_rejection_passed": true,
     "required_latex_full_and_compact_passed": true,
@@ -130,7 +141,7 @@
     "web_client_claim_permitted": false
   },
   "candidate_stage": {
-    "status": "executed_accepted",
+    "status": "previous_evidence_superseded_requalification_required",
     "runner": "scripts/run_mtm015_candidate_stage.py",
     "validator": "scripts/validate_mtm015_candidate_stage.py",
     "evidence": "records/evidence/MTM-015/candidate-stage.json",
@@ -140,6 +151,7 @@
     "evidence_sha256": "082d345b54434504b49dcebceec63e7bbb9cbc5164fe2acfc728c477f284b120",
     "candidate_binary_sha256": "3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707",
     "check_count": 8,
+    "next_check_count": 9,
     "installed_endpoint_tested": true,
     "installed_endpoint_transport": "loopback_oauth_mcp",
     "persisted_secret_path_exercised": true,
@@ -150,7 +162,7 @@
     "repair": "Validate the actual public server_info contract: server/version/tool counts, hidden alias count, complete-flow flag, research-workspace schema/protocol and workflow-authority non-inheritance. No product code or acceptance threshold changed."
   },
   "web_client_harness": {
-    "status": "prepared_release_candidate_web_acceptance_pending",
+    "status": "prepared_new_exact_candidate_pending",
     "launcher": "scripts/launch_mtm015_web_candidate.py",
     "recorder": "scripts/record_mtm015_web_client_evidence.py",
     "validator": "scripts/validate_mtm015_web_client.py",
@@ -161,8 +173,9 @@
     "normal_submission_rejections_allowed": 0,
     "raw_capability_or_oauth_evidence_permitted": false,
     "selector_cutover_permitted": false,
-    "release_candidate_sha256": "3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707",
+    "previous_release_candidate_sha256": "3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707",
     "release_candidate_web_client_tested": false,
+    "oauth_discovery_blocker_repaired_in_commit": "46a587fa2bc5f58c3be03c23d95a302313e04013",
     "prior_functional_candidate_attempt": {
       "candidate_sha256": "7f869fc867a7c2575ad68d65956bc34f2cda26bc42b4878c20ff0d75cc42decd",
       "quick_tunnel_metadata_and_server_info_reached_candidate": true,
@@ -173,5 +186,5 @@
     "Exercise the actual web client and compare correctly paired issued/submitted fingerprints without storing raw capabilities.",
     "After web-client and installed-endpoint acceptance, perform an explicit selector rollback/recutover drill before considering MTM-015 complete."
   ],
-  "decision": "preview_0_5_0_preview_2_exact_candidate_qualified_web_client_pending"
+  "decision": "oauth_interop_repair_implemented_exact_requalification_pending"
 }

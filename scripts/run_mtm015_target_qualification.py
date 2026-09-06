@@ -21,18 +21,18 @@ import run_mtm013_exact_stable_semantic_regression as semantic
 import run_mtm013_runtime_hardening as capability
 import run_mtm013_stable_qualification as historical
 import run_mtm007_target_validation as legacy_target
-from mtm008_runtime_harness import OPERATOR_PASSWORD, form_request
+from mtm008_runtime_harness import OPERATOR_PASSWORD, form_request, json_request, request
 from run_checks import resolve_tool_environment
 
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / "records/evidence/MTM-015/target-qualification.json"
-IMPLEMENTATION_COMMIT = "94e7bde4a9a0db30fe6459ce4352e3d6661c7384"
-BASE_VERSION = "0.5.0-preview.1"
+IMPLEMENTATION_COMMIT = "46a587fa2bc5f58c3be03c23d95a302313e04013"
 VERSION = "0.5.0-preview.2"
 CHECK_NAMES = {
     "committed_rust_scope",
     "candidate_release_identity",
+    "mcp_oauth_resource_discovery",
     "permanent_capability_gate",
     "persisted_secret_owner_only",
     "same_key_restart_reuses_authority",
@@ -77,24 +77,14 @@ def git(*arguments: str) -> str:
 
 
 def rust_scope_unchanged(qualification_commit: str) -> bool:
-    changed = subprocess.check_output(
+    return subprocess.run(
         [
-            "git", "diff", "--name-only", IMPLEMENTATION_COMMIT, qualification_commit, "--",
+            "git", "diff", "--quiet", IMPLEMENTATION_COMMIT, qualification_commit, "--",
             "Cargo.toml", "Cargo.lock", "rust-toolchain.toml", "crates",
         ],
         cwd=ROOT,
-        text=True,
-    ).splitlines()
-    allowed = {"Cargo.toml", "Cargo.lock"}
-    allowed.update(str(path.relative_to(ROOT)) for path in ROOT.glob("crates/*/Cargo.toml"))
-    if not set(changed).issubset(allowed):
-        return False
-    for path in changed:
-        before = subprocess.check_output(["git", "show", f"{IMPLEMENTATION_COMMIT}:{path}"], cwd=ROOT)
-        after = subprocess.check_output(["git", "show", f"{qualification_commit}:{path}"], cwd=ROOT)
-        if after != before.replace(BASE_VERSION.encode(), VERSION.encode()):
-            return False
-    return True
+        check=False,
+    ).returncode == 0
 
 
 def jwt_client_id(token: str) -> str:
@@ -229,6 +219,104 @@ class PersistedServer:
         self.log.close()
         self.output.close()
         require(code == 0, "persisted_server_shutdown")
+
+
+def mcp_oauth_resource_discovery(binary: Path, root: Path) -> bool:
+    server = PersistedServer(binary, root, issue_token=False)
+    try:
+        base = server.base
+        resource = f"{base}/mcp"
+        root_status, _, root_raw = request(
+            server.port, "GET", "/.well-known/oauth-protected-resource"
+        )
+        root_metadata = json.loads(root_raw or b"{}")
+        mcp_status, _, mcp_raw = request(
+            server.port, "GET", "/.well-known/oauth-protected-resource/mcp"
+        )
+        mcp_metadata = json.loads(mcp_raw or b"{}")
+        ping = {"jsonrpc": "2.0", "id": "mtm015-oauth-ping", "method": "ping", "params": {}}
+        unauthorized_status, unauthorized_headers, unauthorized = json_request(
+            server.port, "POST", "/mcp", ping
+        )
+        expected_metadata_url = f'{base}/.well-known/oauth-protected-resource/mcp'
+
+        redirect_uri = "http://127.0.0.1/mtm015-mcp-callback"
+        register_status, _, registered = json_request(
+            server.port,
+            "POST",
+            "/oauth/register",
+            {
+                "redirect_uris": [redirect_uri],
+                "token_endpoint_auth_method": "none",
+                "client_name": "MTM-015 MCP resource qualification",
+            },
+        )
+        client_id = str(registered.get("client_id") or "")
+        verifier = "Q" * 43
+        challenge = (
+            base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())
+            .rstrip(b"=")
+            .decode()
+        )
+        authorize_status, authorize_headers, _ = form_request(
+            server.port,
+            "/oauth/authorize",
+            {
+                "client_id": client_id,
+                "redirect_uri": redirect_uri,
+                "response_type": "code",
+                "code_challenge": challenge,
+                "code_challenge_method": "S256",
+                "resource": resource,
+                "state": "mtm015-mcp-resource",
+                "password": OPERATOR_PASSWORD,
+            },
+        )
+        location = authorize_headers.get("location", "")
+        code = urllib.parse.parse_qs(urllib.parse.urlsplit(location).query).get("code", [""])[0]
+        token_status, _, token_payload_raw = form_request(
+            server.port,
+            "/oauth/token",
+            {
+                "grant_type": "authorization_code",
+                "code": code,
+                "redirect_uri": redirect_uri,
+                "code_verifier": verifier,
+                "client_id": client_id,
+                "resource": resource,
+            },
+        )
+        token_payload = json.loads(token_payload_raw or b"{}")
+        access_token = str(token_payload.get("access_token") or "")
+        authorized_status, _, authorized = json_request(
+            server.port,
+            "POST",
+            "/mcp",
+            ping,
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        return (
+            root_status == 200
+            and root_metadata.get("resource") == base
+            and mcp_status == 200
+            and mcp_metadata.get("resource") == resource
+            and mcp_metadata.get("authorization_servers") == [base]
+            and unauthorized_status == 401
+            and unauthorized.get("error", {}).get("code") == "OAUTH_UNAUTHORIZED"
+            and f'resource_metadata="{expected_metadata_url}"'
+            in unauthorized_headers.get("www-authenticate", "")
+            and register_status == 201
+            and bool(client_id)
+            and authorize_status in (302, 303)
+            and bool(code)
+            and token_status == 200
+            and token_payload.get("token_type") == "Bearer"
+            and bool(access_token)
+            and authorized_status == 200
+            and authorized.get("result") is not None
+        )
+    finally:
+        server.close()
 
 
 def secret_restart_and_rotation(binary: Path, root: Path) -> dict[str, bool]:
@@ -421,6 +509,9 @@ def main() -> int:
             }
             with tempfile.TemporaryDirectory(prefix="mtm015-target-") as temporary:
                 root = Path(temporary)
+                stage = "mcp_oauth_resource_discovery"
+                checks[stage] = mcp_oauth_resource_discovery(binary, root / "oauth-resource")
+
                 stage = "permanent_capability_gate"
                 current_report = root / "current-capability.json"
                 result = subprocess.run(

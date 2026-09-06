@@ -12,12 +12,12 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / "records/evidence/MTM-015/target-qualification.json"
-IMPLEMENTATION_COMMIT = "94e7bde4a9a0db30fe6459ce4352e3d6661c7384"
-BASE_VERSION = "0.5.0-preview.1"
+IMPLEMENTATION_COMMIT = "46a587fa2bc5f58c3be03c23d95a302313e04013"
 VERSION = "0.5.0-preview.2"
 CHECK_NAMES = {
     "committed_rust_scope",
     "candidate_release_identity",
+    "mcp_oauth_resource_discovery",
     "permanent_capability_gate",
     "persisted_secret_owner_only",
     "same_key_restart_reuses_authority",
@@ -125,24 +125,18 @@ def validate(payload: dict[str, Any] | None = None) -> dict[str, Any]:
         == 0,
         "qualification_commit_not_ancestor",
     )
-    changed = subprocess.check_output(
-        [
-            "git", "diff", "--name-only", IMPLEMENTATION_COMMIT, qualification_commit, "--",
-            "Cargo.toml", "Cargo.lock", "rust-toolchain.toml", "crates",
-        ],
-        cwd=ROOT,
-        text=True,
-    ).splitlines()
-    allowed = {"Cargo.toml", "Cargo.lock"}
-    allowed.update(str(path.relative_to(ROOT)) for path in ROOT.glob("crates/*/Cargo.toml"))
-    require(set(changed).issubset(allowed), "qualification_commit_rust_scope_drift")
-    for path in changed:
-        before = subprocess.check_output(["git", "show", f"{IMPLEMENTATION_COMMIT}:{path}"], cwd=ROOT)
-        after = subprocess.check_output(["git", "show", f"{qualification_commit}:{path}"], cwd=ROOT)
-        require(
-            after == before.replace(BASE_VERSION.encode(), VERSION.encode()),
-            f"qualification_commit_non_version_drift:{path}",
-        )
+    require(
+        subprocess.run(
+            [
+                "git", "diff", "--quiet", IMPLEMENTATION_COMMIT, qualification_commit, "--",
+                "Cargo.toml", "Cargo.lock", "rust-toolchain.toml", "crates",
+            ],
+            cwd=ROOT,
+            check=False,
+        ).returncode
+        == 0,
+        "qualification_commit_rust_scope_drift",
+    )
     require("Bearer " not in json.dumps(payload, sort_keys=True), "raw_bearer_in_evidence")
     return {
         "report_sha256": digest(REPORT),
