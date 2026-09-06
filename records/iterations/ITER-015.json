@@ -137,6 +137,19 @@
     "first_attempt_failure": "The exact qualified candidate bytes installed and their OAuth/MCP capability roundtrip passed, but the staging harness incorrectly expected release-identity field names at the top level of server_info.",
     "repair": "Validate the actual public server_info contract: server/version/tool counts, hidden alias count, complete-flow flag, research-workspace schema/protocol and workflow-authority non-inheritance. No product code or acceptance threshold changed."
   },
+  "web_client_harness": {
+    "status": "prepared_not_executed",
+    "launcher": "scripts/launch_mtm015_web_candidate.py",
+    "recorder": "scripts/record_mtm015_web_client_evidence.py",
+    "validator": "scripts/validate_mtm015_web_client.py",
+    "evidence": "records/evidence/MTM-015/web-client.json",
+    "transport": "quick_tunnel_oauth_mcp",
+    "minimum_paired_capability_fingerprints": 5,
+    "normal_capability_invalid_allowed": 0,
+    "normal_submission_rejections_allowed": 0,
+    "raw_capability_or_oauth_evidence_permitted": false,
+    "selector_cutover_permitted": false
+  },
   "remaining_acceptance": [
     "Exercise the actual web client and compare correctly paired issued/submitted fingerprints without storing raw capabilities.",
     "Choose a new release identity before any selector cutover; never overwrite the immutable qualified 0.5.0-preview.1 release path with different bytes.",
