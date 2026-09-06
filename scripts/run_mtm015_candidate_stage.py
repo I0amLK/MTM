@@ -117,13 +117,15 @@ def endpoint_smoke(binary: Path, root: Path) -> dict[str, Any]:
         ) == 0o600
         return {
             "identity": (
-                info.get("version") == "0.5.0-preview.1"
-                and info.get("implementation") == "rust"
-                and info.get("production_authority") == "rust"
-                and info.get("public_tool_count") == 24
-                and info.get("hidden_alias_count") == 11
-                and info.get("state_schema_version") == 2
-                and info.get("workflow_protocol_version") == 3
+                info.get("server") == "mtm"
+                and info.get("version") == "0.5.0-preview.1"
+                and info.get("tool_count") == 24
+                and info.get("rethlas_tool_count") == 6
+                and len(info.get("hidden_legacy_rethlas_aliases", [])) == 11
+                and info.get("complete_flow_locally_validated") is True
+                and info.get("research_workspace", {}).get("state_schema_version") == 2
+                and info.get("research_workspace", {}).get("workflow_protocol_version") == 3
+                and info.get("native", {}).get("workflow_authority_inherited") is False
             ),
             "roundtrip": roundtrip,
             "owner_only": owner_only,

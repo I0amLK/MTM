@@ -126,7 +126,9 @@
     "content_addressed": true,
     "selector_cutover_permitted": false,
     "production_state_rewrite_permitted": false,
-    "web_client_claim_permitted": false
+    "web_client_claim_permitted": false,
+    "first_attempt_failure": "The exact qualified candidate bytes installed and their OAuth/MCP capability roundtrip passed, but the staging harness incorrectly expected release-identity field names at the top level of server_info.",
+    "repair": "Validate the actual public server_info contract: server/version/tool counts, hidden alias count, complete-flow flag, research-workspace schema/protocol and workflow-authority non-inheritance. No product code or acceptance threshold changed."
   },
   "remaining_acceptance": [
     "Exercise the actual web client and compare correctly paired issued/submitted fingerprints without storing raw capabilities.",
