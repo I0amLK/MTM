@@ -382,6 +382,19 @@ impl OAuthService {
         }))
     }
 
+    pub fn protected_mcp_resource_metadata(
+        &self,
+        base_url: Option<&str>,
+    ) -> Result<Value, ReCtmError> {
+        let base = self.base_url(base_url)?;
+        let resource = mcp_resource(&base);
+        Ok(serde_json::json!({
+            "resource": resource,
+            "authorization_servers": [base],
+            "bearer_methods_supported": ["header"],
+        }))
+    }
+
     pub fn register(&self, metadata: &Value, trace_id: &str) -> Result<Value, ReCtmError> {
         let object = metadata
             .as_object()
@@ -439,6 +452,23 @@ impl OAuthService {
         params: &BTreeMap<String, String>,
         base_url: Option<&str>,
     ) -> Result<BTreeMap<String, String>, ReCtmError> {
+        self.validate_authorization_request_inner(params, base_url, false)
+    }
+
+    pub fn validate_mcp_authorization_request(
+        &self,
+        params: &BTreeMap<String, String>,
+        base_url: Option<&str>,
+    ) -> Result<BTreeMap<String, String>, ReCtmError> {
+        self.validate_authorization_request_inner(params, base_url, true)
+    }
+
+    fn validate_authorization_request_inner(
+        &self,
+        params: &BTreeMap<String, String>,
+        base_url: Option<&str>,
+        allow_mcp_resource: bool,
+    ) -> Result<BTreeMap<String, String>, ReCtmError> {
         let base = self.base_url(base_url)?;
         let client_id = value(params, "client_id");
         let redirect_uri = value(params, "redirect_uri");
@@ -469,7 +499,7 @@ impl OAuthService {
                 "code_challenge_method must be S256 with a valid challenge",
             ));
         }
-        if resource != base {
+        if !resource_matches(&base, &resource, allow_mcp_resource) {
             return Err(permission(
                 "OAUTH_INVALID_TARGET",
                 "resource must identify this server.",
@@ -491,7 +521,29 @@ impl OAuthService {
         trace_id: &str,
         base_url: Option<&str>,
     ) -> Result<String, ReCtmError> {
-        let validated = self.validate_authorization_request(params, base_url)?;
+        self.authorize_inner(params, password, trace_id, base_url, false)
+    }
+
+    pub fn authorize_mcp(
+        &self,
+        params: &BTreeMap<String, String>,
+        password: &str,
+        trace_id: &str,
+        base_url: Option<&str>,
+    ) -> Result<String, ReCtmError> {
+        self.authorize_inner(params, password, trace_id, base_url, true)
+    }
+
+    fn authorize_inner(
+        &self,
+        params: &BTreeMap<String, String>,
+        password: &str,
+        trace_id: &str,
+        base_url: Option<&str>,
+        allow_mcp_resource: bool,
+    ) -> Result<String, ReCtmError> {
+        let validated =
+            self.validate_authorization_request_inner(params, base_url, allow_mcp_resource)?;
         if !constant_time_equal(password.as_bytes(), self.password.as_bytes()) {
             self.emit(
                 "oauth.authorization_denied",
@@ -550,6 +602,43 @@ impl OAuthService {
         basic_client_secret: &str,
         trace_id: &str,
         base_url: Option<&str>,
+    ) -> Result<Value, ReCtmError> {
+        self.exchange_code_inner(
+            params,
+            basic_client_id,
+            basic_client_secret,
+            trace_id,
+            base_url,
+            false,
+        )
+    }
+
+    pub fn exchange_mcp_code(
+        &self,
+        params: &BTreeMap<String, String>,
+        basic_client_id: &str,
+        basic_client_secret: &str,
+        trace_id: &str,
+        base_url: Option<&str>,
+    ) -> Result<Value, ReCtmError> {
+        self.exchange_code_inner(
+            params,
+            basic_client_id,
+            basic_client_secret,
+            trace_id,
+            base_url,
+            true,
+        )
+    }
+
+    fn exchange_code_inner(
+        &self,
+        params: &BTreeMap<String, String>,
+        basic_client_id: &str,
+        basic_client_secret: &str,
+        trace_id: &str,
+        base_url: Option<&str>,
+        allow_mcp_resource: bool,
     ) -> Result<Value, ReCtmError> {
         let base = self.base_url(base_url)?;
         if value(params, "grant_type") != "authorization_code" {
@@ -611,7 +700,7 @@ impl OAuthService {
             }),
             text(&record, "resource")
                 .is_some_and(|value| constant_time_equal(value.as_bytes(), resource.as_bytes())),
-            constant_time_equal(resource.as_bytes(), base.as_bytes()),
+            resource_matches(&base, &resource, allow_mcp_resource),
             text(&record, "code_challenge")
                 .is_some_and(|challenge| verify_pkce(&verifier, challenge)),
         ];
@@ -621,7 +710,7 @@ impl OAuthService {
                 "Authorization code binding or PKCE verification failed.",
             ));
         }
-        let token = self.create_access_token(&client_id, Some(&base))?;
+        let token = self.create_access_token_with_audience(&client_id, &base, &resource)?;
         self.emit(
             "oauth.access_token_issued",
             trace_id,
@@ -644,6 +733,25 @@ impl OAuthService {
         trace_id: &str,
         base_url: Option<&str>,
     ) -> Result<OAuthPrincipal, ReCtmError> {
+        self.validate_authorization_header_inner(header, trace_id, base_url, false)
+    }
+
+    pub fn validate_mcp_authorization_header(
+        &self,
+        header: &str,
+        trace_id: &str,
+        base_url: Option<&str>,
+    ) -> Result<OAuthPrincipal, ReCtmError> {
+        self.validate_authorization_header_inner(header, trace_id, base_url, true)
+    }
+
+    fn validate_authorization_header_inner(
+        &self,
+        header: &str,
+        trace_id: &str,
+        base_url: Option<&str>,
+        allow_mcp_resource: bool,
+    ) -> Result<OAuthPrincipal, ReCtmError> {
         let base = self.base_url(base_url)?;
         let token = header
             .strip_prefix("Bearer ")
@@ -652,7 +760,8 @@ impl OAuthService {
         let payload = self.decode_signed_token(token).and_then(|payload| {
             let now = self.runtime.clock.now_unix();
             if text(&payload, "iss") != Some(base.as_str())
-                || text(&payload, "aud") != Some(base.as_str())
+                || text(&payload, "aud")
+                    .is_none_or(|audience| !resource_matches(&base, audience, allow_mcp_resource))
                 || payload
                     .get("exp")
                     .and_then(Value::as_i64)
@@ -709,11 +818,20 @@ impl OAuthService {
         base_url: Option<&str>,
     ) -> Result<String, ReCtmError> {
         let base = self.base_url(base_url)?;
+        self.create_access_token_with_audience(client_id, &base, &base)
+    }
+
+    fn create_access_token_with_audience(
+        &self,
+        client_id: &str,
+        issuer: &str,
+        audience: &str,
+    ) -> Result<String, ReCtmError> {
         let now = self.runtime.clock.now_unix();
         self.encode_signed_token(&serde_json::json!({
             "v": 1,
-            "iss": base,
-            "aud": base,
+            "iss": issuer,
+            "aud": audience,
             "sub": client_id,
             "client_id": client_id,
             "iat": now,
@@ -852,6 +970,16 @@ pub fn parse_basic_authorization(header: &str) -> (String, String) {
         return (String::new(), String::new());
     };
     (percent_decode(client_id), percent_decode(client_secret))
+}
+
+fn mcp_resource(base: &str) -> String {
+    format!("{base}/mcp")
+}
+
+fn resource_matches(base: &str, resource: &str, allow_mcp_resource: bool) -> bool {
+    constant_time_equal(resource.as_bytes(), base.as_bytes())
+        || (allow_mcp_resource
+            && constant_time_equal(resource.as_bytes(), mcp_resource(base).as_bytes()))
 }
 
 fn authenticate_client(client: &Value, secret: &str, presented_method: &str) -> bool {
@@ -1069,6 +1197,87 @@ mod tests {
         assert!(!valid_pkce_challenge("short"));
         assert!(!valid_pkce_verifier("short"));
         assert!(!verify_pkce(&"A".repeat(43), &"B".repeat(43)));
+        Ok(())
+    }
+
+    #[test]
+    fn mcp_resource_metadata_and_pkce_bind_full_resource() -> Result<(), ReCtmError> {
+        let (_temp, service) = service(&["client-mcp-fixed", "authorization-code-mcp-fixed"])?;
+        let base = "https://re-ctm.example.test";
+        let resource = format!("{base}/mcp");
+        let metadata = service.protected_mcp_resource_metadata(Some(base))?;
+        assert_eq!(metadata["resource"], resource);
+        assert_eq!(metadata["authorization_servers"], serde_json::json!([base]));
+
+        let registered = service.register(
+            &serde_json::json!({
+                "redirect_uris": ["http://127.0.0.1/mcp-callback"],
+                "token_endpoint_auth_method": "none",
+            }),
+            "trace-mcp-register",
+        )?;
+        let client_id = registered["client_id"]
+            .as_str()
+            .ok_or_else(internal_client_error)?;
+        let verifier = "M".repeat(43);
+        let mut digest = Sha256::new();
+        digest.update(verifier.as_bytes());
+        let challenge = URL_SAFE_NO_PAD.encode(digest.finalize());
+        let params = BTreeMap::from([
+            ("client_id".to_owned(), client_id.to_owned()),
+            (
+                "redirect_uri".to_owned(),
+                "http://127.0.0.1/mcp-callback".to_owned(),
+            ),
+            ("response_type".to_owned(), "code".to_owned()),
+            ("code_challenge".to_owned(), challenge),
+            ("code_challenge_method".to_owned(), "S256".to_owned()),
+            ("resource".to_owned(), resource.clone()),
+            ("state".to_owned(), "mcp-state".to_owned()),
+        ]);
+        assert_eq!(
+            service
+                .validate_authorization_request(&params, Some(base))
+                .map_err(|error| error.code),
+            Err("OAUTH_INVALID_TARGET".to_owned())
+        );
+        let redirect = service.authorize_mcp(
+            &params,
+            "operator-password",
+            "trace-mcp-authorize",
+            Some(base),
+        )?;
+        let code = Url::parse(&redirect)
+            .map_err(|_| invalid_argument("redirect URL invalid"))?
+            .query_pairs()
+            .find_map(|(key, value)| (key == "code").then(|| value.into_owned()))
+            .ok_or_else(|| invalid_argument("authorization code missing"))?;
+        let exchange = BTreeMap::from([
+            ("grant_type".to_owned(), "authorization_code".to_owned()),
+            ("code".to_owned(), code),
+            (
+                "redirect_uri".to_owned(),
+                "http://127.0.0.1/mcp-callback".to_owned(),
+            ),
+            ("code_verifier".to_owned(), verifier),
+            ("client_id".to_owned(), client_id.to_owned()),
+            ("resource".to_owned(), resource.clone()),
+        ]);
+        let token = service.exchange_mcp_code(&exchange, "", "", "trace-mcp-token", Some(base))?;
+        let access_token = token["access_token"]
+            .as_str()
+            .ok_or_else(internal_client_error)?;
+        let payload = service.decode_signed_token(access_token)?;
+        assert_eq!(payload["iss"], base);
+        assert_eq!(payload["aud"], resource);
+        let bearer = format!("Bearer {access_token}");
+        service.validate_mcp_authorization_header(&bearer, "trace-mcp-valid", Some(base))?;
+        assert_eq!(
+            service
+                .validate_authorization_header(&bearer, "trace-legacy-invalid", Some(base))
+                .map_err(|error| error.code),
+            Err("OAUTH_UNAUTHORIZED".to_owned())
+        );
         Ok(())
     }
 }

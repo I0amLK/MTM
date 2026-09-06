@@ -28,6 +28,7 @@ use crate::runtime::GatewayRuntime;
 
 pub const MAX_REQUEST_BYTES: usize = 1_048_576;
 pub const MCP_PATH: &str = "/mcp";
+pub const MCP_PROTECTED_RESOURCE_METADATA_PATH: &str = "/.well-known/oauth-protected-resource/mcp";
 
 #[derive(Clone, Debug)]
 pub struct GatewayHttpConfig {
@@ -88,6 +89,10 @@ pub fn build_router(state: Arc<GatewayState>) -> Router {
         .route(
             "/.well-known/oauth-protected-resource",
             get(protected_metadata),
+        )
+        .route(
+            MCP_PROTECTED_RESOURCE_METADATA_PATH,
+            get(protected_mcp_metadata),
         )
         .route("/.well-known/mcp.json", get(mcp_card))
         .route(
@@ -150,6 +155,17 @@ async fn protected_metadata(
     value_or_error(result, trace, request.headers(), &state, None)
 }
 
+async fn protected_mcp_metadata(
+    State(state): State<Arc<GatewayState>>,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    request: Request,
+) -> Response {
+    let trace = trace_id(&state);
+    let result = resolve_base_url(&state, request.headers(), Some(peer))
+        .and_then(|base| state.oauth.protected_mcp_resource_metadata(Some(&base)));
+    value_or_error(result, trace, request.headers(), &state, None)
+}
+
 async fn mcp_card(
     State(state): State<Arc<GatewayState>>,
     ConnectInfo(peer): ConnectInfo<SocketAddr>,
@@ -161,7 +177,7 @@ async fn mcp_card(
             "name": "mtm",
             "title": "MTM",
             "endpoint": format!("{base}{MCP_PATH}"),
-            "oauth": state.oauth.protected_resource_metadata(Some(&base))?,
+            "oauth": state.oauth.protected_mcp_resource_metadata(Some(&base))?,
             "tool_count": state.catalog.list_public().len(),
             "tool_catalog_stable": true,
             "manual_validation_required": true,
@@ -181,7 +197,7 @@ async fn authorize_page(
         let params = query_params(request.uri().query().unwrap_or_default());
         state
             .oauth
-            .validate_authorization_request(&params, Some(&base))
+            .validate_mcp_authorization_request(&params, Some(&base))
     })();
     match result {
         Ok(validated) => {
@@ -255,7 +271,7 @@ async fn authorize_submit(
             let password = params.remove("password").unwrap_or_default();
             state
                 .oauth
-                .authorize(&params, &password, &trace, Some(&base))
+                .authorize_mcp(&params, &password, &trace, Some(&base))
         }),
         Err(error) => Err(error),
     };
@@ -292,7 +308,7 @@ async fn token(
         Ok(base) => read_form(request).await.and_then(|params| {
             state
                 .oauth
-                .exchange_code(&params, &basic.0, &basic.1, &trace, Some(&base))
+                .exchange_mcp_code(&params, &basic.0, &basic.1, &trace, Some(&base))
         }),
         Err(error) => Err(error),
     };
@@ -320,7 +336,7 @@ async fn mcp(
         Ok(base) => base,
         Err(error) => return error_response(error, &trace, &headers, &state, None),
     };
-    let principal = match state.oauth.validate_authorization_header(
+    let principal = match state.oauth.validate_mcp_authorization_header(
         headers
             .get(AUTHORIZATION)
             .and_then(|value| value.to_str().ok())
@@ -590,7 +606,7 @@ fn error_response(
             state,
         );
         if let Ok(value) = HeaderValue::from_str(&format!(
-            "Bearer realm=\"mtm\", resource_metadata=\"{base}/.well-known/oauth-protected-resource\""
+            "Bearer realm=\"mtm\", resource_metadata=\"{base}{MCP_PROTECTED_RESOURCE_METADATA_PATH}\""
         )) {
             response.headers_mut().insert(WWW_AUTHENTICATE, value);
         }
