@@ -206,9 +206,14 @@ def main() -> int:
             "mtm014_preview_qualification", [sys.executable, "scripts/validate_mtm014_preview_release.py"],
             env=environment, capture_json=True,
         ))
+    mtm015_release_record = ROOT / "records/evidence/MTM-015/preview-release.json"
+    mtm015_released = mtm015_release_record.is_file()
     if (ROOT / "records/evidence/MTM-014/preview-release.json").is_file() or mtm014_preview_selected:
         checks.append(run(
-            "mtm014_preview_deployment", [sys.executable, "scripts/validate_mtm014_preview_release.py", "--deployed"],
+            "mtm014_preview_release_historical" if mtm015_released else "mtm014_preview_deployment",
+            [sys.executable, "scripts/validate_mtm014_historical_release.py"]
+            if mtm015_released
+            else [sys.executable, "scripts/validate_mtm014_preview_release.py", "--deployed"],
             env=environment, capture_json=True,
         ))
     if (ROOT / "records/evidence/MTM-015/target-qualification.json").is_file():
@@ -217,19 +222,19 @@ def main() -> int:
             [sys.executable, "scripts/validate_mtm015_target_qualification.py"],
             env=environment, capture_json=True,
         ))
-    if (ROOT / "records/evidence/MTM-015/candidate-stage.json").is_file():
+    if (ROOT / "records/evidence/MTM-015/candidate-stage.json").is_file() and not mtm015_released:
         checks.append(run(
             "mtm015_candidate_stage",
             [sys.executable, "scripts/validate_mtm015_candidate_stage.py"],
             env=environment, capture_json=True,
         ))
-    if (ROOT / "records/evidence/MTM-015/web-client.json").is_file():
+    if (ROOT / "records/evidence/MTM-015/web-client.json").is_file() and not mtm015_released:
         checks.append(run(
             "mtm015_web_client",
             [sys.executable, "scripts/validate_mtm015_web_client.py"],
             env=environment, capture_json=True,
         ))
-    if (ROOT / "records/evidence/MTM-015/preview-release.json").is_file():
+    if mtm015_released:
         checks.append(run(
             "mtm015_preview_release",
             [sys.executable, "scripts/validate_mtm015_preview_release.py"],
@@ -542,6 +547,12 @@ def main() -> int:
         "passed": all(item["passed"] for item in checks),
         "checks": checks,
         "local_claim": (
+            "MTM-015 0.5.0-preview.2 is selected for new launches with exact target, installed-candidate, "
+            "clean real web-client and real rollback/recutover release receipts. Historical MTM-014 "
+            "preview.1 release evidence is revalidated statically after supersession; stable 0.4.0 is "
+            "preserved and existing sessions are not restarted by selector changes."
+            if mtm015_released else
+            (
             (
                 "MTM-015 source reliability repair is in progress while the qualified MTM-014 "
                 "0.5.0-preview.1 binary remains selected for new launches. Current-source capability "
@@ -566,6 +577,7 @@ def main() -> int:
                 "MTM-001 through MTM-012 remain accepted historical milestones with immutable "
                 "hash-bound evidence while MTM-013 stable qualification is in progress. The only "
                 "final mathematical artifact remains proof_verified.tex."
+            )
             )
         ),
     }

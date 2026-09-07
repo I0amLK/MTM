@@ -11,23 +11,28 @@ Repository: <https://github.com/I0amLK/MTM>
 
 ## Current release
 
-MTM-014 is qualified as **0.5.0-preview.1**, with Rust Native permission authority
-and Bubblewrap retained as the Linux isolation actuator. The immutable **0.4.0**
-stable binary remains the rollback release. This is a preview, not a new stable cut.
+MTM-015 is qualified as **0.5.0-preview.2** with exact binary SHA-256
+`2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a`.
+Both ordinary `mtm` command entries select that immutable release. Qualified
+**0.5.0-preview.1** remains the direct selector rollback and the immutable **0.4.0**
+stable binary remains preserved as the earlier stable rollback. This is a preview,
+not a new stable cut.
 
-The preview passed real client-owned MRTR consent, public permission regressions,
-required-LaTeX QC/compact workflows, copied-state compatibility, actual selector
-rollback/recutover and bounded resource soak. Magma functional use remains blocked
-by the validation host's license; it is not counted as a functional pass. Explicit
-permission approval requires a modern form-capable MCP client; legacy clients do
-not silently gain approval support.
+Preview.2 retains the qualified MTM-014 Native permission authority and adds the
+MTM-015 capability-reliability repairs: non-overwriting persistent secret creation,
+redacted capability diagnostics, bounded same-run recovery, permanent 500-round
+current-source capability regression, and RFC 9728 path-aware OAuth protected-resource
+metadata for the public `/mcp` endpoint. The exact candidate passed target and
+installed-endpoint qualification, five clean real Quick Tunnel compact capability
+roundtrips with zero normal `CAPABILITY_INVALID`, actual preview.1 rollback/preview.2
+recutover, and a bounded post-recutover permission soak.
 
-See [the preview release contract](docs/releases/0.5.0-preview.1.md) and the exact
-qualification/deployment receipts under `records/evidence/MTM-014/`. Existing
+See [the preview.2 release contract](docs/releases/0.5.0-preview.2.md) and the exact
+qualification/deployment receipts under `records/evidence/MTM-015/`. Existing
 running sessions are not restarted by selector changes. On the qualified target,
 restart the desired TUI with `mtm tui --quick-tunnel --native-mode dangerous` to
-use the new selection. Restore stable selection with
-`python3 scripts/release_mtm014_preview.py --rollback` from this repository.
+adopt the current selection. Magma functional use remains host-license dependent
+and is not counted as a pass when the host installation rejects its license.
 
 ## Highlights
 
@@ -103,10 +108,10 @@ mtm check-config
 Expected command identity:
 
 ```text
-mtm 0.4.0
+mtm 0.5.0-preview.2
 ```
 
-MTM 0.4.0 uses workflow protocol 3 as the production default for new runs
+MTM 0.5.0-preview.2 uses workflow protocol 3 as the production default for new runs
 after the accepted MTM-011 cutover qualification. Protocol 2 remains available as an
 explicit rollback selection:
 

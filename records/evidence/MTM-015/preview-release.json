@@ -1,0 +1,75 @@
+{
+  "candidate_binary_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+  "candidate_stage_sha256": "5787fd9d54cb8eb918833ecc8fc8cba417adde9de0baa612577042abb506aed4",
+  "check_count": 11,
+  "checks": {
+    "both_entries_agree": true,
+    "candidate_stage_valid": true,
+    "deployment_manifest_consistent": true,
+    "immutable_release_installed": true,
+    "post_recutover_soak": true,
+    "preview1_rollback_smoke": true,
+    "preview2_cutover_smoke": true,
+    "preview2_recutover_smoke": true,
+    "stable_artifact_preserved": true,
+    "target_evidence_valid": true,
+    "web_client_valid": true
+  },
+  "evidence_hygiene": {
+    "raw_capability_recorded": false,
+    "raw_logs_recorded": false,
+    "raw_oauth_token_recorded": false,
+    "raw_secret_recorded": false
+  },
+  "existing_sessions_restarted": false,
+  "harness_sha256": {
+    "scripts/mtm008_deployment.py": "aeab6c7f8856f4ae0b596e5b264b4c6a01c463634a585af5281a59d0f6a322d7",
+    "scripts/mtm014_release_support.py": "f041f5a089cff2437b3fb40c99d4f1b2b4841ce4988c93273d76d6eef070da03",
+    "scripts/release_mtm015_preview.py": "927aabc132ecef9fb88633dbe90f9eeceec468d66fe3184f54b4aade2f9f3a15",
+    "scripts/validate_mtm015_preview_release.py": "94066f934c662c7e30305186002476f2b0b99189d6f7ade13737a2743de0bc83"
+  },
+  "milestone": "MTM-015",
+  "ok": true,
+  "performance_claim": false,
+  "phase": "preview_release",
+  "post_recutover_soak": {
+    "after": {
+      "children": 0,
+      "fds": 16,
+      "rss_kib": 15328,
+      "threads": 9
+    },
+    "before": {
+      "children": 0,
+      "fds": 16,
+      "rss_kib": 14312,
+      "threads": 9
+    },
+    "duration_seconds": 60.148,
+    "iterations": 506,
+    "peak": {
+      "children": 0,
+      "fds": 16,
+      "rss_kib": 15328,
+      "threads": 9
+    },
+    "shutdown_ms": 15.685
+  },
+  "previous_sha256": "2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036",
+  "previous_version": "0.5.0-preview.1",
+  "production_state_rewritten": false,
+  "recorded_at": "2026-09-07T06:35:04.487916+00:00",
+  "release_commit": "1c74938fd091c88a4e2e1d0ba78ce8d2fac25d16",
+  "release_path": "/home/lk/.local/share/mtm/releases/0.5.0-preview.2/mtm",
+  "rollback": {
+    "previous_path": "/home/lk/.local/share/mtm/releases/0.5.0-preview.1/mtm",
+    "previous_sha256": "2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036",
+    "previous_version": "0.5.0-preview.1",
+    "real_rollback_and_recutover_passed": true
+  },
+  "schema_version": "1.0.0",
+  "stable_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+  "target_evidence_sha256": "6155b14f9e5c365b0049dd2436b5f6888f403ab4d2685eb45e5e5e8079e05da5",
+  "version": "0.5.0-preview.2",
+  "web_client_sha256": "345d9bdb3bd7da994b7406038ca739a18140c9e581c0ba6761f4e9328ee0040f"
+}

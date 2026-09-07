@@ -44,6 +44,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def deployment_mode() -> str:
     progress = json.loads((ROOT / "records/governance/project-progress.json").read_text(encoding="utf-8"))
     milestone = progress.get("current_milestone")
+    if milestone == "MTM-015" and (ROOT / "records/evidence/MTM-015/preview-release.json").is_file():
+        return "mtm015_preview"
     if milestone in {"MTM-014", "MTM-015"} and (ROOT / "records/evidence/MTM-014/preview-release.json").is_file():
         return "mtm014_preview"
     stable_report = ROOT / "records/evidence/MTM-013/stable-release.json"
@@ -88,6 +90,7 @@ def historical_evidence_mode() -> bool:
         "mtm012_preview",
         "mtm013_stable",
         "mtm014_preview",
+        "mtm015_preview",
     }
 
 
@@ -104,12 +107,12 @@ class GovernanceTestCase(unittest.TestCase):
     def test_repository_migration_graph_is_valid(self) -> None:
         summary = validate_migration(load_graph())
         self.assertEqual(summary["milestone_count"], 15)
-        self.assertEqual(summary["todo_count"], 1)
+        self.assertEqual(summary["todo_count"], 0)
 
-    def test_mtm015_capability_repair_scope_is_registered_without_cutover(self) -> None:
+    def test_mtm015_capability_repair_release_is_completed_and_bound(self) -> None:
         graph = load_graph()
         milestone = next(item for item in graph["milestones"] if item["id"] == "MTM-015")
-        self.assertEqual(milestone["status"], "in_progress")
+        self.assertEqual(milestone["status"], "completed")
         self.assertEqual(milestone["dependencies"], ["MTM-014"])
         self.assertEqual(milestone["production_authority_before"], "rust")
         self.assertEqual(milestone["production_authority_after"], "rust")
@@ -117,10 +120,17 @@ class GovernanceTestCase(unittest.TestCase):
         iteration = json.loads(
             (ROOT / "records" / "iterations" / "ITER-015.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(iteration["status"], "in_progress")
+        self.assertEqual(iteration["status"], "completed")
         self.assertEqual(iteration["base_commit"], "3254e54465f9f10a449f3a6d5877c846a4319773")
-        self.assertFalse(iteration["release_state"]["selector_changed_by_mtm015"])
+        self.assertEqual(iteration["release_state"]["selected_version"], "0.5.0-preview.2")
+        self.assertEqual(
+            iteration["release_state"]["selected_binary_sha256"],
+            "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+        )
+        self.assertTrue(iteration["release_state"]["selector_changed_by_mtm015"])
+        self.assertTrue(iteration["release_state"]["real_rollback_and_recutover_passed"])
         self.assertFalse(iteration["release_state"]["production_state_rewritten"])
+        self.assertEqual(iteration["decision"], "accepted_0_5_0_preview_2")
 
     def test_mtm014_native_permission_contract_is_frozen(self) -> None:
         graph = load_graph()
@@ -868,7 +878,18 @@ class GovernanceTestCase(unittest.TestCase):
 
     def test_current_mtm_and_re_ctm_command_namespaces_are_separate(self) -> None:
         summary = validate_mtm_command_namespace()
-        if deployment_mode() == "mtm014_preview":
+        if deployment_mode() == "mtm015_preview":
+            self.assertEqual(summary["evidence"], "mtm015_preview_release")
+            self.assertEqual(summary["mtm_version"], "0.5.0-preview.2")
+            self.assertEqual(
+                summary["mtm_sha256"],
+                "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+            )
+            self.assertEqual(summary["production_default_workflow_protocol"], 3)
+            self.assertEqual(summary["rollback_workflow_protocol"], 2)
+            self.assertTrue(summary["real_rollback_and_recutover_passed"])
+            self.assertTrue(summary["web_client_qualified"])
+        elif deployment_mode() == "mtm014_preview":
             self.assertEqual(summary["evidence"], "mtm014_preview_release")
             self.assertIn(summary["mtm_version"], {"0.4.0", "0.5.0-preview.1"})
             self.assertEqual(summary["production_default_workflow_protocol"], 3)

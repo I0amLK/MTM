@@ -509,7 +509,7 @@
     {
       "id": "MTM-015",
       "title": "Capability reliability and recovery hardening",
-      "status": "in_progress",
+      "status": "completed",
       "priority": "P0",
       "production_authority_before": "rust",
       "production_authority_after": "rust",
@@ -570,7 +570,7 @@
     {"source": "MTM-014", "target": "MTM-013"},
     {"source": "MTM-015", "target": "MTM-014"}
   ],
-  "todo": ["MTM-015"],
+  "todo": [],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -1035,6 +1035,14 @@
       "status_before": "approved",
       "status_after": "in_progress",
       "summary": "Registered MTM-015 after applying the source candidate, repairing its runtime dependency-boundary drift, restoring the exact immutable stable 0.4.0 rollback artifact, and passing the complete local gate. Target/web-client/restart/copied-state release acceptance remains outstanding."
+    },
+    {
+      "event_id": "MEVT-059",
+      "milestone_id": "MTM-015",
+      "at": "2026-09-06T23:35:04.487916-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "summary": "Completed MTM-015 with qualified 0.5.0-preview.2 selected at both ordinary mtm entries. Exact target qualification passed 15/15 checks, content-addressed candidate stage passed 9/9, clean real Quick Tunnel web-client acceptance recorded five paired compact assess submissions with zero CAPABILITY_INVALID diagnostics or submission rejections, and the final release drill passed preview.2 cutover, preview.1 rollback, preview.2 recutover plus a 60.148-second/506-iteration soak. Earlier rejected web-client and rollout-tooling attempts remain preserved; stable 0.4.0 and production state remain intact."
     }
   ],
   "receipt_contract": {
@@ -2877,6 +2885,82 @@
         "Restore a valid Magma host license for functional algebra validation. Other clients/platforms and long-duration operation remain outside this measured preview scope."
       ],
       "decision": "accepted_0_5_0_preview_1"
+    },
+    {
+      "receipt_id": "MREC-015",
+      "milestone_id": "MTM-015",
+      "started_at": "2026-09-06T02:30:00-07:00",
+      "completed_at": "2026-09-06T23:35:04.487916-07:00",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "docs(mtm015): complete capability reliability preview [MTM-015]",
+      "files_changed": [
+        "crates/mtm-runtime/src/config.rs",
+        "crates/mtm-runtime/src/operator.rs",
+        "crates/mtm-runtime/src/submission_events.rs",
+        "crates/mtm-storage/src/capability.rs",
+        "crates/mtm-storage/src/capability_diagnostics.rs",
+        "crates/mtm-gateway/src/http.rs",
+        "crates/mtm-gateway/src/oauth.rs",
+        "scripts/check_capability_current.py",
+        "scripts/capability_recovery.py",
+        "scripts/run_mtm015_target_qualification.py",
+        "scripts/run_mtm015_candidate_stage.py",
+        "scripts/launch_mtm015_web_candidate.py",
+        "scripts/record_mtm015_web_client_evidence.py",
+        "scripts/release_mtm015_preview.py",
+        "scripts/validate_mtm015_preview_release.py",
+        "records/iterations/ITER-015.json",
+        "records/evidence/MTM-015/target-qualification.json",
+        "records/evidence/MTM-015/candidate-stage.json",
+        "records/evidence/MTM-015/web-client.json",
+        "records/evidence/MTM-015/preview-release.json"
+      ],
+      "commands": [
+        {
+          "command": "python3 scripts/run_mtm015_target_qualification.py",
+          "exit_code": 0,
+          "result": "Fifteen exact-target checks passed for 0.5.0-preview.2 binary SHA-256 2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a, including 500/500 normal capability roundtrips with zero normal INVALID, persisted-secret restart/change-key boundaries, RFC 9728 /mcp OAuth resource flow, required-LaTeX full/compact workflows, copied state, resource bounds and a 60.197-second/506-iteration permission soak."
+        },
+        {
+          "command": "python3 scripts/run_mtm015_candidate_stage.py",
+          "exit_code": 0,
+          "result": "Nine side-by-side installed-candidate checks passed against the same exact SHA, including public server identity, OAuth/MCP capability roundtrip, path-aware /mcp discovery, owner-only persisted secret creation, unchanged pre-cutover selectors and preserved stable rollback bytes."
+        },
+        {
+          "command": "python3 scripts/validate_mtm015_web_client.py",
+          "exit_code": 0,
+          "result": "Accepted clean real Quick Tunnel evidence records five paired independent compact assess submissions, zero CAPABILITY_INVALID diagnostics and zero submission rejections; raw capability/OAuth/log/password material is not stored. An earlier signature-mismatch web session remains preserved as rejected evidence."
+        },
+        {
+          "command": "python3 scripts/release_mtm015_preview.py",
+          "exit_code": 0,
+          "result": "Eleven final release checks passed: immutable preview.2 install, preview.2 cutover smoke, real preview.1 rollback smoke, preview.2 recutover smoke, both selector entries agreeing, deployment-manifest consistency, stable-artifact preservation, and a 60.148-second/506-iteration post-recutover permission soak. The first rollout tooling attempt restored preview.1 and remains recorded as rejected rather than relabelled."
+        },
+        {
+          "command": "python3 scripts/validate_mtm015_preview_release.py && python3 scripts/run_checks.py && git diff --check",
+          "exit_code": 0,
+          "result": "Final preview.2 deployment, historical MTM-014 release semantics, command namespace separation, governance/record layout and the unified Rust/Python validation gate pass after closure."
+        }
+      ],
+      "acceptance": {
+        "A0": {"passed": true, "evidence": ["Formatting, warnings-denied Clippy, complete Rust workspace tests, Python governance/recovery tests, engineering/record/migration validators and the unified local gate pass after release closure."]},
+        "A1": {"passed": true, "evidence": ["Capability issue/validate authority remains signed, role/state/run/owner-bound and fail-closed. Invalid capability bytes authorize zero writes; only the existing recoverable INVALID class can return a fresh envelope and the caller retry is bounded to one."]},
+        "A3": {"passed": true, "evidence": ["Persistent secret first-creation is non-overwriting and owner-only; same-key restart preserves authority, changed-key same-owner rejects old capability with zero writes, diagnostics remain redacted, and rejected web/tooling sessions are preserved without weakening thresholds."]},
+        "A4": {"passed": true, "evidence": ["Exact installed preview.2 passes OAuth DCR/PKCE resource=/mcp, RFC 9728 protected-resource discovery, public OAuth/MCP capability roundtrip, real Quick Tunnel clean client use, required-LaTeX full/compact proof flows, copied-state compatibility and actual selector rollback/recutover."]},
+        "A5": {"passed": true, "evidence": ["Target resource non-regression passed; target and post-recutover permission soaks each completed 506 iterations near 60 seconds with fixed 9 threads/16 descriptors, bounded RSS and no remaining children. No A6 or long-duration performance claim is made."]}
+      },
+      "behavior_before": "Qualified 0.5.0-preview.1 had Rust Native permission authority but capability signer initialization/diagnostic recovery reliability and MCP path-aware OAuth protected-resource interoperability were not yet qualified for the real web-client path.",
+      "behavior_after": "Qualified 0.5.0-preview.2 is selected at both ordinary mtm command entries. Capability secret publication is non-overwriting, diagnostics are redacted, recovery is bounded, normal current-envelope regressions are permanently gated, and /mcp OAuth discovery/resource binding interoperates with the real MCP client while workflow/finalizer and Native authority boundaries remain unchanged.",
+      "risk_review": "This remains a preview rather than a stable 0.5.0 cut. A rejected real-web session containing one unpaired signature-mismatch submission and a rejected first rollout-tooling attempt are retained as failures; neither was relabelled or used to relax the clean-session zero-INVALID or release thresholds. Production workflow/project/proof state was not rewritten, existing sessions were not restarted, and stable 0.4.0 plus preview.1 rollback bytes remain immutable.",
+      "rollback": "Restore both ordinary mtm selectors to immutable 0.5.0-preview.1 SHA-256 2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036 and the previous deployment manifest. The accepted drill actually performed that rollback and recut over to preview.2. Stable 0.4.0 SHA-256 3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3 remains preserved; no database migration or workflow rewrite is required.",
+      "manual_pending": [
+        "Restart already running MTM TUI/serve sessions only when you want them to adopt 0.5.0-preview.2; selector rollout intentionally did not restart them.",
+        "Push the local main branch to GitHub as the operator. Magma functional validation remains dependent on a valid host license; other operating systems and long-duration operation remain outside this bounded preview evidence."
+      ],
+      "decision": "accepted_0_5_0_preview_2"
     }
   ]
 }

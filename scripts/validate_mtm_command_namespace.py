@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import json
 import hashlib
+import subprocess
+import sys
 from pathlib import Path
 
 try:
@@ -170,6 +172,43 @@ def validate_mtm013_stable_namespace() -> dict[str, object]:
 
 
 def validate() -> dict[str, object]:
+    mtm015_receipt = ROOT / "records/evidence/MTM-015/preview-release.json"
+    if mtm015_receipt.is_file():
+        completed = subprocess.run(
+            [sys.executable, "scripts/validate_mtm015_preview_release.py"],
+            cwd=ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+        if completed.returncode != 0:
+            raise ValueError("MTM-015 preview release validation failed")
+        response = json.loads(completed.stdout)
+        summary = response.get("summary")
+        if response.get("ok") is not True or not isinstance(summary, dict):
+            raise ValueError("MTM-015 preview release validator returned no accepted summary")
+        if not RE_CTM_BIN.exists() or MTM_BIN.resolve() == RE_CTM_BIN.resolve():
+            raise ValueError("MTM and Re-CTM commands are not independently installed")
+        if MTM_STATE_ROOT.resolve() == RE_CTM_TOOL_ROOT.resolve():
+            raise ValueError("MTM and Re-CTM share an installation root")
+        if not MTM_DATA_ROOT.is_dir() or MTM_DATA_ROOT.is_symlink():
+            raise ValueError("MTM runtime data root is missing or unsafe")
+        if MTM_DATA_ROOT.resolve() == LEGACY_SHARED_DATA_ROOT.resolve():
+            raise ValueError("MTM and Re-CTM share a runtime data root")
+        return {
+            "evidence": "mtm015_preview_release",
+            "mtm_version": summary["version"],
+            "mtm_sha256": summary["binary_sha256"],
+            "mtm_target": str(MTM_BIN.resolve()),
+            "re_ctm_target": str(RE_CTM_BIN.resolve()),
+            "mtm_data_root": str(MTM_DATA_ROOT.resolve()),
+            "production_default_workflow_protocol": 3,
+            "rollback_workflow_protocol": 2,
+            "real_rollback_and_recutover_passed": summary["rollback_recutover_passed"],
+            "web_client_qualified": summary["web_client_qualified"],
+        }
     preview_receipt = ROOT / "records/evidence/MTM-014/preview-release.json"
     if preview_receipt.is_file():
         try:

@@ -2,7 +2,8 @@
   "schema_version": "1.0.0",
   "milestone": "MTM-015",
   "title": "Capability reliability and recovery hardening",
-  "status": "in_progress",
+  "status": "completed",
+  "completed_at": "2026-09-06T23:35:04.487916-07:00",
   "started_at": "2026-09-06T02:30:00-07:00",
   "base_commit": "3254e54465f9f10a449f3a6d5877c846a4319773",
   "authority": {
@@ -70,7 +71,7 @@
     {
       "id": "R7",
       "name": "RFC 9728 MCP protected-resource OAuth discovery interoperability",
-      "status": "implemented_exact_target_and_stage_qualified_web_client_pending",
+      "status": "implemented_release_qualified",
       "implementation_commit": "46a587fa2bc5f58c3be03c23d95a302313e04013",
       "legacy_origin_metadata_preserved": true,
       "mcp_resource_path": "/mcp",
@@ -90,30 +91,36 @@
     "current_binary_gate_samples": 500,
     "current_binary_gate_normal_invalid": 0,
     "current_binary_gate_production_state_modified": false,
-    "current_source_sha256": "29eac7bec06290a04cb31a522217ea6cb051732bbd51223449764afb8776cde6",
-    "current_binary_sha256": "ada2c932c3aeb7d21cbd536d3268a0d0f119fe39d4f76fd17102d6c223cbdf12",
+    "current_source_sha256": "4b0acf9d3a4aeb281fade0f8032c99b491d05d028f93357401274f9f28672189",
+    "current_binary_sha256": "d81eedce729747bb5824019d2a5dfcb5c60ff86fa8ff435afb869895793012a5",
     "current_capability_record": "records/validation/capability-current.json",
     "unified_validation_record": "records/validation/local-validation.json",
     "unified_local_gate": true,
+    "unified_local_gate_check_count": 32,
     "git_diff_check": true
   },
   "release_state": {
-    "selected_version": "0.5.0-preview.1",
-    "selected_binary_sha256": "2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036",
-    "selector_changed_by_mtm015": false,
+    "selected_version": "0.5.0-preview.2",
+    "selected_binary_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+    "selector_changed_by_mtm015": true,
     "production_state_rewritten": false,
-    "new_mtm015_release_installed": false,
+    "new_mtm015_release_installed": true,
+    "previous_version": "0.5.0-preview.1",
+    "previous_binary_sha256": "2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036",
+    "real_rollback_and_recutover_passed": true,
+    "release_receipt": "records/evidence/MTM-015/preview-release.json",
+    "release_receipt_sha256": "7c3e635619e1a9c9e987366a3cf03a7c12185ec402fa8642d9b3b1e3cd9f29a3",
     "stable_0_4_0_archive_restored": true,
     "stable_0_4_0_archive_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3"
   },
   "release_identity": {
-    "status": "oauth_interop_repair_exact_target_stage_and_web_qualified_release_drill_pending",
+    "status": "released_accepted",
     "candidate_version": "0.5.0-preview.2",
     "base_version": "0.5.0-preview.1",
     "functional_implementation_commit": "46a587fa2bc5f58c3be03c23d95a302313e04013",
     "allowed_delta_after_implementation": "none under Cargo.toml, Cargo.lock, rust-toolchain.toml, or crates before exact qualification",
     "overwrite_existing_release_path": false,
-    "selector_cutover_permitted": false,
+    "selector_cutover_permitted": true,
     "qualification_commit": "3890edc0ba6dd1d4424493ac7ef8e9d8d99318c6",
     "candidate_binary_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
     "target_evidence_sha256": "6155b14f9e5c365b0049dd2436b5f6888f403ab4d2685eb45e5e5e8079e05da5",
@@ -218,7 +225,7 @@
     }
   },
   "release_harness": {
-    "status": "first_attempt_rejected_tooling_repaired_reexecution_pending",
+    "status": "executed_accepted",
     "runner": "scripts/release_mtm015_preview.py",
     "validator": "scripts/validate_mtm015_preview_release.py",
     "evidence": "records/evidence/MTM-015/preview-release.json",
@@ -237,6 +244,12 @@
     "existing_sessions_restart_permitted": false,
     "production_state_rewrite_permitted": false,
     "failure_restores_preview1": true,
+    "accepted_release_receipt_sha256": "7c3e635619e1a9c9e987366a3cf03a7c12185ec402fa8642d9b3b1e3cd9f29a3",
+    "accepted_release_commit": "1c74938fd091c88a4e2e1d0ba78ce8d2fac25d16",
+    "accepted_check_count": 11,
+    "accepted_post_recutover_soak_seconds": 60.148,
+    "accepted_post_recutover_soak_iterations": 506,
+    "real_rollback_and_recutover_passed": true,
     "rejected_attempts": [
       {
         "result": "rejected_not_release_evidence",
@@ -253,8 +266,6 @@
       }
     ]
   },
-  "remaining_acceptance": [
-    "After web-client and installed-endpoint acceptance, perform an explicit selector rollback/recutover drill before considering MTM-015 complete."
-  ],
-  "decision": "oauth_interop_repair_exact_target_stage_and_clean_web_client_qualified_release_drill_pending"
+  "remaining_acceptance": [],
+  "decision": "accepted_0_5_0_preview_2"
 }
