@@ -1,5 +1,5 @@
 {
-  "binary_sha256": "ada2c932c3aeb7d21cbd536d3268a0d0f119fe39d4f76fd17102d6c223cbdf12",
+  "binary_sha256": "d81eedce729747bb5824019d2a5dfcb5c60ff86fa8ff435afb869895793012a5",
   "checks": {
     "bounded_server_shutdown": true,
     "cross_run_capability_remains_denied": true,
@@ -28,6 +28,6 @@
   "raw_oauth_token_recorded": false,
   "samples_requested": 500,
   "schema_version": "1.0.0",
-  "source_sha256": "29eac7bec06290a04cb31a522217ea6cb051732bbd51223449764afb8776cde6",
+  "source_sha256": "4b0acf9d3a4aeb281fade0f8032c99b491d05d028f93357401274f9f28672189",
   "web_client_tested": false
 }

@@ -107,7 +107,7 @@
     "stable_0_4_0_archive_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3"
   },
   "release_identity": {
-    "status": "oauth_interop_repair_exact_target_and_stage_qualified_web_client_pending",
+    "status": "oauth_interop_repair_exact_target_stage_and_web_qualified_release_drill_pending",
     "candidate_version": "0.5.0-preview.2",
     "base_version": "0.5.0-preview.1",
     "functional_implementation_commit": "46a587fa2bc5f58c3be03c23d95a302313e04013",
@@ -165,7 +165,7 @@
     "repair": "Validate the actual public server_info contract: server/version/tool counts, hidden alias count, complete-flow flag, research-workspace schema/protocol and workflow-authority non-inheritance. No product code or acceptance threshold changed."
   },
   "web_client_harness": {
-    "status": "prepared_release_candidate_web_acceptance_pending",
+    "status": "executed_accepted",
     "launcher": "scripts/launch_mtm015_web_candidate.py",
     "recorder": "scripts/record_mtm015_web_client_evidence.py",
     "validator": "scripts/validate_mtm015_web_client.py",
@@ -178,7 +178,19 @@
     "selector_cutover_permitted": false,
     "release_candidate_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
     "previous_release_candidate_sha256": "3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707",
-    "release_candidate_web_client_tested": false,
+    "release_candidate_web_client_tested": true,
+    "accepted_web_client_evidence_sha256": "345d9bdb3bd7da994b7406038ca739a18140c9e581c0ba6761f4e9328ee0040f",
+    "accepted_session": {
+      "session_id": "20260907T051717Z-8c7025e7",
+      "candidate_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+      "independent_compact_runs_reached_assemble": 5,
+      "issued_fingerprint_count": 10,
+      "submitted_fingerprint_count": 5,
+      "paired_fingerprint_count": 5,
+      "invalid_diagnostic_count": 0,
+      "submission_rejection_count": 0,
+      "raw_fingerprint_or_capability_recorded": false
+    },
     "oauth_discovery_blocker_repaired_in_commit": "46a587fa2bc5f58c3be03c23d95a302313e04013",
     "rejected_web_client_sessions": [
       {
@@ -206,8 +218,7 @@
     }
   },
   "remaining_acceptance": [
-    "Exercise the actual web client and compare correctly paired issued/submitted fingerprints without storing raw capabilities.",
     "After web-client and installed-endpoint acceptance, perform an explicit selector rollback/recutover drill before considering MTM-015 complete."
   ],
-  "decision": "oauth_interop_repair_exact_target_and_stage_qualified_first_web_session_rejected_clean_web_client_rerun_pending"
+  "decision": "oauth_interop_repair_exact_target_stage_and_clean_web_client_qualified_release_drill_pending"
 }

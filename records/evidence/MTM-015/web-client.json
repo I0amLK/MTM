@@ -1,0 +1,39 @@
+{
+  "candidate_binary_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+  "candidate_stage_sha256": "5787fd9d54cb8eb918833ecc8fc8cba417adde9de0baa612577042abb506aed4",
+  "confirmation_source": "conversation_user_confirmation",
+  "evidence_hygiene": {
+    "fingerprint_values_recorded": false,
+    "operator_password_path_recorded": false,
+    "public_url_recorded": false,
+    "raw_capability_recorded": false,
+    "raw_logs_recorded": false,
+    "raw_oauth_token_recorded": false,
+    "raw_secret_recorded": false
+  },
+  "explicit_user_confirmation": true,
+  "harness_sha256": {
+    "scripts/launch_mtm015_web_candidate.py": "2203ca8aaba169b3691bcc591ed16b65040edf656c71b92a87d9131afe63379e",
+    "scripts/record_mtm015_web_client_evidence.py": "560df12a65132694ce44797210214f1ad01627ca9821d22c0bd6ccb47e6d64c2",
+    "scripts/validate_mtm015_web_client.py": "e75adf8f2ce53c9ffd65720a44d05d90347e9ea3d6cc00c93885bb59d0a934ef"
+  },
+  "invalid_diagnostic_count": 0,
+  "issued_fingerprint_count": 10,
+  "milestone": "MTM-015",
+  "ok": true,
+  "operator_log_sha256": "c8f7f382379b3b7fa77f7f99db149193f513499746f2782619d749032ebfe59b",
+  "paired_fingerprint_count": 5,
+  "phase": "web_client",
+  "production_state_rewritten": false,
+  "public_metadata_issuer_validated": true,
+  "public_tunnel_observed": true,
+  "recorded_at": "2026-09-07T05:31:00.850707+00:00",
+  "schema_version": "1.0.0",
+  "selector_changed": false,
+  "session_descriptor_sha256": "78a17400797d285f2d1acff4b29032066f9a12570e814587a12995fc3c4acd2e",
+  "session_id": "20260907T051717Z-8c7025e7",
+  "submission_rejection_count": 0,
+  "submitted_fingerprint_count": 5,
+  "transport": "quick_tunnel_oauth_mcp",
+  "web_client_tested": true
+}
