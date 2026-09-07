@@ -217,6 +217,27 @@
       "result": "Subsequent rethlas_start calls were blocked by the client platform before reaching MTM; no web-client acceptance was recorded."
     }
   },
+  "release_harness": {
+    "status": "prepared_not_executed",
+    "runner": "scripts/release_mtm015_preview.py",
+    "validator": "scripts/validate_mtm015_preview_release.py",
+    "evidence": "records/evidence/MTM-015/preview-release.json",
+    "candidate_version": "0.5.0-preview.2",
+    "candidate_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+    "immutable_release_path": "/home/lk/.local/share/mtm/releases/0.5.0-preview.2/mtm",
+    "rollback_version": "0.5.0-preview.1",
+    "rollback_sha256": "2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036",
+    "stable_0_4_0_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+    "drill_sequence": [
+      "preview2_cutover",
+      "preview1_rollback",
+      "preview2_recutover"
+    ],
+    "post_recutover_soak_required": true,
+    "existing_sessions_restart_permitted": false,
+    "production_state_rewrite_permitted": false,
+    "failure_restores_preview1": true
+  },
   "remaining_acceptance": [
     "After web-client and installed-endpoint acceptance, perform an explicit selector rollback/recutover drill before considering MTM-015 complete."
   ],
