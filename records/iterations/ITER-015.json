@@ -180,6 +180,25 @@
     "previous_release_candidate_sha256": "3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707",
     "release_candidate_web_client_tested": false,
     "oauth_discovery_blocker_repaired_in_commit": "46a587fa2bc5f58c3be03c23d95a302313e04013",
+    "rejected_web_client_sessions": [
+      {
+        "session_id": "20260907T034036Z-73d5d5a3",
+        "candidate_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+        "result": "rejected_not_release_evidence",
+        "independent_compact_runs_reached_assemble": 5,
+        "issued_fingerprint_count": 18,
+        "submitted_fingerprint_count": 12,
+        "paired_fingerprint_count": 11,
+        "unpaired_submitted_count": 1,
+        "invalid_diagnostic_count": 1,
+        "invalid_stage": "signature_mismatch",
+        "matched_previous_web_session_count": 0,
+        "logical_submission_rejection_text_count": 0,
+        "transport_observation": "One run encountered an upstream 502. The caller did not blindly replay the uncertain request; it re-read the current assess task and then advanced using the newly returned envelope.",
+        "interpretation": "The single invalid submitted fingerprint was not issued by the current web session and did not match any earlier MTM-015 web-session issued fingerprint. This rejected session therefore cannot establish a normal current-envelope reliability pass and remains preserved rather than relabeled.",
+        "raw_fingerprint_or_capability_recorded": false
+      }
+    ],
     "prior_functional_candidate_attempt": {
       "candidate_sha256": "7f869fc867a7c2575ad68d65956bc34f2cda26bc42b4878c20ff0d75cc42decd",
       "quick_tunnel_metadata_and_server_info_reached_candidate": true,
@@ -190,5 +209,5 @@
     "Exercise the actual web client and compare correctly paired issued/submitted fingerprints without storing raw capabilities.",
     "After web-client and installed-endpoint acceptance, perform an explicit selector rollback/recutover drill before considering MTM-015 complete."
   ],
-  "decision": "oauth_interop_repair_exact_target_and_stage_qualified_web_client_pending"
+  "decision": "oauth_interop_repair_exact_target_and_stage_qualified_first_web_session_rejected_clean_web_client_rerun_pending"
 }
