@@ -32,7 +32,22 @@ No lower-priority goal may weaken a higher-priority goal.
 - Do not claim performance without A6 evidence.
 - Preserve the source baseline and all failed/rollback evidence.
 
-## Required local gate
+## MTM-016 approved contract-change work
+
+Read `docs/MTM-016-NATIVE-PLAN.md` and `records/iterations/ITER-016.json`.
+The operator approved independent MTM contracts, legacy alias retirement and one
+maintenance-only `xtask` crate. This does not authorize production deployment,
+historical evidence rewrites, weaker isolation or changed workflow authority.
+Use the Rust source checks as delivered; unported Python/target suites remain
+explicitly pending rather than being silently counted as passed.
+
+Current commands: `cargo xtask audit`, `cargo xtask records`, `cargo xtask check`.
+The checker retains inherited host integration tests; in a nested Native sandbox
+Bubblewrap tests can fail. Report those failures and compare with the frozen
+baseline; never make the gate green by silently ignoring them. `audit --strict`
+must remain nonzero while first-party Python or legacy Rust references remain.
+
+## Historical local gate (before MTM-016)
 
 ```bash
 python3 scripts/run_checks.py

@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-016",
+  "title": "Rust-native maintenance and usable tools",
+  "status": "in_progress",
+  "started_at": "2026-09-07T14:54:38Z",
+  "base_commit": "b3ab147b72d72aa546c9c41bdbe71924aa5ebb97",
+  "branch": "work/mtm016-native-usability",
+  "working_copy": "~/桌面/MTM/mtm-native-016",
+  "source_acquisition": "Fresh clone of verified origin/main because CTM is unavailable; the original development checkout was not modified.",
+  "plan": "docs/MTM-016-NATIVE-PLAN.md",
+  "authority": {
+    "before": "rust",
+    "after": "rust",
+    "native_does_not_grant_workflow_authority": true,
+    "production_selector_changed": false,
+    "production_state_rewritten": false,
+    "production_keys_changed": false
+  },
+  "approved_maintenance_crates": ["xtask"],
+  "stages": [
+    {"id": "A", "status": "in_progress", "goal": "Inventory and retirement ownership"},
+    {"id": "B", "status": "in_progress", "goal": "Native/Workspace/Git usability regressions"},
+    {"id": "C", "status": "pending", "goal": "MTM-owned contracts and alias retirement"},
+    {"id": "D", "status": "in_progress", "goal": "Rust-only maintenance and independent evidence validation"},
+    {"id": "E", "status": "pending", "goal": "Task-domain lifecycle and workflow idempotency"},
+    {"id": "F", "status": "pending", "goal": "Python-free complete qualification and new release"}
+  ],
+  "open_observations": [
+    "Adjacent shell control operators are not tokenized correctly by executable fact collection.",
+    "search_text delegates to directory-only list_files and rejects a regular-file target.",
+    "The MTM-015 signature_mismatch sample remains unexplained; later clean samples do not close attribution.",
+    "The old Python unified gate depends on sibling Re-CTM sources and host deployment artifacts; it is not a portable source gate."
+  ],
+  "inventory": {
+    "report": "records/validation/mtm016-inventory.json",
+    "python_files_observed": 127,
+    "python_files_deleted": 0,
+    "coverage_retirement_complete": false,
+    "legacy_rust_marker_files_observed": 52,
+    "marker_interpretation": "Textual retirement candidates, not proof that each is a live dependency"
+  },
+  "initial_delivery": {
+    "recorded_at": "2026-09-07T15:28:03Z",
+    "literal_command_lists": "implemented_source_tested",
+    "complex_shell_grammar_and_builtins": "pending",
+    "file_target_search": "implemented_source_tested",
+    "git_repository_selection": "pending",
+    "rust_maintenance_entry": "implemented_partial_not_release_gate",
+    "legacy_catalog_and_alias_retirement": "pending",
+    "product_dependency_edges": 17,
+    "product_dependency_changes": 0,
+    "architecture_record_correction": "Removed stale storage-to-core edge absent from baseline Cargo manifest; added maintenance-only crate record"
+  },
+  "receipts": [
+    {
+      "id": "MTM016-INITIAL-SOURCE",
+      "scope": "A inventory, B two usability repairs, D Rust maintenance entry",
+      "status": "partial_source_checked_host_qualification_pending",
+      "evidence_binding": "Initial worktree observations, not an exact-binary release receipt. The implementation checkpoint commits bind the reviewed changes; full target qualification is pending.",
+      "commands": [
+        {"command": "cargo test -p mtm-core --locked adjacent_", "phase": "before repair", "exit_code": 101, "result": "Two newly added tests reproduced adjacent-operator parsing and permission-classification failures"},
+        {"command": "cargo test -p mtm-runtime --locked workspace::search_tests", "phase": "before repair", "exit_code": 101, "result": "Three failures reproduced regular-file and search-bounds behavior; two boundary/directory tests already passed"},
+        {"command": "cargo test -p mtm-core -p mtm-xtask -p mtm-storage -p mtm-workflow --locked", "phase": "after repair", "exit_code": 0, "passed_tests": {"core": 41, "storage_unit_and_integration": 12, "workflow_unit_and_integration": 91, "xtask_at_this_point": 6}, "scope": "Rust tests; not real web-model or host LaTeX qualification"},
+        {"command": "cargo test -p mtm-runtime --locked workspace::search_tests", "phase": "after repair", "exit_code": 0, "passed_tests": 5},
+        {"command": "cargo test -p mtm-runtime --locked adjacent_commands_keep_privileged_and_missing_file_checks", "exit_code": 0, "passed_tests": 1},
+        {"command": "cargo test -p mtm-xtask --locked", "phase": "after history hardening", "exit_code": 0, "passed_tests": 8},
+        {"command": "cargo xtask audit --strict --record", "exit_code": 1, "result": "Expected rejection while 127 Python files and legacy Rust markers remain; no retirement pass claimed"},
+        {"command": "cargo xtask check --record", "exit_code": 1, "result": "Formatting, warnings-denied Clippy, static records, architecture and diff checks passed; inherited host tests failed under nested isolation"}
+      ],
+      "environment_comparison": {
+        "baseline_commit": "b3ab147b72d72aa546c9c41bdbe71924aa5ebb97",
+        "baseline_runtime_tests": {"passed": 88, "failed": 10, "ignored": 1},
+        "modified_runtime_tests": {"passed": 94, "failed": 10, "ignored": 1},
+        "identical_failed_test_names": true,
+        "probe": "bwrap --unshare-user --ro-bind / / -- /bin/true",
+        "probe_exit_code": 1,
+        "probe_error": "Creating new namespace failed: nesting depth or /proc/sys/user/max_*_namespaces exceeded (ENOSPC)",
+        "test_suppressions_added": 0,
+        "host_native_acceptance": "pending"
+      },
+      "history": {
+        "relocated_evidence_hashes_checked": 26,
+        "old_evidence_and_legal_notices_modified": false,
+        "historical_event_and_receipt_prefix_preserved": true
+      },
+      "release_qualified": false,
+      "production_changed": false,
+      "raw_capability_or_secret_recorded": false
+    }
+  ],
+  "remaining_acceptance": [
+    "Port or retire Python suites with an explicit coverage map before deleting them.",
+    "Remove current Re-CTM authority and hidden aliases after independent contract tests.",
+    "Exercise exact candidate through Native isolation, full Rethlas, retrieval, LaTeX, reconnect and rollback.",
+    "Complete the representative 30-task, three-repeat usability corpus."
+  ],
+  "decision": "implementation_in_progress_not_release_qualified"
+}

@@ -1,5 +1,11 @@
 # MTM
 
+> Development branch: MTM-016 is in progress. See
+> [the native modernization plan](docs/MTM-016-NATIVE-PLAN.md) and
+> `records/iterations/ITER-016.json`. This branch is not release-qualified and
+> must not overwrite the installed immutable 0.5.0-preview.2 binary. The release
+> section below describes the previously accepted MTM-015 baseline.
+
 MTM is a Rust-native mathematical research runtime with capability-gated workflows,
 isolated Native tools, OAuth/MCP access, private workflow state, verifier/finalizer
 gates, and a single operational CLI/TUI.
