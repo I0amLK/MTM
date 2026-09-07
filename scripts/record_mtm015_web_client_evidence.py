@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import hashlib
 import json
 import re
@@ -68,14 +69,32 @@ def main() -> int:
         }:
             invalid += 1
     paired = issued & submitted
+    unpaired_submitted = submitted - issued
+    invalid_stages = Counter(
+        stage_name
+        for kind, _fingerprint, stage_name in DIAGNOSTIC_RE.findall(log_text)
+        if kind == "submitted"
+        and stage_name in {
+            "token_shape", "signature_encoding", "signature_mismatch", "payload_encoding",
+            "payload_json", "payload_version", "claims_invalid",
+        }
+    )
     rejected_lines = sum(
         1 for line in log_text.splitlines()
         if "submission rejected:" in line or "CAPABILITY_INVALID" in line
     )
     if len(paired) < 5:
-        raise ValueError("fewer than five issued/submitted capability fingerprints were paired")
+        raise ValueError(
+            "fewer than five issued/submitted capability fingerprints were paired "
+            f"(paired={len(paired)}, unpaired_submitted={len(unpaired_submitted)})"
+        )
     if invalid != 0 or rejected_lines != 0:
-        raise ValueError("normal web-client session contained capability rejection evidence")
+        raise ValueError(
+            "normal web-client session contained capability rejection evidence "
+            f"(paired={len(paired)}, unpaired_submitted={len(unpaired_submitted)}, "
+            f"invalid_diagnostic_count={invalid}, invalid_stages={dict(sorted(invalid_stages.items()))}, "
+            f"submission_rejection_count={rejected_lines})"
+        )
     payload = {
         "schema_version": "1.0.0",
         "milestone": "MTM-015",
