@@ -11,9 +11,7 @@ from typing import Any
 
 import mtm014_release_support as release_support
 from mtm008_deployment import load_manifest
-from validate_mtm015_candidate_stage import validate as validate_stage
 from validate_mtm015_target_qualification import validate as validate_target
-from validate_mtm015_web_client import validate as validate_web
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -53,6 +51,23 @@ HYGIENE = {
     "raw_secret_recorded": False,
     "raw_logs_recorded": False,
 }
+STAGE_CHECK_NAMES = {
+    "target_evidence_valid",
+    "rebuilt_candidate_matches_target",
+    "content_addressed_install_exact",
+    "installed_endpoint_identity",
+    "installed_endpoint_capability_roundtrip",
+    "installed_endpoint_mcp_oauth_discovery",
+    "installed_persisted_secret_owner_only",
+    "selectors_unchanged",
+    "stable_rollback_artifact_preserved",
+}
+STAGE_HYGIENE = {
+    "raw_capability_recorded": False,
+    "raw_oauth_token_recorded": False,
+    "raw_secret_recorded": False,
+    "raw_logs_recorded": False,
+}
 
 
 def require(value: Any, label: str) -> None:
@@ -62,6 +77,114 @@ def require(value: Any, label: str) -> None:
 
 def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def validate_stage_receipt_static() -> dict[str, Any]:
+    payload = json.loads(STAGE.read_text(encoding="utf-8"))
+    required = {
+        "schema_version", "milestone", "phase", "version", "ok", "recorded_at",
+        "implementation_commit", "target_qualification_commit", "stage_commit",
+        "target_evidence_sha256", "candidate_binary_sha256", "candidate_path",
+        "checks", "check_count", "endpoint", "harness_sha256", "web_client_tested",
+        "installed_endpoint_tested", "selector_changed", "production_state_rewritten",
+        "evidence_hygiene",
+    }
+    require(set(payload) == required, "stage_receipt_fields")
+    require(payload["schema_version"] == "1.0.0", "stage_schema")
+    require(payload["milestone"] == "MTM-015" and payload["phase"] == "candidate_stage",
+            "stage_identity")
+    require(payload["version"] == VERSION and payload["ok"] is True, "stage_version")
+    require(payload["candidate_binary_sha256"] == CANDIDATE_SHA, "stage_binary")
+    require(payload["target_evidence_sha256"] == digest(TARGET), "stage_target_binding")
+    require(re.fullmatch(r"[0-9a-f]{40}", str(payload["stage_commit"])) is not None,
+            "stage_commit")
+    checks = payload["checks"]
+    require(isinstance(checks, dict) and set(checks) == STAGE_CHECK_NAMES,
+            "stage_check_set")
+    require(all(value is True for value in checks.values()), "stage_checks")
+    require(payload["check_count"] == len(STAGE_CHECK_NAMES), "stage_check_count")
+    candidate = Path(str(payload["candidate_path"]))
+    expected_candidate = STATE_ROOT / f"candidates/MTM-015/{CANDIDATE_SHA}/mtm"
+    require(candidate == expected_candidate and candidate.is_file(), "stage_candidate_path")
+    require(digest(candidate) == CANDIDATE_SHA, "stage_candidate_hash")
+    require(payload["installed_endpoint_tested"] is True, "stage_endpoint_tested")
+    require(payload["web_client_tested"] is False, "stage_web_claim")
+    require(payload["selector_changed"] is False, "stage_selector_changed")
+    require(payload["production_state_rewritten"] is False, "stage_state_rewritten")
+    require(payload["evidence_hygiene"] == STAGE_HYGIENE, "stage_hygiene")
+    harness = payload["harness_sha256"]
+    require(set(harness) == {
+        "scripts/run_mtm015_candidate_stage.py",
+        "scripts/validate_mtm015_candidate_stage.py",
+    }, "stage_harness_files")
+    for path, expected in harness.items():
+        require(digest(ROOT / path) == expected, f"stage_harness_drift:{path}")
+    require(
+        subprocess.run(
+            ["git", "merge-base", "--is-ancestor", payload["stage_commit"], "HEAD"],
+            cwd=ROOT, check=False,
+        ).returncode == 0,
+        "stage_commit_not_ancestor",
+    )
+    return payload
+
+
+def validate_web_receipt_static() -> dict[str, Any]:
+    payload = json.loads(WEB.read_text(encoding="utf-8"))
+    required = {
+        "schema_version", "milestone", "phase", "ok", "recorded_at",
+        "candidate_binary_sha256", "candidate_stage_sha256", "session_id",
+        "session_descriptor_sha256", "public_tunnel_observed",
+        "public_metadata_issuer_validated", "explicit_user_confirmation",
+        "confirmation_source", "issued_fingerprint_count",
+        "submitted_fingerprint_count", "paired_fingerprint_count",
+        "invalid_diagnostic_count", "submission_rejection_count",
+        "operator_log_sha256", "web_client_tested", "selector_changed",
+        "production_state_rewritten", "transport", "harness_sha256",
+        "evidence_hygiene",
+    }
+    require(set(payload) == required, "web_receipt_fields")
+    require(payload["schema_version"] == "1.0.0", "web_schema")
+    require(payload["milestone"] == "MTM-015" and payload["phase"] == "web_client",
+            "web_identity")
+    require(payload["ok"] is True and payload["candidate_binary_sha256"] == CANDIDATE_SHA,
+            "web_binary")
+    require(payload["candidate_stage_sha256"] == digest(STAGE), "web_stage_binding")
+    require(payload["transport"] == "quick_tunnel_oauth_mcp", "web_transport")
+    require(payload["public_tunnel_observed"] is True, "web_tunnel")
+    require(payload["public_metadata_issuer_validated"] is True, "web_metadata")
+    require(payload["explicit_user_confirmation"] is True, "web_confirmation")
+    require(payload["confirmation_source"] == "conversation_user_confirmation",
+            "web_confirmation_source")
+    require(type(payload["paired_fingerprint_count"]) is int
+            and payload["paired_fingerprint_count"] >= 5, "web_pairs")
+    require(type(payload["issued_fingerprint_count"]) is int
+            and payload["issued_fingerprint_count"] >= payload["paired_fingerprint_count"],
+            "web_issued")
+    require(type(payload["submitted_fingerprint_count"]) is int
+            and payload["submitted_fingerprint_count"] >= payload["paired_fingerprint_count"],
+            "web_submitted")
+    require(payload["invalid_diagnostic_count"] == 0, "web_invalid")
+    require(payload["submission_rejection_count"] == 0, "web_rejection")
+    require(payload["web_client_tested"] is True, "web_tested")
+    require(payload["selector_changed"] is False, "web_selector_changed")
+    require(payload["production_state_rewritten"] is False, "web_state_rewritten")
+    hygiene = payload["evidence_hygiene"]
+    for key in (
+        "fingerprint_values_recorded", "operator_password_path_recorded",
+        "public_url_recorded", "raw_capability_recorded", "raw_logs_recorded",
+        "raw_oauth_token_recorded", "raw_secret_recorded",
+    ):
+        require(hygiene.get(key) is False, f"web_hygiene:{key}")
+    harness = payload["harness_sha256"]
+    require(set(harness) == {
+        "scripts/launch_mtm015_web_candidate.py",
+        "scripts/record_mtm015_web_client_evidence.py",
+        "scripts/validate_mtm015_web_client.py",
+    }, "web_harness_files")
+    for path, expected in harness.items():
+        require(digest(ROOT / path) == expected, f"web_harness_drift:{path}")
+    return payload
 
 
 def validate(payload: dict[str, Any] | None = None, *, deployed: bool = True) -> dict[str, Any]:
@@ -98,8 +221,8 @@ def validate(payload: dict[str, Any] | None = None, *, deployed: bool = True) ->
     require(payload["candidate_stage_sha256"] == digest(STAGE), "stage_evidence_binding")
     require(payload["web_client_sha256"] == digest(WEB), "web_evidence_binding")
     target = validate_target()
-    stage = validate_stage()
-    web = validate_web()
+    stage = validate_stage_receipt_static()
+    web = validate_web_receipt_static()
     require(target["binary_sha256"] == CANDIDATE_SHA, "target_binary")
     require(stage["candidate_binary_sha256"] == CANDIDATE_SHA, "stage_binary")
     require(web["candidate_binary_sha256"] == CANDIDATE_SHA, "web_binary")

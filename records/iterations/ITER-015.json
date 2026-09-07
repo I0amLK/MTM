@@ -218,7 +218,7 @@
     }
   },
   "release_harness": {
-    "status": "prepared_not_executed",
+    "status": "first_attempt_rejected_tooling_repaired_reexecution_pending",
     "runner": "scripts/release_mtm015_preview.py",
     "validator": "scripts/validate_mtm015_preview_release.py",
     "evidence": "records/evidence/MTM-015/preview-release.json",
@@ -236,7 +236,22 @@
     "post_recutover_soak_required": true,
     "existing_sessions_restart_permitted": false,
     "production_state_rewrite_permitted": false,
-    "failure_restores_preview1": true
+    "failure_restores_preview1": true,
+    "rejected_attempts": [
+      {
+        "result": "rejected_not_release_evidence",
+        "failed_stage_reported": "preview2_recutover",
+        "previous_restored": true,
+        "release_receipt_written": false,
+        "preview2_immutable_install_preserved": true,
+        "followup_preview2_recutover_smoke_passed": true,
+        "followup_preview2_soak_passed": true,
+        "followup_soak_duration_seconds": 60.137,
+        "followup_soak_iterations": 506,
+        "root_cause": "The final release validator reused the pre-cutover candidate/web validators after recutover; those historical validators correctly require preview.1 to remain selected and therefore treated a successful preview.2 selector state as selector drift.",
+        "repair": "Keep historical candidate/web validators byte-identical. The final release validator statically revalidates their frozen receipts and separately requires the deployed selectors and manifest to bind preview.2. Runner stage labels now distinguish recutover smoke, post-recutover soak, manifest finalization and final receipt validation."
+      }
+    ]
   },
   "remaining_acceptance": [
     "After web-client and installed-endpoint acceptance, perform an explicit selector rollback/recutover drill before considering MTM-015 complete."

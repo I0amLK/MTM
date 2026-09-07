@@ -219,9 +219,11 @@ def main() -> int:
                 switch_pair(INSTALLED)
                 verify_pair(INSTALLED, VERSION, CANDIDATE_SHA)
                 checks["preview2_recutover_smoke"] = smoke(INSTALLED, VERSION, root, "recutover")
+                stage = "post_recutover_soak"
                 soak = release_support.soak(INSTALLED, root / "post-recutover-soak")
                 checks["post_recutover_soak"] = release_support.soak_ok(soak)
 
+            stage = "finalize_manifest"
             new["state"] = "rust_active"
             new["updated_at"] = utc_now()
             new["history"].append(
@@ -283,6 +285,7 @@ def main() -> int:
                 },
             }
             from validate_mtm015_preview_release import validate
+            stage = "final_receipt_validation"
             validate(report, deployed=True)
             with REPORT.open("x", encoding="utf-8") as handle:
                 json.dump(report, handle, indent=2, sort_keys=True)
@@ -309,7 +312,8 @@ def main() -> int:
             "ok": False,
             "stage": stage,
             "previous_restored": restored,
-            "error": str(error) if isinstance(error, ReleaseFailure) else type(error).__name__,
+            "error": str(error) if isinstance(error, (ReleaseFailure, ValueError))
+            else type(error).__name__,
         }))
         return 1
 
