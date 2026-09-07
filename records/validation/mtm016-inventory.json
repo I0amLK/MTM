@@ -1,0 +1,830 @@
+{
+  "audit_completed": true,
+  "base_head": "b3ab147b72d72aa546c9c41bdbe71924aa5ebb97",
+  "interpretation": "Text references are retirement candidates, not proof of a runtime dependency. User Python tools are not forbidden.",
+  "legacy_rust_reference_file_count": 52,
+  "legacy_rust_reference_files": [
+    "crates/mtm-cli/src/main.rs",
+    "crates/mtm-contracts/src/error.rs",
+    "crates/mtm-contracts/src/lib.rs",
+    "crates/mtm-core/src/command_policy.rs",
+    "crates/mtm-core/src/evaluator.rs",
+    "crates/mtm-core/src/native_permission.rs",
+    "crates/mtm-core/src/patch.rs",
+    "crates/mtm-core/src/path_policy.rs",
+    "crates/mtm-core/src/redaction.rs",
+    "crates/mtm-core/src/schema.rs",
+    "crates/mtm-core/src/shell_segments.rs",
+    "crates/mtm-core/src/url_policy.rs",
+    "crates/mtm-gateway/src/bin/server.rs",
+    "crates/mtm-gateway/src/bin/shadow.rs",
+    "crates/mtm-gateway/src/catalog.rs",
+    "crates/mtm-gateway/src/http.rs",
+    "crates/mtm-gateway/src/mcp.rs",
+    "crates/mtm-gateway/src/oauth.rs",
+    "crates/mtm-gateway/src/runtime.rs",
+    "crates/mtm-native/src/bin/helper.rs",
+    "crates/mtm-native/src/bin/shadow.rs",
+    "crates/mtm-native/src/bubblewrap.rs",
+    "crates/mtm-native/src/process.rs",
+    "crates/mtm-native/src/quick_tunnel.rs",
+    "crates/mtm-native/src/toolchain.rs",
+    "crates/mtm-runtime/src/application.rs",
+    "crates/mtm-runtime/src/config.rs",
+    "crates/mtm-runtime/src/config_secret_tests.rs",
+    "crates/mtm-runtime/src/helper.rs",
+    "crates/mtm-runtime/src/latex.rs",
+    "crates/mtm-runtime/src/native_authority.rs",
+    "crates/mtm-runtime/src/native_permission.rs",
+    "crates/mtm-runtime/src/native_tools.rs",
+    "crates/mtm-runtime/src/research.rs",
+    "crates/mtm-runtime/src/server.rs",
+    "crates/mtm-runtime/src/tool_backend.rs",
+    "crates/mtm-runtime/src/workspace.rs",
+    "crates/mtm-runtime/src/workspace_search_tests.rs",
+    "crates/mtm-storage/src/bin/shadow.rs",
+    "crates/mtm-storage/src/capability.rs",
+    "crates/mtm-storage/src/capability_diagnostics.rs",
+    "crates/mtm-storage/src/store.rs",
+    "crates/mtm-storage/tests/storage.rs",
+    "crates/mtm-workflow/src/bin/mtm_workflow_shadow.rs",
+    "crates/mtm-workflow/src/bin/target_validation.rs",
+    "crates/mtm-workflow/src/engine.rs",
+    "crates/mtm-workflow/src/kernel.rs",
+    "crates/mtm-workflow/src/methodology.rs",
+    "crates/mtm-workflow/src/research.rs",
+    "crates/mtm-workflow/src/vault.rs",
+    "crates/mtm-workflow/src/verifier.rs",
+    "crates/mtm-workflow/tests/workflow.rs"
+  ],
+  "milestone": "MTM-016",
+  "python_file_count": 127,
+  "python_files": [
+    {
+      "bytes": 12035,
+      "disposition": "extract independent static fixtures, then retire shadow execution",
+      "lines": 198,
+      "path": "conformance/mtm002_cases.py"
+    },
+    {
+      "bytes": 12643,
+      "disposition": "extract independent static fixtures, then retire shadow execution",
+      "lines": 403,
+      "path": "conformance/mtm004_scenario.py"
+    },
+    {
+      "bytes": 848,
+      "disposition": "extract independent static fixtures, then retire shadow execution",
+      "lines": 31,
+      "path": "conformance/python_batch_cli.py"
+    },
+    {
+      "bytes": 11670,
+      "disposition": "extract independent static fixtures, then retire shadow execution",
+      "lines": 341,
+      "path": "conformance/python_gateway_shadow.py"
+    },
+    {
+      "bytes": 6020,
+      "disposition": "extract independent static fixtures, then retire shadow execution",
+      "lines": 140,
+      "path": "conformance/python_native_shadow.py"
+    },
+    {
+      "bytes": 3147,
+      "disposition": "extract independent static fixtures, then retire shadow execution",
+      "lines": 77,
+      "path": "conformance/python_reference.py"
+    },
+    {
+      "bytes": 12054,
+      "disposition": "extract independent static fixtures, then retire shadow execution",
+      "lines": 301,
+      "path": "conformance/python_storage_shadow.py"
+    },
+    {
+      "bytes": 9546,
+      "disposition": "extract independent static fixtures, then retire shadow execution",
+      "lines": 256,
+      "path": "conformance/python_workflow_shadow.py"
+    },
+    {
+      "bytes": 1820,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 52,
+      "path": "scripts/bind_mtm011_resource_evidence.py"
+    },
+    {
+      "bytes": 3875,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 87,
+      "path": "scripts/capability_recovery.py"
+    },
+    {
+      "bytes": 7022,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 148,
+      "path": "scripts/check_capability_current.py"
+    },
+    {
+      "bytes": 3888,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 111,
+      "path": "scripts/diagnose_mtm015_cross_session_capability.py"
+    },
+    {
+      "bytes": 2836,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 71,
+      "path": "scripts/finalize_mtm009_math_evaluation.py"
+    },
+    {
+      "bytes": 2084,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 52,
+      "path": "scripts/finalize_mtm011_math_evaluation.py"
+    },
+    {
+      "bytes": 6820,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 178,
+      "path": "scripts/launch_mtm015_web_candidate.py"
+    },
+    {
+      "bytes": 20791,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 550,
+      "path": "scripts/mtm008_deployment.py"
+    },
+    {
+      "bytes": 15987,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 492,
+      "path": "scripts/mtm008_runtime_harness.py"
+    },
+    {
+      "bytes": 18053,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 392,
+      "path": "scripts/mtm014_release_support.py"
+    },
+    {
+      "bytes": 2050,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 59,
+      "path": "scripts/next_mtm009_web_treatment.py"
+    },
+    {
+      "bytes": 1607,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 42,
+      "path": "scripts/next_mtm011_web_treatment.py"
+    },
+    {
+      "bytes": 4361,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 127,
+      "path": "scripts/prepare_mtm009_blind_bundle.py"
+    },
+    {
+      "bytes": 3652,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 91,
+      "path": "scripts/prepare_mtm011_blind_bundle.py"
+    },
+    {
+      "bytes": 3480,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 82,
+      "path": "scripts/record_mtm009_blind_score.py"
+    },
+    {
+      "bytes": 7929,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 179,
+      "path": "scripts/record_mtm009_web_run.py"
+    },
+    {
+      "bytes": 3235,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 70,
+      "path": "scripts/record_mtm011_blind_score.py"
+    },
+    {
+      "bytes": 10403,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 223,
+      "path": "scripts/record_mtm011_web_run.py"
+    },
+    {
+      "bytes": 6287,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 154,
+      "path": "scripts/record_mtm015_web_client_evidence.py"
+    },
+    {
+      "bytes": 1468,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 46,
+      "path": "scripts/record_paths.py"
+    },
+    {
+      "bytes": 2247,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 76,
+      "path": "scripts/release_mtm009_preview.py"
+    },
+    {
+      "bytes": 10711,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 249,
+      "path": "scripts/release_mtm011_preview.py"
+    },
+    {
+      "bytes": 8700,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 219,
+      "path": "scripts/release_mtm012_preview.py"
+    },
+    {
+      "bytes": 10969,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 263,
+      "path": "scripts/release_mtm013_stable.py"
+    },
+    {
+      "bytes": 8208,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 163,
+      "path": "scripts/release_mtm014_preview.py"
+    },
+    {
+      "bytes": 13662,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 322,
+      "path": "scripts/release_mtm015_preview.py"
+    },
+    {
+      "bytes": 25677,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 592,
+      "path": "scripts/run_checks.py"
+    },
+    {
+      "bytes": 10330,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 297,
+      "path": "scripts/run_mtm002_conformance.py"
+    },
+    {
+      "bytes": 21780,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 633,
+      "path": "scripts/run_mtm003_conformance.py"
+    },
+    {
+      "bytes": 28665,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 821,
+      "path": "scripts/run_mtm003_target_validation.py"
+    },
+    {
+      "bytes": 18610,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 477,
+      "path": "scripts/run_mtm004_conformance.py"
+    },
+    {
+      "bytes": 18154,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 534,
+      "path": "scripts/run_mtm004_target_validation.py"
+    },
+    {
+      "bytes": 26001,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 771,
+      "path": "scripts/run_mtm005_conformance.py"
+    },
+    {
+      "bytes": 27157,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 777,
+      "path": "scripts/run_mtm005_target_validation.py"
+    },
+    {
+      "bytes": 34879,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 1083,
+      "path": "scripts/run_mtm006_conformance.py"
+    },
+    {
+      "bytes": 5848,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 156,
+      "path": "scripts/run_mtm006_target_validation.py"
+    },
+    {
+      "bytes": 22748,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 640,
+      "path": "scripts/run_mtm007_conformance.py"
+    },
+    {
+      "bytes": 8235,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 249,
+      "path": "scripts/run_mtm007_http_smoke.py"
+    },
+    {
+      "bytes": 27566,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 792,
+      "path": "scripts/run_mtm007_target_validation.py"
+    },
+    {
+      "bytes": 11443,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 349,
+      "path": "scripts/run_mtm008_candidate_validation.py"
+    },
+    {
+      "bytes": 17913,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 492,
+      "path": "scripts/run_mtm008_live_cutover.py"
+    },
+    {
+      "bytes": 12855,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 337,
+      "path": "scripts/run_mtm008_performance.py"
+    },
+    {
+      "bytes": 18607,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 496,
+      "path": "scripts/run_mtm008_python_retirement.py"
+    },
+    {
+      "bytes": 8919,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 248,
+      "path": "scripts/run_mtm008_soak.py"
+    },
+    {
+      "bytes": 11175,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 352,
+      "path": "scripts/run_mtm009_protocol3_rollback.py"
+    },
+    {
+      "bytes": 12240,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 336,
+      "path": "scripts/run_mtm009_research_resource.py"
+    },
+    {
+      "bytes": 3470,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 100,
+      "path": "scripts/run_mtm009_tui_visibility.py"
+    },
+    {
+      "bytes": 15770,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 463,
+      "path": "scripts/run_mtm010_native_resolver.py"
+    },
+    {
+      "bytes": 1363,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 51,
+      "path": "scripts/run_mtm011_cutover_resource.py"
+    },
+    {
+      "bytes": 1201,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 41,
+      "path": "scripts/run_mtm011_research_resource.py"
+    },
+    {
+      "bytes": 8177,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 234,
+      "path": "scripts/run_mtm012_tui_validation.py"
+    },
+    {
+      "bytes": 18800,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 497,
+      "path": "scripts/run_mtm013_exact_stable_semantic_regression.py"
+    },
+    {
+      "bytes": 6094,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 189,
+      "path": "scripts/run_mtm013_public_install.py"
+    },
+    {
+      "bytes": 10222,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 281,
+      "path": "scripts/run_mtm013_runtime_hardening.py"
+    },
+    {
+      "bytes": 14973,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 403,
+      "path": "scripts/run_mtm013_stable_qualification.py"
+    },
+    {
+      "bytes": 1464,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 52,
+      "path": "scripts/run_mtm013_stable_resource.py"
+    },
+    {
+      "bytes": 5190,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 105,
+      "path": "scripts/run_mtm014_capacity_validation.py"
+    },
+    {
+      "bytes": 16730,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 476,
+      "path": "scripts/run_mtm014_mrtr_permission_validation.py"
+    },
+    {
+      "bytes": 15246,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 433,
+      "path": "scripts/run_mtm014_native_permission_target.py"
+    },
+    {
+      "bytes": 10152,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 173,
+      "path": "scripts/run_mtm014_preview_qualification.py"
+    },
+    {
+      "bytes": 36705,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 957,
+      "path": "scripts/run_mtm014_public_authority_target.py"
+    },
+    {
+      "bytes": 10384,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 253,
+      "path": "scripts/run_mtm015_candidate_stage.py"
+    },
+    {
+      "bytes": 25773,
+      "disposition": "review and port reusable qualification behavior before retirement",
+      "lines": 649,
+      "path": "scripts/run_mtm015_target_qualification.py"
+    },
+    {
+      "bytes": 18409,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 475,
+      "path": "scripts/run_mtm_command_namespace_cutover.py"
+    },
+    {
+      "bytes": 2288,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 69,
+      "path": "scripts/validate_commit_message.py"
+    },
+    {
+      "bytes": 21420,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 507,
+      "path": "scripts/validate_engineering_graph.py"
+    },
+    {
+      "bytes": 2903,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 64,
+      "path": "scripts/validate_historical_mtm_release_evidence.py"
+    },
+    {
+      "bytes": 8988,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 211,
+      "path": "scripts/validate_migration_graph.py"
+    },
+    {
+      "bytes": 3137,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 84,
+      "path": "scripts/validate_mtm003_target_evidence.py"
+    },
+    {
+      "bytes": 4924,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 126,
+      "path": "scripts/validate_mtm004_target_evidence.py"
+    },
+    {
+      "bytes": 4623,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 125,
+      "path": "scripts/validate_mtm005_target_evidence.py"
+    },
+    {
+      "bytes": 3213,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 86,
+      "path": "scripts/validate_mtm006_target_evidence.py"
+    },
+    {
+      "bytes": 3702,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 103,
+      "path": "scripts/validate_mtm007_target_evidence.py"
+    },
+    {
+      "bytes": 2950,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 80,
+      "path": "scripts/validate_mtm008_candidate_evidence.py"
+    },
+    {
+      "bytes": 4143,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 104,
+      "path": "scripts/validate_mtm008_live_evidence.py"
+    },
+    {
+      "bytes": 7975,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 190,
+      "path": "scripts/validate_mtm008_retirement_evidence.py"
+    },
+    {
+      "bytes": 3592,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 85,
+      "path": "scripts/validate_mtm009_math_corpus.py"
+    },
+    {
+      "bytes": 12720,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 242,
+      "path": "scripts/validate_mtm009_math_evaluation.py"
+    },
+    {
+      "bytes": 5127,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 102,
+      "path": "scripts/validate_mtm009_math_simulation.py"
+    },
+    {
+      "bytes": 6916,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 148,
+      "path": "scripts/validate_mtm009_preview_release.py"
+    },
+    {
+      "bytes": 2903,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 77,
+      "path": "scripts/validate_mtm009_release_gate.py"
+    },
+    {
+      "bytes": 13514,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 362,
+      "path": "scripts/validate_mtm009_research_contract.py"
+    },
+    {
+      "bytes": 3351,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 73,
+      "path": "scripts/validate_mtm009_research_resource.py"
+    },
+    {
+      "bytes": 7466,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 172,
+      "path": "scripts/validate_mtm010_native_resolver.py"
+    },
+    {
+      "bytes": 3512,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 75,
+      "path": "scripts/validate_mtm011_cutover_resource.py"
+    },
+    {
+      "bytes": 3360,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 85,
+      "path": "scripts/validate_mtm011_cutover_source.py"
+    },
+    {
+      "bytes": 5293,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 115,
+      "path": "scripts/validate_mtm011_math_corpus.py"
+    },
+    {
+      "bytes": 15280,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 271,
+      "path": "scripts/validate_mtm011_math_evaluation.py"
+    },
+    {
+      "bytes": 7264,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 153,
+      "path": "scripts/validate_mtm011_preview_release.py"
+    },
+    {
+      "bytes": 3804,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 83,
+      "path": "scripts/validate_mtm011_release_gate.py"
+    },
+    {
+      "bytes": 3379,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 73,
+      "path": "scripts/validate_mtm011_research_resource.py"
+    },
+    {
+      "bytes": 5977,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 142,
+      "path": "scripts/validate_mtm012_preview_release.py"
+    },
+    {
+      "bytes": 2568,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 63,
+      "path": "scripts/validate_mtm012_tui_validation.py"
+    },
+    {
+      "bytes": 4945,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 97,
+      "path": "scripts/validate_mtm013_exact_stable_semantic_regression.py"
+    },
+    {
+      "bytes": 2275,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 57,
+      "path": "scripts/validate_mtm013_public_install.py"
+    },
+    {
+      "bytes": 3112,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 71,
+      "path": "scripts/validate_mtm013_runtime_hardening.py"
+    },
+    {
+      "bytes": 4826,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 96,
+      "path": "scripts/validate_mtm013_stable_qualification.py"
+    },
+    {
+      "bytes": 5272,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 119,
+      "path": "scripts/validate_mtm013_stable_release.py"
+    },
+    {
+      "bytes": 3391,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 73,
+      "path": "scripts/validate_mtm013_stable_resource.py"
+    },
+    {
+      "bytes": 4784,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 107,
+      "path": "scripts/validate_mtm014_capacity_validation.py"
+    },
+    {
+      "bytes": 7404,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 161,
+      "path": "scripts/validate_mtm014_elicitation_capability.py"
+    },
+    {
+      "bytes": 800,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 24,
+      "path": "scripts/validate_mtm014_historical_release.py"
+    },
+    {
+      "bytes": 11716,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 291,
+      "path": "scripts/validate_mtm014_native_permission_target.py"
+    },
+    {
+      "bytes": 9975,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 185,
+      "path": "scripts/validate_mtm014_preview_release.py"
+    },
+    {
+      "bytes": 8633,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 226,
+      "path": "scripts/validate_mtm014_public_authority_target.py"
+    },
+    {
+      "bytes": 5337,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 131,
+      "path": "scripts/validate_mtm015_candidate_stage.py"
+    },
+    {
+      "bytes": 13971,
+      "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
+      "lines": 309,
+      "path": "scripts/validate_mtm015_preview_release.py"
+    },
+    {
+      "bytes": 5993,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 162,
+      "path": "scripts/validate_mtm015_target_qualification.py"
+    },
+    {
+      "bytes": 4959,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 109,
+      "path": "scripts/validate_mtm015_web_client.py"
+    },
+    {
+      "bytes": 15745,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 308,
+      "path": "scripts/validate_mtm_command_namespace.py"
+    },
+    {
+      "bytes": 5192,
+      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
+      "lines": 121,
+      "path": "scripts/validate_record_layout.py"
+    },
+    {
+      "bytes": 4061,
+      "disposition": "port behavior and negative tests to the responsible Rust crate",
+      "lines": 92,
+      "path": "tests/test_capability_recovery.py"
+    },
+    {
+      "bytes": 70298,
+      "disposition": "port behavior and negative tests to the responsible Rust crate",
+      "lines": 1284,
+      "path": "tests/test_governance.py"
+    },
+    {
+      "bytes": 4989,
+      "disposition": "port behavior and negative tests to the responsible Rust crate",
+      "lines": 126,
+      "path": "tests/test_mtm008_deployment.py"
+    },
+    {
+      "bytes": 2843,
+      "disposition": "port behavior and negative tests to the responsible Rust crate",
+      "lines": 55,
+      "path": "tests/test_mtm014_capacity_evidence.py"
+    },
+    {
+      "bytes": 2277,
+      "disposition": "port behavior and negative tests to the responsible Rust crate",
+      "lines": 56,
+      "path": "tests/test_mtm014_elicitation_evidence.py"
+    },
+    {
+      "bytes": 11081,
+      "disposition": "port behavior and negative tests to the responsible Rust crate",
+      "lines": 187,
+      "path": "tests/test_mtm014_preview_release.py"
+    },
+    {
+      "bytes": 4831,
+      "disposition": "port behavior and negative tests to the responsible Rust crate",
+      "lines": 112,
+      "path": "tests/test_mtm014_public_authority_evidence.py"
+    },
+    {
+      "bytes": 6350,
+      "disposition": "port behavior and negative tests to the responsible Rust crate",
+      "lines": 155,
+      "path": "tests/test_mtm014_target_evidence.py"
+    }
+  ],
+  "rust_only_ready": false,
+  "schema_version": "1.0.0",
+  "tracked_and_unignored_file_count": 334,
+  "uninspected_source_files": []
+}

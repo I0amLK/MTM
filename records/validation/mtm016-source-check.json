@@ -1,0 +1,51 @@
+{
+  "architecture": {
+    "maintenance_crates": 1,
+    "ok": true,
+    "product_crates": 8,
+    "product_edges": 17,
+    "reverse_maintenance_dependency": false
+  },
+  "checks": [
+    {
+      "exit_code": 0,
+      "name": "format",
+      "passed": true
+    },
+    {
+      "exit_code": 0,
+      "name": "clippy",
+      "passed": true
+    },
+    {
+      "exit_code": 101,
+      "name": "rust_tests",
+      "passed": false
+    },
+    {
+      "exit_code": 0,
+      "name": "diff",
+      "passed": true
+    }
+  ],
+  "milestone": "MTM-016",
+  "passed": false,
+  "pending": [
+    "Python/shadow coverage retirement",
+    "independent full API and capability suites",
+    "real Native/browser/LaTeX/upgrade qualification"
+  ],
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "record_integrity": {
+    "baseline_history_and_notices_unchanged": true,
+    "historical_hashes_checked": 26,
+    "live_deployment_checked": false,
+    "milestones": 16,
+    "ok": true,
+    "scope": "static_record_integrity_only"
+  },
+  "release_qualified": false,
+  "schema_version": "1.0.0",
+  "scope": "rust_source_with_inherited_host_tests"
+}

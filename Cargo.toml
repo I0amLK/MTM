@@ -8,7 +8,9 @@ members = [
   "crates/mtm-gateway",
   "crates/mtm-runtime",
   "crates/mtm-cli",
+  "xtask",
 ]
+default-members = ["crates/*"]
 resolver = "2"
 
 [workspace.package]
