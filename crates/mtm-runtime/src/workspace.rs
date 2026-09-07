@@ -619,6 +619,19 @@ impl NativeWorkspace {
         let context_lines = usize_from(arguments, "context_lines", 0)?;
         let max_results = usize_from(arguments, "max_results", 1000)?;
         let max_preview = usize_from(arguments, "max_preview_bytes", 512)?;
+        if context_lines > 5
+            || !(1..=10_000).contains(&max_results)
+            || !(80..=4096).contains(&max_preview)
+        {
+            return Err(invalid_details(
+                "Search limits are outside the tool contract.",
+                serde_json::json!({
+                    "context_lines": {"minimum":0,"maximum":5},
+                    "max_results": {"minimum":1,"maximum":10000},
+                    "max_preview_bytes": {"minimum":80,"maximum":4096}
+                }),
+            ));
+        }
         let mut include = string_array(arguments.get("include_globs")).unwrap_or_default();
         if let Some(glob) = optional_text(arguments, "glob")
             && !glob.is_empty()
@@ -626,22 +639,49 @@ impl NativeWorkspace {
             include.push(glob.to_owned());
         }
         let exclude = string_array(arguments.get("exclude_globs")).unwrap_or_default();
-        let listed = self.list_files(&Map::from_iter([
-            (
-                "path".to_owned(),
-                Value::String(text_or(arguments, "path", ".").to_owned()),
-            ),
-            (
-                "patterns".to_owned(),
-                serde_json::json!(if include.is_empty() {
-                    vec!["**/*".to_owned()]
-                } else {
-                    include
-                }),
-            ),
-            ("exclude_patterns".to_owned(), serde_json::json!(exclude)),
-            ("max_results".to_owned(), Value::from(50_000)),
-        ]))?;
+        let target = self.resolve_existing(text_or(arguments, "path", "."))?;
+        let listed = if target.path.is_file() {
+            // An explicit file target must never widen to its parent directory.
+            // Both basename and workspace-relative globs are useful for a single file.
+            let basename = target
+                .path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or("");
+            let matches_glob = |pattern: &String| {
+                glob_match(basename, pattern) || glob_match(&target.display, pattern)
+            };
+            let selected = (include.is_empty() || include.iter().any(matches_glob))
+                && !exclude.iter().any(matches_glob);
+            let files = if selected {
+                vec![serde_json::json!({"path":target.display})]
+            } else {
+                Vec::new()
+            };
+            serde_json::json!({"files":files,"truncated":false})
+        } else if target.path.is_dir() {
+            self.list_files(&Map::from_iter([
+                (
+                    "path".to_owned(),
+                    Value::String(text_or(arguments, "path", ".").to_owned()),
+                ),
+                (
+                    "patterns".to_owned(),
+                    serde_json::json!(if include.is_empty() {
+                        vec!["**/*".to_owned()]
+                    } else {
+                        include
+                    }),
+                ),
+                ("exclude_patterns".to_owned(), serde_json::json!(exclude)),
+                ("max_results".to_owned(), Value::from(50_000)),
+            ]))?
+        } else {
+            return Err(validation_code(
+                "NOT_A_FILE_OR_DIRECTORY",
+                "Search requires a regular file or directory.",
+            ));
+        };
         let escaped_query = regex::escape(query);
         let pattern_text = if regex_mode { query } else { &escaped_query };
         let pattern = RegexBuilder::new(pattern_text)
@@ -2880,6 +2920,10 @@ fn internal(message: &str) -> ReCtmError {
 fn io_error(error: std::io::Error) -> ReCtmError {
     ReCtmError::new("RUNTIME_IO_ERROR", error.to_string()).with_category(ErrorCategory::Runtime)
 }
+
+#[cfg(test)]
+#[path = "workspace_search_tests.rs"]
+mod search_tests;
 
 #[cfg(test)]
 mod tests {

@@ -3004,6 +3004,37 @@ mod tests {
     }
 
     #[test]
+    fn adjacent_commands_keep_privileged_and_missing_file_checks() -> Result<(), ReCtmError> {
+        let workspace = tempfile::tempdir().map_err(|error| internal(&error.to_string()))?;
+        for (name, mode) in [("one", 0o755), ("two", 0o4755)] {
+            let path = workspace.path().join(name);
+            fs::write(&path, "fixture").map_err(|error| internal(&error.to_string()))?;
+            fs::set_permissions(path, fs::Permissions::from_mode(mode))
+                .map_err(|error| internal(&error.to_string()))?;
+        }
+        let args = serde_json::json!({"cmd":"./one;./two"})
+            .as_object()
+            .cloned()
+            .unwrap_or_default();
+        let invocation = ExecInvocation::parse(&args)?;
+        let facts = collect_exec_permission_facts(&invocation, workspace.path(), "/usr/bin", &[])?;
+        assert_eq!(facts.resolved_executables().len(), 2);
+        assert!(
+            mtm_core::classify_exec_permissions(&invocation, &facts)?
+                .contains(&NativePermissionKind::PrivilegedExecutable)
+        );
+        fs::remove_file(workspace.path().join("two"))
+            .map_err(|error| internal(&error.to_string()))?;
+        let missing =
+            collect_exec_permission_facts(&invocation, workspace.path(), "/usr/bin", &[])?;
+        assert_eq!(
+            mtm_core::classify_exec_permissions(&invocation, &missing).map_err(code),
+            Err("NATIVE_EXECUTABLE_UNRESOLVED".to_owned())
+        );
+        Ok(())
+    }
+
+    #[test]
     fn executable_facts_detect_privileged_bits_and_metadata_mutation() -> Result<(), ReCtmError> {
         let workspace = tempfile::tempdir().map_err(|error| internal(&error.to_string()))?;
         let bin = workspace.path().join("bin");

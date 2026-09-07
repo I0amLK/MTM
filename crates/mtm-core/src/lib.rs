@@ -7,6 +7,7 @@ mod patch;
 mod path_policy;
 mod redaction;
 mod schema;
+mod shell_segments;
 mod url_policy;
 
 pub use command_policy::{

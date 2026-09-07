@@ -1268,6 +1268,20 @@ fn shell_executable_candidates(command: &str, depth: usize) -> Result<Vec<String
         )
         .with_category(mtm_contracts::ErrorCategory::Security));
     }
+    if let Some(segments) = crate::shell_segments::literal_command_segments(command)? {
+        let mut candidates = Vec::new();
+        for segment in segments {
+            let words = shell_words::split(segment).map_err(|_| {
+                ReCtmError::new(
+                    "NATIVE_EXECUTABLE_PARSE_FAILED",
+                    "Invalid literal shell segment.",
+                )
+                .with_category(mtm_contracts::ErrorCategory::Security)
+            })?;
+            append_segment_candidates(&words, depth, &mut candidates)?;
+        }
+        return Ok(candidates);
+    }
     let tokens = shell_words::split(command).map_err(|_| {
         ReCtmError::new(
             "NATIVE_EXECUTABLE_PARSE_FAILED",
@@ -1744,6 +1758,34 @@ mod tests {
             invocation.executable_candidates()?,
             vec!["/opt/one", "/opt/two", "/opt/three"]
         );
+        Ok(())
+    }
+
+    #[test]
+    fn adjacent_control_operators_keep_all_executable_checks() -> Result<(), ReCtmError> {
+        for (command, expected) in [
+            ("pwd; pwd", vec!["pwd", "pwd"]),
+            (
+                "/opt/one|/opt/two&&/opt/three",
+                vec!["/opt/one", "/opt/two", "/opt/three"],
+            ),
+            (
+                "/opt/one||/opt/two&/opt/three",
+                vec!["/opt/one", "/opt/two", "/opt/three"],
+            ),
+            (
+                "'/opt/one;literal';/opt/two",
+                vec!["/opt/one;literal", "/opt/two"],
+            ),
+            (
+                "/opt/one\\;literal;/opt/two",
+                vec!["/opt/one;literal", "/opt/two"],
+            ),
+            ("printf '%s' ';' /opt/not-a-command", vec!["printf"]),
+        ] {
+            let invocation = exec(serde_json::json!({"cmd":command}))?;
+            assert_eq!(invocation.executable_candidates()?, expected, "{command}");
+        }
         Ok(())
     }
 

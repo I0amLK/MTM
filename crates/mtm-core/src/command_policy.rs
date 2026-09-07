@@ -64,7 +64,7 @@ pub fn check_command_policy(
         ));
     }
 
-    if case_insensitive_regex(DESTRUCTIVE_PATTERN)?.is_match(command) {
+    if destructive_command(command)? {
         return Err(permission_required(
             "Destructive commands are blocked without explicit permission.",
             permission_details("destructive_command"),
@@ -124,7 +124,7 @@ pub fn classify_current_command_permissions(
     if filtered.into_iter().any(|item| item) {
         needs.push(NativePermissionKind::SensitiveEnv);
     }
-    if case_insensitive_regex(DESTRUCTIVE_PATTERN)?.is_match(command) {
+    if destructive_command(command)? {
         needs.push(NativePermissionKind::DestructiveCommand);
     }
     if mode == NativeMode::Trusted {
@@ -159,16 +159,17 @@ pub fn is_filtered_env_var(name: &str, value: &str) -> Result<bool, ReCtmError> 
 
 #[must_use]
 pub fn inline_script_command(command: &str) -> Option<InlineScript> {
-    let tokens = shell_words::split(command)
-        .unwrap_or_else(|_| command.split_whitespace().map(str::to_owned).collect());
-    let mut segments: Vec<Vec<String>> = vec![Vec::new()];
-    for token in tokens {
-        if matches!(token.as_str(), "|" | "||" | "&" | "&&" | ";") {
-            segments.push(Vec::new());
-        } else if let Some(segment) = segments.last_mut() {
-            segment.push(token);
-        }
-    }
+    let segments = crate::shell_segments::literal_command_segments(command)
+        .ok()
+        .flatten()
+        .and_then(|segments| {
+            segments
+                .into_iter()
+                .map(shell_words::split)
+                .collect::<Result<Vec<_>, _>>()
+                .ok()
+        })
+        .unwrap_or_else(|| existing_command_segments(command));
 
     for mut segment in segments {
         if segment.is_empty() {
@@ -244,6 +245,43 @@ pub fn inline_script_command(command: &str) -> Option<InlineScript> {
     None
 }
 
+fn destructive_command(command: &str) -> Result<bool, ReCtmError> {
+    let pattern = case_insensitive_regex(DESTRUCTIVE_PATTERN)?;
+    if pattern.is_match(command) {
+        return Ok(true);
+    }
+    if let Some(segments) = crate::shell_segments::literal_command_segments(command)? {
+        for segment in segments {
+            let words = shell_words::split(segment).map_err(|_| {
+                ReCtmError::new(
+                    "NATIVE_EXECUTABLE_PARSE_FAILED",
+                    "Invalid literal shell segment.",
+                )
+                .with_category(ErrorCategory::Security)
+            })?;
+            // Normalize escaped executable names while retaining argument quoting.
+            if pattern.is_match(&shell_words::join(words)) {
+                return Ok(true);
+            }
+        }
+    }
+    Ok(false)
+}
+
+fn existing_command_segments(command: &str) -> Vec<Vec<String>> {
+    let tokens = shell_words::split(command)
+        .unwrap_or_else(|_| command.split_whitespace().map(str::to_owned).collect());
+    let mut segments = vec![Vec::new()];
+    for token in tokens {
+        if matches!(token.as_str(), "|" | "||" | "&" | "&&" | ";") {
+            segments.push(Vec::new());
+        } else if let Some(segment) = segments.last_mut() {
+            segment.push(token);
+        }
+    }
+    segments
+}
+
 fn executable_name(value: &str) -> String {
     let normalized = value.replace('\\', "/");
     Path::new(&normalized)
@@ -297,6 +335,40 @@ mod tests {
             })
         );
         assert_eq!(inline_script_command("python3 script.py"), None);
+    }
+
+    #[test]
+    fn adjacent_commands_cannot_hide_destructive_or_inline_permissions() -> Result<(), ReCtmError> {
+        let needs = classify_current_command_permissions(
+            NativeMode::Safe,
+            "printf ok;rm -rf build;python3 -c 'print(1)'",
+            &BTreeMap::new(),
+        )?;
+        assert!(needs.contains(&NativePermissionKind::DestructiveCommand));
+        assert!(needs.contains(&NativePermissionKind::InlineScript));
+        Ok(())
+    }
+
+    #[test]
+    fn quoted_arguments_are_not_commands_but_escaped_names_are_checked() -> Result<(), ReCtmError> {
+        let environment = BTreeMap::new();
+        assert!(
+            !classify_current_command_permissions(
+                NativeMode::Safe,
+                "printf '%s' 'rm -rf build'",
+                &environment,
+            )?
+            .contains(&NativePermissionKind::DestructiveCommand)
+        );
+        assert!(
+            classify_current_command_permissions(
+                NativeMode::Safe,
+                "printf ok;r\\m -rf build",
+                &environment,
+            )?
+            .contains(&NativePermissionKind::DestructiveCommand)
+        );
+        Ok(())
     }
 
     #[test]
