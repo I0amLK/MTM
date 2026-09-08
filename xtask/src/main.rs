@@ -12,6 +12,8 @@ mod architecture;
 mod capability;
 mod commit_message;
 mod inventory;
+#[cfg(target_os = "linux")]
+mod native_preflight;
 mod records;
 mod retirement;
 
@@ -37,6 +39,10 @@ fn root() -> Result<PathBuf> {
 
 fn run() -> Result<()> {
     let args: Vec<String> = env::args().skip(1).collect();
+    #[cfg(target_os = "linux")]
+    if args.len() == 1 && native_preflight::child_mode(&args[0])? {
+        return Ok(());
+    }
     let root = root()?;
     let (name, options) = args
         .split_first()
@@ -52,6 +58,13 @@ fn run() -> Result<()> {
     }
     let record = options.iter().any(|arg| arg == "--record");
     match name {
+        "native-preflight" => {
+            let report = native_environment()?;
+            emit(&root, "mtm016-native-preflight.json", &report, record)?;
+            if report["passed"] != true {
+                return Err("Native environment is blocked or inconclusive; see preflight report. No test was waived.".into());
+            }
+        }
         "audit" => {
             let report = inventory::audit(&root)?;
             emit(&root, "mtm016-inventory.json", &report, record)?;
@@ -87,6 +100,8 @@ fn run() -> Result<()> {
             let integrity = records::validate(&root)?;
             let architecture = architecture::validate(&root)?;
             let retirement = retirement::validate(&root)?;
+            eprintln!("[source-check] native_environment (diagnostic; never skips tests)");
+            let native = native_environment()?;
             let cargo = env::var_os("CARGO").unwrap_or_else(|| "cargo".into());
             let mut checks = Vec::new();
             for (label, arguments) in [
@@ -124,11 +139,13 @@ fn run() -> Result<()> {
                 .stdin(Stdio::null())
                 .status()?;
             checks.push(json!({"name":"diff","passed":status.success(),"exit_code":status.code()}));
-            let passed = checks.iter().all(|check| check["passed"] == true);
+            let passed = aggregate_passed(&checks, &native);
             let report = json!({
                 "schema_version":"1.0.0", "milestone":"MTM-016", "scope":"rust_source_with_inherited_host_tests",
                 "passed":passed, "checks":checks, "record_integrity":integrity,
                 "architecture":architecture,"retirement":retirement,
+                "native_environment":native,"tests_skipped_by_preflight":false,
+                "test_failure_attribution":"Not inferred from preflight; inspect test outcomes and rerun on a capable host.",
                 "commit_hook_executable_checked":true,
                 "production_selector_changed":false, "production_state_modified":false,
                 "release_qualified":false,
@@ -141,12 +158,36 @@ fn run() -> Result<()> {
         }
         "help" | "--help" | "-h" => {
             println!(
-                "cargo xtask audit [--strict] [--record]\ncargo xtask records [--record]\ncargo xtask retirement [--record]\ncargo xtask capability [--record]\ncargo xtask check [--record]\ncargo xtask commit-message <file|--stdin>\n\ncheck is NOT release qualification. Orchestration is Rust; inherited host/toolchain tests are not skipped."
+                "cargo xtask audit [--strict] [--record]\ncargo xtask records [--record]\ncargo xtask retirement [--record]\ncargo xtask capability [--record]\ncargo xtask native-preflight [--record]\ncargo xtask check [--record]\ncargo xtask commit-message <file|--stdin>\n\ncheck is NOT release qualification. Orchestration is Rust; inherited host/toolchain tests are not skipped. A blocked preflight never suppresses a test failure."
             );
         }
         _ => return Err("unknown task; use cargo xtask help".into()),
     }
     Ok(())
+}
+
+fn native_environment() -> Result<Value> {
+    #[cfg(target_os = "linux")]
+    {
+        native_preflight::run()
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        Ok(
+            json!({"schema_version":"1.0.0","scope":"current_environment_native_prerequisites_only",
+        "supported":false,"passed":false,"ready_for_native_tests":false,
+        "classification":"platform_not_supported","release_qualified":false,
+        "tests_skipped_by_preflight":false}),
+        )
+    }
+}
+
+fn aggregate_passed(checks: &[Value], native: &Value) -> bool {
+    // Missing diagnostics are not a pass. Existing commands still all execute.
+    !checks.is_empty()
+        && checks.iter().all(|check| check["passed"] == true)
+        && native["passed"] == true
+        && native["ready_for_native_tests"] == true
 }
 
 fn emit(root: &Path, filename: &str, value: &Value, record: bool) -> Result<()> {
@@ -193,4 +234,20 @@ fn git(root: &Path, args: &[&str]) -> Result<Vec<u8>> {
         return Err("Git metadata output exceeds fixed bound".into());
     }
     Ok(output.stdout)
+}
+
+#[cfg(test)]
+mod gate_tests {
+    use super::*;
+
+    #[test]
+    fn blocked_or_unknown_preflight_cannot_turn_tests_green() {
+        let green = [json!({"passed":true})];
+        let ready = json!({"passed":true,"ready_for_native_tests":true});
+        assert!(aggregate_passed(&green, &ready));
+        assert!(!aggregate_passed(&[json!({"passed":false})], &ready));
+        assert!(!aggregate_passed(&green, &json!({"passed":false})));
+        assert!(!aggregate_passed(&green, &json!({})));
+        assert!(!aggregate_passed(&[], &ready));
+    }
 }

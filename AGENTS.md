@@ -45,6 +45,10 @@ Current commands: `cargo xtask audit`, `cargo xtask records`,
 `cargo xtask retirement`, and `cargo xtask check`.
 `cargo xtask capability --record` runs the Rust current-binary OAuth/socket and
 500-assessment regression; it does not qualify browser, Native or compiled LaTeX.
+`cargo xtask native-preflight --record` measures the current Linux environment;
+`check` embeds a fresh probe without skipping any tests. Read
+`docs/MTM-016-NATIVE-PREFLIGHT.md`: namespace limits/errno are not proof of
+host resource exhaustion, candidate correctness or full Native acceptance.
 Commit messages are validated by `cargo xtask commit-message <FILE|--stdin>`.
 The Git hook must remain executable; atomic patch updates preserve ordinary modes.
 Every Python deletion must match `records/governance/python-retirement.json`,

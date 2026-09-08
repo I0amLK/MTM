@@ -530,6 +530,105 @@
       "release_qualified": false,
       "earlier_signature_mismatch_explained": false,
       "remaining": ["Complete complex shell/builtin/wrapper and shell-local environment/cwd handling", "Remaining Python target/release dependency families", "Persistent workflow idempotency and multi-stage/branch recovery", "Real Native host, web-client, compiled LaTeX, resources and upgrade/rollback qualification"]
+    },
+    {
+      "id": "MTM016-NATIVE-ENVIRONMENT-PREFLIGHT",
+      "scope": "B/D distinguish Native prerequisites from product test outcomes without bypassing isolation or suppressing tests",
+      "base_commit": "79d3a6d886565c7bd926ff426c3c655c9c00d3cc",
+      "status": "diagnostic_implemented_current_environment_blocked_real_host_pending",
+      "documentation": "docs/MTM-016-NATIVE-PREFLIGHT.md",
+      "implementation": [
+        "Rust maintenance child measures unshare(CLONE_NEWUSER) errno directly through the existing nix dependency",
+        "Fixed minimal Bubblewrap probe retains disable-userns, network isolation, dropped capabilities, no-new-privileges and parent-death behavior",
+        "Read-only system/executable mounts only; no workspace/home/private/data mounts or user-selected command",
+        "Bounded nonblocking capture, timeout, output ceiling, child reaping and exact private probe schema; raw diagnostics are not published",
+        "Source check embeds a fresh preflight but still runs every existing workspace test; blocked or unknown preflight cannot manufacture a green aggregate"
+      ],
+      "actual_environment": {
+        "execution_context": "Connected MTM Native Bubblewrap sandbox, not an ordinary Linux host terminal",
+        "uid_map_shape": "restricted_mapping",
+        "no_new_privs": true,
+        "effective_permitted_and_bounding_caps_zero": true,
+        "visible_max_user_namespaces": 2147483647,
+        "direct_user_namespace_creation": {"created": false, "errno": 28, "errno_name": "ENOSPC"},
+        "minimal_bubblewrap": {"exit_code": 1, "diagnostic_hint": "namespace_limit_or_depth", "isolation_payload_reached": false},
+        "both_probe_children_reaped": true,
+        "probe_timeouts": 0,
+        "probe_output_overflows": 0,
+        "host_context_proven": false,
+        "ancestor_limits_inspected": false,
+        "namespace_occupancy_measured": false
+      },
+      "attribution": "The current environment cannot create the required nested namespace. ENOSPC plus a large current visible quota does not establish host resource exhaustion: ancestor quotas and Bubblewrap disable-userns can produce this observation. Candidate defect attribution remains open until real product tests run on a capable host.",
+      "commands": [
+        {"command": "cargo test -p mtm-xtask --offline", "exit_code": 0, "phase": "initial implementation", "unit_passed": 31, "cli_passed": 4},
+        {"command": "cargo clippy --workspace --all-targets --all-features --locked --offline -- -D warnings", "exit_code": 0},
+        {"command": "cargo xtask native-preflight --record", "exit_code": 1, "interpretation": "Real environmental measurement is blocked; diagnostic collection succeeded but Native prerequisites did not pass"},
+        {"command": "cargo xtask check --record", "exit_code": 1, "interpretation": "Preflight did not skip tests. Format, Clippy, architecture, records and retirement passed; only the same ten inherited Native Runtime tests failed."}
+      ],
+      "test_results": {
+        "maintenance_unit_passed": 33,
+        "maintenance_cli_passed": 4,
+        "runtime": {"passed": 125, "failed": 10, "ignored": 1},
+        "capability_and_public_workspace_suite_passed": 14,
+        "gateway_unit_and_http_passed": 27,
+        "core_unit_and_numeric_passed": 47,
+        "storage_unit_and_integration_passed": 12,
+        "workflow_unit_and_integration_passed": 91,
+        "new_test_suppressions": 0
+      },
+      "failed_runtime_tests": [
+        "native_authority::tests::exec_candidate_covers_all_seven_permission_kinds_on_real_bubblewrap",
+        "native_authority::tests::exec_candidate_cross_owner_and_workspace_fail_without_consuming_grant",
+        "native_authority::tests::exec_candidate_enforces_timeout_boundary_and_sensitive_env_binding",
+        "native_authority::tests::exec_candidate_multi_risk_is_atomic_and_has_one_concurrent_winner",
+        "native_authority::tests::exec_candidate_preserves_git_latex_sage_and_exposes_magma",
+        "native_authority::tests::exec_candidate_preserves_trusted_and_dangerous_profiles",
+        "native_authority::tests::exec_candidate_preserves_tty_stdin_and_descendant_cleanup",
+        "native_authority::tests::exec_candidate_preserves_tty_timeout_and_kill_lifecycle",
+        "native_authority::tests::exec_candidate_session_grant_reuses_in_process_and_restart_invalidates",
+        "native_tools::tests::authority_exec_exact_once_grant_runs_once_when_bubblewrap_is_available"
+      ],
+      "reports": ["records/validation/mtm016-native-preflight.json", "records/validation/mtm016-source-check.json", "records/validation/capability-current.json"],
+      "capability_recheck": {
+        "command": "cargo xtask capability --record",
+        "exit_code": 0,
+        "source_sha256": "bd6e22ad15e2f0bb2cf7fc6ec712413ae87dcf49be0714d479748893dec4207c",
+        "binary_sha256": "d0f325ea6f6521947cc09eab667823b7e11ccda3d5287acc56e61f6a8e0c2afe",
+        "source_unchanged": true,
+        "binary_unchanged": true,
+        "independent_normal_runs": 500,
+        "normal_roundtrips": 500,
+        "normal_invalid": 0,
+        "normal_rejections": 0,
+        "scope": "Existing real loopback OAuth/workflow assessment regression with Native disabled; not a host Native or full-proof qualification"
+      },
+      "historical_evidence_policy": "No historical evidence or existing failed test was rewritten as a pass. These reports are current regenerable diagnostics, not target-release receipts.",
+      "post_checks": {
+        "records": {"exit_code": 0, "historical_hashes_checked": 26},
+        "retirement": {"exit_code": 0, "baseline_hashes_checked": 9},
+        "strict_inventory": {"exit_code": 1, "expected": true, "rust_only_ready": false, "python_files_remaining": 118},
+        "product_source_diff_from_checkpoint_base": "empty",
+        "git_diff_check": "passed"
+      },
+      "development_corrections": "An initial warnings-denied Clippy run rejected a test module placed before production items; it was moved, not suppressed. An ambiguous multi-file documentation/test patch was rejected without applying files; contexts were reread and corrected.",
+      "maintenance_dependency_change": "xtask now references the existing locked nix 0.30.1 with Linux sched; no dependency version changed and no product depends on xtask",
+      "product_crates_changed": false,
+      "production_dependencies_added": 0,
+      "python_files_deleted_in_this_checkpoint": 0,
+      "python_files_remaining": 118,
+      "host_settings_modified": false,
+      "production_changed": false,
+      "aggregate_passed": false,
+      "release_qualified": false,
+      "host_validation": {
+        "status": "pending",
+        "commands": ["git rev-parse HEAD", "cargo xtask native-preflight --record", "cargo xtask check --record"],
+        "where": "Ordinary Linux host terminal in the same mtm-native-016 checkout, not through Native exec_command",
+        "success_condition": "Native prerequisites and the formerly failing actual product tests pass; review the existing ignored/manual coverage separately",
+        "forbidden_shortcuts": ["Disable or weaken Bubblewrap", "Automatically raise host sysctls", "Skip failed tests", "Treat this minimal probe as exact-candidate release acceptance"]
+      },
+      "remaining": ["Run and review real-host Native tests before closing B environment attribution", "Complete complex shell handling and Python maintenance retirement", "Persistent workflow idempotency", "Final exact-candidate Native/browser/LaTeX/resource/upgrade/rollback qualification", "Earlier unexplained capability signature mismatch"]
     }
   ],
   "remaining_acceptance": [

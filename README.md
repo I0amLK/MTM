@@ -1,5 +1,10 @@
 # MTM
 
+MTM-016 Native environment diagnostics are available with
+`cargo xtask native-preflight --record`. The ordinary source check includes the
+probe but still runs every test when the environment is blocked. See
+`docs/MTM-016-NATIVE-PREFLIGHT.md` for the real-host handoff and its limits.
+
 > Development branch: MTM-016 (`0.6.0-preview.1`, not qualified) is in progress. See
 > [the native modernization plan](docs/MTM-016-NATIVE-PLAN.md) and
 > `records/iterations/ITER-016.json`. This branch is not release-qualified and
