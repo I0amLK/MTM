@@ -20,6 +20,7 @@ const MAX_BINARY: u64 = 256 * 1024 * 1024;
 pub(super) enum Profile {
     Protocol,
     Target,
+    Resource,
 }
 
 impl Profile {
@@ -27,7 +28,8 @@ impl Profile {
         match value {
             "protocol" => Ok(Self::Protocol),
             "target" => Ok(Self::Target),
-            _ => Err("qualification profile must be protocol or target; release qualification is not implemented here".into()),
+            "resource" => Ok(Self::Resource),
+            _ => Err("qualification profile must be protocol, target or resource; release qualification is not implemented here".into()),
         }
     }
 
@@ -35,6 +37,7 @@ impl Profile {
         match self {
             Self::Protocol => "protocol",
             Self::Target => "target",
+            Self::Resource => "resource",
         }
     }
 
@@ -42,6 +45,7 @@ impl Profile {
         match self {
             Self::Protocol => "D5",
             Self::Target => "D6",
+            Self::Resource => "D7",
         }
     }
 
@@ -49,6 +53,7 @@ impl Profile {
         match self {
             Self::Protocol => "candidate-protocol.json",
             Self::Target => "candidate-target.json",
+            Self::Resource => "candidate-resource.json",
         }
     }
 }
@@ -57,6 +62,8 @@ pub(crate) struct Options {
     binary: String,
     sha256: String,
     profile: Profile,
+    baseline_binary: Option<String>,
+    baseline_sha256: Option<String>,
     pub record: bool,
 }
 
@@ -70,7 +77,14 @@ impl Options {
                 record = true;
                 continue;
             }
-            if !["--binary", "--sha256", "--profile"].contains(&name.as_str())
+            if ![
+                "--binary",
+                "--sha256",
+                "--profile",
+                "--baseline",
+                "--baseline-sha256",
+            ]
+            .contains(&name.as_str())
                 || options.contains_key(name)
             {
                 return Err("unknown or duplicate qualification option".into());
@@ -91,10 +105,36 @@ impl Options {
         if !valid_hash(&sha256) {
             return Err("SHA-256 must be 64 lowercase hexadecimal characters".into());
         }
+        let baseline_binary = options.remove("--baseline");
+        let baseline_sha256 = options.remove("--baseline-sha256");
+        match profile {
+            Profile::Resource => {
+                if baseline_binary.is_none() || baseline_sha256.is_none() {
+                    return Err("resource profile requires --baseline and --baseline-sha256".into());
+                }
+                if !baseline_sha256.as_deref().is_some_and(valid_hash) {
+                    return Err(
+                        "baseline SHA-256 must be 64 lowercase hexadecimal characters".into(),
+                    );
+                }
+                if baseline_sha256.as_deref() == Some(sha256.as_str()) {
+                    return Err(
+                        "resource profile requires distinct candidate and baseline digests".into(),
+                    );
+                }
+            }
+            Profile::Protocol | Profile::Target => {
+                if baseline_binary.is_some() || baseline_sha256.is_some() {
+                    return Err("baseline options are valid only for the resource profile".into());
+                }
+            }
+        }
         Ok(Self {
             binary: options.remove("--binary").ok_or("--binary is required")?,
             sha256,
             profile,
+            baseline_binary,
+            baseline_sha256,
             record,
         })
     }
@@ -157,12 +197,16 @@ struct Snapshot {
 
 impl Snapshot {
     fn prepare(root: &Path, options: &Options) -> Result<Self> {
-        let original = root.join(&options.binary);
-        if digest(&original)? != options.sha256 {
-            return Err("candidate SHA-256 mismatch before launch".into());
+        Self::prepare_artifact(root, &options.binary, &options.sha256)
+    }
+
+    fn prepare_artifact(root: &Path, binary: &str, sha256: &str) -> Result<Self> {
+        let original = root.join(binary);
+        if digest(&original)? != sha256 {
+            return Err("artifact SHA-256 mismatch before launch".into());
         }
         let directory = tempfile::tempdir().map_err(|_| "candidate snapshot directory failed")?;
-        let executable = directory.path().join("mtm-candidate");
+        let executable = directory.path().join("mtm-artifact");
         let mut target = OpenOptions::new()
             .write(true)
             .create_new(true)
@@ -186,7 +230,7 @@ impl Snapshot {
             _directory: directory,
             original,
             executable,
-            sha256: options.sha256.clone(),
+            sha256: sha256.to_owned(),
         };
         snapshot.unchanged()?;
         Ok(snapshot)
@@ -202,31 +246,55 @@ impl Snapshot {
 
 pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     let target = options.profile == Profile::Target;
+    let resource = options.profile == Profile::Resource;
+    let needs_native = target || resource;
+    let scope = match options.profile {
+        Profile::Protocol => "exact_candidate_protocol_not_release",
+        Profile::Target => "exact_candidate_target_not_release",
+        Profile::Resource => "exact_candidate_resource_not_release",
+    };
     let mut report = json!({"schema_version":"1.0.0","milestone":"MTM-016","delivery":options.profile.delivery(),
-    "profile":options.profile.as_str(),"scope":if target {"exact_candidate_target_not_release"} else {"exact_candidate_protocol_not_release"},"passed":false,
+    "profile":options.profile.as_str(),"scope":scope,"passed":false,
     "candidate_sha256":options.sha256,"candidate_launched":false,
+    "baseline_sha256":options.baseline_sha256,"baseline_launched":if resource {Value::Bool(false)} else {Value::Null},
     "release_qualified":false,"production_state_modified":false,"selector_changed":false,
     "raw_test_output_recorded":false,"python_invoked":false,
-    "pending":if target {
-        json!(["browser","resources","upgrade and rollback","Python retirement"])
-    } else {
-        json!(["Native host","compiled LaTeX","browser","resources","upgrade and rollback","Python retirement"])
+    "pending":match options.profile {
+        Profile::Protocol => json!(["Native host","compiled LaTeX","browser","resources","upgrade and rollback","Python retirement"]),
+        Profile::Target => json!(["browser","resources","upgrade and rollback","Python retirement"]),
+        Profile::Resource => json!(["compiled-LaTeX target pass","permission-grant soak","browser","upgrade and rollback","Python retirement"]),
     }});
-    let mut stage = if target {
+    let mut stage = if needs_native {
         "native_preflight"
     } else {
         "candidate_snapshot"
     };
     let outcome = (|| -> Result<()> {
-        if target {
+        if needs_native {
             let native = native_preflight::run()?;
             report["native_preflight"] = native.clone();
             if native["passed"] != true || native["ready_for_native_tests"] != true {
-                return Err("target profile requires a capable Native host".into());
+                return Err("selected profile requires a capable Native host".into());
             }
         }
         stage = "candidate_snapshot";
         let snapshot = Snapshot::prepare(root, options)?;
+        let baseline = if resource {
+            stage = "baseline_snapshot";
+            Some(Snapshot::prepare_artifact(
+                root,
+                options
+                    .baseline_binary
+                    .as_deref()
+                    .ok_or("resource baseline path missing")?,
+                options
+                    .baseline_sha256
+                    .as_deref()
+                    .ok_or("resource baseline digest missing")?,
+            )?)
+        } else {
+            None
+        };
         let before = capability::source_hash(root)?;
         let commit_before = git(root, &["rev-parse", "HEAD"])?;
         stage = "protocol_test_runner";
@@ -242,18 +310,41 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
                 "--test",
                 "capability_runtime",
                 "--",
-                "--nocapture",
-                "--test-threads=1",
             ])
             .current_dir(root)
             .env("MTM_TEST_CANDIDATE", &snapshot.executable)
             .env("MTM_TEST_CANDIDATE_SHA256", &snapshot.sha256);
-        if target {
+        if resource {
+            command
+                .arg("resource_runtime::explicit_baseline_and_candidate_resource_non_regression")
+                .env("MTM_TEST_RESOURCE_PROFILE", "1")
+                .env(
+                    "MTM_TEST_BASELINE",
+                    &baseline
+                        .as_ref()
+                        .ok_or("resource baseline snapshot missing")?
+                        .executable,
+                )
+                .env(
+                    "MTM_TEST_BASELINE_SHA256",
+                    &baseline
+                        .as_ref()
+                        .ok_or("resource baseline snapshot missing")?
+                        .sha256,
+                )
+                .env_remove("MTM_TEST_TARGET_PROFILE");
+        } else if target {
             command.env("MTM_TEST_TARGET_PROFILE", "1");
+            command.env_remove("MTM_TEST_RESOURCE_PROFILE");
         } else {
             command.env_remove("MTM_TEST_TARGET_PROFILE");
+            command.env_remove("MTM_TEST_RESOURCE_PROFILE");
         }
-        eprintln!("[qualify] exact-artifact protocol, capability and workspace fixtures");
+        command.args(["--nocapture", "--test-threads=1"]);
+        eprintln!(
+            "[qualify] exact-artifact {} fixtures",
+            options.profile.as_str()
+        );
         let output = process::capture_command(
             &mut command,
             Duration::from_secs(600),
@@ -266,6 +357,9 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         report["test_stderr_sha256"] = json!(format!("{:x}", Sha256::digest(&output.stderr)));
         stage = "identity_recheck";
         snapshot.unchanged()?;
+        if let Some(baseline) = &baseline {
+            baseline.unchanged()?;
+        }
         let after = capability::source_hash(root)?;
         let commit_after = git(root, &["rev-parse", "HEAD"])?;
         report["harness_source_identity"] = json!({"before_sha256":before,"after_sha256":after,
@@ -274,11 +368,25 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             return Err("qualification harness source changed".into());
         }
         stage = "summary_validation";
-        let summaries = summary::validate(&output.stdout, &snapshot.sha256, options.profile)?;
+        let summaries = if resource {
+            summary::validate_resource(
+                &output.stdout,
+                &snapshot.sha256,
+                baseline
+                    .as_ref()
+                    .map(|value| value.sha256.as_str())
+                    .ok_or("resource baseline snapshot missing")?,
+            )?
+        } else {
+            summary::validate(&output.stdout, &snapshot.sha256, options.profile)?
+        };
         if !output.complete() {
             return Err("qualification runner failed or did not finish cleanly".into());
         }
         report["candidate_launched"] = json!(true);
+        if resource {
+            report["baseline_launched"] = json!(true);
+        }
         report["summaries"] = summaries;
         report["original_and_snapshot_unchanged"] = json!(true);
         Ok(())
@@ -289,8 +397,14 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         report["failure"] = json!(
             "Required candidate identity, runner or profile evidence did not pass; raw diagnostics withheld"
         );
-        if !matches!(stage, "native_preflight" | "candidate_snapshot") {
+        if !matches!(
+            stage,
+            "native_preflight" | "candidate_snapshot" | "baseline_snapshot"
+        ) {
             report["candidate_launched"] = Value::Null;
+            if resource {
+                report["baseline_launched"] = Value::Null;
+            }
         }
     }
     report["recorded_unix_seconds"] =
@@ -301,3 +415,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
 #[cfg(test)]
 #[path = "qualify_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "qualify_resource_tests.rs"]
+mod resource_tests;

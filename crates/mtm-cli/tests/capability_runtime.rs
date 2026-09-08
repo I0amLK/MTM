@@ -10,6 +10,9 @@ mod workspace_smoke;
 #[path = "support/target_runtime.rs"]
 mod target_runtime;
 
+#[path = "support/resource_runtime.rs"]
+mod resource_runtime;
+
 #[path = "support/candidate_lifecycle.rs"]
 mod candidate_lifecycle;
 

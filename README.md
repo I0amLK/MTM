@@ -25,7 +25,10 @@ protocol --binary <artifact> --sha256 <digest> --record`. This selects the actua
 artifact for OAuth/capability, Workspace and complete scripted workflow fixtures;
 `--profile target` adds a fail-closed Native-host preflight, public Bubblewrap
 execution and required compiled LaTeX on that same SHA-bound artifact. The target
-profile is still not browser/resource/install/rollback or release qualification. See
+profile is still not browser/resource/install/rollback or release qualification.
+`--profile resource` accepts an explicit baseline artifact and measures bounded
+startup/request/RSS/thread/FD/shutdown non-regression without reading or changing a
+selector. Target/resource profiles require a capable Native host. See
 `docs/MTM-016-CANDIDATE-GATE.md` before using the development qualification entry.
 The development branch also repairs atomic patch permission preservation and numeric
 schema bounds. See `docs/MTM-016-POLICY-REGRESSION.md` for the policy-test scope. These

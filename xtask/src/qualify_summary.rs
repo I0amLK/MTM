@@ -49,6 +49,9 @@ struct Lifecycle {
     changed_key_old_bearer_denied: bool,
     changed_key_old_capability_zero_writes: bool,
     same_owner_fresh_recovery: bool,
+    copied_v1_state_migrated: bool,
+    legacy_row_preserved: bool,
+    new_run_after_migration: bool,
     verifier_firewall: bool,
     no_premature_artifact: bool,
     clean_shutdown: bool,
@@ -79,7 +82,103 @@ struct TargetRuntime {
     release_qualified: bool,
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ResourceMetrics {
+    startup_samples: u64,
+    request_samples: u64,
+    startup_p50_ms: f64,
+    startup_p95_ms: f64,
+    request_p95_ms: f64,
+    max_rss_kib: u64,
+    max_threads: u64,
+    max_fds: u64,
+    max_shutdown_ms: f64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ResourceRuntime {
+    ok: bool,
+    candidate_sha256: String,
+    baseline_sha256: String,
+    baseline: ResourceMetrics,
+    candidate: ResourceMetrics,
+    resource_non_regression_tested: bool,
+    native_execution_tested: bool,
+    native_mode: String,
+    native_backend: String,
+    request_workload: String,
+    permission_grant_soak_tested: bool,
+    web_client_tested: bool,
+    install_or_selector_changed: bool,
+    performance_claim: bool,
+    release_qualified: bool,
+}
+
+fn metric_shape(value: &ResourceMetrics) -> bool {
+    value.startup_samples == 3
+        && value.request_samples == 180
+        && [
+            value.startup_p50_ms,
+            value.startup_p95_ms,
+            value.request_p95_ms,
+            value.max_shutdown_ms,
+        ]
+        .into_iter()
+        .all(|number| number.is_finite() && number >= 0.0)
+        && value.startup_p95_ms >= value.startup_p50_ms
+        && value.max_rss_kib > 0
+        && value.max_threads > 0
+        && value.max_fds > 0
+}
+
+fn resource_bounds(candidate: &ResourceMetrics, baseline: &ResourceMetrics) -> bool {
+    metric_shape(candidate)
+        && metric_shape(baseline)
+        && candidate.startup_p95_ms
+            <= (2.0 * baseline.startup_p95_ms).max(baseline.startup_p95_ms + 250.0)
+        && candidate.request_p95_ms
+            <= (2.0 * baseline.request_p95_ms).max(baseline.request_p95_ms + 10.0)
+        && candidate.max_rss_kib <= 262_144_u64.min(baseline.max_rss_kib.saturating_add(32_768))
+        && candidate.max_threads <= baseline.max_threads.saturating_add(2)
+        && candidate.max_fds <= baseline.max_fds.saturating_add(8)
+        && candidate.max_shutdown_ms <= 8_000.0
+}
+
+pub(super) fn validate_resource(
+    stdout: &[u8],
+    candidate_hash: &str,
+    baseline_hash: &str,
+) -> Result<Value> {
+    let resource: ResourceRuntime = extract(stdout, "MTM_RESOURCE_RUNTIME ")?;
+    if !valid_hash(candidate_hash)
+        || !valid_hash(baseline_hash)
+        || candidate_hash == baseline_hash
+        || resource.candidate_sha256 != candidate_hash
+        || resource.baseline_sha256 != baseline_hash
+        || !resource.ok
+        || !resource.resource_non_regression_tested
+        || !resource.native_execution_tested
+        || resource.native_mode != "dangerous"
+        || resource.native_backend != "bubblewrap"
+        || resource.request_workload != "server_info_and_public_exec_command"
+        || resource.permission_grant_soak_tested
+        || resource.web_client_tested
+        || resource.install_or_selector_changed
+        || resource.performance_claim
+        || resource.release_qualified
+        || !resource_bounds(&resource.candidate, &resource.baseline)
+    {
+        return Err("resource summary has inconsistent identity, scope or bounds".into());
+    }
+    Ok(json!({"resource":extract::<Value>(stdout,"MTM_RESOURCE_RUNTIME ")?}))
+}
+
 pub(super) fn validate(stdout: &[u8], hash: &str, profile: Profile) -> Result<Value> {
+    if profile == Profile::Resource {
+        return Err("resource profile requires explicit baseline validation".into());
+    }
     let capability = capability::checked_summary(stdout)?;
     let workspace: Workspace = extract(stdout, "MTM_WORKSPACE_SMOKE ")?;
     let lifecycle: Lifecycle = extract(stdout, "MTM_CANDIDATE_LIFECYCLE ")?;
@@ -102,6 +201,9 @@ pub(super) fn validate(stdout: &[u8], hash: &str, profile: Profile) -> Result<Va
         || !lifecycle.changed_key_old_bearer_denied
         || !lifecycle.changed_key_old_capability_zero_writes
         || !lifecycle.same_owner_fresh_recovery
+        || !lifecycle.copied_v1_state_migrated
+        || !lifecycle.legacy_row_preserved
+        || !lifecycle.new_run_after_migration
         || !lifecycle.verifier_firewall
         || !lifecycle.no_premature_artifact
         || !lifecycle.clean_shutdown

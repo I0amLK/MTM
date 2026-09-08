@@ -6,6 +6,8 @@ use crate::support::candidate;
 use crate::support::loopback::{Client, Server};
 use crate::support::recovery::{adopt_refresh, error_code};
 use crate::support::{Result, require, submission, text};
+use mtm_storage::schema::V1_WORKFLOW_SCHEMA_SQL;
+use rusqlite::Connection;
 use serde_json::{Map, Value, json};
 
 const PROBLEM: &str = r"\begin{proposition}For the integer $1$, prove $1=1$.\end{proposition}";
@@ -28,6 +30,37 @@ The number $1$ is an integer. Substituting $x=1$ proves $1=1$.
 
 fn write(resource: &str, content: Value) -> Value {
     json!({"resource":resource,"content":content})
+}
+
+fn seed_v1_state(server: &mut Server, owner: &Client) -> Result {
+    server.stop()?;
+    let path = server.private_state_path();
+    for candidate in [
+        path.clone(),
+        std::path::PathBuf::from(format!("{}-wal", path.display())),
+        std::path::PathBuf::from(format!("{}-shm", path.display())),
+    ] {
+        match fs::remove_file(candidate) {
+            Ok(()) => {}
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(_) => return Err("copied-state fixture cleanup failed"),
+        }
+    }
+    let connection = Connection::open(&path).map_err(|_| "copied-state fixture open failed")?;
+    connection
+        .execute_batch(V1_WORKFLOW_SCHEMA_SQL)
+        .map_err(|_| "copied-state v1 schema setup failed")?;
+    connection
+        .execute(
+            "INSERT INTO runs(run_id, problem_id, owner_id, state, status, created_at, updated_at) VALUES(?1,'legacy-problem',?2,'assess','active','old','old')",
+            ("legacy-run", owner.client_id()),
+        )
+        .map_err(|_| "copied-state legacy row setup failed")?;
+    connection
+        .execute_batch("PRAGMA user_version=1;")
+        .map_err(|_| "copied-state schema version setup failed")?;
+    drop(connection);
+    server.restart()
 }
 
 fn fixture_submission(task: &Value, mode: &str, report_gap: bool) -> Result<Value> {
@@ -324,6 +357,25 @@ fn candidate_persistence_and_complete_protocol_flows() -> Result {
     super::advances(&rejected, &fresh)?;
     super::cancel(&server, &owner, &fresh)?;
 
+    seed_v1_state(&mut server, &owner)?;
+    let migrated_info = server.call(&owner, "server_info", json!({}))?;
+    let legacy = server.call(
+        &owner,
+        "rethlas_inspect",
+        json!({"operation":"status","run_id":"legacy-run"}),
+    )?;
+    require(
+        migrated_info["research_workspace"]["state_schema_version"] == 2
+            && legacy["ok"] == true
+            && legacy["problem_id"] == "legacy-problem"
+            && legacy["state"] == "assess",
+        "candidate did not migrate and preserve copied v1 state",
+    )?;
+    let post_migration = super::start(&server, &owner, "compact")?;
+    let advanced = server.call(&owner, "rethlas_step", submission(&post_migration)?)?;
+    super::advances(&post_migration, &advanced)?;
+    super::cancel(&server, &owner, &advanced)?;
+
     let mut flows = BTreeMap::new();
     for (mode, repair) in [("compact", false), ("full", false), ("compact", true)] {
         flows.insert(
@@ -336,6 +388,7 @@ fn candidate_persistence_and_complete_protocol_flows() -> Result {
     let report = json!({"ok":true,"binary_sha256":candidate.sha256,"flows":flows,
         "persisted_secret_owner_only":true,"same_key_restart":true,"changed_key_old_bearer_denied":true,
         "changed_key_old_capability_zero_writes":true,"same_owner_fresh_recovery":true,
+        "copied_v1_state_migrated":true,"legacy_row_preserved":true,"new_run_after_migration":true,
         "verifier_firewall":true,"no_premature_artifact":true,"clean_shutdown":true,
         "native_execution_tested":false,"latex_policy":"static_only","web_client_tested":false,
         "independent_mathematical_verification":false,"release_qualified":false});

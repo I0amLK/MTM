@@ -48,6 +48,9 @@ Current commands: `cargo xtask audit`, `cargo xtask records`,
 `cargo xtask qualify --profile <protocol|target> --binary <artifact> --sha256
 <digest> --record` selects an explicit artifact for the current Rust qualification
 fixtures. `target` additionally requires a capable Native host and compiled LaTeX.
+`--profile resource` additionally requires an explicit `--baseline` and
+`--baseline-sha256` and compares bounded resource metrics without selecting either
+artifact for production.
 Read `docs/MTM-016-CANDIDATE-GATE.md`; neither profile can authorize release or
 substitute for browser/resource/install/rollback responsibilities.
 `cargo xtask native-preflight --record` measures the current Linux environment;

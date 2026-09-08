@@ -156,3 +156,44 @@ target command therefore stopped before candidate launch, as required. The proto
 profile was rerun against the exact release artifact and remained green. D6 cannot
 be marked target-qualified until the target command is rerun on the ordinary Linux
 host and its report is reviewed/sealed.
+
+## D7 copied-state and resource profile
+
+The protocol lifecycle now includes a bounded synthetic copied-state migration:
+the owned disposable server is stopped, its state database is replaced with a v1
+database using MTM's production v1 schema and one owner-bound legacy run, then the
+same exact candidate is restarted. The gate requires schema version 2, preservation
+of that legacy run and successful creation/advancement of a new run afterward. This
+is stronger than a store-only migration unit test, but it is still a synthetic v1
+copy rather than a claim that an arbitrary production database was exercised.
+
+D7 also adds an explicit A5-style resource entry with two reviewed artifacts:
+
+```sh
+cargo xtask qualify --profile resource \
+  --binary target/release/mtm --sha256 <candidate-sha256> \
+  --baseline <baseline-mtm> --baseline-sha256 <baseline-sha256> --record
+```
+
+Candidate and baseline digests must be distinct and both artifacts are copied to
+private executable snapshots. The resource profile runs Native preflight before
+launching either artifact. On a capable host, each artifact gets three disposable
+server starts and 70 alternating public `server_info` / Bubblewrap `exec_command`
+requests per start; the first ten requests per start are warmup, leaving exactly
+180 measured requests. The Rust validator independently recomputes the declared
+startup/request, RSS, thread, FD and shutdown bounds instead of trusting a `passed`
+boolean from the test process.
+
+The baseline is supplied explicitly; no selector is read as authority and no
+installation is changed. The intended current comparison is the immutable
+0.5.0-preview.2 artifact SHA-256
+`2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a`.
+This resource lane deliberately excludes permission-elicitation soak, browser,
+compiled-LaTeX, install/cutover and performance claims. It is non-regression
+evidence only, not A6.
+
+In the connected nested environment, the completed D7 command stops at the Native
+preflight with both `candidate_launched=false` and `baseline_launched=false`.
+Therefore no resource numbers from this environment are recorded as evidence. The
+same D7 command must run on the ordinary Linux host before resource acceptance can
+be sealed.

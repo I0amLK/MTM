@@ -5,6 +5,8 @@ fn options(path: &str, hash: &str) -> Options {
         binary: path.into(),
         sha256: hash.into(),
         profile: Profile::Protocol,
+        baseline_binary: None,
+        baseline_sha256: None,
         record: false,
     }
 }
@@ -24,6 +26,29 @@ fn selection_requires_explicit_profile_artifact_and_digest() -> Result<()> {
     let mut target = good.clone();
     target[1] = "target".to_owned();
     assert_eq!(Options::parse(&target)?.profile, Profile::Target);
+    let mut resource = [
+        good.to_vec(),
+        vec![
+            "--baseline".into(),
+            "target/release/old-mtm".into(),
+            "--baseline-sha256".into(),
+            "b".repeat(64),
+        ],
+    ]
+    .concat();
+    resource[1] = "resource".to_owned();
+    let parsed_resource = Options::parse(&resource)?;
+    assert_eq!(parsed_resource.profile, Profile::Resource);
+    let expected_baseline_hash = "b".repeat(64);
+    assert_eq!(
+        parsed_resource.baseline_sha256.as_deref(),
+        Some(expected_baseline_hash.as_str())
+    );
+    let mut resource_missing = good.to_vec();
+    resource_missing[1] = "resource".to_owned();
+    assert!(Options::parse(&resource_missing).is_err());
+    let protocol_with_baseline = [good.to_vec(), vec!["--baseline".into(), "old".into()]].concat();
+    assert!(Options::parse(&protocol_with_baseline).is_err());
     for changed in [
         vec![],
         good[..4].to_vec(),
@@ -121,7 +146,8 @@ fn summaries() -> [Value; 3] {
     }
     let lifecycle = json!({"ok":true,"binary_sha256":"a".repeat(64),"flows":flows,
         "persisted_secret_owner_only":true,"same_key_restart":true,"changed_key_old_bearer_denied":true,
-        "changed_key_old_capability_zero_writes":true,"same_owner_fresh_recovery":true,"verifier_firewall":true,
+        "changed_key_old_capability_zero_writes":true,"same_owner_fresh_recovery":true,
+        "copied_v1_state_migrated":true,"legacy_row_preserved":true,"new_run_after_migration":true,"verifier_firewall":true,
         "no_premature_artifact":true,"clean_shutdown":true,"native_execution_tested":false,"latex_policy":"static_only",
         "web_client_tested":false,"independent_mathematical_verification":false,"release_qualified":false});
     [cap, workspace, lifecycle]
@@ -172,6 +198,9 @@ fn summaries_require_all_three_scopes_and_the_exact_candidate() -> Result<()> {
         ("flows", json!({})),
         ("clean_shutdown", json!(false)),
         ("same_key_restart", Value::Null),
+        ("copied_v1_state_migrated", json!(false)),
+        ("legacy_row_preserved", json!(false)),
+        ("new_run_after_migration", json!(false)),
         ("native_execution_tested", json!(true)),
         ("latex_policy", json!("required")),
         ("independent_mathematical_verification", json!(true)),

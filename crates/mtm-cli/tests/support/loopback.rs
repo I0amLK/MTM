@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::net::{SocketAddr, TcpStream};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::mpsc::{self, Receiver};
 use std::thread;
@@ -91,6 +91,12 @@ pub struct Client {
     client_id: String,
 }
 
+impl Client {
+    pub fn client_id(&self) -> &str {
+        &self.client_id
+    }
+}
+
 pub struct Server {
     child: Option<Child>,
     logs_closed: Option<Receiver<()>>,
@@ -107,22 +113,97 @@ pub struct Server {
 
 impl Server {
     pub fn start(binary: &str) -> Result<Self> {
-        Self::start_profile(binary, false, false)
+        Self::start_profile(binary, false, false, false)
     }
 
     pub fn start_workspace(binary: &str) -> Result<Self> {
-        Self::start_profile(binary, true, false)
+        Self::start_profile(binary, true, false, false)
     }
 
     pub fn start_target(binary: &str) -> Result<Self> {
-        Self::start_profile(binary, true, true)
+        Self::start_profile(binary, true, true, true)
+    }
+
+    pub fn start_resource(binary: &str) -> Result<Self> {
+        Self::start_profile(binary, false, true, false)
     }
 
     pub fn workspace_path(&self) -> std::path::PathBuf {
         self.directory.path().join("workspace")
     }
 
-    fn start_profile(binary: &str, git_enabled: bool, target: bool) -> Result<Self> {
+    pub fn private_state_path(&self) -> std::path::PathBuf {
+        self.directory.path().join("data/private/state.sqlite3")
+    }
+
+    pub fn process_facts(&self) -> Result<Value> {
+        let pid = self
+            .child
+            .as_ref()
+            .ok_or("owned server is not running")?
+            .id();
+        let proc_root = PathBuf::from(format!("/proc/{pid}"));
+        let status = fs::read_to_string(proc_root.join("status"))
+            .map_err(|_| "owned server process status unavailable")?;
+        require(
+            status.len() <= 256 * 1024,
+            "owned server status exceeded bound",
+        )?;
+        let mut rss_kib: Option<u64> = None;
+        let mut threads: Option<u64> = None;
+        for line in status.lines() {
+            if let Some(value) = line.strip_prefix("VmRSS:") {
+                rss_kib = value
+                    .split_whitespace()
+                    .next()
+                    .and_then(|value| value.parse().ok());
+            } else if let Some(value) = line.strip_prefix("Threads:") {
+                threads = value.trim().parse().ok();
+            }
+        }
+        let mut fds = 0_u64;
+        for entry in
+            fs::read_dir(proc_root.join("fd")).map_err(|_| "owned server fd list unavailable")?
+        {
+            entry.map_err(|_| "owned server fd entry unavailable")?;
+            fds += 1;
+            require(fds <= 4096, "owned server fd count exceeded bound")?;
+        }
+        let mut children = std::collections::BTreeSet::new();
+        let mut tasks = 0_u64;
+        for entry in fs::read_dir(proc_root.join("task"))
+            .map_err(|_| "owned server task list unavailable")?
+        {
+            let entry = entry.map_err(|_| "owned server task entry unavailable")?;
+            tasks += 1;
+            require(tasks <= 512, "owned server task count exceeded bound")?;
+            let path = entry.path().join("children");
+            match fs::read_to_string(path) {
+                Ok(value) => {
+                    require(
+                        value.len() <= 64 * 1024,
+                        "owned server children list exceeded bound",
+                    )?;
+                    children.extend(value.split_whitespace().map(str::to_owned));
+                }
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+                Err(_) => return Err("owned server children list unavailable"),
+            }
+        }
+        Ok(json!({
+            "rss_kib":rss_kib.ok_or("owned server RSS missing")?,
+            "threads":threads.ok_or("owned server thread count missing")?,
+            "fds":fds,
+            "children":children.len()
+        }))
+    }
+
+    fn start_profile(
+        binary: &str,
+        git_enabled: bool,
+        native_enabled: bool,
+        compiled_latex: bool,
+    ) -> Result<Self> {
         let directory = tempfile::tempdir().map_err(|_| "temporary server directory failed")?;
         fs::create_dir(directory.path().join("workspace")).map_err(|_| "workspace setup failed")?;
         // Keep the capability suite curl-only. Workspace qualification adds the
@@ -135,8 +216,11 @@ impl Server {
         if git_enabled {
             names.push("git");
         }
-        if target {
-            names.extend(["bwrap", "latexmk", "pdflatex"]);
+        if native_enabled {
+            names.push("bwrap");
+        }
+        if compiled_latex {
+            names.extend(["latexmk", "pdflatex"]);
         }
         for name in names {
             let program = std::env::var_os("PATH")
@@ -160,9 +244,17 @@ impl Server {
             password: URL_SAFE_NO_PAD.encode(random),
             binary: binary.to_owned(),
             binary_sha256: sha256_file(Path::new(binary))?,
-            native_backend: if target { "bubblewrap" } else { "disabled" },
-            native_mode: if target { "dangerous" } else { "safe" },
-            latex_policy: if target { "required" } else { "static_only" },
+            native_backend: if native_enabled {
+                "bubblewrap"
+            } else {
+                "disabled"
+            },
+            native_mode: if native_enabled { "dangerous" } else { "safe" },
+            latex_policy: if compiled_latex {
+                "required"
+            } else {
+                "static_only"
+            },
             directory,
             deadline: Instant::now() + Duration::from_secs(240),
         };

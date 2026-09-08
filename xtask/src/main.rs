@@ -142,6 +142,10 @@ fn run() -> Result<()> {
                 let status = Command::new(&cargo)
                     .env_remove("MTM_TEST_CANDIDATE")
                     .env_remove("MTM_TEST_CANDIDATE_SHA256")
+                    .env_remove("MTM_TEST_TARGET_PROFILE")
+                    .env_remove("MTM_TEST_RESOURCE_PROFILE")
+                    .env_remove("MTM_TEST_BASELINE")
+                    .env_remove("MTM_TEST_BASELINE_SHA256")
                     .args(arguments)
                     .current_dir(&root)
                     .stdin(Stdio::null())
@@ -185,7 +189,7 @@ fn run() -> Result<()> {
         }
         "help" | "--help" | "-h" => {
             println!(
-                "cargo xtask qualify --profile <protocol|target> --binary <artifact> --sha256 <sha256> [--record]"
+                "cargo xtask qualify --profile <protocol|target> --binary <artifact> --sha256 <sha256> [--record]\ncargo xtask qualify --profile resource --binary <artifact> --sha256 <sha256> --baseline <artifact> --baseline-sha256 <sha256> [--record]"
             );
             println!(
                 "cargo xtask audit [--strict] [--record]\ncargo xtask records [--record]\ncargo xtask retirement [--record]\ncargo xtask capability [--record]\ncargo xtask native-preflight [--record]\ncargo xtask check [--record]\ncargo xtask commit-message <file|--stdin>\n\ncheck is NOT release qualification. Orchestration is Rust; inherited host/toolchain tests are not skipped. A blocked preflight never suppresses a test failure."

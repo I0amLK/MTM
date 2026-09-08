@@ -9,6 +9,8 @@ use super::{Result, require};
 
 pub const BINARY_ENV: &str = "MTM_TEST_CANDIDATE";
 pub const HASH_ENV: &str = "MTM_TEST_CANDIDATE_SHA256";
+pub const BASELINE_ENV: &str = "MTM_TEST_BASELINE";
+pub const BASELINE_HASH_ENV: &str = "MTM_TEST_BASELINE_SHA256";
 
 pub struct Candidate {
     pub path: String,
@@ -16,8 +18,19 @@ pub struct Candidate {
 }
 
 pub fn select() -> Result<Candidate> {
-    let (path, expected) = match (env::var_os(BINARY_ENV), env::var_os(HASH_ENV)) {
-        (None, None) => (env!("CARGO_BIN_EXE_mtm").to_owned(), None),
+    select_pair(BINARY_ENV, HASH_ENV, Some(env!("CARGO_BIN_EXE_mtm")))
+}
+
+pub fn select_baseline() -> Result<Candidate> {
+    select_pair(BASELINE_ENV, BASELINE_HASH_ENV, None)
+}
+
+fn select_pair(path_env: &str, hash_env: &str, fallback: Option<&str>) -> Result<Candidate> {
+    let (path, expected) = match (env::var_os(path_env), env::var_os(hash_env)) {
+        (None, None) => match fallback {
+            Some(path) => (path.to_owned(), None),
+            None => return Err("explicit baseline selection is required"),
+        },
         (Some(path), Some(hash)) => (
             path.into_string()
                 .map_err(|_| "candidate path is not UTF-8")?,
@@ -26,7 +39,7 @@ pub fn select() -> Result<Candidate> {
                     .map_err(|_| "candidate digest is not UTF-8")?,
             ),
         ),
-        _ => return Err("candidate selection requires both path and SHA-256"),
+        _ => return Err("artifact selection requires both path and SHA-256"),
     };
     inspect(&path, expected.as_deref())
 }

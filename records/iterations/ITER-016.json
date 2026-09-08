@@ -937,6 +937,67 @@
       "rust_only_ready": false,
       "release_qualified": false,
       "earlier_signature_mismatch_explained": false
+    },
+    {
+      "id": "MTM016-D7-COPIED-STATE-RESOURCE-IMPLEMENTATION",
+      "delivery": "D7",
+      "status": "implemented_protocol_checked_resource_host_execution_pending",
+      "base_commit": "ccc28ea57ede02d20d09889a8922d9344a6c4a9d",
+      "scope": "Add exact-candidate synthetic v1 state migration and explicit candidate-versus-baseline resource non-regression without selector/install authority",
+      "changes": [
+        "Extend the exact-candidate lifecycle with an owned v1 SQLite state database using the production V1 workflow schema, one OAuth-owner-bound legacy run, candidate migration to schema 2, legacy-row preservation and a successful new post-migration run",
+        "Add resource profile requiring explicit candidate/baseline paths and distinct lowercase SHA-256 identities",
+        "Snapshot both artifacts privately and require Native preflight before either resource artifact can launch",
+        "Measure three starts and exactly 180 post-warmup requests per artifact through public server_info and Bubblewrap exec_command",
+        "Collect bounded /proc RSS, threads, file descriptors, child state and shutdown latency from only the owned server process",
+        "Recompute startup/request/RSS/thread/FD/shutdown thresholds inside the Rust parent validator rather than trusting child success metadata",
+        "Clear candidate, target, resource and baseline test selectors from ordinary source capability/check subprocesses so inherited qualification settings cannot alter source gates",
+        "Keep permission-grant soak, browser, compiled-LaTeX target acceptance, install/rollback and A6 performance claims outside this profile"
+      ],
+      "candidate": {
+        "version": "0.6.0-preview.1",
+        "sha256": "42b959cb3df17f496e74479f05e9eeea867ba087040f4de93004771416dcce18",
+        "profile": "release",
+        "installed": false
+      },
+      "resource_baseline": {
+        "version": "0.5.0-preview.2",
+        "sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+        "path_used_only_as_explicit_read_only_artifact": "/home/lk/.local/share/mtm/releases/0.5.0-preview.2/mtm",
+        "selector_used_as_authority": false
+      },
+      "commands": [
+        {"command": "cargo fmt --all -- --check", "exit_code": 0},
+        {"command": "cargo clippy -p mtm-cli -p mtm-xtask --all-targets --locked --offline -- -D warnings", "exit_code": 0},
+        {"command": "cargo test -p mtm-xtask --locked --offline", "exit_code": 0, "maintenance_unit_passed": 57, "maintenance_cli_passed": 8},
+        {"command": "cargo test -p mtm-cli --test capability_runtime --locked --offline -- --test-threads=1", "exit_code": 0, "passed": 18, "target_and_resource_profiles_inert_without_explicit_flags": true},
+        {"command": "cargo test -p mtm-cli --test capability_runtime candidate_lifecycle::candidate_persistence_and_complete_protocol_flows -- --nocapture --test-threads=1", "exit_code": 0, "copied_v1_state_migrated": true, "legacy_row_preserved": true, "new_run_after_migration": true},
+        {"command": "cargo xtask qualify --profile protocol --binary target/release/mtm --sha256 42b959cb3df17f496e74479f05e9eeea867ba087040f4de93004771416dcce18", "exit_code": 0, "normal_runs": 500, "copied_v1_state_migrated": true, "legacy_row_preserved": true, "new_run_after_migration": true},
+        {"command": "cargo xtask qualify --profile resource --binary target/release/mtm --sha256 42b959cb3df17f496e74479f05e9eeea867ba087040f4de93004771416dcce18 --baseline /home/lk/.local/share/mtm/releases/0.5.0-preview.2/mtm --baseline-sha256 2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a", "exit_code": 1, "expected_in_connected_nested_environment": true, "failed_stage": "native_preflight", "candidate_launched": false, "baseline_launched": false},
+        {"command": "cargo xtask capability --record with deliberately invalid inherited candidate/target/resource/baseline environment", "exit_code": 0, "normal_runs": 500, "normal_invalid": 0, "normal_rejections": 0, "interpretation": "ordinary current-source gate removed every qualification selector before Cargo tests"}
+      ],
+      "resource_bounds": {
+        "startup_samples_each": 3,
+        "measured_request_samples_each": 180,
+        "startup_p95": "candidate <= max(2*baseline, baseline+250ms)",
+        "request_p95": "candidate <= max(2*baseline, baseline+10ms)",
+        "rss_kib": "candidate <= min(262144, baseline+32768)",
+        "threads": "candidate <= baseline+2",
+        "fds": "candidate <= baseline+8",
+        "shutdown_ms": "candidate <= 8000",
+        "performance_claim": false
+      },
+      "development_boundary": "The connected nested Native environment blocks D7 before either resource artifact launches. No current resource measurement is claimed. The synthetic v1 fixture is representative schema migration coverage, not evidence that every production database was copied and opened.",
+      "dependency_change": "mtm-cli test-only dependencies now reference existing locked mtm-storage/rusqlite so the integration fixture can build a v1 database from the production schema; no runtime dependency or version changed.",
+      "python_retirement": {"baseline": 127, "retired": 11, "remaining": 116, "deleted_in_D7": 0},
+      "product_runtime_source_changed": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "new_test_suppressions": 0,
+      "rust_only_ready": false,
+      "release_qualified": false,
+      "earlier_signature_mismatch_explained": false,
+      "host_pending": ["Run and seal D6 target profile", "Run and seal D7 resource profile against the immutable preview.2 baseline"]
     }
   ],
   "remaining_acceptance": [
