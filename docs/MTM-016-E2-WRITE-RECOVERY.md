@@ -44,3 +44,26 @@ reported as MEMORY_CORRUPT instead of omitted. Oversized files and unsafe type,
 link or writable-permission drift are rejected, not truncated or chmod-repaired.
 Copy-on-write memory append may cost more for large histories; resource/performance
 acceptance remains pending and no performance improvement is claimed.
+
+## Delivery
+
+Implementation `56c2263abacb40649657747d44bf654e15a8f76e` passed 18 added tests:
+eight storage, six vault and four actual authenticated socket tests. The latter
+cover normalized-memory acknowledgement loss, concurrent recovery, a live file
+lock, conflict bytes, proof-versus-database effects, corruption during acknowledgement
+and actual two-branch domain/barrier preservation. Faults are injected in owned
+temporary state, followed by actual forced process restart; not power-cut tests.
+
+The separately built `target/mtm016-e2-writes/release/mtm`, SHA-256
+`7610e0366fbe7094ed14b4e969ef00c44c5a33863a6e37a3a99e12ad2d92d736`, passed
+post-commit protocol qualification. The raw report is sealed in
+`records/evidence/MTM-016/candidate-protocol-e2-writes-56c2263.json` and bound by
+ITER-016. It includes 500 normal assessment first hops and three scripted complete
+protocol flows, not 500 independent mathematical proofs.
+
+The full source gate remains false inside the nested Native environment: the same
+ten Runtime failures remain, with no new suppression. Two explicit host-profile
+test functions are inert without their selected profile and do not count as host
+acceptance. Supported caller-write reconciliation is delivered; entered-action,
+opaque-database and final release qualification remain pending. No production
+artifact, selector, database or key was modified.

@@ -1,0 +1,161 @@
+{
+  "baseline_launched": null,
+  "baseline_sha256": null,
+  "candidate_launched": true,
+  "candidate_sha256": "7610e0366fbe7094ed14b4e969ef00c44c5a33863a6e37a3a99e12ad2d92d736",
+  "delivery": "D5",
+  "harness_source_identity": {
+    "after_sha256": "f6a1f985a403ee1365fcb95022ed577fd8fb85bce3dd660113744fbfa1084a5f",
+    "before_sha256": "f6a1f985a403ee1365fcb95022ed577fd8fb85bce3dd660113744fbfa1084a5f",
+    "commit": "56c2263abacb40649657747d44bf654e15a8f76e",
+    "unchanged": true
+  },
+  "milestone": "MTM-016",
+  "original_and_snapshot_unchanged": true,
+  "passed": true,
+  "pending": [
+    "Native host",
+    "compiled LaTeX",
+    "browser",
+    "resources",
+    "upgrade and rollback",
+    "Python retirement"
+  ],
+  "production_state_modified": false,
+  "profile": "protocol",
+  "python_invoked": false,
+  "raw_test_output_recorded": false,
+  "recorded_unix_seconds": 1788879545,
+  "release_qualified": false,
+  "runner": {
+    "child_reaped": true,
+    "elapsed_ms": 64353,
+    "exit_code": 0,
+    "output_limit_exceeded": false,
+    "pipes_closed": true,
+    "raw_output_recorded": false,
+    "signal": null,
+    "stderr_bytes_retained": 431,
+    "stdout_bytes_retained": 5506,
+    "timed_out": false
+  },
+  "schema_version": "1.0.0",
+  "scope": "exact_candidate_protocol_not_release",
+  "selector_changed": false,
+  "summaries": {
+    "capability": {
+      "adversarial_checks": {
+        "cross_owner_refresh_denied": true,
+        "cross_run_denied": true,
+        "fresh_submission_advances": true,
+        "invalid_inspect_and_retrieve_denied": true,
+        "invalid_submission_zero_memory_changes": true,
+        "mutated_and_truncated_signature": true,
+        "revoked_inspect_and_retrieve_denied": true,
+        "used_capability_revoked": true
+      },
+      "binary_sha256": "7610e0366fbe7094ed14b4e969ef00c44c5a33863a6e37a3a99e12ad2d92d736",
+      "binary_unchanged": true,
+      "bounded_clean_shutdown": true,
+      "child_path_policy": "curl_only_no_python",
+      "external_retrieval_tested": false,
+      "independent_normal_runs": 500,
+      "kind": "rust_current_binary_loopback_capability_regression",
+      "latex_policy": "static_only",
+      "lost_outcome_no_automatic_replay": true,
+      "native_backend": "disabled",
+      "normal_invalid": 0,
+      "normal_modes": {
+        "compact": 250,
+        "full": 250
+      },
+      "normal_rejections": 0,
+      "normal_roundtrips": 500,
+      "ok": true,
+      "production_state_modified": false,
+      "raw_capability_recorded": false,
+      "raw_oauth_token_recorded": false,
+      "release_qualified": false,
+      "same_identity_and_capability_survive_restart": true,
+      "samples_requested": 500,
+      "schema_version": "1.0.0",
+      "version": "0.6.0-preview.1",
+      "web_client_tested": false
+    },
+    "lifecycle": {
+      "binary_sha256": "7610e0366fbe7094ed14b4e969ef00c44c5a33863a6e37a3a99e12ad2d92d736",
+      "changed_key_old_bearer_denied": true,
+      "changed_key_old_capability_zero_writes": true,
+      "clean_shutdown": true,
+      "copied_v1_state_migrated": true,
+      "flows": {
+        "compact": {
+          "artifact_matches": true,
+          "restart_resumed": true,
+          "sealed": true,
+          "states": [
+            "assess",
+            "assemble",
+            "verify",
+            "done"
+          ]
+        },
+        "full": {
+          "artifact_matches": true,
+          "restart_resumed": true,
+          "sealed": true,
+          "states": [
+            "assess",
+            "explore",
+            "propose_plans",
+            "direct_proving",
+            "assemble",
+            "verify",
+            "done"
+          ]
+        },
+        "repair": {
+          "artifact_matches": true,
+          "restart_resumed": true,
+          "sealed": true,
+          "states": [
+            "assess",
+            "assemble",
+            "verify",
+            "repair",
+            "verify",
+            "done"
+          ]
+        }
+      },
+      "independent_mathematical_verification": false,
+      "latex_policy": "static_only",
+      "legacy_row_preserved": true,
+      "native_execution_tested": false,
+      "new_run_after_migration": true,
+      "no_premature_artifact": true,
+      "ok": true,
+      "persisted_secret_owner_only": true,
+      "release_qualified": false,
+      "same_key_restart": true,
+      "same_owner_fresh_recovery": true,
+      "verifier_firewall": true,
+      "web_client_tested": false
+    },
+    "target": null,
+    "workspace": {
+      "binary_sha256": "7610e0366fbe7094ed14b4e969ef00c44c5a33863a6e37a3a99e12ad2d92d736",
+      "blame_continuation_preserved": true,
+      "changed_file_denied": true,
+      "child_path": "curl_and_git_only",
+      "git_tools_checked": 5,
+      "native_execution_tested": false,
+      "ok": true,
+      "release_qualified": false,
+      "utf8_continuation_lossless": true,
+      "web_client_tested": false
+    }
+  },
+  "test_stderr_sha256": "c854bdd83e1ee1fc55043d9c4862f57e7456c63240da84ed439b93325bbe7262",
+  "test_stdout_sha256": "4693a53061951b435af1646b9afedcadad4eac119375ac4a635ce5d074a5bea0"
+}
