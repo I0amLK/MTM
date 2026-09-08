@@ -6,7 +6,7 @@
   "release_qualified": false,
   "schema_version": "1.0.0",
   "scope": "current_binary_loopback_not_release",
-  "source_sha256": "e00926ea0a95c3da02e772979acc1f54f5e119b258f8ca4965db49e36033f069",
+  "source_sha256": "c1d9cd4c6ecf0ec098c7f36ecad52b9a44e6ef97cf2f6174f1a6bf10a1011e49",
   "source_unchanged": true,
   "summary": {
     "adversarial_checks": {
@@ -47,6 +47,6 @@
     "version": "0.6.0-preview.1",
     "web_client_tested": false
   },
-  "test_stderr_sha256": "db16665b60e30f903088b2e63b1d59c8bfba9e67858bb5ba0b35c7a545bb64fd",
-  "test_stdout_sha256": "e416de34727821d6984ae5f5a6ebdd518a6c6522a69432ab16f2baaf953d0e56"
+  "test_stderr_sha256": "e6201b6770df77979043859f7c2cd1c27d7499ac8b65811ac3b8f9771ca756f0",
+  "test_stdout_sha256": "a84510a6f589bf9d17340f01a85434971a66b71899f072246af584f2e806e013"
 }

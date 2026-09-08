@@ -831,6 +831,61 @@
       "rust_only_ready": false,
       "release_qualified": false,
       "earlier_signature_mismatch_explained": false
+    },
+    {
+      "id": "MTM016-D5-PROTOCOL-DELIVERY-COMPLETE",
+      "delivery": "D5",
+      "status": "completed_for_exact_candidate_protocol_scope",
+      "milestone_status": "in_progress",
+      "implementation_commit": "9bcf435acba27ba9f1a4b44900ec786c4e269b27",
+      "scope": "Complete the next bounded Rust qualification delivery; do not mark all of MTM-016 or stage D complete",
+      "sealed_reports": [
+        {"path": "records/evidence/MTM-016/candidate-protocol-d5-9bcf435.json", "sha256": "1c533a735ff76b8772569b409b0b0acb54dda5c5b2ff42dcf41b12f2b8ec3b31"}
+      ],
+      "final_execution": {
+        "command": "cargo xtask qualify --profile protocol --binary target/release/mtm --sha256 42b959cb3df17f496e74479f05e9eeea867ba087040f4de93004771416dcce18 --record",
+        "exit_code": 0,
+        "candidate_sha256": "42b959cb3df17f496e74479f05e9eeea867ba087040f4de93004771416dcce18",
+        "candidate_version": "0.6.0-preview.1",
+        "candidate_build_profile": "release",
+        "harness_source_sha256": "c1d9cd4c6ecf0ec098c7f36ecad52b9a44e6ef97cf2f6174f1a6bf10a1011e49",
+        "harness_head_before_and_after": "9bcf435acba27ba9f1a4b44900ec786c4e269b27",
+        "original_and_snapshot_unchanged": true,
+        "runner_exit_code": 0,
+        "runner_child_reaped": true,
+        "runner_pipes_closed": true,
+        "runner_timeout": false,
+        "runner_output_limit_exceeded": false,
+        "normal_independent_assessments": 500,
+        "normal_invalid": 0,
+        "normal_rejections": 0,
+        "complete_scripted_protocol_flows": 3,
+        "git_tools_checked": 5,
+        "raw_test_output_recorded": false,
+        "release_qualified": false
+      },
+      "source_checks": {
+        "rust_source_hash_matches_final_harness": true,
+        "current_source_capability_gate_passed": true,
+        "inherited_invalid_candidate_selection_was_not_used": true,
+        "maintenance_unit_passed": 54,
+        "maintenance_cli_passed": 7,
+        "real_binary_protocol_suite_passed": 16,
+        "runtime": {"passed": 125, "failed": 10, "ignored": 1},
+        "aggregate_passed_in_current_sandbox": false,
+        "new_test_suppressions": 0,
+        "interpretation": "All new checks and other Rust targets passed. The same ten nested-Native failures remain in this environment, not waived by the archived host result."
+      },
+      "evidence_preservation": "Final protocol report moved byte-for-byte after post-commit execution. Two operator-host reports and 26 historical evidence hashes are unchanged. New source/capability reports retain their original execution identity rather than being relabelled after the commit.",
+      "commit_identity_note": "The first commit attempt failed before creation because this isolated process lacked Git identity settings. The established MTM Automation identity and required hook were then supplied only to the commit command; no global Git configuration changed. The hook returned a successful Rust policy result.",
+      "python_retirement": {"baseline": 127, "retired": 11, "remaining": 116, "deleted_in_D5": 0},
+      "next_target_chain_responsibilities": ["Exact-artifact real Native and required-LaTeX profile", "Resource and copied-state checks", "Installed selector upgrade/rollback and real-web acceptance", "Retire the corresponding Python caller families only after coverage replacement"],
+      "persistent_workflow_idempotency_implemented": false,
+      "production_runtime_source_or_manifest_changed": false,
+      "production_changed": false,
+      "rust_only_ready": false,
+      "release_qualified": false,
+      "earlier_signature_mismatch_explained": false
     }
   ],
   "remaining_acceptance": [

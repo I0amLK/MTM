@@ -95,3 +95,19 @@ groups are terminated while still owned. This is not a guarantee against a
 hostile daemon escaping a process group. Raw test protocol/credential/log data
 is not written to repository reports. On incomplete execution, whether a
 candidate launched remains unknown unless validated evidence establishes it.
+
+## D5 completion
+
+Implementation `9bcf435` passed the protocol profile again after commit, using a
+release-profile `0.6.0-preview.1` artifact. The byte-bound report is sealed as
+`records/evidence/MTM-016/candidate-protocol-d5-9bcf435.json`; the iteration receipt
+binds its hash. All 500 normal first hops, three complete scripted flows and five
+Git-tool checks passed on the same selected artifact. Wrong-SHA execution was
+separately rejected before candidate launch.
+
+The source suite now has 16 passing protocol tests and 61 passing maintenance
+unit/CLI tests. The complete workspace command in the connected nested sandbox
+still reports its ten known Native failures. The previous host pass is kept as
+its own sealed observation, not used to turn this later environment green.
+D5 is complete only within the declared protocol scope; MTM-016, full target
+qualification, persistent workflow idempotency and Python retirement are pending.

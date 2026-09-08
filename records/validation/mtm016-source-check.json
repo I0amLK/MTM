@@ -81,7 +81,7 @@
       "ENOSPC/EUSERS alone cannot distinguish a configured nesting prohibition from depth/quota exhaustion.",
       "Passing this probe is not full Native, TTY, external-tool, private-vault, workflow or release qualification."
     ],
-    "maintenance_binary_sha256": "66d25a9aedd3ec2aba8fe41742923208ba4b020fc7039c32b807428069600513",
+    "maintenance_binary_sha256": "020e87c5b6ad6410fc8cf2fae629ec0d055126483158105008b789ecddd9335a",
     "milestone": "MTM-016",
     "native_product_runtime_tested": false,
     "passed": false,
@@ -90,7 +90,7 @@
     "python_invoked": false,
     "raw_output_recorded": false,
     "ready_for_native_tests": false,
-    "recorded_unix_seconds": 1788854468,
+    "recorded_unix_seconds": 1788857728,
     "recovery": {
       "action": "run_the_same_checkout_tests_on_a_capable_native_host",
       "automatic_retry": false,
@@ -201,7 +201,7 @@
     "release_qualified": false,
     "scope": "static_record_integrity_only"
   },
-  "recorded_unix_seconds": 1788854528,
+  "recorded_unix_seconds": 1788857792,
   "release_qualified": false,
   "retirement": {
     "baseline_hashes_checked": 11,
@@ -216,10 +216,10 @@
   "schema_version": "1.0.0",
   "scope": "rust_source_with_inherited_host_tests",
   "source_identity": {
-    "after_sha256": "e00926ea0a95c3da02e772979acc1f54f5e119b258f8ca4965db49e36033f069",
-    "before_sha256": "e00926ea0a95c3da02e772979acc1f54f5e119b258f8ca4965db49e36033f069",
-    "commit_after": "841bfe1e90ecac309be556d16602ca36fdcf0089",
-    "commit_before": "841bfe1e90ecac309be556d16602ca36fdcf0089",
+    "after_sha256": "c1d9cd4c6ecf0ec098c7f36ecad52b9a44e6ef97cf2f6174f1a6bf10a1011e49",
+    "before_sha256": "c1d9cd4c6ecf0ec098c7f36ecad52b9a44e6ef97cf2f6174f1a6bf10a1011e49",
+    "commit_after": "69b5fd35b7bed2c359ee9d499abd874706616805",
+    "commit_before": "69b5fd35b7bed2c359ee9d499abd874706616805",
     "hash_scope": "mtm-rust-source-v1",
     "unchanged": true
   },

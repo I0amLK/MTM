@@ -1,6 +1,6 @@
 {
   "audit_completed": true,
-  "base_head": "841bfe1e90ecac309be556d16602ca36fdcf0089",
+  "base_head": "9bcf435acba27ba9f1a4b44900ec786c4e269b27",
   "interpretation": "Text references are retirement candidates, not proof of a runtime dependency. User Python tools are not forbidden.",
   "legacy_rust_reference_file_count": 60,
   "legacy_rust_reference_files": [
@@ -66,11 +66,8 @@
     "crates/mtm-workflow/tests/workflow.rs"
   ],
   "milestone": "MTM-016",
-  "pending_deleted_file_count": 2,
-  "pending_deleted_files": [
-    "scripts/validate_historical_mtm_release_evidence.py",
-    "scripts/validate_record_layout.py"
-  ],
+  "pending_deleted_file_count": 0,
+  "pending_deleted_files": [],
   "python_file_count": 116,
   "python_files": [
     {
@@ -772,6 +769,6 @@
   ],
   "rust_only_ready": false,
   "schema_version": "1.0.0",
-  "tracked_and_unignored_file_count": 364,
+  "tracked_and_unignored_file_count": 373,
   "uninspected_source_files": []
 }
