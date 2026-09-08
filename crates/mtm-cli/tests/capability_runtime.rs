@@ -19,6 +19,9 @@ mod candidate_lifecycle;
 #[path = "support/submission_receipts.rs"]
 mod submission_receipts;
 
+#[path = "support/e2_recovery.rs"]
+mod e2_recovery;
+
 use std::collections::BTreeSet;
 use std::path::Path;
 

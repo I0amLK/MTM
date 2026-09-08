@@ -247,6 +247,7 @@ fn partial_nonrecoverable_failure_stays_unknown_across_restart_and_fresh_tokens(
     let mut server = Server::start(&candidate.path)?;
     let owner = server.login()?;
     let task = super::start(&server, &owner, "compact")?;
+    let alternate = server.call(&owner, "rethlas_step", json!({"run_id":task["run_id"]}))?;
     let mut request = submission(&task)?;
     request["writes"]
         .as_array_mut()
@@ -268,11 +269,16 @@ fn partial_nonrecoverable_failure_stays_unknown_across_restart_and_fresh_tokens(
     )?;
     let fresh = server.call(&owner, "rethlas_step", json!({"run_id":task["run_id"]}))?;
     require(
-        error_code(&server.call(&owner, "rethlas_step", submission(&fresh)?)?) == "RESULT_UNKNOWN",
+        error_code(&fresh) == "RESULT_UNKNOWN" && fresh.get("capability").is_none(),
+        "pending task refresh ran mechanical work or issued authority",
+    )?;
+    require(
+        error_code(&server.call(&owner, "rethlas_step", submission(&alternate)?)?)
+            == "RESULT_UNKNOWN",
         "fresh token bypassed pending-run guard",
     )?;
     require(
-        memory(&server, &owner, &fresh, resource)? == content,
+        memory(&server, &owner, &task, resource)? == content,
         "pending replay wrote memory",
     )?;
     super::cancel(&server, &owner, &task)?;

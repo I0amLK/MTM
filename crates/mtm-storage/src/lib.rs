@@ -9,7 +9,8 @@ pub use capability::{
     CapabilityObserver, authorize_role_resource, default_permissions, role_for_state,
 };
 pub use store::{
-    Clock, IdSource, StateStore, StoreRuntime, SubmissionDisposition, SubmissionReceipt,
+    Clock, CreationIdentity, CreationReceipt, CreationReservation, CreationSlot, IdSource,
+    StateStore, StoreRuntime, SubmissionDisposition, SubmissionExecution, SubmissionReceipt,
     SubmissionReservation, SubmissionResult, SubmissionSlot, SystemClock, SystemIdSource,
     TransitionRun,
 };

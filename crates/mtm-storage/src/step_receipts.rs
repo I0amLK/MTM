@@ -7,6 +7,11 @@ use serde::{Deserialize, Serialize};
 const MAX_RECEIPTS_PER_RUN: i64 = 4096;
 const MAX_RECEIPTS_TOTAL: i64 = 100_000;
 
+#[path = "step_checkpoints.rs"]
+mod checkpoints;
+pub use checkpoints::SubmissionExecution;
+pub(super) use checkpoints::record_transition;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SubmissionDisposition {
@@ -196,6 +201,10 @@ impl StateStore {
                 params![authorized.fingerprint, claims.owner_id(), workspace, request, claims.run_id(),
                     claims.domain_id(), claims.role().as_str(), claims.epoch(), claims.issued_state().as_str(), created_at],
             ).map_err(sql_error)?;
+            tx.execute(
+                "INSERT INTO step_checkpoints(capability_sha256,execution_id,phase) VALUES(?,?,'prepared')",
+                params![authorized.fingerprint,self.runtime.ids.token_hex(16)?],
+            ).map_err(sql_error)?;
             let receipt = read_receipt(tx, &authorized.fingerprint, claims.owner_id(), claims.run_id())?.ok_or_else(invalid_receipt)?;
             Ok(SubmissionSlot::Reserved(SubmissionReservation { receipt }))
         })
@@ -206,14 +215,34 @@ impl StateStore {
         reservation: SubmissionReservation,
         result: &SubmissionResult,
     ) -> Result<SubmissionReceipt, ReCtmError> {
+        self.record_submission_outcome(&reservation, result)
+    }
+
+    pub fn record_submission_outcome(
+        &self,
+        reservation: &SubmissionReservation,
+        result: &SubmissionResult,
+    ) -> Result<SubmissionReceipt, ReCtmError> {
         result.validate()?;
         let summary = serde_json::to_string(result).map_err(|_| invalid_receipt())?;
         if summary.len() > 2048 {
             return Err(invalid_receipt());
         }
-        let binding = reservation.receipt.row;
+        let binding = &reservation.receipt.row;
         let completed_at = self.runtime.clock.now_iso()?;
         self.immediate(|tx| {
+            let existing = read_receipt(tx, &binding.capability_sha256, &binding.owner_id, &binding.run_id)?.ok_or_else(invalid_receipt)?;
+            existing.check_binding(&binding.workspace_sha256, &binding.request_sha256)?;
+            if let Some(recorded) = existing.result() {
+                // A transition certificate describes the immediate commit state;
+                // next-task mechanics may since have advanced further.
+                if recorded == result || (recorded.disposition == SubmissionDisposition::Applied
+                    && result.disposition == SubmissionDisposition::Applied
+                    && recorded.writes_applied == result.writes_applied && recorded.complete == result.complete) {
+                    return Ok(existing);
+                }
+                return Err(invalid_receipt());
+            }
             let changed = tx.execute(
                 "UPDATE step_receipts SET status='completed',result_json=?,completed_at=? WHERE capability_sha256=? AND owner_id=? AND run_id=? AND workspace_sha256=? AND request_sha256=? AND status='pending'",
                 params![summary, completed_at, binding.capability_sha256, binding.owner_id,

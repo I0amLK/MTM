@@ -331,7 +331,7 @@ impl RuntimeToolBackend {
             }
             Some(self.workspace.resolve_for_write(export_path)?.display)
         };
-        self.workflow.start(mtm_workflow::StartRequest {
+        let request = mtm_workflow::StartRequest {
             owner_id: &principal.client_id,
             problem_tex: text_or(arguments, "problem_tex", ""),
             problem_id: Some(text_or(arguments, "problem_id", "problem")),
@@ -347,7 +347,15 @@ impl RuntimeToolBackend {
                 .unwrap_or(true),
             workflow_protocol_version: self.workflow_protocol_version,
             trace_id: Some(trace_id),
-        })
+        };
+        match arguments.get("creation_key") {
+            None => self.workflow.start(request),
+            Some(key) => {
+                let identity =
+                    submission_receipts::creation_binding(self.workspace.root(), key, &request)?;
+                self.workflow.start_idempotent(request, identity)
+            }
+        }
     }
 
     fn rethlas_read(
@@ -408,6 +416,11 @@ impl RuntimeToolBackend {
     ) -> Result<Value, ReCtmError> {
         let run_id = text_or(arguments, "run_id", "");
         let capability = text_or(arguments, "capability", "");
+        let recover_only = match arguments.get("recover_only") {
+            None => false,
+            Some(Value::Bool(value)) => *value,
+            Some(_) => return Err(validation("recover_only must be a boolean")),
+        };
         let writes = arguments
             .get("writes")
             .and_then(Value::as_array)
@@ -425,6 +438,11 @@ impl RuntimeToolBackend {
             return Err(validation("payload must be an object"));
         }
         if action.is_empty() && writes.is_empty() && capability.is_empty() {
+            if recover_only {
+                return Err(validation(
+                    "Recovery requires the original capability and submission",
+                ));
+            }
             let result = self
                 .workflow
                 .next_task(&principal.client_id, run_id, Some(trace_id))?;
@@ -444,7 +462,18 @@ impl RuntimeToolBackend {
             &workspace_digest,
             &request_digest,
         )? {
+            if recover_only {
+                let recovered = self.store.reconcile_unstarted_submission(receipt)?;
+                return submission_receipts::replay(&recovered);
+            }
             return submission_receipts::replay(&receipt);
+        }
+        if recover_only {
+            return Err(ReCtmError::new(
+                "SUBMISSION_RECEIPT_NOT_FOUND",
+                "Recovery never executes a missing submission.",
+            )
+            .with_category(ErrorCategory::NotFound));
         }
         let authorized = match self.capabilities.authorize_submission(
             capability,
@@ -488,8 +517,19 @@ impl RuntimeToolBackend {
                 }
                 mtm_storage::SubmissionSlot::Reserved(reservation) => reservation,
             };
+        let execution = self
+            .store
+            .activate_submission(&reservation, &authorized, writes.len())?;
         let result = self.execute_rethlas_submission(
-            principal, run_id, capability, action, &payload, &writes, trace_id,
+            principal,
+            run_id,
+            capability,
+            action,
+            &payload,
+            &writes,
+            trace_id,
+            &reservation,
+            &execution,
         );
         self.finish_receipted_submission(reservation, result)
     }
@@ -504,6 +544,8 @@ impl RuntimeToolBackend {
         payload: &Value,
         writes: &[Value],
         trace_id: &str,
+        reservation: &mtm_storage::SubmissionReservation,
+        execution: &mtm_storage::SubmissionExecution,
     ) -> Result<Value, ReCtmError> {
         if !writes.is_empty() && action.is_empty() {
             return Err(validation("action is required when writes are submitted"));
@@ -523,7 +565,11 @@ impl RuntimeToolBackend {
                 )
             })();
             match result {
-                Ok(value) => write_results.push(value),
+                Ok(value) => {
+                    write_results.push(value);
+                    self.store
+                        .checkpoint_submission_write(execution, write_results.len())?;
+                }
                 Err(error) if recoverable_error(&error) => {
                     return self.recoverable_step(
                         principal,
@@ -536,6 +582,7 @@ impl RuntimeToolBackend {
                             "index":index,
                             "resource":item.get("resource").and_then(Value::as_str).unwrap_or_default()
                         })),
+                        reservation,
                     );
                 }
                 Err(error) => return Err(error),
@@ -544,12 +591,13 @@ impl RuntimeToolBackend {
         if action.is_empty() {
             return Err(validation("action is required to complete a Rethlas step"));
         }
+        self.store.arm_submission_commit(execution)?;
         let submission = match self.workflow.commit(
             &principal.client_id,
             capability,
             action,
             payload,
-            Some(trace_id),
+            Some(execution.trace_id()),
         ) {
             Ok(value) => value,
             Err(error) if recoverable_error(&error) => {
@@ -561,10 +609,16 @@ impl RuntimeToolBackend {
                     &write_results,
                     trace_id,
                     None,
+                    reservation,
                 );
             }
             Err(error) => return Err(error),
         };
+        let summary = submission_receipts::result_summary(&serde_json::json!({
+            "submission":&submission,"state":submission["state"],"writes_applied":write_results.len()
+        }))?;
+        self.store
+            .record_submission_outcome(reservation, &summary)?;
         let next = self
             .workflow
             .next_task(&principal.client_id, run_id, Some(trace_id))?;
@@ -592,7 +646,15 @@ impl RuntimeToolBackend {
         writes: &[Value],
         trace_id: &str,
         failed_write: Option<Value>,
+        reservation: &mtm_storage::SubmissionReservation,
     ) -> Result<Value, ReCtmError> {
+        let state = self.workflow.status(&principal.client_id, run_id)?;
+        let summary = submission_receipts::result_summary(&serde_json::json!({
+            "state":state["state"],"writes_applied":writes.len(),
+            "submission":{"ok":false,"complete":false,"error":{"code":error.code}}
+        }))?;
+        self.store
+            .record_submission_outcome(reservation, &summary)?;
         let mut current = self
             .workflow
             .next_task(&principal.client_id, run_id, Some(trace_id))?;
@@ -1539,6 +1601,17 @@ fn tool_result(name: &str, mut payload: Value, is_error: bool) -> Value {
 }
 fn render_summary(name: &str, payload: &Map<String, Value>) -> String {
     if name == "rethlas_start" {
+        if payload
+            .get("creation_receipt")
+            .and_then(|r| r.get("replayed"))
+            .and_then(Value::as_bool)
+            == Some(true)
+        {
+            return format!(
+                "Recovered run {} from its creation receipt; no new run was created. Its state is historical; fetch the current task separately.",
+                json_text(payload, "run_id")
+            );
+        }
         return format!(
             "Run {} started; verified LaTeX will be written to {} when the workflow reaches done.",
             json_text(payload, "run_id"),
@@ -1546,6 +1619,19 @@ fn render_summary(name: &str, payload: &Map<String, Value>) -> String {
         );
     }
     if matches!(name, "rethlas_step" | "rethlas_next") {
+        if payload.get("task_required").and_then(Value::as_bool) == Some(true)
+            && payload
+                .get("submission_receipt")
+                .and_then(|r| r.get("replayed"))
+                .and_then(Value::as_bool)
+                == Some(false)
+        {
+            return format!(
+                "Recorded submission for run {}; {} caller writes were applied. The result is historical and next-task construction did not finish; fetch the current task separately.",
+                json_text(payload, "run_id"),
+                payload.get("writes_applied").unwrap_or(&Value::Null)
+            );
+        }
         if name == "rethlas_step" {
             if payload
                 .get("submission_receipt")

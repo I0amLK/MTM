@@ -52,6 +52,7 @@ pub(super) fn start() -> Value {
     object(
         json!({
             "problem_id":{"type":"string","default":"problem"},"problem_tex":nonempty(),
+            "creation_key":{"type":"string","minLength":16,"maxLength":128,"pattern":"^[A-Za-z0-9_-]+$","description":"Unique identity for one intended creation. Keep the same key and input after a lost response; use a different key for an intentionally independent run."},
             "references":{"type":"array","default":[],"items":object(json!({
                 "name":nonempty(),"content":nonempty(),"source":text()
             }), &["name","content"])},
@@ -65,6 +66,7 @@ pub(super) fn start() -> Value {
 pub(super) fn step() -> Value {
     let properties = json!({
         "run_id":nonempty(),"capability":capability(),
+        "recover_only":{"type":"boolean","default":false,"description":"Only inspect/reconcile this exact original submission. Never executes missing work; only a still-unstarted reservation can be safely closed."},
         "action":{"type":"string","minLength":1,"description":"Exact current task.commit_action."},
         "payload":{"type":"object","description":"Match the current task.commit_payload_schema."},
         "writes":{"type":"array","items":object(json!({

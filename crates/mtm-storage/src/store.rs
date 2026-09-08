@@ -16,15 +16,19 @@ use time::macros::format_description;
 
 use crate::schema::{
     SCHEMA_MIGRATIONS_TABLE_SQL, STATE_SCHEMA_VERSION, V1_WORKFLOW_SCHEMA_SQL,
-    V2_RESEARCH_SCHEMA_SQL, V3_SUBMISSION_RECEIPTS_SQL,
+    V2_RESEARCH_SCHEMA_SQL, V3_SUBMISSION_RECEIPTS_SQL, V4_RECOVERY_SQL,
 };
 
 #[path = "step_receipts.rs"]
 mod step_receipts;
 pub use step_receipts::{
-    SubmissionDisposition, SubmissionReceipt, SubmissionReservation, SubmissionResult,
-    SubmissionSlot,
+    SubmissionDisposition, SubmissionExecution, SubmissionReceipt, SubmissionReservation,
+    SubmissionResult, SubmissionSlot,
 };
+
+#[path = "creation_receipts.rs"]
+mod creation_receipts;
+pub use creation_receipts::{CreationIdentity, CreationReceipt, CreationReservation, CreationSlot};
 
 const REGISTRY_ID_MAX_BYTES: usize = 128;
 
@@ -179,6 +183,10 @@ impl StateStore {
             self.migrate_2_to_3()?;
             version = 3;
         }
+        if version == 3 {
+            self.migrate_3_to_4()?;
+            version = 4;
+        }
         if version != STATE_SCHEMA_VERSION {
             return Err(ReCtmError::new(
                 "STATE_SCHEMA_MIGRATION_FAILED",
@@ -252,6 +260,19 @@ impl StateStore {
                 [applied_at],
             ).map_err(sql_error)?;
             transaction.execute_batch("PRAGMA user_version=3;").map_err(sql_error)?;
+            Ok(())
+        })
+    }
+
+    fn migrate_3_to_4(&self) -> Result<(), ReCtmError> {
+        let applied_at = self.runtime.clock.now_iso()?;
+        self.immediate(|transaction| {
+            transaction.execute_batch(V4_RECOVERY_SQL).map_err(sql_error)?;
+            transaction.execute(
+                "INSERT INTO schema_migrations(version, applied_at, description) VALUES(4, ?, 'MTM creation identity and submission checkpoints')",
+                [applied_at],
+            ).map_err(sql_error)?;
+            transaction.execute_batch("PRAGMA user_version=4;").map_err(sql_error)?;
             Ok(())
         })
     }
@@ -416,6 +437,8 @@ impl StateStore {
                     params![now, request.run_id],
                 ).map_err(sql_error)?;
             }
+            creation_receipts::record_initialization(transaction, &request, object, &now)?;
+            step_receipts::record_transition(transaction, &request, object, &now)?;
             Ok(())
         })?;
         self.get_run(request.run_id)

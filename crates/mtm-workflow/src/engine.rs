@@ -4,8 +4,8 @@ use std::sync::Arc;
 
 use mtm_contracts::{ErrorCategory, ReCtmError, WorkflowRole, WorkflowState};
 use mtm_storage::{
-    CapabilityAuthority, CapabilityClaims, StateStore, TransitionRun, default_permissions,
-    role_for_state,
+    CapabilityAuthority, CapabilityClaims, CreationIdentity, CreationSlot, StateStore,
+    TransitionRun, default_permissions, role_for_state,
 };
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -130,6 +130,22 @@ impl WorkflowEngine {
     }
 
     pub fn start(&self, request: StartRequest<'_>) -> Result<Value, ReCtmError> {
+        self.start_inner(request, None)
+    }
+
+    pub fn start_idempotent(
+        &self,
+        request: StartRequest<'_>,
+        identity: CreationIdentity,
+    ) -> Result<Value, ReCtmError> {
+        self.start_inner(request, Some(identity))
+    }
+
+    fn start_inner(
+        &self,
+        request: StartRequest<'_>,
+        identity: Option<CreationIdentity>,
+    ) -> Result<Value, ReCtmError> {
         if request.owner_id.trim().is_empty() {
             return Err(invalid("owner_id is required"));
         }
@@ -157,7 +173,23 @@ impl WorkflowEngine {
         let problem_id = safe_component(request.problem_id.unwrap_or("problem"));
         let runtime = self.store.runtime();
         let run_id = format!("run-{problem_id}-{}", runtime.ids.token_hex(6)?);
-        let trace = match request.trace_id {
+        let creation = match identity {
+            None => None,
+            Some(identity) => {
+                match self
+                    .store
+                    .reserve_creation(request.owner_id, &identity, &run_id)?
+                {
+                    CreationSlot::Existing(receipt) => return receipt.response(true),
+                    CreationSlot::Reserved(reservation) => Some(reservation),
+                }
+            }
+        };
+        let trace = match creation
+            .as_ref()
+            .map(|r| r.execution_id())
+            .or(request.trace_id)
+        {
             Some(trace) => trace.to_owned(),
             None => runtime.ids.token_urlsafe(16)?,
         };
@@ -167,6 +199,34 @@ impl WorkflowEngine {
             .filter(|path| !path.is_empty())
             .map(str::to_owned)
             .unwrap_or_else(|| format!("rethlas-output/{run_id}/proof_verified.tex"));
+        let initialized = self.initialize_start(request, run_id, problem_id, trace, export_path);
+        match creation {
+            None => initialized,
+            Some(reservation) => {
+                let observed = self.store.observe_creation(&reservation)?.response(false)?;
+                match initialized {
+                    Ok(mut result) => {
+                        result["creation_receipt"] = observed["creation_receipt"].clone();
+                        result["runs_created"] = Value::from(1);
+                        Ok(result)
+                    }
+                    // Initialization may have committed before a later read failed.
+                    // The receipt returns only the certified historical run identity.
+                    Err(_) => Ok(observed),
+                }
+            }
+        }
+    }
+
+    fn initialize_start(
+        &self,
+        request: StartRequest<'_>,
+        run_id: String,
+        problem_id: String,
+        trace: String,
+        export_path: String,
+    ) -> Result<Value, ReCtmError> {
+        let runtime = self.store.runtime();
         let created_at = runtime.clock.now_iso()?;
         let vault_result = self.vault.initialize_run(
             &run_id,
@@ -297,6 +357,11 @@ impl WorkflowEngine {
             None => runtime.ids.token_urlsafe(16)?,
         };
         let mut run = self.require_owner(run_id, owner_id)?;
+        let pending = self.store.pending_submission_status(owner_id, run_id)?;
+        if !pending.is_null() {
+            return Err(ReCtmError::new("RESULT_UNKNOWN", "Pending submission prevents mechanical task advancement; inspect its checkpoint or recover the original request.")
+                .with_category(ErrorCategory::Conflict).with_retryable(false).with_details(pending));
+        }
         run = self.advance_mechanical(run, &trace)?;
         let state = workflow_state(text(&run, "state")?)?;
         if state.terminal() {
@@ -849,6 +914,7 @@ impl WorkflowEngine {
             "status":run["status"],
             "round_index":run["round_index"],
             "transition_seq":run["transition_seq"],
+            "pending_submission":self.store.pending_submission_status(owner_id, run_id)?,
             "latex_passed":run["latex_passed"],
             "verdict":run["verdict"],
             "sealed":run["sealed"],

@@ -4,6 +4,51 @@ use mtm_core::validate_schema_value;
 
 use super::*;
 
+#[test]
+fn creation_identity_and_recovery_only_have_bounded_distinct_contracts() -> Result<(), ReCtmError> {
+    for key in [
+        "a".repeat(16),
+        "z".repeat(128),
+        "idempotent_start-01".into(),
+    ] {
+        validate_schema_value(
+            &json!({"problem_tex":"fixture","creation_key":key}),
+            &schema::input(ToolId::RethlasStart),
+            "arguments",
+        )?;
+    }
+    for key in [
+        json!("short"),
+        json!("z".repeat(129)),
+        json!(false),
+        json!(null),
+        json!("invalid key with spaces"),
+    ] {
+        assert!(
+            validate_schema_value(
+                &json!({"problem_tex":"fixture","creation_key":key}),
+                &schema::input(ToolId::RethlasStart),
+                "arguments",
+            )
+            .is_err()
+        );
+    }
+    // Schema-only fixture, not an authenticated or server-issued capability.
+    let capability = format!("{}.{}", "a".repeat(64), "b".repeat(43));
+    let request = json!({"run_id":"run","capability":capability,"action":"assessment_complete","recover_only":true});
+    validate_schema_value(&request, &schema::input(ToolId::RethlasStep), "arguments")?;
+    for request in [
+        json!({"run_id":"run","recover_only":true}),
+        json!({"run_id":"run","capability":capability,"action":"assessment_complete","recover_only":"true"}),
+    ] {
+        assert!(
+            validate_schema_value(&request, &schema::input(ToolId::RethlasStep), "arguments")
+                .is_err()
+        );
+    }
+    Ok(())
+}
+
 const RETIRED: [&str; 11] = [
     "rethlas_next",
     "rethlas_read",

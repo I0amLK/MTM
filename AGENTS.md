@@ -68,6 +68,11 @@ grants no authority, contains no raw capability or task context, and never licen
 replay of an unresolved submission. Keep start deduplication, crash reconciliation
 and final host qualification explicitly pending. This development schema change
 does not authorize opening production data or modifying an installed selector.
+E2 follows with schema 4 and mtm-tools-v3; read `docs/MTM-016-E2-RECOVERY.md`.
+Optional creation keys distinguish intended starts. recover_only never executes
+missing requests or resets running/legacy pending work. Transition certificates
+are committed atomically with their step result. This bounded recovery does not
+qualify arbitrary mid-write crash replay or permit production deployment.
 Do not treat deletion provenance as runtime parity or real-client qualification.
 The checker retains inherited host integration tests; in a nested Native sandbox
 Bubblewrap tests can fail. Report those failures and compare with the frozen

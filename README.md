@@ -13,6 +13,14 @@ probe but still runs every test when the environment is blocked. See
 > [MTM-owned tool contract](docs/MTM-016-TOOL-CONTRACT.md) removes hidden aliases and
 > exposes a Rust-built directory with `mtm tool-catalog`.
 
+The E2 development checkpoint uses schema 4 and `mtm-tools-v3`. Optional
+`creation_key` preserves one intended start across a lost response; explicit
+`recover_only` can resolve a still-unstarted step without executing it. Completed
+transition receipts survive failures constructing the next task. Partial writes,
+legacy unknown operations and unfinished initialization are never blindly retried.
+See `docs/MTM-016-E2-RECOVERY.md`. This is not complete crash reconciliation,
+release qualification or an instruction to open production state with this build.
+
 The E1 development checkpoint introduces state schema **3** and `mtm-tools-v2`:
 identical `rethlas_step` retries recover a durable non-authorizing submission
 receipt rather than applying writes twice. Pending outcomes remain blocked; this

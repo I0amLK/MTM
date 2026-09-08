@@ -1,5 +1,32 @@
 pub const STATE_SCHEMA_VERSION: i64 = mtm_contracts::STATE_SCHEMA_VERSION as i64;
 
+pub const V4_RECOVERY_SQL: &str = r#"
+CREATE TABLE creation_receipts (
+    owner_id TEXT NOT NULL,
+    key_sha256 TEXT NOT NULL CHECK(length(key_sha256)=64),
+    workspace_sha256 TEXT NOT NULL CHECK(length(workspace_sha256)=64),
+    request_sha256 TEXT NOT NULL CHECK(length(request_sha256)=64),
+    run_id TEXT NOT NULL UNIQUE,
+    execution_id TEXT NOT NULL UNIQUE,
+    status TEXT NOT NULL CHECK(status IN ('pending','completed')),
+    created_at TEXT NOT NULL,
+    completed_at TEXT,
+    PRIMARY KEY(owner_id,key_sha256),
+    CHECK((status='pending' AND completed_at IS NULL)
+       OR (status='completed' AND completed_at IS NOT NULL))
+);
+CREATE TABLE step_checkpoints (
+    capability_sha256 TEXT PRIMARY KEY REFERENCES step_receipts(capability_sha256) ON DELETE RESTRICT,
+    execution_id TEXT NOT NULL UNIQUE,
+    phase TEXT NOT NULL CHECK(phase IN ('prepared','running','commit_ready')),
+    expected_writes INTEGER CHECK(expected_writes BETWEEN 0 AND 65536),
+    accepted_writes INTEGER NOT NULL DEFAULT 0 CHECK(accepted_writes BETWEEN 0 AND 65536),
+    CHECK((phase='prepared' AND expected_writes IS NULL AND accepted_writes=0)
+       OR (phase='running' AND expected_writes IS NOT NULL AND accepted_writes<=expected_writes)
+       OR (phase='commit_ready' AND expected_writes IS NOT NULL AND accepted_writes=expected_writes))
+);
+"#;
+
 pub const V3_SUBMISSION_RECEIPTS_SQL: &str = r#"
 CREATE TABLE step_receipts (
     capability_sha256 TEXT PRIMARY KEY CHECK(length(capability_sha256)=64),

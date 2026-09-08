@@ -10,6 +10,49 @@ use mtm_storage::{
 use serde_json::json;
 use sha2::{Digest, Sha256};
 
+fn workspace_digest(workspace: &Path) -> String {
+    let mut hash = Sha256::new();
+    hash.update(b"mtm-step-workspace-v1\0");
+    hash.update(workspace.as_os_str().as_bytes());
+    format!("{:x}", hash.finalize())
+}
+
+pub(super) fn creation_binding(
+    workspace: &Path,
+    key: &Value,
+    request: &mtm_workflow::StartRequest<'_>,
+) -> Result<mtm_storage::CreationIdentity, ReCtmError> {
+    let key = key
+        .as_str()
+        .filter(|key| {
+            (16..=128).contains(&key.len())
+                && key
+                    .bytes()
+                    .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'_' | b'-'))
+        })
+        .ok_or_else(|| {
+            validation(
+                "creation_key must contain 16 to 128 ASCII letters, digits, underscores or hyphens",
+            )
+        })?;
+    let normalized = json!({"version":"mtm-start-request-v1",
+        "problem_id":request.problem_id.unwrap_or("problem"),"problem_tex":request.problem_tex,
+        "references":request.references,"export_path":request.workspace_export_path,
+        "project_id":request.project_id,"target_claim_id":request.target_claim_id,
+        "workflow_mode":request.workflow_mode,"register_result":request.register_result,
+        "workflow_protocol":request.workflow_protocol_version,"native_mode":request.native_mode});
+    let digest = canonical_arguments_sha256(
+        normalized
+            .as_object()
+            .ok_or_else(|| internal("creation request"))?,
+    )?;
+    mtm_storage::CreationIdentity::new(
+        format!("{:x}", Sha256::digest(key.as_bytes())),
+        workspace_digest(workspace),
+        digest,
+    )
+}
+
 pub(super) fn binding(
     workspace: &Path,
     run: &str,
@@ -17,10 +60,7 @@ pub(super) fn binding(
     payload: &Value,
     writes: &[Value],
 ) -> Result<(String, String), ReCtmError> {
-    let mut hash = Sha256::new();
-    hash.update(b"mtm-step-workspace-v1\0");
-    hash.update(workspace.as_os_str().as_bytes());
-    let workspace = format!("{:x}", hash.finalize());
+    let workspace = workspace_digest(workspace);
     let request = json!({"version":"mtm-step-request-v1","run_id":run,
         "action":action,"payload":payload,"writes":writes});
     let request = canonical_arguments_sha256(
@@ -46,28 +86,32 @@ fn unknown_result(code: Option<&str>) -> ReCtmError {
 }
 
 pub(super) fn replay(receipt: &SubmissionReceipt) -> Result<Value, ReCtmError> {
+    receipt_response(receipt, true)
+}
+
+fn receipt_response(receipt: &SubmissionReceipt, replayed: bool) -> Result<Value, ReCtmError> {
     let Some(result) = receipt.result() else {
         return Err(unknown_result(None));
     };
     let applied = result.disposition == SubmissionDisposition::Applied;
     let mut submission = json!({"ok":applied,"complete":result.complete,
-        "replayed":true,"retryable":false,"writes_retained":result.writes_applied>0});
+        "replayed":replayed,"retryable":false,"writes_retained":result.writes_applied>0});
     if !applied {
         submission["error"] = json!({"code":result.error_code,
-            "message":"Original submission requires correction. This replay applied no writes; fetch the current task separately.",
+            "message":"The recorded submission requires correction. Do not reapply retained writes; fetch the current task separately.",
             "category":"validation","retryable":false,"details":{}});
     }
     let mut summary = receipt.summary();
-    summary["replayed"] = json!(true);
+    summary["replayed"] = json!(replayed);
     Ok(
         json!({"ok":true,"run_id":receipt.run_id(),"state":result.state,
-        "state_is_historical":true,"writes_applied":0,"submission":submission,
+        "state_is_historical":true,"writes_applied":if replayed {0} else {result.writes_applied},"submission":submission,
         "submission_receipt":summary,"task_required":true,
         "next_action":{"tool":"rethlas_step","arguments":{"run_id":receipt.run_id()}}}),
     )
 }
 
-fn result_summary(value: &Value) -> Result<SubmissionResult, ReCtmError> {
+pub(super) fn result_summary(value: &Value) -> Result<SubmissionResult, ReCtmError> {
     let submission = value
         .get("submission")
         .ok_or_else(|| unknown_result(Some("SUBMISSION_RESULT_MISSING")))?;
@@ -107,7 +151,16 @@ impl RuntimeToolBackend {
         reservation: SubmissionReservation,
         result: Result<Value, ReCtmError>,
     ) -> Result<Value, ReCtmError> {
-        let mut value = result.map_err(|error| unknown_result(Some(&error.code)))?;
+        let mut value = match result {
+            Ok(value) => value,
+            Err(error) => {
+                let receipt = self.store.observed_submission(&reservation)?;
+                if receipt.result().is_some() {
+                    return receipt_response(&receipt, false);
+                }
+                return Err(unknown_result(Some(&error.code)));
+            }
+        };
         let summary = result_summary(&value)?;
         let receipt = self
             .store

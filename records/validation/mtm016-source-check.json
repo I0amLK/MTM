@@ -81,7 +81,7 @@
       "ENOSPC/EUSERS alone cannot distinguish a configured nesting prohibition from depth/quota exhaustion.",
       "Passing this probe is not full Native, TTY, external-tool, private-vault, workflow or release qualification."
     ],
-    "maintenance_binary_sha256": "e5e2b4c3649321b3f1b14c2c1a0a9d438972a64f0056055fea3322b92d133517",
+    "maintenance_binary_sha256": "4ae1a95ec3fc396a410b86a11be8e5744414b6f59a92a00826698ed99319ff46",
     "milestone": "MTM-016",
     "native_product_runtime_tested": false,
     "passed": false,
@@ -90,7 +90,7 @@
     "python_invoked": false,
     "raw_output_recorded": false,
     "ready_for_native_tests": false,
-    "recorded_unix_seconds": 1788868819,
+    "recorded_unix_seconds": 1788871498,
     "recovery": {
       "action": "run_the_same_checkout_tests_on_a_capable_native_host",
       "automatic_retry": false,
@@ -113,7 +113,7 @@
       },
       "process": {
         "child_reaped": true,
-        "elapsed_ms": 2,
+        "elapsed_ms": 5,
         "exit_code": 0,
         "output_limit_exceeded": false,
         "pipes_closed": true,
@@ -193,7 +193,7 @@
       "observations_reexecuted": false,
       "relocation_count": 32,
       "root_json_count": 0,
-      "sealed_observation_hashes_checked": 3
+      "sealed_observation_hashes_checked": 4
     },
     "live_deployment_checked": false,
     "milestones": 16,
@@ -201,7 +201,7 @@
     "release_qualified": false,
     "scope": "static_record_integrity_only"
   },
-  "recorded_unix_seconds": 1788868896,
+  "recorded_unix_seconds": 1788871600,
   "release_qualified": false,
   "retirement": {
     "baseline_hashes_checked": 11,
@@ -216,10 +216,10 @@
   "schema_version": "1.0.0",
   "scope": "rust_source_with_inherited_host_tests",
   "source_identity": {
-    "after_sha256": "5810fbc138b830868b06fee4980322a8820d3da5d7f1026973ed91fc9472fc54",
-    "before_sha256": "5810fbc138b830868b06fee4980322a8820d3da5d7f1026973ed91fc9472fc54",
-    "commit_after": "648679f64a889728cf1e9c9794a514c9e04a9581",
-    "commit_before": "648679f64a889728cf1e9c9794a514c9e04a9581",
+    "after_sha256": "76f3a98e9e9624ef51f26ffaf559d58d8c9eb64d1e1a485a3ff8590cfc33e030",
+    "before_sha256": "76f3a98e9e9624ef51f26ffaf559d58d8c9eb64d1e1a485a3ff8590cfc33e030",
+    "commit_after": "ed613d4ef72f0df210226811122d29d07cbea308",
+    "commit_before": "ed613d4ef72f0df210226811122d29d07cbea308",
     "hash_scope": "mtm-rust-source-v1",
     "unchanged": true
   },
