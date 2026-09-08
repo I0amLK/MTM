@@ -8,12 +8,11 @@ import sys
 import tempfile
 import tomllib
 import unittest
+from functools import lru_cache
 from pathlib import Path
 
 from scripts.validate_engineering_graph import validate_graph as validate_engineering
-from scripts.validate_historical_mtm_release_evidence import validate as validate_historical_mtm_release_evidence
 from scripts.validate_migration_graph import load_graph, validate_graph as validate_migration
-from scripts.validate_record_layout import validate as validate_record_layout
 from scripts.record_paths import resolve_repository_record
 from scripts.validate_mtm003_target_evidence import validate as validate_mtm003_target
 from scripts.validate_mtm004_target_evidence import validate as validate_mtm004_target
@@ -93,8 +92,22 @@ def historical_evidence_mode() -> bool:
     }
 
 
+@lru_cache(maxsize=1)
+def rust_record_integrity() -> dict[str, object]:
+    # Transitional caller only: record-validation policy now lives in Rust.
+    completed = subprocess.run(
+        ["cargo", "xtask", "records"], cwd=ROOT, check=True, timeout=60,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+    )
+    report = json.loads(completed.stdout)
+    if not isinstance(report, dict) or report.get("ok") is not True:
+        raise ValueError("Rust record validation failed")
+    return report
+
+
 def historical_check_count(milestone: str) -> int:
-    summary = validate_historical_mtm_release_evidence()
+    summary = rust_record_integrity()["historical_releases"]
+    assert isinstance(summary, dict)
     evidence = summary["evidence"]
     assert isinstance(evidence, dict)
     item = evidence[milestone]
@@ -824,10 +837,8 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertTrue(summary["deployment_command_namespace_separated"])
 
     def test_repository_record_layout_is_canonical(self) -> None:
-        payload = json.loads(
-            (ROOT / "records/governance/record-layout.json").read_text(encoding="utf-8")
-        )
-        summary = validate_record_layout(payload)
+        summary = rust_record_integrity()["layout"]
+        self.assertIsInstance(summary, dict)
         self.assertEqual(summary["root_json_count"], 0)
         self.assertGreaterEqual(summary["iteration_record_count"], 13)
         self.assertGreaterEqual(summary["evidence_milestone_count"], 9)

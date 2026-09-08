@@ -6,7 +6,7 @@
   "release_qualified": false,
   "schema_version": "1.0.0",
   "scope": "current_binary_loopback_not_release",
-  "source_sha256": "bd6e22ad15e2f0bb2cf7fc6ec712413ae87dcf49be0714d479748893dec4207c",
+  "source_sha256": "e00926ea0a95c3da02e772979acc1f54f5e119b258f8ca4965db49e36033f069",
   "source_unchanged": true,
   "summary": {
     "adversarial_checks": {
@@ -19,7 +19,7 @@
       "revoked_inspect_and_retrieve_denied": true,
       "used_capability_revoked": true
     },
-    "binary_sha256": "d0f325ea6f6521947cc09eab667823b7e11ccda3d5287acc56e61f6a8e0c2afe",
+    "binary_sha256": "6642ef5975e3e4992f4f2e574056258fb80afb52add530806e728e746479a550",
     "binary_unchanged": true,
     "bounded_clean_shutdown": true,
     "child_path_policy": "curl_only_no_python",
@@ -47,6 +47,6 @@
     "version": "0.6.0-preview.1",
     "web_client_tested": false
   },
-  "test_stderr_sha256": "01c593238c967988a03dd94994cb6626d0c660ba8a46228dfe74c436139daa80",
-  "test_stdout_sha256": "baae6ae38f5761200d364790012f1957ed139c780068a806c92d79835ee3dd70"
+  "test_stderr_sha256": "db16665b60e30f903088b2e63b1d59c8bfba9e67858bb5ba0b35c7a545bb64fd",
+  "test_stdout_sha256": "e416de34727821d6984ae5f5a6ebdd518a6c6522a69432ab16f2baaf953d0e56"
 }

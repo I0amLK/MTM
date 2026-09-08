@@ -1,10 +1,10 @@
 {
-  "baseline_hashes_checked": 9,
+  "baseline_hashes_checked": 11,
   "historical_comparisons_retired": 4,
   "ok": true,
   "release_qualified": false,
-  "replaced_by_rust": 5,
-  "retired_python_files": 9,
+  "replaced_by_rust": 7,
+  "retired_python_files": 11,
   "runtime_parity_proven": false,
   "scope": "reviewed_python_deletion_provenance"
 }

@@ -148,8 +148,8 @@ def main() -> int:
             env=environment,
         ),
         run(
-            "record_layout",
-            [sys.executable, "scripts/validate_record_layout.py"],
+            "rust_record_integrity",
+            [cargo or "cargo", "xtask", "records"],
             env=environment,
             capture_json=True,
         ),
@@ -357,12 +357,6 @@ def main() -> int:
                 ),
                 *(
                     [
-                        run(
-                            "historical_release_evidence",
-                            [sys.executable, "scripts/validate_historical_mtm_release_evidence.py"],
-                            env=environment,
-                            capture_json=True,
-                        ),
                         *(
                             [
                                 run(

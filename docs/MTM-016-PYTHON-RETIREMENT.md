@@ -94,3 +94,18 @@ The old `check_capability_current.py` remains because target/installed-binary
 harnesses still depend on its external-binary and report interfaces. Those callers
 must migrate together before deletion; switching the ordinary source gate does
 not prove target or release-path retirement. Historical evidence stays immutable.
+
+## Fourth batch: consolidated record integrity
+
+Replacement commit `841bfe1` moves canonical record-layout validation and the six
+historical release-summary checks into the existing Rust `records` command. It
+also validates sealed host observations and append-only committed receipt prefixes.
+The two Python validators are deleted only after the Rust filesystem regressions
+and actual Git-only-PATH CLI test pass. Eleven Python files are retired in total;
+116 remain. The three earlier batches and their results above are historical.
+
+Residual `run_checks.py` calls this Rust check once rather than executing separate
+Python validators. Remaining governance test callers consume its JSON result;
+they do not implement a second validation policy. That outer legacy test suite,
+target drivers and release tooling are not yet fully retired. See
+`MTM-016-RECORD-INTEGRITY.md` for exact responsibilities and limitations.

@@ -15,8 +15,11 @@ probe but still runs every test when the environment is blocked. See
 
 MTM-016 now has Rust commit-policy checks, authenticated HTTP tests and a
 current-binary capability regression and independent 135-case pure-policy tests;
-nine reviewed Python files have been retired and 118 remain. See
+eleven reviewed Python files have been retired and 116 remain. See
 `docs/MTM-016-PYTHON-RETIREMENT.md` for coverage and remaining limitations.
+Record integrity is now consolidated in `cargo xtask records`, including archived
+operator host reports that are not overwritten by subsequent sandbox diagnostics.
+See `docs/MTM-016-RECORD-INTEGRITY.md` for the evidence and test boundaries.
 The development branch also repairs atomic patch permission preservation and numeric
 schema bounds. See `docs/MTM-016-POLICY-REGRESSION.md` for the policy-test scope. These
 source changes are not installed by this checkout and are not release-qualified.

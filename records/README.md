@@ -69,7 +69,7 @@ append-only historical ledger.
    move through `record-layout.json`.
 6. No OAuth token, capability, private proof text, generated secret, or other
    sensitive runtime material may be written to repository records.
-7. Run `python3 scripts/validate_record_layout.py` and
+7. Run `cargo xtask records` and
    `python3 scripts/run_checks.py` after changing record structure.
 
 Hash-bound historical measurement harnesses may still contain their original
