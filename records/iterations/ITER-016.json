@@ -35,8 +35,8 @@
   "inventory": {
     "report": "records/validation/mtm016-inventory.json",
     "python_files_observed": 127,
-    "python_files_deleted": 3,
-    "python_files_remaining": 124,
+    "python_files_deleted": 5,
+    "python_files_remaining": 122,
     "retirement_ledger": "records/governance/python-retirement.json",
     "coverage_retirement_complete": false,
     "legacy_rust_marker_files_observed": 52,
@@ -286,6 +286,45 @@
       "new_test_suppressions": 0,
       "production_changed": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-PYTHON-RETIREMENT-BATCH-2",
+      "scope": "D retire test-client recovery helper and tests after real Rust binary qualification",
+      "status": "reviewed_deletions_validated_full_retirement_pending",
+      "replacement_commit": "cf553c5",
+      "removed_paths": ["scripts/capability_recovery.py", "tests/test_capability_recovery.py"],
+      "retirement_ledger": "records/governance/python-retirement.json",
+      "python_inventory": {"baseline_files": 127, "retired_files": 5, "remaining_files": 122},
+      "source_gate": "The residual run_checks.py now invokes cargo xtask capability --record instead of executing the Python checker. Rust workspace tests also include the current-binary capability suite automatically.",
+      "retained_dependency": "check_capability_current.py and its historical MTM-013 helpers remain for the MTM-015 target harness's external --binary interface and old report schema. That target dependency family is not claimed as migrated by this deletion.",
+      "commands": [
+        {"command": "cargo xtask retirement --record", "exit_code": 0, "baseline_source_hashes_checked": 5},
+        {"command": "cargo xtask records --record", "exit_code": 0, "historical_evidence_hashes_checked": 26, "baseline_history_and_notices_unchanged": true},
+        {"command": "cargo xtask audit --strict --record", "exit_code": 1, "expected": true, "result": "122 first-party Python files remain; no complete retirement claim"},
+        {"command": "git grep -n capability_recovery -- scripts tests conformance .githooks", "exit_code": 1, "expected": true, "result": "No active imports or calls to the deleted helper remain"},
+        {"command": "git log -1 --format=%B cf553c5 | cargo xtask commit-message --stdin", "exit_code": 0, "scope": "Explicit validation of replacement commit message; not evidence that its automatic hook ran"},
+        {"command": "cargo xtask check --record", "exit_code": 1, "result": "New capability suite passed; format, warnings-denied Clippy, architecture, history, deletion provenance and hook-mode checks passed. Same ten inherited nested-Bubblewrap failures remain."}
+      ],
+      "test_results": {
+        "capability_runtime_suite_passed": 13,
+        "normal_independent_assessment_roundtrips": 500,
+        "cli_identity_passed": 2,
+        "core_passed": 42,
+        "gateway_unit_and_http_passed": 26,
+        "storage_unit_and_integration_passed": 12,
+        "workflow_unit_and_integration_passed": 91,
+        "maintenance_unit_passed": 21,
+        "maintenance_cli_passed": 2,
+        "runtime": {"passed": 101, "failed": 10, "ignored": 1},
+        "new_test_suppressions": 0
+      },
+      "capability_report": "records/validation/capability-current.json",
+      "source_report": "records/validation/mtm016-source-check.json",
+      "aggregate_passed": false,
+      "rust_only_ready": false,
+      "release_qualified": false,
+      "production_changed": false,
+      "earlier_signature_mismatch_explained": false
     }
   ],
   "remaining_acceptance": [

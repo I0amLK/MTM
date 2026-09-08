@@ -61,3 +61,23 @@ not inherit special permission bits; this does not promise owner/ACL/xattr
 preservation. Seven regressions cover executable/private modes, moves, metadata
 races, rollback and new-file behavior. The source gate also checks that the Git
 hook is actually executable on Unix.
+
+## Second batch: Rust current-binary capability regression
+
+Replacement commit `cf553c5` adds `cargo xtask capability --record` and the actual
+CLI integration suite before deleting `scripts/capability_recovery.py` and
+`tests/test_capability_recovery.py`. Their rules now live in Rust test-only code;
+no product SDK or second capability authority is introduced. Five Python files
+have been retired in total; 122 of the original 127 remain.
+
+The current-source check now uses Rust and passes 500 independent assessment first
+hops (250 compact, 250 full), zero normal INVALID/rejections, negative capability
+tests, persisted-key restart and simulated response-loss recovery. See
+`MTM-016-CAPABILITY-REGRESSION.md` for the exact scope and exclusions. The complete
+source check still fails its ten inherited nested-Bubblewrap tests; no new tests
+are suppressed and this is not release qualification.
+
+The old `check_capability_current.py` remains because target/installed-binary
+harnesses still depend on its external-binary and report interfaces. Those callers
+must migrate together before deletion; switching the ordinary source gate does
+not prove target or release-path retirement. Historical evidence stays immutable.

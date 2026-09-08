@@ -311,9 +311,8 @@ def main() -> int:
                 run("cargo_test", [cargo, "test", "--workspace"], env=environment),
                 run(
                     "capability_runtime_current",
-                    [sys.executable, "scripts/check_capability_current.py", "--build", "--samples", "500"],
+                    [cargo, "xtask", "capability", "--record"],
                     env=environment,
-                    capture_json=True,
                 ),
                 run(
                     "mtm002_conformance",

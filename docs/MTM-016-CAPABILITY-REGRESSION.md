@@ -66,8 +66,8 @@ is insufficient: a strict typed summary must contain all expected adversarial
 checks, 500 independent successes, both modes and successful clean shutdown. Missing,
 duplicate, extra-field, reduced-count or false-scope reports are rejected.
 
-Only `scripts/capability_recovery.py` and its Python unit-test module are candidates
-for the next deletion commit. `scripts/check_capability_current.py` still supplies
+Only `scripts/capability_recovery.py` and its Python unit-test module are removed
+in this reviewed deletion batch. `scripts/check_capability_current.py` still supplies
 the historical target harness's external `--binary` interface and old report shape;
 it remains until that target/release dependency family is replaced or explicitly
 retired. The normal source-check entry can use Rust now without pretending the old

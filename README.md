@@ -8,8 +8,9 @@
 > [MTM-owned tool contract](docs/MTM-016-TOOL-CONTRACT.md) removes hidden aliases and
 > exposes a Rust-built directory with `mtm tool-catalog`.
 
-MTM-016 now has Rust commit-policy checks and authenticated in-process HTTP tests;
-its first three reviewed Python maintenance files have been retired. See
+MTM-016 now has Rust commit-policy checks, authenticated HTTP tests and a
+current-binary capability regression; five reviewed Python files have been retired
+and 122 remain. See
 `docs/MTM-016-PYTHON-RETIREMENT.md` for coverage and remaining limitations.
 The development branch also repairs atomic patch permission preservation. These
 source changes are not installed by this checkout and are not release-qualified.
@@ -17,6 +18,12 @@ source changes are not installed by this checkout and are not release-qualified.
 MTM is a Rust-native mathematical research runtime with capability-gated workflows,
 isolated Native tools, OAuth/MCP access, private workflow state, verifier/finalizer
 gates, and a single operational CLI/TUI.
+
+The development source gate includes a Rust-owned current-binary capability suite:
+`cargo xtask capability --record`. Its disposable OAuth/socket tests cover 500
+assessment first hops, negative capability cases and restart; see
+[the exact scope](docs/MTM-016-CAPABILITY-REGRESSION.md). This is not release or
+real-web-client qualification.
 
 MTM was migrated from the Re-CTM 0.3.0 compatibility baseline, but it is now a
 separate project with its own executable, configuration namespace, and runtime data.

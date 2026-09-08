@@ -48,12 +48,12 @@
   },
   "release_qualified": false,
   "retirement": {
-    "baseline_hashes_checked": 3,
+    "baseline_hashes_checked": 5,
     "historical_comparisons_retired": 2,
     "ok": true,
     "release_qualified": false,
-    "replaced_by_rust": 1,
-    "retired_python_files": 3,
+    "replaced_by_rust": 3,
+    "retired_python_files": 5,
     "runtime_parity_proven": false,
     "scope": "reviewed_python_deletion_provenance"
   },

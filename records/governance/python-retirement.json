@@ -26,6 +26,22 @@
       "rationale": "This Python shadow exists only for the retired cross-language gateway comparison. No live product behavior depends on it. Authentication tests now use the real Rust router and disposable OAuth stores; no authority-bypass principal constructor replaces this runner. Historical source is recoverable from the pinned baseline.",
       "replacements": ["crates/mtm-gateway/src/catalog/tests.rs", "crates/mtm-gateway/tests/http_contract.rs"],
       "verification": ["cargo test -p mtm-gateway --locked", "cargo xtask retirement"]
+    },
+    {
+      "path": "scripts/capability_recovery.py",
+      "baseline_sha256": "c92bc888a800857664cffe9cbacf3010bc4c4bcef0e366d6443c404a2f63f91a",
+      "disposition": "replaced_by_rust",
+      "rationale": "The one-refresh test/client helper has no remaining product caller. Rust test-only recovery preserves same-envelope, same-run/domain, unchanged-contract and zero-write binding, no uncertain-transport replay and the two-request ceiling. This is not a new SDK or automatic web-model behavior. Real disposable-binary tests use the Rust client; historical target-specific checker interfaces remain separately retained.",
+      "replacements": ["crates/mtm-cli/tests/support/recovery.rs", "crates/mtm-cli/tests/capability_runtime.rs"],
+      "verification": ["cargo test -p mtm-cli --test capability_runtime --locked", "cargo xtask capability --record", "cargo xtask retirement"]
+    },
+    {
+      "path": "tests/test_capability_recovery.py",
+      "baseline_sha256": "dbd068a943ee280e02312cbeba47eb34e34e64f09457a6095a9b17425ee0a7f3",
+      "disposition": "replaced_by_rust",
+      "rationale": "Python recovery assertions move beside the Rust test-only helper: one normal call, one fresh retry, cross-run/domain/state/contract denial, no retained/unknown writes replay, revoked-token denial, stale preparer prevention and redacted errors. New negative cases include missing contract fields, fractional counts and uncertain transport; the actual built-binary regression separately checks 500 distinct submissions and restart behavior.",
+      "replacements": ["crates/mtm-cli/tests/support/recovery.rs", "crates/mtm-cli/tests/capability_runtime.rs", "xtask/src/capability.rs"],
+      "verification": ["cargo test -p mtm-cli --test capability_runtime --locked", "cargo test -p mtm-xtask --locked", "cargo xtask capability --record"]
     }
   ]
 }

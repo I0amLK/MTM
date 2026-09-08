@@ -1,6 +1,6 @@
 {
   "audit_completed": true,
-  "base_head": "f1ef1f16207a302132cc90ba147a30e13abc4da4",
+  "base_head": "cf553c5b3dbe0c632f2867642df5f8e24639a9e2",
   "interpretation": "Text references are retirement candidates, not proof of a runtime dependency. User Python tools are not forbidden.",
   "legacy_rust_reference_file_count": 54,
   "legacy_rust_reference_files": [
@@ -60,13 +60,12 @@
     "crates/mtm-workflow/tests/workflow.rs"
   ],
   "milestone": "MTM-016",
-  "pending_deleted_file_count": 3,
+  "pending_deleted_file_count": 2,
   "pending_deleted_files": [
-    "conformance/python_gateway_shadow.py",
-    "scripts/run_mtm005_conformance.py",
-    "scripts/validate_commit_message.py"
+    "scripts/capability_recovery.py",
+    "tests/test_capability_recovery.py"
   ],
-  "python_file_count": 124,
+  "python_file_count": 122,
   "python_files": [
     {
       "bytes": 12035,
@@ -115,12 +114,6 @@
       "disposition": "consolidate Rust evidence validation; keep historical records immutable",
       "lines": 52,
       "path": "scripts/bind_mtm011_resource_evidence.py"
-    },
-    {
-      "bytes": 3875,
-      "disposition": "review and port reusable qualification behavior before retirement",
-      "lines": 87,
-      "path": "scripts/capability_recovery.py"
     },
     {
       "bytes": 7022,
@@ -267,9 +260,9 @@
       "path": "scripts/release_mtm015_preview.py"
     },
     {
-      "bytes": 25643,
+      "bytes": 25560,
       "disposition": "review and port reusable qualification behavior before retirement",
-      "lines": 591,
+      "lines": 590,
       "path": "scripts/run_checks.py"
     },
     {
@@ -765,12 +758,6 @@
       "path": "scripts/validate_record_layout.py"
     },
     {
-      "bytes": 4061,
-      "disposition": "port behavior and negative tests to the responsible Rust crate",
-      "lines": 92,
-      "path": "tests/test_capability_recovery.py"
-    },
-    {
       "bytes": 69423,
       "disposition": "port behavior and negative tests to the responsible Rust crate",
       "lines": 1255,
@@ -815,6 +802,6 @@
   ],
   "rust_only_ready": false,
   "schema_version": "1.0.0",
-  "tracked_and_unignored_file_count": 342,
+  "tracked_and_unignored_file_count": 346,
   "uninspected_source_files": []
 }
