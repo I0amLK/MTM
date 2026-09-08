@@ -10,6 +10,7 @@ use serde_json::{Value, json};
 
 mod architecture;
 mod capability;
+mod check_report;
 mod commit_message;
 mod inventory;
 #[cfg(target_os = "linux")]
@@ -96,6 +97,8 @@ fn run() -> Result<()> {
             }
         }
         "check" => {
+            let commit_before = git(&root, &["rev-parse", "HEAD"])?;
+            let source_before = capability::source_hash(&root)?;
             commit_message::check_hook(&root)?;
             let integrity = records::validate(&root)?;
             let architecture = architecture::validate(&root)?;
@@ -139,13 +142,23 @@ fn run() -> Result<()> {
                 .stdin(Stdio::null())
                 .status()?;
             checks.push(json!({"name":"diff","passed":status.success(),"exit_code":status.code()}));
-            let passed = aggregate_passed(&checks, &native);
+            let source_after = capability::source_hash(&root)?;
+            let commit_after = git(&root, &["rev-parse", "HEAD"])?;
+            let source_unchanged = source_before == source_after && commit_before == commit_after;
+            let evaluation = check_report::summarize(&checks, &native, source_unchanged);
+            let passed = evaluation["passed"] == true;
             let report = json!({
                 "schema_version":"1.0.0", "milestone":"MTM-016", "scope":"rust_source_with_inherited_host_tests",
                 "passed":passed, "checks":checks, "record_integrity":integrity,
                 "architecture":architecture,"retirement":retirement,
                 "native_environment":native,"tests_skipped_by_preflight":false,
-                "test_failure_attribution":"Not inferred from preflight; inspect test outcomes and rerun on a capable host.",
+                "product_test_evaluation":evaluation,
+                "source_identity":{"hash_scope":"mtm-rust-source-v1","before_sha256":source_before,
+                    "after_sha256":source_after,"unchanged":source_unchanged,
+                    "commit_before":String::from_utf8_lossy(&commit_before).trim(),
+                    "commit_after":String::from_utf8_lossy(&commit_after).trim()},
+                "recorded_unix_seconds":SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs(),
+                "test_failure_attribution":"Historical comparisons belong in reviewed evidence, not the prerequisite probe.",
                 "commit_hook_executable_checked":true,
                 "production_selector_changed":false, "production_state_modified":false,
                 "release_qualified":false,
@@ -180,14 +193,6 @@ fn native_environment() -> Result<Value> {
         "tests_skipped_by_preflight":false}),
         )
     }
-}
-
-fn aggregate_passed(checks: &[Value], native: &Value) -> bool {
-    // Missing diagnostics are not a pass. Existing commands still all execute.
-    !checks.is_empty()
-        && checks.iter().all(|check| check["passed"] == true)
-        && native["passed"] == true
-        && native["ready_for_native_tests"] == true
 }
 
 fn emit(root: &Path, filename: &str, value: &Value, record: bool) -> Result<()> {
@@ -234,20 +239,4 @@ fn git(root: &Path, args: &[&str]) -> Result<Vec<u8>> {
         return Err("Git metadata output exceeds fixed bound".into());
     }
     Ok(output.stdout)
-}
-
-#[cfg(test)]
-mod gate_tests {
-    use super::*;
-
-    #[test]
-    fn blocked_or_unknown_preflight_cannot_turn_tests_green() {
-        let green = [json!({"passed":true})];
-        let ready = json!({"passed":true,"ready_for_native_tests":true});
-        assert!(aggregate_passed(&green, &ready));
-        assert!(!aggregate_passed(&[json!({"passed":false})], &ready));
-        assert!(!aggregate_passed(&green, &json!({"passed":false})));
-        assert!(!aggregate_passed(&green, &json!({})));
-        assert!(!aggregate_passed(&[], &ready));
-    }
 }

@@ -22,6 +22,11 @@ fn missing_bubblewrap_is_explicit_and_never_a_qualification() -> Result<(), Box<
     assert_eq!(report["release_qualified"], false);
     assert_eq!(report["production_state_modified"], false);
     assert_eq!(report["context"]["host_context_proven"], false);
+    assert_eq!(
+        report["candidate_defect_attribution"],
+        "not_evaluated_by_preflight"
+    );
+    assert!(report["source_tests_passed"].is_null());
     assert!(!String::from_utf8_lossy(&output.stdout).contains("must-not-appear-in-preflight"));
     assert!(!String::from_utf8_lossy(&output.stderr).contains("must-not-appear-in-preflight"));
     Ok(())

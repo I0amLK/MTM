@@ -661,6 +661,23 @@
       "release_qualified": false,
       "python_files_remaining": 118,
       "earlier_signature_mismatch_explained": false
+    },
+    {
+      "id": "MTM016-CHECK-REPORT-SCOPE-REPAIR",
+      "scope": "D distinguish current environment prerequisites, actual Cargo results, source identity and reviewed historical attribution",
+      "status": "unit_and_cli_checked_full_gate_followup_pending",
+      "host_evidence_commit": "739d60b",
+      "changes": ["Preflight says not_evaluated_by_preflight and never claims to run product tests", "Source report separately summarizes the actual four required check names and consistent exit status", "Bind Rust source and HEAD before/after the complete check", "Missing, duplicate, contradictory checks or source drift cannot produce an accepted aggregate", "Do not automatically infer historical failure causes or individual test counts"],
+      "commands": [
+        {"command": "cargo test -p mtm-xtask --locked --offline", "exit_code": 0, "unit_passed": 36, "cli_passed": 4},
+        {"command": "cargo fmt --all -- --check", "exit_code": 0},
+        {"command": "cargo clippy -p mtm-xtask --all-targets --locked --offline -- -D warnings", "exit_code": 0}
+      ],
+      "test_replacement": "The earlier one-case aggregate check is replaced by four stricter suites; no Native or product test is removed or ignored.",
+      "product_crates_changed": false,
+      "production_changed": false,
+      "release_qualified": false,
+      "python_files_remaining": 118
     }
   ],
   "remaining_acceptance": [

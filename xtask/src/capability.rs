@@ -108,7 +108,7 @@ fn validate(summary: &Summary) -> Result<()> {
     Ok(())
 }
 
-fn source_hash(root: &Path) -> Result<String> {
+pub(crate) fn source_hash(root: &Path) -> Result<String> {
     let listed = git(
         root,
         &[

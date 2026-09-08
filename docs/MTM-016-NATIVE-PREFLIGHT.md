@@ -19,6 +19,19 @@ checks. A blocked probe does not skip a test or relabel a failed test as passed.
 Successful tests plus an unknown/blocked probe also cannot make the aggregate
 green. `source_tests_passed` is null in the standalone diagnostic, not true.
 
+The preflight now states `candidate_defect_attribution=not_evaluated_by_preflight`.
+The enclosing source report separately publishes `product_test_evaluation` for
+the actual Cargo command. It requires exactly the four named checks with
+consistent pass/exit status, a ready environment, and unchanged Rust source/HEAD
+before and after the check. This does not claim per-test counts or automatically
+attribute historical failures. Historical comparison belongs in reviewed evidence.
+
+The operator's passing reports for `61e6bf7` were sealed byte-for-byte at
+`records/evidence/MTM-016/host-native-preflight-61e6bf7.json` and
+`records/evidence/MTM-016/host-source-check-61e6bf7.json`. Their original field
+wording is intentionally unchanged. A later sandbox run does not replace this
+host observation, and that host observation cannot make a later run pass.
+
 These are regenerable current observations. Historical accepted/rejected evidence
 is neither replaced nor used as an environment waiver. The iteration ledger
 records the actual failed names and counts separately; attribution stays open
