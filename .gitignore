@@ -2,6 +2,8 @@
 /.toolchain/
 /.cargo-home/
 /.rustup-home/
+/.cargo-cache/
+/.rustup/
 /.venv/
 /dist/
 __pycache__/
