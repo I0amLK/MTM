@@ -7,8 +7,8 @@ use mtm_core::{
     classify_patch_permissions, native_mode_implicitly_grants,
 };
 use mtm_gateway::{
-    HIDDEN_TOOL_NAMES, InputRequiredResult, OAuthPrincipal, PUBLIC_TOOL_NAMES,
-    SUPPORTED_PROTOCOL_VERSIONS, ToolBackend, ToolBackendResult, ToolCallContext,
+    InputRequiredResult, OAuthPrincipal, PUBLIC_TOOL_NAMES, SUPPORTED_PROTOCOL_VERSIONS,
+    TOOL_CONTRACT_VERSION, ToolBackend, ToolBackendResult, ToolCallContext, ToolId,
 };
 use mtm_storage::{CapabilityAuthority, StateStore, StoreRuntime};
 use mtm_workflow::WorkflowEngine;
@@ -175,70 +175,39 @@ impl RuntimeToolBackend {
         principal: &OAuthPrincipal,
         trace_id: &str,
     ) -> Result<Value, ReCtmError> {
-        match name {
-            "server_info" => self.server_info(principal, trace_id),
-            "check_exec_environment" => Ok(self.native.check_exec_environment()),
-            "read_file" => self.workspace.read_file(arguments),
-            "list_dir" => self.workspace.list_dir(arguments),
-            "list_files" => self.workspace.list_files(arguments),
-            "search_text" => self.workspace.search_text(arguments),
-            "apply_patch" => self
+        let tool = ToolId::parse(name)
+            .ok_or_else(|| validation_details("unknown tool", serde_json::json!({"tool":name})))?;
+        match tool {
+            ToolId::ServerInfo => self.server_info(principal, trace_id),
+            ToolId::CheckExecEnvironment => Ok(self.native.check_exec_environment()),
+            ToolId::ReadFile => self.workspace.read_file(arguments),
+            ToolId::ListDir => self.workspace.list_dir(arguments),
+            ToolId::ListFiles => self.workspace.list_files(arguments),
+            ToolId::SearchText => self.workspace.search_text(arguments),
+            ToolId::ApplyPatch => self
                 .native_authority
                 .apply_patch(&principal.client_id, arguments)
                 .map_err(public_native_authority_error),
-            "exec_command" => self
+            ToolId::ExecCommand => self
                 .native_authority
                 .exec_command(&principal.client_id, arguments)
                 .map_err(public_native_authority_error),
-            "write_stdin" => self.native.write_stdin(arguments),
-            "kill_command" => self.native.kill_command(arguments),
-            "read_output" => self.native.read_output(arguments),
-            "git_status" => self.workspace.git_status(arguments),
-            "git_diff" => self.workspace.git_diff(arguments),
-            "git_log" => self.workspace.git_log(arguments),
-            "git_show" => self.workspace.git_show(arguments),
-            "git_blame" => self.workspace.git_blame(arguments),
-            "request_permissions" => Ok(self.native.request_permissions(arguments)),
-            "view_image" => self.workspace.view_image(arguments),
-            "rethlas_start" => self.rethlas_start(principal, arguments, trace_id),
-            "rethlas_step" => self.rethlas_step(principal, arguments, trace_id),
-            "rethlas_inspect" => self.rethlas_inspect(principal, arguments, trace_id),
-            "rethlas_retrieve" => self.rethlas_retrieve(principal, arguments, trace_id),
-            "rethlas_control" => self.rethlas_control(principal, arguments, trace_id),
-            "rethlas_artifact" => self.rethlas_artifact(principal, arguments, trace_id),
-            "rethlas_next" => self.rethlas_next(principal, arguments, trace_id),
-            "rethlas_read" => self.rethlas_read(principal, arguments, trace_id),
-            "rethlas_write" => self.rethlas_write(principal, arguments, trace_id),
-            "rethlas_search" => self.rethlas_search(principal, arguments, trace_id),
-            "rethlas_commit" => self.rethlas_commit(principal, arguments, trace_id),
-            "rethlas_status" => self
-                .workflow
-                .status(&principal.client_id, text_or(arguments, "run_id", "")),
-            "rethlas_steer" => self.workflow.steer(
-                &principal.client_id,
-                text_or(arguments, "run_id", ""),
-                text_or(arguments, "message", ""),
-                Some(trace_id),
-            ),
-            "rethlas_resume" => self
-                .workflow
-                .resume(&principal.client_id, text_or(arguments, "run_id", "")),
-            "rethlas_cancel" => self.workflow.cancel(
-                &principal.client_id,
-                text_or(arguments, "run_id", ""),
-                text_or(arguments, "reason", "user_cancelled"),
-                Some(trace_id),
-            ),
-            "rethlas_get_artifact" => self.workflow.get_artifact(
-                &principal.client_id,
-                text_or(arguments, "run_id", ""),
-                text_or(arguments, "artifact", ""),
-            ),
-            "rethlas_export_final" => self.rethlas_export_final(principal, arguments, trace_id),
-            other => Err(validation_details(
-                "unknown tool",
-                serde_json::json!({"tool":other}),
-            )),
+            ToolId::WriteStdin => self.native.write_stdin(arguments),
+            ToolId::KillCommand => self.native.kill_command(arguments),
+            ToolId::ReadOutput => self.native.read_output(arguments),
+            ToolId::GitStatus => self.workspace.git_status(arguments),
+            ToolId::GitDiff => self.workspace.git_diff(arguments),
+            ToolId::GitLog => self.workspace.git_log(arguments),
+            ToolId::GitShow => self.workspace.git_show(arguments),
+            ToolId::GitBlame => self.workspace.git_blame(arguments),
+            ToolId::RequestPermissions => Ok(self.native.request_permissions(arguments)),
+            ToolId::ViewImage => self.workspace.view_image(arguments),
+            ToolId::RethlasStart => self.rethlas_start(principal, arguments, trace_id),
+            ToolId::RethlasStep => self.rethlas_step(principal, arguments, trace_id),
+            ToolId::RethlasInspect => self.rethlas_inspect(principal, arguments, trace_id),
+            ToolId::RethlasRetrieve => self.rethlas_retrieve(principal, arguments, trace_id),
+            ToolId::RethlasControl => self.rethlas_control(principal, arguments, trace_id),
+            ToolId::RethlasArtifact => self.rethlas_artifact(principal, arguments, trace_id),
         }
     }
 
@@ -297,11 +266,12 @@ impl RuntimeToolBackend {
             "oauth_client_id":principal.client_id,
             "tool_count":PUBLIC_TOOL_NAMES.len(),
             "tools":PUBLIC_TOOL_NAMES,
-            "ctm_native_tool_count":18,
+            "native_tool_count":18,
             "rethlas_tool_count":6,
-            "ctm_native_tools":&PUBLIC_TOOL_NAMES[..18],
+            "native_tools":&PUBLIC_TOOL_NAMES[..18],
             "rethlas_tools":&PUBLIC_TOOL_NAMES[18..],
-            "hidden_legacy_rethlas_aliases":HIDDEN_TOOL_NAMES,
+            "hidden_alias_count":0,
+            "tool_contract_version":TOOL_CONTRACT_VERSION,
             "tool_catalog_stable":true,
         });
         let Value::Object(identity_and_tools) = identity_and_tools else {
@@ -377,20 +347,6 @@ impl RuntimeToolBackend {
         })
     }
 
-    fn rethlas_next(
-        &self,
-        principal: &OAuthPrincipal,
-        arguments: &Map<String, Value>,
-        trace_id: &str,
-    ) -> Result<Value, ReCtmError> {
-        let result = self.workflow.next_task(
-            &principal.client_id,
-            text_or(arguments, "run_id", ""),
-            Some(trace_id),
-        )?;
-        self.attach_done_export_if_needed(principal, result, trace_id)
-    }
-
     fn rethlas_read(
         &self,
         principal: &OAuthPrincipal,
@@ -401,21 +357,6 @@ impl RuntimeToolBackend {
             &principal.client_id,
             text_or(arguments, "capability", ""),
             text_or(arguments, "resource", ""),
-            Some(trace_id),
-        )
-    }
-
-    fn rethlas_write(
-        &self,
-        principal: &OAuthPrincipal,
-        arguments: &Map<String, Value>,
-        trace_id: &str,
-    ) -> Result<Value, ReCtmError> {
-        self.workflow.write(
-            &principal.client_id,
-            text_or(arguments, "capability", ""),
-            text_or(arguments, "resource", ""),
-            arguments.get("content").unwrap_or(&Value::Null),
             Some(trace_id),
         )
     }
@@ -452,29 +393,6 @@ impl RuntimeToolBackend {
             text_or(arguments, "keywords", ""),
             text_or(arguments, "search_intent", "theorem"),
             usize_value(arguments, "num_results", 10)?,
-            Some(trace_id),
-        )
-    }
-
-    fn rethlas_commit(
-        &self,
-        principal: &OAuthPrincipal,
-        arguments: &Map<String, Value>,
-        trace_id: &str,
-    ) -> Result<Value, ReCtmError> {
-        let payload = arguments
-            .get("payload")
-            .and_then(Value::as_object)
-            .cloned()
-            .unwrap_or_default();
-        if arguments.contains_key("payload") && !arguments["payload"].is_object() {
-            return Err(validation("payload must be an object"));
-        }
-        self.workflow.commit(
-            &principal.client_id,
-            text_or(arguments, "capability", ""),
-            text_or(arguments, "action", ""),
-            &Value::Object(payload),
             Some(trace_id),
         )
     }

@@ -21,7 +21,7 @@
   "stages": [
     {"id": "A", "status": "in_progress", "goal": "Inventory and retirement ownership"},
     {"id": "B", "status": "in_progress", "goal": "Native/Workspace/Git usability regressions"},
-    {"id": "C", "status": "pending", "goal": "MTM-owned contracts and alias retirement"},
+    {"id": "C", "status": "in_progress", "goal": "MTM-owned contracts and alias retirement"},
     {"id": "D", "status": "in_progress", "goal": "Rust-only maintenance and independent evidence validation"},
     {"id": "E", "status": "pending", "goal": "Task-domain lifecycle and workflow idempotency"},
     {"id": "F", "status": "pending", "goal": "Python-free complete qualification and new release"}
@@ -87,11 +87,84 @@
       "release_qualified": false,
       "production_changed": false,
       "raw_capability_or_secret_recorded": false
+    },
+    {
+      "id": "MTM016-RUST-TOOL-CONTRACT",
+      "recorded_at": "2026-09-08T03:56:08Z",
+      "scope": "C Rust-owned catalog and alias retirement; D inventory deletion handling",
+      "status": "implemented_source_tested_target_qualification_pending",
+      "development_version": "0.6.0-preview.1",
+      "tool_contract_version": "mtm-tools-v1",
+      "contract_document": "docs/MTM-016-TOOL-CONTRACT.md",
+      "public_tools": 24,
+      "registered_hidden_aliases": 0,
+      "runtime_alias_dispatch_removed": 11,
+      "removed_paths": [
+        "crates/mtm-cli/assets/tool-catalog-v1.b64",
+        "crates/mtm-gateway/src/catalog.rs",
+        "crates/mtm-gateway/src/bin/shadow.rs"
+      ],
+      "replacement": "Rust ToolId registry plus operation-specific visible schemas; RuntimeAssets now holds only methodology and cannot inject a catalog",
+      "additional_changes": [
+        "Explicit argv/cmd exclusive input contract with nonempty program and permitted empty arguments",
+        "Bounded-array maxItems and prefixItems validation with regression tests",
+        "Shared task-domain capability guidance on step/inspect/retrieve and server instructions",
+        "Removed gateway shadow-fixture feature and its public principal constructor",
+        "Current CLI contract/release/status identity no longer reports the old migration snapshot",
+        "Rust inventory distinguishes tracked pending deletions from unreadable current files"
+      ],
+      "commands": [
+        {"command": "cargo test -p mtm-gateway --locked", "exit_code": 0, "passed_tests": 20},
+        {"command": "cargo test -p mtm-cli -p mtm-xtask --locked", "exit_code": 0, "passed_tests": {"cli_integration": 2, "xtask": 10}, "note": "An unused import warning observed during this run was removed before the warnings-denied check"},
+        {"command": "cargo clippy --workspace --all-targets --all-features --locked -- -D warnings", "exit_code": 0},
+        {"command": "cargo test --workspace --locked --no-fail-fast", "exit_code": 101, "runtime_results": {"passed": 94, "failed": 10, "ignored": 1}, "result": "Only the same ten inherited nested-Bubblewrap runtime tests failed; no new suppression or ignore was added"},
+        {"command": "cargo xtask audit --record", "exit_code": 0, "result": "Inventory completed with pending deletions explicitly recorded; retirement remains incomplete"}
+      ],
+      "final_source_check": {
+        "command": "cargo xtask check --record",
+        "exit_code": 1,
+        "report": "records/validation/mtm016-source-check.json",
+        "format_passed": true,
+        "clippy_warnings_denied_passed": true,
+        "diff_passed": true,
+        "architecture_passed": true,
+        "historical_hashes_checked": 26,
+        "baseline_history_and_notices_unchanged": true,
+        "core_tests_passed": 42,
+        "gateway_tests_passed": 20,
+        "cli_identity_tests_passed": 2,
+        "storage_tests_passed": 12,
+        "workflow_tests_passed": 91,
+        "maintenance_tests_passed": 10,
+        "runtime_tests": {"passed": 94, "failed": 10, "ignored": 1},
+        "aggregate_passed": false,
+        "interpretation": "Same ten inherited nested-Bubblewrap failures; no new failures or test suppressions. This remains a partial source checkpoint, not exact target or real-client acceptance."
+      },
+      "new_authenticated_dispatch_test": {
+        "status": "not_applied_platform_blocked",
+        "qualifies_real_client": false,
+        "replacement_claim": "Catalog identity/schema absence only; new authenticated MCP roundtrip coverage is still pending"
+      },
+      "python_files_deleted_in_this_checkpoint": 0,
+      "python_files_remaining": 127,
+      "remaining": [
+        "Typed request/response boundary completion and operation-specific recovery details",
+        "Real MCP client schema visibility and full facade operation qualification",
+        "Rust replacements for the legacy Python conformance/target/release suites",
+        "Complex shell/Git usability and task-domain idempotency",
+        "Root cause of the previous signature_mismatch sample"
+      ],
+      "release_qualified": false,
+      "production_changed": false,
+      "state_schema_changed": false,
+      "workflow_protocol_changed": false,
+      "historical_evidence_modified": false,
+      "raw_capability_or_secret_recorded": false
     }
   ],
   "remaining_acceptance": [
     "Port or retire Python suites with an explicit coverage map before deleting them.",
-    "Remove current Re-CTM authority and hidden aliases after independent contract tests.",
+    "Complete typed MTM-owned contracts and real-client validation after the Rust registry and legacy alias retirement checkpoint.",
     "Exercise exact candidate through Native isolation, full Rethlas, retrieval, LaTeX, reconnect and rollback.",
     "Complete the representative 30-task, three-repeat usability corpus."
   ],

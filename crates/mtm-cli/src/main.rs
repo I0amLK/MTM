@@ -6,13 +6,11 @@ use std::net::TcpListener;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use mtm_contracts::{
-    ContractSnapshot, ErrorCategory, LatexPolicy, NativeMode, PRODUCTION_WORKFLOW_PROTOCOL_VERSION,
-    ReCtmError,
-};
+use mtm_contracts::{ContractSnapshot, ErrorCategory, LatexPolicy, NativeMode, ReCtmError};
 use mtm_runtime::{
     OperatorSession, QuickTunnel, RuntimeApplication, RuntimeAssets, RuntimeSettings,
-    attest_native, evaluate_request, generate_operator_password, materialize_secrets, serve_bound,
+    TOOL_CONTRACT_VERSION, attest_native, evaluate_request, generate_operator_password,
+    materialize_secrets, serve_bound,
 };
 use serde_json::Value;
 
@@ -36,42 +34,20 @@ fn main() {
             println!("mtm {}", env!("CARGO_PKG_VERSION"));
         }
         Some("contract") => {
-            println!("{}", ContractSnapshot::source_baseline().to_json());
+            println!("{}", ContractSnapshot::current().to_json());
+        }
+        Some("tool-catalog") => {
+            println!("{}", RuntimeAssets::tool_catalog());
         }
         Some("release-info") => {
-            println!(
-                "{}",
-                serde_json::json!({
-                    "name": "mtm",
-                    "version": env!("CARGO_PKG_VERSION"),
-                    "implementation": "rust",
-                    "python_runtime_required": false,
-                    "public_tool_count": 24,
-                    "hidden_alias_count": 11,
-                    "state_schema_version": 2,
-                    "workflow_protocol_version": PRODUCTION_WORKFLOW_PROTOCOL_VERSION,
-                    "production_authority": "rust",
-                    "target_os": env::consts::OS,
-                    "target_arch": env::consts::ARCH,
-                })
-            );
+            println!("{}", release_identity());
         }
         Some("status") => {
-            const STATUS_JSON: &str = concat!(
-                "{\"project\":\"MTM-reboot\",",
-                "\"milestone\":\"MTM-008\",",
-                "\"production_authority\":\"rust\",",
-                "\"rust_production_components\":7,",
-                "\"rust_authoritative_pure_components\":1,",
-                "\"rust_authoritative_native_components\":1,",
-                "\"rust_authoritative_storage_components\":1,",
-                "\"rust_authoritative_gateway_components\":1,",
-                "\"rust_authoritative_workflow_components\":1,",
-                "\"rust_authoritative_runtime_components\":1,",
-                "\"milestone_state\":\"authoritative\",",
-                "\"completed_milestones\":7}"
-            );
-            println!("{STATUS_JSON}");
+            let mut status = release_identity();
+            status["scope"] = Value::String("compiled_runtime_identity".to_owned());
+            status["installed_selector_checked"] = Value::Bool(false);
+            status["release_qualification_checked"] = Value::Bool(false);
+            println!("{status}");
         }
         Some("evaluate") => evaluate_from_stdin(false),
         Some("evaluate-batch") => evaluate_from_stdin(true),
@@ -88,6 +64,19 @@ fn main() {
     }
 }
 
+fn release_identity() -> Value {
+    let contract = ContractSnapshot::current();
+    serde_json::json!({
+        "name":"mtm", "version":env!("CARGO_PKG_VERSION"), "implementation":"rust",
+        "python_runtime_required":false, "tool_contract_version":TOOL_CONTRACT_VERSION,
+        "public_tool_count":contract.native_tools + contract.rethlas_tools,
+        "hidden_alias_count":contract.hidden_aliases, "state_schema_version":contract.state_schema,
+        "workflow_protocol_version":contract.workflow_protocol,
+        "production_authority":contract.authority.as_str(),
+        "target_os":env::consts::OS, "target_arch":env::consts::ARCH
+    })
+}
+
 fn print_help() {
     const HELP: &str = concat!(
         "MTM Rust runtime\n\n",
@@ -95,6 +84,7 @@ fn print_help() {
         "  mtm --version\n",
         "  mtm release-info\n",
         "  mtm contract\n",
+        "  mtm tool-catalog\n",
         "  mtm status\n",
         "  mtm check-config [--workspace PATH] [--native-mode MODE]\n",
         "  mtm attest-native [--workspace PATH] [--native-mode MODE]\n",
@@ -107,10 +97,7 @@ fn print_help() {
 }
 
 fn embedded_assets() -> Result<RuntimeAssets, ReCtmError> {
-    RuntimeAssets::from_base64_catalog(
-        include_str!("../assets/tool-catalog-v1.b64"),
-        include_str!("../assets/methodology-v2.json"),
-    )
+    RuntimeAssets::from_json(include_str!("../assets/methodology-v2.json"))
 }
 
 fn settings_with_overrides(
@@ -183,7 +170,7 @@ fn settings_with_overrides(
 
 fn check_config(arguments: &[String]) -> Result<(), ReCtmError> {
     let (settings, host, port) = settings_with_overrides(arguments)?;
-    let assets = embedded_assets()?;
+    let _assets = embedded_assets()?;
     println!(
         "{}",
         serde_json::json!({
@@ -197,7 +184,7 @@ fn check_config(arguments: &[String]) -> Result<(), ReCtmError> {
             "oauth_server_url": settings.oauth_server_url,
             "bind_host": host,
             "bind_port": port,
-            "tool_count": assets.tool_catalog()["public_names"].as_array().map_or(0, Vec::len),
+            "tool_count": RuntimeAssets::tool_catalog()["public_names"].as_array().map_or(0, Vec::len),
             "workflow_protocol_version": settings.workflow_protocol_version,
             "secrets_materialized": settings.token_secret.len() >= 32 && settings.capability_secret.len() >= 32,
         })

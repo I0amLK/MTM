@@ -1,10 +1,12 @@
 # MTM
 
-> Development branch: MTM-016 is in progress. See
+> Development branch: MTM-016 (`0.6.0-preview.1`, not qualified) is in progress. See
 > [the native modernization plan](docs/MTM-016-NATIVE-PLAN.md) and
 > `records/iterations/ITER-016.json`. This branch is not release-qualified and
 > must not overwrite the installed immutable 0.5.0-preview.2 binary. The release
-> section below describes the previously accepted MTM-015 baseline.
+> section below describes the previously accepted MTM-015 baseline. The development
+> [MTM-owned tool contract](docs/MTM-016-TOOL-CONTRACT.md) removes hidden aliases and
+> exposes a Rust-built directory with `mtm tool-catalog`.
 
 MTM is a Rust-native mathematical research runtime with capability-gated workflows,
 isolated Native tools, OAuth/MCP access, private workflow state, verifier/finalizer
@@ -43,7 +45,7 @@ and is not counted as a pass when the host installation rejects its license.
 ## Highlights
 
 - Single Rust executable: `mtm`.
-- 24 public MCP tools plus 11 hidden compatibility aliases.
+- 24 public MCP tools; this development branch removes the 11 historical hidden aliases.
 - OAuth DCR, PKCE, bearer-token validation, legacy/modern MCP, and HTTP gateway.
 - Capability-gated Rethlas workflow with private vault, verifier, repair, and
   mechanical finalizer.

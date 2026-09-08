@@ -139,8 +139,24 @@ fn validate_array(
             "{path} must contain at least {minimum} items"
         )));
     }
+    if let Some(maximum) = schema.get("maxItems").and_then(Value::as_u64)
+        && items.len() > usize_from_u64(maximum)
+    {
+        return Err(invalid_argument(format!(
+            "{path} must contain at most {maximum} items"
+        )));
+    }
+    if let Some(prefix) = schema.get("prefixItems").and_then(Value::as_array) {
+        for (index, (item, item_schema)) in items.iter().zip(prefix).enumerate() {
+            validate_schema_value(item, item_schema, &format!("{path}[{index}]"))?;
+        }
+    }
     if let Some(item_schema) = schema.get("items").filter(|value| value.is_object()) {
-        for (index, item) in items.iter().enumerate() {
+        let prefix_len = schema
+            .get("prefixItems")
+            .and_then(Value::as_array)
+            .map_or(0, Vec::len);
+        for (index, item) in items.iter().enumerate().skip(prefix_len) {
             validate_schema_value(item, item_schema, &format!("{path}[{index}]"))?;
         }
     }
@@ -264,6 +280,23 @@ fn usize_from_u64(value: u64) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn bounded_array_prefix_checks_program_without_rejecting_empty_arguments() {
+        let schema = serde_json::json!({"type":"array","minItems":1,"maxItems":3,
+            "prefixItems":[{"type":"string","minLength":1}],"items":{"type":"string"}});
+        assert!(validate_schema_value(&serde_json::json!(["printf", ""]), &schema, "argv").is_ok());
+        for invalid in [
+            serde_json::json!([]),
+            serde_json::json!([""]),
+            serde_json::json!(["printf", 1]),
+            serde_json::json!(["a", "b", "c", "d"]),
+        ] {
+            assert!(validate_schema_value(&invalid, &schema, "argv").is_err());
+        }
+        let tuple = serde_json::json!({"type":"array","prefixItems":[{"type":"integer"}],"items":{"type":"string"}});
+        assert!(validate_schema_value(&serde_json::json!([1, "tail"]), &tuple, "tuple").is_ok());
+    }
 
     #[test]
     fn validates_nested_object_and_rejects_extra_field() -> Result<(), &'static str> {

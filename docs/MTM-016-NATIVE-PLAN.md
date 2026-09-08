@@ -51,6 +51,10 @@ Missing coverage remains listed as pending, never converted to a green check.
 
 ## Retirement map
 
+The C-stage registry/alias checkpoint is documented in
+`docs/MTM-016-TOOL-CONTRACT.md`. It uses the separate `0.6.0-preview.1` development
+identity, not the installed preview.2 release identity. No deployment is implied.
+
 | Existing responsibility | Replacement / disposition |
 |---|---|
 | Re-CTM imports and Python shadows | Extract useful static cases, independently validate expected values, then delete executables |

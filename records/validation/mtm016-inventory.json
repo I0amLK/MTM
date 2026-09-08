@@ -1,6 +1,6 @@
 {
   "audit_completed": true,
-  "base_head": "b3ab147b72d72aa546c9c41bdbe71924aa5ebb97",
+  "base_head": "03a35903ab939e21ed7f1a425de2ce40c5183301",
   "interpretation": "Text references are retirement candidates, not proof of a runtime dependency. User Python tools are not forbidden.",
   "legacy_rust_reference_file_count": 52,
   "legacy_rust_reference_files": [
@@ -17,8 +17,8 @@
     "crates/mtm-core/src/shell_segments.rs",
     "crates/mtm-core/src/url_policy.rs",
     "crates/mtm-gateway/src/bin/server.rs",
-    "crates/mtm-gateway/src/bin/shadow.rs",
-    "crates/mtm-gateway/src/catalog.rs",
+    "crates/mtm-gateway/src/catalog/mod.rs",
+    "crates/mtm-gateway/src/catalog/tests.rs",
     "crates/mtm-gateway/src/http.rs",
     "crates/mtm-gateway/src/mcp.rs",
     "crates/mtm-gateway/src/oauth.rs",
@@ -58,6 +58,8 @@
     "crates/mtm-workflow/tests/workflow.rs"
   ],
   "milestone": "MTM-016",
+  "pending_deleted_file_count": 0,
+  "pending_deleted_files": [],
   "python_file_count": 127,
   "python_files": [
     {
@@ -825,6 +827,6 @@
   ],
   "rust_only_ready": false,
   "schema_version": "1.0.0",
-  "tracked_and_unignored_file_count": 334,
+  "tracked_and_unignored_file_count": 337,
   "uninspected_source_files": []
 }

@@ -44,12 +44,6 @@ impl OAuthPrincipal {
             },
         }
     }
-
-    #[cfg(feature = "shadow-fixture")]
-    #[doc(hidden)]
-    pub fn shadow_fixture(client_id: String, subject: String, scope: String) -> Self {
-        Self::authenticated(client_id, subject, scope)
-    }
 }
 
 impl Deref for OAuthPrincipal {
