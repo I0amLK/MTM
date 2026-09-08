@@ -629,6 +629,38 @@
         "forbidden_shortcuts": ["Disable or weaken Bubblewrap", "Automatically raise host sysctls", "Skip failed tests", "Treat this minimal probe as exact-candidate release acceptance"]
       },
       "remaining": ["Run and review real-host Native tests before closing B environment attribution", "Complete complex shell handling and Python maintenance retirement", "Persistent workflow idempotency", "Final exact-candidate Native/browser/LaTeX/resource/upgrade/rollback qualification", "Earlier unexplained capability signature mismatch"]
+    },
+    {
+      "id": "MTM016-HOST-SOURCE-GATE-REVIEW",
+      "scope": "B preserve operator-run capable-host source qualification separately from later sandbox diagnostics",
+      "status": "host_source_gate_passed_environment_blocker_closed_for_observed_checkout",
+      "observed_checkout_commit": "61e6bf7fffcecad74533118c640e3891eda43fe0",
+      "provenance": "Operator reports running native-preflight and check in an ordinary Linux terminal. On review, HEAD was 61e6bf7 and only the two generated reports differed; no source or test changes were present. This is a reviewed observation, not a signed build attestation.",
+      "sealed_reports": [
+        {"path": "records/evidence/MTM-016/host-native-preflight-61e6bf7.json", "sha256": "e7bf030d0679fdaa2934a0f892db51bdcfbd12d9be5f81bd4122f785e3aeba98", "original_path": "records/validation/mtm016-native-preflight.json"},
+        {"path": "records/evidence/MTM-016/host-source-check-61e6bf7.json", "sha256": "cb0bddc959daca50c4aebed17a2ee7a951bf21e89f93360a437df18d739ace79", "original_path": "records/validation/mtm016-source-check.json"}
+      ],
+      "observations": {
+        "direct_user_namespace_created": true,
+        "minimal_bubblewrap_exit_code": 0,
+        "minimal_isolation_checks_passed": 12,
+        "format_exit_code": 0,
+        "clippy_exit_code": 0,
+        "rust_workspace_tests_exit_code": 0,
+        "diff_exit_code": 0,
+        "aggregate_passed": true,
+        "tests_skipped_by_preflight": false,
+        "maintenance_binary_sha256": "d28fe8072a2a986fb65ae395b6901f30ad8665202ac6c04254c2f67a2a69ed60",
+        "bubblewrap_binary_sha256": "52231e1caf55bcbc667b269f49c63599a6f7db4767ae6a039580d0ff853db712"
+      },
+      "attribution": "The same source passed the complete Cargo command on a capable environment while the recorded nested environment cannot create the required user namespace. Close this checkout's environment blocker; do not automatically reclassify later failures or infer exact per-test coverage from command exit status alone.",
+      "report_preservation": "Reports moved byte-for-byte before any regeneration. Earlier blocked reports remain in commit 61e6bf7 and in the preceding checkpoint; neither failures nor their diagnostics are relabelled. Subsequent validation reports describe their own execution context.",
+      "limitations": ["No raw host test transcript or per-test counts were stored", "No product binary hash is bound by these two reports", "Not a release, resource, real-web-client, full external-tool or finalization acceptance", "No retrospective edit of the old preflight attribution fields"],
+      "production_changed": false,
+      "rust_only_ready": false,
+      "release_qualified": false,
+      "python_files_remaining": 118,
+      "earlier_signature_mismatch_explained": false
     }
   ],
   "remaining_acceptance": [
