@@ -9,10 +9,11 @@
 > exposes a Rust-built directory with `mtm tool-catalog`.
 
 MTM-016 now has Rust commit-policy checks, authenticated HTTP tests and a
-current-binary capability regression; five reviewed Python files have been retired
-and 122 remain. See
+current-binary capability regression and independent 135-case pure-policy tests;
+nine reviewed Python files have been retired and 118 remain. See
 `docs/MTM-016-PYTHON-RETIREMENT.md` for coverage and remaining limitations.
-The development branch also repairs atomic patch permission preservation. These
+The development branch also repairs atomic patch permission preservation and numeric
+schema bounds. See `docs/MTM-016-POLICY-REGRESSION.md` for the policy-test scope. These
 source changes are not installed by this checkout and are not release-qualified.
 
 MTM is a Rust-native mathematical research runtime with capability-gated workflows,

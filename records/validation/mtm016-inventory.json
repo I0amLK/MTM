@@ -1,8 +1,8 @@
 {
   "audit_completed": true,
-  "base_head": "cf553c5b3dbe0c632f2867642df5f8e24639a9e2",
+  "base_head": "3f0fb444bb5e5cb8708647796674656ed45f2442",
   "interpretation": "Text references are retirement candidates, not proof of a runtime dependency. User Python tools are not forbidden.",
-  "legacy_rust_reference_file_count": 54,
+  "legacy_rust_reference_file_count": 55,
   "legacy_rust_reference_files": [
     "crates/mtm-cli/src/main.rs",
     "crates/mtm-contracts/src/error.rs",
@@ -14,6 +14,7 @@
     "crates/mtm-core/src/path_policy.rs",
     "crates/mtm-core/src/redaction.rs",
     "crates/mtm-core/src/schema.rs",
+    "crates/mtm-core/src/schema/numeric.rs",
     "crates/mtm-core/src/shell_segments.rs",
     "crates/mtm-core/src/url_policy.rs",
     "crates/mtm-gateway/src/bin/server.rs",
@@ -60,19 +61,15 @@
     "crates/mtm-workflow/tests/workflow.rs"
   ],
   "milestone": "MTM-016",
-  "pending_deleted_file_count": 2,
+  "pending_deleted_file_count": 4,
   "pending_deleted_files": [
-    "scripts/capability_recovery.py",
-    "tests/test_capability_recovery.py"
+    "conformance/mtm002_cases.py",
+    "conformance/python_batch_cli.py",
+    "conformance/python_reference.py",
+    "scripts/run_mtm002_conformance.py"
   ],
-  "python_file_count": 122,
+  "python_file_count": 118,
   "python_files": [
-    {
-      "bytes": 12035,
-      "disposition": "extract independent static fixtures, then retire shadow execution",
-      "lines": 198,
-      "path": "conformance/mtm002_cases.py"
-    },
     {
       "bytes": 12643,
       "disposition": "extract independent static fixtures, then retire shadow execution",
@@ -80,22 +77,10 @@
       "path": "conformance/mtm004_scenario.py"
     },
     {
-      "bytes": 848,
-      "disposition": "extract independent static fixtures, then retire shadow execution",
-      "lines": 31,
-      "path": "conformance/python_batch_cli.py"
-    },
-    {
       "bytes": 6020,
       "disposition": "extract independent static fixtures, then retire shadow execution",
       "lines": 140,
       "path": "conformance/python_native_shadow.py"
-    },
-    {
-      "bytes": 3147,
-      "disposition": "extract independent static fixtures, then retire shadow execution",
-      "lines": 77,
-      "path": "conformance/python_reference.py"
     },
     {
       "bytes": 12054,
@@ -260,16 +245,10 @@
       "path": "scripts/release_mtm015_preview.py"
     },
     {
-      "bytes": 25560,
+      "bytes": 25586,
       "disposition": "review and port reusable qualification behavior before retirement",
       "lines": 590,
       "path": "scripts/run_checks.py"
-    },
-    {
-      "bytes": 10330,
-      "disposition": "review and port reusable qualification behavior before retirement",
-      "lines": 297,
-      "path": "scripts/run_mtm002_conformance.py"
     },
     {
       "bytes": 21780,
@@ -802,6 +781,6 @@
   ],
   "rust_only_ready": false,
   "schema_version": "1.0.0",
-  "tracked_and_unignored_file_count": 346,
+  "tracked_and_unignored_file_count": 348,
   "uninspected_source_files": []
 }

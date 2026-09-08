@@ -42,6 +42,38 @@
       "rationale": "Python recovery assertions move beside the Rust test-only helper: one normal call, one fresh retry, cross-run/domain/state/contract denial, no retained/unknown writes replay, revoked-token denial, stale preparer prevention and redacted errors. New negative cases include missing contract fields, fractional counts and uncertain transport; the actual built-binary regression separately checks 500 distinct submissions and restart behavior.",
       "replacements": ["crates/mtm-cli/tests/support/recovery.rs", "crates/mtm-cli/tests/capability_runtime.rs", "xtask/src/capability.rs"],
       "verification": ["cargo test -p mtm-cli --test capability_runtime --locked", "cargo test -p mtm-xtask --locked", "cargo xtask capability --record"]
+    },
+    {
+      "path": "scripts/run_mtm002_conformance.py",
+      "baseline_sha256": "c48a1258169dead2aae41cbce9c742785275726dba9912199bc1a3e1b09d6562",
+      "disposition": "historical_comparison_retired",
+      "rationale": "Current pure-policy tests no longer require a sibling Re-CTM checkout, Python oracle, old output hash or cross-language resource measurements. All 135 inputs across 14 groups have independent Rust expectations and actual CLI boundary tests. The inherited fractional minimum bypass is explicitly corrected by df6660c rather than frozen. Historical golden hash and A5 measurements remain unchanged; this deletion does not assert new performance or target qualification.",
+      "replacements": ["crates/mtm-cli/tests/policy_corpus.rs", "crates/mtm-cli/tests/policy_cli.rs", "crates/mtm-core/tests/numeric_schema.rs"],
+      "verification": ["cargo test -p mtm-cli --test policy_corpus --test policy_cli --locked", "cargo test -p mtm-core --test numeric_schema --locked", "cargo xtask records", "cargo xtask retirement"]
+    },
+    {
+      "path": "conformance/mtm002_cases.py",
+      "baseline_sha256": "4b0ca901b6cd07796db174c3db1ca7d50dce91e072970ef9f8549eaef049ae55",
+      "disposition": "replaced_by_rust",
+      "rationale": "The 135 named input cases are maintained as package-local Rust test data, with explicit expected results, group-count checks and the recorded 13719-byte input length. No fixture generator or Python execution is needed; command-looking strings are only pure-policy inputs, not commands to execute.",
+      "replacements": ["crates/mtm-cli/tests/support/policy_cases.rs", "crates/mtm-cli/tests/policy_corpus.rs", "crates/mtm-cli/tests/policy_cli.rs"],
+      "verification": ["cargo test -p mtm-cli --test policy_corpus --test policy_cli --locked", "cargo xtask retirement"]
+    },
+    {
+      "path": "conformance/python_reference.py",
+      "baseline_sha256": "9e8e2d141ab9e49239ebd6b0e78d17d9001c59d747938c6cb6eb260bdf7e5355",
+      "disposition": "historical_comparison_retired",
+      "rationale": "This adapter imports the retired reference project's pure policy functions and has no remaining current caller. Explicit Rust test expectations replace the oracle dependency. Success results and error code/category/retryability/details are checked; exact old Python diagnostic wording is not a new contract. Existing historical reference hashes are preserved, not re-evaluated from the new implementation.",
+      "replacements": ["crates/mtm-cli/tests/support/policy_cases.rs", "crates/mtm-cli/tests/policy_corpus.rs"],
+      "verification": ["cargo test -p mtm-cli --test policy_corpus --locked", "cargo xtask records", "cargo xtask retirement"]
+    },
+    {
+      "path": "conformance/python_batch_cli.py",
+      "baseline_sha256": "c01e51363817e01f1d9f70e55d9d7e4143f8ad5d2ef6e03a193ea210634dad93",
+      "disposition": "replaced_by_rust",
+      "rationale": "The built Rust CLI is tested directly with empty inherited environment and PATH: all 135 inputs, single/batch equivalence, 1000/1001-item and 1 MiB input limits, malformed JSON/UTF-8, deterministic output and ordered per-item errors. The disposable working directory remains empty. Python batch execution is unnecessary; this is not a browser, Native or entire-host-without-Python claim.",
+      "replacements": ["crates/mtm-cli/tests/policy_cli.rs", "crates/mtm-cli/tests/support/policy_cases.rs"],
+      "verification": ["cargo test -p mtm-cli --test policy_cli --locked", "cargo xtask retirement"]
     }
   ]
 }

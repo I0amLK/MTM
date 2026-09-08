@@ -52,11 +52,11 @@ Both targets also run under `cargo test --workspace` and `cargo xtask check`.
 
 ## Retirement decision and limits
 
-After these replacements are committed, retire the old four-file chain together:
+After replacement commit `3f0fb44`, the old four-file chain is retired together:
 `scripts/run_mtm002_conformance.py`, `conformance/mtm002_cases.py`,
 `conformance/python_reference.py`, and `conformance/python_batch_cli.py`.
 The reviewed deletion ledger binds their baseline bytes and replacement locations.
-The residual Python aggregate must call the Rust tests rather than the removed driver.
+The residual Python aggregate now calls the Rust tests rather than the removed driver.
 
 Cross-language output equality and cross-language performance comparison cease to
 be current acceptance conditions. No new performance claim follows from their

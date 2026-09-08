@@ -35,8 +35,8 @@
   "inventory": {
     "report": "records/validation/mtm016-inventory.json",
     "python_files_observed": 127,
-    "python_files_deleted": 5,
-    "python_files_remaining": 122,
+    "python_files_deleted": 9,
+    "python_files_remaining": 118,
     "retirement_ledger": "records/governance/python-retirement.json",
     "coverage_retirement_complete": false,
     "legacy_rust_marker_files_observed": 52,
@@ -371,6 +371,65 @@
       "historical_golden_or_receipts_rewritten": false,
       "production_changed": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-PYTHON-RETIREMENT-BATCH-3",
+      "scope": "D retire the four-file pure-policy reference dependency after independent Rust replacement; C numeric fix revalidated on current binary",
+      "status": "reviewed_deletions_validated_full_retirement_pending",
+      "replacement_commit": "3f0fb44",
+      "numeric_repair_commit": "df6660c",
+      "removed_paths": [
+        "scripts/run_mtm002_conformance.py",
+        "conformance/mtm002_cases.py",
+        "conformance/python_reference.py",
+        "conformance/python_batch_cli.py"
+      ],
+      "retirement_ledger": "records/governance/python-retirement.json",
+      "batch_dispositions": {"replaced_by_rust": 2, "historical_comparison_retired": 2},
+      "python_inventory": {"baseline_files": 127, "retired_files": 9, "remaining_files": 118},
+      "residual_callers": "Historical run_checks.py now executes cargo tests policy_corpus and policy_cli. No active import or call to this deleted four-file chain remains in scripts/tests/conformance/.githooks.",
+      "commands": [
+        {"command": "cargo xtask records --record", "exit_code": 0, "historical_evidence_hashes_checked": 26, "baseline_history_and_notices_unchanged": true},
+        {"command": "cargo xtask retirement --record", "exit_code": 0, "baseline_source_hashes_checked": 9},
+        {"command": "cargo xtask audit --strict --record", "exit_code": 1, "expected": true, "result": "118 first-party Python files remain; strict readiness stays false"},
+        {"command": "git grep -n -E 'run_mtm002_conformance|mtm002_cases|python_batch_cli|from python_reference|import python_reference' -- scripts tests conformance .githooks", "result": "No active references found"},
+        {"command": "git diff --exit-code b3ab147b72d72aa546c9c41bdbe71924aa5ebb97 -- conformance/golden", "result": "No historical golden changes"},
+        {"command": "cargo xtask check --record", "exit_code": 1, "result": "All new policy and numeric tests passed, as did format, warnings-denied Clippy, architecture, hook, history and retirement checks. The same ten inherited nested-Bubblewrap tests remain failed."},
+        {"command": "cargo xtask capability --record", "exit_code": 0, "normal_independent_runs": 500, "normal_invalid": 0, "normal_rejections": 0, "source_unchanged": true, "binary_unchanged": true}
+      ],
+      "test_results": {
+        "policy_cases": 135,
+        "policy_operation_groups": 14,
+        "policy_corpus_tests_passed": 2,
+        "actual_policy_cli_tests_passed": 5,
+        "core_unit_passed": 42,
+        "numeric_integration_passed": 5,
+        "capability_runtime_suite_passed": 13,
+        "cli_identity_passed": 2,
+        "gateway_unit_and_http_passed": 26,
+        "storage_unit_and_integration_passed": 12,
+        "workflow_unit_and_integration_passed": 91,
+        "maintenance_unit_passed": 21,
+        "maintenance_cli_passed": 2,
+        "runtime": {"passed": 101, "failed": 10, "ignored": 1},
+        "new_test_suppressions": 0
+      },
+      "capability_binding": {
+        "binary_sha256": "ffdcb4a8a32e5d05363b6eb51f63aa1b95f78aa56eed00fa84aae94ae5953dcb",
+        "rust_source_sha256": "f9c971e0a6f5819bf1b1a3e251ce4f0184e083fa47139c51d2aa6ae86ce144fb",
+        "compact": 250,
+        "full": 250,
+        "scope": "Disposable current-binary OAuth/socket assessment first hops, negative authorization, restart and simulated lost-result handling; Native disabled and LaTeX static_only, not full-proof or real-web acceptance"
+      },
+      "historical_policy": "Retire current Re-CTM equality and cross-language performance requirements, keep old golden hashes and evidence bytes intact. New independently specified numeric behavior must not inherit the old float-bound bypass.",
+      "source_report": "records/validation/mtm016-source-check.json",
+      "capability_report": "records/validation/capability-current.json",
+      "aggregate_passed": false,
+      "rust_only_ready": false,
+      "release_qualified": false,
+      "production_changed": false,
+      "earlier_signature_mismatch_explained": false,
+      "remaining": ["Target/release Python dependency families", "Complex shell, PATH, pagination and Git usability", "Typed boundary completion and workflow persistent idempotency", "Real Native/browser/LaTeX/resource/upgrade/rollback qualification"]
     }
   ],
   "remaining_acceptance": [

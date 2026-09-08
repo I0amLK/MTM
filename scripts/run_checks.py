@@ -315,10 +315,10 @@ def main() -> int:
                     env=environment,
                 ),
                 run(
-                    "mtm002_conformance",
-                    [sys.executable, "scripts/run_mtm002_conformance.py"],
+                    "rust_policy_contract",
+                    [cargo, "test", "--locked", "-p", "mtm-cli",
+                     "--test", "policy_corpus", "--test", "policy_cli"],
                     env=environment,
-                    capture_json=True,
                 ),
                 *(
                     []

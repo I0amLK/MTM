@@ -1,5 +1,18 @@
 # Python retirement: reviewed responsibilities, not a line-count target
 
+## Current third-batch checkpoint
+
+Nine baseline Python files have now been retired; 118 remain. After `df6660c`
+fixed inherited numeric validation and `3f0fb44` introduced independent Rust policy
+tests, the pure-policy Python reference chain was retired as one dependency family.
+All 135 original inputs and 14 operation groups remain tested, with the fractional
+lower-bound bug intentionally rejected instead of copied. The actual CLI tests
+run with an empty inherited environment and PATH. See
+`docs/MTM-016-POLICY-REGRESSION.md` for exact coverage and limitations.
+
+This does not complete target/release migration or justify a new performance claim.
+The old cross-language golden hash and measurements remain immutable history.
+
 The Rust replacements are introduced before a separate deletion commit. The
 retirement ledger is `records/governance/python-retirement.json`; each deleted
 Python file is bound to its bytes at the MTM-015 baseline, a disposition, Rust
