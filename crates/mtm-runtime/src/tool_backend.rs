@@ -41,6 +41,9 @@ const CONTROL_ACTIONS: [&str; 5] = [
 ];
 const PROJECT_ARTIFACTS: [&str; 2] = ["project_manifest", "project_summary_tex"];
 
+#[path = "submission_receipts.rs"]
+mod submission_receipts;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct RuntimeBackendFacts {
     pub workflow_protocol_version: i64,
@@ -432,20 +435,76 @@ impl RuntimeToolBackend {
                 "capability is required when submitting a Rethlas step",
             ));
         }
-        match self.capabilities.validate(
+        let (workspace_digest, request_digest) =
+            submission_receipts::binding(self.workspace.root(), run_id, action, &payload, &writes)?;
+        if let Some(receipt) = self.capabilities.submission_receipt(
             capability,
             &principal.client_id,
-            "commit",
-            "workflow",
+            run_id,
+            &workspace_digest,
+            &request_digest,
+        )? {
+            return submission_receipts::replay(&receipt);
+        }
+        let authorized = match self.capabilities.authorize_submission(
+            capability,
+            &principal.client_id,
+            run_id,
             trace_id,
-            Some(run_id),
         ) {
-            Ok(_) => {}
+            Ok(authorized) => authorized,
             Err(error) if invalid_capability_error(&error) => {
                 return self.refresh_invalid_capability_step(principal, run_id, error, trace_id);
             }
-            Err(error) => return Err(error),
+            Err(error) => {
+                // Another request may have reserved/completed after our first lookup.
+                if let Some(receipt) = self.capabilities.submission_receipt(
+                    capability,
+                    &principal.client_id,
+                    run_id,
+                    &workspace_digest,
+                    &request_digest,
+                )? {
+                    return submission_receipts::replay(&receipt);
+                }
+                return Err(error);
+            }
+        };
+        if action.is_empty() {
+            return Err(validation("action is required to complete a Rethlas step"));
         }
+        if writes.len() > 65_536 {
+            return Err(validation(
+                "submission write count exceeds the supported bound",
+            ));
+        }
+        let reservation =
+            match self
+                .store
+                .reserve_submission(&authorized, &workspace_digest, &request_digest)?
+            {
+                mtm_storage::SubmissionSlot::Existing(receipt) => {
+                    return submission_receipts::replay(&receipt);
+                }
+                mtm_storage::SubmissionSlot::Reserved(reservation) => reservation,
+            };
+        let result = self.execute_rethlas_submission(
+            principal, run_id, capability, action, &payload, &writes, trace_id,
+        );
+        self.finish_receipted_submission(reservation, result)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn execute_rethlas_submission(
+        &self,
+        principal: &OAuthPrincipal,
+        run_id: &str,
+        capability: &str,
+        action: &str,
+        payload: &Value,
+        writes: &[Value],
+        trace_id: &str,
+    ) -> Result<Value, ReCtmError> {
         if !writes.is_empty() && action.is_empty() {
             return Err(validation("action is required when writes are submitted"));
         }
@@ -489,7 +548,7 @@ impl RuntimeToolBackend {
             &principal.client_id,
             capability,
             action,
-            &payload,
+            payload,
             Some(trace_id),
         ) {
             Ok(value) => value,
@@ -1488,6 +1547,17 @@ fn render_summary(name: &str, payload: &Map<String, Value>) -> String {
     }
     if matches!(name, "rethlas_step" | "rethlas_next") {
         if name == "rethlas_step" {
+            if payload
+                .get("submission_receipt")
+                .and_then(|value| value.get("replayed"))
+                .and_then(Value::as_bool)
+                == Some(true)
+            {
+                return format!(
+                    "Recovered the recorded submission for run {}. This replay applied zero writes and grants no authority; its state is historical. Fetch the current task separately.",
+                    json_text(payload, "run_id")
+                );
+            }
             if let Some(sub) = payload.get("submission").and_then(Value::as_object) {
                 if let Some(error) = sub.get("error").and_then(Value::as_object) {
                     if sub.get("capability_refreshed").and_then(Value::as_bool) == Some(true) {

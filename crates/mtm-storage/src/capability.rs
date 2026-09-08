@@ -17,6 +17,18 @@ mod diagnostics;
 const CAPABILITY_TOKEN_MIN_LENGTH: usize = 80;
 const CAPABILITY_TOKEN_MAX_LENGTH: usize = 8192;
 
+/// An active commit capability validated by this authority. Never deserializable.
+pub struct AuthorizedSubmission {
+    pub(crate) claims: CapabilityClaims,
+    pub(crate) fingerprint: String,
+}
+
+impl std::fmt::Debug for AuthorizedSubmission {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("AuthorizedSubmission([REDACTED])")
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CapabilityClaims {
     nonce: String,
@@ -435,6 +447,70 @@ impl CapabilityAuthority {
         Ok(claims)
     }
 
+    pub fn authorize_submission(
+        &self,
+        token: &str,
+        owner_id: &str,
+        run_id: &str,
+        trace_id: &str,
+    ) -> Result<AuthorizedSubmission, ReCtmError> {
+        let claims = self.validate(
+            token,
+            owner_id,
+            "commit",
+            "workflow",
+            trace_id,
+            Some(run_id),
+        )?;
+        Ok(AuthorizedSubmission {
+            claims,
+            fingerprint: format!("{:x}", Sha256::digest(token.as_bytes())),
+        })
+    }
+
+    /// Receipt lookup is read-only and never yields active CapabilityClaims.
+    /// Failure to identify a receipt falls back to the ordinary authorization path.
+    pub fn submission_receipt(
+        &self,
+        token: &str,
+        owner_id: &str,
+        run_id: &str,
+        workspace_sha256: &str,
+        request_sha256: &str,
+    ) -> Result<Option<crate::SubmissionReceipt>, ReCtmError> {
+        if !valid_token_shape(token) {
+            return Ok(None);
+        }
+        let fingerprint = format!("{:x}", Sha256::digest(token.as_bytes()));
+        let Some(receipt) = self
+            .store
+            .find_submission_receipt(&fingerprint, owner_id, run_id)?
+        else {
+            return Ok(None);
+        };
+        let claims = match self
+            .decode(token)
+            .and_then(|payload| claims_from_payload(&payload))
+        {
+            Ok(claims) => claims,
+            Err(_) => return Ok(None),
+        };
+        let record = self.store.get_capability(claims.nonce())?;
+        let run = self.store.get_run(run_id)?;
+        if claims.owner_id() != owner_id
+            || claims.run_id() != run_id
+            || run["owner_id"].as_str() != Some(owner_id)
+            || !record
+                .as_ref()
+                .is_some_and(|record| record_matches_claims(record, &claims))
+            || !receipt.matches_claims(&claims)
+        {
+            return Ok(None);
+        }
+        receipt.check_binding(workspace_sha256, request_sha256)?;
+        Ok(Some(receipt))
+    }
+
     pub fn revoke(&self, token: &str, reason: &str, trace_id: &str) -> Result<(), ReCtmError> {
         let payload = self.decode(token)?;
         let claims = claims_from_payload(&payload)?;
@@ -742,7 +818,7 @@ fn claims_from_payload(payload: &Value) -> Result<CapabilityClaims, ReCtmError> 
     })
 }
 
-fn record_matches_claims(record: &Value, claims: &CapabilityClaims) -> bool {
+pub(crate) fn record_matches_claims(record: &Value, claims: &CapabilityClaims) -> bool {
     let permissions = record
         .get("permissions")
         .and_then(Value::as_array)

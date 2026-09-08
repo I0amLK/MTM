@@ -85,10 +85,50 @@ impl Reply {
 }
 
 // These are opaque client credentials, not authenticated server principal types.
+#[derive(Clone)]
 pub struct Client {
     endpoint: SocketAddr,
     token: String,
     client_id: String,
+}
+
+impl Client {
+    /// Independent bounded socket calls for concurrent tests; no principal forgery.
+    pub fn call(&self, name: &str, arguments: Value) -> Result<Value> {
+        let body = serde_json::to_vec(&json!({"jsonrpc":"2.0","id":"gate",
+            "method":"tools/call","params":{"name":name,"arguments":arguments}}))
+        .map_err(|_| "request serialization failed")?;
+        let reply = Server::request_at(
+            self.endpoint,
+            Instant::now() + IO_TIMEOUT,
+            "POST",
+            "/mcp",
+            "application/json",
+            &body,
+            Some(self),
+        )?;
+        tool_outcome(reply)
+    }
+}
+
+fn tool_outcome(reply: Reply) -> Result<Value> {
+    require(reply.status == 200, "MCP HTTP failure; no automatic replay")?;
+    let reply = reply.json()?;
+    require(reply.get("error").is_none(), "MCP protocol failure")?;
+    let result = reply.get("result").ok_or("missing MCP result")?;
+    let data = result
+        .get("structuredContent")
+        .filter(|v| v.is_object())
+        .ok_or("missing structured tool outcome")?;
+    require(
+        result["isError"].is_boolean(),
+        "missing explicit tool outcome",
+    )?;
+    require(
+        result["isError"] != true || data["ok"] == false,
+        "inconsistent tool error flags",
+    )?;
+    Ok(data.clone())
 }
 
 impl Client {
@@ -369,23 +409,43 @@ impl Server {
         body: &[u8],
         client: Option<&Client>,
     ) -> Result<Reply> {
+        Self::request_at(
+            self.endpoint,
+            self.deadline,
+            method,
+            path,
+            content_type,
+            body,
+            client,
+        )
+    }
+
+    fn request_at(
+        endpoint: SocketAddr,
+        total_deadline: Instant,
+        method: &str,
+        path: &str,
+        content_type: &str,
+        body: &[u8],
+        client: Option<&Client>,
+    ) -> Result<Reply> {
         require(
-            self.deadline > Instant::now(),
+            total_deadline > Instant::now(),
             "capability gate exceeded total deadline",
         )?;
         require(
             path.starts_with('/') && !path.contains(['\r', '\n']) && body.len() <= MAX_RESPONSE,
             "invalid bounded loopback request",
         )?;
-        let timeout = IO_TIMEOUT.min(self.deadline.saturating_duration_since(Instant::now()));
-        let mut stream = TcpStream::connect_timeout(&self.endpoint, timeout)
+        let timeout = IO_TIMEOUT.min(total_deadline.saturating_duration_since(Instant::now()));
+        let mut stream = TcpStream::connect_timeout(&endpoint, timeout)
             .map_err(|_| "loopback connection failed; operation outcome unknown")?;
         stream
             .set_write_timeout(Some(timeout))
             .map_err(|_| "socket timeout setup failed")?;
         let auth = if let Some(client) = client {
             require(
-                client.endpoint == self.endpoint && !client.token.contains(['\r', '\n']),
+                client.endpoint == endpoint && !client.token.contains(['\r', '\n']),
                 "client belongs to another endpoint",
             )?;
             format!("Authorization: Bearer {}\r\n", client.token)
@@ -394,7 +454,7 @@ impl Server {
         };
         let headers = format!(
             "{method} {path} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\nContent-Type: {content_type}\r\nContent-Length: {}\r\n{auth}\r\n",
-            self.endpoint,
+            endpoint,
             body.len()
         );
         stream
@@ -525,23 +585,7 @@ impl Server {
             "method":"tools/call","params":{"name":name,"arguments":arguments}}),
             Some(client),
         )?;
-        require(reply.status == 200, "MCP HTTP failure; no automatic replay")?;
-        let reply = reply.json()?;
-        require(reply.get("error").is_none(), "MCP protocol failure")?;
-        let result = reply.get("result").ok_or("missing MCP result")?;
-        let data = result
-            .get("structuredContent")
-            .filter(|v| v.is_object())
-            .ok_or("missing structured tool outcome")?;
-        require(
-            result["isError"].is_boolean(),
-            "missing explicit tool outcome",
-        )?;
-        require(
-            result["isError"] != true || data["ok"] == false,
-            "inconsistent tool error flags",
-        )?;
-        Ok(data.clone())
+        tool_outcome(reply)
     }
 
     pub fn restart(&mut self) -> Result {

@@ -16,7 +16,14 @@ use time::macros::format_description;
 
 use crate::schema::{
     SCHEMA_MIGRATIONS_TABLE_SQL, STATE_SCHEMA_VERSION, V1_WORKFLOW_SCHEMA_SQL,
-    V2_RESEARCH_SCHEMA_SQL,
+    V2_RESEARCH_SCHEMA_SQL, V3_SUBMISSION_RECEIPTS_SQL,
+};
+
+#[path = "step_receipts.rs"]
+mod step_receipts;
+pub use step_receipts::{
+    SubmissionDisposition, SubmissionReceipt, SubmissionReservation, SubmissionResult,
+    SubmissionSlot,
 };
 
 const REGISTRY_ID_MAX_BYTES: usize = 128;
@@ -168,6 +175,10 @@ impl StateStore {
             self.migrate_1_to_2()?;
             version = 2;
         }
+        if version == 2 {
+            self.migrate_2_to_3()?;
+            version = 3;
+        }
         if version != STATE_SCHEMA_VERSION {
             return Err(ReCtmError::new(
                 "STATE_SCHEMA_MIGRATION_FAILED",
@@ -228,6 +239,19 @@ impl StateStore {
             transaction
                 .execute_batch("PRAGMA user_version = 2;")
                 .map_err(sql_error)?;
+            Ok(())
+        })
+    }
+
+    fn migrate_2_to_3(&self) -> Result<(), ReCtmError> {
+        let applied_at = self.runtime.clock.now_iso()?;
+        self.immediate(|transaction| {
+            transaction.execute_batch(V3_SUBMISSION_RECEIPTS_SQL).map_err(sql_error)?;
+            transaction.execute(
+                "INSERT INTO schema_migrations(version, applied_at, description) VALUES(3, ?, 'MTM durable step submission receipts')",
+                [applied_at],
+            ).map_err(sql_error)?;
+            transaction.execute_batch("PRAGMA user_version=3;").map_err(sql_error)?;
             Ok(())
         })
     }

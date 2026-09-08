@@ -1,4 +1,27 @@
-pub const STATE_SCHEMA_VERSION: i64 = 2;
+pub const STATE_SCHEMA_VERSION: i64 = mtm_contracts::STATE_SCHEMA_VERSION as i64;
+
+pub const V3_SUBMISSION_RECEIPTS_SQL: &str = r#"
+CREATE TABLE step_receipts (
+    capability_sha256 TEXT PRIMARY KEY CHECK(length(capability_sha256)=64),
+    owner_id TEXT NOT NULL,
+    workspace_sha256 TEXT NOT NULL CHECK(length(workspace_sha256)=64),
+    request_sha256 TEXT NOT NULL CHECK(length(request_sha256)=64),
+    run_id TEXT NOT NULL REFERENCES runs(run_id) ON DELETE RESTRICT,
+    domain_id TEXT NOT NULL REFERENCES domains(domain_id) ON DELETE RESTRICT,
+    role TEXT NOT NULL,
+    epoch INTEGER NOT NULL,
+    issued_state TEXT NOT NULL,
+    status TEXT NOT NULL CHECK(status IN ('pending','completed')),
+    result_json TEXT CHECK(result_json IS NULL OR length(result_json)<=2048),
+    created_at TEXT NOT NULL,
+    completed_at TEXT,
+    CHECK((status='pending' AND result_json IS NULL AND completed_at IS NULL)
+       OR (status='completed' AND result_json IS NOT NULL AND completed_at IS NOT NULL))
+);
+CREATE INDEX idx_step_receipts_run ON step_receipts(run_id);
+CREATE UNIQUE INDEX idx_step_receipts_pending_run
+    ON step_receipts(run_id) WHERE status='pending';
+"#;
 
 pub const SCHEMA_MIGRATIONS_TABLE_SQL: &str = r#"
 CREATE TABLE IF NOT EXISTS schema_migrations (

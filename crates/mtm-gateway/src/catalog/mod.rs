@@ -9,10 +9,10 @@ use sha2::{Digest, Sha256};
 mod schema;
 mod workflow_schema;
 
-pub const TOOL_CONTRACT_VERSION: &str = "mtm-tools-v1";
+pub const TOOL_CONTRACT_VERSION: &str = "mtm-tools-v2";
 pub const NATIVE_TOOL_COUNT: usize = 18;
 
-pub const CAPABILITY_LIFECYCLE: &str = "Use only the unmodified capability from the current server-issued task envelope for the intended run and task domain (including branch/role). Never reuse a consumed or replaced envelope, mix task domains, or manufacture a capability. After a step returns a replacement task, use that envelope for subsequent inspect/retrieve/step calls. On INVALID, REVOKED, STALE or EXPIRED, stop replaying the rejected request and obtain the current task with rethlas_step(run_id). Only an explicit recoverable, zero-write response with a fresh task permits one corrected resubmission of the same task; never replay retained writes. A transport failure leaves the outcome unknown: inspect status/current task before any new submission. A run_id or Native dangerous mode does not grant workflow authority.";
+pub const CAPABILITY_LIFECYCLE: &str = "For new work use only the unmodified capability from the current server-issued task envelope for the intended run and task domain (including branch/role). Never mix task domains or manufacture a capability. After a step returns a replacement task, use it for subsequent inspect/retrieve/step calls. Exception for rethlas_step only: an exact repeat of the original capability/action/payload/ordered writes may return its durable submission_receipt, with zero new writes and no task or capability. Fetch the current task separately; a receipt state is historical, not current authority. Changed content with a consumed capability is IDEMPOTENCY_CONFLICT. RESULT_UNKNOWN means a pending outcome: stop; a fresh token does not permit replay. On INVALID, REVOKED, STALE or EXPIRED without a receipt, stop replaying and obtain the current task with rethlas_step(run_id). Only an explicit recoverable zero-write response with a fresh task permits one corrected resubmission; never replay retained writes. A transport failure leaves the outcome unknown; only the exact step replay described above can recover a completed receipt. Start/control/retrieve operations are not deduplicated. A run_id or Native dangerous mode does not grant workflow authority.";
 
 // A single table generates the typed identity, ordered public names and metadata.
 macro_rules! define_tools {

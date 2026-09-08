@@ -23,7 +23,7 @@
     {"id": "B", "status": "in_progress", "goal": "Native/Workspace/Git usability regressions"},
     {"id": "C", "status": "in_progress", "goal": "MTM-owned contracts and alias retirement"},
     {"id": "D", "status": "in_progress", "goal": "Rust-only maintenance and independent evidence validation"},
-    {"id": "E", "status": "pending", "goal": "Task-domain lifecycle and workflow idempotency"},
+    {"id": "E", "status": "in_progress", "goal": "Task-domain lifecycle and workflow idempotency"},
     {"id": "F", "status": "pending", "goal": "Python-free complete qualification and new release"}
   ],
   "open_observations": [
@@ -1025,6 +1025,69 @@
       "python_files_remaining": 116,
       "rust_only_ready": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-E1-PERSISTENT-STEP-RECEIPTS",
+      "delivery": "E1",
+      "status": "implemented_regressions_passed_exact_artifact_pending",
+      "stage_event": {"stage": "E", "before": "pending", "after": "in_progress", "reason": "Begin the approved durable workflow submission implementation"},
+      "base_commit": "648679f64a889728cf1e9c9794a514c9e04a9581",
+      "plan": "docs/MTM-016-SUBMISSION-RECEIPTS.md",
+      "scope": "Capability-identified persistent rethlas_step receipts; no rethlas_start deduplication or automatic crash reconciliation",
+      "contract_change": {"state_schema_before": 2, "state_schema_after": 3, "historical_bootstrap_schema": 2, "workflow_protocol": 3, "tool_contract": "mtm-tools-v2", "public_tools": 24, "hidden_aliases": 0},
+      "changes": [
+        "Reserve a durable pending receipt before logical writes, using a full capability SHA-256 and owner/run/domain/role/epoch/state/workspace/request bindings",
+        "Recheck registered live authorization and current expiry inside the reservation transaction; one pending submission per run across independent connections and distinct tokens",
+        "Record only a typed bounded completion summary, never a raw capability, next task, private context, proof or request body",
+        "Identical replay uses current-signer signature and registry/owner checks to return zero new writes and a historical receipt; it never returns new authority",
+        "Changed content conflicts; pending or unclassified post-reservation failures remain RESULT_UNKNOWN and cannot be bypassed with a fresh token",
+        "Persist corrections separately from applied submissions, preserving previous write counts without replaying retained records",
+        "Migrate schema 2 to 3 transactionally, preserve historical bootstrap identity and pre-upgrade database copies",
+        "Keep the single workflow/finalizer authority, existing Native isolation and authentication boundaries"
+      ],
+      "source_tests_observed": {
+        "storage_receipt_regressions": {"passed": 13, "failed": 0},
+        "workspace_clippy_all_targets_all_features": {"exit_code": 0},
+        "format_check_after_repairs": {"exit_code": 0},
+        "authenticated_receipt_suite": {"passed": 4, "failed": 0, "scope": "actual disposable candidate process, OAuth and public MCP; includes four concurrent sockets"},
+        "full_source_gate": {"command": "cargo xtask check --record", "exit_code": 1, "format": 0, "clippy": 0, "rust_tests": 101, "diff": 0, "source_unchanged": true, "runtime": {"passed": 128, "failed": 10, "ignored": 1}, "interpretation": "Only the same inherited nested-Bubblewrap failure set remains; no new ignored tests or waived assertions"},
+        "gateway": {"unit_passed": 21, "http_passed": 6, "failed": 0},
+        "protocol_suite": {"passed": 22, "failed": 0, "inert_explicit_host_profiles": 2, "interpretation": "Target/resource fixture functions return without host work when not explicitly requested; their test-runner ok is not target or resource acceptance"},
+        "storage_total": {"unit_passed": 6, "existing_integration_passed": 6, "new_receipt_integration_passed": 13},
+        "new_runtime_tests": 3,
+        "historical_evidence_hashes_checked": 26,
+        "prior_sealed_observation_hashes_checked": 3,
+        "retirement_source_hashes_checked": 11,
+        "strict_retirement_audit": {"exit_code": 1, "expected": true, "python_files_remaining": 116}
+      },
+      "implementation_binding": {
+        "rust_source_sha256": "5810fbc138b830868b06fee4980322a8820d3da5d7f1026973ed91fc9472fc54",
+        "source_report": "records/validation/mtm016-source-check.json",
+        "report_head": "648679f64a889728cf1e9c9794a514c9e04a9581",
+        "report_interpretation": "Recorded before implementation commit with unchanged dirty-source content hash; not relabelled as a clean-commit execution",
+        "candidate_build_command": "cargo build --release --locked --offline -p mtm-cli --bin mtm --target-dir target/mtm016-e1",
+        "candidate_build_exit_code": 0,
+        "candidate_path": "target/mtm016-e1/release/mtm",
+        "candidate_sha256": "c1785b4938b349a04f81a870ccf82ed8068077ca4af613448ef94217a5865563",
+        "previous_schema2_artifact_preserved": "target/release/mtm sha256=42b959cb3df17f496e74479f05e9eeea867ba087040f4de93004771416dcce18",
+        "product_crates": 8,
+        "product_edges": 17,
+        "runtime_authority": "rust"
+      },
+      "development_failures_retained": [
+        "The initial correction fixture used an unrecognized route under explicitly requested compact mode; existing route selection did not reject it. The test failed rather than claiming correction coverage, then switched to a definite incorrect commit_action. No workflow route semantics were relaxed.",
+        "The first full gate caught the lifecycle description omitting the literal transport-failure warning required by the existing catalog test. The description was repaired and the original test was retained unchanged; that first full gate was not called a pass.",
+        "Initial test borrowing and formatting errors and a forbidden test expect were fixed before acceptance. Ambiguous patches were atomically rejected and reapplied with precise context."
+      ],
+      "rollback": "Before deployment revert the E1 source commits; for any disposable database opened by schema 3 restore its pre-upgrade copy. Never decrement user_version or delete receipt rows to make an old binary accept it.",
+      "limitations": ["Pending reservations may block a run until E2 reconciliation is implemented", "No atomic transaction spans SQLite and vault files", "No start/control/retrieval deduplication", "No deduplication of different capabilities after a completed submission", "No Native or arbitrary-shell exactly-once claim", "Fresh task issuance and owner control keep their existing semantics"],
+      "python_files_deleted": 0,
+      "python_files_remaining": 116,
+      "production_changed": false,
+      "new_crates_or_dependencies": 0,
+      "rust_only_ready": false,
+      "release_qualified": false,
+      "earlier_signature_mismatch_explained": false
     }
   ],
   "remaining_acceptance": [

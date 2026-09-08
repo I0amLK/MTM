@@ -61,6 +61,13 @@ Commit messages are validated by `cargo xtask commit-message <FILE|--stdin>`.
 The Git hook must remain executable; atomic patch updates preserve ordinary modes.
 Every Python deletion must match `records/governance/python-retirement.json`,
 including the baseline source hash and Rust replacement/coverage explanation.
+
+The approved E-stage durable step-receipt implementation introduces state schema 3
+and tool contract mtm-tools-v2. Read `docs/MTM-016-SUBMISSION-RECEIPTS.md`: a receipt
+grants no authority, contains no raw capability or task context, and never licenses
+replay of an unresolved submission. Keep start deduplication, crash reconciliation
+and final host qualification explicitly pending. This development schema change
+does not authorize opening production data or modifying an installed selector.
 Do not treat deletion provenance as runtime parity or real-client qualification.
 The checker retains inherited host integration tests; in a nested Native sandbox
 Bubblewrap tests can fail. Report those failures and compare with the frozen

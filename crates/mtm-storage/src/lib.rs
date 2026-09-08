@@ -5,9 +5,11 @@ pub mod schema;
 pub mod store;
 
 pub use capability::{
-    CapabilityAuthority, CapabilityClaims, CapabilityEvent, CapabilityObserver,
-    authorize_role_resource, default_permissions, role_for_state,
+    AuthorizedSubmission, CapabilityAuthority, CapabilityClaims, CapabilityEvent,
+    CapabilityObserver, authorize_role_resource, default_permissions, role_for_state,
 };
 pub use store::{
-    Clock, IdSource, StateStore, StoreRuntime, SystemClock, SystemIdSource, TransitionRun,
+    Clock, IdSource, StateStore, StoreRuntime, SubmissionDisposition, SubmissionReceipt,
+    SubmissionReservation, SubmissionResult, SubmissionSlot, SystemClock, SystemIdSource,
+    TransitionRun,
 };

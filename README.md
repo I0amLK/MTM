@@ -13,6 +13,14 @@ probe but still runs every test when the environment is blocked. See
 > [MTM-owned tool contract](docs/MTM-016-TOOL-CONTRACT.md) removes hidden aliases and
 > exposes a Rust-built directory with `mtm tool-catalog`.
 
+The E1 development checkpoint introduces state schema **3** and `mtm-tools-v2`:
+identical `rethlas_step` retries recover a durable non-authorizing submission
+receipt rather than applying writes twice. Pending outcomes remain blocked; this
+does not yet deduplicate run creation or reconcile interrupted submissions.
+Read `docs/MTM-016-SUBMISSION-RECEIPTS.md` before using this development binary.
+Do not point it at production data. Schema-2 binaries need an untouched pre-upgrade
+copy for rollback; deleting receipts or decrementing a schema version is not rollback.
+
 MTM-016 now has Rust commit-policy checks, authenticated HTTP tests and a
 current-binary capability regression and independent 135-case pure-policy tests;
 eleven reviewed Python files have been retired and 116 remain. See

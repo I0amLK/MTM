@@ -16,6 +16,9 @@ mod resource_runtime;
 #[path = "support/candidate_lifecycle.rs"]
 mod candidate_lifecycle;
 
+#[path = "support/submission_receipts.rs"]
+mod submission_receipts;
+
 use std::collections::BTreeSet;
 use std::path::Path;
 
@@ -154,10 +157,14 @@ fn adversarial(server: &Server, owner: &Client, report: &mut Value) -> Result {
             server.call(owner, "rethlas_step", args)
         })?;
         advances(&refreshed, &completed)?;
-        let revoked = server.call(owner, "rethlas_step", submission(&refreshed)?)?;
+        let replayed = server.call(owner, "rethlas_step", submission(&refreshed)?)?;
         require(
-            revoked["ok"] == false && error_code(&revoked) == "CAPABILITY_REVOKED",
-            "used capability was not revoked",
+            replayed["ok"] == true
+                && replayed["writes_applied"] == 0
+                && replayed["submission_receipt"]["replayed"] == true
+                && replayed.get("capability").is_none()
+                && replayed.get("context").is_none(),
+            "identical replay did not return a non-authorizing zero-write receipt",
         )?;
         for (name, args) in [
             (

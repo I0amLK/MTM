@@ -90,7 +90,7 @@
     "python_invoked": false,
     "raw_output_recorded": false,
     "ready_for_native_tests": false,
-    "recorded_unix_seconds": 1788865671,
+    "recorded_unix_seconds": 1788868819,
     "recovery": {
       "action": "run_the_same_checkout_tests_on_a_capable_native_host",
       "automatic_retry": false,
@@ -113,7 +113,7 @@
       },
       "process": {
         "child_reaped": true,
-        "elapsed_ms": 5,
+        "elapsed_ms": 2,
         "exit_code": 0,
         "output_limit_exceeded": false,
         "pipes_closed": true,
@@ -201,7 +201,7 @@
     "release_qualified": false,
     "scope": "static_record_integrity_only"
   },
-  "recorded_unix_seconds": 1788865738,
+  "recorded_unix_seconds": 1788868896,
   "release_qualified": false,
   "retirement": {
     "baseline_hashes_checked": 11,
@@ -216,10 +216,10 @@
   "schema_version": "1.0.0",
   "scope": "rust_source_with_inherited_host_tests",
   "source_identity": {
-    "after_sha256": "05d5623fe06d20a11c115fdd660579bc8fc7be0b907a93ab46a01cdb23f92fa2",
-    "before_sha256": "05d5623fe06d20a11c115fdd660579bc8fc7be0b907a93ab46a01cdb23f92fa2",
-    "commit_after": "8bdeb53c017197bd40fe76df9ec6e6b5df6c904f",
-    "commit_before": "8bdeb53c017197bd40fe76df9ec6e6b5df6c904f",
+    "after_sha256": "5810fbc138b830868b06fee4980322a8820d3da5d7f1026973ed91fc9472fc54",
+    "before_sha256": "5810fbc138b830868b06fee4980322a8820d3da5d7f1026973ed91fc9472fc54",
+    "commit_after": "648679f64a889728cf1e9c9794a514c9e04a9581",
+    "commit_before": "648679f64a889728cf1e9c9794a514c9e04a9581",
     "hash_scope": "mtm-rust-source-v1",
     "unchanged": true
   },
