@@ -65,3 +65,23 @@ counts/capacity and no raw token/body persistence. Exercise actual authenticated
 MCP replay before/after restart and check memory/transition counts independently.
 Keep the 500 normal-assessment and complete protocol fixtures. Environment-blocked
 Native and final target/browser/resource/install gates remain separate observations.
+
+## E1 delivery record
+
+Implementation `a80fd85` passed the post-commit exact-artifact protocol gate using
+the separately built `target/mtm016-e1/release/mtm` (schema 3, mtm-tools-v2).
+The unmodified gate result is sealed in
+`records/evidence/MTM-016/candidate-protocol-e1-a80fd85.json` and hash-bound by the
+iteration receipt. Twenty new tests cover thirteen storage, three pure/runtime
+and four actual authenticated socket cases. The four-client race executes once.
+The unchanged normal workload has 500 successful assessment first hops and three
+complete scripted protocol flows. This is not 500 independently proved theorems.
+
+The full source gate still reports the same ten nested-Native failures, with no
+new test suppression. A separate additional `cargo xtask capability` invocation
+was platform-blocked and is not counted as another pass. The exact-artifact run
+did execute its own capability regression successfully; its scope is recorded.
+
+E1 is complete only for the declared durable same-capability step-receipt scope.
+E2 run creation identity and interrupted-operation reconciliation remain required
+before deployment. No production state, selector, key or installed binary changed.
