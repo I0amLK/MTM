@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 use std::fs::{self, OpenOptions};
 use std::io::{Read, Write};
-use std::os::unix::fs::MetadataExt;
+use std::os::unix::fs::{MetadataExt, OpenOptionsExt, PermissionsExt};
 use std::path::{Component, Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::time::UNIX_EPOCH;
@@ -70,6 +70,8 @@ struct PreparedPathChange {
     resolved: ResolvedPath,
     baseline: PatchBaseline,
     final_content: Option<Vec<u8>>,
+    // Preserve ordinary source permissions on update/move, never setuid/setgid.
+    final_mode: Option<u32>,
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
@@ -798,6 +800,7 @@ impl NativeWorkspace {
                             resolved: target,
                             baseline: PatchBaseline::Missing,
                             final_content: Some(content.into_bytes()),
+                            final_mode: None,
                         },
                     )?;
                 }
@@ -820,12 +823,19 @@ impl NativeWorkspace {
                             resolved: source,
                             baseline,
                             final_content: None,
+                            final_mode: None,
                         },
                     )?;
                 }
                 "update" => {
                     let (source, baseline, old) =
                         self.capture_existing_patch_file(&operation.path, semantics)?;
+                    let final_mode = match &baseline {
+                        PatchBaseline::File { fingerprint } => {
+                            Some(fingerprint.identity.mode & 0o777)
+                        }
+                        PatchBaseline::Missing => None,
+                    };
                     let updated = apply_update_hunks(&old, &operation.hunks, &operation.path)?;
                     additions += updated.lines().count().saturating_sub(old.lines().count());
                     removals += old.lines().count().saturating_sub(updated.lines().count());
@@ -848,6 +858,7 @@ impl NativeWorkspace {
                                 resolved: target,
                                 baseline: target_baseline,
                                 final_content: Some(updated.into_bytes()),
+                                final_mode,
                             },
                         )?;
                         remove_prepared_virtual_path(
@@ -863,6 +874,7 @@ impl NativeWorkspace {
                                 resolved: source,
                                 baseline,
                                 final_content: None,
+                                final_mode: None,
                             },
                         )?;
                     } else {
@@ -880,6 +892,7 @@ impl NativeWorkspace {
                                 resolved: source,
                                 baseline,
                                 final_content: Some(updated.into_bytes()),
+                                final_mode,
                             },
                         )?;
                     }
@@ -1975,6 +1988,7 @@ fn insert_prepared_change(
                 existing.resolution = PatchPathResolution::ForWrite;
             }
             existing.final_content = change.final_content;
+            existing.final_mode = change.final_mode;
             Ok(())
         }
     }
@@ -2267,7 +2281,7 @@ where
         let stage = change
             .final_content
             .as_deref()
-            .map(|content| create_patch_stage_file(parent, index, content))
+            .map(|content| create_patch_stage_file(parent, index, content, change.final_mode))
             .transpose()?;
         if let Some(path) = &stage {
             cleanup.track_temporary(path.clone());
@@ -2481,12 +2495,27 @@ fn create_patch_stage_file(
     parent: &Path,
     index: usize,
     content: &[u8],
+    final_mode: Option<u32>,
 ) -> Result<PathBuf, ReCtmError> {
+    let ordinary_mode = final_mode.map(|mode| mode & 0o777);
     for _ in 0..PATCH_TEMP_NAME_ATTEMPTS {
         let path = patch_temporary_path(parent, "stage", index)?;
-        match OpenOptions::new().write(true).create_new(true).open(&path) {
+        match OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .mode(ordinary_mode.unwrap_or(0o666))
+            .open(&path)
+        {
             Ok(mut file) => {
-                let result = file.write_all(content).and_then(|()| file.sync_all());
+                // Restrictive modes apply at creation, before content is written.
+                // Restore exact ordinary update/move permissions after umask;
+                // newly added files continue to respect the caller's umask.
+                let result = file.write_all(content).and_then(|()| {
+                    if let Some(mode) = ordinary_mode {
+                        file.set_permissions(fs::Permissions::from_mode(mode))?;
+                    }
+                    file.sync_all()
+                });
                 if let Err(error) = result {
                     let _ = fs::remove_file(&path);
                     return Err(io_error(error));
@@ -2924,6 +2953,10 @@ fn io_error(error: std::io::Error) -> ReCtmError {
 #[cfg(test)]
 #[path = "workspace_search_tests.rs"]
 mod search_tests;
+
+#[cfg(test)]
+#[path = "workspace_mode_tests.rs"]
+mod mode_tests;
 
 #[cfg(test)]
 mod tests {

@@ -2,6 +2,7 @@
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{self, Read};
+use std::path::Path;
 
 use crate::Result;
 
@@ -18,6 +19,28 @@ const TRAILERS: [&str; 7] = [
 const TYPES: [&str; 8] = [
     "docs", "test", "build", "feat", "fix", "refactor", "perf", "chore",
 ];
+
+pub(crate) fn check_hook(root: &Path) -> Result<()> {
+    let path = root.join(".githooks/commit-msg");
+    let metadata = std::fs::symlink_metadata(&path)?;
+    if !metadata.is_file() || !path.canonicalize()?.starts_with(root) {
+        return Err("commit hook must be a regular file within the checkout".into());
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        require_executable(metadata.permissions().mode())?;
+    }
+    Ok(())
+}
+
+#[cfg(unix)]
+fn require_executable(mode: u32) -> Result<()> {
+    if mode & 0o100 == 0 {
+        return Err("commit hook is not executable; restore its tracked executable bit".into());
+    }
+    Ok(())
+}
 
 fn bounded_message(reader: impl Read) -> Result<String> {
     let mut bytes = Vec::new();
@@ -201,5 +224,14 @@ mod tests {
         assert!(bounded_message(vec![b'x'; MAX_MESSAGE_BYTES as usize + 1].as_slice()).is_err());
         assert!(bounded_message(&b"\xff"[..]).is_err());
         Ok(())
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn non_executable_hook_cannot_silently_pass_the_source_gate() {
+        assert!(require_executable(0o755).is_ok());
+        assert!(require_executable(0o700).is_ok());
+        assert!(require_executable(0o644).is_err());
+        assert!(require_executable(0o600).is_err());
     }
 }

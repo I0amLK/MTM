@@ -40,3 +40,19 @@ Rust-only readiness remains false while any other first-party Python responsibil
 or live legacy dependency remains. Unexplained capability failures stay open; a
 clean later test is not a root-cause explanation. Production installs, selectors,
 keys, research files and run databases are untouched by this retirement.
+
+## Regression discovered while replacing the hook
+
+The installed patch tool changed the commit hook from executable to non-executable
+when updating its content. Git ignored it for checkpoint `92bdd05`; that result
+is recorded, not relabelled as a successful automatic hook invocation. Its message
+was subsequently validated by the Rust entry, and the checkout's executable bit
+was restored without changing file content or installing a new runtime.
+
+The development runtime now preserves ordinary Unix rwx bits on updates and moves.
+Restrictive source permissions are applied when the staging file is created,
+before writing content. New files continue to honor umask. Changed content does
+not inherit special permission bits; this does not promise owner/ACL/xattr
+preservation. Seven regressions cover executable/private modes, moves, metadata
+races, rollback and new-file behavior. The source gate also checks that the Git
+hook is actually executable on Unix.

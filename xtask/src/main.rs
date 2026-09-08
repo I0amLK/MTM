@@ -75,6 +75,7 @@ fn run() -> Result<()> {
             )?;
         }
         "check" => {
+            commit_message::check_hook(&root)?;
             let integrity = records::validate(&root)?;
             let architecture = architecture::validate(&root)?;
             let retirement = retirement::validate(&root)?;
@@ -120,6 +121,7 @@ fn run() -> Result<()> {
                 "schema_version":"1.0.0", "milestone":"MTM-016", "scope":"rust_source_with_inherited_host_tests",
                 "passed":passed, "checks":checks, "record_integrity":integrity,
                 "architecture":architecture,"retirement":retirement,
+                "commit_hook_executable_checked":true,
                 "production_selector_changed":false, "production_state_modified":false,
                 "release_qualified":false,
                 "pending":["Python/shadow coverage retirement", "independent full API and capability suites", "real Native/browser/LaTeX/upgrade qualification"]

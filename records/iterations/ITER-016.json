@@ -184,6 +184,28 @@
       "production_changed": false,
       "release_qualified": false,
       "remaining": ["Delete only reviewed replacement files in a separate commit", "Ten inherited nested-Bubblewrap failures remain unwaived", "Actual web-client, workflow, host and full Python retirement qualification"]
+    },
+    {
+      "id": "MTM016-PATCH-FILE-MODES",
+      "scope": "B preserve ordinary file permissions during atomic patch updates and moves",
+      "status": "source_repaired_and_regression_tested_not_deployed",
+      "trigger": "Commit 92bdd05 was created while the current installed apply_patch had removed the executable bit of .githooks/commit-msg. Git reported that the hook was ignored. That automatic hook check did not run; the same commit message was subsequently validated directly by the Rust checker.",
+      "before": "Seven added tests yielded four failures; update/move discarded executable bits and widened a dummy 0600 file to 0664 under the test environment's umask.",
+      "after": "Prepared changes carry source ordinary rwx bits. Staging starts with restricted source permissions before content write; updates/moves restore ordinary bits after umask. Special setuid/setgid/sticky bits are not inherited on changed content. New files retain default umask behavior.",
+      "boundaries": "No owner/group/ACL/xattr preservation claim; no weaker path, authorization or transaction checks. Existing hard-link rollback restores original bytes and original mode.",
+      "commands": [
+        {"command": "cargo test -p mtm-runtime --locked workspace::mode_tests", "phase": "before fix", "exit_code": 101, "passed": 3, "failed": 4},
+        {"command": "cargo test -p mtm-runtime --locked workspace::mode_tests", "phase": "after fix", "exit_code": 0, "passed": 7, "failed": 0},
+        {"command": "cargo test -p mtm-runtime --locked workspace::", "exit_code": 0, "passed": 34},
+        {"command": "cargo test -p mtm-xtask --locked", "exit_code": 0, "unit_passed": 19, "cli_passed": 2},
+        {"command": "git log -1 --format=%B 92bdd05 | cargo xtask commit-message --stdin", "exit_code": 0},
+        {"command": ".githooks/commit-msg .git/COMMIT_EDITMSG", "exit_code": 0, "result": "Actual offline Rust hook accepted the recorded valid message"},
+        {"command": ".githooks/commit-msg scripts/validate_commit_message.py", "exit_code": 1, "result": "Expected negative test: Python source used only as invalid text input, never executed"}
+      ],
+      "operator_metadata_repair": "Restored only this checkout's commit-msg mode to 0755; hook content unchanged. The running tool binary was not replaced.",
+      "source_gate": "Now rejects a missing/non-executable commit hook on Unix instead of silently accepting Git's ignored-hook behavior",
+      "production_changed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
