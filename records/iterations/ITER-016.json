@@ -325,6 +325,22 @@
       "release_qualified": false,
       "production_changed": false,
       "earlier_signature_mismatch_explained": false
+    },
+    {
+      "id": "MTM016-NUMERIC-BOUNDS",
+      "scope": "C repair inherited numeric range validation before retiring the pure-policy shadow corpus",
+      "status": "regression_reproduced_and_source_repaired",
+      "before": "All five independent numeric tests failed: float instances skipped minimum/maximum; integer limits lost precision through f64; malformed bound values were ignored.",
+      "after": "Validate every JSON number, compare i64/u64 values exactly in i128, handle finite float comparisons without rounding integer operands, and reject nonnumeric bounds. Errors locate the input field.",
+      "intentional_contract_change": "The old schema-float-number case (1.5 with minimum 3) must now reject instead of preserving the inherited acceptance bug. Historical MTM-002 hash/results are not rewritten.",
+      "commands": [
+        {"command": "cargo test -p mtm-core --test numeric_schema --locked --offline", "phase": "before", "exit_code": 101, "passed": 0, "failed": 5},
+        {"command": "cargo test -p mtm-core --test numeric_schema --locked --offline", "phase": "after", "exit_code": 0, "passed": 5, "failed": 0}
+      ],
+      "test_scope": "Fractions, inclusive endpoints, signed/unsigned extremes, values beyond 2^53, mixed bounds and 4556 comparisons against integer quarter-unit expectations",
+      "limits": "Only minimum/maximum on serde_json i64/u64/f64 values; not arbitrary-precision decimals or complete JSON Schema conformance",
+      "production_changed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [

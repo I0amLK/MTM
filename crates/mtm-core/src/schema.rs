@@ -1,6 +1,8 @@
 use mtm_contracts::{ErrorCategory, ReCtmError, invalid_argument};
 use regex::Regex;
-use serde_json::{Map, Number, Value};
+use serde_json::{Map, Value};
+
+mod numeric;
 
 pub fn validate_schema_value(value: &Value, schema: &Value, path: &str) -> Result<(), ReCtmError> {
     let schema_object = schema.as_object().ok_or_else(|| {
@@ -52,9 +54,7 @@ pub fn validate_schema_value(value: &Value, schema: &Value, path: &str) -> Resul
 
     match value {
         Value::String(text) => validate_string(text, schema_object, path)?,
-        Value::Number(number) if number.is_i64() || number.is_u64() => {
-            validate_integer(number, schema_object, path)?;
-        }
+        Value::Number(number) => numeric::validate(number, schema_object, path)?,
         Value::Array(items) => validate_array(items, schema_object, path)?,
         Value::Object(object) => validate_object(object, schema_object, path)?,
         _ => {}
@@ -97,31 +97,6 @@ fn validate_string(text: &str, schema: &Map<String, Value>, path: &str) -> Resul
         return Err(invalid_argument(format!(
             "{path} must be one of {}",
             python_repr(&Value::Array(options.clone()))
-        )));
-    }
-    Ok(())
-}
-
-fn validate_integer(
-    number: &Number,
-    schema: &Map<String, Value>,
-    path: &str,
-) -> Result<(), ReCtmError> {
-    let value = number_as_f64(number);
-    if let Some(minimum) = schema.get("minimum").and_then(Value::as_f64)
-        && value < minimum
-    {
-        return Err(invalid_argument(format!(
-            "{path} must be >= {}",
-            number_text(schema.get("minimum"), minimum)
-        )));
-    }
-    if let Some(maximum) = schema.get("maximum").and_then(Value::as_f64)
-        && value > maximum
-    {
-        return Err(invalid_argument(format!(
-            "{path} must be <= {}",
-            number_text(schema.get("maximum"), maximum)
         )));
     }
     Ok(())
@@ -259,18 +234,6 @@ fn escape_python_string(value: &str) -> String {
         .replace('\n', "\\n")
         .replace('\r', "\\r")
         .replace('\t', "\\t")
-}
-
-fn number_as_f64(number: &Number) -> f64 {
-    number
-        .as_i64()
-        .map(|value| value as f64)
-        .or_else(|| number.as_u64().map(|value| value as f64))
-        .unwrap_or(0.0)
-}
-
-fn number_text(original: Option<&Value>, fallback: f64) -> String {
-    original.map_or_else(|| fallback.to_string(), Value::to_string)
 }
 
 fn usize_from_u64(value: u64) -> usize {
