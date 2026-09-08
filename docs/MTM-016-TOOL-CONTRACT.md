@@ -29,6 +29,8 @@ have already been replaced with typed Rust request structures.
 | Legacy aliases | All eleven former hidden Rethlas names have no catalog entry or runtime dispatch arm. Use the six public facades instead. |
 | `exec_command` | Both `argv` and `cmd` are advertised, with exactly one required. Empty non-program arguments are valid; an empty program is not. |
 | `search_text` | A file target is supported, with file-only scope and the existing directory/filter path preserved. |
+| `read_file` | Lossless UTF-8 pages with `line_byte_offset`, content-bound `expected_sha256` and a complete `next_action`; range limits and page sizes are distinct. |
+| Git tools | `repo_path` selects a workspace-contained repository, separately from literal file filters. Status parses NUL records; blame preserves repository/revision/range in continuations. |
 | Rethlas guidance | Step, inspect and retrieve share task-domain/branch lifecycle rules, zero-write correction limits and uncertain-transport handling. |
 | `server_info` | Publishes `native_tool_count`, `native_tools`, `hidden_alias_count=0` and `tool_contract_version`; former `ctm_native_*` and hidden-alias inventory fields are retired. |
 | `mtm contract` | Reports the current Rust-authoritative protocol-3 contract, not the historical migration baseline. |
@@ -49,6 +51,11 @@ here. Shared logical read/search/export implementations remain behind the public
 facades. Only obsolete external entry points and unused alias wrappers are removed.
 Shell-program argument semantics and schema validation remain separate from
 execution authorization; passing an input schema is never a permission grant.
+
+The later paging/Git/PATH repair is described in
+`docs/MTM-016-WORKSPACE-REPAIR.md`. That checkpoint intentionally changes the normal
+shell wrapper to non-login `/bin/sh -c` and aligns executable facts with `env.PATH`;
+it does not change which permission kinds or workflow authority are granted.
 
 An uncertain transport result is not a zero-write result. A run identifier alone
 never grants workflow authority. Updating descriptions is not evidence that the

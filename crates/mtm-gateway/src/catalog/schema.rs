@@ -60,6 +60,8 @@ pub(super) fn input(id: ToolId) -> Value {
                 "path":nonempty(), "encoding":{"type":"string","enum":["utf-8"],"default":"utf-8"},
                 "start_line":{"type":"integer","minimum":1,"default":1},
                 "end_line":{"type":"integer","minimum":1},"max_lines":{"type":"integer","minimum":1},
+                "line_byte_offset":integer(0,67_108_864,0),
+                "expected_sha256":{"type":"string","pattern":"[0-9a-f]{64}"},
                 "max_bytes":integer(1,1_048_576,131_072)
             }),
             &["path"],
@@ -150,6 +152,7 @@ pub(super) fn input(id: ToolId) -> Value {
         ),
         T::GitStatus => object(
             json!({
+                "repo_path":nonempty(),
                 "path":{"type":"string","default":"."},"include_untracked":boolean(true),
                 "max_entries":integer(1,10_000,1000)
             }),
@@ -157,6 +160,7 @@ pub(super) fn input(id: ToolId) -> Value {
         ),
         T::GitDiff => object(
             json!({
+                "repo_path":nonempty(),
                 "path":text(),"paths":strings(),"staged":boolean(false),"unstaged":boolean(true),
                 "context_lines":integer(0,20,3),"max_bytes":integer(1,1_048_576,262_144)
             }),
@@ -164,6 +168,7 @@ pub(super) fn input(id: ToolId) -> Value {
         ),
         T::GitLog => object(
             json!({
+                "repo_path":nonempty(),
                 "path":{"type":"string","default":"."},"ref":{"type":"string","default":"HEAD"},
                 "max_count":integer(1,100,20),"skip":integer(0,10_000,0)
             }),
@@ -171,6 +176,7 @@ pub(super) fn input(id: ToolId) -> Value {
         ),
         T::GitShow => object(
             json!({
+                "repo_path":nonempty(),
                 "rev":{"type":"string","default":"HEAD"},"path":text(),"paths":strings(),
                 "include_diff":boolean(true),"context_lines":integer(0,20,3),"max_bytes":integer(1,1_048_576,262_144)
             }),
@@ -178,6 +184,7 @@ pub(super) fn input(id: ToolId) -> Value {
         ),
         T::GitBlame => object(
             json!({
+                "repo_path":nonempty(),
                 "path":nonempty(),"rev":text(),"start_line":{"type":"integer","minimum":1,"default":1},
                 "end_line":{"type":"integer","minimum":1},"max_lines":integer(1,1000,200)
             }),

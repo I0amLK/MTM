@@ -18,6 +18,42 @@ const RETIRED: [&str; 11] = [
     "rethlas_export_final",
 ];
 
+#[test]
+fn workspace_continuations_and_repository_selectors_are_model_visible() -> Result<(), ReCtmError> {
+    for id in [
+        ToolId::GitStatus,
+        ToolId::GitDiff,
+        ToolId::GitLog,
+        ToolId::GitShow,
+        ToolId::GitBlame,
+    ] {
+        let mut value = json!({"repo_path":"nested"});
+        if id == ToolId::GitBlame {
+            value["path"] = json!("a.txt");
+        }
+        validate_schema_value(&value, &schema::input(id), "arguments")?;
+        assert_eq!(
+            schema::input(id)["properties"]["repo_path"]["type"],
+            "string"
+        );
+    }
+    validate_schema_value(
+        &json!({"path":"a.txt","start_line":1,"end_line":4,"max_lines":2,
+        "line_byte_offset":6,"max_bytes":7,"expected_sha256":"a".repeat(64)}),
+        &schema::input(ToolId::ReadFile),
+        "arguments",
+    )?;
+    assert!(
+        validate_schema_value(
+            &json!({"path":"a.txt","line_byte_offset":-1}),
+            &schema::input(ToolId::ReadFile),
+            "arguments"
+        )
+        .is_err()
+    );
+    Ok(())
+}
+
 // Syntax-only fixture, not a signed credential or an authority-bearing object.
 fn capability_shape() -> String {
     format!("{}.{}", "A".repeat(40), "B".repeat(43))

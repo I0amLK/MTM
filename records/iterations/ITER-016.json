@@ -430,6 +430,54 @@
       "production_changed": false,
       "earlier_signature_mismatch_explained": false,
       "remaining": ["Target/release Python dependency families", "Complex shell, PATH, pagination and Git usability", "Typed boundary completion and workflow persistent idempotency", "Real Native/browser/LaTeX/resource/upgrade/rollback qualification"]
+    },
+    {
+      "id": "MTM016-B-OMISSIONS-REPAIR",
+      "scope": "B/C reproduce and repair lost read pages, Git repository routing and Native executable PATH mismatches before further retirement",
+      "base_commit": "bdcf0cd2f3f93dc18df8e38eef22c5236f10e00c",
+      "status": "source_regressions_passed_host_and_public_runtime_followup_pending",
+      "documentation": "docs/MTM-016-WORKSPACE-REPAIR.md",
+      "before_fix_results": {
+        "read_paging": {"passed": 2, "failed": 5},
+        "git_routing": {"passed": 0, "failed": 7},
+        "native_path": {"passed": 1, "failed": 4}
+      },
+      "repairs": [
+        "Read pages retain a partial UTF-8 line and emit complete range-preserving, content-hash-bound continuation arguments; explicit range and page size are distinct",
+        "Regular-file input is bounded at 64 MiB and read identity is checked; malformed ranges, small character budgets and changed contents produce actionable failures",
+        "All five Git tools select repo_path separately from literal file filters, report actual repository identity and do not discover repositories outside the workspace",
+        "NUL-delimited status preserves unusual UTF-8 names and distinguishes exact limit from truncation; blame clamps to source length and retains revision/repository/range on continuation",
+        "Legitimate in-workspace worktrees and deleted-file history remain usable; partial structured Git output is rejected instead of parsed as complete",
+        "Native fact collection honors env.PATH, resolves relative/empty entries in the invocation workdir, skips non-executable PATH entries, and preserves explicit-path denial and revalidation",
+        "The default shell is non-login /bin/sh -c; unresolved errors offer safe candidate indexes and correction instructions without echoing command or environment text"
+      ],
+      "commands": [
+        {"command": "cargo test -p mtm-runtime --locked --offline workspace::", "exit_code": 0, "passed": 52},
+        {"command": "cargo test -p mtm-runtime --locked --offline native_permission::resolver_tests", "exit_code": 0, "passed": 6},
+        {"command": "cargo test -p mtm-gateway --locked --offline", "exit_code": 0, "unit_passed": 21, "http_passed": 6},
+        {"command": "cargo test -p mtm-core --locked --offline", "exit_code": 0, "unit_passed": 42, "numeric_passed": 5},
+        {"command": "cargo fmt --all -- --check", "exit_code": 0},
+        {"command": "cargo clippy --workspace --all-targets --all-features --locked --offline -- -D warnings", "exit_code": 0},
+        {"command": "cargo xtask check --record", "exit_code": 1, "runtime": {"passed": 125, "failed": 10, "ignored": 1}, "interpretation": "Only the same ten inherited nested-Bubblewrap failures. New read/Git/PATH tests, current-binary capability suite, policy, storage, workflow, gateway and maintenance tests passed; no new suppressions."}
+      ],
+      "environment_boundary": "Git and a minimal /bin/sh are genuinely invoked in disposable fixtures; this does not test the full Native sandbox on a capable host. Public MCP followup is a separate next checkpoint.",
+      "source_report": "records/validation/mtm016-source-check.json",
+      "historical_evidence_hashes_checked": 26,
+      "python_files_deleted_in_this_checkpoint": 0,
+      "python_files_remaining": 118,
+      "new_dependencies": 0,
+      "new_test_suppressions": 0,
+      "workflow_protocol_changed": false,
+      "state_schema_changed": false,
+      "production_changed": false,
+      "release_qualified": false,
+      "remaining": [
+        "Actual built-binary MCP schema-to-runtime paging/Git smoke",
+        "Complex shell, shell-local PATH/cwd changes, explicit login shells and complete builtin/wrapper resolution",
+        "Host Native, real web-client, external research and compiled-LaTeX qualification",
+        "Remaining Python target/release maintenance and persistent workflow idempotency",
+        "Earlier unexplained capability signature mismatch"
+      ]
     }
   ],
   "remaining_acceptance": [

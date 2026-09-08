@@ -16,6 +16,10 @@ use mtm_storage::StoreRuntime;
 use serde_json::{Map, Value};
 
 const SANDBOX_WORKSPACE_ROOT: &str = "/workspace";
+
+#[cfg(test)]
+#[path = "native_resolver_tests.rs"]
+mod resolver_tests;
 pub const NATIVE_PERMISSION_CONSENT_CHALLENGE_TTL_SECONDS: i64 = 300;
 const MAX_PENDING_CONSENT_CHALLENGES: usize = 256;
 const MAX_PENDING_CONSENT_CHALLENGES_PER_OWNER: usize = 32;
@@ -35,11 +39,12 @@ const SYSTEM_SANDBOX_ROOTS: [&str; 9] = [
     "/var/cache/fonts",
 ];
 
-/// Collect filesystem-dependent executable facts for the D3 shadow evaluator.
+/// Collect filesystem-dependent executable facts for Native execution authority.
 ///
 /// Resolution uses the exact sandbox PATH supplied by the existing toolchain
-/// exposure plan.  It does not consult the caller's login-shell PATH and it
-/// never starts a command.
+/// exposure plan, overridden by env.PATH exactly as in the sandbox actuator.
+/// Relative and empty entries use the invocation workdir, never the server cwd.
+/// This never starts a command.
 pub fn collect_exec_permission_facts(
     invocation: &ExecInvocation,
     workspace: &Path,
@@ -68,6 +73,10 @@ pub fn collect_exec_permission_facts(
         ));
     }
     let visible_roots = visible_read_roots(exposed_read_only_roots);
+    let sandbox_path = invocation
+        .environment()
+        .get("PATH")
+        .map_or(sandbox_path, String::as_str);
     let mut resolved = Vec::new();
     let mut unresolved = Vec::new();
     for requested in invocation.executable_candidates()? {
@@ -85,9 +94,7 @@ pub fn collect_exec_permission_facts(
     ExecPermissionFacts::with_unresolved(invocation, resolved, unresolved)
 }
 
-/// Recheck all executable identity and mode facts immediately before a future
-/// command start.  D3 exposes this only to shadow tests; production execution
-/// remains on the accepted pre-cutover path.
+/// Recheck executable identity and mode facts immediately before command start.
 pub fn revalidate_exec_permission_facts(
     invocation: &ExecInvocation,
     expected: &ExecPermissionFacts,
@@ -148,9 +155,11 @@ fn resolve_sandbox_executable(
         return inspect_workspace_candidate(&workdir.join(requested_path), workspace);
     }
 
-    for entry in sandbox_path.split(':').filter(|entry| !entry.is_empty()) {
+    for entry in sandbox_path.split(':') {
         let entry_path = Path::new(entry);
-        let candidate = if entry_path == Path::new(SANDBOX_WORKSPACE_ROOT)
+        let candidate = if !entry_path.is_absolute() {
+            workdir.join(entry_path).join(requested)
+        } else if entry_path == Path::new(SANDBOX_WORKSPACE_ROOT)
             || entry_path.starts_with(SANDBOX_WORKSPACE_ROOT)
         {
             let relative = entry_path
@@ -175,11 +184,28 @@ fn resolve_sandbox_executable(
                 ));
             }
         };
+        if !entry_path.is_absolute() && !resolved.starts_with(workspace) {
+            return Err(security(
+                "NATIVE_EXECUTABLE_PATH_DENIED",
+                "Relative PATH entries must remain in the workspace; use an exposed absolute sandbox path otherwise.",
+            ));
+        }
         if resolved.starts_with(workspace)
             || visible_roots
                 .iter()
                 .any(|root| resolved == *root || resolved.starts_with(root))
         {
+            let metadata = fs::metadata(&resolved).map_err(|_| {
+                security(
+                    "NATIVE_EXECUTABLE_INSPECTION_FAILED",
+                    "A PATH candidate could not be inspected.",
+                )
+            })?;
+            // Like executable PATH search, skip non-executable entries instead
+            // of checking a different file from the one that would run.
+            if !metadata.is_file() || metadata.mode() & 0o111 == 0 {
+                continue;
+            }
             return Ok(Some(resolved));
         }
         return Err(security(

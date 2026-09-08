@@ -302,7 +302,7 @@ impl ExecInvocation {
                     return Err(invalid_argument("cmd contains a NUL byte"));
                 }
                 (
-                    vec!["/bin/sh".to_owned(), "-lc".to_owned(), command.to_owned()],
+                    vec!["/bin/sh".to_owned(), "-c".to_owned(), command.to_owned()],
                     command.to_owned(),
                     ExecInvocationForm::Cmd,
                 )
@@ -885,6 +885,14 @@ pub fn classify_exec_permissions(
         .with_category(mtm_contracts::ErrorCategory::Security)
         .with_details(serde_json::json!({
             "unresolved_count": facts.unresolved_executables().len(),
+            "unresolved_candidate_indexes":invocation.executable_candidates()?.iter().enumerate()
+                .filter_map(|(index,name)|facts.unresolved_executables().contains(name).then_some(index))
+                .collect::<Vec<_>>(),
+            "recovery":{
+                "action":"correct_command","automatic_retry":false,"side_effects":"none",
+                "next_tool":"check_exec_environment",
+                "guidance":"Check available tools; prefer argv for a literal program and explicit workdir/env.PATH. Candidate indexes are zero-based parse order, not argv indexes. Do not repeat unchanged parameters or relax isolation."
+            }
         })));
     }
 
@@ -1612,7 +1620,7 @@ mod tests {
             "env":{"TOKEN":"do-not-print"},
         }))?;
         assert_eq!(command.form(), ExecInvocationForm::Cmd);
-        assert_eq!(command.argv(), &["/bin/sh", "-lc", "printf secret"]);
+        assert_eq!(command.argv(), &["/bin/sh", "-c", "printf secret"]);
         assert_eq!(command.workdir(), "src");
         assert_eq!(command.timeout_ms(), DEFAULT_EXEC_TIMEOUT_MS);
         assert_eq!(command.yield_time_ms(), DEFAULT_EXEC_YIELD_TIME_MS);
