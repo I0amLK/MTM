@@ -15,5 +15,8 @@ sha2.workspace = true
 # Reuse the existing pinned dependency; no product-to-xtask dependency.
 nix = { workspace = true, features = ["sched"] }
 
+[dev-dependencies]
+tempfile.workspace = true
+
 [lints]
 workspace = true

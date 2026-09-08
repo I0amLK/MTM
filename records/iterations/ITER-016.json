@@ -678,6 +678,30 @@
       "production_changed": false,
       "release_qualified": false,
       "python_files_remaining": 118
+    },
+    {
+      "id": "MTM016-RUST-RECORD-INTEGRITY",
+      "scope": "D consolidate canonical record layout, immutable release summaries and new observation seals in the existing Rust records command",
+      "status": "replacement_implemented_and_tested_before_python_deletion",
+      "documentation": "docs/MTM-016-RECORD-INTEGRITY.md",
+      "replacement_paths": ["xtask/src/records.rs", "xtask/src/record_layout.rs", "xtask/src/record_layout_tests.rs", "xtask/tests/records_cli.rs"],
+      "replaced_responsibilities": ["scripts/validate_record_layout.py", "scripts/validate_historical_mtm_release_evidence.py"],
+      "coverage": ["Required namespaces, governance files, iteration/evidence naming and bounded one-to-one relocation index", "Canonical paths, no symlink components, regular-file and input-size bounds", "All 26 existing historical hashes and the original six release identity/verdict/check-count checks", "Two newly sealed host observations and append-only committed iteration receipt prefixes", "Actual Rust records CLI with cleared environment and Git-only PATH"],
+      "commands": [
+        {"command": "cargo test -p mtm-xtask --locked --offline", "exit_code": 0, "unit_passed": 48, "cli_passed": 5},
+        {"command": "cargo clippy -p mtm-xtask --all-targets --locked --offline -- -D warnings", "exit_code": 0},
+        {"command": "cargo fmt --all -- --check", "exit_code": 0},
+        {"command": "cargo xtask records --record", "exit_code": 0, "historical_hashes_checked": 26, "sealed_observation_hashes_checked": 2, "historical_release_summaries": 6}
+      ],
+      "development_correction": "The first actual-CLI test found that the stricter namespace check rejected the existing records/README.md. The guide is now explicitly allowed as a regular documentation file and included in fixture coverage; no evidence rule was disabled.",
+      "dependency_change": "Reuse existing locked tempfile as an xtask dev-dependency for disposable filesystem tests; no dependency version or product manifest changed.",
+      "limitations": ["Static integrity is not reexecution or signed build attestation", "Historical counts are historical facts, not new test counts", "No hostile-concurrent-filesystem guarantee", "No complete Python/target/release-chain retirement claimed"],
+      "new_test_suppressions": 0,
+      "python_files_deleted_in_this_checkpoint": 0,
+      "python_files_remaining": 118,
+      "product_crates_changed": false,
+      "production_changed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [

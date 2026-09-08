@@ -1,12 +1,16 @@
 //! Static integrity checks; never reads a live selector or author-specific home.
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
+use std::io::Read;
 use std::path::{Component, Path};
 
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
 use crate::{Result, git};
+
+#[path = "record_layout.rs"]
+mod layout;
 
 const RETIREMENT_BASELINE: &str = "b3ab147b72d72aa546c9c41bdbe71924aa5ebb97";
 
@@ -34,28 +38,53 @@ fn require(condition: bool, message: &str) -> Result<()> {
 }
 
 fn load(root: &Path, path: &str) -> Result<Value> {
+    Ok(serde_json::from_slice(&read_bytes(
+        root,
+        path,
+        8 * 1024 * 1024,
+    )?)?)
+}
+
+fn read_bytes(root: &Path, path: &str, limit: u64) -> Result<Vec<u8>> {
     let path = safe_path(root, path)?;
+    let metadata = fs::metadata(&path)?;
     require(
-        fs::metadata(&path)?.len() <= 8 * 1024 * 1024,
-        "record exceeds fixed size bound",
+        metadata.is_file() && metadata.len() <= limit,
+        "record must be a bounded regular file",
     )?;
-    Ok(serde_json::from_slice(&fs::read(path)?)?)
+    let mut bytes = Vec::new();
+    fs::File::open(path)?
+        .take(limit + 1)
+        .read_to_end(&mut bytes)?;
+    require(bytes.len() as u64 <= limit, "record grew beyond its bound")?;
+    Ok(bytes)
 }
 
 fn safe_path(root: &Path, relative: &str) -> Result<std::path::PathBuf> {
     let path = Path::new(relative);
     require(
         !relative.is_empty()
+            && relative.len() <= 512
+            && !relative.contains('\\')
+            && relative
+                .split('/')
+                .all(|part| !part.is_empty() && part != "." && part != "..")
             && path
                 .components()
                 .all(|part| matches!(part, Component::Normal(_))),
         "record path must be repository relative",
     )?;
     let joined = root.join(path);
-    require(
-        !fs::symlink_metadata(&joined)?.file_type().is_symlink(),
-        "record cannot be a symlink",
-    )?;
+    let mut component_path = root.to_path_buf();
+    for component in path.components() {
+        component_path.push(component);
+        require(
+            !fs::symlink_metadata(&component_path)?
+                .file_type()
+                .is_symlink(),
+            "record path cannot contain a symlink",
+        )?;
+    }
     require(
         joined.canonicalize()?.starts_with(root),
         "record escaped repository",
@@ -218,53 +247,82 @@ fn preserve_history(root: &Path, graph: &Value) -> Result<()> {
     )
 }
 
+fn preserve_receipt_prefix(previous: &Value, current: &Value) -> Result<()> {
+    if previous.get("receipts").is_some() {
+        require(
+            array(current, "receipts")?.starts_with(array(previous, "receipts")?),
+            "committed iteration receipts cannot be deleted or rewritten",
+        )?;
+    }
+    Ok(())
+}
+
+fn preserve_iteration_receipts(root: &Path) -> Result<()> {
+    let paths = git(
+        root,
+        &[
+            "ls-tree",
+            "-rz",
+            "--name-only",
+            "HEAD",
+            "--",
+            "records/iterations",
+        ],
+    )?;
+    let mut count = 0;
+    for path in paths
+        .split(|byte| *byte == 0)
+        .filter(|path| !path.is_empty())
+    {
+        count += 1;
+        require(count <= 512, "iteration history exceeds fixed bound")?;
+        let path = std::str::from_utf8(path)?;
+        let current = load(root, path)?;
+        let previous: Value =
+            serde_json::from_slice(&git(root, &["show", &format!("HEAD:{path}")])?)?;
+        preserve_receipt_prefix(&previous, &current)?;
+    }
+    Ok(())
+}
+
 pub(crate) fn validate(root: &Path) -> Result<Value> {
     let graph = load(root, "records/governance/migration-graph.json")?;
     let count = validate_graph(&graph)?;
     preserve_history(root, &graph)?;
+    preserve_iteration_receipts(root)?;
     let layout = load(root, "records/governance/record-layout.json")?;
-    let mut hashes = 0;
-    let mut locators = BTreeSet::new();
-    for relocation in array(&layout, "relocations")? {
-        let locator = text(relocation, "current_path")?;
-        require(locators.insert(locator), "duplicate record locator")?;
-        let path = safe_path(root, locator)?;
-        if relocation["kind"] == "evidence" {
-            require(
-                relocation["sha256"].is_string(),
-                "evidence digest is mandatory",
-            )?;
-        }
-        if let Some(hash) = relocation["sha256"].as_str() {
-            require(
-                hash.len() == 64 && hash.bytes().all(|byte| byte.is_ascii_hexdigit()),
-                "invalid evidence digest",
-            )?;
-            require(
-                fs::metadata(&path)?.len() <= 64 * 1024 * 1024,
-                "evidence exceeds fixed size bound",
-            )?;
-            require(
-                format!("{:x}", Sha256::digest(fs::read(path)?)) == hash,
-                "historical evidence digest changed",
-            )?;
-            hashes += 1;
-        }
-    }
-    for entry in fs::read_dir(root)? {
-        require(
-            entry?.path().extension().is_none_or(|ext| ext != "json"),
-            "repository-root JSON records are forbidden",
-        )?;
-    }
+    let layout_summary = layout::validate(root, &layout)?;
+    let historical_releases = layout::historical_releases(root)?;
+    let hashes = layout_summary["evidence_hashes_checked"].clone();
     Ok(
-        json!({"ok":true,"scope":"static_record_integrity_only","milestones":count,"historical_hashes_checked":hashes,"live_deployment_checked":false,"baseline_history_and_notices_unchanged":true}),
+        json!({"ok":true,"scope":"static_record_integrity_only","milestones":count,
+            "historical_hashes_checked":hashes,"layout":layout_summary,
+            "historical_releases":historical_releases,"live_deployment_checked":false,
+            "baseline_history_and_notices_unchanged":true,"release_qualified":false}),
     )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn committed_receipt_seals_cannot_disappear_or_change_with_the_expected_hash() -> Result<()> {
+        let previous = json!({"receipts":[{"id":"review","sealed_reports":[
+            {"path":"records/evidence/MTM-016/report.json","sha256":"a".repeat(64)}]}]});
+        let mut appended = previous.clone();
+        appended["receipts"]
+            .as_array_mut()
+            .ok_or("missing fixture receipts")?
+            .push(json!({"id":"next"}));
+        preserve_receipt_prefix(&previous, &appended)?;
+        assert!(preserve_receipt_prefix(&previous, &json!({"receipts":[]})).is_err());
+        assert!(preserve_receipt_prefix(&previous, &json!({})).is_err());
+        let mut edited = previous.clone();
+        edited["receipts"][0]["sealed_reports"][0]["sha256"] = json!("b".repeat(64));
+        assert!(preserve_receipt_prefix(&previous, &edited).is_err());
+        Ok(())
+    }
 
     fn graph() -> Value {
         json!({"schema_version":"1.0.0","milestones":[{"id":"MTM-A","status":"in_progress","dependencies":[]}],
