@@ -16,6 +16,12 @@ The development branch also repairs atomic patch permission preservation and num
 schema bounds. See `docs/MTM-016-POLICY-REGRESSION.md` for the policy-test scope. These
 source changes are not installed by this checkout and are not release-qualified.
 
+The development branch also fixes lossless UTF-8 read continuations, explicit Git
+repository selection, and executable checks using the requested PATH. These have
+Rust regressions and a real-binary OAuth/MCP workspace smoke; see
+`docs/MTM-016-WORKSPACE-REPAIR.md`. Complex shell semantics and target qualification
+remain open. The installed preview.2 is not changed by this checkout.
+
 MTM is a Rust-native mathematical research runtime with capability-gated workflows,
 isolated Native tools, OAuth/MCP access, private workflow state, verifier/finalizer
 gates, and a single operational CLI/TUI.

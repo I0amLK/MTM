@@ -4,6 +4,9 @@
 
 mod support;
 
+#[path = "support/workspace_smoke.rs"]
+mod workspace_smoke;
+
 use std::collections::BTreeSet;
 use std::path::Path;
 

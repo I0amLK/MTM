@@ -1,8 +1,8 @@
 {
   "audit_completed": true,
-  "base_head": "3f0fb444bb5e5cb8708647796674656ed45f2442",
+  "base_head": "8515ec2fdf42af6c0c72d52ba1819ec8a24f5d76",
   "interpretation": "Text references are retirement candidates, not proof of a runtime dependency. User Python tools are not forbidden.",
-  "legacy_rust_reference_file_count": 55,
+  "legacy_rust_reference_file_count": 60,
   "legacy_rust_reference_files": [
     "crates/mtm-cli/src/main.rs",
     "crates/mtm-contracts/src/error.rs",
@@ -38,12 +38,17 @@
     "crates/mtm-runtime/src/latex.rs",
     "crates/mtm-runtime/src/native_authority.rs",
     "crates/mtm-runtime/src/native_permission.rs",
+    "crates/mtm-runtime/src/native_resolver_tests.rs",
     "crates/mtm-runtime/src/native_tools.rs",
     "crates/mtm-runtime/src/research.rs",
     "crates/mtm-runtime/src/server.rs",
     "crates/mtm-runtime/src/tool_backend.rs",
     "crates/mtm-runtime/src/workspace.rs",
+    "crates/mtm-runtime/src/workspace_git.rs",
+    "crates/mtm-runtime/src/workspace_git_tests.rs",
     "crates/mtm-runtime/src/workspace_mode_tests.rs",
+    "crates/mtm-runtime/src/workspace_read.rs",
+    "crates/mtm-runtime/src/workspace_read_tests.rs",
     "crates/mtm-runtime/src/workspace_search_tests.rs",
     "crates/mtm-storage/src/bin/shadow.rs",
     "crates/mtm-storage/src/capability.rs",
@@ -61,13 +66,8 @@
     "crates/mtm-workflow/tests/workflow.rs"
   ],
   "milestone": "MTM-016",
-  "pending_deleted_file_count": 4,
-  "pending_deleted_files": [
-    "conformance/mtm002_cases.py",
-    "conformance/python_batch_cli.py",
-    "conformance/python_reference.py",
-    "scripts/run_mtm002_conformance.py"
-  ],
+  "pending_deleted_file_count": 0,
+  "pending_deleted_files": [],
   "python_file_count": 118,
   "python_files": [
     {
@@ -781,6 +781,6 @@
   ],
   "rust_only_ready": false,
   "schema_version": "1.0.0",
-  "tracked_and_unignored_file_count": 348,
+  "tracked_and_unignored_file_count": 355,
   "uninspected_source_files": []
 }

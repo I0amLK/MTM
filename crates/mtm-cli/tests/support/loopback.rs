@@ -102,23 +102,37 @@ pub struct Server {
 
 impl Server {
     pub fn start(binary: &str) -> Result<Self> {
+        Self::start_with_git(binary, false)
+    }
+
+    pub fn start_workspace(binary: &str) -> Result<Self> {
+        Self::start_with_git(binary, true)
+    }
+
+    pub fn workspace_path(&self) -> std::path::PathBuf {
+        self.directory.path().join("workspace")
+    }
+
+    fn start_with_git(binary: &str, git_enabled: bool) -> Result<Self> {
         let directory = tempfile::tempdir().map_err(|_| "temporary server directory failed")?;
         fs::create_dir(directory.path().join("workspace")).map_err(|_| "workspace setup failed")?;
-        // The existing research adapter resolves curl during startup even when unused.
-        // Expose the actual installed curl, not a stub or the host's Python/toolchain PATH.
-        let curl = std::env::var_os("PATH")
-            .and_then(|paths| {
-                std::env::split_paths(&paths)
-                    .map(|path| path.join("curl"))
-                    .find(|path| path.is_file())
-            })
-            .ok_or("existing runtime prerequisite curl is unavailable")?
-            .canonicalize()
-            .map_err(|_| "curl prerequisite cannot be resolved")?;
+        // Keep the capability suite curl-only. Workspace qualification adds the
+        // real Git executable, never a stub or the host's entire PATH.
         let tools = directory.path().join("tool-bin");
         fs::create_dir(&tools).map_err(|_| "minimal test PATH setup failed")?;
-        std::os::unix::fs::symlink(curl, tools.join("curl"))
-            .map_err(|_| "curl-only test PATH setup failed")?;
+        for name in ["curl"].into_iter().chain(git_enabled.then_some("git")) {
+            let program = std::env::var_os("PATH")
+                .and_then(|paths| {
+                    std::env::split_paths(&paths)
+                        .map(|path| path.join(name))
+                        .find(|path| path.is_file())
+                })
+                .ok_or("required test executable is unavailable")?
+                .canonicalize()
+                .map_err(|_| "test executable cannot be resolved")?;
+            std::os::unix::fs::symlink(program, tools.join(name))
+                .map_err(|_| "minimal test PATH setup failed")?;
+        }
         let mut random = [0_u8; 32];
         getrandom::fill(&mut random).map_err(|_| "test randomness unavailable")?;
         let mut server = Self {

@@ -78,6 +78,26 @@ case. This checkpoint does not replace uncertain syntax with permissive executio
 
 ## Recording and remaining work
 
+### Public runtime follow-up
+
+`crates/mtm-cli/tests/support/workspace_smoke.rs` now starts the actual built
+binary with temporary workspace/data, performs OAuth DCR/password/PKCE and sends
+MCP calls through the published schemas to the real workspace backend. It checks
+lossless UTF-8 continuation, changed-file rejection, all five Git tools against
+a nested repository, blame continuation and a file-valued repo_path rejection.
+
+Run this focused check with:
+
+```sh
+cargo test -p mtm-cli --test capability_runtime --locked workspace_smoke -- --nocapture
+```
+
+The existing owned loopback fixture is reused, without a new test framework or
+production dependency. Its workspace variant exposes only real curl and Git in
+the subprocess PATH. The capability test retains its separate curl-only PATH,
+500 independent assessment runs and unchanged strict summary scope. This is real
+binary/socket/OAuth coverage, not browser rendering or Native sandbox execution.
+
 Before/after regression results and full source-check outcomes are appended to
 `records/iterations/ITER-016.json`. Earlier failures are retained as failures.
 The same inherited nested-Bubblewrap tests must remain visible; none is waived.
