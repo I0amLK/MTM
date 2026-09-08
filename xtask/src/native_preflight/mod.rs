@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
-mod process;
+pub(crate) mod process;
 #[cfg(test)]
 mod tests;
 

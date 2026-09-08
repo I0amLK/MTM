@@ -1,6 +1,7 @@
 //! Bounded capture for fixed, owned diagnostic children, never user commands.
 use std::io::{self, Read};
 use std::os::fd::AsFd;
+use std::os::unix::process::CommandExt;
 use std::os::unix::process::ExitStatusExt;
 use std::path::Path;
 use std::process::{Child, Command, ExitStatus, Stdio};
@@ -12,7 +13,7 @@ use serde_json::{Value, json};
 
 const OUTPUT_LIMIT: usize = 16_384;
 
-pub(super) struct Output {
+pub(crate) struct Output {
     pub status: Option<ExitStatus>,
     pub stdout: Vec<u8>,
     pub stderr: Vec<u8>,
@@ -45,6 +46,7 @@ impl Output {
 struct OwnedChild {
     child: Child,
     status: Option<ExitStatus>,
+    signal_group: bool,
 }
 
 impl OwnedChild {
@@ -61,6 +63,16 @@ impl OwnedChild {
         }
         // Only signal the still-owned direct child. Bubblewrap's fixed
         // --die-with-parent and PID namespace own its diagnostic descendants.
+        // A qualification caller owns a separate process group. Signal it only
+        // while its leader is still owned and unreaped.
+        if self.signal_group
+            && let Ok(pid) = i32::try_from(self.child.id())
+        {
+            let _ = nix::sys::signal::killpg(
+                nix::unistd::Pid::from_raw(pid),
+                nix::sys::signal::Signal::SIGKILL,
+            );
+        }
         let _ = self.child.kill();
         let deadline = Instant::now() + Duration::from_secs(1);
         while self.status.is_none() && Instant::now() < deadline {
@@ -89,14 +101,14 @@ fn nonblocking(fd: &impl AsFd) -> io::Result<()> {
     Ok(())
 }
 
-fn drain(reader: &mut impl Read, bytes: &mut Vec<u8>) -> io::Result<(bool, bool)> {
+fn drain(reader: &mut impl Read, bytes: &mut Vec<u8>, limit: usize) -> io::Result<(bool, bool)> {
     let mut buffer = [0_u8; 4096];
     // A continuously writing child must not prevent the deadline check.
     for _ in 0..8 {
         match reader.read(&mut buffer) {
             Ok(0) => return Ok((true, false)),
             Ok(count) => {
-                let retained = count.min(OUTPUT_LIMIT - bytes.len());
+                let retained = count.min(limit - bytes.len());
                 bytes.extend_from_slice(&buffer[..retained]);
                 if retained < count {
                     return Ok((false, true));
@@ -115,14 +127,35 @@ pub(super) fn capture(
     arguments: &[String],
     timeout: Duration,
 ) -> io::Result<Output> {
-    let started = Instant::now();
-    let child = Command::new(program)
+    let mut command = Command::new(program);
+    command
         .args(arguments)
         .env_clear()
         .env("PATH", "/usr/bin:/bin")
         .env("LANG", "C")
         .env("LC_ALL", "C")
-        .current_dir("/")
+        .current_dir("/");
+    capture_command(&mut command, timeout, OUTPUT_LIMIT, false)
+}
+
+/// Fixed maintenance callers configure the command; not a public execution API.
+pub(crate) fn capture_command(
+    command: &mut Command,
+    timeout: Duration,
+    limit: usize,
+    signal_group: bool,
+) -> io::Result<Output> {
+    if !(1..=2 * 1024 * 1024).contains(&limit)
+        || timeout.is_zero()
+        || timeout > Duration::from_secs(600)
+    {
+        return Err(io::Error::other("maintenance capture bounds invalid"));
+    }
+    if signal_group {
+        command.process_group(0);
+    }
+    let started = Instant::now();
+    let child = command
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -130,6 +163,7 @@ pub(super) fn capture(
     let mut owned = OwnedChild {
         child,
         status: None,
+        signal_group,
     };
     let mut stdout = owned
         .child
@@ -154,8 +188,8 @@ pub(super) fn capture(
         elapsed_ms: 0,
     };
     loop {
-        let (out_closed, out_limit) = drain(&mut stdout, &mut result.stdout)?;
-        let (err_closed, err_limit) = drain(&mut stderr, &mut result.stderr)?;
+        let (out_closed, out_limit) = drain(&mut stdout, &mut result.stdout, limit)?;
+        let (err_closed, err_limit) = drain(&mut stderr, &mut result.stderr, limit)?;
         result.pipes_closed = out_closed && err_closed;
         result.output_limit = out_limit || err_limit;
         owned.poll()?;
@@ -192,6 +226,43 @@ mod tests {
         assert!(out.reaped && out.pipes_closed);
         assert!(!out.complete());
         Ok(())
+    }
+
+    #[test]
+    fn qualification_capture_honors_custom_budget_and_owned_group_timeout() -> io::Result<()> {
+        let mut command = Command::new("/bin/sh");
+        command
+            .args(["-c", "while :; do printf 1234567890; done"])
+            .env_clear();
+        let output = capture_command(&mut command, Duration::from_secs(2), 512, true)?;
+        assert!(output.output_limit && output.reaped);
+        assert_eq!(output.stdout.len(), 512);
+        assert!(!output.complete());
+
+        let mut command = Command::new("/bin/sh");
+        command.args(["-c", "/bin/sleep 30 & wait"]).env_clear();
+        let output = capture_command(&mut command, Duration::from_millis(80), 512, true)?;
+        assert!(output.timed_out && output.reaped);
+        assert!(output.elapsed_ms < 3000);
+        assert!(!output.complete());
+        Ok(())
+    }
+
+    #[test]
+    fn invalid_qualification_capture_bounds_fail_before_spawn() {
+        for (timeout, limit) in [
+            (Duration::ZERO, 512),
+            (Duration::from_secs(601), 512),
+            (Duration::from_secs(1), 0),
+            (Duration::from_secs(1), 2 * 1024 * 1024 + 1),
+        ] {
+            let mut command = Command::new("/not-a-program");
+            let result = capture_command(&mut command, timeout, limit, true);
+            assert!(
+                result
+                    .is_err_and(|error| error.to_string() == "maintenance capture bounds invalid")
+            );
+        }
     }
 
     #[test]

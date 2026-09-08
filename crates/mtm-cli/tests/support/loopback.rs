@@ -88,6 +88,7 @@ impl Reply {
 pub struct Client {
     endpoint: SocketAddr,
     token: String,
+    client_id: String,
 }
 
 pub struct Server {
@@ -96,6 +97,7 @@ pub struct Server {
     pub endpoint: SocketAddr,
     password: String,
     binary: String,
+    binary_sha256: String,
     directory: tempfile::TempDir,
     deadline: Instant,
 }
@@ -141,6 +143,7 @@ impl Server {
             endpoint: ([127, 0, 0, 1], 0).into(),
             password: URL_SAFE_NO_PAD.encode(random),
             binary: binary.to_owned(),
+            binary_sha256: sha256_file(Path::new(binary))?,
             directory,
             deadline: Instant::now() + Duration::from_secs(240),
         };
@@ -149,6 +152,10 @@ impl Server {
     }
 
     fn spawn(&mut self) -> Result {
+        require(
+            sha256_file(Path::new(&self.binary))? == self.binary_sha256,
+            "candidate changed before server start",
+        )?;
         let root = self.directory.path();
         let child = Command::new(&self.binary)
             .env_clear()
@@ -333,6 +340,16 @@ impl Server {
         require(registration.status == 201, "test DCR failed")?;
         let registration = registration.json()?;
         let id = text(&registration, "client_id")?;
+        self.login_existing(id)
+    }
+
+    pub fn relogin(&self, client: &Client) -> Result<Client> {
+        require(client.endpoint == self.endpoint, "relogin endpoint changed")?;
+        self.login_existing(&client.client_id)
+    }
+
+    fn login_existing(&self, id: &str) -> Result<Client> {
+        let redirect = "http://127.0.0.1/test-callback";
         let verifier = "v".repeat(64);
         let challenge = URL_SAFE_NO_PAD.encode(Sha256::digest(verifier.as_bytes()));
         let resource = format!("http://{}/mcp", self.endpoint);
@@ -383,6 +400,7 @@ impl Server {
         Ok(Client {
             endpoint: self.endpoint,
             token: text(&token, "access_token")?.to_owned(),
+            client_id: id.to_owned(),
         })
     }
 
@@ -414,6 +432,48 @@ impl Server {
 
     pub fn restart(&mut self) -> Result {
         self.stop()?;
+        self.spawn()
+    }
+
+    // This fixture owns its temporary data directory. Never accepts a data path.
+    pub fn secret_fingerprint(&self) -> Result<String> {
+        use std::os::unix::fs::PermissionsExt;
+        let path = self.directory.path().join("data/oauth-token-secret.hex");
+        let metadata = fs::symlink_metadata(&path).map_err(|_| "persisted test secret missing")?;
+        require(
+            metadata.is_file()
+                && metadata.len() <= 128
+                && metadata.permissions().mode() & 0o777 == 0o600,
+            "persisted secret must be a bounded owner-only file",
+        )?;
+        sha256_file(&path)
+    }
+
+    pub fn restart_with_changed_test_secret(&mut self) -> Result {
+        use std::os::unix::fs::OpenOptionsExt;
+        self.stop()?;
+        let before = self.secret_fingerprint()?;
+        let data = self.directory.path().join("data");
+        let mut random = [0_u8; 32];
+        getrandom::fill(&mut random).map_err(|_| "test secret randomness unavailable")?;
+        let value: String = random.iter().map(|byte| format!("{byte:02x}")).collect();
+        let temporary = data.join("qualification-secret.tmp");
+        let mut file = fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .mode(0o600)
+            .open(&temporary)
+            .map_err(|_| "temporary test secret creation failed")?;
+        file.write_all(value.as_bytes())
+            .and_then(|()| file.write_all(b"\n"))
+            .and_then(|()| file.sync_all())
+            .map_err(|_| "test secret publication failed")?;
+        fs::rename(temporary, data.join("oauth-token-secret.hex"))
+            .map_err(|_| "test secret replacement failed")?;
+        require(
+            self.secret_fingerprint()? != before,
+            "test key did not change",
+        )?;
         self.spawn()
     }
 
@@ -465,8 +525,16 @@ impl Drop for Server {
 
 pub fn sha256_file(path: &Path) -> Result<String> {
     let mut file = File::open(path).map_err(|_| "cannot read binary identity")?;
+    const MAX_BINARY: u64 = 256 * 1024 * 1024;
+    require(
+        file.metadata()
+            .map_err(|_| "cannot inspect binary identity")?
+            .is_file(),
+        "binary is not regular",
+    )?;
     let mut digest = Sha256::new();
     let mut bytes = [0_u8; 65_536];
+    let mut total = 0_u64;
     loop {
         let count = file
             .read(&mut bytes)
@@ -474,6 +542,8 @@ pub fn sha256_file(path: &Path) -> Result<String> {
         if count == 0 {
             break;
         }
+        total += count as u64;
+        require(total <= MAX_BINARY, "binary exceeds identity size bound")?;
         digest.update(&bytes[..count]);
     }
     Ok(format!("{:x}", digest.finalize()))

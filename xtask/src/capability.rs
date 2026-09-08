@@ -108,6 +108,12 @@ fn validate(summary: &Summary) -> Result<()> {
     Ok(())
 }
 
+pub(crate) fn checked_summary(stdout: &[u8]) -> Result<Value> {
+    let summary = extract(stdout)?;
+    validate(&summary)?;
+    Ok(serde_json::to_value(summary)?)
+}
+
 pub(crate) fn source_hash(root: &Path) -> Result<String> {
     let listed = git(
         root,
@@ -156,6 +162,8 @@ pub(crate) fn run(root: &Path) -> Result<Value> {
     let cargo = env::var_os("CARGO").unwrap_or_else(|| "cargo".into());
     eprintln!("[capability] built-binary socket/OAuth/500-run regression");
     let output = Command::new(cargo)
+        .env_remove("MTM_TEST_CANDIDATE")
+        .env_remove("MTM_TEST_CANDIDATE_SHA256")
         .args([
             "test",
             "--locked",
@@ -195,10 +203,10 @@ pub(crate) fn run(root: &Path) -> Result<Value> {
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::*;
 
-    fn fixture() -> Value {
+    pub(crate) fn fixture() -> Value {
         json!({
             "schema_version":"1.0.0","kind":"rust_current_binary_loopback_capability_regression",
             "version":"0.6.0-preview.1","ok":true,"binary_sha256":"a".repeat(64),

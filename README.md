@@ -20,6 +20,11 @@ eleven reviewed Python files have been retired and 116 remain. See
 Record integrity is now consolidated in `cargo xtask records`, including archived
 operator host reports that are not overwritten by subsequent sandbox diagnostics.
 See `docs/MTM-016-RECORD-INTEGRITY.md` for the evidence and test boundaries.
+Exact-artifact protocol checks are available with `cargo xtask qualify --profile
+protocol --binary <artifact> --sha256 <digest> --record`. This selects the actual
+artifact for OAuth/capability, Workspace and complete scripted workflow fixtures;
+it does not qualify Native, compiled LaTeX, browser or installation. See
+`docs/MTM-016-CANDIDATE-GATE.md` before using the development qualification entry.
 The development branch also repairs atomic patch permission preservation and numeric
 schema bounds. See `docs/MTM-016-POLICY-REGRESSION.md` for the policy-test scope. These
 source changes are not installed by this checkout and are not release-qualified.

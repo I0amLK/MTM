@@ -7,6 +7,9 @@ mod support;
 #[path = "support/workspace_smoke.rs"]
 mod workspace_smoke;
 
+#[path = "support/candidate_lifecycle.rs"]
+mod candidate_lifecycle;
+
 use std::collections::BTreeSet;
 use std::path::Path;
 
@@ -196,7 +199,8 @@ fn adversarial(server: &Server, owner: &Client, report: &mut Value) -> Result {
 }
 
 fn run_gate(report: &mut Value) -> Result {
-    let binary = env!("CARGO_BIN_EXE_mtm");
+    let candidate = support::candidate::select()?;
+    let binary = candidate.path.as_str();
     let hash = sha256_file(Path::new(binary))?;
     report["binary_sha256"] = json!(hash);
     let mut server = Server::start(binary)?;
@@ -277,6 +281,7 @@ fn run_gate(report: &mut Value) -> Result {
         "binary changed during qualification",
     )?;
     report["binary_unchanged"] = json!(true);
+    candidate.unchanged()?;
     Ok(())
 }
 

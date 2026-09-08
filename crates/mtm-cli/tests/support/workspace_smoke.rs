@@ -75,7 +75,8 @@ fn page_text(server: &Server, owner: &Client, initial: Value) -> Result<String> 
 
 #[test]
 fn public_read_paging_and_git_selection_reach_the_real_runtime() -> Result {
-    let mut server = Server::start_workspace(env!("CARGO_BIN_EXE_mtm"))?;
+    let candidate = crate::support::candidate::select()?;
+    let mut server = Server::start_workspace(&candidate.path)?;
     let owner = server.login()?;
     let workspace = server.workspace_path();
     let input = "中文🙂abcdefgh\r\nlast line without newline";
@@ -165,8 +166,11 @@ fn public_read_paging_and_git_selection_reach_the_real_runtime() -> Result {
         "file-valued repo_path was not rejected",
     )?;
     server.stop()?;
-    println!(
-        "MTM_WORKSPACE_SMOKE {{\"ok\":true,\"git_tools_checked\":5,\"utf8_continuation_lossless\":true,\"changed_file_denied\":true,\"blame_continuation_preserved\":true,\"child_path\":\"curl_and_git_only\",\"native_execution_tested\":false,\"web_client_tested\":false,\"release_qualified\":false}}"
-    );
+    candidate.unchanged()?;
+    let summary = json!({"ok":true,"binary_sha256":candidate.sha256,"git_tools_checked":5,
+        "utf8_continuation_lossless":true,"changed_file_denied":true,
+        "blame_continuation_preserved":true,"child_path":"curl_and_git_only",
+        "native_execution_tested":false,"web_client_tested":false,"release_qualified":false});
+    println!("MTM_WORKSPACE_SMOKE {summary}");
     Ok(())
 }

@@ -15,6 +15,8 @@ mod commit_message;
 mod inventory;
 #[cfg(target_os = "linux")]
 mod native_preflight;
+#[cfg(target_os = "linux")]
+mod qualify;
 mod records;
 mod retirement;
 
@@ -50,6 +52,18 @@ fn run() -> Result<()> {
         .map_or(("help", &[][..]), |(name, tail)| (name.as_str(), tail));
     if name == "commit-message" {
         return commit_message::run(options);
+    }
+    #[cfg(target_os = "linux")]
+    if name == "qualify" {
+        let options = qualify::Options::parse(options)?;
+        let report = qualify::run(&root, &options)?;
+        emit(&root, "candidate-protocol.json", &report, options.record)?;
+        if report["passed"] != true {
+            return Err(
+                "exact-candidate protocol qualification failed; see sanitized report".into(),
+            );
+        }
+        return Ok(());
     }
     if options
         .iter()
@@ -128,6 +142,8 @@ fn run() -> Result<()> {
             ] {
                 eprintln!("[source-check] {label}");
                 let status = Command::new(&cargo)
+                    .env_remove("MTM_TEST_CANDIDATE")
+                    .env_remove("MTM_TEST_CANDIDATE_SHA256")
                     .args(arguments)
                     .current_dir(&root)
                     .stdin(Stdio::null())
@@ -170,6 +186,9 @@ fn run() -> Result<()> {
             }
         }
         "help" | "--help" | "-h" => {
+            println!(
+                "cargo xtask qualify --profile protocol --binary <artifact> --sha256 <sha256> [--record]"
+            );
             println!(
                 "cargo xtask audit [--strict] [--record]\ncargo xtask records [--record]\ncargo xtask retirement [--record]\ncargo xtask capability [--record]\ncargo xtask native-preflight [--record]\ncargo xtask check [--record]\ncargo xtask commit-message <file|--stdin>\n\ncheck is NOT release qualification. Orchestration is Rust; inherited host/toolchain tests are not skipped. A blocked preflight never suppresses a test failure."
             );

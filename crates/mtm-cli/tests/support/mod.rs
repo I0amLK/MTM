@@ -1,4 +1,5 @@
 //! Test-only clients. No product authority or Python/runtime fallback lives here.
+pub mod candidate;
 pub mod loopback;
 pub mod recovery;
 
