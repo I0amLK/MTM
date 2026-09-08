@@ -1,8 +1,8 @@
 {
   "audit_completed": true,
-  "base_head": "03a35903ab939e21ed7f1a425de2ce40c5183301",
+  "base_head": "f1ef1f16207a302132cc90ba147a30e13abc4da4",
   "interpretation": "Text references are retirement candidates, not proof of a runtime dependency. User Python tools are not forbidden.",
-  "legacy_rust_reference_file_count": 52,
+  "legacy_rust_reference_file_count": 54,
   "legacy_rust_reference_files": [
     "crates/mtm-cli/src/main.rs",
     "crates/mtm-contracts/src/error.rs",
@@ -23,6 +23,7 @@
     "crates/mtm-gateway/src/mcp.rs",
     "crates/mtm-gateway/src/oauth.rs",
     "crates/mtm-gateway/src/runtime.rs",
+    "crates/mtm-gateway/tests/http_contract.rs",
     "crates/mtm-native/src/bin/helper.rs",
     "crates/mtm-native/src/bin/shadow.rs",
     "crates/mtm-native/src/bubblewrap.rs",
@@ -41,6 +42,7 @@
     "crates/mtm-runtime/src/server.rs",
     "crates/mtm-runtime/src/tool_backend.rs",
     "crates/mtm-runtime/src/workspace.rs",
+    "crates/mtm-runtime/src/workspace_mode_tests.rs",
     "crates/mtm-runtime/src/workspace_search_tests.rs",
     "crates/mtm-storage/src/bin/shadow.rs",
     "crates/mtm-storage/src/capability.rs",
@@ -58,9 +60,13 @@
     "crates/mtm-workflow/tests/workflow.rs"
   ],
   "milestone": "MTM-016",
-  "pending_deleted_file_count": 0,
-  "pending_deleted_files": [],
-  "python_file_count": 127,
+  "pending_deleted_file_count": 3,
+  "pending_deleted_files": [
+    "conformance/python_gateway_shadow.py",
+    "scripts/run_mtm005_conformance.py",
+    "scripts/validate_commit_message.py"
+  ],
+  "python_file_count": 124,
   "python_files": [
     {
       "bytes": 12035,
@@ -79,12 +85,6 @@
       "disposition": "extract independent static fixtures, then retire shadow execution",
       "lines": 31,
       "path": "conformance/python_batch_cli.py"
-    },
-    {
-      "bytes": 11670,
-      "disposition": "extract independent static fixtures, then retire shadow execution",
-      "lines": 341,
-      "path": "conformance/python_gateway_shadow.py"
     },
     {
       "bytes": 6020,
@@ -267,9 +267,9 @@
       "path": "scripts/release_mtm015_preview.py"
     },
     {
-      "bytes": 25677,
+      "bytes": 25643,
       "disposition": "review and port reusable qualification behavior before retirement",
-      "lines": 592,
+      "lines": 591,
       "path": "scripts/run_checks.py"
     },
     {
@@ -301,12 +301,6 @@
       "disposition": "review and port reusable qualification behavior before retirement",
       "lines": 534,
       "path": "scripts/run_mtm004_target_validation.py"
-    },
-    {
-      "bytes": 26001,
-      "disposition": "review and port reusable qualification behavior before retirement",
-      "lines": 771,
-      "path": "scripts/run_mtm005_conformance.py"
     },
     {
       "bytes": 27157,
@@ -493,12 +487,6 @@
       "disposition": "consolidate release/install/rollback in Rust CLI and xtask",
       "lines": 475,
       "path": "scripts/run_mtm_command_namespace_cutover.py"
-    },
-    {
-      "bytes": 2288,
-      "disposition": "consolidate Rust evidence validation; keep historical records immutable",
-      "lines": 69,
-      "path": "scripts/validate_commit_message.py"
     },
     {
       "bytes": 21420,
@@ -783,9 +771,9 @@
       "path": "tests/test_capability_recovery.py"
     },
     {
-      "bytes": 70298,
+      "bytes": 69423,
       "disposition": "port behavior and negative tests to the responsible Rust crate",
-      "lines": 1284,
+      "lines": 1255,
       "path": "tests/test_governance.py"
     },
     {
@@ -827,6 +815,6 @@
   ],
   "rust_only_ready": false,
   "schema_version": "1.0.0",
-  "tracked_and_unignored_file_count": 337,
+  "tracked_and_unignored_file_count": 342,
   "uninspected_source_files": []
 }

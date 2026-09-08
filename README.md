@@ -8,6 +8,12 @@
 > [MTM-owned tool contract](docs/MTM-016-TOOL-CONTRACT.md) removes hidden aliases and
 > exposes a Rust-built directory with `mtm tool-catalog`.
 
+MTM-016 now has Rust commit-policy checks and authenticated in-process HTTP tests;
+its first three reviewed Python maintenance files have been retired. See
+`docs/MTM-016-PYTHON-RETIREMENT.md` for coverage and remaining limitations.
+The development branch also repairs atomic patch permission preservation. These
+source changes are not installed by this checkout and are not release-qualified.
+
 MTM is a Rust-native mathematical research runtime with capability-gated workflows,
 isolated Native tools, OAuth/MCP access, private workflow state, verifier/finalizer
 gates, and a single operational CLI/TUI.

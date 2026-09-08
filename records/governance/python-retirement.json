@@ -2,5 +2,30 @@
   "schema_version": "1.0.0",
   "milestone": "MTM-016",
   "baseline_commit": "b3ab147b72d72aa546c9c41bdbe71924aa5ebb97",
-  "entries": []
+  "entries": [
+    {
+      "path": "scripts/validate_commit_message.py",
+      "baseline_sha256": "a8d18cb8e7c8530a89515a439895cd557a4bf024d55a91ae866db9cdb42bb160",
+      "disposition": "replaced_by_rust",
+      "rationale": "Commit policy and both legacy assertions are implemented in Rust. The real Git hook invokes Cargo directly without a Python fallback; stricter duplicate, receipt-binding, input-size and acceptance checks are intentional MTM-016 changes.",
+      "replacements": ["xtask/src/commit_message.rs", "xtask/tests/commit_cli.rs"],
+      "verification": ["cargo test -p mtm-xtask --locked", "Actual offline commit-msg hook positive and negative invocations recorded in ITER-016"]
+    },
+    {
+      "path": "scripts/run_mtm005_conformance.py",
+      "baseline_sha256": "151caceb3f311b5d44938cd387e5833a73700c3f3c8c6159ae887717661316a2",
+      "disposition": "historical_comparison_retired",
+      "rationale": "Exact equality to the Re-CTM 0.3.0 directory and hidden dispatch is an intentionally retired requirement. The Rust shadow executable was already removed. Current catalog, OAuth, MCP and HTTP behavior have independent Rust tests; old 44-record parity and resource measurements remain immutable historical evidence, not new-contract claims. Browser/socket/target coverage is not claimed by this deletion.",
+      "replacements": ["crates/mtm-gateway/src/catalog/tests.rs", "crates/mtm-gateway/src/oauth.rs", "crates/mtm-gateway/src/mcp.rs", "crates/mtm-gateway/tests/http_contract.rs"],
+      "verification": ["cargo test -p mtm-gateway --locked", "cargo xtask records", "cargo xtask retirement"]
+    },
+    {
+      "path": "conformance/python_gateway_shadow.py",
+      "baseline_sha256": "504d78c3a91c98ca02f2a130a67a7bb440218040b3f022667bddde8abd4a4393",
+      "disposition": "historical_comparison_retired",
+      "rationale": "This Python shadow exists only for the retired cross-language gateway comparison. No live product behavior depends on it. Authentication tests now use the real Rust router and disposable OAuth stores; no authority-bypass principal constructor replaces this runner. Historical source is recoverable from the pinned baseline.",
+      "replacements": ["crates/mtm-gateway/src/catalog/tests.rs", "crates/mtm-gateway/tests/http_contract.rs"],
+      "verification": ["cargo test -p mtm-gateway --locked", "cargo xtask retirement"]
+    }
+  ]
 }

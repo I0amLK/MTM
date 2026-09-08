@@ -41,7 +41,13 @@ historical evidence rewrites, weaker isolation or changed workflow authority.
 Use the Rust source checks as delivered; unported Python/target suites remain
 explicitly pending rather than being silently counted as passed.
 
-Current commands: `cargo xtask audit`, `cargo xtask records`, `cargo xtask check`.
+Current commands: `cargo xtask audit`, `cargo xtask records`,
+`cargo xtask retirement`, and `cargo xtask check`.
+Commit messages are validated by `cargo xtask commit-message <FILE|--stdin>`.
+The Git hook must remain executable; atomic patch updates preserve ordinary modes.
+Every Python deletion must match `records/governance/python-retirement.json`,
+including the baseline source hash and Rust replacement/coverage explanation.
+Do not treat deletion provenance as runtime parity or real-client qualification.
 The checker retains inherited host integration tests; in a nested Native sandbox
 Bubblewrap tests can fail. Report those failures and compare with the frozen
 baseline; never make the gate green by silently ignoring them. `audit --strict`

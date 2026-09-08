@@ -340,10 +340,9 @@ def main() -> int:
                     capture_json=True,
                 ),
                 run(
-                    "mtm005_conformance",
-                    [sys.executable, "scripts/run_mtm005_conformance.py"],
+                    "mtm_gateway_current_contract",
+                    [cargo, "test", "-p", "mtm-gateway", "--locked"],
                     env=environment,
-                    capture_json=True,
                 ),
                 run(
                     "mtm006_conformance",

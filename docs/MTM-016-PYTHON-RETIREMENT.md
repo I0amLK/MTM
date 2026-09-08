@@ -9,6 +9,11 @@ from the ledger and does not equate a coverage declaration with runtime parity.
 
 ## First reviewed batch
 
+The first batch is now removed from the working source tree: three Python files,
+leaving 124 of the initial 127. `cargo xtask retirement` verifies all three original
+content hashes and replacement locations. The strict whole-repository retirement
+check still fails, as required; this is not a completed Rust-only release.
+
 | Python responsibility | Rust responsibility / decision |
 |---|---|
 | `scripts/validate_commit_message.py` | `xtask/src/commit_message.rs`, unit tests and actual CLI tests; Git hook delegates directly to Rust. |
@@ -17,8 +22,8 @@ from the ledger and does not equate a coverage declaration with runtime parity.
 
 The two legacy commit-message assertions in `tests/test_governance.py` move to
 Rust with their behavior preserved; unrelated Python tests remain until their
-responsibilities are addressed. The residual historical `run_checks.py` should
-schedule current Rust gateway tests rather than a deleted shadow driver. This
+responsibilities are addressed. The residual historical `run_checks.py` now
+schedules current Rust gateway tests rather than a deleted shadow driver. This
 does not promote that legacy aggregate into the current qualification authority.
 
 The old 44-record cross-language hash and measurements remain historical facts,

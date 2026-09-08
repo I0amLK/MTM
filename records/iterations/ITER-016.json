@@ -35,7 +35,9 @@
   "inventory": {
     "report": "records/validation/mtm016-inventory.json",
     "python_files_observed": 127,
-    "python_files_deleted": 0,
+    "python_files_deleted": 3,
+    "python_files_remaining": 124,
+    "retirement_ledger": "records/governance/python-retirement.json",
     "coverage_retirement_complete": false,
     "legacy_rust_marker_files_observed": 52,
     "marker_interpretation": "Textual retirement candidates, not proof that each is a live dependency"
@@ -206,6 +208,51 @@
       "source_gate": "Now rejects a missing/non-executable commit hook on Unix instead of silently accepting Git's ignored-hook behavior",
       "production_changed": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-PYTHON-RETIREMENT-BATCH-1",
+      "scope": "D first reviewed Python deletions after Rust replacement and authenticated gateway coverage",
+      "status": "reviewed_deletions_validated_full_retirement_pending",
+      "replacement_commits": ["92bdd05", "f1ef1f1"],
+      "retirement_ledger": "records/governance/python-retirement.json",
+      "removed_paths": [
+        "scripts/validate_commit_message.py",
+        "scripts/run_mtm005_conformance.py",
+        "conformance/python_gateway_shadow.py"
+      ],
+      "dispositions": {"replaced_by_rust": 1, "historical_comparison_retired": 2},
+      "legacy_test_transfer": "Only the two commit-policy assertions and their obsolete import were removed from the residual Python governance test module; Rust commit-policy and actual CLI tests preserve those rules and extend negative coverage.",
+      "residual_callers": "Historical run_checks.py schedules current Rust gateway tests instead of the deleted shadow driver. No active reference to the three deleted modules remains in scripts/tests/conformance/.githooks.",
+      "python_inventory": {"baseline_files": 127, "retired_files": 3, "remaining_files": 124},
+      "commands": [
+        {"command": "cargo xtask retirement --record", "exit_code": 0, "baseline_source_hashes_checked": 3},
+        {"command": "cargo xtask records --record", "exit_code": 0, "historical_evidence_hashes_checked": 26, "baseline_history_and_notices_unchanged": true},
+        {"command": "cargo xtask audit --strict --record", "exit_code": 1, "expected": true, "result": "Retirement remains incomplete: 124 first-party Python files and remaining legacy Rust markers"},
+        {"command": "git grep -n -E 'validate_commit_message|run_mtm005_conformance|python_gateway_shadow' -- scripts tests conformance .githooks", "exit_code": 1, "expected": true, "result": "No active references found"},
+        {"command": "cargo xtask check --record", "exit_code": 1, "result": "Format, warnings-denied Clippy, record integrity, architecture, executable-hook, deletion provenance and diff checks passed; same ten inherited nested-Bubblewrap tests failed"}
+      ],
+      "test_results": {
+        "gateway_unit_passed": 20,
+        "gateway_http_in_process_passed": 6,
+        "maintenance_unit_passed": 19,
+        "maintenance_cli_passed": 2,
+        "runtime": {"passed": 101, "failed": 10, "ignored": 1},
+        "storage_unit_and_integration_passed": 12,
+        "workflow_unit_and_integration_passed": 91,
+        "new_test_suppressions": 0
+      },
+      "historical_comparison_policy": "The old exact Re-CTM directory/hidden-alias parity and 44-record measurements are intentionally historical, not rewritten as current results. Existing golden data and accepted/rejected evidence remain unchanged. The separate browser/target harness is not deleted or treated as replaced by in-process HTTP tests.",
+      "report": "records/validation/mtm016-source-check.json",
+      "aggregate_passed": false,
+      "rust_only_ready": false,
+      "release_qualified": false,
+      "production_changed": false,
+      "remaining": [
+        "Replace or retire remaining first-party Python responsibilities with reviewed coverage",
+        "Complete typed contracts, complex shell/Git behavior and workflow idempotency",
+        "Requalify exact candidate on a real Native host, web client, LaTeX, copied-state and rollback paths",
+        "Investigate the earlier unexplained capability signature mismatch"
+      ]
     }
   ],
   "remaining_acceptance": [

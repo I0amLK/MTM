@@ -10,7 +10,6 @@ import tomllib
 import unittest
 from pathlib import Path
 
-from scripts.validate_commit_message import validate_message
 from scripts.validate_engineering_graph import validate_graph as validate_engineering
 from scripts.validate_historical_mtm_release_evidence import validate as validate_historical_mtm_release_evidence
 from scripts.validate_migration_graph import load_graph, validate_graph as validate_migration
@@ -1251,34 +1250,6 @@ class GovernanceTestCase(unittest.TestCase):
     def test_mtm_cli_publishes_only_the_mtm_binary_name(self) -> None:
         manifest = tomllib.loads((ROOT / "crates" / "mtm-cli" / "Cargo.toml").read_text(encoding="utf-8"))
         self.assertEqual([item["name"] for item in manifest.get("bin", [])], ["mtm"])
-
-    def test_commit_message_contract(self) -> None:
-        message = """docs(governance): establish project foundation [MTM-001]
-
-Milestone: MTM-001
-Authority-Before: python
-Authority-After: python
-Acceptance: A0
-Receipt: records/iterations/ITER-001.json
-Rollback: delete the bootstrap repository
-Manual-Pending: all target acceptance
-"""
-        self.assertEqual(validate_message(message), "MTM-001")
-
-    def test_perf_commit_requires_a6(self) -> None:
-        message = """perf(core): accelerate parser [MTM-002]
-
-Milestone: MTM-002
-Authority-Before: rust-shadow
-Authority-After: rust
-Acceptance: A0,A1,A2
-Receipt: records/iterations/ITER-002.json
-Rollback: restore Python adapter
-Manual-Pending: none
-"""
-        with self.assertRaisesRegex(ValueError, "requires A6"):
-            validate_message(message)
-
 
 if __name__ == "__main__":
     unittest.main()
