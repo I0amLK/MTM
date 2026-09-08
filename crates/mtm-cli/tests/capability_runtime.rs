@@ -4,6 +4,9 @@
 
 mod support;
 
+#[path = "support/database_recovery.rs"]
+mod database_recovery;
+
 #[path = "support/write_recovery.rs"]
 mod write_recovery;
 

@@ -34,6 +34,10 @@ pub use creation_receipts::{
     CreationReservation, CreationSlot,
 };
 
+#[path = "research_writes.rs"]
+mod research_writes;
+pub use research_writes::ReferenceAuditWrite;
+
 const REGISTRY_ID_MAX_BYTES: usize = 128;
 
 pub trait Clock: Send + Sync {
@@ -1165,11 +1169,7 @@ impl StateStore {
         let digest = sha256_text(&canonical);
         let now = self.runtime.clock.now_iso()?;
         self.immediate(|transaction| {
-            transaction.execute(
-                "INSERT INTO proof_manifests(run_id, manifest_json, sha256, created_at, updated_at) VALUES(?, ?, ?, ?, ?) ON CONFLICT(run_id) DO UPDATE SET manifest_json=excluded.manifest_json, sha256=excluded.sha256, updated_at=excluded.updated_at",
-                params![run_id, canonical, digest, now, now],
-            ).map_err(sql_error)?;
-            Ok(())
+            research_writes::manifest_on(transaction, run_id, &canonical, &digest, &now)
         })?;
         Ok(serde_json::json!({
             "run_id": run_id,
@@ -1341,14 +1341,22 @@ impl StateStore {
             .with_category(ErrorCategory::Validation));
         }
         let now = self.runtime.clock.now_iso()?;
-        self.immediate(|transaction| {
-            transaction.execute(
-                "INSERT INTO reference_audits(run_id, reference_id, disposition, evidence_basis, evidence_locator, verifier_domain_id, proof_sha256, proof_manifest_sha256, material, assumptions_checked, notation_checked, source_checked, independently_rederived, notes, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(run_id, reference_id) DO UPDATE SET disposition=excluded.disposition, evidence_basis=excluded.evidence_basis, evidence_locator=excluded.evidence_locator, verifier_domain_id=excluded.verifier_domain_id, proof_sha256=excluded.proof_sha256, proof_manifest_sha256=excluded.proof_manifest_sha256, material=excluded.material, assumptions_checked=excluded.assumptions_checked, notation_checked=excluded.notation_checked, source_checked=excluded.source_checked, independently_rederived=excluded.independently_rederived, notes=excluded.notes, updated_at=excluded.updated_at",
-                params![run_id, reference_id, disposition, evidence_basis, evidence_locator, verifier_domain_id, proof_sha256, proof_manifest_sha256, i64::from(material), i64::from(assumptions_checked), i64::from(notation_checked), i64::from(source_checked), i64::from(independently_rederived), notes, now, now],
-            ).map_err(sql_error)?;
-            Ok(())
-        })?;
-        self.get_reference_audit(run_id, reference_id)
+        let audit = ReferenceAuditWrite {
+            reference_id: reference_id.into(),
+            disposition: disposition.into(),
+            evidence_basis: evidence_basis.into(),
+            evidence_locator: evidence_locator.into(),
+            verifier_domain_id: verifier_domain_id.into(),
+            proof_sha256: proof_sha256.into(),
+            proof_manifest_sha256: proof_manifest_sha256.into(),
+            material,
+            assumptions_checked,
+            notation_checked,
+            source_checked,
+            independently_rederived,
+            notes: notes.into(),
+        };
+        self.immediate(|tx| research_writes::audit_on(tx, run_id, &audit, &now))
     }
 
     pub fn get_reference_audit(

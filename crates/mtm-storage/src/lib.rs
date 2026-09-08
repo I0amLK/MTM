@@ -10,8 +10,8 @@ pub use capability::{
 };
 pub use store::{
     Clock, CreationIdentity, CreationInitialization, CreationReceipt, CreationReference,
-    CreationReservation, CreationSlot, FileEffectEvidence, FileImage, IdSource, StateStore,
-    StoreRuntime, SubmissionDisposition, SubmissionExecution, SubmissionReceipt,
-    SubmissionRecovery, SubmissionReservation, SubmissionResult, SubmissionSlot, SystemClock,
-    SystemIdSource, TransitionRun,
+    CreationReservation, CreationSlot, FileEffectEvidence, FileImage, IdSource,
+    ReferenceAuditWrite, StateStore, StoreRuntime, SubmissionDisposition, SubmissionExecution,
+    SubmissionReceipt, SubmissionRecovery, SubmissionReservation, SubmissionResult, SubmissionSlot,
+    SystemClock, SystemIdSource, TransitionRun,
 };

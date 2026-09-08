@@ -7,6 +7,9 @@ use serde::{Deserialize, Serialize};
 const MAX_RECEIPTS_PER_RUN: i64 = 4096;
 const MAX_RECEIPTS_TOTAL: i64 = 100_000;
 
+#[path = "step_database_write.rs"]
+mod database_write;
+
 #[path = "step_checkpoints.rs"]
 mod checkpoints;
 pub use checkpoints::SubmissionExecution;
@@ -252,7 +255,11 @@ impl StateStore {
                 [&binding.capability_sha256], |row| row.get(0),
             ).map_err(sql_error)?;
             // An error category is not evidence that an outstanding effect did not happen.
-            if enrolled { write_journal::require_between(tx, &binding.capability_sha256)?; }
+            if enrolled {
+                write_journal::require_between(tx, &binding.capability_sha256)?;
+                let accepted: i64 = tx.query_row("SELECT accepted_writes FROM step_checkpoints WHERE capability_sha256=?", [&binding.capability_sha256], |r| r.get(0)).map_err(sql_error)?;
+                if u64::try_from(accepted).ok() != Some(result.writes_applied) { return Err(invalid_receipt()); }
+            }
             let changed = tx.execute(
                 "UPDATE step_receipts SET status='completed',result_json=?,completed_at=? WHERE capability_sha256=? AND owner_id=? AND run_id=? AND workspace_sha256=? AND request_sha256=? AND status='pending'",
                 params![summary, completed_at, binding.capability_sha256, binding.owner_id,

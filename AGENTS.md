@@ -86,6 +86,11 @@ binding, strict acknowledgement validation and shared permanent file locks.
 Recovery must never regenerate normalized records, execute missing writes or
 promote an unknown action to success. No file lock spans observers or external I/O.
 Legacy journals are not backfilled; restore pre-upgrade copies for rollback.
+The next E2 database-write checkpoint retains schema 6 and introduces mtm-tools-v6.
+Read `docs/MTM-016-E2-DATABASE-WRITES.md`: manifest/audit SQL and accepted-write
+counts share one short transaction, normalizers remain in workflow, and no public
+transaction callback is exposed. Summary counts must match durable counts. This
+does not authorize replay of old opaque journals or arbitrary action effects.
 The checker retains inherited host integration tests; in a nested Native sandbox
 Bubblewrap tests can fail. Report those failures and compare with the frozen
 baseline; never make the gate green by silently ignoring them. `audit --strict`

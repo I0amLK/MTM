@@ -137,6 +137,14 @@ impl WorkflowEngine {
             self.store
                 .checkpoint_submission_write(execution, index + 1)?;
             file.result
+        } else if resource == "proof_manifest" {
+            let manifest = self.normalize_proof_manifest(&claims, content)?;
+            let stored = self
+                .store
+                .write_submission_proof_manifest(execution, index, &manifest)?;
+            serde_json::json!({"path_kind":"proof_manifest","sha256":stored["sha256"]})
+        } else if resource == "reference_audit" {
+            self.write_reference_audit(&claims, content, Some((execution, index)))?
         } else {
             self.store.begin_submission_write(execution, index, None)?;
             let result = self.write_resource(&claims, resource, content)?;

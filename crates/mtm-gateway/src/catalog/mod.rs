@@ -9,8 +9,10 @@ use sha2::{Digest, Sha256};
 mod schema;
 mod workflow_schema;
 
-pub const TOOL_CONTRACT_VERSION: &str = "mtm-tools-v5";
+pub const TOOL_CONTRACT_VERSION: &str = "mtm-tools-v6";
 pub const NATIVE_TOOL_COUNT: usize = 18;
+
+const DATABASE_WRITE_RECOVERY: &str = "New proof_manifest and reference_audit caller writes commit with their accepted-write checkpoint in one database transaction. A failed transaction retains neither the new record nor its count; committed writes can be included in the retained prefix. Historical opaque database journals remain unknown. Recovery never executes the action or grants verifier/finalizer authority. These database records are bounded to 1 MiB.";
 
 const CREATION_RECOVERY: &str = "For an interrupted keyed creation enrolled in the current initialization protocol, repeat the same key and input: MTM acquires exclusive initialization ownership, verifies existing bytes and database facts, and completes only missing initialization. It never creates a replacement run for that retry. Keyed input is bounded to 128 uniquely named references and 8 MiB of combined text. Conflicting input, active initialization or legacy pending work must not be bypassed by changing the key. Completed replies are historical receipts, not task authority.";
 
@@ -43,7 +45,7 @@ macro_rules! define_tools {
                     $(Self::$id => ($title, $description, $read, $destructive, $open, $idempotent)),+
                 };
                 let description = if matches!(self, Self::RethlasStep | Self::RethlasInspect | Self::RethlasRetrieve) {
-                    format!("{description} {CAPABILITY_LIFECYCLE}")
+                    format!("{description} {CAPABILITY_LIFECYCLE} {DATABASE_WRITE_RECOVERY}")
                 } else if matches!(self, Self::RethlasStart) {
                     format!("{description} {CREATION_RECOVERY}")
                 } else {

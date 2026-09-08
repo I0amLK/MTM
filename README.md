@@ -1,5 +1,12 @@
 # MTM
 
+The next E2 checkpoint keeps schema 6 and uses `mtm-tools-v6`: caller
+`proof_manifest` and `reference_audit` writes commit with their accepted-write
+checkpoint in a single database transaction. Failed transactions preserve any
+earlier retained prefix; recovery never executes the action or rewrites evidence.
+Historical opaque journals and action-internal interruptions remain unresolved.
+See `docs/MTM-016-E2-DATABASE-WRITES.md`. Development only; no production cutover.
+
 The E2 caller-write checkpoint uses schema 6 and `mtm-tools-v5`. Explicit
 `recover_only` may reconcile a proven retained write prefix without replaying
 records or executing the action. File evidence and permanent private file locks

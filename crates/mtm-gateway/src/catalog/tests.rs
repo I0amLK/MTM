@@ -5,6 +5,22 @@ use mtm_core::validate_schema_value;
 use super::*;
 
 #[test]
+fn database_recovery_contract_preserves_legacy_unknown_and_no_authority() {
+    assert_eq!(TOOL_CONTRACT_VERSION, "mtm-tools-v6");
+    for tool in [
+        ToolId::RethlasStep,
+        ToolId::RethlasInspect,
+        ToolId::RethlasRetrieve,
+    ] {
+        let value = tool.definition();
+        let description = value["description"].as_str().unwrap_or_default();
+        assert!(description.contains("one database transaction"));
+        assert!(description.contains("Historical opaque database journals remain unknown"));
+        assert!(description.contains("Recovery never executes the action"));
+    }
+}
+
+#[test]
 fn creation_identity_and_recovery_only_have_bounded_distinct_contracts() -> Result<(), ReCtmError> {
     for key in [
         "a".repeat(16),

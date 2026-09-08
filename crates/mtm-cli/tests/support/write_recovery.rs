@@ -304,7 +304,7 @@ fn branch_write_recovery_preserves_domain_and_join_barrier() -> Result {
 }
 
 #[test]
-fn proof_file_is_reconciled_but_unacknowledged_database_write_stays_unknown() -> Result {
+fn proof_file_and_atomic_database_failure_preserve_the_exact_prefix() -> Result {
     let candidate = candidate::select()?;
     for (ack, corrupt_marker) in [(1, false), (2, false), (1, true)] {
         let mut server = Server::start(&candidate.path)?;
@@ -331,14 +331,18 @@ fn proof_file_is_reconciled_but_unacknowledged_database_write_stays_unknown() ->
         server.force_restart()?;
         request["recover_only"] = json!(true);
         let result = server.call(&owner, "rethlas_step", request)?;
-        if ack == 1 {
-            recovered(&result, 1)?;
-        } else {
-            require(
-                error_code(&result) == "RESULT_UNKNOWN",
-                "opaque DB write falsely resolved",
-            )?;
-        }
+        // New manifest writes and their acknowledgements roll back together.
+        // Legacy opaque journals remain covered separately by storage regressions.
+        recovered(&result, 1)?;
+        let db = Connection::open(server.private_state_path()).map_err(|_| "fixture DB")?;
+        let count: i64 = db
+            .query_row(
+                "SELECT COUNT(*) FROM proof_manifests WHERE run_id=?",
+                [text(&task, "run_id")?],
+                |r| r.get(0),
+            )
+            .map_err(|_| "manifest rollback count")?;
+        require(count == 0, "unacknowledged manifest remained in database")?;
         require(
             fs::read(&file).map_err(|_| "proof after")? == before,
             "recovery changed proof",

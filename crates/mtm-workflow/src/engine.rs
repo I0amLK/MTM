@@ -1794,7 +1794,7 @@ impl WorkflowEngine {
                     .write_proof_manifest(claims.run_id(), &manifest)?;
                 Ok(serde_json::json!({"path_kind":"proof_manifest","sha256":stored["sha256"]}))
             }
-            "reference_audit" => self.write_reference_audit(claims, content),
+            "reference_audit" => self.write_reference_audit(claims, content, None),
             "branch:self" => Err(ReCtmError::new(
                 "BRANCH_RESULT_REQUIRES_COMMIT",
                 "Branch results are written and sealed atomically by branch_complete.",
@@ -2010,6 +2010,7 @@ impl WorkflowEngine {
         &self,
         claims: &CapabilityClaims,
         content: &Value,
+        submission: Option<(&mtm_storage::SubmissionExecution, usize)>,
     ) -> Result<Value, ReCtmError> {
         if claims.role() != WorkflowRole::Verifier {
             return Err(invalid(
@@ -2134,22 +2135,42 @@ impl WorkflowEngine {
             .as_str()
             .unwrap_or_default()
             .to_owned();
-        let audit = self.store.write_reference_audit(
-            claims.run_id(),
-            &reference_id,
-            &disposition,
-            &evidence_basis,
-            &evidence_locator,
-            claims.domain_id(),
-            &proof_hash,
-            &manifest_hash,
-            material,
-            assumptions,
-            notation,
-            source,
-            rederived,
-            notes,
-        )?;
+        let audit = if let Some((execution, index)) = submission {
+            let audit = mtm_storage::ReferenceAuditWrite {
+                reference_id: reference_id.clone(),
+                disposition: disposition.clone(),
+                evidence_basis,
+                evidence_locator,
+                verifier_domain_id: claims.domain_id().into(),
+                proof_sha256: proof_hash,
+                proof_manifest_sha256: manifest_hash,
+                material,
+                assumptions_checked: assumptions,
+                notation_checked: notation,
+                source_checked: source,
+                independently_rederived: rederived,
+                notes: notes.into(),
+            };
+            self.store
+                .write_submission_reference_audit(execution, index, &audit)?
+        } else {
+            self.store.write_reference_audit(
+                claims.run_id(),
+                &reference_id,
+                &disposition,
+                &evidence_basis,
+                &evidence_locator,
+                claims.domain_id(),
+                &proof_hash,
+                &manifest_hash,
+                material,
+                assumptions,
+                notation,
+                source,
+                rederived,
+                notes,
+            )?
+        };
         Ok(
             serde_json::json!({"path_kind":"reference_audit","reference_id":reference_id,"disposition":audit["disposition"]}),
         )
