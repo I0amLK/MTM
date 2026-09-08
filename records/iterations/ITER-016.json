@@ -1354,6 +1354,70 @@
       "rust_only_ready": false,
       "release_qualified": false,
       "earlier_signature_mismatch_explained": false
+    },
+    {
+      "id": "MTM016-E2-INITIALIZATION-RESUME-DELIVERY",
+      "delivery": "E2 restartable keyed initialization",
+      "status": "completed_for_enrolled_keyed_initialization_scope",
+      "milestone_status": "in_progress",
+      "stage_E_status": "in_progress",
+      "implementation_commit": "0cfdf7cf79983d1113e61b7ce6ff72098e253d7d",
+      "sealed_reports": [
+        {"path": "records/evidence/MTM-016/candidate-protocol-e2-init-0cfdf7c.json", "sha256": "917dc0f40c138f269f52508b8612063612f63217aff79f1e8c2c49e93b98cfbd"}
+      ],
+      "post_commit_execution": {
+        "command": "cargo xtask qualify --profile protocol --binary target/mtm016-e2-init/release/mtm --sha256 5f06e6681633872e877a4c7f85223c4ada4333f05f702d01c4a09feba1191b69 --record",
+        "exit_code": 0,
+        "candidate_sha256": "5f06e6681633872e877a4c7f85223c4ada4333f05f702d01c4a09feba1191b69",
+        "state_schema": 5,
+        "tool_contract": "mtm-tools-v4",
+        "workflow_protocol": 3,
+        "harness_commit": "0cfdf7cf79983d1113e61b7ce6ff72098e253d7d",
+        "source_sha256": "5c84bce76107ae6de578a5f1e3c621fb5cc3b4a2c4509b9d780af0fc759c42cf",
+        "candidate_launched": true,
+        "source_and_original_snapshot_unchanged": true,
+        "normal_assessment_roundtrips": 500,
+        "compact_assessments": 250,
+        "full_assessments": 250,
+        "normal_invalid": 0,
+        "normal_rejections": 0,
+        "complete_scripted_protocol_flows": 3,
+        "copied_v1_migration_and_new_run": true,
+        "git_tools_checked": 5,
+        "child_reaped": true,
+        "pipes_closed": true,
+        "timed_out": false,
+        "output_limit_exceeded": false,
+        "scope": "Exact-artifact protocol runner executes all 27 capability_runtime functions, including the initialization interruption fixtures. Two explicit host profiles remain inert. No Native host, compiled LaTeX, real browser, resource, independent mathematics or release claim."
+      },
+      "new_coverage": {
+        "vault_unit_tests": 5,
+        "storage_tests": 3,
+        "public_socket_tests": 2,
+        "total_new_tests": 10,
+        "cases": [
+          "Incomplete private temporary input and interrupted hard-link publication resume without rewriting final input",
+          "Private file modes/inodes remain unchanged across repeated initialization",
+          "Final input conflict, symlink, unexpected hardlink and permission drift refuse overwrite",
+          "Existing-schema pending creation is preserved without invented enrollment",
+          "Schema-5 migration rollback preserves prior version and backup bytes",
+          "Database preparation trigger failure rolls back run, selected project snapshot/link and references together",
+          "Real server forced restart after source-insert or initial-transition failure resumes the same run with one snapshot/reference set",
+          "Later changes to the source project do not change the already selected snapshot on retry",
+          "A separate process holding the initialization lock prevents the server from entering initialization",
+          "Tampered input/database or missing legacy enrollment does not advance or recreate the run"
+        ]
+      },
+      "pre_commit_source_result": {"public_suite_passed": 27, "storage_passed": 39, "workflow_passed": 96, "gateway_passed": 28, "runtime_passed": 128, "runtime_failed": 10, "runtime_ignored": 1, "aggregate_passed": false, "new_test_suppressions": 0},
+      "commit_validation": {"identity": "Existing MTM Automation identity via command-local settings", "implementation_hook": "Executable .githooks/commit-msg explicitly selected; Rust validator returned ok=true", "explicit_message_recheck": true},
+      "evidence_preservation": "Raw qualifier output moved byte-for-byte; five prior MTM-016 seals, 26 historical evidence hashes and schema-2/3/4 candidate binaries remain unchanged",
+      "dependency_change": "Reuse the already pinned nix 0.30.1 filesystem binding as a direct workflow dependency; no new package/version/compiler or internal product dependency edge",
+      "limitations": ["Fault fixtures inject boundary failures then force-restart the owned process, not random power loss", "General running-step/action partial effects and full branch crash coverage remain pending", "Legacy unknown creations remain deliberately unresolved", "No first-party Python deleted; maintenance retirement and real-host/release qualification remain pending"],
+      "production_changed": false,
+      "python_files_remaining": 116,
+      "rust_only_ready": false,
+      "release_qualified": false,
+      "earlier_signature_mismatch_explained": false
     }
   ],
   "remaining_acceptance": [

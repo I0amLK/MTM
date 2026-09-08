@@ -37,3 +37,22 @@ deployment or deletion of unported Python responsibilities is implied.
 Scope: process-interruption recovery on a local filesystem supporting the tested
 locking/publication operations. This is not a power-cut test, distributed lease,
 hostile same-UID filesystem defense, or arbitrary partial-step reconciliation.
+
+## Delivery
+
+Implementation `0cfdf7c` passed ten new regressions (five vault, three storage,
+two public socket tests). The complete source gate has 39 passing storage tests,
+96 passing workflow tests and 27 passing public fixture functions, including two
+explicit host functions that are inert without a selected host profile. Runtime
+still has the same ten nested-Bubblewrap failures; none were suppressed.
+
+The separately built `target/mtm016-e2-init/release/mtm` passed post-commit
+SHA-bound protocol qualification. Its raw report is sealed as
+`records/evidence/MTM-016/candidate-protocol-e2-init-0cfdf7c.json` and bound by the
+iteration ledger. This includes the forced-restart initialization fixtures, 500
+normal assessment first hops and three complete scripted protocol flows, not
+independent mathematical, browser or final-host release acceptance.
+
+Enrolled keyed initialization recovery is complete for this scope. General
+running-step/action partial effects, legacy unknown work and final qualification
+remain pending. No production artifact, selector, database or key changed.
