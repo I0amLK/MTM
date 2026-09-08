@@ -2,6 +2,10 @@
 use super::*;
 use serde::Deserialize;
 
+#[path = "creation_records.rs"]
+mod creation_records;
+pub use creation_records::{CreationInitialization, CreationReference};
+
 pub struct CreationIdentity {
     key: String,
     workspace: String,
@@ -40,6 +44,10 @@ pub struct CreationReceipt {
 }
 
 impl CreationReceipt {
+    #[must_use]
+    pub fn is_completed(&self) -> bool {
+        self.row.status == "completed"
+    }
     fn decode(value: Value) -> Result<Self, ReCtmError> {
         let row: RowData = serde_json::from_value(value).map_err(|_| invalid())?;
         if !matches!(row.status.as_str(), "pending" | "completed")
@@ -97,6 +105,15 @@ pub struct CreationReservation {
 
 impl CreationReservation {
     #[must_use]
+    pub fn run_id(&self) -> &str {
+        &self.receipt.row.run_id
+    }
+
+    #[must_use]
+    pub fn created_at(&self) -> &str {
+        &self.receipt.row.created_at
+    }
+    #[must_use]
     pub fn execution_id(&self) -> &str {
         &self.receipt.row.execution_id
     }
@@ -108,6 +125,30 @@ pub enum CreationSlot {
 }
 
 impl StateStore {
+    pub fn creation_receipt(
+        &self,
+        owner: &str,
+        identity: &CreationIdentity,
+    ) -> Result<Option<CreationReceipt>, ReCtmError> {
+        let connection = self.lock_connection()?;
+        let receipt = find(&connection, owner, &identity.key)?;
+        if let Some(receipt) = &receipt {
+            receipt.check(identity)?;
+            if receipt.is_completed() {
+                let run = query_one_on(
+                    &connection,
+                    "SELECT owner_id FROM runs WHERE run_id=?",
+                    [&receipt.row.run_id],
+                    &[],
+                )?;
+                if run.as_ref().and_then(|r| r["owner_id"].as_str()) != Some(owner) {
+                    return Err(invalid());
+                }
+            }
+        }
+        Ok(receipt)
+    }
+
     pub fn reserve_creation(
         &self,
         owner: &str,
@@ -137,6 +178,7 @@ impl StateStore {
             let now = self.runtime.clock.now_iso()?;
             tx.execute("INSERT INTO creation_receipts(owner_id,key_sha256,workspace_sha256,request_sha256,run_id,execution_id,status,created_at) VALUES(?,?,?,?,?,?,'pending',?)",
                 params![owner,identity.key,identity.workspace,identity.request,proposed_run,execution,now]).map_err(sql_error)?;
+            tx.execute("INSERT INTO creation_initializations(run_id) VALUES(?)", [proposed_run]).map_err(sql_error)?;
             let receipt = find(tx, owner, &identity.key)?.ok_or_else(invalid)?;
             Ok(CreationSlot::Reserved(CreationReservation { receipt }))
         })
@@ -157,6 +199,41 @@ impl StateStore {
             return Err(invalid());
         }
         Ok(receipt)
+    }
+
+    /// Rebind only a creation enrolled in the immutable initialization protocol.
+    /// The workflow must additionally hold its private OS file lock before any I/O.
+    pub fn resume_creation(
+        &self,
+        receipt: CreationReceipt,
+    ) -> Result<CreationReservation, ReCtmError> {
+        let connection = self.lock_connection()?;
+        let current = find(&connection, &receipt.row.owner_id, &receipt.row.key_sha256)?
+            .ok_or_else(invalid)?;
+        current.check(&CreationIdentity::new(
+            receipt.row.key_sha256,
+            receipt.row.workspace_sha256,
+            receipt.row.request_sha256,
+        )?)?;
+        if current.row.run_id != receipt.row.run_id
+            || current.row.execution_id != receipt.row.execution_id
+        {
+            return Err(invalid());
+        }
+        let enrolled: bool = connection
+            .query_row(
+                "SELECT EXISTS(SELECT 1 FROM creation_initializations WHERE run_id=?)",
+                [&current.row.run_id],
+                |r| r.get(0),
+            )
+            .map_err(sql_error)?;
+        if !enrolled {
+            return Err(conflict(
+                "CREATION_RESULT_UNKNOWN",
+                "Legacy initialization has no resumable evidence; it was not restarted.",
+            ));
+        }
+        Ok(CreationReservation { receipt: current })
     }
 }
 

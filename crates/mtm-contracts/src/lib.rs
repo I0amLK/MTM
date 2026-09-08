@@ -21,7 +21,7 @@ pub const RETHLAS_TOOL_COUNT: u16 = 6;
 pub const HIDDEN_ALIAS_COUNT: u16 = 11;
 
 /// Current MTM persistent-state schema, including durable step receipts.
-pub const STATE_SCHEMA_VERSION: u16 = 4;
+pub const STATE_SCHEMA_VERSION: u16 = 5;
 
 /// Historical workflow protocol captured by the immutable source baseline.
 pub const WORKFLOW_PROTOCOL_VERSION: u16 = 2;

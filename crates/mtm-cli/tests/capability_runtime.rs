@@ -4,6 +4,9 @@
 
 mod support;
 
+#[path = "support/creation_resume.rs"]
+mod creation_resume;
+
 #[path = "support/workspace_smoke.rs"]
 mod workspace_smoke;
 

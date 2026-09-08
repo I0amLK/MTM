@@ -77,6 +77,9 @@ pub type WorkflowObserver = Arc<dyn Fn(WorkflowEvent) + Send + Sync + 'static>;
 
 const MAX_TASK_REFERENCE_LOCATORS: usize = 64;
 
+#[path = "creation_resume.rs"]
+mod creation_resume;
+
 pub struct WorkflowEngine {
     store: Arc<StateStore>,
     vault: Arc<PrivateVault>,
@@ -170,26 +173,13 @@ impl WorkflowEngine {
                 }
             }
         }
+        if let Some(identity) = identity {
+            return self.start_resumable(request, identity);
+        }
         let problem_id = safe_component(request.problem_id.unwrap_or("problem"));
         let runtime = self.store.runtime();
         let run_id = format!("run-{problem_id}-{}", runtime.ids.token_hex(6)?);
-        let creation = match identity {
-            None => None,
-            Some(identity) => {
-                match self
-                    .store
-                    .reserve_creation(request.owner_id, &identity, &run_id)?
-                {
-                    CreationSlot::Existing(receipt) => return receipt.response(true),
-                    CreationSlot::Reserved(reservation) => Some(reservation),
-                }
-            }
-        };
-        let trace = match creation
-            .as_ref()
-            .map(|r| r.execution_id())
-            .or(request.trace_id)
-        {
+        let trace = match request.trace_id {
             Some(trace) => trace.to_owned(),
             None => runtime.ids.token_urlsafe(16)?,
         };
@@ -199,23 +189,7 @@ impl WorkflowEngine {
             .filter(|path| !path.is_empty())
             .map(str::to_owned)
             .unwrap_or_else(|| format!("rethlas-output/{run_id}/proof_verified.tex"));
-        let initialized = self.initialize_start(request, run_id, problem_id, trace, export_path);
-        match creation {
-            None => initialized,
-            Some(reservation) => {
-                let observed = self.store.observe_creation(&reservation)?.response(false)?;
-                match initialized {
-                    Ok(mut result) => {
-                        result["creation_receipt"] = observed["creation_receipt"].clone();
-                        result["runs_created"] = Value::from(1);
-                        Ok(result)
-                    }
-                    // Initialization may have committed before a later read failed.
-                    // The receipt returns only the certified historical run identity.
-                    Err(_) => Ok(observed),
-                }
-            }
-        }
+        self.initialize_start(request, run_id, problem_id, trace, export_path)
     }
 
     fn initialize_start(

@@ -635,6 +635,28 @@ impl Server {
         self.spawn()
     }
 
+    /// Kill only this fixture's owned server, reap it, then reopen the same data.
+    pub fn force_restart(&mut self) -> Result {
+        let child = self.child.as_mut().ok_or("fixture server missing")?;
+        child.kill().map_err(|_| "fixture kill failed")?;
+        let deadline = Instant::now() + Duration::from_secs(8);
+        loop {
+            if let Some(status) = child.try_wait().map_err(|_| "fixture crash wait failed")? {
+                require(!status.success(), "fixture did not terminate abnormally")?;
+                break;
+            }
+            require(Instant::now() < deadline, "fixture crash reap timed out")?;
+            thread::sleep(Duration::from_millis(10));
+        }
+        self.child = None;
+        if let Some(closed) = self.logs_closed.take() {
+            closed
+                .recv_timeout(Duration::from_secs(2))
+                .map_err(|_| "fixture crash log drain remained open")?;
+        }
+        self.spawn()
+    }
+
     pub fn stop(&mut self) -> Result {
         let Some(child) = self.child.as_mut() else {
             return Ok(());

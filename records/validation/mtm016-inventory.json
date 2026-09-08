@@ -1,8 +1,8 @@
 {
   "audit_completed": true,
-  "base_head": "648679f64a889728cf1e9c9794a514c9e04a9581",
+  "base_head": "b824e164354df401d1e287e931dc568b10ebdbb0",
   "interpretation": "Text references are retirement candidates, not proof of a runtime dependency. User Python tools are not forbidden.",
-  "legacy_rust_reference_file_count": 63,
+  "legacy_rust_reference_file_count": 68,
   "legacy_rust_reference_files": [
     "crates/mtm-cli/src/main.rs",
     "crates/mtm-contracts/src/error.rs",
@@ -54,12 +54,17 @@
     "crates/mtm-storage/src/bin/shadow.rs",
     "crates/mtm-storage/src/capability.rs",
     "crates/mtm-storage/src/capability_diagnostics.rs",
+    "crates/mtm-storage/src/creation_receipts.rs",
+    "crates/mtm-storage/src/creation_records.rs",
+    "crates/mtm-storage/src/step_checkpoints.rs",
     "crates/mtm-storage/src/step_receipts.rs",
     "crates/mtm-storage/src/store.rs",
     "crates/mtm-storage/tests/storage.rs",
     "crates/mtm-storage/tests/submission_receipts.rs",
     "crates/mtm-workflow/src/bin/mtm_workflow_shadow.rs",
     "crates/mtm-workflow/src/bin/target_validation.rs",
+    "crates/mtm-workflow/src/creation_resume.rs",
+    "crates/mtm-workflow/src/creation_vault.rs",
     "crates/mtm-workflow/src/engine.rs",
     "crates/mtm-workflow/src/kernel.rs",
     "crates/mtm-workflow/src/methodology.rs",
@@ -772,6 +777,6 @@
   ],
   "rust_only_ready": false,
   "schema_version": "1.0.0",
-  "tracked_and_unignored_file_count": 383,
+  "tracked_and_unignored_file_count": 395,
   "uninspected_source_files": []
 }

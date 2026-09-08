@@ -73,6 +73,12 @@ Optional creation keys distinguish intended starts. recover_only never executes
 missing requests or resets running/legacy pending work. Transition certificates
 are committed atomically with their step result. This bounded recovery does not
 qualify arbitrary mid-write crash replay or permit production deployment.
+The next E2 checkpoint uses schema 5 and mtm-tools-v4 for restartable keyed
+initialization; read `docs/MTM-016-E2-CREATION-RESUME.md`. Keep the permanent
+private lock inode, no-clobber file publication, transactional database setup and
+legacy enrollment distinction. Never call external commands, model/network/LaTeX
+work or observers while holding the initialization lock. The existing pinned nix
+filesystem binding is reused; no new package or compiler version is required.
 Do not treat deletion provenance as runtime parity or real-client qualification.
 The checker retains inherited host integration tests; in a nested Native sandbox
 Bubblewrap tests can fail. Report those failures and compare with the frozen

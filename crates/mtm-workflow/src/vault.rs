@@ -10,6 +10,10 @@ use serde::Serialize;
 use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
 
+#[path = "creation_vault.rs"]
+mod creation_vault;
+pub(crate) use creation_vault::PreparedInitialization;
+
 pub const GENERATION_CHANNELS: [&str; 10] = [
     "immediate_conclusions",
     "toy_examples",

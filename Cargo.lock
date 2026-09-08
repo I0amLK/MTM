@@ -670,6 +670,7 @@ dependencies = [
  "mtm-contracts",
  "mtm-core",
  "mtm-storage",
+ "nix",
  "regex",
  "serde",
  "serde_json",

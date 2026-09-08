@@ -1,5 +1,14 @@
 pub const STATE_SCHEMA_VERSION: i64 = mtm_contracts::STATE_SCHEMA_VERSION as i64;
 
+pub const V5_CREATION_INITIALIZATION_SQL: &str = r#"
+CREATE TABLE creation_initializations (
+    run_id TEXT PRIMARY KEY REFERENCES creation_receipts(run_id) ON DELETE RESTRICT,
+    material_sha256 TEXT CHECK(material_sha256 IS NULL OR length(material_sha256)=64),
+    database_sha256 TEXT CHECK(database_sha256 IS NULL OR length(database_sha256)=64),
+    CHECK((material_sha256 IS NULL)=(database_sha256 IS NULL))
+);
+"#;
+
 pub const V4_RECOVERY_SQL: &str = r#"
 CREATE TABLE creation_receipts (
     owner_id TEXT NOT NULL,

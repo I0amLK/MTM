@@ -9,8 +9,10 @@ use sha2::{Digest, Sha256};
 mod schema;
 mod workflow_schema;
 
-pub const TOOL_CONTRACT_VERSION: &str = "mtm-tools-v3";
+pub const TOOL_CONTRACT_VERSION: &str = "mtm-tools-v4";
 pub const NATIVE_TOOL_COUNT: usize = 18;
+
+const CREATION_RECOVERY: &str = "For an interrupted keyed creation enrolled in the current initialization protocol, repeat the same key and input: MTM acquires exclusive initialization ownership, verifies existing bytes and database facts, and completes only missing initialization. It never creates a replacement run for that retry. Keyed input is bounded to 128 uniquely named references and 8 MiB of combined text. Conflicting input, active initialization or legacy pending work must not be bypassed by changing the key. Completed replies are historical receipts, not task authority.";
 
 pub const CAPABILITY_LIFECYCLE: &str = "For new work use only the unmodified capability from the current server-issued task envelope for the intended run and task domain (including branch/role). Never mix task domains or manufacture a capability. After a step returns a replacement task, use it for subsequent inspect/retrieve/step calls. Exception for rethlas_step only: an exact repeat of the original capability/action/payload/ordered writes may return its durable submission_receipt, with zero new writes and no task or capability. Fetch the current task separately; a receipt state is historical, not current authority. Changed content with a consumed capability is IDEMPOTENCY_CONFLICT. RESULT_UNKNOWN means a pending outcome: stop; a fresh token does not permit replay. recover_only=true on the exact original submission may resolve a still-unstarted reservation; it never executes missing or partial work. Pending work blocks mechanical task refresh; inspect status for checkpoint details. On INVALID, REVOKED, STALE or EXPIRED without a receipt, stop replaying and obtain the current task with rethlas_step(run_id). Only an explicit recoverable zero-write response with a fresh task permits one corrected resubmission; never replay retained writes. A transport failure leaves the outcome unknown; only starts with the original creation_key are deduplicated, not unkeyed start/control/retrieve calls. A run_id or Native dangerous mode does not grant workflow authority.";
 
@@ -42,6 +44,8 @@ macro_rules! define_tools {
                 };
                 let description = if matches!(self, Self::RethlasStep | Self::RethlasInspect | Self::RethlasRetrieve) {
                     format!("{description} {CAPABILITY_LIFECYCLE}")
+                } else if matches!(self, Self::RethlasStart) {
+                    format!("{description} {CREATION_RECOVERY}")
                 } else {
                     description.to_owned()
                 };
