@@ -9,6 +9,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use serde_json::{Value, json};
 
 mod architecture;
+mod capability;
 mod commit_message;
 mod inventory;
 mod records;
@@ -74,6 +75,13 @@ fn run() -> Result<()> {
                 record,
             )?;
         }
+        "capability" => {
+            let report = capability::run(&root)?;
+            emit(&root, "capability-current.json", &report, record)?;
+            if report["passed"] != true {
+                return Err("current-binary capability regression failed; see summary".into());
+            }
+        }
         "check" => {
             commit_message::check_hook(&root)?;
             let integrity = records::validate(&root)?;
@@ -133,7 +141,7 @@ fn run() -> Result<()> {
         }
         "help" | "--help" | "-h" => {
             println!(
-                "cargo xtask audit [--strict] [--record]\ncargo xtask records [--record]\ncargo xtask retirement [--record]\ncargo xtask check [--record]\ncargo xtask commit-message <file|--stdin>\n\ncheck is NOT release qualification. Orchestration is Rust; inherited host/toolchain tests are not skipped."
+                "cargo xtask audit [--strict] [--record]\ncargo xtask records [--record]\ncargo xtask retirement [--record]\ncargo xtask capability [--record]\ncargo xtask check [--record]\ncargo xtask commit-message <file|--stdin>\n\ncheck is NOT release qualification. Orchestration is Rust; inherited host/toolchain tests are not skipped."
             );
         }
         _ => return Err("unknown task; use cargo xtask help".into()),

@@ -553,9 +553,15 @@ dependencies = [
 name = "mtm-cli"
 version = "0.6.0-preview.1"
 dependencies = [
+ "base64",
+ "getrandom",
  "mtm-contracts",
  "mtm-runtime",
+ "nix",
  "serde_json",
+ "sha2",
+ "tempfile",
+ "url",
 ]
 
 [[package]]

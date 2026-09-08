@@ -37,7 +37,10 @@ fn git_paths(bytes: &[u8]) -> Result<BTreeSet<String>> {
         .collect()
 }
 
-fn current_paths(list: &[u8], deleted: &[u8]) -> Result<(BTreeSet<String>, BTreeSet<String>)> {
+pub(crate) fn current_paths(
+    list: &[u8],
+    deleted: &[u8],
+) -> Result<(BTreeSet<String>, BTreeSet<String>)> {
     let mut paths = git_paths(list)?;
     let deleted = git_paths(deleted)?;
     if !deleted.is_subset(&paths) {

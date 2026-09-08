@@ -253,6 +253,39 @@
         "Requalify exact candidate on a real Native host, web client, LaTeX, copied-state and rollback paths",
         "Investigate the earlier unexplained capability signature mismatch"
       ]
+    },
+    {
+      "id": "MTM016-RUST-CAPABILITY-REPLACEMENT",
+      "scope": "D current-source regression and bounded test-client recovery, before Python helper deletion",
+      "status": "real_disposable_binary_loopback_passed_not_release_qualified",
+      "documentation": "docs/MTM-016-CAPABILITY-REGRESSION.md",
+      "report": "records/validation/capability-current.json",
+      "normal_samples": {"independent_runs": 500, "compact": 250, "full": 250, "successful_assessment_submissions": 500, "invalid": 0, "rejections": 0},
+      "binary_sha256": "fd6d3f45ab566ce7f4abecfad812529ca73a863675a24f88a125c476b71a4432",
+      "rust_source_sha256": "c660e3c41467f12f83a52a4f46c48912a0cffc419b847d0be4a0298b8f15b20e",
+      "coverage": [
+        "Actual built CLI, socket HTTP, disposable OAuth DCR/password/PKCE, SQLite and workflow submissions",
+        "Signature mutation/truncation, zero logical memory change, fresh retry, revoked step/inspect/retrieve, invalid inspect/retrieve, cross-run and cross-owner denial",
+        "Same principal and verbatim pre-restart capability survive a real process restart with persisted disposable data",
+        "Simulated loss of an already completed tool outcome causes no automatic replay; status reports the resulting assemble state",
+        "Strict summary/count/scope validation and source/binary change detection"
+      ],
+      "commands": [
+        {"command": "cargo test -p mtm-cli --test capability_runtime --locked --offline -- --nocapture --test-threads=1", "exit_code": 0, "tests_passed": 13, "normal_roundtrips": 500},
+        {"command": "cargo test -p mtm-xtask --locked --offline", "exit_code": 0, "unit_passed": 21, "cli_passed": 2},
+        {"command": "cargo clippy -p mtm-cli -p mtm-xtask --all-targets --locked --offline -- -D warnings", "exit_code": 0},
+        {"command": "cargo fmt --all -- --check", "exit_code": 0},
+        {"command": "cargo xtask capability --record", "exit_code": 0, "source_unchanged": true, "binary_unchanged": true, "bounded_clean_shutdown": true}
+      ],
+      "development_failures_retained": "An initial test borrow-check failure and two subprocess setup failures were corrected before the successful gate. The subprocess needed an explicit non-overlapping MTM_WORKSPACE and the existing curl startup prerequisite. No run/capability was obtained by those failed startups; they are not classified as capability failures.",
+      "child_environment": "Cleared environment; PATH exposes only the actual installed curl. Python is not exposed; no fake curl is used.",
+      "unclaimed": ["Entire host lacks Python", "Real browser or Quick Tunnel", "Actual Cloudflare 502", "Native isolation", "External retrieval", "Compiled LaTeX or final proof", "Production exactly-once semantics", "Root cause of earlier web signature mismatch"],
+      "python_files_deleted_in_this_checkpoint": 0,
+      "remaining_checker_dependency": "The historical MTM-015 target harness still requires check_capability_current.py's external-binary/report interface. Preserve it until that dependency family is replaced; deleting this caller prematurely would break retained target tooling.",
+      "new_production_dependencies": 0,
+      "new_test_suppressions": 0,
+      "production_changed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
