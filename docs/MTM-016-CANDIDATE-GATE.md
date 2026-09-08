@@ -1,4 +1,4 @@
-# MTM-016 D5: exact-candidate protocol qualification
+# MTM-016 D5/D6: exact-candidate protocol and target qualification
 
 D5 is a bounded delivery within MTM-016, not completion of stages D/E/F and not
 a new production release. Starting source: `69b5fd35b7bed2c359ee9d499abd874706616805`.
@@ -111,3 +111,48 @@ still reports its ten known Native failures. The previous host pass is kept as
 its own sealed observation, not used to turn this later environment green.
 D5 is complete only within the declared protocol scope; MTM-016, full target
 qualification, persistent workflow idempotency and Python retirement are pending.
+
+## D6 target profile
+
+D6 extends the same exact-artifact entry rather than introducing another release
+script:
+
+```sh
+cargo xtask qualify --profile target --binary target/release/mtm \
+  --sha256 <the-reviewed-artifact-sha256> --record
+```
+
+The target profile first runs the Rust Native preflight. If the current environment
+cannot create the required user/Bubblewrap namespaces, qualification stops at
+`native_preflight` and reports `candidate_launched=false`. It never weakens
+Bubblewrap, changes sysctls, skips the target test or falls back to protocol-only
+success.
+
+On a capable Linux host it launches the same private SHA-bound candidate snapshot
+through a fixed target server profile: Bubblewrap backend, dangerous Native mode
+and `LatexPolicy::Required`. Dangerous mode is intentional for this qualification
+lane because permission elicitation is not the object under test; the public
+`exec_command` still traverses OAuth/MCP, the production Native authority and the
+production Bubblewrap executor. The test requires hard-isolation attestation,
+private-vault exclusion and a real command result.
+
+The target profile also runs a complete compact workflow with the required LaTeX
+policy. A sealed `done` result with `latex_passed=true` in that fixed profile
+requires the isolated `latexmk` compile path; static-only fallback cannot satisfy
+the test. The exported TeX bytes, restart-at-assemble behavior and verifier memory
+firewall remain checked. The verifier result is a scripted fixture, so this proves
+runtime/finalizer mechanics and compiled-LaTeX compatibility, not independent
+mathematical correctness.
+
+The target profile intentionally does **not** claim browser use, resource
+non-regression, installation, selector cutover, upgrade/rollback or release
+qualification. Those remain later D/F responsibilities. It also does not authorize
+deletion of the old target Python family until copied-state/resource and remaining
+target responsibilities have explicit Rust coverage.
+
+During D6 development, the connected nested Native environment returned the same
+namespace-limit preflight classification already recorded for source tests. The
+target command therefore stopped before candidate launch, as required. The protocol
+profile was rerun against the exact release artifact and remained green. D6 cannot
+be marked target-qualified until the target command is rerun on the ordinary Linux
+host and its report is reviewed/sealed.

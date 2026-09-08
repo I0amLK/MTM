@@ -140,7 +140,12 @@ fn fixture_submission(task: &Value, mode: &str, report_gap: bool) -> Result<Valu
     Ok(args)
 }
 
-fn completed_flow(server: &mut Server, owner: &Client, mode: &str, repair: bool) -> Result<Value> {
+pub(super) fn completed_flow(
+    server: &mut Server,
+    owner: &Client,
+    mode: &str,
+    repair: bool,
+) -> Result<Value> {
     let label = if repair { "repair" } else { mode };
     let export = format!("qualification/{label}/proof_verified.tex");
     let started = server.call(owner,"rethlas_start",json!({"problem_tex":PROBLEM,

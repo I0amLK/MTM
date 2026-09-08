@@ -59,7 +59,27 @@ struct Lifecycle {
     release_qualified: bool,
 }
 
-pub(super) fn validate(stdout: &[u8], hash: &str) -> Result<Value> {
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct TargetRuntime {
+    ok: bool,
+    binary_sha256: String,
+    native_execution_tested: bool,
+    native_mode: String,
+    native_backend: String,
+    hard_isolation_attested: bool,
+    private_vault_visible: bool,
+    compiled_latex_tested: bool,
+    latex_policy: String,
+    flow: Flow,
+    web_client_tested: bool,
+    independent_mathematical_verification: bool,
+    resource_non_regression_tested: bool,
+    install_or_selector_changed: bool,
+    release_qualified: bool,
+}
+
+pub(super) fn validate(stdout: &[u8], hash: &str, profile: Profile) -> Result<Value> {
     let capability = capability::checked_summary(stdout)?;
     let workspace: Workspace = extract(stdout, "MTM_WORKSPACE_SMOKE ")?;
     let lifecycle: Lifecycle = extract(stdout, "MTM_CANDIDATE_LIFECYCLE ")?;
@@ -122,7 +142,46 @@ pub(super) fn validate(stdout: &[u8], hash: &str) -> Result<Value> {
             return Err("candidate flow did not complete its exact expected route".into());
         }
     }
+    let target = if profile == Profile::Target {
+        let target: TargetRuntime = extract(stdout, "MTM_TARGET_RUNTIME ")?;
+        if !target.ok
+            || target.binary_sha256 != hash
+            || !target.native_execution_tested
+            || target.native_mode != "dangerous"
+            || target.native_backend != "bubblewrap"
+            || !target.hard_isolation_attested
+            || target.private_vault_visible
+            || !target.compiled_latex_tested
+            || target.latex_policy != "required"
+            || target.flow.states != vec!["assess", "assemble", "verify", "done"]
+            || !target.flow.sealed
+            || !target.flow.artifact_matches
+            || !target.flow.restart_resumed
+            || target.web_client_tested
+            || target.independent_mathematical_verification
+            || target.resource_non_regression_tested
+            || target.install_or_selector_changed
+            || target.release_qualified
+        {
+            return Err(
+                "target candidate summary has inconsistent identity, scope or checks".into(),
+            );
+        }
+        Some(extract::<Value>(stdout, "MTM_TARGET_RUNTIME ")?)
+    } else {
+        // Protocol qualification must not accidentally consume target-only claims.
+        if std::str::from_utf8(stdout)
+            .map_err(|_| "qualification output is not UTF-8")?
+            .contains("MTM_TARGET_RUNTIME ")
+        {
+            return Err(
+                "protocol profile unexpectedly emitted target qualification evidence".into(),
+            );
+        }
+        None
+    };
     Ok(json!({"capability":capability,
         "workspace":extract::<Value>(stdout,"MTM_WORKSPACE_SMOKE ")?,
-        "lifecycle":extract::<Value>(stdout,"MTM_CANDIDATE_LIFECYCLE ")?}))
+        "lifecycle":extract::<Value>(stdout,"MTM_CANDIDATE_LIFECYCLE ")?,
+        "target":target}))
 }

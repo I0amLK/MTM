@@ -23,7 +23,9 @@ See `docs/MTM-016-RECORD-INTEGRITY.md` for the evidence and test boundaries.
 Exact-artifact protocol checks are available with `cargo xtask qualify --profile
 protocol --binary <artifact> --sha256 <digest> --record`. This selects the actual
 artifact for OAuth/capability, Workspace and complete scripted workflow fixtures;
-it does not qualify Native, compiled LaTeX, browser or installation. See
+`--profile target` adds a fail-closed Native-host preflight, public Bubblewrap
+execution and required compiled LaTeX on that same SHA-bound artifact. The target
+profile is still not browser/resource/install/rollback or release qualification. See
 `docs/MTM-016-CANDIDATE-GATE.md` before using the development qualification entry.
 The development branch also repairs atomic patch permission preservation and numeric
 schema bounds. See `docs/MTM-016-POLICY-REGRESSION.md` for the policy-test scope. These

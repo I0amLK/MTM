@@ -4,6 +4,7 @@ fn options(path: &str, hash: &str) -> Options {
     Options {
         binary: path.into(),
         sha256: hash.into(),
+        profile: Profile::Protocol,
         record: false,
     }
 }
@@ -20,6 +21,9 @@ fn selection_requires_explicit_profile_artifact_and_digest() -> Result<()> {
     ]
     .map(str::to_owned);
     Options::parse(&good)?;
+    let mut target = good.clone();
+    target[1] = "target".to_owned();
+    assert_eq!(Options::parse(&target)?.profile, Profile::Target);
     for changed in [
         vec![],
         good[..4].to_vec(),
@@ -29,7 +33,7 @@ fn selection_requires_explicit_profile_artifact_and_digest() -> Result<()> {
     ] {
         assert!(Options::parse(&changed).is_err());
     }
-    for (index, value) in [(1, "release"), (5, "invalid"), (3, "")] {
+    for (index, value) in [(1, "release"), (1, "unknown"), (5, "invalid"), (3, "")] {
         let mut changed = good.clone();
         changed[index] = value.to_owned();
         assert!(Options::parse(&changed).is_err());
@@ -123,18 +127,32 @@ fn summaries() -> [Value; 3] {
     [cap, workspace, lifecycle]
 }
 
-fn output(values: &[Value; 3]) -> Vec<u8> {
+fn output(values: &[Value; 3], target: Option<&Value>) -> Vec<u8> {
+    let target = target.map_or_else(String::new, |value| format!("MTM_TARGET_RUNTIME {value}\n"));
     format!(
-        "MTM_CAPABILITY_GATE {}\nMTM_WORKSPACE_SMOKE {}\nMTM_CANDIDATE_LIFECYCLE {}\n",
-        values[0], values[1], values[2]
+        "MTM_CAPABILITY_GATE {}\nMTM_WORKSPACE_SMOKE {}\nMTM_CANDIDATE_LIFECYCLE {}\n{target}",
+        values[0], values[1], values[2],
     )
     .into_bytes()
+}
+
+fn target_summary() -> Value {
+    json!({
+        "ok":true,"binary_sha256":"a".repeat(64),"native_execution_tested":true,
+        "native_mode":"dangerous","native_backend":"bubblewrap","hard_isolation_attested":true,
+        "private_vault_visible":false,"compiled_latex_tested":true,"latex_policy":"required",
+        "flow":{"states":["assess","assemble","verify","done"],"sealed":true,
+            "artifact_matches":true,"restart_resumed":true},
+        "web_client_tested":false,"independent_mathematical_verification":false,
+        "resource_non_regression_tested":false,"install_or_selector_changed":false,
+        "release_qualified":false
+    })
 }
 
 #[test]
 fn summaries_require_all_three_scopes_and_the_exact_candidate() -> Result<()> {
     let good = summaries();
-    summary::validate(&output(&good), &"a".repeat(64))?;
+    summary::validate(&output(&good, None), &"a".repeat(64), Profile::Protocol)?;
     for index in 0..3 {
         for (key, value) in [
             ("binary_sha256", json!("b".repeat(64))),
@@ -144,7 +162,10 @@ fn summaries_require_all_three_scopes_and_the_exact_candidate() -> Result<()> {
         ] {
             let mut changed = good.clone();
             changed[index][key] = value;
-            assert!(summary::validate(&output(&changed), &"a".repeat(64)).is_err());
+            assert!(
+                summary::validate(&output(&changed, None), &"a".repeat(64), Profile::Protocol)
+                    .is_err()
+            );
         }
     }
     for (key, value) in [
@@ -158,13 +179,61 @@ fn summaries_require_all_three_scopes_and_the_exact_candidate() -> Result<()> {
     ] {
         let mut changed = good.clone();
         changed[2][key] = value;
-        assert!(summary::validate(&output(&changed), &"a".repeat(64)).is_err());
+        assert!(
+            summary::validate(&output(&changed, None), &"a".repeat(64), Profile::Protocol).is_err()
+        );
     }
     let mut changed = good.clone();
     changed[2]["flows"]["full"]["states"] = json!(["assess", "done"]);
-    assert!(summary::validate(&output(&changed), &"a".repeat(64)).is_err());
-    let duplicate = [output(&good), output(&good)].concat();
-    assert!(summary::validate(&duplicate, &"a".repeat(64)).is_err());
-    assert!(summary::validate(b"test result: ok", &"a".repeat(64)).is_err());
+    assert!(
+        summary::validate(&output(&changed, None), &"a".repeat(64), Profile::Protocol).is_err()
+    );
+    let duplicate = [output(&good, None), output(&good, None)].concat();
+    assert!(summary::validate(&duplicate, &"a".repeat(64), Profile::Protocol).is_err());
+    assert!(summary::validate(b"test result: ok", &"a".repeat(64), Profile::Protocol).is_err());
+    assert!(
+        summary::validate(
+            &output(&good, Some(&target_summary())),
+            &"a".repeat(64),
+            Profile::Protocol,
+        )
+        .is_err()
+    );
+    Ok(())
+}
+
+#[test]
+fn target_summary_is_required_and_strictly_scoped() -> Result<()> {
+    let good = summaries();
+    let target = target_summary();
+    summary::validate(
+        &output(&good, Some(&target)),
+        &"a".repeat(64),
+        Profile::Target,
+    )?;
+    assert!(summary::validate(&output(&good, None), &"a".repeat(64), Profile::Target).is_err());
+    for (key, value) in [
+        ("binary_sha256", json!("b".repeat(64))),
+        ("native_execution_tested", json!(false)),
+        ("native_mode", json!("safe")),
+        ("hard_isolation_attested", json!(false)),
+        ("private_vault_visible", json!(true)),
+        ("compiled_latex_tested", json!(false)),
+        ("latex_policy", json!("static_only")),
+        ("resource_non_regression_tested", json!(true)),
+        ("install_or_selector_changed", json!(true)),
+        ("release_qualified", json!(true)),
+    ] {
+        let mut changed = target.clone();
+        changed[key] = value;
+        assert!(
+            summary::validate(
+                &output(&good, Some(&changed)),
+                &"a".repeat(64),
+                Profile::Target
+            )
+            .is_err()
+        );
+    }
     Ok(())
 }

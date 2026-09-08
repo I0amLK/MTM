@@ -57,11 +57,9 @@ fn run() -> Result<()> {
     if name == "qualify" {
         let options = qualify::Options::parse(options)?;
         let report = qualify::run(&root, &options)?;
-        emit(&root, "candidate-protocol.json", &report, options.record)?;
+        emit(&root, options.report_name(), &report, options.record)?;
         if report["passed"] != true {
-            return Err(
-                "exact-candidate protocol qualification failed; see sanitized report".into(),
-            );
+            return Err("exact-candidate qualification failed; see sanitized report".into());
         }
         return Ok(());
     }
@@ -187,7 +185,7 @@ fn run() -> Result<()> {
         }
         "help" | "--help" | "-h" => {
             println!(
-                "cargo xtask qualify --profile protocol --binary <artifact> --sha256 <sha256> [--record]"
+                "cargo xtask qualify --profile <protocol|target> --binary <artifact> --sha256 <sha256> [--record]"
             );
             println!(
                 "cargo xtask audit [--strict] [--record]\ncargo xtask records [--record]\ncargo xtask retirement [--record]\ncargo xtask capability [--record]\ncargo xtask native-preflight [--record]\ncargo xtask check [--record]\ncargo xtask commit-message <file|--stdin>\n\ncheck is NOT release qualification. Orchestration is Rust; inherited host/toolchain tests are not skipped. A blocked preflight never suppresses a test failure."

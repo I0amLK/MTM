@@ -886,6 +886,57 @@
       "rust_only_ready": false,
       "release_qualified": false,
       "earlier_signature_mismatch_explained": false
+    },
+    {
+      "id": "MTM016-D6-TARGET-PROFILE-IMPLEMENTATION",
+      "delivery": "D6",
+      "status": "implemented_source_checked_host_execution_pending",
+      "base_commit": "6721428dc57a7f2e93a7f00c46ca323288ac4f63",
+      "scope": "Extend the exact-candidate Rust qualifier with fail-closed real Native and required compiled-LaTeX checks; do not claim resource/install/browser/release qualification",
+      "entry": "cargo xtask qualify --profile target --binary <artifact> --sha256 <digest> --record",
+      "changes": [
+        "Add an explicit target profile while keeping protocol and target reports separate",
+        "Require the Rust Native preflight before target candidate launch; blocked/inconclusive environments cannot skip or downgrade the target lane",
+        "Use the same SHA-bound private candidate snapshot as D5 and preserve source/HEAD identity checks",
+        "Launch a fixed Bubblewrap/dangerous/required-LaTeX disposable server using only concrete curl/Git/Bubblewrap/LaTeX executables rather than inherited host PATH",
+        "Exercise public OAuth/MCP exec_command through production Native authority and require hard-isolation attestation plus private-vault exclusion",
+        "Run a complete compact workflow under LatexPolicy::Required, including assembly restart, verifier firewall, final sealing and exact exported TeX bytes",
+        "Require a dedicated typed target summary bound to the same candidate SHA; protocol profile rejects unexpected target claims",
+        "Keep browser, resource, install/selector, independent mathematical verification and release claims explicitly false"
+      ],
+      "tests": [
+        {"command": "cargo fmt --all -- --check", "exit_code": 0},
+        {"command": "cargo clippy -p mtm-cli -p mtm-xtask --all-targets --locked --offline -- -D warnings", "exit_code": 0},
+        {"command": "cargo test -p mtm-xtask --locked --offline", "exit_code": 0, "maintenance_unit_passed": 55, "maintenance_cli_passed": 7},
+        {"command": "cargo xtask qualify --profile protocol --binary target/release/mtm --sha256 42b959cb3df17f496e74479f05e9eeea867ba087040f4de93004771416dcce18", "exit_code": 0, "candidate_launched": true, "normal_runs": 500, "complete_scripted_flows": 3},
+        {"command": "cargo xtask qualify --profile target --binary target/release/mtm --sha256 42b959cb3df17f496e74479f05e9eeea867ba087040f4de93004771416dcce18", "exit_code": 1, "expected_in_connected_nested_environment": true, "failed_stage": "native_preflight", "classification": "namespace_limit_or_depth", "candidate_launched": false}
+      ],
+      "candidate_binding": {
+        "version": "0.6.0-preview.1",
+        "sha256": "42b959cb3df17f496e74479f05e9eeea867ba087040f4de93004771416dcce18",
+        "build_profile": "release",
+        "installed": false,
+        "selector_changed": false,
+        "production_state_modified": false
+      },
+      "target_success_contract": [
+        "Native preflight passes on the current host",
+        "Candidate executes a public Native command through Bubblewrap and reports hard-isolation attestation",
+        "Private vault remains unavailable to Native",
+        "Required compiled LaTeX workflow reaches sealed done with exact artifact bytes",
+        "All protocol/capability/workspace summaries still bind the same candidate SHA",
+        "Candidate and qualification source remain unchanged before/after"
+      ],
+      "development_boundary": "The connected MTM Native sandbox cannot create the nested namespace required by D6. This is an expected fail-closed environment result, not a candidate pass or failure. Run the same target profile on the ordinary Linux host before sealing D6 target evidence.",
+      "retirement_boundary": "No Python target/release file is deleted in this checkpoint. The old target family also covers copied-state/resource/soak and release/install responsibilities that D6 does not yet replace.",
+      "product_runtime_source_or_manifest_changed": false,
+      "new_crates": 0,
+      "new_test_suppressions": 0,
+      "python_files_deleted": 0,
+      "python_files_remaining": 116,
+      "rust_only_ready": false,
+      "release_qualified": false,
+      "earlier_signature_mismatch_explained": false
     }
   ],
   "remaining_acceptance": [

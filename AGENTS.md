@@ -45,10 +45,11 @@ Current commands: `cargo xtask audit`, `cargo xtask records`,
 `cargo xtask retirement`, and `cargo xtask check`.
 `cargo xtask capability --record` runs the Rust current-binary OAuth/socket and
 500-assessment regression; it does not qualify browser, Native or compiled LaTeX.
-`cargo xtask qualify --profile protocol --binary <artifact> --sha256 <digest>
---record` selects an explicit artifact for the current Rust protocol fixtures.
-Read `docs/MTM-016-CANDIDATE-GATE.md`; a passing protocol profile cannot authorize
-release or substitute for the other target qualification responsibilities.
+`cargo xtask qualify --profile <protocol|target> --binary <artifact> --sha256
+<digest> --record` selects an explicit artifact for the current Rust qualification
+fixtures. `target` additionally requires a capable Native host and compiled LaTeX.
+Read `docs/MTM-016-CANDIDATE-GATE.md`; neither profile can authorize release or
+substitute for browser/resource/install/rollback responsibilities.
 `cargo xtask native-preflight --record` measures the current Linux environment;
 `check` embeds a fresh probe without skipping any tests. Read
 `docs/MTM-016-NATIVE-PREFLIGHT.md`: namespace limits/errno are not proof of

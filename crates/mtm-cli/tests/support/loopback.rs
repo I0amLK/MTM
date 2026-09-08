@@ -98,31 +98,47 @@ pub struct Server {
     password: String,
     binary: String,
     binary_sha256: String,
+    native_backend: &'static str,
+    native_mode: &'static str,
+    latex_policy: &'static str,
     directory: tempfile::TempDir,
     deadline: Instant,
 }
 
 impl Server {
     pub fn start(binary: &str) -> Result<Self> {
-        Self::start_with_git(binary, false)
+        Self::start_profile(binary, false, false)
     }
 
     pub fn start_workspace(binary: &str) -> Result<Self> {
-        Self::start_with_git(binary, true)
+        Self::start_profile(binary, true, false)
+    }
+
+    pub fn start_target(binary: &str) -> Result<Self> {
+        Self::start_profile(binary, true, true)
     }
 
     pub fn workspace_path(&self) -> std::path::PathBuf {
         self.directory.path().join("workspace")
     }
 
-    fn start_with_git(binary: &str, git_enabled: bool) -> Result<Self> {
+    fn start_profile(binary: &str, git_enabled: bool, target: bool) -> Result<Self> {
         let directory = tempfile::tempdir().map_err(|_| "temporary server directory failed")?;
         fs::create_dir(directory.path().join("workspace")).map_err(|_| "workspace setup failed")?;
         // Keep the capability suite curl-only. Workspace qualification adds the
-        // real Git executable, never a stub or the host's entire PATH.
+        // real Git executable. Explicit target qualification additionally exposes
+        // only the concrete Native/LaTeX executables it is required to exercise;
+        // it never inherits the host's entire PATH.
         let tools = directory.path().join("tool-bin");
         fs::create_dir(&tools).map_err(|_| "minimal test PATH setup failed")?;
-        for name in ["curl"].into_iter().chain(git_enabled.then_some("git")) {
+        let mut names = vec!["curl"];
+        if git_enabled {
+            names.push("git");
+        }
+        if target {
+            names.extend(["bwrap", "latexmk", "pdflatex"]);
+        }
+        for name in names {
             let program = std::env::var_os("PATH")
                 .and_then(|paths| {
                     std::env::split_paths(&paths)
@@ -144,6 +160,9 @@ impl Server {
             password: URL_SAFE_NO_PAD.encode(random),
             binary: binary.to_owned(),
             binary_sha256: sha256_file(Path::new(binary))?,
+            native_backend: if target { "bubblewrap" } else { "disabled" },
+            native_mode: if target { "dangerous" } else { "safe" },
+            latex_policy: if target { "required" } else { "static_only" },
             directory,
             deadline: Instant::now() + Duration::from_secs(240),
         };
@@ -166,7 +185,10 @@ impl Server {
             .env("MTM_DATA_ROOT", root.join("data"))
             .env("MTM_PRIVATE_ROOT", root.join("data/private"))
             .env("MTM_DEBUG_ROOT", root.join("data/debug"))
-            .env("MTM_NATIVE_EXEC_BACKEND", "disabled")
+            .env("MTM_NATIVE_EXEC_BACKEND", self.native_backend)
+            .env("MTM_NATIVE_MODE", self.native_mode)
+            .env("MTM_LATEX_POLICY", self.latex_policy)
+            .env("MTM_NATIVE_EXEC_ALLOW_ROOTS", "")
             .env("MTM_WORKFLOW_PROTOCOL_VERSION", "3")
             .env("MTM_OAUTH_PASSWORD", &self.password)
             .args([
@@ -176,9 +198,9 @@ impl Server {
                 "--port",
                 &self.endpoint.port().to_string(),
                 "--native-mode",
-                "safe",
+                self.native_mode,
                 "--latex-policy",
-                "static_only",
+                self.latex_policy,
                 "--workspace",
             ])
             .arg(root.join("workspace"))

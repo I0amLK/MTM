@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use crate::{Result, capability, git, native_preflight::process};
+use crate::{Result, capability, git, native_preflight, native_preflight::process};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
@@ -16,9 +16,47 @@ use sha2::{Digest, Sha256};
 mod summary;
 const MAX_BINARY: u64 = 256 * 1024 * 1024;
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(super) enum Profile {
+    Protocol,
+    Target,
+}
+
+impl Profile {
+    fn parse(value: &str) -> Result<Self> {
+        match value {
+            "protocol" => Ok(Self::Protocol),
+            "target" => Ok(Self::Target),
+            _ => Err("qualification profile must be protocol or target; release qualification is not implemented here".into()),
+        }
+    }
+
+    pub(super) const fn as_str(self) -> &'static str {
+        match self {
+            Self::Protocol => "protocol",
+            Self::Target => "target",
+        }
+    }
+
+    const fn delivery(self) -> &'static str {
+        match self {
+            Self::Protocol => "D5",
+            Self::Target => "D6",
+        }
+    }
+
+    const fn report_name(self) -> &'static str {
+        match self {
+            Self::Protocol => "candidate-protocol.json",
+            Self::Target => "candidate-target.json",
+        }
+    }
+}
+
 pub(crate) struct Options {
     binary: String,
     sha256: String,
+    profile: Profile,
     pub record: bool,
 }
 
@@ -43,9 +81,12 @@ impl Options {
                 .ok_or("qualification option requires a value")?;
             options.insert(name.clone(), value.clone());
         }
-        if options.get("--profile").map(String::as_str) != Some("protocol") {
-            return Err("explicit --profile protocol is required; release qualification is not implemented here".into());
-        }
+        let profile = Profile::parse(
+            options
+                .remove("--profile")
+                .ok_or("explicit --profile is required")?
+                .as_str(),
+        )?;
         let sha256 = options.remove("--sha256").ok_or("--sha256 is required")?;
         if !valid_hash(&sha256) {
             return Err("SHA-256 must be 64 lowercase hexadecimal characters".into());
@@ -53,8 +94,13 @@ impl Options {
         Ok(Self {
             binary: options.remove("--binary").ok_or("--binary is required")?,
             sha256,
+            profile,
             record,
         })
+    }
+
+    pub(crate) const fn report_name(&self) -> &'static str {
+        self.profile.report_name()
     }
 }
 
@@ -155,14 +201,31 @@ impl Snapshot {
 }
 
 pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
-    let mut report = json!({"schema_version":"1.0.0","milestone":"MTM-016","delivery":"D5",
-        "profile":"protocol","scope":"exact_candidate_protocol_not_release","passed":false,
-        "candidate_sha256":options.sha256,"candidate_launched":false,
-        "release_qualified":false,"production_state_modified":false,"selector_changed":false,
-        "raw_test_output_recorded":false,"python_invoked":false,
-        "pending":["Native host","compiled LaTeX","browser","resources","upgrade and rollback","Python retirement"]});
-    let mut stage = "candidate_snapshot";
+    let target = options.profile == Profile::Target;
+    let mut report = json!({"schema_version":"1.0.0","milestone":"MTM-016","delivery":options.profile.delivery(),
+    "profile":options.profile.as_str(),"scope":if target {"exact_candidate_target_not_release"} else {"exact_candidate_protocol_not_release"},"passed":false,
+    "candidate_sha256":options.sha256,"candidate_launched":false,
+    "release_qualified":false,"production_state_modified":false,"selector_changed":false,
+    "raw_test_output_recorded":false,"python_invoked":false,
+    "pending":if target {
+        json!(["browser","resources","upgrade and rollback","Python retirement"])
+    } else {
+        json!(["Native host","compiled LaTeX","browser","resources","upgrade and rollback","Python retirement"])
+    }});
+    let mut stage = if target {
+        "native_preflight"
+    } else {
+        "candidate_snapshot"
+    };
     let outcome = (|| -> Result<()> {
+        if target {
+            let native = native_preflight::run()?;
+            report["native_preflight"] = native.clone();
+            if native["passed"] != true || native["ready_for_native_tests"] != true {
+                return Err("target profile requires a capable Native host".into());
+            }
+        }
+        stage = "candidate_snapshot";
         let snapshot = Snapshot::prepare(root, options)?;
         let before = capability::source_hash(root)?;
         let commit_before = git(root, &["rev-parse", "HEAD"])?;
@@ -185,6 +248,11 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             .current_dir(root)
             .env("MTM_TEST_CANDIDATE", &snapshot.executable)
             .env("MTM_TEST_CANDIDATE_SHA256", &snapshot.sha256);
+        if target {
+            command.env("MTM_TEST_TARGET_PROFILE", "1");
+        } else {
+            command.env_remove("MTM_TEST_TARGET_PROFILE");
+        }
         eprintln!("[qualify] exact-artifact protocol, capability and workspace fixtures");
         let output = process::capture_command(
             &mut command,
@@ -206,7 +274,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             return Err("qualification harness source changed".into());
         }
         stage = "summary_validation";
-        let summaries = summary::validate(&output.stdout, &snapshot.sha256)?;
+        let summaries = summary::validate(&output.stdout, &snapshot.sha256, options.profile)?;
         if !output.complete() {
             return Err("qualification runner failed or did not finish cleanly".into());
         }
@@ -221,7 +289,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         report["failure"] = json!(
             "Required candidate identity, runner or profile evidence did not pass; raw diagnostics withheld"
         );
-        if stage != "candidate_snapshot" {
+        if !matches!(stage, "native_preflight" | "candidate_snapshot") {
             report["candidate_launched"] = Value::Null;
         }
     }

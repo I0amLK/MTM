@@ -7,6 +7,9 @@ mod support;
 #[path = "support/workspace_smoke.rs"]
 mod workspace_smoke;
 
+#[path = "support/target_runtime.rs"]
+mod target_runtime;
+
 #[path = "support/candidate_lifecycle.rs"]
 mod candidate_lifecycle;
 
