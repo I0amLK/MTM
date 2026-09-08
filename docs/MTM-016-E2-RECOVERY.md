@@ -50,3 +50,24 @@ independent intended starts; same-key races/restart; no secret/body persistence;
 prepared recovery versus activation; atomic transition/receipt rollback; wrong
 execution trace/epoch; legacy/running unknown refusal; real OAuth/MCP response loss
 and multi-stage replay. Retain capability, finalizer, full-flow and integrity gates.
+
+## Delivered checkpoint
+
+Implementation: `9be59a5d587920c453857883a6b5773cced74c72`. The exact candidate
+`target/mtm016-e2/release/mtm` has SHA-256
+`61f2581e3e008701dc5030e1e171a197c43c65922ef3b951efe866ed478e657c`.
+After that commit the Rust protocol qualification passed 500 normal assessment
+roundtrips and the compact/full/repair lifecycle fixtures with unchanged source
+and artifact identities. Its raw-byte report is sealed as
+`records/evidence/MTM-016/candidate-protocol-e2-9be59a5.json`.
+
+New tests comprise 11 storage recovery/migration tests, one public-schema boundary
+test and three real OAuth/MCP tests. The complete source check remains false in
+the connected nested namespace: Runtime reports 128 passed, the same 10 inherited
+Bubblewrap failures, and one existing ignored real-network test. No assertion was
+removed or test suppressed. Target/resource profile test functions are inert in
+the ordinary protocol suite and do not constitute host qualification.
+
+This closes the declared creation-key and evidenced-checkpoint subset, not all E2
+crash reconciliation. Source gates, a protocol profile and historical host evidence
+do not authorize deploying schema 4 or opening production data with this candidate.

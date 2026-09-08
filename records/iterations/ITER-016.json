@@ -1215,9 +1215,71 @@
       "rust_only_ready": false,
       "release_qualified": false,
       "earlier_signature_mismatch_explained": false
+    },
+    {
+      "id": "MTM016-E2-CREATION-CHECKPOINT-DELIVERY",
+      "delivery": "E2 bounded creation and evidenced-checkpoint recovery",
+      "status": "completed_for_declared_checkpoint_scope_not_complete_crash_reconciliation",
+      "milestone_status": "in_progress",
+      "stage_E_status": "in_progress",
+      "implementation_commit": "9be59a5d587920c453857883a6b5773cced74c72",
+      "sealed_reports": [
+        {"path": "records/evidence/MTM-016/candidate-protocol-e2-9be59a5.json", "sha256": "8152240746663a7113cd97131c2c922bebdbf77d059978dc7a7b638dbe0c35cf"}
+      ],
+      "post_commit_execution": {
+        "command": "cargo xtask qualify --profile protocol --binary target/mtm016-e2/release/mtm --sha256 61f2581e3e008701dc5030e1e171a197c43c65922ef3b951efe866ed478e657c --record",
+        "exit_code": 0,
+        "candidate_launched": true,
+        "candidate_sha256": "61f2581e3e008701dc5030e1e171a197c43c65922ef3b951efe866ed478e657c",
+        "state_schema": 4,
+        "tool_contract": "mtm-tools-v3",
+        "workflow_protocol": 3,
+        "harness_commit": "9be59a5d587920c453857883a6b5773cced74c72",
+        "harness_source_sha256": "76f3a98e9e9624ef51f26ffaf559d58d8c9eb64d1e1a485a3ff8590cfc33e030",
+        "source_and_artifact_unchanged": true,
+        "normal_assessment_roundtrips": 500,
+        "compact_assessments": 250,
+        "full_assessments": 250,
+        "normal_invalid": 0,
+        "normal_rejections": 0,
+        "complete_scripted_protocol_flows": 3,
+        "copied_v1_migration_and_new_run": true,
+        "git_tools_checked": 5,
+        "child_reaped": true,
+        "pipes_closed": true,
+        "timed_out": false,
+        "output_limit_exceeded": false,
+        "scope": "Reuses the D5 exact-artifact protocol runner with current E2 test source. The runner executes the full capability_runtime integration target, including E1/E2 replay tests; target/resource functions remain inert without their explicit profile switches. Not real browser, Native, compiled-LaTeX, independent mathematical verification or final release qualification."
+      },
+      "verified_behaviors": [
+        "Four concurrent keyed HTTP starts produce one creation; repeat after actual process restart returns the original run with no new creation",
+        "Different creation keys, unkeyed starts and another owner remain independent; changed input conflicts",
+        "Eight independent database connections choose one creation reservation",
+        "Prepared-step recovery and original-worker activation are fenced by one transactional winner",
+        "A fixture-only SQLite trigger rejects next-task construction after a real assessment commit; its durable result remains recoverable after restart without duplicated caller writes",
+        "Recovery-only missing or partially running requests do not execute or clear unknown work",
+        "Transition receipt failure rolls back the state transition and capability revocation together",
+        "Schema-3 pending/completed receipt bytes survive schema-4 migration without fabricated checkpoints"
+      ],
+      "validation_totals": {"new_storage_recovery_tests": 11, "new_gateway_contract_tests": 1, "new_public_recovery_tests": 3, "all_storage_tests": 36, "gateway_tests": 28, "public_binary_suite": 25, "runtime_passed": 128, "runtime_nested_failures": 10, "runtime_original_ignored": 1, "new_test_suppressions": 0},
+      "commit_validation": {
+        "initial_commit_attempt": "Git refused before creating a commit because sandbox author configuration was absent",
+        "identity_resolution": "Reused the existing MTM Automation identity through command-local Git configuration; no global settings changed",
+        "implementation_message_check": "git log -1 --format=%B | cargo xtask commit-message --stdin returned ok=true",
+        "automatic_implementation_hook_claimed": false,
+        "evidence_commit_hook": "Explicit command-local core.hooksPath=.githooks selects the existing executable Rust-backed hook"
+      },
+      "remaining": ["Known running/mid-write interruptions require per-effect recovery evidence", "Creation interrupted before initialized-to-assess certification remains unknown", "Full branch and crash-point coverage", "Final exact candidate Native, compiled-LaTeX, browser, resource and install/rollback qualification", "116 remaining first-party Python files and legacy Rust references"],
+      "python_files_deleted": 0,
+      "python_files_remaining": 116,
+      "production_changed": false,
+      "rust_only_ready": false,
+      "release_qualified": false,
+      "earlier_signature_mismatch_explained": false
     }
   ],
   "remaining_acceptance": [
+    "Complete E2 per-effect recovery for running or incomplete-creation interruptions without blind replay.",
     "Port or retire Python suites with an explicit coverage map before deleting them.",
     "Complete typed MTM-owned contracts and real-client validation after the Rust registry and legacy alias retirement checkpoint.",
     "Exercise exact candidate through Native isolation, full Rethlas, retrieval, LaTeX, reconnect and rollback.",
