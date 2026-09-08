@@ -59,8 +59,14 @@ WIP
 
 These do not identify the milestone, authority change, or evidence.
 
-The local commit-msg validator is:
+The local commit-msg validator is Rust (MTM-016):
 
 ```bash
-python3 scripts/validate_commit_message.py <message-file>
+cargo xtask commit-message <message-file>
 ```
+
+The Git hook is a minimal shell bootstrap into Cargo, not a second policy
+implementation. It uses `--locked --offline` and fails closed if the Rust tools
+are unavailable. Build the maintenance binary once before using the hook.
+Duplicate required trailers, malformed/duplicate acceptance levels and receipts
+that do not name the subject's milestone are now rejected explicitly.

@@ -63,12 +63,14 @@ retired aliases. CLI integration tests run the actual built binary with its
 inherited environment cleared and compare the published identity and directory.
 Existing OAuth tests, storage tests and workflow tests remain in the Rust suite.
 
-A proposed new authenticated dispatcher integration-test patch was blocked by the
-tool platform and was not applied. New real OAuth/MCP alias rejection and complete
-web-client flow acceptance remain pending; catalog membership tests must not be
-described as that acceptance. The already identified nested Bubblewrap limitation
-still causes the same ten inherited runtime tests to fail. No test suppression or
-new ignore attribute was added to obtain a passing aggregate.
+A previous authenticated dispatcher test proposal was not applied; its historical
+receipt is retained. A later Rust HTTP suite now exercises the real router, DCR,
+authorization form, PKCE exchange and authenticated dispatch against a counting
+test backend. All eleven retired aliases are rejected before that backend. This
+is more than catalog membership, but is explicitly not a socket/browser test,
+Native execution or a complete Rethlas run. Web-client flow acceptance remains
+pending. The identified nested Bubblewrap limitation still affects the same ten
+inherited runtime tests; no suppression or new ignore attribute was added.
 
 Use `cargo xtask check --record` for current source checks. A failed host test keeps
 the aggregate false. Use `cargo xtask audit --strict` to check retirement completion;

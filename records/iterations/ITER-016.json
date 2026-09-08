@@ -160,6 +160,30 @@
       "workflow_protocol_changed": false,
       "historical_evidence_modified": false,
       "raw_capability_or_secret_recorded": false
+    },
+    {
+      "id": "MTM016-RUST-MAINTENANCE-REPLACEMENTS",
+      "scope": "D commit-policy replacement, deletion provenance and C authenticated in-process HTTP tests",
+      "status": "replacement_implemented_before_python_deletion",
+      "commands": [
+        {"command": "cargo test -p mtm-xtask -p mtm-gateway --locked", "exit_code": 0, "passed_tests": {"gateway_unit": 20, "gateway_http": 6, "xtask_unit": 18, "xtask_cli": 2}},
+        {"command": "cargo fmt --all -- --check", "exit_code": 0},
+        {"command": "cargo clippy --workspace --all-targets --all-features --locked -- -D warnings", "exit_code": 0}
+      ],
+      "coverage": [
+        "Rust commit policy preserves historical valid messages and A6 requirement; adds duplicate-trailer, receipt/milestone, input-bound and acceptance-level checks",
+        "Actual maintenance binary accepts stdin with inherited environment cleared and does not echo invalid message contents",
+        "Real gateway router handles disposable DCR, authorization form, PKCE exchange, code replay and authenticated dispatcher; no principal fixture constructor is introduced",
+        "All eleven retired aliases and malformed tool arguments are denied before the counting test backend",
+        "Origin/CORS, body bounds, bearer challenge, current public catalog, modern duplicate/mismatched headers, proxy peer and fixed issuer tests",
+        "Typed deletion ledger rejects missing coverage, unknown schema, unreviewed deletions and escaping replacement paths"
+      ],
+      "http_test_boundary": "In-process HTTP through production router/OAuth/dispatcher with a counting backend. Does not exercise a socket, browser, Native command, workflow transition, external provider or production endpoint.",
+      "commit_hook": "Minimal shell bootstrap executes Rust maintenance policy with Cargo locked/offline; no Python policy fallback",
+      "python_files_deleted_in_this_checkpoint": 0,
+      "production_changed": false,
+      "release_qualified": false,
+      "remaining": ["Delete only reviewed replacement files in a separate commit", "Ten inherited nested-Bubblewrap failures remain unwaived", "Actual web-client, workflow, host and full Python retirement qualification"]
     }
   ],
   "remaining_acceptance": [

@@ -9,8 +9,10 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use serde_json::{Value, json};
 
 mod architecture;
+mod commit_message;
 mod inventory;
 mod records;
+mod retirement;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
@@ -38,6 +40,9 @@ fn run() -> Result<()> {
     let (name, options) = args
         .split_first()
         .map_or(("help", &[][..]), |(name, tail)| (name.as_str(), tail));
+    if name == "commit-message" {
+        return commit_message::run(options);
+    }
     if options
         .iter()
         .any(|arg| arg != "--record" && !(name == "audit" && arg == "--strict"))
@@ -61,9 +66,18 @@ fn run() -> Result<()> {
                 record,
             )?;
         }
+        "retirement" => {
+            emit(
+                &root,
+                "mtm016-retirement.json",
+                &retirement::validate(&root)?,
+                record,
+            )?;
+        }
         "check" => {
             let integrity = records::validate(&root)?;
             let architecture = architecture::validate(&root)?;
+            let retirement = retirement::validate(&root)?;
             let cargo = env::var_os("CARGO").unwrap_or_else(|| "cargo".into());
             let mut checks = Vec::new();
             for (label, arguments) in [
@@ -105,7 +119,7 @@ fn run() -> Result<()> {
             let report = json!({
                 "schema_version":"1.0.0", "milestone":"MTM-016", "scope":"rust_source_with_inherited_host_tests",
                 "passed":passed, "checks":checks, "record_integrity":integrity,
-                "architecture":architecture,
+                "architecture":architecture,"retirement":retirement,
                 "production_selector_changed":false, "production_state_modified":false,
                 "release_qualified":false,
                 "pending":["Python/shadow coverage retirement", "independent full API and capability suites", "real Native/browser/LaTeX/upgrade qualification"]
@@ -117,7 +131,7 @@ fn run() -> Result<()> {
         }
         "help" | "--help" | "-h" => {
             println!(
-                "cargo xtask audit [--strict] [--record]\ncargo xtask records [--record]\ncargo xtask check [--record]\n\ncheck is NOT release qualification. Orchestration is Rust; inherited host/toolchain tests are not skipped."
+                "cargo xtask audit [--strict] [--record]\ncargo xtask records [--record]\ncargo xtask retirement [--record]\ncargo xtask check [--record]\ncargo xtask commit-message <file|--stdin>\n\ncheck is NOT release qualification. Orchestration is Rust; inherited host/toolchain tests are not skipped."
             );
         }
         _ => return Err("unknown task; use cargo xtask help".into()),
