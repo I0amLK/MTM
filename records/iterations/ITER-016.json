@@ -341,6 +341,36 @@
       "limits": "Only minimum/maximum on serde_json i64/u64/f64 values; not arbitrary-precision decimals or complete JSON Schema conformance",
       "production_changed": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-RUST-POLICY-REPLACEMENT",
+      "scope": "D independent policy corpus and actual CLI boundary tests, before retiring the four-file Python reference chain",
+      "status": "replacement_implemented_and_tested_before_deletion",
+      "numeric_repair_commit": "df6660c",
+      "documentation": "docs/MTM-016-POLICY-REGRESSION.md",
+      "case_count": 135,
+      "operation_groups": 14,
+      "encoded_input_bytes": 13719,
+      "test_paths": [
+        "crates/mtm-cli/tests/support/policy_cases.rs",
+        "crates/mtm-cli/tests/policy_corpus.rs",
+        "crates/mtm-cli/tests/policy_cli.rs",
+        "crates/mtm-core/tests/numeric_schema.rs"
+      ],
+      "expectations": "Explicit independently authored results, error code/category/retryability/details, nonempty diagnostics and deterministic repeats. No current-output golden generation and no Re-CTM process. Original numeric lower-bound bypass is intentionally corrected.",
+      "commands": [
+        {"command": "cargo test -p mtm-cli --test policy_corpus --test policy_cli --locked --offline", "exit_code": 0, "policy_corpus_tests": 2, "actual_cli_tests": 5, "all_named_cases_passed": 135},
+        {"command": "cargo fmt --all -- --check", "exit_code": 0},
+        {"command": "cargo clippy --workspace --all-targets --all-features --locked --offline -- -D warnings", "exit_code": 0}
+      ],
+      "cli_environment": "Inherited environment cleared, PATH empty, no HOME required for pure evaluation, temporary cwd checked for unexpected files; no policy sample is executed as a command",
+      "coverage": ["Single/batch equivalence across all 14 operations", "1000/1001 request count and inclusive 1 MiB input boundaries", "Invalid JSON and UTF-8, per-item errors and stable result ordering", "Bounded child runtime, bounded captured output and repeated deterministic batch results"],
+      "unclaimed": ["New performance comparison", "Full JSON Schema implementation", "Native execution", "External network or browser", "Workflow idempotency", "Production release qualification"],
+      "python_files_deleted_in_this_checkpoint": 0,
+      "new_dependencies": 0,
+      "historical_golden_or_receipts_rewritten": false,
+      "production_changed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
