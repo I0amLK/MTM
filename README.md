@@ -1,5 +1,13 @@
 # MTM
 
+The E2 caller-write checkpoint uses schema 6 and `mtm-tools-v5`. Explicit
+`recover_only` may reconcile a proven retained write prefix without replaying
+records or executing the action. File evidence and permanent private file locks
+distinguish publication from lost acknowledgement; opaque database writes,
+entered actions, conflicting bytes and legacy unknown work remain blocked.
+See `docs/MTM-016-E2-WRITE-RECOVERY.md`. This development branch is not installed
+or release-qualified; no previous candidate evidence qualifies schema 6.
+
 MTM-016 Native environment diagnostics are available with
 `cargo xtask native-preflight --record`. The ordinary source check includes the
 probe but still runs every test when the environment is blocked. See

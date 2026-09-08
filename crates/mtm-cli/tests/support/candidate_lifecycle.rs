@@ -63,7 +63,7 @@ fn seed_v1_state(server: &mut Server, owner: &Client) -> Result {
     server.restart()
 }
 
-fn fixture_submission(task: &Value, mode: &str, report_gap: bool) -> Result<Value> {
+pub(super) fn fixture_submission(task: &Value, mode: &str, report_gap: bool) -> Result<Value> {
     let state = text(task, "state")?;
     let minimal = task["task"]
         .get("minimal_submission")
@@ -365,7 +365,7 @@ fn candidate_persistence_and_complete_protocol_flows() -> Result {
         json!({"operation":"status","run_id":"legacy-run"}),
     )?;
     require(
-        migrated_info["research_workspace"]["state_schema_version"] == 5
+        migrated_info["research_workspace"]["state_schema_version"] == 6
             && legacy["ok"] == true
             && legacy["problem_id"] == "legacy-problem"
             && legacy["state"] == "assess",

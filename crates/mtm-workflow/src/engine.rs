@@ -75,6 +75,9 @@ pub struct WorkflowEvent {
 
 pub type WorkflowObserver = Arc<dyn Fn(WorkflowEvent) + Send + Sync + 'static>;
 
+#[path = "submission_write.rs"]
+mod submission_write;
+
 const MAX_TASK_REFERENCE_LOCATORS: usize = 64;
 
 #[path = "creation_resume.rs"]
@@ -1775,78 +1778,21 @@ impl WorkflowEngine {
         resource: &str,
         content: &Value,
     ) -> Result<Value, ReCtmError> {
-        if let Some(channel) = resource.strip_prefix("memory:generation:") {
-            if !GENERATION_CHANNELS.contains(&channel) || !content.is_object() {
-                return Err(invalid(
-                    "generation memory writes require a known channel and JSON object",
-                ));
-            }
-            let normalized = self.normalize_protocol3_generation_write(claims, channel, content)?;
-            let path =
-                self.vault
-                    .append_generation_memory(claims.run_id(), channel, &normalized)?;
-            return Ok(
-                serde_json::json!({"path_kind":"generation_memory","channel":channel,"file":file_name(&path)}),
-            );
-        }
-        if let Some(channel) = resource.strip_prefix("memory:verifier:") {
-            if !VERIFIER_CHANNELS.contains(&channel) || !content.is_object() {
-                return Err(invalid(
-                    "verifier memory writes require a known channel and JSON object",
-                ));
-            }
-            let path = self
+        if let Some(file) = self.prepare_file_resource(claims, resource, content)? {
+            let guard = self
                 .vault
-                .append_verifier_memory(claims.run_id(), channel, content)?;
-            return Ok(
-                serde_json::json!({"path_kind":"verifier_memory","channel":channel,"file":file_name(&path)}),
-            );
-        }
-        if let Some(channel) = resource.strip_prefix("memory:branch:") {
-            if !BRANCH_CHANNELS.contains(&channel) || !content.is_object() {
-                return Err(invalid(
-                    "branch memory writes require a known channel and JSON object",
-                ));
-            }
-            let branch_id = self.branch_id_for_domain(claims.domain_id())?;
-            let path =
-                self.vault
-                    .append_branch_memory(claims.run_id(), &branch_id, channel, content)?;
-            return Ok(
-                serde_json::json!({"path_kind":"branch_memory","branch_id":branch_id,"channel":channel,"file":file_name(&path)}),
-            );
+                .lock_file_effect(claims.run_id(), &file.relative)?;
+            let (evidence, bytes) = guard.prepare(&file.bytes, file.append)?;
+            guard.publish(&evidence, &bytes)?;
+            return Ok(file.result);
         }
         match resource {
-            "join_result" => {
-                if !content.is_object() {
-                    return Err(invalid("join_result must be a JSON object"));
-                }
-                let path = self.vault.write_join_result(claims.run_id(), content)?;
-                Ok(serde_json::json!({"path_kind":"join_result","file":file_name(&path)}))
-            }
-            "proof" => {
-                let proof = content
-                    .as_str()
-                    .ok_or_else(|| invalid("proof must be a LaTeX string"))?;
-                let path = self.vault.write_proof(claims.run_id(), proof)?;
-                Ok(
-                    serde_json::json!({"path_kind":"draft_tex","file":file_name(&path),"size":proof.len()}),
-                )
-            }
             "proof_manifest" => {
                 let manifest = self.normalize_proof_manifest(claims, content)?;
                 let stored = self
                     .store
                     .write_proof_manifest(claims.run_id(), &manifest)?;
                 Ok(serde_json::json!({"path_kind":"proof_manifest","sha256":stored["sha256"]}))
-            }
-            "verification_report" => {
-                let decision = VerificationDecision::from_submitted_report(content)?;
-                let normalized = decision.normalized_payload();
-                let path = self
-                    .vault
-                    .write_verification_report(claims.run_id(), &normalized)?;
-                Ok(serde_json::json!({"path_kind":"verification_report","file":file_name(&path)}))
             }
             "reference_audit" => self.write_reference_audit(claims, content),
             "branch:self" => Err(ReCtmError::new(

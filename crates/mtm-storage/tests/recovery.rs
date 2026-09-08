@@ -37,7 +37,7 @@ fn schema5_preserves_legacy_creation_and_does_not_enroll_unknown_work() -> Resul
         _ => return Err("old identity was replaced".into()),
     };
     assert!(store.resume_creation(old).is_err());
-    assert_eq!(store.schema_version()?, 5);
+    assert_eq!(store.schema_version()?, 6);
     let db = Connection::open(&path)?;
     let enrolled: i64 = db.query_row("SELECT COUNT(*) FROM creation_initializations", [], |r| {
         r.get(0)
@@ -483,8 +483,10 @@ fn transition_certificate_survives_loss_of_runtime_continuation() -> Result {
     let f = Fixture::new()?;
     let (authorized, reservation) = f.reserve()?;
     let execution = f.store.activate_submission(&reservation, &authorized, 2)?;
+    f.store.begin_submission_write(&execution, 0, None)?;
     f.store.checkpoint_submission_write(&execution, 1)?;
     assert!(f.store.arm_submission_commit(&execution).is_err());
+    f.store.begin_submission_write(&execution, 1, None)?;
     f.store.checkpoint_submission_write(&execution, 2)?;
     f.store.arm_submission_commit(&execution)?;
     f.store.transition_run(transition(
@@ -636,7 +638,7 @@ fn schema4_migration_preserves_schema3_and_rolls_back_on_failure() -> Result {
         let db = Connection::open(&path)?;
         assert_eq!(
             db.query_row("PRAGMA user_version", [], |r| r.get::<_, i64>(0))?,
-            if broken { 3 } else { 5 }
+            if broken { 3 } else { 6 }
         );
         assert_eq!(
             db.query_row(

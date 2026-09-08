@@ -463,7 +463,7 @@ impl RuntimeToolBackend {
             &request_digest,
         )? {
             if recover_only {
-                let recovered = self.store.reconcile_unstarted_submission(receipt)?;
+                let recovered = self.workflow.recover_submission(receipt)?;
                 return submission_receipts::replay(&recovered);
             }
             return submission_receipts::replay(&receipt);
@@ -556,19 +556,19 @@ impl RuntimeToolBackend {
                 let object = item
                     .as_object()
                     .ok_or_else(|| validation("each write must be an object"))?;
-                self.workflow.write(
+                self.workflow.write_submission(
                     &principal.client_id,
                     capability,
                     text_or(object, "resource", ""),
                     object.get("content").unwrap_or(&Value::Null),
-                    Some(trace_id),
+                    trace_id,
+                    execution,
+                    index,
                 )
             })();
             match result {
                 Ok(value) => {
                     write_results.push(value);
-                    self.store
-                        .checkpoint_submission_write(execution, write_results.len())?;
                 }
                 Err(error) if recoverable_error(&error) => {
                     return self.recoverable_step(

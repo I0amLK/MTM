@@ -12,6 +12,10 @@ mod checkpoints;
 pub use checkpoints::SubmissionExecution;
 pub(super) use checkpoints::record_transition;
 
+#[path = "step_write_journal.rs"]
+mod write_journal;
+pub use write_journal::{FileEffectEvidence, FileImage, SubmissionRecovery};
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SubmissionDisposition {
@@ -243,6 +247,12 @@ impl StateStore {
                 }
                 return Err(invalid_receipt());
             }
+            let enrolled: bool = tx.query_row(
+                "SELECT EXISTS(SELECT 1 FROM step_write_journals WHERE capability_sha256=?)",
+                [&binding.capability_sha256], |row| row.get(0),
+            ).map_err(sql_error)?;
+            // An error category is not evidence that an outstanding effect did not happen.
+            if enrolled { write_journal::require_between(tx, &binding.capability_sha256)?; }
             let changed = tx.execute(
                 "UPDATE step_receipts SET status='completed',result_json=?,completed_at=? WHERE capability_sha256=? AND owner_id=? AND run_id=? AND workspace_sha256=? AND request_sha256=? AND status='pending'",
                 params![summary, completed_at, binding.capability_sha256, binding.owner_id,

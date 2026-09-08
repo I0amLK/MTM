@@ -4,6 +4,9 @@
 
 mod support;
 
+#[path = "support/write_recovery.rs"]
+mod write_recovery;
+
 #[path = "support/creation_resume.rs"]
 mod creation_resume;
 

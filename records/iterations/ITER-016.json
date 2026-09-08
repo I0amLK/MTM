@@ -1418,6 +1418,65 @@
       "rust_only_ready": false,
       "release_qualified": false,
       "earlier_signature_mismatch_explained": false
+    },
+    {
+      "id": "MTM016-E2-CALLER-WRITE-RECONCILIATION",
+      "delivery": "E2 evidenced caller-write reconciliation",
+      "status": "implemented_regressions_passed_exact_artifact_pending",
+      "base_commit": "70fa5ef21a655e6224b1e90147d9d91cfd16c448",
+      "plan": "docs/MTM-016-E2-WRITE-RECOVERY.md",
+      "contract_change": {"state_schema_before": 5, "state_schema_after": 6, "tool_contract": "mtm-tools-v5", "workflow_protocol": 3, "public_tools": 24, "hidden_aliases": 0},
+      "changes": [
+        "One bounded enrolled journal per new submission distinguishes between-writes, opaque database effects and before/after file evidence",
+        "Reserve each effect before mutation and commit accepted count and journal advancement together; corrupted evidence cannot be acknowledged or converted into a correction",
+        "Reuse one normalizer for ordinary and journaled writes; preserve exact normalized records instead of regenerating them during recovery",
+        "Permanent nonblocking file locks serialize relevant vault writers and recovery; memory append publishes a bounded atomic replacement",
+        "recover_only reconciles a proven caller-write prefix as correction required, with zero new writes and no action, next-task authority or mathematical-success claim",
+        "Revalidate execution claims, resource permissions and branch binding before recording file evidence",
+        "Malformed memory records are rejected rather than silently filtered out; old ambiguous state remains explicitly unknown",
+        "Keep opaque database effects, entered actions, equal-image ambiguity, conflicting files and unenrolled legacy work blocked"
+      ],
+      "tests_added": {"storage": 8, "vault": 6, "authenticated_socket": 4, "total": 18},
+      "observations_before_full_gate": [
+        "The initial three real socket write-recovery tests passed, including forced restart, proof-file recovery, four concurrent recovery requests and opaque database refusal",
+        "A fourth real socket fixture reached two actual branch domains, recovered its own caller event and preserved both branch statuses, sibling memory and transition sequence",
+        "Eight storage tests passed before the final additional correction-fence assertion; full gate rechecks the final source",
+        "Review identified that generic recoverable-error categories could conceal an unacknowledged write; outcome recording now requires a between-writes journal, with a corruption/rollback regression",
+        "Formatting and stale/ambiguous patch contexts were corrected using apply_patch only; failed attempts did not count as passing validation"
+      ],
+      "validation": {
+        "full_source_gate": {"command": "cargo xtask check --record", "exit_code": 1, "format": 0, "clippy": 0, "rust_tests": 101, "diff": 0, "source_unchanged": true, "runtime": {"passed": 128, "failed": 10, "ignored": 1}, "only_same_nested_native_failures": true, "new_test_suppressions": 0},
+        "storage": {"unit": 6, "recovery": 14, "existing_store": 6, "existing_receipts": 13, "caller_write_recovery": 8, "total_passed": 47},
+        "workflow": {"unit_passed": 93, "integration_passed": 9, "total_passed": 102},
+        "gateway": {"unit_passed": 22, "http_passed": 6},
+        "public_binary_suite": {"passed": 31, "failed": 0, "host_profile_functions_inert": 2, "new_write_recovery_tests": 4, "includes_corrupted_acknowledgement_not_misclassified_as_correction": true},
+        "maintenance": {"unit_passed": 57, "cli_passed": 8},
+        "integrity": {"historical_hashes_checked": 26, "prior_sealed_observation_hashes_checked": 6, "retirement_baseline_hashes_checked": 11, "passed": true},
+        "strict_retirement": {"command": "cargo xtask audit --strict --record", "exit_code": 1, "expected": true, "python_files_remaining": 116}
+      },
+      "source_binding": {
+        "pre_commit_head": "70fa5ef21a655e6224b1e90147d9d91cfd16c448",
+        "before_after_rust_source_sha256": "f6a1f985a403ee1365fcb95022ed577fd8fb85bce3dd660113744fbfa1084a5f",
+        "interpretation": "Validation ran before implementation commit against unchanged dirty source; not relabelled as a clean-commit observation",
+        "report": "records/validation/mtm016-source-check.json"
+      },
+      "candidate_build": {
+        "command": "cargo build --release --locked --offline -p mtm-cli --bin mtm --target-dir target/mtm016-e2-writes",
+        "exit_code": 0,
+        "path": "target/mtm016-e2-writes/release/mtm",
+        "sha256": "7610e0366fbe7094ed14b4e969ef00c44c5a33863a6e37a3a99e12ad2d92d736",
+        "version": "0.6.0-preview.1", "state_schema": 6, "tool_contract": "mtm-tools-v5", "installed": false,
+        "prior_schema_2_3_4_5_binaries_unchanged": true
+      },
+      "limits": ["64 MiB per supported file", "4096 bytes per persisted journal", "No raw capability/body/private record in journal", "No lock across observers/network/model/LaTeX", "No automatic replay of missing caller writes or action internals", "Process-boundary fault testing is not random power-loss or hostile same-UID testing"],
+      "rollback": "Revert dedicated development commits before deployment. Restore untouched pre-upgrade copies for disposable schema-6 data; never drop safety records or decrement user_version to run an older binary.",
+      "new_packages_or_versions": 0,
+      "python_files_deleted": 0,
+      "python_files_remaining": 116,
+      "production_changed": false,
+      "rust_only_ready": false,
+      "release_qualified": false,
+      "earlier_signature_mismatch_explained": false
     }
   ],
   "remaining_acceptance": [

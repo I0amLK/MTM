@@ -17,14 +17,14 @@ use time::macros::format_description;
 use crate::schema::{
     SCHEMA_MIGRATIONS_TABLE_SQL, STATE_SCHEMA_VERSION, V1_WORKFLOW_SCHEMA_SQL,
     V2_RESEARCH_SCHEMA_SQL, V3_SUBMISSION_RECEIPTS_SQL, V4_RECOVERY_SQL,
-    V5_CREATION_INITIALIZATION_SQL,
+    V5_CREATION_INITIALIZATION_SQL, V6_CALLER_WRITE_JOURNAL_SQL,
 };
 
 #[path = "step_receipts.rs"]
 mod step_receipts;
 pub use step_receipts::{
-    SubmissionDisposition, SubmissionExecution, SubmissionReceipt, SubmissionReservation,
-    SubmissionResult, SubmissionSlot,
+    FileEffectEvidence, FileImage, SubmissionDisposition, SubmissionExecution, SubmissionReceipt,
+    SubmissionRecovery, SubmissionReservation, SubmissionResult, SubmissionSlot,
 };
 
 #[path = "creation_receipts.rs"]
@@ -195,6 +195,10 @@ impl StateStore {
             self.migrate_4_to_5()?;
             version = 5;
         }
+        if version == 5 {
+            self.migrate_5_to_6()?;
+            version = 6;
+        }
         if version != STATE_SCHEMA_VERSION {
             return Err(ReCtmError::new(
                 "STATE_SCHEMA_MIGRATION_FAILED",
@@ -291,6 +295,16 @@ impl StateStore {
             tx.execute_batch(V5_CREATION_INITIALIZATION_SQL).map_err(sql_error)?;
             tx.execute("INSERT INTO schema_migrations(version,applied_at,description) VALUES(5,?,'Restartable immutable keyed initialization')", [now]).map_err(sql_error)?;
             tx.execute_batch("PRAGMA user_version=5").map_err(sql_error)?;
+            Ok(())
+        })
+    }
+
+    fn migrate_5_to_6(&self) -> Result<(), ReCtmError> {
+        let now = self.runtime.clock.now_iso()?;
+        self.immediate(|tx| {
+            tx.execute_batch(V6_CALLER_WRITE_JOURNAL_SQL).map_err(sql_error)?;
+            tx.execute("INSERT INTO schema_migrations(version,applied_at,description) VALUES(6,?,'Bounded caller-write reconciliation journals')", [now]).map_err(sql_error)?;
+            tx.execute_batch("PRAGMA user_version=6").map_err(sql_error)?;
             Ok(())
         })
     }

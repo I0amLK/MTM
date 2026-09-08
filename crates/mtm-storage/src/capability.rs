@@ -840,7 +840,7 @@ pub(crate) fn record_matches_claims(record: &Value, claims: &CapabilityClaims) -
         && record.get("expires_at").and_then(Value::as_i64) == Some(claims.expires_at)
 }
 
-fn wildcard_match(pattern: &str, value: &str) -> bool {
+pub(crate) fn wildcard_match(pattern: &str, value: &str) -> bool {
     let pattern = pattern.as_bytes();
     let value = value.as_bytes();
     let mut previous = vec![false; value.len() + 1];

@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 use std::fs::{self, OpenOptions};
-use std::io::Write;
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
@@ -13,6 +13,9 @@ use sha2::{Digest, Sha256};
 #[path = "creation_vault.rs"]
 mod creation_vault;
 pub(crate) use creation_vault::PreparedInitialization;
+
+#[path = "file_effect.rs"]
+mod file_effect;
 
 pub const GENERATION_CHANNELS: [&str; 10] = [
     "immediate_conclusions",
@@ -46,6 +49,7 @@ pub struct PrivateVault {
 impl PrivateVault {
     pub fn new(private_root: impl AsRef<Path>) -> Result<Self, ReCtmError> {
         let private_root = absolute_normalized(private_root.as_ref())?;
+        create_private_dir(&private_root)?;
         let runs_root = private_root.join("runs");
         create_private_dir(&runs_root)?;
         Ok(Self {
@@ -68,9 +72,11 @@ impl PrivateVault {
         metadata: &Value,
     ) -> Result<Value, ReCtmError> {
         let root = self.run_root(run_id)?;
+        create_private_dir(&root)?;
         for relative in [
             "input",
             "references",
+            "memory",
             "memory/generation",
             "memory/verifier",
             "branches",
@@ -79,6 +85,7 @@ impl PrivateVault {
             "draft",
             "verification",
             "final",
+            "debug",
             "debug/state",
         ] {
             create_private_dir(&root.join(relative))?;
@@ -295,6 +302,7 @@ impl PrivateVault {
     ) -> Result<PathBuf, ReCtmError> {
         let branch = require_safe_id(branch_id, "branch_id")?;
         let root = self.run_root(run_id)?.join("branches").join(branch);
+        create_private_dir(&root)?;
         create_private_dir(&root.join("memory"))?;
         self.atomic_json(&root.join("assignment.json"), payload)?;
         Ok(root)
@@ -534,6 +542,11 @@ impl PrivateVault {
     }
 
     fn atomic_text(&self, path: &Path, content: &str) -> Result<(), ReCtmError> {
+        if let Some((run, relative)) = self.file_effect_location(path) {
+            let guard = self.lock_file_effect(&run, &relative)?;
+            let (evidence, bytes) = guard.prepare(content.as_bytes(), false)?;
+            return guard.publish(&evidence, &bytes);
+        }
         if let Some(parent) = path.parent() {
             create_private_dir(parent)?;
         }
@@ -572,6 +585,12 @@ impl PrivateVault {
     }
 
     fn append_jsonl(&self, path: &Path, payload: &Value) -> Result<(), ReCtmError> {
+        if let Some((run, relative)) = self.file_effect_location(path) {
+            let line = Self::file_effect_bytes(payload, true)?;
+            let guard = self.lock_file_effect(&run, &relative)?;
+            let (evidence, bytes) = guard.prepare(&line, true)?;
+            return guard.publish(&evidence, &bytes);
+        }
         if !payload.is_object() {
             return Err(validation("memory records must be JSON objects"));
         }
@@ -652,12 +671,47 @@ fn read_jsonl(path: &Path) -> Result<Vec<Value>, ReCtmError> {
     if !path.exists() {
         return Ok(Vec::new());
     }
-    let content = fs::read_to_string(path).map_err(io_error)?;
-    Ok(content
+    if fs::metadata(path).map_err(io_error)?.len() > 64 * 1024 * 1024 {
+        return Err(validation_code(
+            "MEMORY_TOO_LARGE",
+            "Memory exceeds the bounded read size.",
+        ));
+    }
+    let mut content = String::new();
+    fs::File::open(path)
+        .map_err(io_error)?
+        .take(64 * 1024 * 1024 + 1)
+        .read_to_string(&mut content)
+        .map_err(io_error)?;
+    if content.len() > 64 * 1024 * 1024 {
+        return Err(validation_code(
+            "MEMORY_TOO_LARGE",
+            "Memory exceeds the bounded read size.",
+        ));
+    }
+    parse_jsonl(&content)
+}
+
+fn parse_jsonl(content: &str) -> Result<Vec<Value>, ReCtmError> {
+    content
         .lines()
-        .filter_map(|line| serde_json::from_str::<Value>(line.trim()).ok())
-        .filter(Value::is_object)
-        .collect())
+        .filter(|line| !line.trim().is_empty())
+        .map(|line| {
+            let value: Value = serde_json::from_str(line).map_err(|_| {
+                validation_code(
+                    "MEMORY_CORRUPT",
+                    "Memory contains an invalid record; no records were discarded.",
+                )
+            })?;
+            if !value.is_object() {
+                return Err(validation_code(
+                    "MEMORY_CORRUPT",
+                    "Memory contains a non-object record; no records were discarded.",
+                ));
+            }
+            Ok(value)
+        })
+        .collect()
 }
 
 fn python_json(value: &Value) -> Result<String, ReCtmError> {

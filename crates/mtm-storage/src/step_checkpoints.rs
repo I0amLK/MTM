@@ -2,11 +2,17 @@
 use super::*;
 
 pub struct SubmissionExecution {
-    id: String,
-    fingerprint: String,
+    pub(super) id: String,
+    pub(super) fingerprint: String,
+    pub(super) claims: CapabilityClaims,
 }
 
 impl SubmissionExecution {
+    #[must_use]
+    pub fn matches_claims(&self, claims: &CapabilityClaims) -> bool {
+        self.claims == *claims
+    }
+
     #[must_use]
     pub fn trace_id(&self) -> &str {
         &self.id
@@ -42,7 +48,8 @@ impl StateStore {
                 params![writes as i64,authorized.fingerprint,id],
             ).map_err(sql_error)?;
             if changed != 1 { return Err(unknown()); }
-            Ok(SubmissionExecution { id, fingerprint: authorized.fingerprint.clone() })
+            write_journal::enroll(tx, &authorized.fingerprint)?;
+            Ok(SubmissionExecution { id, fingerprint: authorized.fingerprint.clone(), claims: authorized.claims.clone() })
         })
     }
 
@@ -60,12 +67,14 @@ impl StateStore {
                 params![accepted as i64,execution.fingerprint,execution.id,(accepted-1) as i64,accepted as i64,execution.fingerprint],
             ).map_err(sql_error)?;
             if changed != 1 { return Err(invalid_receipt()); }
+            write_journal::accept(tx, &execution.fingerprint)?;
             Ok(())
         })
     }
 
     pub fn arm_submission_commit(&self, execution: &SubmissionExecution) -> Result<(), ReCtmError> {
         self.immediate(|tx| {
+            write_journal::require_between(tx, &execution.fingerprint)?;
             let changed = tx.execute(
                 "UPDATE step_checkpoints SET phase='commit_ready' WHERE capability_sha256=? AND execution_id=? AND phase='running' AND accepted_writes=expected_writes AND EXISTS(SELECT 1 FROM step_receipts WHERE capability_sha256=? AND status='pending')",
                 params![execution.fingerprint,execution.id,execution.fingerprint],
@@ -111,7 +120,7 @@ impl StateStore {
         let connection = self.lock_connection()?;
         let pending = query_one_on(
             &connection,
-            "SELECT c.phase,c.accepted_writes FROM step_receipts r LEFT JOIN step_checkpoints c ON c.capability_sha256=r.capability_sha256 WHERE r.owner_id=? AND r.run_id=? AND r.status='pending'",
+            "SELECT c.phase,c.accepted_writes,j.marker_json FROM step_receipts r LEFT JOIN step_checkpoints c ON c.capability_sha256=r.capability_sha256 LEFT JOIN step_write_journals j ON j.capability_sha256=r.capability_sha256 WHERE r.owner_id=? AND r.run_id=? AND r.status='pending'",
             [owner, run],
             &[],
         )?;
@@ -119,6 +128,7 @@ impl StateStore {
             None => Value::Null,
             Some(value) => serde_json::json!({"status":"pending",
                 "phase":value["phase"].as_str().unwrap_or("legacy_unknown"),
+                "caller_write_recovery":write_journal::diagnostic(value["marker_json"].as_str(),value["phase"].as_str().unwrap_or("legacy_unknown"))?,
                 "accepted_caller_writes_lower_bound":value["accepted_writes"],
                 "recover_unstarted_available":value["phase"]=="prepared",
                 "automatic_retry":false,"grants_authority":false}),
@@ -174,7 +184,7 @@ pub(in crate::store) fn record_transition(
     Ok(())
 }
 
-fn current(
+pub(super) fn current(
     connection: &Connection,
     expected: &SubmissionReceipt,
 ) -> Result<SubmissionReceipt, ReCtmError> {
@@ -197,7 +207,7 @@ fn current(
     Ok(actual)
 }
 
-fn finish_on(
+pub(super) fn finish_on(
     tx: &Transaction<'_>,
     receipt: &SubmissionReceipt,
     result: &SubmissionResult,
@@ -215,7 +225,7 @@ fn finish_on(
     current(tx, receipt)
 }
 
-fn unknown() -> ReCtmError {
+pub(super) fn unknown() -> ReCtmError {
     receipt_error(
         "RESULT_UNKNOWN",
         "No safe unstarted or completed checkpoint exists. Do not replay partial work or replace its capability.",

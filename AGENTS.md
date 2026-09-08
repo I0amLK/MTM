@@ -80,6 +80,12 @@ legacy enrollment distinction. Never call external commands, model/network/LaTeX
 work or observers while holding the initialization lock. The existing pinned nix
 filesystem binding is reused; no new package or compiler version is required.
 Do not treat deletion provenance as runtime parity or real-client qualification.
+Schema-6 caller-write reconciliation is documented in
+`docs/MTM-016-E2-WRITE-RECOVERY.md`. Keep one journal per step, resource/role/domain
+binding, strict acknowledgement validation and shared permanent file locks.
+Recovery must never regenerate normalized records, execute missing writes or
+promote an unknown action to success. No file lock spans observers or external I/O.
+Legacy journals are not backfilled; restore pre-upgrade copies for rollback.
 The checker retains inherited host integration tests; in a nested Native sandbox
 Bubblewrap tests can fail. Report those failures and compare with the frozen
 baseline; never make the gate green by silently ignoring them. `audit --strict`

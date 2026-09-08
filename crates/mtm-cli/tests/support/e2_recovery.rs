@@ -116,7 +116,7 @@ fn keyed_creation_races_restart_and_independent_intent_are_distinct() -> Result 
 }
 
 #[test]
-fn recovery_only_never_executes_missing_or_running_work() -> Result {
+fn recovery_only_never_executes_missing_work_and_reconciles_completed_prefix() -> Result {
     let candidate = candidate::select()?;
     let mut server = Server::start(&candidate.path)?;
     let owner = server.login()?;
@@ -151,8 +151,13 @@ fn recovery_only_never_executes_missing_or_running_work() -> Result {
     request["recover_only"] = json!(true);
     let recovered = server.call(&owner, "rethlas_step", request)?;
     require(
-        error_code(&recovered) == "RESULT_UNKNOWN",
-        "recovery cleared running partial work",
+        recovered["writes_applied"] == 0
+            && recovered["submission"]["ok"] == false
+            && recovered["submission_receipt"]["result"]["error_code"] == "SUBMISSION_INTERRUPTED"
+            && recovered["submission_receipt"]["result"]["writes_applied"]
+                .as_u64()
+                .is_some_and(|n| n > 0),
+        "recovery did not preserve the exact accepted prefix as a correction",
     )?;
     let state = server.call(
         &owner,
@@ -160,11 +165,8 @@ fn recovery_only_never_executes_missing_or_running_work() -> Result {
         json!({"operation":"status","run_id":task["run_id"]}),
     )?;
     require(
-        state["pending_submission"]["phase"] == "running"
-            && state["pending_submission"]["accepted_caller_writes_lower_bound"]
-                .as_u64()
-                .is_some_and(|n| n > 0),
-        "pending checkpoint not exposed by status",
+        state["pending_submission"].is_null() && state["state"] == "assess",
+        "prefix recovery advanced workflow or retained a false pending blocker",
     )?;
     super::cancel(&server, &owner, &task)?;
     server.stop()?;

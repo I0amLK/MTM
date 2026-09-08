@@ -1,5 +1,12 @@
 pub const STATE_SCHEMA_VERSION: i64 = mtm_contracts::STATE_SCHEMA_VERSION as i64;
 
+pub const V6_CALLER_WRITE_JOURNAL_SQL: &str = r#"
+CREATE TABLE step_write_journals (
+    capability_sha256 TEXT PRIMARY KEY REFERENCES step_checkpoints(capability_sha256) ON DELETE RESTRICT,
+    marker_json TEXT NOT NULL CHECK(length(marker_json)<=4096)
+);
+"#;
+
 pub const V5_CREATION_INITIALIZATION_SQL: &str = r#"
 CREATE TABLE creation_initializations (
     run_id TEXT PRIMARY KEY REFERENCES creation_receipts(run_id) ON DELETE RESTRICT,

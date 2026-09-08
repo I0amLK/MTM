@@ -92,7 +92,7 @@ fn historical_v1_migration_preserves_rows_and_rejects_newer_schema() -> Result<(
     drop(connection);
 
     let store = StateStore::open_with_runtime(&path, runtime(&[], &[]))?;
-    assert_eq!(store.schema_version()?, 5);
+    assert_eq!(store.schema_version()?, 6);
     assert_eq!(
         value_text(&store.get_run("legacy-run")?, "problem_id")?,
         "legacy-problem"
@@ -103,7 +103,7 @@ fn historical_v1_migration_preserves_rows_and_rejects_newer_schema() -> Result<(
     let connection =
         Connection::open(&newer).map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
     connection
-        .execute_batch("PRAGMA user_version=6;")
+        .execute_batch("PRAGMA user_version=7;")
         .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
     drop(connection);
     let newer_error = match StateStore::open_with_runtime(&newer, runtime(&[], &[])) {
@@ -377,7 +377,7 @@ fn rollback_copy_remains_a_version_one_database() -> Result<(), ReCtmError> {
         .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
     assert_eq!(
         StateStore::open_with_runtime(&migrated, runtime(&[], &[]))?.schema_version()?,
-        5
+        6
     );
     let connection =
         Connection::open(&rollback).map_err(|error| ReCtmError::new("TEST", error.to_string()))?;

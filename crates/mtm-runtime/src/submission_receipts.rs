@@ -78,7 +78,7 @@ fn unknown_result(code: Option<&str>) -> ReCtmError {
                 .bytes()
                 .all(|b| b.is_ascii_uppercase() || b.is_ascii_digit() || b == b'_')
     });
-    ReCtmError::new("RESULT_UNKNOWN", "A submission was reserved but its final outcome is not recorded. Do not replay it or submit with another capability; inspect status for diagnosis.")
+    ReCtmError::new("RESULT_UNKNOWN", "A submission was reserved but its final outcome is not recorded. Do not execute it again or replace its capability. Inspect status or use recover_only=true with the exact original submission for evidenced reconciliation.")
         .with_category(ErrorCategory::Conflict)
         .with_retryable(false)
         .with_details(json!({"receipt_status":"pending","writes_applied":null,
@@ -97,6 +97,7 @@ fn receipt_response(receipt: &SubmissionReceipt, replayed: bool) -> Result<Value
     let mut submission = json!({"ok":applied,"complete":result.complete,
         "replayed":replayed,"retryable":false,"writes_retained":result.writes_applied>0});
     if !applied {
+        submission["retained_write_prefix_len"] = json!(result.writes_applied);
         submission["error"] = json!({"code":result.error_code,
             "message":"The recorded submission requires correction. Do not reapply retained writes; fetch the current task separately.",
             "category":"validation","retryable":false,"details":{}});
