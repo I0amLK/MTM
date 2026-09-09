@@ -26,7 +26,7 @@ fn git(path: &Path, arguments: &[&str]) -> Result {
     )
 }
 
-fn repository(path: &Path, label: &str) -> Result {
+pub(super) fn repository(path: &Path, label: &str) -> Result {
     fs::create_dir_all(path).map_err(|_| "repository directory setup failed")?;
     git(path, &["init", "--quiet"])?;
     fs::write(path.join("a.txt"), format!("{label}\nsecond\n"))
@@ -45,7 +45,7 @@ fn repository(path: &Path, label: &str) -> Result {
     )
 }
 
-fn page_text(server: &Server, owner: &Client, initial: Value) -> Result<String> {
+pub(super) fn page_text(server: &Server, owner: &Client, initial: Value) -> Result<String> {
     let mut arguments = initial;
     let mut combined = String::new();
     for _ in 0..64 {

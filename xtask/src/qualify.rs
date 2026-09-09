@@ -12,8 +12,11 @@ use crate::{Result, capability, git, native_preflight, native_preflight::process
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
+#[path = "qualification_receipt.rs"]
+mod receipt;
 #[path = "qualify_summary.rs"]
 mod summary;
+pub(crate) use receipt::validate as validate_receipt;
 const MAX_BINARY: u64 = 256 * 1024 * 1024;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -23,6 +26,7 @@ pub(super) enum Profile {
     Resource,
     Upgrade,
     Permissions,
+    Corpus,
 }
 
 impl Profile {
@@ -33,7 +37,8 @@ impl Profile {
             "resource" => Ok(Self::Resource),
             "upgrade" => Ok(Self::Upgrade),
             "permissions" => Ok(Self::Permissions),
-            _ => Err("qualification profile must be protocol, target, resource, upgrade or permissions; release qualification is not implemented here".into()),
+            "corpus" => Ok(Self::Corpus),
+            _ => Err("qualification profile must be protocol, target, resource, upgrade, permissions or corpus; release qualification is not implemented here".into()),
         }
     }
 
@@ -44,6 +49,7 @@ impl Profile {
             Self::Resource => "resource",
             Self::Upgrade => "upgrade",
             Self::Permissions => "permissions",
+            Self::Corpus => "corpus",
         }
     }
 
@@ -54,6 +60,7 @@ impl Profile {
             Self::Resource => "D7",
             Self::Upgrade => "F1",
             Self::Permissions => "F2",
+            Self::Corpus => "F5",
         }
     }
 
@@ -64,6 +71,7 @@ impl Profile {
             Self::Resource => "candidate-resource.json",
             Self::Upgrade => "candidate-upgrade.json",
             Self::Permissions => "candidate-permissions.json",
+            Self::Corpus => "candidate-corpus.json",
         }
     }
 }
@@ -133,7 +141,7 @@ impl Options {
                     );
                 }
             }
-            Profile::Protocol | Profile::Target | Profile::Permissions => {
+            Profile::Protocol | Profile::Target | Profile::Permissions | Profile::Corpus => {
                 if baseline_binary.is_some() || baseline_sha256.is_some() {
                     return Err("baseline options require a resource or upgrade profile".into());
                 }
@@ -161,7 +169,7 @@ fn valid_hash(value: &str) -> bool {
             .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
 }
 
-fn digest(path: &Path) -> Result<String> {
+pub(crate) fn digest(path: &Path) -> Result<String> {
     let metadata = fs::symlink_metadata(path).map_err(|_| "candidate metadata unavailable")?;
     if !metadata.is_file()
         || metadata.len() > MAX_BINARY
@@ -259,6 +267,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     let resource = options.profile == Profile::Resource;
     let upgrade = options.profile == Profile::Upgrade;
     let permissions = options.profile == Profile::Permissions;
+    let corpus = options.profile == Profile::Corpus;
     let paired = resource || upgrade;
     let needs_native = target || resource;
     let scope = match options.profile {
@@ -267,6 +276,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         Profile::Resource => "exact_candidate_resource_not_release",
         Profile::Upgrade => "exact_candidate_installed_upgrade_fixture_not_release",
         Profile::Permissions => "exact_candidate_scripted_patch_permissions_not_release",
+        Profile::Corpus => "exact_candidate_partial_usability_corpus_not_release",
     };
     let mut report = json!({"schema_version":"1.0.0","milestone":"MTM-016","delivery":options.profile.delivery(),
     "profile":options.profile.as_str(),"scope":scope,"passed":false,
@@ -281,6 +291,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         Profile::Resource => json!(["compiled-LaTeX target pass","permission-grant soak","browser","upgrade and rollback","Python retirement"]),
         Profile::Upgrade => json!(["real Native and compiled LaTeX","resources and permission-grant soak","browser and human consent","operator-authorized production-state copy","abrupt installation interruption","Python retirement and full release gate"]),
         Profile::Permissions => json!(["real Native command execution and command-grant soak","compiled LaTeX and external retrieval","browser and independent human consent","baseline resource comparison","production upgrade and abrupt installation interruption","Python retirement and full release gate"]),
+        Profile::Corpus => json!(["Native tasks U16-U20","independent research tasks U21-U25","external-client/operator tasks U26-U30","full release gates"]),
     }});
     let mut stage = if needs_native {
         "native_preflight"
@@ -314,6 +325,15 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             None
         };
         let before = capability::source_hash(root)?;
+        let corpus_before = if corpus {
+            Some(crate::records::read_bytes(
+                root,
+                "conformance/mtm016-usability-corpus.json",
+                64 * 1024,
+            )?)
+        } else {
+            None
+        };
         let commit_before = git(root, &["rev-parse", "HEAD"])?;
         stage = "protocol_test_runner";
         if upgrade {
@@ -336,6 +356,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
                 "--",
             ])
             .current_dir(root)
+            .env_remove("MTM_TEST_CORPUS_PROFILE")
             .env_remove("MTM_TEST_PERMISSION_PROFILE")
             .env_remove("MTM_TEST_UPGRADE_PROFILE")
             .env_remove("MTM_TEST_TARGET_PROFILE")
@@ -374,6 +395,11 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
                         .sha256,
                 )
                 .env_remove("MTM_TEST_TARGET_PROFILE");
+        } else if corpus {
+            command
+                .arg("corpus_runtime::exact_candidate_three_repeat_usability_matrix")
+                .arg("--exact")
+                .env("MTM_TEST_CORPUS_PROFILE", "1");
         } else if permissions {
             command
                 .arg("permission_runtime::exact_candidate_permission_patch_soak")
@@ -413,8 +439,21 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         if before != after || commit_before != commit_after {
             return Err("qualification harness source changed".into());
         }
+        if let Some(bytes) = &corpus_before {
+            if crate::records::read_bytes(
+                root,
+                "conformance/mtm016-usability-corpus.json",
+                64 * 1024,
+            )? != *bytes
+            {
+                return Err("corpus input changed during execution".into());
+            }
+            report["corpus_definition_sha256"] = json!(format!("{:x}", Sha256::digest(bytes)));
+        }
         stage = "summary_validation";
-        let summaries = if permissions {
+        let summaries = if corpus {
+            summary::validate_corpus(&output.stdout, &snapshot.sha256)?
+        } else if permissions {
             summary::validate_permissions(&output.stdout, &snapshot.sha256)?
         } else if upgrade {
             summary::validate_upgrade(
@@ -437,6 +476,14 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         } else {
             summary::validate(&output.stdout, &snapshot.sha256, options.profile)?
         };
+        if corpus {
+            if report["corpus_definition_sha256"] != summaries["corpus"]["corpus_sha256"] {
+                return Err("compiled corpus differs from current input file".into());
+            }
+            // Preserve validated partial rows even if a portable scenario fails.
+            // This does not turn the failing runner or incomplete matrix green.
+            report["summaries"] = summaries.clone();
+        }
         if !output.complete() {
             return Err("qualification runner failed or did not finish cleanly".into());
         }
@@ -453,6 +500,12 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         Ok(())
     })();
     report["passed"] = json!(outcome.is_ok());
+    if outcome.is_ok() && corpus && report["summaries"]["corpus"]["passed"] != true {
+        report["passed"] = json!(false);
+        report["failed_stage"] = json!("corpus_coverage");
+        report["failure"] =
+            json!("Corpus contains blocked or failed trials; completed trials remain recorded");
+    }
     if outcome.is_err() {
         report["failed_stage"] = json!(stage);
         report["failure"] = json!(

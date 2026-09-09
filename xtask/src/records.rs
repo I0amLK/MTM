@@ -45,7 +45,7 @@ fn load(root: &Path, path: &str) -> Result<Value> {
     )?)?)
 }
 
-fn read_bytes(root: &Path, path: &str, limit: u64) -> Result<Vec<u8>> {
+pub(crate) fn read_bytes(root: &Path, path: &str, limit: u64) -> Result<Vec<u8>> {
     let path = safe_path(root, path)?;
     let metadata = fs::metadata(&path)?;
     require(

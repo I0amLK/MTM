@@ -1,0 +1,47 @@
+{
+  "baseline_launched": null,
+  "baseline_sha256": null,
+  "candidate_launched": null,
+  "candidate_sha256": "589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8",
+  "delivery": "F5",
+  "failed_stage": "summary_validation",
+  "failure": "Required candidate identity, runner or profile evidence did not pass; raw diagnostics withheld",
+  "harness_source_identity": {
+    "after_sha256": "6069f5b838437b8912a898cb0bb9311806f755ba04a03ed3e774e5dc29fdd32d",
+    "before_sha256": "6069f5b838437b8912a898cb0bb9311806f755ba04a03ed3e774e5dc29fdd32d",
+    "commit": "3a13720b0576b21f428280f9a64e3caf2c16af8d",
+    "unchanged": true
+  },
+  "milestone": "MTM-016",
+  "passed": false,
+  "pending": [
+    "Native tasks U16-U20",
+    "independent research tasks U21-U25",
+    "external-client/operator tasks U26-U30",
+    "full release gates"
+  ],
+  "production_selectors_changed": false,
+  "production_state_modified": false,
+  "profile": "corpus",
+  "python_invoked": false,
+  "raw_test_output_recorded": false,
+  "recorded_unix_seconds": 1788971790,
+  "release_qualified": false,
+  "runner": {
+    "child_reaped": true,
+    "elapsed_ms": 63654,
+    "exit_code": 101,
+    "output_limit_exceeded": false,
+    "pipes_closed": true,
+    "raw_output_recorded": false,
+    "signal": null,
+    "stderr_bytes_retained": 501,
+    "stdout_bytes_retained": 9927,
+    "timed_out": false
+  },
+  "schema_version": "1.0.0",
+  "scope": "exact_candidate_partial_usability_corpus_not_release",
+  "selector_changed": false,
+  "test_stderr_sha256": "39cb48dc078d0c711a9ce97328ffaab71b52443338506c656620154d7153061b",
+  "test_stdout_sha256": "b437bbf27914057668dea0a750b2d8dcc3ae256a33787374760d6bddc2fe0a4d"
+}

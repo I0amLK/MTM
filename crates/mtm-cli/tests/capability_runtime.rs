@@ -4,6 +4,9 @@
 
 mod support;
 
+#[path = "support/corpus_runtime.rs"]
+mod corpus_runtime;
+
 #[path = "support/permission_runtime.rs"]
 mod permission_runtime;
 

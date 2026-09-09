@@ -158,6 +158,18 @@ locked `status`, `install` or `rollback` conservatively restores the pre-operati
 state before continuing. Never delete the journal before the final postcheck or
 describe persisted-prefix tests as a physical power-loss qualification.
 
+## F4/F5 release blockers and task matrix
+
+Read `docs/MTM-016-F4-F5-RELEASE-CHECK.md`. `release-check --binary <artifact>
+--manifest records/governance/mtm016-release-inputs.json` is read-only readiness,
+not release authorization. Missing or unsupported evidence adapters block it;
+hash-bound observations are not authenticated human witnesses. The explicit
+`qualify --profile corpus` emits all 30 x 3 task outcomes; initially only the 15
+portable scenarios execute, with a new disposable server for each repeat.
+Never count blocked rows, inert profile functions or protocol fixtures as research
+or independent browser/consent acceptance. Clear `MTM_TEST_CORPUS_PROFILE` in
+ordinary checks. An incomplete corpus and blocked release checklist exit nonzero.
+
 ## Historical local gate (before MTM-016)
 
 ```bash

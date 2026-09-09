@@ -1,0 +1,13 @@
+{
+  "schema": "mtm-release-inputs-v1",
+  "milestone": "MTM-016",
+  "candidate_sha256": "589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8",
+  "candidate_source_commit": "cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+  "baseline_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+  "evidence": {
+    "source": {"path":"records/evidence/MTM-016/source-check-f4-f5-composed.json","sha256":"0604f471da36aca00488218a6d1f3cd91c7949112aeeeca3df015af5c9e88dc3"},
+    "protocol": {"path":"records/evidence/MTM-016/candidate-protocol-f3-cc17b16.json","sha256":"8cb88b43ce3818c5f25a9be78661c4f084ccf72fa752afe79066fdf545fe1bc0"},
+    "permissions": {"path":"records/evidence/MTM-016/candidate-permissions-f3-cc17b16.json","sha256":"a1281a45abd80336768e70cc678e20b801518364b6ca9678fe95a19664b7d17c"},
+    "upgrade": {"path":"records/evidence/MTM-016/candidate-upgrade-f3-cc17b16.json","sha256":"8c606b37a4e26ece8173bf84347a7aff22616887f70772069fcb146ebd67828e"}
+  }
+}

@@ -51,6 +51,12 @@ Missing coverage remains listed as pending, never converted to a green check.
 
 ## Retirement map
 
+F4/F5 adds a read-only release-readiness checklist and an explicit 30 x 3
+usability matrix; see `docs/MTM-016-F4-F5-RELEASE-CHECK.md`. This advances final
+corpus work without closing missing round-4 host/client/operator evidence. Source,
+artifact, scope and count checks remain independent; a blocked matrix never
+becomes release authority and current Python retirement gaps remain pending.
+
 Round 4/5 F2 adds exact-artifact scripted MCP permission and protected-patch
 qualification; see `docs/MTM-016-F2-PERMISSION-QUALIFICATION.md`. Its 100-cycle
 sampled-resource soak is distinct from Native command execution, baseline resource

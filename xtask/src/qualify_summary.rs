@@ -2,6 +2,10 @@
 use super::*;
 use serde::Deserialize;
 
+#[path = "corpus_summary.rs"]
+mod corpus;
+pub(super) use corpus::validate as validate_corpus;
+
 #[path = "permission_summary.rs"]
 mod permissions;
 pub(super) use permissions::validate as validate_permissions;
@@ -162,9 +166,13 @@ pub(super) fn validate_resource(
     candidate_hash: &str,
     baseline_hash: &str,
 ) -> Result<Value> {
-    if ["MTM_UPGRADE_RUNTIME ", "MTM_PERMISSION_RUNTIME "]
-        .iter()
-        .any(|marker| std::str::from_utf8(stdout).is_ok_and(|text| text.contains(marker)))
+    if [
+        "MTM_UPGRADE_RUNTIME ",
+        "MTM_PERMISSION_RUNTIME ",
+        "MTM_USABILITY_CORPUS ",
+    ]
+    .iter()
+    .any(|marker| std::str::from_utf8(stdout).is_ok_and(|text| text.contains(marker)))
     {
         return Err("resource output contains foreign profile evidence".into());
     }
@@ -193,9 +201,13 @@ pub(super) fn validate_resource(
 }
 
 pub(super) fn validate(stdout: &[u8], hash: &str, profile: Profile) -> Result<Value> {
-    if ["MTM_UPGRADE_RUNTIME ", "MTM_PERMISSION_RUNTIME "]
-        .iter()
-        .any(|marker| std::str::from_utf8(stdout).is_ok_and(|text| text.contains(marker)))
+    if [
+        "MTM_UPGRADE_RUNTIME ",
+        "MTM_PERMISSION_RUNTIME ",
+        "MTM_USABILITY_CORPUS ",
+    ]
+    .iter()
+    .any(|marker| std::str::from_utf8(stdout).is_ok_and(|text| text.contains(marker)))
     {
         return Err("protocol/target output contains foreign profile evidence".into());
     }

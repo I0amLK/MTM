@@ -13,12 +13,15 @@ mod capability;
 mod check_report;
 mod commit_message;
 mod dist;
+mod evidence_json;
 mod inventory;
 #[cfg(target_os = "linux")]
 mod native_preflight;
 #[cfg(target_os = "linux")]
 mod qualify;
 mod records;
+#[cfg(target_os = "linux")]
+mod release_check;
 mod retirement;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
@@ -66,6 +69,16 @@ fn run() -> Result<()> {
         emit(&root, options.report_name(), &report, options.record)?;
         if report["passed"] != true {
             return Err("exact-candidate qualification failed; see sanitized report".into());
+        }
+        return Ok(());
+    }
+    #[cfg(target_os = "linux")]
+    if name == "release-check" {
+        let options = release_check::Options::parse(options)?;
+        let report = release_check::run(&root, &options)?;
+        emit(&root, "mtm016-release-check.json", &report, options.record)?;
+        if report["passed"] != true {
+            return Err("release readiness blocked; no deployment authorized".into());
         }
         return Ok(());
     }
@@ -146,6 +159,7 @@ fn run() -> Result<()> {
             ] {
                 eprintln!("[source-check] {label}");
                 let status = Command::new(&cargo)
+                    .env_remove("MTM_TEST_CORPUS_PROFILE")
                     .env_remove("MTM_TEST_CANDIDATE")
                     .env_remove("MTM_TEST_CANDIDATE_SHA256")
                     .env_remove("MTM_TEST_TARGET_PROFILE")
@@ -196,6 +210,12 @@ fn run() -> Result<()> {
             }
         }
         "help" | "--help" | "-h" => {
+            println!(
+                "cargo xtask qualify --profile corpus --binary <artifact> --sha256 <sha256> [--record]"
+            );
+            println!(
+                "cargo xtask release-check --binary <artifact> --manifest <repo-relative-json> [--record]"
+            );
             println!(
                 "cargo xtask qualify --profile permissions --binary <artifact> --sha256 <sha256> [--record]"
             );

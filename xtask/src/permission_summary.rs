@@ -69,6 +69,7 @@ pub(crate) fn validate(stdout: &[u8], hash: &str) -> Result<Value> {
         "MTM_RESOURCE_RUNTIME ",
         "MTM_UPGRADE_RUNTIME ",
         "MTM_CANDIDATE_LIFECYCLE ",
+        "MTM_USABILITY_CORPUS ",
     ]
     .iter()
     .any(|marker| output.contains(marker))

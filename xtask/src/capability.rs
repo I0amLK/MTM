@@ -157,11 +157,44 @@ pub(crate) fn source_hash(root: &Path) -> Result<String> {
     Ok(format!("{:x}", hash.finalize()))
 }
 
+/// Recompute a receipt's source identity from immutable Git bytes, not its claim.
+pub(crate) fn source_hash_at(root: &Path, commit: &str) -> Result<String> {
+    if commit.len() != 40 || !commit.bytes().all(|b| b.is_ascii_hexdigit()) {
+        return Err("evidence source commit must be a full Git identity".into());
+    }
+    let listed = git(root, &["ls-tree", "-rz", "--name-only", commit])?;
+    let (paths, _) = inventory::current_paths(&listed, &[])?;
+    let mut hash = Sha256::new();
+    hash.update(b"mtm-rust-source-v1\0");
+    for path in paths {
+        if path.starts_with("crates/")
+            || path.starts_with("xtask/")
+            || [
+                "Cargo.toml",
+                "Cargo.lock",
+                "rust-toolchain.toml",
+                ".cargo/config.toml",
+            ]
+            .contains(&path.as_str())
+        {
+            let bytes = git(root, &["show", &format!("{commit}:{path}")])?;
+            if bytes.len() > 8 * 1024 * 1024 {
+                return Err("historical source file exceeds identity bound".into());
+            }
+            hash.update((path.len() as u64).to_be_bytes());
+            hash.update(path.as_bytes());
+            hash.update(Sha256::digest(bytes));
+        }
+    }
+    Ok(format!("{:x}", hash.finalize()))
+}
+
 pub(crate) fn run(root: &Path) -> Result<Value> {
     let before = source_hash(root)?;
     let cargo = env::var_os("CARGO").unwrap_or_else(|| "cargo".into());
     eprintln!("[capability] built-binary socket/OAuth/500-run regression");
     let output = Command::new(cargo)
+        .env_remove("MTM_TEST_CORPUS_PROFILE")
         .env_remove("MTM_TEST_CANDIDATE")
         .env_remove("MTM_TEST_CANDIDATE_SHA256")
         .env_remove("MTM_TEST_TARGET_PROFILE")

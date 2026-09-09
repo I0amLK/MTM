@@ -2424,6 +2424,42 @@
       "product_source_changed":true,"production_changed":false,"python_files_deleted_this_round":0,
       "remaining_python_files":67,"new_suppressions":0,"rust_only_ready":false,
       "release_qualified":false,"earlier_signature_mismatch_explained":false
+    },
+    {
+      "id":"MTM016-F4-F5-IMPLEMENTATION",
+      "status":"release_blocker_check_implemented_portable_corpus_executed_full_acceptance_pending",
+      "round4_status":"blocked_on_real_environment_and_missing_evidence_adapters",
+      "round5_status":"in_progress",
+      "stage_D_status":"in_progress",
+      "stage_F_status":"in_progress",
+      "base_commit":"3a13720b0576b21f428280f9a64e3caf2c16af8d",
+      "design":"docs/MTM-016-F4-F5-RELEASE-CHECK.md",
+      "candidate_sha256":"589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8",
+      "candidate_source_commit":"cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+      "corpus":{"path":"conformance/mtm016-usability-corpus.json","sha256":"9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861","tasks":30,"repeats":3,"portable_tasks":15,"actual_portable_trials":45,"passed_trials":45,"failed_trials":0,"blocked_trials":45,"independent_disposable_server_per_trial":true,"independent_research_or_human_consent_tested":false},
+      "sealed_reports":[
+        {"path":"records/evidence/MTM-016/native-preflight-f4-3a13720.json","sha256":"1763c74aa4689d39ad497e081f3d885ca6b7e8eb0c1396358d79eaf9eebb28c8","passed":false},
+        {"path":"records/evidence/MTM-016/candidate-corpus-f5-first-rejected.json","sha256":"b059aa3d73631871ac8daab9c53ce8012c47980e0595eae934f24e8ad22ba302","passed":false},
+        {"path":"records/evidence/MTM-016/corpus-f5-first-diagnostics.json","sha256":"c82180aa30659513a036c3689c67028f9d22b172a98c9caaddc8d5b559bca846"},
+        {"path":"records/evidence/MTM-016/f4-f5-development-observations.json","sha256":"9e5b1f02a9f1384509213e68446d623e3a9205f5f1e76088b1883faa96a7c04f"},
+        {"path":"records/evidence/MTM-016/candidate-corpus-f5-composed.json","sha256":"d2027cfc2c0d4f93fcac520a9a6a17f87adf09619576529a093873c3db9c7669","passed":false}
+      ],
+      "validation":[
+        {"command":"cargo fmt --all -- --check","exit_code":0},
+        {"command":"cargo test --locked --offline -p mtm-xtask","exit_code":0,"unit_passed":72,"cli_passed":13},
+        {"command":"cargo clippy --locked --offline --workspace --all-targets -- -D warnings","exit_code":0},
+        {"command":"exact F3 artifact U15 targeted regression","exit_code":0,"tests_passed":1},
+        {"command":"cargo xtask qualify --profile corpus with exact F3 SHA --record","exit_code":1,"runner_exit_code":0,"failed_stage":"corpus_coverage","actual_passes":45,"actual_failures":0,"blocked_trials":45,"candidate_and_corpus_unchanged":true},
+        {"command":"cargo xtask release-check with exact F3 artifact and reviewed manifest","exit_code":1,"validated_gates":5,"blocked_gates":12,"release_qualified":false}
+      ],
+      "release_check_boundary":"Read-only readiness, not deployment permission. Six reviewed adapters reuse source and existing qualification checks; eight evidence categories still need reviewed adapters and remain blocked. Current record/retirement/inventory checks are independent. No caller-controlled pass, skip or approval flag can bypass them. Hashes prove integrity, not an independent human witness.",
+      "failure_repair":"Initial U15 input failed the public syntax schema before reaching the capability guard. Reused the existing catalog syntax-only negative fixture and verified zero writes without relaxing any product validation. All failed observations remain sealed.",
+      "full_source_gate":{"command":"cargo xtask check --record with locked offline persistent environment","exit_code":1,"format_exit":0,"clippy_exit":0,"diff_exit":0,"source_unchanged":true,"harness_source_sha256":"6f00e648b0a67102d0bc7bf30189e2010e38d9d45d277bed0a4bafb6a7ad4269","deployment_unit_passed":6,"deployment_cli_passed":7,"capability_runtime_functions_passed":46,"inert_explicit_profile_functions":5,"runtime_passed":128,"runtime_failed":10,"runtime_ignored":1,"only_failed_target":"mtm-runtime --lib","same_named_native_failure_set_as_F3":true,"maintenance_unit_passed":72,"maintenance_cli_passed":13},
+      "full_source_report":{"path":"records/evidence/MTM-016/source-check-f4-f5-composed.json","sha256":"0604f471da36aca00488218a6d1f3cd91c7949112aeeeca3df015af5c9e88dc3","passed":false},
+      "product_source_changed":false,"new_packages_or_crates":0,"python_files_deleted":0,
+      "remaining_python_files":67,"legacy_rust_reference_files":81,"new_suppressions":0,
+      "production_changed":false,"rust_only_ready":false,"release_qualified":false,
+      "remaining":["Capable-host Native/TTY/CAS and command-grant soak", "Required compiled-LaTeX and real external retrieval", "Independent browser and human consent", "Approved operator-state copy and external installer SIGKILL evidence", "Eight unimplemented forward-evidence adapters and complete 30 x 3 corpus", "Remaining D retirement and final exact-artifact release authorization"]
     }
   ],
   "remaining_acceptance": [
