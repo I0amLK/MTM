@@ -1,6 +1,6 @@
 {
   "audit_completed": true,
-  "base_head": "375c6b4ad3a7740cf8cdd223af0429758ddf4a0c",
+  "base_head": "d9129f05a14228f218f7a8beb7de733217c45db9",
   "interpretation": "Text references are retirement candidates, not proof of a runtime dependency. User Python tools are not forbidden.",
   "legacy_rust_reference_file_count": 81,
   "legacy_rust_reference_files": [
@@ -496,6 +496,6 @@
   ],
   "rust_only_ready": false,
   "schema_version": "1.0.0",
-  "tracked_and_unignored_file_count": 385,
+  "tracked_and_unignored_file_count": 400,
   "uninspected_source_files": []
 }

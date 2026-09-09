@@ -107,7 +107,7 @@
     "observations_reexecuted": false,
     "relocation_count": 32,
     "root_json_count": 0,
-    "sealed_observation_hashes_checked": 16
+    "sealed_observation_hashes_checked": 28
   },
   "live_deployment_checked": false,
   "milestones": 16,

@@ -1,0 +1,13 @@
+{
+  "artifact": "/workspace/mtm-native-016/target/mtm016-f1-dist/mtm-0.6.0-preview.1-496f83ba59578a61833d2bef40085bc6e5771a0d5edb0a30d5aeca7bbccc6183/mtm",
+  "installed": false,
+  "python_invoked": false,
+  "release_qualified": false,
+  "schema_version": "1.0.0",
+  "scope": "byte_bound_distribution_staging",
+  "selector_changed": false,
+  "sha256": "496f83ba59578a61833d2bef40085bc6e5771a0d5edb0a30d5aeca7bbccc6183",
+  "size_bytes": 13580984,
+  "version": "0.6.0-preview.1",
+  "version_label_verified": false
+}

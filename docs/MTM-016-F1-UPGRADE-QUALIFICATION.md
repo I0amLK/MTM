@@ -110,3 +110,39 @@ full gate remains nonzero only for the same ten inherited Native/Bubblewrap test
 An independent clean checkout and restricted compiler/tool PATH are supplemental
 checks. Absence of Python from that PATH is not proof that no interpreter exists
 anywhere on the host, and does not retire the 67 remaining first-party Python files.
+
+## Post-commit observations
+
+Implementation commit: `d9129f05a14228f218f7a8beb7de733217c45db9`.
+A separate `git clone --local --no-hardlinks` of that commit was clean before
+execution. Locked offline release build and all 63 maintenance unit / 11 CLI tests
+passed with the pinned compiler and an explicit C/Git/curl/Bubblewrap tool PATH,
+without a Python executable on that PATH. Build output used a separate target
+directory. This is scoped build/test evidence, not full-host Python removal.
+
+The clean build produced SHA-256
+`496f83ba59578a61833d2bef40085bc6e5771a0d5edb0a30d5aeca7bbccc6183`
+(13,580,984 bytes), distinct from the retained D8 SHA-256
+`955b097c8fdbb781a5ae5d7da9797c1b57d5a84bf755502c25a856016439025f`.
+Both report version 0.6.0-preview.1, schema 7 and mtm-tools-v9. Product source,
+Cargo manifests/lockfile and toolchain pin were unchanged between D8 and F1.
+The byte difference is retained as an observation, not attributed without further
+investigation; no byte-reproducible-build or interchangeable-artifact claim is made.
+
+The original D8 artifact passed post-commit protocol qualification (500 normal
+assessments, no normal INVALID/rejection, full/compact/repair fixtures) and the
+clean-checkout upgrade profile against the exact preview.2 baseline. Upgrade
+passed all 15 declared checks after stopped-copy mode preparation, with an exact
+25-entry / 221,439-byte original snapshot restored before the old runtime resumed.
+The standalone clean-build artifact is assessed separately and never overwrites
+D8 or the production installation. Exact sealed report paths and remaining scope
+are recorded in the F1 delivery receipt.
+
+The clean-build artifact also passed its own 15-check upgrade profile, its own
+500-assessment full/compact/repair protocol qualification, and exact-byte `dist`.
+Both successful upgrade reports bind schema 2 -> 7 -> 2 and original snapshot
+restoration; neither report claims browser, Native execution or compiled LaTeX.
+All four post-commit qualification reports, the byte-identical copied dist report
+and the explicitly labelled clean-build observation are sealed in
+`MTM016-F1-UPGRADE-DELIVERY`. F1 is complete for that conditional fixture scope;
+the overall F stage, production migration and release remain incomplete.

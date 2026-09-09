@@ -2243,6 +2243,51 @@
       "rust_only_ready":false,
       "release_qualified":false,
       "earlier_signature_mismatch_explained":false
+    },
+    {
+      "id": "MTM016-F1-UPGRADE-DELIVERY",
+      "round": "4_of_final_5",
+      "delivery": "Post-commit exact installed-runtime and prepared-copy rollback qualification with independent clean checkout",
+      "status": "completed_for_conditional_F1_fixture_scope_not_full_F_or_release",
+      "stage_D_status": "in_progress",
+      "stage_F_status": "in_progress",
+      "implementation_commit": "d9129f05a14228f218f7a8beb7de733217c45db9",
+      "harness_source_sha256": "83c950e8ebe240f5b1336c0675d0f50b999e1438fa110716e818283f64b26679",
+      "sealed_reports": [
+        {"path":"records/evidence/MTM-016/candidate-upgrade-f1-d9129f0.json","sha256":"9a3f80ddd7144a6c418caf9b8b7d2264ad9ff2517763acdcb3e177e6d414ba93","passed":true},
+        {"path":"records/evidence/MTM-016/candidate-protocol-f1-d9129f0.json","sha256":"5ef3a39d2b3a2284acf72b6a960a5ab96a0fd751c7a75eba8b762a23f1bda8b5","passed":true},
+        {"path":"records/evidence/MTM-016/candidate-upgrade-f1-clean-d9129f0.json","sha256":"c1a89c1cfc8ed7f8357efb872595cb6612a498bdcc9320c2ff92a612cdea2cfd","passed":true},
+        {"path":"records/evidence/MTM-016/candidate-protocol-f1-clean-d9129f0.json","sha256":"2fe3227d34d92b3115d63ced70f735310ca4ce99c867be8da48b5bd7094b75e5","passed":true},
+        {"path":"records/evidence/MTM-016/dist-f1-clean-d9129f0.json","sha256":"3881e5f3d0709ebbcf232acd5735ffff3d13cb81bbf687f0e22194f93e0e42a6"},
+        {"path":"records/evidence/MTM-016/clean-build-f1-d9129f0.json","sha256":"169759518de8c2c7340e8e13c278a11d84b226546aea67ca5394faac3c2d5ded"}
+      ],
+      "artifacts": {
+        "retained_d8": {"sha256":"955b097c8fdbb781a5ae5d7da9797c1b57d5a84bf755502c25a856016439025f","version":"0.6.0-preview.1","protocol_exit":0,"upgrade_exit":0,"production_installed":false},
+        "independent_clean_build": {"sha256":"496f83ba59578a61833d2bef40085bc6e5771a0d5edb0a30d5aeca7bbccc6183","version":"0.6.0-preview.1","bytes":13580984,"protocol_exit":0,"upgrade_exit":0,"dist_exit":0,"production_installed":false},
+        "baseline": {"sha256":"2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a","version":"0.5.0-preview.2","production_data_read":false}
+      },
+      "upgrade_each_artifact": {"checks_passed":15,"selectors":2,"fixture_only":true,"installed_endpoint_tested":true,"schema_path":[2,7,2],"old_run_advances_after_upgrade":true,"new_run_after_upgrade":true,"same_key_restart":true,"snapshot_entries":25,"snapshot_bytes":221439,"original_modes_and_bytes_restored":true,"real_old_runtime_advances_restored_run":true,"legacy_shared_write_entries":5,"prepared_private_mode_entries":6,"private_mode_preparation_is_explicit_prerequisite":true,"snapshot_unchanged":true},
+      "protocol_each_artifact": {"normal_assessments":500,"compact_assessments":250,"full_assessments":250,"normal_invalid":0,"normal_rejections":0,"scripted_complete_flows":3,"full_compact_and_repair":true,"native_backend":"disabled","latex_policy":"static_only","independent_mathematical_verification":false,"web_client_tested":false},
+      "clean_checkout": {"clone_head_matches_implementation":true,"initially_clean":true,"tracked_sources_unchanged":true,"build_locked_offline":true,"build_exit":0,"maintenance_unit_passed":63,"maintenance_cli_passed":11,"maintenance_failed":0,"separate_build_target_directory":true,"python_on_build_and_qualification_path":false,"whole_host_python_absence_claim":false},
+      "build_identity_boundary": "Product source, manifests, Cargo.lock and toolchain pin are unchanged, but the independent artifact SHA differs from D8. Both exact artifacts were separately qualified for declared protocol/upgrade scopes; no silent substitution, reproducibility, performance or release claim is made. The byte difference is not attributed here.",
+      "source_gate": {"serial_run_exit":1,"format_exit":0,"clippy_exit":0,"diff_exit":0,"deployment_passed":6,"deployment_failed":0,"capability_runtime_functions_passed":42,"inert_explicit_profile_functions":3,"runtime_passed":128,"runtime_failed":10,"runtime_ignored":1,"same_named_Native_failure_set_as_D8":true,"new_suppressions":0},
+      "failures_preserved": ["Fresh exact D8 target and resource checks blocked before candidate launch at Native preflight ENOSPC", "Unprepared legacy private-mode upgrade returned FILE_EFFECT_CONFLICT with no accepted writes", "First composed source run had one extra repeat-install failure while Cargo jobs shared a target directory; unchanged sequential full rerun passed installation tests, without proving the original cause"],
+      "final_retirement": {"retired_python_files":60,"remaining_python_files":67,"legacy_rust_reference_files":81,"pending_git_deletions":0,"audit_strict_exit":1,"rust_only_ready":false},
+      "remaining": [
+        "Full F: capable-host Native safe/trusted/dangerous, TTY/timeout/descendant cleanup and available CAS tools",
+        "Full F: real compiled-LaTeX full/compact/repair plus actual external retrieval and real browser/human-consent evidence",
+        "Full F: exact equivalent baseline/candidate resource measurements and 60-90 second permission-grant soak",
+        "Full F: explicitly authorized copied operator production data, unprepared legacy-mode migration procedure, and abrupt install/power-loss recovery",
+        "Full D: remaining 67 Python files, legacy Rust references and residual governance/release-parser coverage",
+        "30-task x3 representative research corpus and final exact-artifact release decision"
+      ],
+      "completion_boundary": "F1 is accepted only for explicit prepared disposable state using real reviewed old/current runtimes and exact snapshots. It is not a production migration, not full round-4 completion and not a waiver of failed Native gates.",
+      "production_changed":false,
+      "product_source_changed":false,
+      "python_files_deleted_this_round":0,
+      "rust_only_ready":false,
+      "release_qualified":false,
+      "earlier_signature_mismatch_explained":false
     }
   ],
   "remaining_acceptance": [
