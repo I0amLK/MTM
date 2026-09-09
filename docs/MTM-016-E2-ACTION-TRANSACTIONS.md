@@ -47,3 +47,27 @@ now establishes its read view using read-only status before freezing the complet
 directory. It still compares all database, WAL, SHM and private bytes; a separate
 positive-control regression detects real SQL and file writes. No assertion or test
 is suppressed, no product projector code changed, and no weak isolation mode is used.
+
+## Delivery
+
+Implementation `b3c9ad11d1d68b3055f243dfa7dbd280b5b1f537` passed 13 added tests:
+nine storage, one workflow measurement positive control and three authenticated
+socket fixture functions. The public fixtures cover assessment, exploration,
+proof submission/escalation, repair and conservative branch handling across
+injected failures and actual forced process restarts. Existing catalog tests were
+extended, not counted as additional new tests.
+
+The schema-7 artifact `target/mtm016-e2-actions/release/mtm`, SHA-256
+`991ad6ccef4d7cdf881c17924cd79b26fb35b437d601c691ab01079d5b529455`, passed
+post-commit protocol qualification with unchanged artifact and harness identities.
+Its raw report is sealed as
+`records/evidence/MTM-016/candidate-protocol-e2-actions-b3c9ad1.json`. The original
+failed source report remains separately sealed and is not relabelled as success.
+
+Final source checks passed 65 storage, 103 workflow and 29 gateway tests, and all
+36 public fixture functions (two host-profile functions remain inert). Runtime
+still has the same ten nested-Bubblewrap failures; the aggregate remains false.
+The exact-artifact protocol includes 500 assessment first hops and three scripted
+complete flows, not independent proofs or browser/Native/compiled-LaTeX acceptance.
+Only the four enrolled database-only actions are closed by this delivery. Other
+action file effects, mechanical phases, Python retirement and release remain open.
