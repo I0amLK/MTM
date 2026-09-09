@@ -2124,6 +2124,33 @@
       "rust_only_ready": false,
       "release_qualified": false,
       "earlier_signature_mismatch_explained": false
+    },
+    {
+      "id": "MTM016-D8-GROUPED-RETIREMENT",
+      "round": "3_of_final_5",
+      "status": "reviewed_family_deletion_exact_candidate_seal_pending",
+      "stage_D_status": "in_progress",
+      "replacement_commit": "45d67572403bdbf45e82ce8e5e37aad055f339cc",
+      "ledger": "records/governance/python-retirement.json",
+      "ledger_sha256": "42f7af21c3d6ed3dd2d261d9d89ed471a072e626a4d71e7889ef795c94b2a864",
+      "baseline_commit": "b3ab147b72d72aa546c9c41bdbe71924aa5ebb97",
+      "python_counts": {"baseline": 127, "previously_retired": 11, "deleted_this_round": 49, "retired_total": 60, "remaining": 67, "direct_rust_replacements": 8, "historical_comparisons_retired": 4, "consolidated_with_pending_acceptance": 48},
+      "families": {"historical_and_mtm015_target_qualification": 14, "release_install_cutover_and_candidate_staging": 32, "release_deployment_python_tests": 2},
+      "additional_orphan_removed": "scripts/check_capability_current.py no longer has a target/release caller; current/exact-binary Rust capability gates own its forward responsibility",
+      "residual_callers": "run_checks and governance tests no longer invoke deleted release/target modules. The retained historical browser adapter delegates receipt policy to Rust and verifies only the frozen candidate. It is explicitly not counted as retired or as new browser acceptance.",
+      "verification": [
+        {"command": "cargo xtask retirement --record", "exit_code": 0, "baseline_hashes_checked": 60},
+        {"command": "cargo xtask audit --record", "exit_code": 0, "python_files_remaining": 67, "rust_only_ready": false},
+        {"command": "cargo xtask records", "exit_code": 0, "historical_evidence_unchanged": true},
+        {"command": "git diff --check", "exit_code": 0},
+        {"command": "residual Python unittest discovery after orphan deletion", "exit_code": 1, "passed": 39, "failures": 1, "errors": 2, "skipped": 1, "new_missing_module_errors": 0}
+      ],
+      "scope_correction": "The preliminary 59-retired/55-replaced progress summary preceded removal of the orphan checker and did not distinguish consolidation from completed forward replacement. The authoritative split is now 60 retired: 8 direct replacements, 4 historical comparisons and 48 consolidations with explicit pending acceptance. Neither the ledger nor file counts prove runtime parity.",
+      "unchanged_requirements": "Every family pending_acceptance remains a release blocker. Full Native/permission/TTY/CAS, compiled-LaTeX/retrieval/browser, copied real state, clean-clone install, equivalent resource measurements, permission soak and reversible installed upgrade must not be inferred from historical integrity or local selector tests.",
+      "rollback": "Restore this retirement commit before reverting 45d6757 and 1097188; original Python bytes remain recoverable from the pinned baseline. No production data rollback is needed for this source-only change.",
+      "production_changed": false,
+      "rust_only_ready": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [

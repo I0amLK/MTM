@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-"""Validate the side-by-side MTM-015 content-addressed candidate stage."""
+"""Resolve the immutable MTM-015 staged artifact for retained browser checks.
+
+Historical target/install acceptance is owned by Rust record integrity. This
+bridge verifies the frozen receipt and exact candidate bytes only; it does not
+inspect production selectors or re-qualify an installation.
+"""
 from __future__ import annotations
 
 import hashlib
 import json
-import re
+import os
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -12,23 +17,6 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / "records/evidence/MTM-015/candidate-stage.json"
-TARGET = ROOT / "records/evidence/MTM-015/target-qualification.json"
-SELECTOR = Path("/home/lk/.local/bin/mtm")
-CARGO_ENTRY = Path("/home/lk/.cargo/bin/mtm")
-INSTALLED = Path("/home/lk/.local/share/mtm/releases/0.5.0-preview.1/mtm")
-STABLE = Path("/home/lk/.local/share/mtm/releases/0.4.0/mtm")
-STABLE_SHA = "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3"
-CHECK_NAMES = {
-    "target_evidence_valid",
-    "rebuilt_candidate_matches_target",
-    "content_addressed_install_exact",
-    "installed_endpoint_identity",
-    "installed_endpoint_capability_roundtrip",
-    "installed_endpoint_mcp_oauth_discovery",
-    "installed_persisted_secret_owner_only",
-    "selectors_unchanged",
-    "stable_rollback_artifact_preserved",
-}
 
 
 def require(value: Any, label: str) -> None:
@@ -37,91 +25,59 @@ def require(value: Any, label: str) -> None:
 
 
 def digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    require(path.is_file() and not path.is_symlink(), "regular_artifact_required")
+    require(path.stat().st_size <= 512 * 1024 * 1024, "artifact_size_bound")
+    value = hashlib.sha256()
+    total = 0
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(65536), b""):
+            total += len(chunk)
+            require(total <= 512 * 1024 * 1024, "artifact_growth_bound")
+            value.update(chunk)
+    return value.hexdigest()
 
 
 def validate(payload: dict[str, Any] | None = None) -> dict[str, Any]:
-    payload = payload or json.loads(REPORT.read_text(encoding="utf-8"))
-    target = json.loads(TARGET.read_text(encoding="utf-8"))
-    required = {
-        "schema_version", "milestone", "phase", "version", "ok", "recorded_at",
-        "implementation_commit", "target_qualification_commit", "stage_commit",
-        "target_evidence_sha256", "candidate_binary_sha256", "candidate_path",
-        "checks", "check_count", "endpoint", "harness_sha256", "web_client_tested",
-        "installed_endpoint_tested", "selector_changed", "production_state_rewritten",
-        "evidence_hygiene",
-    }
-    require(set(payload) == required, "candidate_stage_fields")
-    require(payload["schema_version"] == "1.0.0", "schema_version")
-    require(payload["milestone"] == "MTM-015" and payload["phase"] == "candidate_stage",
-            "candidate_stage_identity")
-    require(payload["ok"] is True and payload["version"] == "0.5.0-preview.2",
-            "candidate_stage_version")
-    require(payload["candidate_binary_sha256"] == target["binary_sha256"],
-            "target_binary_binding")
-    require(payload["target_evidence_sha256"] == digest(TARGET), "target_evidence_binding")
-    require(re.fullmatch(r"[0-9a-f]{40}", payload["stage_commit"]) is not None, "stage_commit")
-    checks = payload["checks"]
-    require(isinstance(checks, dict) and set(checks) == CHECK_NAMES, "stage_check_set")
-    require(all(value is True for value in checks.values()), "stage_checks")
-    require(payload["check_count"] == len(CHECK_NAMES), "stage_check_count")
+    # Rust owns all historical receipt policy. This residual browser adapter only
+    # selects that frozen artifact; it is not a second install/release validator.
+    completed = subprocess.run(
+        [os.environ.get("CARGO", "cargo"), "xtask", "records"], cwd=ROOT,
+        stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        text=True, check=True, timeout=60,
+    )
+    integrity = json.loads(completed.stdout)
+    require(integrity.get("ok") is True, "rust_record_integrity")
+    stage = integrity["historical_releases"]["mtm015_lifecycle_evidence"]["candidate_stage"]
+    require(REPORT.stat().st_size <= 65536, "receipt_size_bound")
+    with REPORT.open("rb") as source:
+        raw = source.read(65537)
+    require(len(raw) <= 65536 and hashlib.sha256(raw).hexdigest() == stage["sha256"],
+            "frozen_receipt_binding")
+    frozen = json.loads(raw)
+    require(payload is None or payload == frozen, "alternate_receipt_not_allowed")
+    payload = frozen
     candidate = Path(payload["candidate_path"])
     expected = Path(
-        f"/home/lk/.local/share/mtm/candidates/MTM-015/{payload['candidate_binary_sha256']}/mtm"
+        f"/home/lk/.local/share/mtm/candidates/MTM-015/{stage['candidate_binary_sha256']}/mtm"
     )
     require(candidate == expected and candidate.is_file(), "candidate_path")
-    require(digest(candidate) == payload["candidate_binary_sha256"], "candidate_binary_drift")
-    require(SELECTOR.resolve() == INSTALLED and CARGO_ENTRY.resolve() == INSTALLED,
-            "selector_drift")
-    require(digest(SELECTOR) == digest(CARGO_ENTRY) == digest(INSTALLED), "selector_bytes")
-    require(STABLE.is_file() and digest(STABLE) == STABLE_SHA, "stable_drift")
-    require(payload["installed_endpoint_tested"] is True, "installed_endpoint_tested")
-    require(payload["web_client_tested"] is False, "web_client_claim")
-    require(payload["selector_changed"] is False, "selector_changed")
-    require(payload["production_state_rewritten"] is False, "production_state_rewritten")
-    require(
-        payload["evidence_hygiene"]
-        == {
-            "raw_capability_recorded": False,
-            "raw_oauth_token_recorded": False,
-            "raw_secret_recorded": False,
-            "raw_logs_recorded": False,
-        },
-        "evidence_hygiene",
-    )
-    harness = payload["harness_sha256"]
-    require(
-        set(harness)
-        == {
-            "scripts/run_mtm015_candidate_stage.py",
-            "scripts/validate_mtm015_candidate_stage.py",
-        },
-        "stage_harness_files",
-    )
-    for path, expected_hash in harness.items():
-        require(digest(ROOT / path) == expected_hash, f"stage_harness_drift:{path}")
-    require(
-        subprocess.run(
-            ["git", "merge-base", "--is-ancestor", payload["stage_commit"], "HEAD"],
-            cwd=ROOT,
-            check=False,
-        ).returncode == 0,
-        "stage_commit_not_ancestor",
-    )
+    require(digest(candidate) == stage["candidate_binary_sha256"], "candidate_binary_drift")
     return {
-        "report_sha256": digest(REPORT),
-        "candidate_binary_sha256": payload["candidate_binary_sha256"],
+        "report_sha256": stage["sha256"],
+        "candidate_binary_sha256": stage["candidate_binary_sha256"],
         "candidate_path": str(candidate),
         "check_count": payload["check_count"],
         "web_client_pending": True,
+        "historical_install_revalidated": False,
+        "live_selectors_checked": False,
     }
 
 
 def main() -> int:
     try:
         summary = validate()
-    except (OSError, json.JSONDecodeError, ValueError) as error:
-        print(json.dumps({"ok": False, "error": str(error)}))
+    except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError):
+        print(json.dumps({"ok": False, "error": "frozen candidate bridge validation failed"}))
         return 1
     print(json.dumps({"ok": True, "summary": summary}, indent=2))
     return 0

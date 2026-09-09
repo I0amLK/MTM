@@ -51,6 +51,13 @@ Missing coverage remains listed as pending, never converted to a green check.
 
 ## Retirement map
 
+Round 3/5 (D8) consolidates the reviewed target/release/install family. Its
+replacement mechanics and regression repairs are committed before the separate
+Python deletion. The family ledger keeps forward acceptance gaps explicit rather
+than treating file removal as parity: 60 baseline files are retired, 67 remain,
+and full D/F acceptance is still open. See
+`docs/MTM-016-D8-FAMILY-RETIREMENT.md` and the D8 receipts in `ITER-016.json`.
+
 The C-stage registry/alias checkpoint is documented in
 `docs/MTM-016-TOOL-CONTRACT.md`. It uses the separate `0.6.0-preview.1` development
 identity, not the installed preview.2 release identity. No deployment is implied.

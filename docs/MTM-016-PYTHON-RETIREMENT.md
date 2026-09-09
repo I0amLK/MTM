@@ -1,6 +1,17 @@
 # Python retirement: reviewed responsibilities, not a line-count target
 
-## Current third-batch checkpoint
+## Current D8 grouped-retirement checkpoint
+
+Round 3/5 removes 49 target/release/install-family files, including the now-orphaned
+external-binary capability checker. **60 of the original 127 Python files are
+retired; 67 remain.** The ledger now distinguishes 8 direct Rust replacements,
+4 historical comparisons and 48 consolidated family files whose forward
+acceptance remains explicitly pending. This corrects the provisional broader
+"replaced_by_rust" classification; deletion provenance is not runtime parity.
+See `docs/MTM-016-D8-FAMILY-RETIREMENT.md` and the D8 iteration receipts for the
+complete responsibility map, installation safety tests and unchanged F gates.
+
+## Historical third-batch checkpoint
 
 Nine baseline Python files have now been retired; 118 remain. After `df6660c`
 fixed inherited numeric validation and `3f0fb44` introduced independent Rust policy

@@ -87,55 +87,7 @@ def resolve_tool_environment() -> tuple[dict[str, str], str | None, str | None]:
 def main() -> int:
     environment, cargo, rustc = resolve_tool_environment()
     progress = json.loads((ROOT / "records/governance/project-progress.json").read_text(encoding="utf-8"))
-    selector = Path("/home/lk/.local/bin/mtm")
     current_milestone = progress.get("current_milestone")
-    mtm015_source_mode = current_milestone == "MTM-015"
-    mtm014_release_context = current_milestone in {"MTM-014", "MTM-015"}
-    mtm014_preview_selected = (
-        mtm014_release_context and selector.is_symlink()
-        and "/releases/0.5.0-preview.1/" in str(selector.resolve())
-    )
-    mtm013_stable_deployed_mode = (
-        progress.get("version") == "0.4.0"
-        and current_milestone in {"MTM-013", "MTM-014", "MTM-015"}
-        and progress.get("status")
-        in {"MTM-013-in-progress", "MTM-013-completed", "MTM-014-in-progress", "MTM-014-completed", "MTM-015-in-progress"}
-        and (ROOT / "records/evidence/MTM-013/stable-release.json").is_file()
-        and selector.is_symlink()
-        and "/releases/0.4.0/" in str(selector.resolve())
-    )
-    mtm009_preview_mode = (
-        str(progress.get("version") or "").startswith("0.4.0-preview.")
-        and progress.get("current_milestone") == "MTM-009"
-        and progress.get("status") == "MTM-009-in-progress"
-    )
-    mtm011_preview_mode = (
-        progress.get("version") == "0.4.0-preview.2"
-        and progress.get("current_milestone") in {"MTM-011", "MTM-012"}
-        and progress.get("status")
-        in {"MTM-011-in-progress", "MTM-011-completed", "MTM-012-in-progress"}
-    )
-    mtm012_preview_mode = (
-        progress.get("version") in {"0.4.0-preview.3", "0.4.0"}
-        and progress.get("current_milestone") in {"MTM-012", "MTM-013"}
-        and progress.get("status")
-        in {"MTM-012-in-progress", "MTM-012-completed", "MTM-013-in-progress"}
-        and not mtm013_stable_deployed_mode
-    )
-    current_preview_mode = mtm011_preview_mode or mtm012_preview_mode
-    historical_release_mode = (
-        mtm009_preview_mode or current_preview_mode or mtm013_stable_deployed_mode or mtm014_release_context
-    )
-    mtm011_cutover_mode = current_preview_mode or mtm013_stable_deployed_mode or mtm014_release_context
-    mtm012_source_mode = (
-        progress.get("current_milestone") == "MTM-012"
-        and progress.get("status") == "MTM-012-in-progress"
-    )
-    mtm013_stable_source_mode = (
-        progress.get("current_milestone") == "MTM-013"
-        and progress.get("status") == "MTM-013-in-progress"
-        and progress.get("version") == "0.4.0"
-    )
     checks: list[dict[str, Any]] = [
         run(
             "migration_graph",
@@ -201,45 +153,6 @@ def main() -> int:
                 capture_json=True,
             )
         )
-    if (ROOT / "records/evidence/MTM-014/preview-qualification.json").is_file():
-        checks.append(run(
-            "mtm014_preview_qualification", [sys.executable, "scripts/validate_mtm014_preview_release.py"],
-            env=environment, capture_json=True,
-        ))
-    mtm015_release_record = ROOT / "records/evidence/MTM-015/preview-release.json"
-    mtm015_released = mtm015_release_record.is_file()
-    if (ROOT / "records/evidence/MTM-014/preview-release.json").is_file() or mtm014_preview_selected:
-        checks.append(run(
-            "mtm014_preview_release_historical" if mtm015_released else "mtm014_preview_deployment",
-            [sys.executable, "scripts/validate_mtm014_historical_release.py"]
-            if mtm015_released
-            else [sys.executable, "scripts/validate_mtm014_preview_release.py", "--deployed"],
-            env=environment, capture_json=True,
-        ))
-    if (ROOT / "records/evidence/MTM-015/target-qualification.json").is_file():
-        checks.append(run(
-            "mtm015_target_qualification",
-            [sys.executable, "scripts/validate_mtm015_target_qualification.py"],
-            env=environment, capture_json=True,
-        ))
-    if (ROOT / "records/evidence/MTM-015/candidate-stage.json").is_file() and not mtm015_released:
-        checks.append(run(
-            "mtm015_candidate_stage",
-            [sys.executable, "scripts/validate_mtm015_candidate_stage.py"],
-            env=environment, capture_json=True,
-        ))
-    if (ROOT / "records/evidence/MTM-015/web-client.json").is_file() and not mtm015_released:
-        checks.append(run(
-            "mtm015_web_client",
-            [sys.executable, "scripts/validate_mtm015_web_client.py"],
-            env=environment, capture_json=True,
-        ))
-    if mtm015_released:
-        checks.append(run(
-            "mtm015_preview_release",
-            [sys.executable, "scripts/validate_mtm015_preview_release.py"],
-            env=environment, capture_json=True,
-        ))
     if progress.get("current_milestone") == "MTM-013":
         checks.append(
             run(
@@ -252,36 +165,8 @@ def main() -> int:
         if (ROOT / "records/evidence/MTM-013/stable-qualification.json").is_file():
             checks.append(
                 run(
-                    "mtm013_stable_qualification",
-                    [sys.executable, "scripts/validate_mtm013_stable_qualification.py"],
-                    env=environment,
-                    capture_json=True,
-                )
-            )
-            checks.append(
-                run(
                     "mtm013_stable_resource",
                     [sys.executable, "scripts/validate_mtm013_stable_resource.py"],
-                    env=environment,
-                    capture_json=True,
-                )
-            )
-
-        if (ROOT / "records/evidence/MTM-013/public-install.json").is_file():
-            checks.append(
-                run(
-                    "mtm013_public_install",
-                    [sys.executable, "scripts/validate_mtm013_public_install.py"],
-                    env=environment,
-                    capture_json=True,
-                )
-            )
-
-        if (ROOT / "records/evidence/MTM-013/stable-release.json").is_file():
-            checks.append(
-                run(
-                    "mtm013_stable_release",
-                    [sys.executable, "scripts/validate_mtm013_stable_release.py"],
                     env=environment,
                     capture_json=True,
                 )
@@ -320,17 +205,11 @@ def main() -> int:
                      "--test", "policy_corpus", "--test", "policy_cli"],
                     env=environment,
                 ),
-                *(
-                    []
-                    if mtm011_cutover_mode
-                    else [
-                        run(
-                            "mtm003_conformance",
-                            [sys.executable, "scripts/run_mtm003_conformance.py"],
-                            env=environment,
-                            capture_json=True,
-                        )
-                    ]
+                run(
+                    "mtm003_conformance",
+                    [sys.executable, "scripts/run_mtm003_conformance.py"],
+                    env=environment,
+                    capture_json=True,
                 ),
                 run(
                     "mtm004_conformance",
@@ -352,134 +231,6 @@ def main() -> int:
                 run(
                     "mtm007_conformance",
                     [sys.executable, "scripts/run_mtm007_conformance.py"],
-                    env=environment,
-                    capture_json=True,
-                ),
-                *(
-                    [
-                        *(
-                            [
-                                run(
-                                    "mtm009_preview_release",
-                                    [sys.executable, "scripts/validate_mtm009_preview_release.py"],
-                                    env=environment,
-                                    capture_json=True,
-                                )
-                            ]
-                            if mtm009_preview_mode
-                            else (
-                                []
-                                if mtm013_stable_deployed_mode or mtm014_release_context
-                                else (
-                                [
-                                    *(
-                                        []
-                                        if mtm013_stable_source_mode
-                                        else [
-                                            run(
-                                                "mtm012_tui_validation",
-                                                [
-                                                    sys.executable,
-                                                    "scripts/validate_mtm012_tui_validation.py",
-                                                ],
-                                                env=environment,
-                                                capture_json=True,
-                                            )
-                                        ]
-                                    ),
-                                    run(
-                                        "mtm012_preview_release",
-                                        [
-                                            sys.executable,
-                                            "scripts/validate_mtm012_preview_release.py",
-                                        ],
-                                        env=environment,
-                                        capture_json=True,
-                                    ),
-                                ]
-                                if mtm012_preview_mode
-                                else [
-                                    *(
-                                        []
-                                        if mtm012_source_mode
-                                        else [
-                                            run(
-                                                "mtm011_cutover_source",
-                                                [
-                                                    sys.executable,
-                                                    "scripts/validate_mtm011_cutover_source.py",
-                                                ],
-                                                env=environment,
-                                                capture_json=True,
-                                            )
-                                        ]
-                                    ),
-                                    run(
-                                        "mtm011_cutover_resource",
-                                        [
-                                            sys.executable,
-                                            "scripts/validate_mtm011_cutover_resource.py",
-                                        ],
-                                        env=environment,
-                                        capture_json=True,
-                                    ),
-                                    run(
-                                        "mtm011_preview_release",
-                                        [
-                                            sys.executable,
-                                            "scripts/validate_mtm011_preview_release.py",
-                                        ],
-                                        env=environment,
-                                        capture_json=True,
-                                    ),
-                                ]
-                                )
-                            )
-                        ),
-                    ]
-                    if historical_release_mode
-                    else [
-                        run(
-                            "mtm003_target_evidence",
-                            [sys.executable, "scripts/validate_mtm003_target_evidence.py"],
-                            env=environment,
-                            capture_json=True,
-                        ),
-                        run(
-                            "mtm004_target_evidence",
-                            [sys.executable, "scripts/validate_mtm004_target_evidence.py"],
-                            env=environment,
-                            capture_json=True,
-                        ),
-                        run(
-                            "mtm005_target_evidence",
-                            [sys.executable, "scripts/validate_mtm005_target_evidence.py"],
-                            env=environment,
-                            capture_json=True,
-                        ),
-                        run(
-                            "mtm006_target_evidence",
-                            [sys.executable, "scripts/validate_mtm006_target_evidence.py"],
-                            env=environment,
-                            capture_json=True,
-                        ),
-                        run(
-                            "mtm007_target_evidence",
-                            [sys.executable, "scripts/validate_mtm007_target_evidence.py"],
-                            env=environment,
-                            capture_json=True,
-                        ),
-                        run(
-                            "mtm008_candidate_evidence",
-                            [sys.executable, "scripts/validate_mtm008_candidate_evidence.py"],
-                            env=environment,
-                            capture_json=True,
-                        ),
-                    ]
-                ),
-                run(
-                    "mtm_command_namespace",
-                    [sys.executable, "scripts/validate_mtm_command_namespace.py"],
                     env=environment,
                     capture_json=True,
                 ),
@@ -539,38 +290,10 @@ def main() -> int:
         "passed": all(item["passed"] for item in checks),
         "checks": checks,
         "local_claim": (
-            "MTM-015 0.5.0-preview.2 is selected for new launches with exact target, installed-candidate, "
-            "clean real web-client and real rollback/recutover release receipts. Historical MTM-014 "
-            "preview.1 release evidence is revalidated statically after supersession; stable 0.4.0 is "
-            "preserved and existing sessions are not restarted by selector changes."
-            if mtm015_released else
-            (
-            (
-                "MTM-015 source reliability repair is in progress while the qualified MTM-014 "
-                "0.5.0-preview.1 binary remains selected for new launches. Current-source capability "
-                "regression is mandatory; no release selector or production state is changed by this gate."
-                if mtm015_source_mode
-                else
-                "MTM-014 preview is selected for new launches. Its separate release and deployment "
-                "gates bind exact Native authority, rollback/recutover and bounded soak evidence; "
-                "stable 0.4.0 is preserved. Existing sessions are not restarted by selector changes."
-            )
-            if mtm014_preview_selected else
-            (
-                "MTM 0.4.0 is the active stable command for new launches under Rust authority. "
-                "The public Git install, exact stable binary identity, workflow protocol 3 default, "
-                "explicit protocol-2 rollback, selector rollback/recutover, command namespace, "
-                "state schema 2, 24 public tools, 11 hidden aliases, and proof_verified.tex "
-                "finalization path are locally validated. Historical MTM-001 through MTM-012 "
-                "evidence remains immutable; existing runs are not rewritten by the stable cutover."
-            )
-            if mtm013_stable_deployed_mode
-            else (
-                "MTM-001 through MTM-012 remain accepted historical milestones with immutable "
-                "hash-bound evidence while MTM-013 stable qualification is in progress. The only "
-                "final mathematical artifact remains proof_verified.tex."
-            )
-            )
+            "Historical target and release receipts are validated statically by Rust without live "
+            "selector checks. This source gate does not claim current release qualification or a "
+            "production cutover; ordinary-host D6/D7 qualification plus browser and permission "
+            "soak remain separate manual acceptance work."
         ),
     }
     temporary = REPORT.with_name(REPORT.name + ".tmp")

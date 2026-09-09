@@ -1,10 +1,39 @@
 {
-  "baseline_hashes_checked": 11,
+  "baseline_hashes_checked": 60,
+  "consolidated_with_pending_acceptance": 48,
   "historical_comparisons_retired": 4,
   "ok": true,
+  "pending_family_acceptance": [
+    {
+      "family": "historical_and_mtm015_target_qualification",
+      "pending": [
+        "F: exact current candidate on a capable Native host, safe/trusted/dangerous permission suites, TTY/timeout/descendant cleanup and available CAS tools",
+        "F: required compiled-LaTeX full/compact/repair flows, real retrieval and browser OAuth/consent; protocol-only tests do not discharge these",
+        "F: operator-authorized copied production state and old-run resume/rollback; the existing synthetic v1 fixture is not equivalent"
+      ]
+    },
+    {
+      "family": "release_install_cutover_and_candidate_staging",
+      "pending": [
+        "F: clean-clone Python-free locked build/test/distribution and exact candidate identity",
+        "F: equivalent baseline/candidate resource samples and a 60-90 second permission-grant soak with at least 100 iterations",
+        "F: independently observed real web-client roundtrips and human consent where required, never inferred from frozen historical evidence",
+        "F: reversible installed-runtime upgrade using verified previous artifacts and pre-upgrade database copies; install/status/rollback here test selector mechanics only",
+        "F: abrupt process interruption or power-loss during multi-selector/manifest update is not covered by ordinary error compensation"
+      ]
+    },
+    {
+      "family": "release_deployment_python_tests",
+      "pending": [
+        "F: validate complete current release evidence schema and mandatory target/browser/resource/soak gates before any release verdict",
+        "F: old resource/soak/qualification-parser mutation fixtures are preserved at the baseline; Rust frozen-byte checks protect history but do not claim forward parser equivalence"
+      ]
+    }
+  ],
   "release_qualified": false,
-  "replaced_by_rust": 7,
-  "retired_python_files": 11,
+  "replaced_by_rust": 8,
+  "retired_python_files": 60,
+  "retirement_families": 3,
   "runtime_parity_proven": false,
   "scope": "reviewed_python_deletion_provenance"
 }

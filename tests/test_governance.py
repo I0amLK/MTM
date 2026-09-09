@@ -14,22 +14,12 @@ from pathlib import Path
 from scripts.validate_engineering_graph import validate_graph as validate_engineering
 from scripts.validate_migration_graph import load_graph, validate_graph as validate_migration
 from scripts.record_paths import resolve_repository_record
-from scripts.validate_mtm003_target_evidence import validate as validate_mtm003_target
-from scripts.validate_mtm004_target_evidence import validate as validate_mtm004_target
-from scripts.validate_mtm005_target_evidence import validate as validate_mtm005_target
-from scripts.validate_mtm006_target_evidence import validate as validate_mtm006_target
-from scripts.validate_mtm007_target_evidence import validate as validate_mtm007_target
-from scripts.validate_mtm008_candidate_evidence import validate as validate_mtm008_candidate
-from scripts.validate_mtm_command_namespace import validate as validate_mtm_command_namespace
-from scripts.validate_mtm009_preview_release import validate as validate_mtm009_preview_release
 from scripts.validate_mtm009_research_contract import validate as validate_mtm009_research_contract
 from scripts.validate_mtm011_math_corpus import validate as validate_mtm011_math_corpus
 from scripts.validate_mtm011_math_evaluation import (
     aggregate_complete as aggregate_mtm011_complete,
     validate as validate_mtm011_math_evaluation,
 )
-from scripts.validate_mtm011_preview_release import validate as validate_mtm011_preview_release
-from scripts.validate_mtm012_preview_release import validate as validate_mtm012_preview_release
 from scripts.validate_mtm013_runtime_hardening import validate as validate_mtm013_runtime_hardening
 from scripts.validate_mtm013_exact_stable_semantic_regression import (
     validate as validate_mtm013_exact_stable_semantic_regression,
@@ -37,59 +27,6 @@ from scripts.validate_mtm013_exact_stable_semantic_regression import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-
-
-def deployment_mode() -> str:
-    progress = json.loads((ROOT / "records/governance/project-progress.json").read_text(encoding="utf-8"))
-    milestone = progress.get("current_milestone")
-    if milestone == "MTM-015" and (ROOT / "records/evidence/MTM-015/preview-release.json").is_file():
-        return "mtm015_preview"
-    if milestone in {"MTM-014", "MTM-015"} and (ROOT / "records/evidence/MTM-014/preview-release.json").is_file():
-        return "mtm014_preview"
-    stable_report = ROOT / "records/evidence/MTM-013/stable-release.json"
-    stable_selector = Path("/home/lk/.local/bin/mtm")
-    if (
-        progress.get("version") == "0.4.0"
-        and milestone in {"MTM-013", "MTM-014"}
-        and progress.get("status")
-        in {"MTM-013-in-progress", "MTM-013-completed", "MTM-014-in-progress", "MTM-014-completed"}
-        and stable_report.is_file()
-        and stable_selector.is_symlink()
-        and "/releases/0.4.0/" in str(stable_selector.resolve())
-    ):
-        return "mtm013_stable"
-    if (
-        str(progress.get("version") or "").startswith("0.4.0-preview.")
-        and milestone == "MTM-009"
-        and progress.get("status") == "MTM-009-in-progress"
-    ):
-        return "mtm009_preview"
-    if (
-        progress.get("version") == "0.4.0-preview.2"
-        and milestone in {"MTM-011", "MTM-012"}
-        and progress.get("status")
-        in {"MTM-011-in-progress", "MTM-011-completed", "MTM-012-in-progress"}
-    ):
-        return "mtm011_preview"
-    if (
-        progress.get("version") in {"0.4.0-preview.3", "0.4.0"}
-        and milestone in {"MTM-012", "MTM-013"}
-        and progress.get("status")
-        in {"MTM-012-in-progress", "MTM-012-completed", "MTM-013-in-progress"}
-    ):
-        return "mtm012_preview"
-    return "non_preview"
-
-
-def historical_evidence_mode() -> bool:
-    return deployment_mode() in {
-        "mtm009_preview",
-        "mtm011_preview",
-        "mtm012_preview",
-        "mtm013_stable",
-        "mtm014_preview",
-        "mtm015_preview",
-    }
 
 
 @lru_cache(maxsize=1)
@@ -108,7 +45,7 @@ def rust_record_integrity() -> dict[str, object]:
 def historical_check_count(milestone: str) -> int:
     summary = rust_record_integrity()["historical_releases"]
     assert isinstance(summary, dict)
-    evidence = summary["evidence"]
+    evidence = summary["target_evidence"]
     assert isinstance(evidence, dict)
     item = evidence[milestone]
     assert isinstance(item, dict)
@@ -844,111 +781,38 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertGreaterEqual(summary["evidence_milestone_count"], 9)
         self.assertGreaterEqual(summary["evidence_hashes_checked"], 26)
 
-    def test_current_mtm003_target_evidence_is_fresh(self) -> None:
-        if historical_evidence_mode():
-            self.assertEqual(historical_check_count("MTM-003"), 14)
-            return
-        summary = validate_mtm003_target()
-        self.assertEqual(summary["required_check_count"], 14)
+    def test_historical_target_receipts_are_owned_by_rust_records(self) -> None:
+        expected = {
+            "MTM-003": 14,
+            "MTM-004": 10,
+            "MTM-005": 15,
+            "MTM-006": 8,
+            "MTM-007": 12,
+            "MTM-008": 10,
+        }
+        for milestone, count in expected.items():
+            self.assertEqual(historical_check_count(milestone), count)
 
-    def test_current_mtm004_target_evidence_is_fresh_and_redacted(self) -> None:
-        if historical_evidence_mode():
-            self.assertEqual(historical_check_count("MTM-004"), 10)
-            return
-        summary = validate_mtm004_target()
-        self.assertEqual(summary["required_check_count"], 10)
-
-    def test_current_mtm005_target_evidence_is_fresh_and_redacted(self) -> None:
-        if historical_evidence_mode():
-            self.assertEqual(historical_check_count("MTM-005"), 15)
-            return
-        summary = validate_mtm005_target()
-        self.assertEqual(summary["required_check_count"], 15)
-
-    def test_current_mtm006_target_evidence_is_fresh_and_redacted(self) -> None:
-        if historical_evidence_mode():
-            self.assertEqual(historical_check_count("MTM-006"), 8)
-            return
-        summary = validate_mtm006_target()
-        self.assertEqual(summary["required_check_count"], 8)
-
-    def test_current_mtm007_target_evidence_is_fresh_and_redacted(self) -> None:
-        if historical_evidence_mode():
-            self.assertEqual(historical_check_count("MTM-007"), 12)
-            return
-        summary = validate_mtm007_target()
-        self.assertEqual(summary["required_check_count"], 12)
-
-    def test_current_mtm008_candidate_evidence_is_fresh_and_redacted(self) -> None:
-        if historical_evidence_mode():
-            self.assertEqual(historical_check_count("MTM-008"), 10)
-            return
-        summary = validate_mtm008_candidate()
-        self.assertEqual(summary["required_check_count"], 10)
-
-    def test_current_mtm_and_re_ctm_command_namespaces_are_separate(self) -> None:
-        summary = validate_mtm_command_namespace()
-        if deployment_mode() == "mtm015_preview":
-            self.assertEqual(summary["evidence"], "mtm015_preview_release")
-            self.assertEqual(summary["mtm_version"], "0.5.0-preview.2")
-            self.assertEqual(
-                summary["mtm_sha256"],
-                "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
-            )
-            self.assertEqual(summary["production_default_workflow_protocol"], 3)
-            self.assertEqual(summary["rollback_workflow_protocol"], 2)
-            self.assertTrue(summary["real_rollback_and_recutover_passed"])
-            self.assertTrue(summary["web_client_qualified"])
-        elif deployment_mode() == "mtm014_preview":
-            self.assertEqual(summary["evidence"], "mtm014_preview_release")
-            self.assertIn(summary["mtm_version"], {"0.4.0", "0.5.0-preview.1"})
-            self.assertEqual(summary["production_default_workflow_protocol"], 3)
-            self.assertTrue(summary["real_rollback_and_recutover_passed"])
-        elif deployment_mode() == "mtm009_preview":
-            self.assertEqual(summary["evidence"], "mtm009_preview_release")
-            self.assertEqual(summary["mtm_version"], "0.4.0-preview.1")
-            self.assertFalse(summary["existing_sessions_restarted_for_preview"])
-        elif deployment_mode() == "mtm011_preview":
-            self.assertEqual(summary["evidence"], "mtm011_preview_release")
-            self.assertEqual(summary["mtm_version"], "0.4.0-preview.2")
-            self.assertEqual(summary["production_default_workflow_protocol"], 3)
-            self.assertEqual(summary["rollback_workflow_protocol"], 2)
-            self.assertTrue(summary["real_rollback_and_recutover_passed"])
-        elif deployment_mode() == "mtm012_preview":
-            self.assertEqual(summary["evidence"], "mtm012_preview_release")
-            self.assertEqual(summary["mtm_version"], "0.4.0-preview.3")
-            self.assertEqual(summary["production_default_workflow_protocol"], 3)
-            self.assertEqual(summary["rollback_workflow_protocol"], 2)
-            self.assertTrue(summary["real_rollback_and_recutover_passed"])
-        elif deployment_mode() == "mtm013_stable":
-            self.assertEqual(summary["evidence"], "mtm013_stable_release")
-            self.assertEqual(summary["mtm_version"], "0.4.0")
-            self.assertEqual(summary["production_default_workflow_protocol"], 3)
-            self.assertEqual(summary["rollback_workflow_protocol"], 2)
-            self.assertTrue(summary["real_rollback_and_recutover_passed"])
-        else:
-            self.assertEqual(summary["required_check_count"], 10)
-
-    def test_current_mtm009_preview_release_is_installed_and_bounded(self) -> None:
-        if deployment_mode() != "mtm009_preview":
-            self.skipTest("MTM-009 preview release is not the current deployment mode")
-        summary = validate_mtm009_preview_release()
-        self.assertEqual(summary["version"], "0.4.0-preview.1")
-        self.assertEqual(summary["production_default_workflow_protocol"], 2)
-        self.assertTrue(summary["protocol3_opt_in"])
-        self.assertFalse(summary["protocol3_default_cutover_allowed"])
-        self.assertEqual(summary["real_web_a4"], "complete_rejected")
-        self.assertEqual(summary["final_artifact"], "proof_verified.tex")
-
-    def test_current_mtm011_preview_release_is_installed_and_rollback_qualified(self) -> None:
-        if deployment_mode() != "mtm011_preview":
-            self.skipTest("MTM-011 preview release is not the current deployment mode")
-        summary = validate_mtm011_preview_release()
-        self.assertEqual(summary["version"], "0.4.0-preview.2")
-        self.assertEqual(summary["production_default_workflow_protocol"], 3)
-        self.assertEqual(summary["rollback_workflow_protocol"], 2)
-        self.assertTrue(summary["real_rollback_and_recutover_passed"])
-        self.assertEqual(summary["final_artifact"], "proof_verified.tex")
+    def test_historical_release_receipts_do_not_require_live_selectors(self) -> None:
+        summary = rust_record_integrity()["historical_releases"]
+        self.assertIsInstance(summary, dict)
+        self.assertEqual(summary["historical_release_milestones"], 6)
+        self.assertFalse(summary["live_selectors_checked"])
+        self.assertFalse(summary["current_release_qualified"])
+        evidence = summary["release_evidence"]
+        self.assertIsInstance(evidence, dict)
+        expected = {
+            "MTM-009": "0.4.0-preview.1",
+            "MTM-011": "0.4.0-preview.2",
+            "MTM-012": "0.4.0-preview.3",
+            "MTM-013": "0.4.0",
+            "MTM-014": "0.5.0-preview.1",
+            "MTM-015": "0.5.0-preview.2",
+        }
+        for milestone, version in expected.items():
+            item = evidence[milestone]
+            self.assertEqual(item["version"], version)
+            self.assertRegex(item["binary_sha256"], r"^[0-9a-f]{64}$")
 
     def test_mtm013_runtime_hardening_evidence_is_bound_and_redacted(self) -> None:
         progress = json.loads((ROOT / "records/governance/project-progress.json").read_text(encoding="utf-8"))
@@ -1001,18 +865,6 @@ class GovernanceTestCase(unittest.TestCase):
         self.assertEqual(exact["qc_constituent_matching"]["verdict"], "correct")
         self.assertEqual(exact["compact_proof"]["verdict"], "correct")
         self.assertEqual(iteration["decision"], "completed")
-
-    def test_current_mtm012_preview_release_is_installed_and_tui_qualified(self) -> None:
-        if deployment_mode() != "mtm012_preview":
-            self.skipTest("MTM-012 preview release is not the current deployment mode")
-        summary = validate_mtm012_preview_release()
-        self.assertEqual(summary["version"], "0.4.0-preview.3")
-        self.assertEqual(summary["production_default_workflow_protocol"], 3)
-        self.assertEqual(summary["rollback_workflow_protocol"], 2)
-        self.assertEqual(summary["selector_rollback_version"], "0.4.0-preview.2")
-        self.assertTrue(summary["real_rollback_and_recutover_passed"])
-        self.assertEqual(summary["tui_check_count"], 20)
-        self.assertEqual(summary["final_artifact"], "proof_verified.tex")
 
     def test_mtm009_research_contract_freezes_complexity_and_authority(self) -> None:
         summary = validate_mtm009_research_contract()
