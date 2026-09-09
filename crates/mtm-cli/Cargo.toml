@@ -13,6 +13,7 @@ path = "src/main.rs"
 mtm-contracts = { version = "=0.6.0-preview.1", path = "../mtm-contracts" }
 mtm-runtime = { version = "=0.6.0-preview.1", path = "../mtm-runtime" }
 serde_json.workspace = true
+sha2.workspace = true
 
 [dev-dependencies]
 base64.workspace = true

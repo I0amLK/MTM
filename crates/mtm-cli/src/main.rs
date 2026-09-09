@@ -16,6 +16,9 @@ use serde_json::Value;
 
 const MAX_EVALUATION_INPUT_BYTES: u64 = 1_048_576;
 
+#[cfg(unix)]
+mod deployment;
+
 fn main() {
     let args = env::args().skip(1).collect::<Vec<_>>();
     let command = args.first().map(String::as_str);
@@ -42,13 +45,13 @@ fn main() {
         Some("release-info") => {
             println!("{}", release_identity());
         }
-        Some("status") => {
-            let mut status = release_identity();
-            status["scope"] = Value::String("compiled_runtime_identity".to_owned());
-            status["installed_selector_checked"] = Value::Bool(false);
-            status["release_qualification_checked"] = Value::Bool(false);
-            println!("{status}");
-        }
+        Some("status") if args.len() == 1 => print_compiled_status(),
+        #[cfg(unix)]
+        Some("status") => exit_deployment(deployment::status(&args[1..])),
+        #[cfg(unix)]
+        Some("install") => exit_deployment(deployment::install(&args[1..])),
+        #[cfg(unix)]
+        Some("rollback") => exit_deployment(deployment::rollback(&args[1..])),
         Some("evaluate") => evaluate_from_stdin(false),
         Some("evaluate-batch") => evaluate_from_stdin(true),
         Some("check-config") => exit_on_error(check_config(&args[1..])),
@@ -77,6 +80,31 @@ fn release_identity() -> Value {
     })
 }
 
+fn print_compiled_status() {
+    let mut status = release_identity();
+    status["scope"] = Value::String("compiled_runtime_identity".to_owned());
+    status["installed_selector_checked"] = Value::Bool(false);
+    status["release_qualification_checked"] = Value::Bool(false);
+    println!("{status}");
+}
+
+#[cfg(unix)]
+fn exit_deployment(result: std::result::Result<Value, String>) {
+    match result {
+        Ok(value) => println!("{value}"),
+        Err(error) => {
+            eprintln!(
+                "{}",
+                serde_json::json!({
+                    "ok":false,
+                    "error":{"code":"DEPLOYMENT_REJECTED","category":"validation","message":error}
+                })
+            );
+            std::process::exit(2);
+        }
+    }
+}
+
 fn print_help() {
     const HELP: &str = concat!(
         "MTM Rust runtime\n\n",
@@ -86,6 +114,9 @@ fn print_help() {
         "  mtm contract\n",
         "  mtm tool-catalog\n",
         "  mtm status\n",
+        "  mtm status --state-root ABSOLUTE_PATH\n",
+        "  mtm install --binary ABSOLUTE_PATH --sha256 SHA256 --version VERSION --state-root ABSOLUTE_PATH --selector ABSOLUTE_PATH [--selector ABSOLUTE_PATH]\n",
+        "  mtm rollback --state-root ABSOLUTE_PATH\n",
         "  mtm check-config [--workspace PATH] [--native-mode MODE]\n",
         "  mtm attest-native [--workspace PATH] [--native-mode MODE]\n",
         "  mtm serve [--host HOST] [--port PORT] [--workspace PATH] [--native-mode MODE]\n",

@@ -33,7 +33,19 @@ fn records_cli_needs_git_but_neither_python_nor_a_reference_checkout() -> Result
     let report: Value = serde_json::from_slice(&output.stdout)?;
     assert_eq!(report["ok"], true);
     assert_eq!(report["historical_hashes_checked"], 26);
-    assert_eq!(report["historical_releases"]["historical_milestones"], 6);
+    assert_eq!(report["historical_releases"]["historical_milestones"], 12);
+    assert_eq!(
+        report["historical_releases"]["historical_target_milestones"],
+        6
+    );
+    assert_eq!(
+        report["historical_releases"]["historical_release_milestones"],
+        6
+    );
+    assert_eq!(
+        report["historical_releases"]["live_selectors_checked"],
+        false
+    );
     assert!(
         report["layout"]["sealed_observation_hashes_checked"]
             .as_u64()

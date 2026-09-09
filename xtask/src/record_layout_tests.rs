@@ -259,5 +259,40 @@ fn historical_summary_preserves_identity_counts_and_verdict_types() -> Result<()
     }
     let v8 = json!({"project":"MTM-reboot","milestone":"MTM-008","passed":true,"checks":vec![json!({});10]});
     assert_eq!(historical_identity(&v8, "MTM-008", 10)?, 10);
+
+    let release = json!({"schema_version":"1.0.0","project":"MTM-reboot",
+        "milestone":"MTM-011","phase":"mtm011_preview_release","passed":true,
+        "version":"0.4.0-preview.2","binary_sha256":"b".repeat(64),
+        "rollback":{"real_rollback_and_recutover_passed":true},
+        "release_info":{"implementation":"rust","python_runtime_required":false,
+            "version":"0.4.0-preview.2"}});
+    historical_release_identity(
+        &release,
+        "MTM-011",
+        "mtm011_preview_release",
+        "0.4.0-preview.2",
+        "binary_sha256",
+        &"b".repeat(64),
+    )?;
+    for (key, value) in [
+        ("passed", json!(false)),
+        ("phase", json!("wrong")),
+        ("version", json!("wrong")),
+        ("binary_sha256", json!("c".repeat(64))),
+    ] {
+        let mut changed = release.clone();
+        changed[key] = value;
+        assert!(
+            historical_release_identity(
+                &changed,
+                "MTM-011",
+                "mtm011_preview_release",
+                "0.4.0-preview.2",
+                "binary_sha256",
+                &"b".repeat(64),
+            )
+            .is_err()
+        );
+    }
     Ok(())
 }

@@ -243,8 +243,56 @@ fn historical_identity(payload: &Value, milestone: &str, expected_count: u64) ->
     Ok(expected_count)
 }
 
+fn historical_release_identity(
+    payload: &Value,
+    milestone: &str,
+    phase: &str,
+    version: &str,
+    binary_field: &str,
+    binary_sha256: &str,
+) -> Result<()> {
+    require(
+        payload["schema_version"] == "1.0.0"
+            && payload["milestone"] == milestone
+            && payload["phase"] == phase
+            && payload["version"] == version,
+        "historical release identity changed",
+    )?;
+    let accepted = payload.get("passed").or_else(|| payload.get("ok"));
+    require(
+        accepted == Some(&Value::Bool(true)),
+        "historical release verdict changed",
+    )?;
+    require(
+        payload[binary_field] == binary_sha256,
+        "historical release binary identity changed",
+    )?;
+    let rollback_recutover = payload["rollback"]["real_rollback_and_recutover_passed"] == true
+        || (payload["checks"]["stable_rollback_smoke"] == true
+            && payload["checks"]["candidate_recutover_smoke"] == true);
+    require(
+        rollback_recutover,
+        "historical release rollback receipt changed",
+    )?;
+    if let Some(project) = payload.get("project") {
+        require(
+            project == "MTM-reboot",
+            "historical release project changed",
+        )?;
+    }
+    if let Some(info) = payload.get("release_info") {
+        require(
+            info["implementation"] == "rust"
+                && info["python_runtime_required"] == false
+                && info["version"] == version,
+            "historical release runtime identity changed",
+        )?;
+    }
+    Ok(())
+}
+
 pub(super) fn historical_releases(root: &Path) -> Result<Value> {
-    let mut evidence = BTreeMap::new();
+    let mut target_evidence = BTreeMap::new();
     for (milestone, expected) in [
         ("MTM-003", 14),
         ("MTM-004", 10),
@@ -262,14 +310,84 @@ pub(super) fn historical_releases(root: &Path) -> Result<Value> {
         // Called only after the baseline-bound layout hashes have been verified.
         let bytes = read_bytes(root, &path, 8 * 1024 * 1024)?;
         let count = historical_identity(&serde_json::from_slice(&bytes)?, milestone, expected)?;
-        evidence.insert(
+        target_evidence.insert(
             milestone,
             json!({"path":path,"sha256":format!("{:x}",Sha256::digest(bytes)),"check_count":count}),
         );
     }
+    let mut release_evidence = BTreeMap::new();
+    for (milestone, phase, version, binary_field, binary_sha256) in [
+        (
+            "MTM-009",
+            "mtm009_preview_release",
+            "0.4.0-preview.1",
+            "binary_sha256",
+            "e76c2124cddb73370d902394df3c143124870abf8f05240f1a72ca835a8e2477",
+        ),
+        (
+            "MTM-011",
+            "mtm011_preview_release",
+            "0.4.0-preview.2",
+            "binary_sha256",
+            "5ed668d5bf765be2efd1b50933e941cf60dbbd414e3b6daab77745624d5cfa81",
+        ),
+        (
+            "MTM-012",
+            "mtm012_preview_release",
+            "0.4.0-preview.3",
+            "binary_sha256",
+            "545ab9ef8cc01edf804581cb52c2b1a4158d03bd8a25ea00c7785039167f3659",
+        ),
+        (
+            "MTM-013",
+            "stable_0_4_0_release",
+            "0.4.0",
+            "binary_sha256",
+            "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+        ),
+        (
+            "MTM-014",
+            "preview_release",
+            "0.5.0-preview.1",
+            "binary_sha256",
+            "2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036",
+        ),
+        (
+            "MTM-015",
+            "preview_release",
+            "0.5.0-preview.2",
+            "candidate_binary_sha256",
+            "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+        ),
+    ] {
+        let path = format!("records/evidence/{milestone}/preview-release.json");
+        let path = if milestone == "MTM-013" {
+            "records/evidence/MTM-013/stable-release.json".to_owned()
+        } else {
+            path
+        };
+        let bytes = read_bytes(root, &path, 8 * 1024 * 1024)?;
+        historical_release_identity(
+            &serde_json::from_slice(&bytes)?,
+            milestone,
+            phase,
+            version,
+            binary_field,
+            binary_sha256,
+        )?;
+        release_evidence.insert(
+            milestone,
+            json!({"path":path,"sha256":format!("{:x}",Sha256::digest(bytes)),
+                "version":version,"binary_sha256":binary_sha256}),
+        );
+    }
     Ok(
-        json!({"historical_milestones":evidence.len(),"evidence":evidence,
-        "scope":"immutable_historical_receipts_only","current_release_qualified":false}),
+        json!({"historical_milestones":target_evidence.len()+release_evidence.len(),
+        "historical_target_milestones":target_evidence.len(),
+        "historical_release_milestones":release_evidence.len(),
+        "target_evidence":target_evidence,"release_evidence":release_evidence,
+        "scope":"immutable_historical_receipts_only","live_selectors_checked":false,
+        "current_release_qualified":false}),
     )
 }
 

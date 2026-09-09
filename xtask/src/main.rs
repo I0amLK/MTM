@@ -12,6 +12,7 @@ mod architecture;
 mod capability;
 mod check_report;
 mod commit_message;
+mod dist;
 mod inventory;
 #[cfg(target_os = "linux")]
 mod native_preflight;
@@ -52,6 +53,11 @@ fn run() -> Result<()> {
         .map_or(("help", &[][..]), |(name, tail)| (name.as_str(), tail));
     if name == "commit-message" {
         return commit_message::run(options);
+    }
+    if name == "dist" {
+        let options = dist::Options::parse(options)?;
+        println!("{}", serde_json::to_string_pretty(&dist::run(&options)?)?);
+        return Ok(());
     }
     #[cfg(target_os = "linux")]
     if name == "qualify" {
@@ -189,7 +195,7 @@ fn run() -> Result<()> {
         }
         "help" | "--help" | "-h" => {
             println!(
-                "cargo xtask qualify --profile <protocol|target> --binary <artifact> --sha256 <sha256> [--record]\ncargo xtask qualify --profile resource --binary <artifact> --sha256 <sha256> --baseline <artifact> --baseline-sha256 <sha256> [--record]"
+                "cargo xtask qualify --profile <protocol|target> --binary <artifact> --sha256 <sha256> [--record]\ncargo xtask qualify --profile resource --binary <artifact> --sha256 <sha256> --baseline <artifact> --baseline-sha256 <sha256> [--record]\ncargo xtask dist --binary <artifact> --sha256 <sha256> --version <version> --out <absolute-directory>"
             );
             println!(
                 "cargo xtask audit [--strict] [--record]\ncargo xtask records [--record]\ncargo xtask retirement [--record]\ncargo xtask capability [--record]\ncargo xtask native-preflight [--record]\ncargo xtask check [--record]\ncargo xtask commit-message <file|--stdin>\n\ncheck is NOT release qualification. Orchestration is Rust; inherited host/toolchain tests are not skipped. A blocked preflight never suppresses a test failure."
