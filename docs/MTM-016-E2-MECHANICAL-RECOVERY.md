@@ -80,3 +80,30 @@ submission records stay unknown; no timeout, blanket reset or replay is introduc
 Final Native host, real browser, compiled-LaTeX target, resource, install/upgrade/
 rollback and research-corpus acceptance remain F-stage work. First-party Python
 retirement remains separate and no Python is deleted by this checkpoint.
+
+## Delivery
+
+Implementation `4e08475524b057e367a1bd55febb802dde8d6a30` keeps state schema 7 and
+advances the MTM-owned tool contract to `mtm-tools-v8`. The independent release
+artifact `target/mtm016-e2-mechanical/release/mtm` has SHA-256
+`44eb052244b2a5075a8cc95b8d0c6f496ecd6dbbbf7a8b67bdb863580786b724`.
+
+The complete sandbox source gate remains false only because the same ten inherited
+nested-Bubblewrap Runtime tests fail: Runtime reports 128 passed, 10 failed and one
+existing ignored real-network test. Format, Clippy, all other Rust targets and diff
+checks pass; no test is suppressed. The separately rerun Runtime target confirms the
+same ten names. This does not reuse historical host success for the schema-7/v8
+candidate.
+
+Post-commit exact-artifact protocol qualification passed with 500 normal assessment
+first hops (250 compact, 250 full), zero normal INVALID/rejections, three scripted
+complete workflows, copied-v1 migration/new-run, restart/key checks and five Git
+tools. The raw report is sealed byte-for-byte at
+`records/evidence/MTM-016/candidate-protocol-e2-mechanical-4e08475.json`, SHA-256
+`ba13b008ddb04699556881ba686266349ea5f0270dc0d4b3bd29b7eccaaafdb1`.
+Those 500 first hops are not 500 independent mathematical proofs, and the protocol
+profile has Native disabled and static-only LaTeX.
+
+No package/version/schema migration, Python deletion, production selector, installed
+binary, production database or key changed. The next planned final-five round is the
+remaining model-action file-effect recovery and E-stage closure.
