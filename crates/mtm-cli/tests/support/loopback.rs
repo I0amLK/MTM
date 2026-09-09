@@ -19,6 +19,9 @@ use url::{Url, form_urlencoded};
 
 use super::{Result, require, text};
 
+#[path = "upgrade_state.rs"]
+mod upgrade_state;
+
 const MAX_RESPONSE: usize = 2 * 1024 * 1024;
 const IO_TIMEOUT: Duration = Duration::from_secs(5);
 

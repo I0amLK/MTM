@@ -21,6 +21,7 @@ pub(super) enum Profile {
     Protocol,
     Target,
     Resource,
+    Upgrade,
 }
 
 impl Profile {
@@ -29,7 +30,8 @@ impl Profile {
             "protocol" => Ok(Self::Protocol),
             "target" => Ok(Self::Target),
             "resource" => Ok(Self::Resource),
-            _ => Err("qualification profile must be protocol, target or resource; release qualification is not implemented here".into()),
+            "upgrade" => Ok(Self::Upgrade),
+            _ => Err("qualification profile must be protocol, target, resource or upgrade; release qualification is not implemented here".into()),
         }
     }
 
@@ -38,6 +40,7 @@ impl Profile {
             Self::Protocol => "protocol",
             Self::Target => "target",
             Self::Resource => "resource",
+            Self::Upgrade => "upgrade",
         }
     }
 
@@ -46,6 +49,7 @@ impl Profile {
             Self::Protocol => "D5",
             Self::Target => "D6",
             Self::Resource => "D7",
+            Self::Upgrade => "F1",
         }
     }
 
@@ -54,6 +58,7 @@ impl Profile {
             Self::Protocol => "candidate-protocol.json",
             Self::Target => "candidate-target.json",
             Self::Resource => "candidate-resource.json",
+            Self::Upgrade => "candidate-upgrade.json",
         }
     }
 }
@@ -108,9 +113,9 @@ impl Options {
         let baseline_binary = options.remove("--baseline");
         let baseline_sha256 = options.remove("--baseline-sha256");
         match profile {
-            Profile::Resource => {
+            Profile::Resource | Profile::Upgrade => {
                 if baseline_binary.is_none() || baseline_sha256.is_none() {
-                    return Err("resource profile requires --baseline and --baseline-sha256".into());
+                    return Err("paired profile requires --baseline and --baseline-sha256".into());
                 }
                 if !baseline_sha256.as_deref().is_some_and(valid_hash) {
                     return Err(
@@ -119,13 +124,13 @@ impl Options {
                 }
                 if baseline_sha256.as_deref() == Some(sha256.as_str()) {
                     return Err(
-                        "resource profile requires distinct candidate and baseline digests".into(),
+                        "paired profile requires distinct candidate and baseline digests".into(),
                     );
                 }
             }
             Profile::Protocol | Profile::Target => {
                 if baseline_binary.is_some() || baseline_sha256.is_some() {
-                    return Err("baseline options are valid only for the resource profile".into());
+                    return Err("baseline options require a resource or upgrade profile".into());
                 }
             }
         }
@@ -247,22 +252,27 @@ impl Snapshot {
 pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     let target = options.profile == Profile::Target;
     let resource = options.profile == Profile::Resource;
+    let upgrade = options.profile == Profile::Upgrade;
+    let paired = resource || upgrade;
     let needs_native = target || resource;
     let scope = match options.profile {
         Profile::Protocol => "exact_candidate_protocol_not_release",
         Profile::Target => "exact_candidate_target_not_release",
         Profile::Resource => "exact_candidate_resource_not_release",
+        Profile::Upgrade => "exact_candidate_installed_upgrade_fixture_not_release",
     };
     let mut report = json!({"schema_version":"1.0.0","milestone":"MTM-016","delivery":options.profile.delivery(),
     "profile":options.profile.as_str(),"scope":scope,"passed":false,
     "candidate_sha256":options.sha256,"candidate_launched":false,
-    "baseline_sha256":options.baseline_sha256,"baseline_launched":if resource {Value::Bool(false)} else {Value::Null},
+    "baseline_sha256":options.baseline_sha256,"baseline_launched":if paired {Value::Bool(false)} else {Value::Null},
     "release_qualified":false,"production_state_modified":false,"selector_changed":false,
+    "production_selectors_changed":false,
     "raw_test_output_recorded":false,"python_invoked":false,
     "pending":match options.profile {
         Profile::Protocol => json!(["Native host","compiled LaTeX","browser","resources","upgrade and rollback","Python retirement"]),
         Profile::Target => json!(["browser","resources","upgrade and rollback","Python retirement"]),
         Profile::Resource => json!(["compiled-LaTeX target pass","permission-grant soak","browser","upgrade and rollback","Python retirement"]),
+        Profile::Upgrade => json!(["real Native and compiled LaTeX","resources and permission-grant soak","browser and human consent","operator-authorized production-state copy","abrupt installation interruption","Python retirement and full release gate"]),
     }});
     let mut stage = if needs_native {
         "native_preflight"
@@ -279,7 +289,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         }
         stage = "candidate_snapshot";
         let snapshot = Snapshot::prepare(root, options)?;
-        let baseline = if resource {
+        let baseline = if paired {
             stage = "baseline_snapshot";
             Some(Snapshot::prepare_artifact(
                 root,
@@ -298,6 +308,9 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         let before = capability::source_hash(root)?;
         let commit_before = git(root, &["rev-parse", "HEAD"])?;
         stage = "protocol_test_runner";
+        if upgrade {
+            stage = "upgrade_test_runner";
+        }
         let cargo = env::var_os("CARGO").unwrap_or_else(|| "cargo".into());
         let mut command = Command::new(cargo);
         command
@@ -312,12 +325,28 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
                 "--",
             ])
             .current_dir(root)
+            .env_remove("MTM_TEST_UPGRADE_PROFILE")
+            .env_remove("MTM_TEST_TARGET_PROFILE")
+            .env_remove("MTM_TEST_RESOURCE_PROFILE")
+            .env_remove("MTM_TEST_BASELINE")
+            .env_remove("MTM_TEST_BASELINE_SHA256")
             .env("MTM_TEST_CANDIDATE", &snapshot.executable)
             .env("MTM_TEST_CANDIDATE_SHA256", &snapshot.sha256);
-        if resource {
+        if paired {
             command
-                .arg("resource_runtime::explicit_baseline_and_candidate_resource_non_regression")
-                .env("MTM_TEST_RESOURCE_PROFILE", "1")
+                .arg(if upgrade {
+                    "upgrade_runtime::exact_installed_upgrade_and_preupgrade_state_rollback"
+                } else {
+                    "resource_runtime::explicit_baseline_and_candidate_resource_non_regression"
+                })
+                .env(
+                    if upgrade {
+                        "MTM_TEST_UPGRADE_PROFILE"
+                    } else {
+                        "MTM_TEST_RESOURCE_PROFILE"
+                    },
+                    "1",
+                )
                 .env(
                     "MTM_TEST_BASELINE",
                     &baseline
@@ -368,7 +397,16 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             return Err("qualification harness source changed".into());
         }
         stage = "summary_validation";
-        let summaries = if resource {
+        let summaries = if upgrade {
+            summary::validate_upgrade(
+                &output.stdout,
+                &snapshot.sha256,
+                baseline
+                    .as_ref()
+                    .map(|value| value.sha256.as_str())
+                    .ok_or("upgrade baseline missing")?,
+            )?
+        } else if resource {
             summary::validate_resource(
                 &output.stdout,
                 &snapshot.sha256,
@@ -384,8 +422,12 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             return Err("qualification runner failed or did not finish cleanly".into());
         }
         report["candidate_launched"] = json!(true);
-        if resource {
+        if paired {
             report["baseline_launched"] = json!(true);
+        }
+        if upgrade {
+            report["selector_changed"] = json!(true);
+            report["selector_scope"] = json!("owned_disposable_fixture_only");
         }
         report["summaries"] = summaries;
         report["original_and_snapshot_unchanged"] = json!(true);
@@ -402,8 +444,11 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             "native_preflight" | "candidate_snapshot" | "baseline_snapshot"
         ) {
             report["candidate_launched"] = Value::Null;
-            if resource {
+            if paired {
                 report["baseline_launched"] = Value::Null;
+            }
+            if upgrade {
+                report["selector_changed"] = Value::Null;
             }
         }
     }

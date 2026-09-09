@@ -131,6 +131,17 @@ rollback. A retirement family with pending forward acceptance must retain that
 classification and list its gaps. Do not promote immutable historical target,
 browser, resource or release receipts into current acceptance.
 
+## F1 installed-upgrade fixture
+
+Read `docs/MTM-016-F1-UPGRADE-QUALIFICATION.md`. The explicit `qualify --profile
+upgrade` requires both reviewed artifacts and hashes. It tests real old/current
+endpoints using only baseline-created disposable state, including stopped-copy
+private-mode preparation and exact pre-upgrade restoration. It is not an in-place
+production migration, browser/Native/compiled-LaTeX test, or release verdict.
+Current source/protocol gates must clear the upgrade profile flag. Keep all failed
+Native/resource and unprepared-legacy-mode observations; never widen scope from
+the later successful prepared-copy rehearsal.
+
 ## Historical local gate (before MTM-016)
 
 ```bash

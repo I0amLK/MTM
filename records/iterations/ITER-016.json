@@ -2194,6 +2194,55 @@
       "rust_only_ready": false,
       "release_qualified": false,
       "earlier_signature_mismatch_explained": false
+    },
+    {
+      "id": "MTM016-F1-UPGRADE-IMPLEMENTATION",
+      "round": "4_of_final_5",
+      "status": "prepared_copy_upgrade_profile_source_validated_post_commit_qualification_pending",
+      "stage_D_status": "in_progress",
+      "stage_F_status": "in_progress",
+      "base_commit": "188da23fbb33e47d0d329d8845b9eb26d1706aa3",
+      "design": "docs/MTM-016-F1-UPGRADE-QUALIFICATION.md",
+      "source_sha256": "83c950e8ebe240f5b1336c0675d0f50b999e1438fa110716e818283f64b26679",
+      "candidate": {"path":"target/mtm016-d8/release/mtm","sha256":"955b097c8fdbb781a5ae5d7da9797c1b57d5a84bf755502c25a856016439025f","version":"0.6.0-preview.1","state_schema":7,"tool_contract":"mtm-tools-v9","production_installed":false},
+      "baseline": {"sha256":"2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a","version":"0.5.0-preview.2","state_schema":2,"production_data_read":false},
+      "sealed_reports": [
+        {"path":"records/evidence/MTM-016/candidate-target-f1-env-188da23.json","sha256":"16fc062cae325aca47979fd9967b4eaaaf892e32dcc9799843042e38c437c88d","passed":false},
+        {"path":"records/evidence/MTM-016/candidate-resource-f1-env-188da23.json","sha256":"045dff4bfc46f00d4c9f9d972344b2938ef1630cc43f1166bbf64a5a2bb43346","passed":false},
+        {"path":"records/evidence/MTM-016/candidate-upgrade-f1-first-rejected.json","sha256":"f4aac9465e20af3b887ec87512939a746c376edce63bf2e9e2957fe1cd9b6aa4","passed":false},
+        {"path":"records/evidence/MTM-016/source-check-f1-concurrent-rejected.json","sha256":"fc1deb62088da413836199a9bf8e0ae6ee4ff310a6e8e7841a0f2d59187f6bdd","passed":false},
+        {"path":"records/evidence/MTM-016/candidate-upgrade-f1-composed.json","sha256":"5bdb75599967759d21c3a72670681aaa1df7e82955af73fea3673ba2f0a555d4","passed":true},
+        {"path":"records/evidence/MTM-016/source-check-f1-serial.json","sha256":"124bbd34d61fc7245b617fa94548d75d36eb7cbad7ba700b4ea7b2ccd217d9cd","passed":false}
+      ],
+      "implementation": [
+        "One new upgrade profile in the existing Rust qualifier; explicit distinct binary/hash pairs, private snapshots, bounded runner and strict independently validated summary",
+        "Real baseline creates OAuth state and an active run, then stops before a bounded complete owned-data/workspace snapshot",
+        "Current candidate self-installs on two disposable selectors, preserves repeat-install rollback state, serves and advances old/new runs, and restarts with the same key",
+        "Rollback restores pre-upgrade bytes, path set and modes before launching the real baseline and advancing the restored old run",
+        "Snapshot symlink/hardlink/special-file/mode/size/depth guards, foreign-owner and drift rejection; no raw private data or credentials in receipts",
+        "Source/protocol profiles clear upgrade flags, and summary validation refuses missing/duplicate/foreign scopes or widened production/Native/browser claims"
+      ],
+      "legacy_mode_finding": {"initial_submission_error":"FILE_EFFECT_CONFLICT","accepted_writes":0,"observed_shared_write_entries":5,"prepared_mode_entries":6,"resolution":"Explicitly tighten only stopped fixture-owned private copies to 0700/0600, verify unchanged contents, keep original snapshot intact; do not relax the product guard or claim automatic in-place migration","unprepared_production_upgrade_accepted":false},
+      "validation": [
+        {"command":"cargo xtask qualify --profile target with exact D8 SHA --record","exit_code":1,"failed_stage":"native_preflight","candidate_launched":false,"namespace_errno":28},
+        {"command":"cargo xtask qualify --profile resource with exact D8/baseline SHAs --record","exit_code":1,"failed_stage":"native_preflight","candidate_launched":false,"baseline_launched":false},
+        {"command":"initial unprepared-copy upgrade profile","exit_code":1,"runner_exit_code":101,"result":"old run obtained but first write did not advance"},
+        {"command":"prepared-copy upgrade profile on composed working tree and restricted PATH","exit_code":0,"checks":15,"schema_path":[2,7,2],"snapshot_entries":25,"snapshot_bytes":221439,"installed_endpoint_tested":true,"snapshot_restored_exactly":true},
+        {"command":"first cargo xtask check --record overlapping another qualifier","exit_code":1,"format_exit":0,"clippy_exit":0,"diff_exit":0,"capability_runtime_functions_passed":42,"host_profile_functions_inert":3,"maintenance_unit_tests_passed":63,"maintenance_cli_tests_passed":11,"deployment_passed":5,"deployment_failed":1,"runtime_passed":128,"runtime_failed":10,"runtime_ignored":1}
+      ],
+      "additional_failure": "repeat_install_preserves_the_original_rollback failed during overlapping Cargo operations on one target directory. Shared-artifact interference is plausible but not proven from the assertion alone. The failed report is retained; the unchanged full sequential rerun passed all six deployment tests.",
+      "sequential_source_rerun": {"command":"cargo xtask check --record","exit_code":1,"source_unchanged":true,"format_exit":0,"clippy_exit":0,"diff_exit":0,"capability_runtime_functions_passed":42,"host_profile_functions_inert":3,"deployment_passed":6,"deployment_failed":0,"maintenance_unit_tests_passed":63,"maintenance_cli_tests_passed":11,"runtime_passed":128,"runtime_failed":10,"runtime_ignored":1,"only_failed_target":"mtm-runtime --lib","failure_set":"same ten named inherited Native/Bubblewrap cases as D8; no skipped tests or suppressed failures"},
+      "environment_note": "A restricted-PATH invocation's shell bootstrap warned that id was missing but the qualifier completed successfully. The explicit tool PATH now includes id; it still contains no Python executable. This is not a Python-free-host claim.",
+      "pending": ["Post-commit exact-candidate upgrade", "Independent clean-clone locked build/test with no Python on PATH", "Real Native/compiled-LaTeX/retrieval/browser/human consent and resource/permission soak", "Explicitly approved copied operator production-state rehearsal", "Abrupt installation interruption and complete release gate", "Remaining D retirement and 30-task x3 corpus"],
+      "product_source_changed":false,
+      "new_packages_or_versions":0,
+      "python_files_deleted":0,
+      "python_files_remaining":67,
+      "new_suppressions":0,
+      "production_changed":false,
+      "rust_only_ready":false,
+      "release_qualified":false,
+      "earlier_signature_mismatch_explained":false
     }
   ],
   "remaining_acceptance": [

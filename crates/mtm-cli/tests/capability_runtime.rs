@@ -25,6 +25,9 @@ mod target_runtime;
 #[path = "support/resource_runtime.rs"]
 mod resource_runtime;
 
+#[path = "support/upgrade_runtime.rs"]
+mod upgrade_runtime;
+
 #[path = "support/candidate_lifecycle.rs"]
 mod candidate_lifecycle;
 

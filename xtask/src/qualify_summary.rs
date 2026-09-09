@@ -2,6 +2,13 @@
 use super::*;
 use serde::Deserialize;
 
+#[path = "upgrade_summary.rs"]
+mod upgrade;
+
+pub(super) fn validate_upgrade(stdout: &[u8], candidate: &str, baseline: &str) -> Result<Value> {
+    upgrade::validate(stdout, candidate, baseline)
+}
+
 fn extract<T: serde::de::DeserializeOwned>(stdout: &[u8], marker: &str) -> Result<T> {
     let text = std::str::from_utf8(stdout).map_err(|_| "qualification output is not UTF-8")?;
     let mut lines = text.lines().filter_map(|line| line.split_once(marker));
@@ -151,6 +158,9 @@ pub(super) fn validate_resource(
     candidate_hash: &str,
     baseline_hash: &str,
 ) -> Result<Value> {
+    if std::str::from_utf8(stdout)?.contains("MTM_UPGRADE_RUNTIME ") {
+        return Err("resource output contains upgrade-only evidence".into());
+    }
     let resource: ResourceRuntime = extract(stdout, "MTM_RESOURCE_RUNTIME ")?;
     if !valid_hash(candidate_hash)
         || !valid_hash(baseline_hash)
@@ -176,8 +186,11 @@ pub(super) fn validate_resource(
 }
 
 pub(super) fn validate(stdout: &[u8], hash: &str, profile: Profile) -> Result<Value> {
-    if profile == Profile::Resource {
-        return Err("resource profile requires explicit baseline validation".into());
+    if std::str::from_utf8(stdout)?.contains("MTM_UPGRADE_RUNTIME ") {
+        return Err("protocol/target output contains upgrade-only evidence".into());
+    }
+    if matches!(profile, Profile::Resource | Profile::Upgrade) {
+        return Err("paired profile requires explicit baseline validation".into());
     }
     let capability = capability::checked_summary(stdout)?;
     let workspace: Workspace = extract(stdout, "MTM_WORKSPACE_SMOKE ")?;

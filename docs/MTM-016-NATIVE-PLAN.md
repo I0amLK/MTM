@@ -51,6 +51,12 @@ Missing coverage remains listed as pending, never converted to a green check.
 
 ## Retirement map
 
+Round 4/5 begins with F1 exact installed-runtime upgrade qualification, documented
+in `docs/MTM-016-F1-UPGRADE-QUALIFICATION.md`. It supplements D8 selector mechanics
+with real old/current OAuth/MCP endpoints and baseline-generated state. Full F
+remains open: a prepared disposable copy is not operator production data, and
+blocked Native/resource gates are never replaced by the upgrade profile.
+
 Round 3/5 (D8) consolidates the reviewed target/release/install family. Its
 replacement mechanics and regression repairs are committed before the separate
 Python deletion. The family ledger keeps forward acceptance gaps explicit rather

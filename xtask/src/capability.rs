@@ -166,6 +166,7 @@ pub(crate) fn run(root: &Path) -> Result<Value> {
         .env_remove("MTM_TEST_CANDIDATE_SHA256")
         .env_remove("MTM_TEST_TARGET_PROFILE")
         .env_remove("MTM_TEST_RESOURCE_PROFILE")
+        .env_remove("MTM_TEST_UPGRADE_PROFILE")
         .env_remove("MTM_TEST_BASELINE")
         .env_remove("MTM_TEST_BASELINE_SHA256")
         .args([

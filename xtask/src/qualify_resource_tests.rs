@@ -79,3 +79,33 @@ fn resource_profile_requires_complete_baseline_selection() -> Result<()> {
     assert!(Options::parse(&protocol).is_err());
     Ok(())
 }
+
+#[test]
+fn upgrade_profile_requires_distinct_complete_artifact_pairs() -> Result<()> {
+    let base = [
+        "--profile",
+        "upgrade",
+        "--binary",
+        "target/release/mtm",
+        "--sha256",
+        &"a".repeat(64),
+        "--baseline",
+        "target/release/old",
+        "--baseline-sha256",
+        &"b".repeat(64),
+    ]
+    .map(str::to_owned);
+    let parsed = Options::parse(&base)?;
+    assert_eq!(parsed.profile, Profile::Upgrade);
+    assert_eq!(parsed.report_name(), "candidate-upgrade.json");
+    for missing in [base[..6].to_vec(), base[..8].to_vec()] {
+        assert!(Options::parse(&missing).is_err());
+    }
+    let mut equal = base.to_vec();
+    equal[9] = "a".repeat(64);
+    assert!(Options::parse(&equal).is_err());
+    let mut foreign = base.to_vec();
+    foreign.extend(["--state-root".into(), "/operator/data".into()]);
+    assert!(Options::parse(&foreign).is_err());
+    Ok(())
+}
