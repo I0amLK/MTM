@@ -2398,6 +2398,32 @@
       "python_files_deleted":0,"remaining_python_files":67,"new_suppressions":0,
       "production_changed":false,"rust_only_ready":false,"release_qualified":false,
       "earlier_signature_mismatch_explained":false
+    },
+    {
+      "id":"MTM016-F3-INSTALL-RECOVERY-DELIVERY",
+      "round":"4_of_final_5",
+      "status":"completed_for_durable_process_interruption_recovery_not_physical_power_loss_or_release",
+      "stage_D_status":"in_progress",
+      "stage_F_status":"in_progress",
+      "implementation_commit":"cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+      "candidate":{"sha256":"589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8","version":"0.6.0-preview.1","state_schema":7,"workflow_protocol":3,"public_tools":24,"production_installed":false},
+      "harness_source_sha256":"26e87629f2906ccf0475adf28a5eba1da673bca85cc7890d4b7a31a265dc959f",
+      "sealed_reports":[
+        {"path":"records/evidence/MTM-016/candidate-protocol-f3-cc17b16.json","sha256":"8cb88b43ce3818c5f25a9be78661c4f084ccf72fa752afe79066fdf545fe1bc0","passed":true},
+        {"path":"records/evidence/MTM-016/candidate-upgrade-f3-cc17b16.json","sha256":"8c606b37a4e26ece8173bf84347a7aff22616887f70772069fcb146ebd67828e","passed":true},
+        {"path":"records/evidence/MTM-016/candidate-permissions-f3-cc17b16.json","sha256":"a1281a45abd80336768e70cc678e20b801518364b6ca9678fe95a19664b7d17c","passed":true},
+        {"path":"records/evidence/MTM-016/protocol-f3-cache-miss-observation.json","sha256":"94eabd6db76f7de90850f78e1aad4553572498ec8e2fbb11eb4dd6b0e1a0c255","passed":false,"candidate_verdict":null}
+      ],
+      "post_commit_protocol":{"exit_code":0,"candidate_launched":true,"normal_roundtrips":500,"normal_invalid":0,"normal_rejections":0,"full_compact_repair":true,"source_and_artifact_unchanged":true},
+      "post_commit_upgrade":{"exit_code":0,"candidate_launched":true,"baseline_launched":true,"baseline_sha256":"2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a","schema_path":[2,7,2],"checks_passed":15,"snapshot_entries":25,"snapshot_bytes":221439,"legacy_shared_write_entries":5,"prepared_private_mode_entries":6,"production_state_modified":false},
+      "post_commit_permissions":{"exit_code":0,"candidate_launched":true,"boundary_checks":21,"iterations":100,"measurement_ms":86711,"initial_rss_kib":12760,"max_sampled_rss_kib":13856,"rss_growth_kib":1096,"initial_and_max_threads":9,"initial_and_max_fds":16,"retained_children":0,"shutdown_ms":10,"scripted_consent":true,"human_consent":false},
+      "deployment_recovery":{"unit_tests_passed":6,"cli_tests_passed":7,"interrupted_install_prefix_recovered":true,"interrupted_rollback_prefix_recovered":true,"malformed_journal_zero_mutation":true,"orphan_backup_inert":true,"journal_durable_before_selector_mutation":true,"journal_removed_after_postcheck":true},
+      "preserved_post_commit_failure":"The first post-commit protocol qualifier in a fresh command sandbox had no locked Cargo crate cache. Its offline runner exited 101 before emitting a summary; candidate_launched remained unknown. The exact observation is sealed and is not relabelled as a candidate failure. After cargo fetch populated that sandbox cache, the same exact candidate passed protocol; upgrade and permissions were then run separately and passed.",
+      "completion_boundary":"F3 closes cooperative local process-interruption recovery for exact persisted install/rollback prefixes. It does not prove a physical power cycle, device/controller cache durability, hostile same-UID mutation, shared-filesystem semantics, production upgrade or release acceptance.",
+      "remaining":["Capable-host Native command execution, TTY/CAS and full real command/grant soak", "Compiled LaTeX, external retrieval, real browser and independent human consent", "Equivalent baseline/candidate Native resource comparison", "Explicitly approved copied operator production-state rehearsal and optional external SIGKILL/power-loss supplement", "Remaining D Python/legacy-reference retirement and forward release validation", "Representative 30-task x3 corpus and final exact-artifact release decision"],
+      "product_source_changed":true,"production_changed":false,"python_files_deleted_this_round":0,
+      "remaining_python_files":67,"new_suppressions":0,"rust_only_ready":false,
+      "release_qualified":false,"earlier_signature_mismatch_explained":false
     }
   ],
   "remaining_acceptance": [
