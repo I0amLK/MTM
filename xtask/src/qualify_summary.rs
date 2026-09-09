@@ -2,6 +2,10 @@
 use super::*;
 use serde::Deserialize;
 
+#[path = "permission_summary.rs"]
+mod permissions;
+pub(super) use permissions::validate as validate_permissions;
+
 #[path = "upgrade_summary.rs"]
 mod upgrade;
 
@@ -158,8 +162,11 @@ pub(super) fn validate_resource(
     candidate_hash: &str,
     baseline_hash: &str,
 ) -> Result<Value> {
-    if std::str::from_utf8(stdout)?.contains("MTM_UPGRADE_RUNTIME ") {
-        return Err("resource output contains upgrade-only evidence".into());
+    if ["MTM_UPGRADE_RUNTIME ", "MTM_PERMISSION_RUNTIME "]
+        .iter()
+        .any(|marker| std::str::from_utf8(stdout).is_ok_and(|text| text.contains(marker)))
+    {
+        return Err("resource output contains foreign profile evidence".into());
     }
     let resource: ResourceRuntime = extract(stdout, "MTM_RESOURCE_RUNTIME ")?;
     if !valid_hash(candidate_hash)
@@ -186,11 +193,14 @@ pub(super) fn validate_resource(
 }
 
 pub(super) fn validate(stdout: &[u8], hash: &str, profile: Profile) -> Result<Value> {
-    if std::str::from_utf8(stdout)?.contains("MTM_UPGRADE_RUNTIME ") {
-        return Err("protocol/target output contains upgrade-only evidence".into());
+    if ["MTM_UPGRADE_RUNTIME ", "MTM_PERMISSION_RUNTIME "]
+        .iter()
+        .any(|marker| std::str::from_utf8(stdout).is_ok_and(|text| text.contains(marker)))
+    {
+        return Err("protocol/target output contains foreign profile evidence".into());
     }
-    if matches!(profile, Profile::Resource | Profile::Upgrade) {
-        return Err("paired profile requires explicit baseline validation".into());
+    if !matches!(profile, Profile::Protocol | Profile::Target) {
+        return Err("selected profile requires its own explicit summary validation".into());
     }
     let capability = capability::checked_summary(stdout)?;
     let workspace: Workspace = extract(stdout, "MTM_WORKSPACE_SMOKE ")?;

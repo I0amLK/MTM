@@ -151,6 +151,7 @@ fn run() -> Result<()> {
                     .env_remove("MTM_TEST_TARGET_PROFILE")
                     .env_remove("MTM_TEST_RESOURCE_PROFILE")
                     .env_remove("MTM_TEST_UPGRADE_PROFILE")
+                    .env_remove("MTM_TEST_PERMISSION_PROFILE")
                     .env_remove("MTM_TEST_BASELINE")
                     .env_remove("MTM_TEST_BASELINE_SHA256")
                     .args(arguments)
@@ -195,6 +196,9 @@ fn run() -> Result<()> {
             }
         }
         "help" | "--help" | "-h" => {
+            println!(
+                "cargo xtask qualify --profile permissions --binary <artifact> --sha256 <sha256> [--record]"
+            );
             println!(
                 "cargo xtask qualify --profile upgrade --binary <artifact> --sha256 <sha256> --baseline <artifact> --baseline-sha256 <sha256> [--record]"
             );

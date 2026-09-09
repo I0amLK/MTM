@@ -22,6 +22,7 @@ pub(super) enum Profile {
     Target,
     Resource,
     Upgrade,
+    Permissions,
 }
 
 impl Profile {
@@ -31,7 +32,8 @@ impl Profile {
             "target" => Ok(Self::Target),
             "resource" => Ok(Self::Resource),
             "upgrade" => Ok(Self::Upgrade),
-            _ => Err("qualification profile must be protocol, target, resource or upgrade; release qualification is not implemented here".into()),
+            "permissions" => Ok(Self::Permissions),
+            _ => Err("qualification profile must be protocol, target, resource, upgrade or permissions; release qualification is not implemented here".into()),
         }
     }
 
@@ -41,6 +43,7 @@ impl Profile {
             Self::Target => "target",
             Self::Resource => "resource",
             Self::Upgrade => "upgrade",
+            Self::Permissions => "permissions",
         }
     }
 
@@ -50,6 +53,7 @@ impl Profile {
             Self::Target => "D6",
             Self::Resource => "D7",
             Self::Upgrade => "F1",
+            Self::Permissions => "F2",
         }
     }
 
@@ -59,6 +63,7 @@ impl Profile {
             Self::Target => "candidate-target.json",
             Self::Resource => "candidate-resource.json",
             Self::Upgrade => "candidate-upgrade.json",
+            Self::Permissions => "candidate-permissions.json",
         }
     }
 }
@@ -128,7 +133,7 @@ impl Options {
                     );
                 }
             }
-            Profile::Protocol | Profile::Target => {
+            Profile::Protocol | Profile::Target | Profile::Permissions => {
                 if baseline_binary.is_some() || baseline_sha256.is_some() {
                     return Err("baseline options require a resource or upgrade profile".into());
                 }
@@ -253,6 +258,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     let target = options.profile == Profile::Target;
     let resource = options.profile == Profile::Resource;
     let upgrade = options.profile == Profile::Upgrade;
+    let permissions = options.profile == Profile::Permissions;
     let paired = resource || upgrade;
     let needs_native = target || resource;
     let scope = match options.profile {
@@ -260,6 +266,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         Profile::Target => "exact_candidate_target_not_release",
         Profile::Resource => "exact_candidate_resource_not_release",
         Profile::Upgrade => "exact_candidate_installed_upgrade_fixture_not_release",
+        Profile::Permissions => "exact_candidate_scripted_patch_permissions_not_release",
     };
     let mut report = json!({"schema_version":"1.0.0","milestone":"MTM-016","delivery":options.profile.delivery(),
     "profile":options.profile.as_str(),"scope":scope,"passed":false,
@@ -273,6 +280,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         Profile::Target => json!(["browser","resources","upgrade and rollback","Python retirement"]),
         Profile::Resource => json!(["compiled-LaTeX target pass","permission-grant soak","browser","upgrade and rollback","Python retirement"]),
         Profile::Upgrade => json!(["real Native and compiled LaTeX","resources and permission-grant soak","browser and human consent","operator-authorized production-state copy","abrupt installation interruption","Python retirement and full release gate"]),
+        Profile::Permissions => json!(["real Native command execution and command-grant soak","compiled LaTeX and external retrieval","browser and independent human consent","baseline resource comparison","production upgrade and abrupt installation interruption","Python retirement and full release gate"]),
     }});
     let mut stage = if needs_native {
         "native_preflight"
@@ -311,6 +319,9 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         if upgrade {
             stage = "upgrade_test_runner";
         }
+        if permissions {
+            stage = "permission_test_runner";
+        }
         let cargo = env::var_os("CARGO").unwrap_or_else(|| "cargo".into());
         let mut command = Command::new(cargo);
         command
@@ -325,6 +336,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
                 "--",
             ])
             .current_dir(root)
+            .env_remove("MTM_TEST_PERMISSION_PROFILE")
             .env_remove("MTM_TEST_UPGRADE_PROFILE")
             .env_remove("MTM_TEST_TARGET_PROFILE")
             .env_remove("MTM_TEST_RESOURCE_PROFILE")
@@ -362,6 +374,11 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
                         .sha256,
                 )
                 .env_remove("MTM_TEST_TARGET_PROFILE");
+        } else if permissions {
+            command
+                .arg("permission_runtime::exact_candidate_permission_patch_soak")
+                .arg("--exact")
+                .env("MTM_TEST_PERMISSION_PROFILE", "1");
         } else if target {
             command.env("MTM_TEST_TARGET_PROFILE", "1");
             command.env_remove("MTM_TEST_RESOURCE_PROFILE");
@@ -397,7 +414,9 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             return Err("qualification harness source changed".into());
         }
         stage = "summary_validation";
-        let summaries = if upgrade {
+        let summaries = if permissions {
+            summary::validate_permissions(&output.stdout, &snapshot.sha256)?
+        } else if upgrade {
             summary::validate_upgrade(
                 &output.stdout,
                 &snapshot.sha256,

@@ -22,8 +22,17 @@ use super::{Result, require, text};
 #[path = "upgrade_state.rs"]
 mod upgrade_state;
 
+#[path = "permission_client.rs"]
+mod permission_client;
+
 const MAX_RESPONSE: usize = 2 * 1024 * 1024;
 const IO_TIMEOUT: Duration = Duration::from_secs(5);
+
+struct HttpPayload<'a> {
+    content_type: &'a str,
+    body: &'a [u8],
+    extra_headers: &'static str,
+}
 
 pub struct Reply {
     pub status: u16,
@@ -106,8 +115,11 @@ impl Client {
             Instant::now() + IO_TIMEOUT,
             "POST",
             "/mcp",
-            "application/json",
-            &body,
+            HttpPayload {
+                content_type: "application/json",
+                body: &body,
+                extra_headers: "",
+            },
             Some(self),
         )?;
         tool_outcome(reply)
@@ -156,19 +168,23 @@ pub struct Server {
 
 impl Server {
     pub fn start(binary: &str) -> Result<Self> {
-        Self::start_profile(binary, false, false, false)
+        Self::start_profile(binary, false, false, false, "safe")
     }
 
     pub fn start_workspace(binary: &str) -> Result<Self> {
-        Self::start_profile(binary, true, false, false)
+        Self::start_profile(binary, true, false, false, "safe")
     }
 
     pub fn start_target(binary: &str) -> Result<Self> {
-        Self::start_profile(binary, true, true, true)
+        Self::start_profile(binary, true, true, true, "dangerous")
     }
 
     pub fn start_resource(binary: &str) -> Result<Self> {
-        Self::start_profile(binary, false, true, false)
+        Self::start_profile(binary, false, true, false, "dangerous")
+    }
+
+    pub fn start_permissions(binary: &str, mode: mtm_contracts::NativeMode) -> Result<Self> {
+        Self::start_profile(binary, true, false, false, mode.as_str())
     }
 
     pub fn workspace_path(&self) -> std::path::PathBuf {
@@ -246,6 +262,7 @@ impl Server {
         git_enabled: bool,
         native_enabled: bool,
         compiled_latex: bool,
+        native_mode: &'static str,
     ) -> Result<Self> {
         let directory = tempfile::tempdir().map_err(|_| "temporary server directory failed")?;
         fs::create_dir(directory.path().join("workspace")).map_err(|_| "workspace setup failed")?;
@@ -292,7 +309,7 @@ impl Server {
             } else {
                 "disabled"
             },
-            native_mode: if native_enabled { "dangerous" } else { "safe" },
+            native_mode,
             latex_policy: if compiled_latex {
                 "required"
             } else {
@@ -417,8 +434,11 @@ impl Server {
             self.deadline,
             method,
             path,
-            content_type,
-            body,
+            HttpPayload {
+                content_type,
+                body,
+                extra_headers: "",
+            },
             client,
         )
     }
@@ -428,10 +448,14 @@ impl Server {
         total_deadline: Instant,
         method: &str,
         path: &str,
-        content_type: &str,
-        body: &[u8],
+        payload: HttpPayload<'_>,
         client: Option<&Client>,
     ) -> Result<Reply> {
+        let HttpPayload {
+            content_type,
+            body,
+            extra_headers,
+        } = payload;
         require(
             total_deadline > Instant::now(),
             "capability gate exceeded total deadline",
@@ -456,7 +480,7 @@ impl Server {
             String::new()
         };
         let headers = format!(
-            "{method} {path} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\nContent-Type: {content_type}\r\nContent-Length: {}\r\n{auth}\r\n",
+            "{method} {path} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\nContent-Type: {content_type}\r\nContent-Length: {}\r\n{auth}{extra_headers}\r\n",
             endpoint,
             body.len()
         );

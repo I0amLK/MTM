@@ -51,6 +51,12 @@ Missing coverage remains listed as pending, never converted to a green check.
 
 ## Retirement map
 
+Round 4/5 F2 adds exact-artifact scripted MCP permission and protected-patch
+qualification; see `docs/MTM-016-F2-PERMISSION-QUALIFICATION.md`. Its 100-cycle
+sampled-resource soak is distinct from Native command execution, baseline resource
+comparison and real human/browser acceptance. It does not retire another Python
+family or waive those pending checks.
+
 Round 4/5 begins with F1 exact installed-runtime upgrade qualification, documented
 in `docs/MTM-016-F1-UPGRADE-QUALIFICATION.md`. It supplements D8 selector mechanics
 with real old/current OAuth/MCP endpoints and baseline-generated state. Full F

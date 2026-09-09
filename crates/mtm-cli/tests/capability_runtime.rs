@@ -4,6 +4,9 @@
 
 mod support;
 
+#[path = "support/permission_runtime.rs"]
+mod permission_runtime;
+
 #[path = "support/action_recovery.rs"]
 mod action_recovery;
 

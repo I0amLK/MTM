@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-016",
+  "kind": "reviewed_development_tool_observations_not_qualification",
+  "base_commit": "529d903",
+  "observations": [
+    {"command_id": "cmd-36992-80d-18d3ac9f3d7ac96e", "test": "scripted_permission_boundary_regression", "exit_code": 101, "error": "permission fixture HTTP failure; no replay", "resolution": "The test client sent modern metadata without matching HTTP protocol/method/name headers. Fixed the client, not the server."},
+    {"command_id": "cmd-36992-812-18d3acc24e991c36", "test": "scripted_permission_boundary_regression", "exit_code": 101, "error": "permission race unexpected rejection", "resolution": "A concurrent loser may encounter consumed permission or a changed prepared-file baseline. Both are bounded no-write rejections; require exactly one winner plus a subsequent sequential permission denial."},
+    {"command_id": "cmd-36992-818-18d3acdd286a1960", "test": "exact_candidate_permission_patch_soak", "exit_code": 101, "error": "permission challenge missing", "resolution": "Replacing a line invalidated the same patch after success. Insert after a permanent unique anchor so rechallenge measures grant consumption rather than failed hunk matching."}
+  ],
+  "successful_pilot": {
+    "command_id": "cmd-36992-827-18d3ad1e294dc86a",
+    "candidate_sha256": "496f83ba59578a61833d2bef40085bc6e5771a0d5edb0a30d5aeca7bbccc6183",
+    "exit_code": 0,
+    "checks": 21,
+    "iterations": 100,
+    "duration_ms": 86851,
+    "initial_rss_kib": 12788,
+    "max_rss_kib": 14164,
+    "initial_and_max_threads": 9,
+    "initial_and_max_fds": 16,
+    "retained_children": 0,
+    "shutdown_ms": 10
+  },
+  "limits": "Pilot used a directly selected reviewed artifact. Formatting/test edits occurred during development, so these observations are not a sealed clean-source qualification. The subsequent post-commit qualifier must bind source and artifact independently.",
+  "raw_credentials_or_protocol_bodies_recorded": false,
+  "human_consent_tested": false,
+  "native_command_execution_tested": false,
+  "production_state_modified": false,
+  "release_qualified": false
+}

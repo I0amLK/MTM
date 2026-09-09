@@ -54,6 +54,7 @@ struct Upgrade {
 pub(super) fn validate(stdout: &[u8], candidate: &str, baseline: &str) -> Result<Value> {
     if std::str::from_utf8(stdout)?.contains("MTM_TARGET_RUNTIME ")
         || std::str::from_utf8(stdout)?.contains("MTM_RESOURCE_RUNTIME ")
+        || std::str::from_utf8(stdout)?.contains("MTM_PERMISSION_RUNTIME ")
     {
         return Err("upgrade output contains a foreign qualification profile".into());
     }

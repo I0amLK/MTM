@@ -1,5 +1,21 @@
 use super::*;
 
+#[test]
+fn permission_evidence_cannot_be_consumed_as_protocol_or_target() -> Result<()> {
+    let good = summaries();
+    let target = target_summary();
+    for profile in [Profile::Protocol, Profile::Target] {
+        let bytes = output(&good, (profile == Profile::Target).then_some(&target));
+        summary::validate(&bytes, &"a".repeat(64), profile)?;
+        let foreign = [bytes, b"MTM_PERMISSION_RUNTIME {}\n".to_vec()].concat();
+        assert!(summary::validate(&foreign, &"a".repeat(64), profile).is_err());
+    }
+    assert!(
+        summary::validate(&output(&good, None), &"a".repeat(64), Profile::Permissions).is_err()
+    );
+    Ok(())
+}
+
 fn options(path: &str, hash: &str) -> Options {
     Options {
         binary: path.into(),

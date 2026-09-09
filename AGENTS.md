@@ -142,6 +142,14 @@ Current source/protocol gates must clear the upgrade profile flag. Keep all fail
 Native/resource and unprepared-legacy-mode observations; never widen scope from
 the later successful prepared-copy rehearsal.
 
+## F2 protected-patch permission fixture
+
+F2 adds `qualify --profile permissions` for scripted real-MCP consent and protected
+patch writes on disposable files. Read `docs/MTM-016-F2-PERMISSION-QUALIFICATION.md`.
+Keep its 100-cycle/60-90-second bounds and explicit disabled-command/no-human scope.
+Never infer full Native command/grant soak or browser acceptance from it. Other
+source/qualification entries must clear `MTM_TEST_PERMISSION_PROFILE`.
+
 ## Historical local gate (before MTM-016)
 
 ```bash

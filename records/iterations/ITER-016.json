@@ -2288,6 +2288,47 @@
       "rust_only_ready":false,
       "release_qualified":false,
       "earlier_signature_mismatch_explained":false
+    },
+    {
+      "id": "MTM016-F2-PERMISSION-IMPLEMENTATION",
+      "round": "4_of_final_5",
+      "status": "implementation_and_source_review_complete_exact_postcommit_permission_gate_pending",
+      "stage_D_status": "in_progress",
+      "stage_F_status": "in_progress",
+      "base_commit": "529d903b6d3c6c526b6c9badbe72f98f0571cbe7",
+      "design": "docs/MTM-016-F2-PERMISSION-QUALIFICATION.md",
+      "harness_source_sha256": "f4a52f4cd88fe911029f5e194946d4f016ee7565a8f5a1d3b0ef150d5ed0d663",
+      "sealed_reports": [
+        {"path":"records/evidence/MTM-016/source-check-f2-composed.json","sha256":"750c625f5b8037d80349a34c04dcdabbd6ef3c1b154f955f56b8b7515957efcf","passed":false},
+        {"path":"records/evidence/MTM-016/permission-f2-development-observations.json","sha256":"8e8e6e9755d30de93ed5153d3fe6078b1c260a4ffa5e49d88a054b01073dd70f"}
+      ],
+      "implemented_scope": [
+        "Real loopback OAuth/MCP scripted form-consent requests with matching modern HTTP headers; protected writes use production apply_patch authority on disposable generated paths",
+        "Twenty-one boundary checks: zero-write refusal, negative consent, owner/argument binding, duplicate/replay behavior, dry-run preservation, once/session use, concurrency, expiry and restart invalidation",
+        "Exactly 100 changed-byte protected-patch cycles, five warmups and 60-90 seconds of measured runtime; sampled RSS growth at most 8192 KiB, no added threads/FDs, no retained child and bounded shutdown",
+        "Strict exact-artifact summary checks with typed bounded counts, no missing/foreign check sets or widened human/browser/Native/release claims; other profiles clear the permission flag and refuse its summary"
+      ],
+      "source_validation": {
+        "command":"cargo xtask check --record",
+        "command_id":"cmd-36992-833-18d3ad553ac2f043",
+        "exit_code":1,
+        "format_exit":0,"clippy_exit":0,"diff_exit":0,
+        "source_unchanged":true,
+        "installation_unit_passed":4,"deployment_cli_passed":6,
+        "capability_runtime_functions_passed":44,"explicit_profile_functions_inert":4,
+        "maintenance_unit_passed":66,"maintenance_cli_passed":12,
+        "runtime_passed":128,"runtime_failed":10,"runtime_ignored":1,
+        "failure_scope":"Same ten inherited Native/Bubblewrap cases named in the D8 receipt; Native prerequisites report namespace_limit_or_depth/ENOSPC. No assertion or isolation boundary was waived."
+      },
+      "pilot": {"candidate_sha256":"496f83ba59578a61833d2bef40085bc6e5771a0d5edb0a30d5aeca7bbccc6183","checks":21,"cycles":100,"measurement_ms":86851,"rss_growth_kib":1376,"threads":9,"fds":16,"retained_children":0,"qualification_claim":false},
+      "preserved_development_failures":"Missing modern HTTP headers, too-narrow concurrent loser expectation, and a replacement hunk that was no longer applicable after success. Corrections are test-side only; the pilot is not a source-immutable post-commit gate.",
+      "boundary":"Native command backend disabled; LaTeX static-only; responses scripted rather than human consent. This is not the full Native command/grant soak, baseline resource comparison, browser acceptance, production upgrade, complete F or release qualification.",
+      "pending":["Post-commit exact permission profile", "Capable-host Native/TTY/CAS and full command/grant soak", "Compiled LaTeX and external retrieval", "Real browser and independent human consent", "Baseline resource comparison", "Approved production-state rehearsal and abrupt install interruption", "Remaining D retirement and 30-task x3 corpus"],
+      "product_source_changed":false,"new_packages_or_versions":0,
+      "python_files_deleted":0,"remaining_python_files":67,
+      "new_suppressions":0,"production_changed":false,
+      "rust_only_ready":false,"release_qualified":false,
+      "earlier_signature_mismatch_explained":false
     }
   ],
   "remaining_acceptance": [
