@@ -109,3 +109,37 @@ substitute for final real-host Native isolation, compiled LaTeX, browser/OAuth,
 resource, install/upgrade/rollback or representative research-corpus acceptance.
 Production selectors, production state and production keys are not changed.
 
+## Delivery
+
+Implementation commit `1633ab8221dd9f394a87482923f35d4361e74cd3` keeps
+state schema 7 and advances the MTM-owned tool contract to `mtm-tools-v9`.
+The independent development artifact
+`target/mtm016-e2-action-files/release/mtm` has SHA-256
+`1e056a583e03effdbd2366056bf2b8985f929f4e712cf7c4bfa7da720ee673e4`.
+
+Post-commit exact-artifact protocol qualification passed with 500 normal assessment
+first hops (250 compact, 250 full), zero normal INVALID/rejections, three scripted
+complete workflows, copied-v1 migration/new-run, restart/key checks, five Git tools
+and the complete current `capability_runtime` recovery fixture family. The raw
+passing report is sealed at
+`records/evidence/MTM-016/candidate-protocol-e2-action-files-1633ab8.json`, SHA-256
+`3f7592b025017d945746452361fd1727200b93dae598d3c3f9753f706ab4bf21`.
+
+The first post-commit qualifier attempt is also preserved at
+`records/evidence/MTM-016/candidate-protocol-e2-action-files-first-env.json`, SHA-256
+`1c146c83b3fc76b8ef87745ff9001cdae01c1b95d23205d50dd5ea50ddcbc1d5`.
+That attempt never launched the candidate: a recreated command sandbox had not yet
+populated the full locked dependency cache needed by the qualifier's deliberately
+offline child cargo runner. Running `cargo fetch --locked` in the same command
+environment before the unchanged qualifier resolved the environment prerequisite.
+
+The complete connected-sandbox source gate remains false only because the same ten
+inherited Bubblewrap/Native Runtime tests fail; Runtime reports 128 passed, 10 failed
+and one existing ignored target-only network test. Format, Clippy, the other Rust
+targets and diff checks pass, with no new ignore or suppression.
+
+With the successful exact-artifact run, Stage E is complete for the current contract:
+new current-schema state-changing paths have either evidenced recovery or an explicit
+deterministic no-replay result. Historical opaque/unmarked work remains
+`RESULT_UNKNOWN`. This Stage-E completion is not release qualification.
+

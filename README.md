@@ -1,6 +1,7 @@
 # MTM
 
-The current E2 action-file checkpoint keeps schema 7 and uses `mtm-tools-v9`.
+Stage E is complete for the current development contract. The E2 action-file
+checkpoint keeps schema 7 and uses `mtm-tools-v9`.
 All state-changing model actions now have a current-contract interruption policy:
 four database-only actions commit atomically, while plans/direct proving/branch/
 join/failure/replan/verification actions use explicit restartable enrollment plus

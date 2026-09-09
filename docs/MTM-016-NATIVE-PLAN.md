@@ -38,7 +38,7 @@ build orchestration, tests and release control; it does not ban external tools.
 | B | Fix ordinary command parsing and Workspace/Git usability | Positive and adversarial Rust regressions, exact-binary native smoke where possible |
 | C | MTM-owned typed contracts/catalog; remove 11 legacy public dispatch aliases | Schema/description fixtures, unknown-alias rejection, complete Rethlas regressions |
 | D | Consolidate maintenance into a small Rust `xtask`; retire Python/shadow execution only after coverage replacement | Python-free clean-clone build/test, Rust historical evidence validation, equivalent security/target suites |
-| E | Task-domain lifecycle, explicit uncertain-result recovery, bounded workflow idempotency | Concurrent/restart/response-loss tests; no shell exactly-once claim; no authority from receipt lookup |
+| E ✅ | Task-domain lifecycle, explicit uncertain-result recovery, bounded workflow idempotency | **Current-contract complete at `1633ab8` / `mtm-tools-v9`:** concurrent/restart/response-loss and action-file recovery are covered; legacy opaque outcomes remain explicit no-replay; no shell exactly-once claim; no authority from receipt lookup |
 | F | New release identity, complete task corpus and reversible upgrade | 30 representative tasks x 3 runs, full LaTeX/retrieval/branch flows, resource bounds and rollback |
 
 The single `xtask` maintenance crate is approved here. Product crates may not depend
