@@ -2460,6 +2460,34 @@
       "remaining_python_files":67,"legacy_rust_reference_files":81,"new_suppressions":0,
       "production_changed":false,"rust_only_ready":false,"release_qualified":false,
       "remaining":["Capable-host Native/TTY/CAS and command-grant soak", "Required compiled-LaTeX and real external retrieval", "Independent browser and human consent", "Approved operator-state copy and external installer SIGKILL evidence", "Eight unimplemented forward-evidence adapters and complete 30 x 3 corpus", "Remaining D retirement and final exact-artifact release authorization"]
+    },
+    {
+      "id":"MTM016-F4-F5-DELIVERY",
+      "status":"readiness_blocker_checkpoint_delivered_round4_blocked_round5_partial",
+      "implementation_commit":"d59e7f9dcf9376c345e41d1773e0b77e9db28f2e",
+      "candidate_source_commit":"cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+      "candidate_sha256":"589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8",
+      "harness_source_sha256":"6f00e648b0a67102d0bc7bf30189e2010e38d9d45d277bed0a4bafb6a7ad4269",
+      "release_input_manifest_sha256_at_check":"f009c74b1c67ac726b6142d0538611ad3734b64bfd0ca9e94011b5a9fb6eeb71",
+      "sealed_reports":[
+        {"path":"records/evidence/MTM-016/candidate-corpus-f5-d59e7f9.json","sha256":"4eda9d4710f42fcbd2cdae13b3ef00a0d30f854a754d9126f5adfe70fecde75e","passed":false},
+        {"path":"records/evidence/MTM-016/candidate-protocol-f4-f5-d59e7f9.json","sha256":"83c601815437e1dbb6b3d4cce9b09c45471e74170cd70d371179dabbc6c4efbc","passed":true},
+        {"path":"records/evidence/MTM-016/release-check-f4-d59e7f9.json","sha256":"6a0cb40f9baa0e88a02585fd707d97258b651775ed07df41c9d71b769a1b53d7","passed":false}
+      ],
+      "post_commit_corpus":{"outer_exit_code":1,"runner_exit_code":0,"failed_stage":"corpus_coverage","candidate_launched":true,"tasks":30,"repeats":3,"rows":90,"passed_trials":45,"failed_trials":0,"blocked_trials":45,"new_disposable_server_each_portable_trial":true,"corpus_sha256":"9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861","source_corpus_and_artifact_unchanged":true},
+      "corpus_groups":{"U01_U05_workspace":{"passed":15},"U06_U10_git":{"passed":15},"U11_U15_workflow":{"passed":15},"U16_U20_native":{"blocked":15},"U21_U25_independent_research":{"blocked":15},"U26_U30_external_client_operator_and_sigkill":{"blocked":15}},
+      "post_commit_protocol":{"finalized_report_passed":true,"outer_command_exit_observed":false,"runner_exit_code":0,"runner_child_reaped":true,"runner_pipes_closed":true,"normal_assessments":500,"normal_rejections":0,"normal_invalid":0,"scripted_full_compact_repair_passed":true,"source_and_artifact_unchanged":true,"native_backend":"disabled","latex_policy":"static_only","independent_mathematical_verification":false},
+      "protocol_observation_boundary":"One status-poll call was blocked by the tool platform. The finalized report was subsequently read with authorized workspace file access, hash-verified and revalidated by release-check against the committed harness. No outer command exit was inferred and no test was rerun to erase this observation.",
+      "release_readiness":{"exit_code":1,"required_gates":17,"validated_gates":5,"blocked_gates":12,"validated":["protocol","permissions","upgrade","record_integrity","retirement_provenance"],"ready_for_release_review":false,"release_authorization_implemented":false,"reviewed_adapters_implemented":6,"reviewed_adapters_pending":8,"evidence_reexecuted_by_check":false},
+      "source_gate":{"exit_code":1,"format_passed":true,"clippy_passed":true,"diff_passed":true,"deployment_unit_passed":6,"deployment_cli_passed":7,"capability_runtime_functions_passed":46,"inert_explicit_profile_functions":5,"maintenance_unit_passed":72,"maintenance_cli_passed":13,"runtime_passed":128,"runtime_failed":10,"runtime_ignored":1,"only_failed_target":"mtm-runtime --lib","same_named_native_failure_set_as_F3":true},
+      "commit_validation":{"implementation_message_postchecked":true,"repository_commit_hook_enabled":true,"hook_path":".githooks"},
+      "round4_complete":false,"round5_complete":false,"round5_status":"in_progress",
+      "stage_D_status":"in_progress","stage_F_status":"in_progress",
+      "completion_boundary":"This delivers the read-only release-blocker checker and the portable half of the declared 30 x 3 usability corpus. It does not complete round 4, implement all evidence adapters or certify independent research/browser/human/operator-state/externally killed-installation acceptance. Two runs of the portable half are not 90 complete-corpus passes.",
+      "remaining":["Required Native/TTY/CAS and true command-grant soak on a capable host", "Required compiled-LaTeX, actual retrieval and independent mathematical research trials", "Real browser and independent human consent", "Equivalent baseline/candidate Native resources and current clean-build evidence", "Authorized operator-state copy plus external installer SIGKILL/power-loss boundaries", "Eight reviewed forward-evidence adapters, 45 blocked corpus trials, remaining D retirement and final release authorization"],
+      "remaining_python_files":67,"legacy_rust_reference_files":81,"python_files_deleted_this_round":0,
+      "product_source_changed":false,"production_changed":false,"new_suppressions":0,
+      "rust_only_ready":false,"release_qualified":false,"earlier_signature_mismatch_explained":false
     }
   ],
   "remaining_acceptance": [

@@ -93,3 +93,29 @@ test functions (five explicit profile functions inert), 72 maintenance unit and
 128 passed, ten existing Native/Bubblewrap failures, one existing ignored test.
 That failed full check is sealed separately and is a release blocker, not a
 portable-test waiver. Current records and retirement provenance checks passed.
+
+Post-commit implementation identity is
+`d59e7f9dcf9376c345e41d1773e0b77e9db28f2e`. Its separately rerun exact-artifact
+corpus again returned 45 passed / zero failed / 45 blocked, with all 90 rows and
+unchanged source/corpus/candidate hashes. This is one 90-row partial matrix,
+not 90 passes obtained by adding together two runs of the portable half.
+The readiness input manifest may reference that partial observation, but the
+complete-corpus release adapter remains deliberately unavailable until reviewed
+real-world task execution and complete evidence ingestion are implemented.
+
+The same exact F3 artifact also completed post-commit protocol qualification:
+500 normal assessments with zero normal rejection/INVALID, and full, compact
+and repair routes. The finalized report binds implementation commit `d59e7f9`
+and unchanged harness hash `6f00e648b0a67102d0bc7bf30189e2010e38d9d45d277bed0a4bafb6a7ad4269`.
+Its owned runner exited zero, reaped children and closed pipes. One command-status
+poll was blocked by the tool platform; acceptance is based on the subsequently
+read and hash-verified finalized report, not an inferred outer-command exit.
+No Native, compiler, browser, human or release claim is inferred from that pass.
+
+Final release readiness has five validated conditions and twelve blockers out of
+seventeen. Protocol, permissions and prepared-copy upgrade retain their exact
+scopes; current record integrity and retirement provenance also pass. This does
+not discharge the incomplete source/Native/full-corpus/retirement gates. Eight
+forward evidence adapters remain unfinished. The delivery receipt is
+`MTM016-F4-F5-DELIVERY` in `records/iterations/ITER-016.json`. No push, installation
+selector switch, production database read/write or secret change occurred.
