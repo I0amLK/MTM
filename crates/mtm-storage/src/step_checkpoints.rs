@@ -120,13 +120,16 @@ impl StateStore {
         let connection = self.lock_connection()?;
         let pending = query_one_on(
             &connection,
-            "SELECT c.phase,c.accepted_writes,j.marker_json FROM step_receipts r LEFT JOIN step_checkpoints c ON c.capability_sha256=r.capability_sha256 LEFT JOIN step_write_journals j ON j.capability_sha256=r.capability_sha256 WHERE r.owner_id=? AND r.run_id=? AND r.status='pending'",
+            "SELECT c.phase,c.accepted_writes,j.marker_json,c.atomic_action FROM step_receipts r LEFT JOIN step_checkpoints c ON c.capability_sha256=r.capability_sha256 LEFT JOIN step_write_journals j ON j.capability_sha256=r.capability_sha256 WHERE r.owner_id=? AND r.run_id=? AND r.status='pending'",
             [owner, run],
             &[],
         )?;
         Ok(match pending {
             None => Value::Null,
             Some(value) => serde_json::json!({"status":"pending",
+                "atomic_action":value["atomic_action"],
+                "recover_atomic_action_available":value["phase"]=="commit_ready"
+                    && value["atomic_action"].as_str().and_then(AtomicActionKind::parse).is_some(),
                 "phase":value["phase"].as_str().unwrap_or("legacy_unknown"),
                 "caller_write_recovery":write_journal::diagnostic(value["marker_json"].as_str(),value["phase"].as_str().unwrap_or("legacy_unknown"))?,
                 "accepted_caller_writes_lower_bound":value["accepted_writes"],

@@ -1,5 +1,10 @@
 pub const STATE_SCHEMA_VERSION: i64 = mtm_contracts::STATE_SCHEMA_VERSION as i64;
 
+pub const V7_ATOMIC_ACTION_SQL: &str = r#"
+ALTER TABLE step_checkpoints ADD COLUMN atomic_action TEXT
+    CHECK(atomic_action IN ('assessment_complete','exploration_complete','proof_submitted','repair_submitted'));
+"#;
+
 pub const V6_CALLER_WRITE_JOURNAL_SQL: &str = r#"
 CREATE TABLE step_write_journals (
     capability_sha256 TEXT PRIMARY KEY REFERENCES step_checkpoints(capability_sha256) ON DELETE RESTRICT,

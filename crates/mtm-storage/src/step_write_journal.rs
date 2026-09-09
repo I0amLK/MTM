@@ -126,6 +126,7 @@ struct Checkpoint {
     expected_writes: Option<u64>,
     accepted_writes: u64,
     marker_json: Option<String>,
+    atomic_action: Option<AtomicActionKind>,
 }
 
 /// Constructed only from a bound receipt and current durable checkpoint.
@@ -150,7 +151,7 @@ fn checkpoint(
     fingerprint: &str,
 ) -> Result<Option<Checkpoint>, ReCtmError> {
     query_one_on(connection,
-        "SELECT c.execution_id,c.phase,c.expected_writes,c.accepted_writes,j.marker_json FROM step_checkpoints c LEFT JOIN step_write_journals j ON j.capability_sha256=c.capability_sha256 WHERE c.capability_sha256=?",
+        "SELECT c.execution_id,c.phase,c.expected_writes,c.accepted_writes,j.marker_json,c.atomic_action FROM step_checkpoints c LEFT JOIN step_write_journals j ON j.capability_sha256=c.capability_sha256 WHERE c.capability_sha256=?",
         [fingerprint], &[])?
         .map(|row| serde_json::from_value(row).map_err(|_| invalid_receipt()))
         .transpose()
@@ -304,6 +305,17 @@ impl StateStore {
                 return Err(checkpoints::unknown());
             }
             let current = current.ok_or_else(checkpoints::unknown)?;
+            if current.atomic_action.is_some()
+                && (current.phase != "commit_ready"
+                    || !current
+                        .atomic_action
+                        .is_some_and(|kind| kind.state() == receipt.row.issued_state)
+                    || current.expected_writes != Some(current.accepted_writes)
+                    || recovery.marker != Some(Marker::Between)
+                    || observed.is_some())
+            {
+                return Err(checkpoints::unknown());
+            }
             if current.phase == "prepared" {
                 let result = SubmissionResult {
                     disposition: SubmissionDisposition::CorrectionRequired,
@@ -319,7 +331,14 @@ impl StateStore {
                     &self.runtime.clock.now_iso()?,
                 );
             }
-            if current.phase != "running" {
+            let atomic = current.phase == "commit_ready"
+                && current
+                    .atomic_action
+                    .is_some_and(|kind| kind.state() == receipt.row.issued_state)
+                && current.expected_writes == Some(current.accepted_writes)
+                && recovery.marker == Some(Marker::Between)
+                && observed.is_none();
+            if current.phase != "running" && !atomic {
                 return Err(checkpoints::unknown());
             }
             let extra = match (&recovery.marker, observed) {

@@ -7,6 +7,11 @@ use serde::{Deserialize, Serialize};
 const MAX_RECEIPTS_PER_RUN: i64 = 4096;
 const MAX_RECEIPTS_TOTAL: i64 = 100_000;
 
+#[path = "atomic_actions.rs"]
+mod atomic_actions;
+pub use atomic_actions::AtomicActionKind;
+pub(super) use atomic_actions::check_task;
+
 #[path = "step_database_write.rs"]
 mod database_write;
 
@@ -287,7 +292,7 @@ fn read_receipt(
     .transpose()
 }
 
-fn recheck_authority(
+pub(super) fn recheck_authority(
     tx: &Transaction<'_>,
     claims: &CapabilityClaims,
     now: i64,

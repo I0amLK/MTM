@@ -4,6 +4,9 @@
 
 mod support;
 
+#[path = "support/action_recovery.rs"]
+mod action_recovery;
+
 #[path = "support/database_recovery.rs"]
 mod database_recovery;
 

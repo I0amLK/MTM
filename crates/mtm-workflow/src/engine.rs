@@ -75,6 +75,10 @@ pub struct WorkflowEvent {
 
 pub type WorkflowObserver = Arc<dyn Fn(WorkflowEvent) + Send + Sync + 'static>;
 
+#[path = "action_transactions.rs"]
+mod action_transactions;
+use action_transactions::TaskEffects;
+
 #[path = "submission_write.rs"]
 mod submission_write;
 
@@ -1188,22 +1192,24 @@ impl WorkflowEngine {
         reason: &str,
         verdict: Option<&str>,
     ) -> Result<Value, ReCtmError> {
-        self.store.seal_domain(claims.domain_id())?;
         let empty = serde_json::json!({});
-        let updated = self.transition(TransitionInput {
-            run_id: claims.run_id(),
-            before: workflow_state(text(run, "state")?)?,
-            after,
-            trace_id,
-            actor: role_name(claims.role()),
-            reason,
-            evidence: &empty,
-            latex_passed: None,
-            verdict,
-            status: None,
-            sealed: None,
-            round_delta: 0,
-        })?;
+        let updated = self.transition_with_task(
+            TransitionInput {
+                run_id: claims.run_id(),
+                before: workflow_state(text(run, "state")?)?,
+                after,
+                trace_id,
+                actor: role_name(claims.role()),
+                reason,
+                evidence: &empty,
+                latex_passed: None,
+                verdict,
+                status: None,
+                sealed: None,
+                round_delta: 0,
+            },
+            Some(TaskEffects::new(claims)),
+        )?;
         Ok(serde_json::json!({
             "run_id":claims.run_id(),
             "state":updated["state"],
@@ -1547,6 +1553,14 @@ impl WorkflowEngine {
     }
 
     fn transition(&self, input: TransitionInput<'_>) -> Result<Value, ReCtmError> {
+        self.transition_with_task(input, None)
+    }
+
+    fn transition_with_task(
+        &self,
+        input: TransitionInput<'_>,
+        task: Option<TaskEffects<'_>>,
+    ) -> Result<Value, ReCtmError> {
         let decision = TransitionDecision::validate(TransitionRequest {
             run_id: input.run_id.to_owned(),
             before: input.before,
@@ -1556,7 +1570,7 @@ impl WorkflowEngine {
             trace_id: input.trace_id.to_owned(),
         })?;
         let request = decision.request();
-        let result = self.store.transition_run(TransitionRun {
+        let persisted = TransitionRun {
             run_id: &request.run_id,
             expected_state: state_name(request.before),
             after_state: state_name(request.after),
@@ -1570,7 +1584,20 @@ impl WorkflowEngine {
             verdict: input.verdict,
             sealed: input.sealed,
             round_delta: input.round_delta,
-        })?;
+        };
+        let result = match task {
+            None => self.store.transition_run(persisted)?,
+            Some(task) => self.store.transition_task(
+                task.claims,
+                mtm_storage::TaskTransition {
+                    transition: persisted,
+                    expected_metadata: task.expected_metadata,
+                    metadata_updates: &task.metadata_updates,
+                    project_mode: task.project_mode,
+                    branch: task.branch,
+                },
+            )?,
+        };
         self.emit(WorkflowEvent {
             event_type: "workflow.transition".to_owned(),
             trace_id: input.trace_id.to_owned(),
@@ -2272,10 +2299,12 @@ impl WorkflowEngine {
                 .unwrap_or_default(),
             ));
         }
+        if let Some(kind) = mtm_storage::AtomicActionKind::parse(action) {
+            self.store.enroll_atomic_action(claims, trace_id, kind)?;
+        }
         match action {
             "assessment_complete" => {
-                let after = self.commit_assessment_complete(run, claims, payload)?;
-                self.seal_and_transition(run, claims, after, trace_id, action, None)
+                self.commit_assessment_complete(run, claims, payload, trace_id)
             }
             "exploration_complete" => {
                 self.require_generation_records(claims.run_id(), "events")?;
@@ -2349,13 +2378,14 @@ impl WorkflowEngine {
             "proof_submitted" => self.commit_proof_submitted(run, claims, payload, trace_id),
             "verification_submitted" => self.commit_verification_submitted(run, claims, trace_id),
             "repair_submitted" => {
-                self.commit_repair_submitted(run, claims)?;
-                self.seal_and_transition(
+                let proof_sha256 = self.commit_repair_submitted(run, claims)?;
+                self.seal_atomic_transition(
                     run,
                     claims,
                     WorkflowState::LatexValidate,
                     trace_id,
                     action,
+                    serde_json::json!({"last_submitted_proof_sha256":proof_sha256}),
                     None,
                 )
             }
@@ -2371,10 +2401,19 @@ impl WorkflowEngine {
         run: &Value,
         claims: &CapabilityClaims,
         payload: &Value,
-    ) -> Result<WorkflowState, ReCtmError> {
+        trace_id: &str,
+    ) -> Result<Value, ReCtmError> {
         self.require_generation_records(claims.run_id(), "immediate_conclusions")?;
         if metadata_i64(run, "workflow_protocol_version", 1) < 2 {
-            return Ok(WorkflowState::Explore);
+            return self.seal_atomic_transition(
+                run,
+                claims,
+                WorkflowState::Explore,
+                trace_id,
+                "assessment_complete",
+                serde_json::json!({}),
+                None,
+            );
         }
         let requested = metadata_text(run, "requested_workflow_mode");
         let route = payload
@@ -2398,27 +2437,25 @@ impl WorkflowEngine {
             _ if route == "compact" && compact_allowed => "compact",
             _ => "full",
         };
-        self.update_metadata(
-            claims.run_id(),
-            serde_json::json!({
-                "effective_workflow_mode":effective_mode,
-                "workflow_route_reason":payload.get("route_reason").and_then(Value::as_str).unwrap_or_default(),
-                "compact_route_allowed":compact_allowed
-            }),
-        )?;
-        if self
-            .store
-            .get_project_run(claims.run_id(), Some(claims.owner_id()))?
-            .is_some()
-        {
-            self.store
-                .set_project_run_mode(claims.run_id(), effective_mode)?;
-        }
-        Ok(if effective_mode == "compact" {
+        let updates = serde_json::json!({
+            "effective_workflow_mode":effective_mode,
+            "workflow_route_reason":payload.get("route_reason").and_then(Value::as_str).unwrap_or_default(),
+            "compact_route_allowed":compact_allowed
+        });
+        let after = if effective_mode == "compact" {
             WorkflowState::Assemble
         } else {
             WorkflowState::Explore
-        })
+        };
+        self.seal_atomic_transition(
+            run,
+            claims,
+            after,
+            trace_id,
+            "assessment_complete",
+            updates,
+            Some(effective_mode),
+        )
     }
 
     fn commit_plans_proposed(
@@ -2716,9 +2753,6 @@ impl WorkflowEngine {
             .vault
             .write_branch_result(claims.run_id(), &branch_id, &result_payload)?;
         let path_text = path.to_string_lossy().into_owned();
-        self.store
-            .update_branch_status(&branch_id, "sealed", Some(&path_text))?;
-        self.store.seal_domain(claims.domain_id())?;
         let branch_state = serde_json::json!({
             "record_type":"branch_sealed","branch_id":branch_id,
             "plan_id":result_payload["plan_id"],"status":status
@@ -2737,9 +2771,10 @@ impl WorkflowEngine {
             .append_generation_memory(claims.run_id(), "branch_states", &branch_state)?;
         let branches = self.store.list_branches(claims.run_id())?;
         let barrier_complete = !branches.is_empty()
-            && branches
-                .iter()
-                .all(|branch| branch.get("status").and_then(Value::as_str) == Some("sealed"));
+            && branches.iter().all(|branch| {
+                branch["branch_id"] == branch_id
+                    || branch.get("status").and_then(Value::as_str) == Some("sealed")
+            });
         let after = if barrier_complete {
             WorkflowState::BranchJoin
         } else {
@@ -2748,24 +2783,32 @@ impl WorkflowEngine {
         let evidence = serde_json::json!({
             "branch_id":branch_id,"status":status,"barrier_complete":barrier_complete
         });
-        let result = self.transition(TransitionInput {
-            run_id: claims.run_id(),
-            before: WorkflowState::BranchRun,
-            after,
-            trace_id,
-            actor: role_name(claims.role()),
-            reason: if barrier_complete {
-                "branch_sealed_barrier_complete"
-            } else {
-                "branch_sealed_next_pending"
+        let mut effects = TaskEffects::new(claims);
+        effects.branch = Some(mtm_storage::BranchSeal {
+            branch_id: &branch_id,
+            result_path: &path_text,
+        });
+        let result = self.transition_with_task(
+            TransitionInput {
+                run_id: claims.run_id(),
+                before: WorkflowState::BranchRun,
+                after,
+                trace_id,
+                actor: role_name(claims.role()),
+                reason: if barrier_complete {
+                    "branch_sealed_barrier_complete"
+                } else {
+                    "branch_sealed_next_pending"
+                },
+                evidence: &evidence,
+                latex_passed: None,
+                verdict: None,
+                status: None,
+                sealed: None,
+                round_delta: 0,
             },
-            evidence: &evidence,
-            latex_passed: None,
-            verdict: None,
-            status: None,
-            sealed: None,
-            round_delta: 0,
-        })?;
+            Some(effects),
+        )?;
         Ok(serde_json::json!({
             "run_id":claims.run_id(),"state":result["state"],"branch_id":branch_id,
             "branch_status":"sealed","barrier_complete":barrier_complete
@@ -2927,43 +2970,30 @@ impl WorkflowEngine {
                     "Only a compact assembly may escalate to full exploration",
                 ));
             }
-            self.update_metadata(
-                claims.run_id(),
-                serde_json::json!({
-                    "effective_workflow_mode":"full",
-                    "compact_escalation_reason":payload.get("escalation_reason").and_then(Value::as_str).unwrap_or("assembly requested full exploration")
-                }),
-            )?;
-            if self
-                .store
-                .get_project_run(claims.run_id(), Some(claims.owner_id()))?
-                .is_some()
-            {
-                self.store.set_project_run_mode(claims.run_id(), "full")?;
-            }
-            return self.seal_and_transition(
+            return self.seal_atomic_transition(
                 run,
                 claims,
                 WorkflowState::Explore,
                 trace_id,
                 "compact_assembly_escalated_to_full",
-                None,
+                serde_json::json!({
+                    "effective_workflow_mode":"full",
+                    "compact_escalation_reason":payload.get("escalation_reason").and_then(Value::as_str).unwrap_or("assembly requested full exploration")
+                }),
+                Some("full"),
             );
         }
         let proof = self.vault.read_proof(claims.run_id())?;
         if protocol >= 2 {
             self.store.read_proof_manifest(claims.run_id())?;
         }
-        self.update_metadata(
-            claims.run_id(),
-            serde_json::json!({"last_submitted_proof_sha256":sha256_text(&proof)}),
-        )?;
-        self.seal_and_transition(
+        self.seal_atomic_transition(
             run,
             claims,
             WorkflowState::LatexValidate,
             trace_id,
             "proof_submitted",
+            serde_json::json!({"last_submitted_proof_sha256":sha256_text(&proof)}),
             None,
         )
     }
@@ -3134,7 +3164,7 @@ impl WorkflowEngine {
         &self,
         run: &Value,
         claims: &CapabilityClaims,
-    ) -> Result<(), ReCtmError> {
+    ) -> Result<String, ReCtmError> {
         let proof = self.vault.read_proof(claims.run_id())?;
         if metadata_i64(run, "workflow_protocol_version", 1) >= 2 {
             self.store.read_proof_manifest(claims.run_id())?;
@@ -3148,11 +3178,7 @@ impl WorkflowEngine {
             )
             .with_category(ErrorCategory::Validation));
         }
-        self.update_metadata(
-            claims.run_id(),
-            serde_json::json!({"last_submitted_proof_sha256":proof_sha256}),
-        )?;
-        Ok(())
+        Ok(proof_sha256)
     }
 }
 

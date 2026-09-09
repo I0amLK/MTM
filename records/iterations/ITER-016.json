@@ -1678,6 +1678,83 @@
       "rust_only_ready": false,
       "release_qualified": false,
       "earlier_signature_mismatch_explained": false
+    },
+    {
+      "id": "MTM016-E2-ACTION-TRANSACTION-IMPLEMENTATION",
+      "scope": "E2 bounded atomic action transactions and task-domain sealing",
+      "status": "implementation_and_targeted_tests_complete_full_gates_pending",
+      "base_commit": "a38482a5220c90a33fbfec836a2a25d9570224ae",
+      "design": "docs/MTM-016-E2-ACTION-TRANSACTIONS.md",
+      "contract": {"state_schema": 7, "tool_contract": "mtm-tools-v7", "workflow_protocol": 3},
+      "behavior": [
+        "Assessment, exploration, proof/escalation and repair explicitly enroll before pure database action completion",
+        "Domain seal, revocation, metadata/project-mode changes, state transition and receipt use one transaction",
+        "Recovery returns only an evidenced retained-prefix correction, never runs the action or creates authority",
+        "Branch status/domain/barrier/transition are coupled, but preceding file effects remain unknown",
+        "Historical commit-ready checkpoints are not enrolled or inferred from unchanged state"
+      ],
+      "observations": [
+        {"command": "Pre-fix authenticated assessment transition fault fixture", "exit_code": 101, "error": "failed transition left a sealed domain or action metadata", "interpretation": "Actual regression reproduced before implementation"},
+        {"command": "First compilation of task transaction helper", "exit_code": 101, "interpretation": "Private helper re-export visibility corrected without exposing new public authority constructors"},
+        {"command": "Poll prior command cmd-36992-4e1-18d38bd7cfda7f80", "tool_error": "COMMAND_NOT_FOUND", "interpretation": "Old command outcome unavailable; not counted as successful and independently rerun"},
+        {"command": "cargo test -p mtm-storage --test action_transactions --locked --offline", "exit_code": 0, "tests_passed": 7, "scope": "Before the additional inconsistent-enrollment regression"},
+        {"command": "cargo test -p mtm-cli --test capability_runtime action_recovery --locked --offline -- --nocapture", "exit_code": 0, "tests_passed": 3, "scope": "Disposable actual OAuth/MCP, deterministic failure injection then forced process restart"}
+      ],
+      "non_goals": ["Planning/direct-screening/join/verification file-effect recovery", "Mechanical branch preparation/finalization recovery", "Legacy unknown adoption", "Power-cut or hostile same-UID defense", "Production deployment or final release qualification"],
+      "new_packages_or_versions": 0,
+      "schema_migrations_added": 1,
+      "python_files_deleted": 0,
+      "production_changed": false,
+      "rust_only_ready": false,
+      "release_qualified": false,
+      "earlier_signature_mismatch_explained": false
+    },
+    {
+      "id": "MTM016-E2-ACTION-TEST-REPAIR",
+      "status": "initial_failures_preserved_targeted_repairs_passed",
+      "sealed_reports": [
+        {"path": "records/evidence/MTM-016/source-check-e2-actions-first.json", "sha256": "4127af80ce837604f56fcc0bc9e1cebee4a04465976cd0e75ad439145642d5a0"}
+      ],
+      "initial_source_gate": {"exit_code": 1, "source_sha256": "7a36ea335e7cbfd7a813c264ba44601974f38399101a3f3ee7020f3956005e12", "failed_targets": ["mtm-runtime lib", "mtm-storage action_transactions", "mtm-storage storage", "mtm-workflow workflow"]},
+      "repairs": [
+        "The migrated working copy must report schema 7 while the untouched rollback copy still reports schema 1; the overlooked current-version assertion was corrected",
+        "Malformed atomic enrollment fixtures now preserve SQL phase/count constraints to exercise semantic rejection. A separate positive-control test verifies the database constraint rejects an inconsistent completion count without changing state",
+        "Per-file diagnosis of research shadow observed unchanged database and WAL, with only SHM changing on the first post-commit SELECT. Read-only status establishes the read view before freezing the entire tree; no database, WAL, SHM or private-file content is excluded from the original equality checks",
+        "An added positive-control test proves that the same full-tree comparison still detects actual SQL and filesystem writes",
+        "A patch listing the workflow test path twice retained the later operation and left the temporary diagnostic in place; a single-target patch corrected this and the actual file was rechecked"
+      ],
+      "references": ["https://www.sqlite.org/wal.html", "https://github.com/sqlite/sqlite/blob/master/src/wal.c"],
+      "targeted_results": {"storage_action_tests_passed": 9, "storage_existing_tests_passed": 6, "workflow_integration_tests_passed": 10},
+      "scope": "Test setup and expectations corrected without weakening product isolation, modifying the research projector, dropping byte comparisons or suppressing a test",
+      "production_changed": false,
+      "release_qualified": false
+    },
+    {
+      "id": "MTM016-E2-ACTION-TRANSACTION-SOURCE-REVIEW",
+      "status": "reviewed_with_existing_nested_host_failures_and_exact_candidate_pending",
+      "source_sha256": "b03bc94320d8e62ac16e5a1e8500e1f1b2e9c1c3d397962fd942cb11898b7a26",
+      "source_unchanged_during_check": true,
+      "commands": [
+        {"command": "cargo xtask check --record", "exit_code": 1, "result": "Only mtm-runtime lib failed: the same ten inherited nested-Bubblewrap tests; no additional failure or suppression"},
+        {"command": "cargo build --release --locked --offline -p mtm-cli --bin mtm --target-dir target/mtm016-e2-actions", "exit_code": 0, "result": "Independent candidate and repeat build retain identical bytes"},
+        {"command": "target/mtm016-e2-actions/release/mtm release-info", "exit_code": 0},
+        {"command": "cargo xtask records", "exit_code": 0, "historical_hashes": 26, "sealed_observations": 9},
+        {"command": "cargo xtask retirement", "exit_code": 0, "baseline_deletion_hashes": 11},
+        {"command": "cargo xtask audit --strict --record", "exit_code": 1, "expected": true, "python_files_remaining": 116},
+        {"command": "git diff --exit-code -- Cargo.toml Cargo.lock rust-toolchain.toml", "exit_code": 0},
+        {"command": "git diff --check", "exit_code": 0}
+      ],
+      "validation_totals": {"new_storage_tests": 9, "new_workflow_test_controls": 1, "new_public_tests": 3, "new_tests": 13, "storage_passed": 65, "workflow_passed": 103, "gateway_passed": 29, "public_fixture_functions_passed": 36, "inert_host_profile_functions": 2, "maintenance_unit_passed": 57, "maintenance_cli_passed": 8, "runtime_passed": 128, "runtime_failed": 10, "runtime_ignored": 1, "new_suppressions": 0},
+      "candidate": {"path": "target/mtm016-e2-actions/release/mtm", "sha256": "991ad6ccef4d7cdf881c17924cd79b26fb35b437d601c691ab01079d5b529455", "version": "0.6.0-preview.1", "state_schema": 7, "tool_contract": "mtm-tools-v7", "workflow_protocol": 3, "installed": false},
+      "preservation": "Six previous candidate binaries and 26 historical records are unchanged. Eight prior MTM-016 seals are unchanged; the additional first-attempt failure report is sealed separately and remains failed.",
+      "commit_identity": "The cleared environment had no default Git identity; the existing MTM Automation <mtm-automation@localhost> identity was read from HEAD and will be used command-locally with the existing executable Rust-backed hook. No global Git configuration change.",
+      "rollback": "Before deployment revert the dedicated development commit; schema-7 state requires untouched pre-upgrade copies, never lowered user_version or deleted checkpoints.",
+      "new_packages_or_versions": 0,
+      "python_files_deleted": 0,
+      "production_changed": false,
+      "aggregate_passed": false,
+      "release_qualified": false,
+      "remaining": ["Post-commit exact-SHA protocol qualification", "File-affecting action and mechanical branch/finalization recovery", "Legacy unknown work", "Final host/browser/compiled-LaTeX/resource/install/rollback qualification", "Python/Re-CTM retirement"]
     }
   ],
   "remaining_acceptance": [

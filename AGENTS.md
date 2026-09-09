@@ -91,6 +91,11 @@ Read `docs/MTM-016-E2-DATABASE-WRITES.md`: manifest/audit SQL and accepted-write
 counts share one short transaction, normalizers remain in workflow, and no public
 transaction callback is exposed. Summary counts must match durable counts. This
 does not authorize replay of old opaque journals or arbitrary action effects.
+Schema 7 records explicit enrollment for four database-only actions; read
+`docs/MTM-016-E2-ACTION-TRANSACTIONS.md`. Metadata, project mode, domain seal,
+revocation, transition and receipt commit together. Branch database sealing does
+not certify its earlier file effects. Never backfill atomic enrollment for old
+commit-ready work or run callbacks/observers/file I/O under a SQLite transaction.
 The checker retains inherited host integration tests; in a nested Native sandbox
 Bubblewrap tests can fail. Report those failures and compare with the frozen
 baseline; never make the gate green by silently ignoring them. `audit --strict`

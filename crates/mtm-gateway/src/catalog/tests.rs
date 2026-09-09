@@ -6,7 +6,7 @@ use super::*;
 
 #[test]
 fn database_recovery_contract_preserves_legacy_unknown_and_no_authority() {
-    assert_eq!(TOOL_CONTRACT_VERSION, "mtm-tools-v6");
+    assert_eq!(TOOL_CONTRACT_VERSION, "mtm-tools-v7");
     for tool in [
         ToolId::RethlasStep,
         ToolId::RethlasInspect,
@@ -22,6 +22,25 @@ fn database_recovery_contract_preserves_legacy_unknown_and_no_authority() {
 
 #[test]
 fn creation_identity_and_recovery_only_have_bounded_distinct_contracts() -> Result<(), ReCtmError> {
+    for id in [
+        ToolId::RethlasStep,
+        ToolId::RethlasInspect,
+        ToolId::RethlasRetrieve,
+    ] {
+        let value = id.definition();
+        let description = value["description"].as_str().unwrap_or_default();
+        for action in [
+            "assessment_complete",
+            "exploration_complete",
+            "proof_submitted",
+            "repair_submitted",
+        ] {
+            assert!(description.contains(action));
+        }
+        assert!(description.contains("Enrollment is not inferred"));
+        assert!(description.contains("mechanical finalization are not covered"));
+        assert!(description.contains("without running the action"));
+    }
     for key in [
         "a".repeat(16),
         "z".repeat(128),

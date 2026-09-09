@@ -66,7 +66,7 @@ pub(super) fn start() -> Value {
 pub(super) fn step() -> Value {
     let properties = json!({
         "run_id":nonempty(),"capability":capability(),
-        "recover_only":{"type":"boolean","default":false,"description":"Only reconcile this exact original submission. Never executes writes or the action. A proven retained caller-write prefix is returned as SUBMISSION_INTERRUPTED; fetch the current task separately and omit retained writes. Opaque, conflicting, action-entered and legacy unknown outcomes remain blocked."},
+        "recover_only":{"type":"boolean","default":false,"description":"Only reconcile this exact original submission. Never executes writes or the action. A proven retained prefix or explicitly enrolled atomic action is returned as SUBMISSION_INTERRUPTED; fetch the current task separately and omit retained writes. Opaque, conflicting, unenrolled action and legacy unknown outcomes remain blocked."},
         "action":{"type":"string","minLength":1,"description":"Exact current task.commit_action."},
         "payload":{"type":"object","description":"Match the current task.commit_payload_schema."},
         "writes":{"type":"array","items":object(json!({

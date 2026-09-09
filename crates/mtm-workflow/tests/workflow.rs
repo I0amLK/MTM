@@ -178,6 +178,23 @@ fn tree_digest(root: &Path) -> Result<String, ReCtmError> {
 }
 
 #[test]
+fn tree_digest_still_detects_database_and_file_writes_after_read_setup() -> Result<(), ReCtmError> {
+    let temp = tempfile::tempdir().map_err(|e| ReCtmError::new("TEST_IO", e.to_string()))?;
+    let store = StateStore::open(temp.path().join("state.sqlite3"))?;
+    store.create_run("run", "p", "owner", "assess", &serde_json::json!({}))?;
+    store.get_run("run")?;
+    let before = tree_digest(temp.path())?;
+    let updates = serde_json::Map::from_iter([("changed".into(), Value::Bool(true))]);
+    store.update_run_metadata("run", &updates)?;
+    let after_database = tree_digest(temp.path())?;
+    assert_ne!(before, after_database);
+    fs::write(temp.path().join("fixture.txt"), "changed bytes")
+        .map_err(|e| ReCtmError::new("TEST_IO", e.to_string()))?;
+    assert_ne!(after_database, tree_digest(temp.path())?);
+    Ok(())
+}
+
+#[test]
 fn compact_correct_flow_reaches_mechanical_finalization() -> Result<(), ReCtmError> {
     let temp = tempfile::tempdir().map_err(|error| {
         ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
@@ -1083,6 +1100,11 @@ fn research_state_shadow_is_deterministic_owner_scoped_and_side_effect_free()
     )?;
     assert_eq!(branched["state"], "branch_prepare");
 
+    // The transition returns its row inside the write transaction. Establish the
+    // post-commit read view before freezing bytes: the first SELECT can update
+    // SQLite's transient WAL-index read mark. Do not exclude SHM, WAL, database
+    // or private files from the unchanged-byte assertions below.
+    assert_eq!(engine.status("owner", &run_id)?["state"], "branch_prepare");
     let before = tree_digest(temp.path())?;
     let first = engine.research_state_shadow("owner", &run_id)?;
     let second = engine.research_state_shadow("owner", &run_id)?;

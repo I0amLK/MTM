@@ -1,6 +1,13 @@
 # MTM
 
-The next E2 checkpoint keeps schema 6 and uses `mtm-tools-v6`: caller
+The current E2 action checkpoint uses schema 7 and `mtm-tools-v7`. Assessment,
+exploration, proof submission/escalation and repair commit their database effects,
+domain seal and transition receipt together. Explicitly enrolled interrupted actions
+can be reconciled without executing them; caller writes remain retained. Branch
+database sealing is also atomic, but preceding branch file effects stay unknown.
+See `docs/MTM-016-E2-ACTION-TRANSACTIONS.md`. Development only: no deployment.
+
+The preceding E2 checkpoint keeps schema 6 and uses `mtm-tools-v6`: caller
 `proof_manifest` and `reference_audit` writes commit with their accepted-write
 checkpoint in a single database transaction. Failed transactions preserve any
 earlier retained prefix; recovery never executes the action or rewrites evidence.
