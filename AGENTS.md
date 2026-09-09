@@ -150,6 +150,14 @@ Keep its 100-cycle/60-90-second bounds and explicit disabled-command/no-human sc
 Never infer full Native command/grant soak or browser acceptance from it. Other
 source/qualification entries must clear `MTM_TEST_PERMISSION_PROFILE`.
 
+## F3 interrupted deployment recovery
+
+Read `docs/MTM-016-F3-INSTALL-INTERRUPTION-RECOVERY.md`. A `pending-v2.json`
+journal must be durable before any install/rollback selector mutation. The next
+locked `status`, `install` or `rollback` conservatively restores the pre-operation
+state before continuing. Never delete the journal before the final postcheck or
+describe persisted-prefix tests as a physical power-loss qualification.
+
 ## Historical local gate (before MTM-016)
 
 ```bash

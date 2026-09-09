@@ -63,6 +63,12 @@ with real old/current OAuth/MCP endpoints and baseline-generated state. Full F
 remains open: a prepared disposable copy is not operator production data, and
 blocked Native/resource gates are never replaced by the upgrade profile.
 
+F3 separately closes the process-interruption hole in local selector mechanics by
+persisting recovery authority before the first selector mutation. See
+`docs/MTM-016-F3-INSTALL-INTERRUPTION-RECOVERY.md`. Exact crash-state prefixes are
+recoverable by the next locked public command; this is not a physical power-loss
+or production deployment claim.
+
 Round 3/5 (D8) consolidates the reviewed target/release/install family. Its
 replacement mechanics and regression repairs are committed before the separate
 Python deletion. The family ledger keeps forward acceptance gaps explicit rather

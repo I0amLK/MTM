@@ -221,3 +221,96 @@ fn install_checks_its_own_artifact_and_version_before_writing() -> Result<(), Bo
     assert!(!root.path().join("state").exists());
     Ok(())
 }
+
+#[test]
+fn public_commands_recover_persisted_interrupted_prefixes() -> Result<(), Box<dyn Error>> {
+    // Interrupted rollback: one selector has already been restored when the
+    // process disappears. `status` must use the durable journal to put the
+    // active release back and preserve the exact active manifest.
+    let root = tempfile::tempdir()?;
+    let (_, args) = fixture(root.path())?;
+    assert!(run(&args)?.status.success());
+    let state = root.path().join("state");
+    let manifest = state.join("deployment/current-v2.json");
+    let manifest_bytes = fs::read(&manifest)?;
+    let active: Value = serde_json::from_slice(&manifest_bytes)?;
+    let backup = state.join("deployment/pending-v2.manifest.backup");
+    fs::write(&backup, &manifest_bytes)?;
+    fs::set_permissions(&backup, fs::Permissions::from_mode(0o600))?;
+    let pending = state.join("deployment/pending-v2.json");
+    let journal = serde_json::json!({
+        "schema":"mtm-install-recovery-v2","operation":"rollback",
+        "active_manifest":active,
+        "manifest_before":{"kind":"file","backup":backup,"sha256":sha(&backup)?}
+    });
+    fs::write(&pending, serde_json::to_vec_pretty(&journal)?)?;
+    fs::set_permissions(&pending, fs::Permissions::from_mode(0o600))?;
+    let first = root.path().join("bin-a/mtm");
+    fs::remove_file(&first)?;
+    let status = run(&[
+        "status".into(),
+        "--state-root".into(),
+        state.to_string_lossy().into_owned(),
+    ])?;
+    assert!(
+        status.status.success(),
+        "{}",
+        String::from_utf8_lossy(&status.stderr)
+    );
+    assert_eq!(
+        serde_json::from_slice::<Value>(&status.stdout)?["state"],
+        "active"
+    );
+    assert_eq!(fs::read(&manifest)?, manifest_bytes);
+    assert!(!pending.exists());
+    assert!(!backup.exists());
+
+    // Interrupted first install: only the first selector points at the staged
+    // release and no deployment manifest exists. Retrying the same explicit
+    // install must first restore the missing baseline and then install normally.
+    let retry = tempfile::tempdir()?;
+    let (digest, retry_args) = fixture(retry.path())?;
+    let retry_state = retry.path().join("state");
+    let deployment = retry_state.join("deployment");
+    fs::create_dir_all(&deployment)?;
+    let release = retry_state
+        .join("releases/0.6.0-preview.1")
+        .join(&digest)
+        .join("mtm");
+    fs::create_dir_all(release.parent().ok_or("release parent")?)?;
+    fs::copy(retry.path().join("candidate"), &release)?;
+    fs::set_permissions(&release, fs::Permissions::from_mode(0o755))?;
+    let first = retry.path().join("bin-a/mtm");
+    let second = retry.path().join("bin-b/mtm");
+    let active = serde_json::json!({
+        "schema":"mtm-install-v2","state":"active","version":"0.6.0-preview.1",
+        "sha256":digest,"release_path":release,
+        "selectors":[
+            {"path":first,"previous":{"kind":"missing"}},
+            {"path":second,"previous":{"kind":"missing"}}
+        ],
+        "release_qualified":false,"python_runtime_required":false
+    });
+    let pending = retry_state.join("deployment/pending-v2.json");
+    fs::write(
+        &pending,
+        serde_json::to_vec_pretty(&serde_json::json!({
+            "schema":"mtm-install-recovery-v2","operation":"install",
+            "active_manifest":active,"manifest_before":{"kind":"missing"}
+        }))?,
+    )?;
+    fs::set_permissions(&pending, fs::Permissions::from_mode(0o600))?;
+    symlink(&release, &first)?;
+    let installed = run(&retry_args)?;
+    assert!(
+        installed.status.success(),
+        "{}",
+        String::from_utf8_lossy(&installed.stderr)
+    );
+    let report: Value = serde_json::from_slice(&installed.stdout)?;
+    assert_eq!(report["state"], "active");
+    assert_eq!(report["sha256"], digest);
+    assert_eq!(first.canonicalize()?, second.canonicalize()?);
+    assert!(!pending.exists());
+    Ok(())
+}

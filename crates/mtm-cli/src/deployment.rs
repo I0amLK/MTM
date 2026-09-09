@@ -12,6 +12,7 @@ use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
 const SCHEMA: &str = "mtm-install-v2";
+const RECOVERY_SCHEMA: &str = "mtm-install-recovery-v2";
 const MAX_BINARY_BYTES: u64 = 512 * 1024 * 1024;
 const MAX_MANIFEST_BYTES: u64 = 1024 * 1024;
 
@@ -204,6 +205,10 @@ fn atomic_json(path: &Path, payload: &Value) -> Result<()> {
     let mut bytes = serde_json::to_vec_pretty(payload).map_err(|error| error.to_string())?;
     bytes.push(b'\n');
     atomic_bytes(path, &bytes, 0o600)
+}
+
+fn hash_bytes(bytes: &[u8]) -> String {
+    format!("{:x}", Sha256::digest(bytes))
 }
 
 fn atomic_link(target: &Path, selector: &Path) -> Result<()> {
@@ -447,6 +452,172 @@ fn manifest_path(root: &Path) -> PathBuf {
     root.join("deployment/current-v2.json")
 }
 
+fn recovery_path(root: &Path) -> PathBuf {
+    root.join("deployment/pending-v2.json")
+}
+
+fn recovery_manifest_backup(root: &Path) -> PathBuf {
+    root.join("deployment/pending-v2.manifest.backup")
+}
+
+fn recovery_manifest_bytes(payload: &Value, root: &Path) -> Result<Option<Vec<u8>>> {
+    let previous = &payload["manifest_before"];
+    match previous["kind"].as_str() {
+        Some("missing") => {
+            exact_keys(previous, &["kind"])?;
+            Ok(None)
+        }
+        Some("file") => {
+            exact_keys(previous, &["kind", "backup", "sha256"])?;
+            let backup = text_path(previous, "backup")?;
+            let metadata = fs::symlink_metadata(&backup).map_err(|error| error.to_string())?;
+            require(
+                backup == recovery_manifest_backup(root)
+                    && metadata.is_file()
+                    && !metadata.file_type().is_symlink()
+                    && metadata.permissions().mode() & 0o7777 == 0o600
+                    && previous["sha256"].as_str().is_some_and(valid_sha256),
+                "invalid pending manifest backup identity",
+            )?;
+            let bytes = bounded_bytes(&backup, MAX_MANIFEST_BYTES)?;
+            require(
+                previous["sha256"].as_str() == Some(hash_bytes(&bytes).as_str()),
+                "pending manifest backup drifted",
+            )?;
+            let manifest: Value =
+                serde_json::from_slice(&bytes).map_err(|error| error.to_string())?;
+            validate_manifest(&manifest, root)?;
+            Ok(Some(bytes))
+        }
+        _ => Err("pending manifest backup kind is invalid".to_owned()),
+    }
+}
+
+fn validate_recovery(payload: &Value, root: &Path) -> Result<()> {
+    exact_keys(
+        payload,
+        &["schema", "operation", "active_manifest", "manifest_before"],
+    )?;
+    require(
+        payload["schema"] == RECOVERY_SCHEMA
+            && matches!(payload["operation"].as_str(), Some("install" | "rollback")),
+        "unsupported pending deployment transaction",
+    )?;
+    let active = &payload["active_manifest"];
+    validate_manifest(active, root)?;
+    require(
+        active["state"] == "active",
+        "pending deployment transaction must bind an active manifest",
+    )?;
+    recovery_manifest_bytes(payload, root).map(|_| ())
+}
+
+fn load_recovery(root: &Path) -> Result<Value> {
+    let path = recovery_path(root);
+    let payload: Value = serde_json::from_slice(&bounded_bytes(&path, MAX_MANIFEST_BYTES)?)
+        .map_err(|error| error.to_string())?;
+    validate_recovery(&payload, root)?;
+    Ok(payload)
+}
+
+fn cleanup_orphan_recovery_backup(root: &Path) -> Result<()> {
+    let backup = recovery_manifest_backup(root);
+    match fs::remove_file(&backup) {
+        Ok(()) => sync_dir(
+            backup
+                .parent()
+                .ok_or_else(|| "pending backup parent missing".to_owned())?,
+        ),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(error) => Err(error.to_string()),
+    }
+}
+
+fn begin_recovery(
+    root: &Path,
+    operation: &str,
+    active_manifest: &Value,
+    before: Option<&[u8]>,
+) -> Result<()> {
+    require(
+        matches!(operation, "install" | "rollback"),
+        "unsupported deployment transaction operation",
+    )?;
+    let pending = recovery_path(root);
+    require(
+        fs::symlink_metadata(&pending)
+            .is_err_and(|error| error.kind() == std::io::ErrorKind::NotFound),
+        "pending deployment transaction already exists",
+    )?;
+    cleanup_orphan_recovery_backup(root)?;
+    let manifest_before = match before {
+        Some(bytes) => {
+            let backup = recovery_manifest_backup(root);
+            atomic_bytes(&backup, bytes, 0o600)?;
+            json!({"kind":"file","backup":backup,"sha256":hash_bytes(bytes)})
+        }
+        None => json!({"kind":"missing"}),
+    };
+    let payload = json!({
+        "schema":RECOVERY_SCHEMA,"operation":operation,
+        "active_manifest":active_manifest,"manifest_before":manifest_before
+    });
+    validate_recovery(&payload, root)?;
+    atomic_json(&pending, &payload)
+}
+
+fn clear_recovery(root: &Path) -> Result<()> {
+    let pending = recovery_path(root);
+    fs::remove_file(&pending).map_err(|error| error.to_string())?;
+    sync_dir(
+        pending
+            .parent()
+            .ok_or_else(|| "pending deployment parent missing".to_owned())?,
+    )?;
+    // A backup without a journal is inert. Removing it only after the journal
+    // means interruption during cleanup cannot destroy the recovery authority.
+    let _ = cleanup_orphan_recovery_backup(root);
+    Ok(())
+}
+
+fn recover_interrupted(root: &Path) -> Result<bool> {
+    let pending = recovery_path(root);
+    match fs::symlink_metadata(&pending) {
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            cleanup_orphan_recovery_backup(root)?;
+            return Ok(false);
+        }
+        Err(error) => return Err(error.to_string()),
+        Ok(metadata) => require(
+            metadata.is_file()
+                && !metadata.file_type().is_symlink()
+                && metadata.len() <= MAX_MANIFEST_BYTES
+                && metadata.permissions().mode() & 0o7777 == 0o600,
+            "pending deployment journal is unsafe or oversized",
+        )?,
+    }
+    let recovery = load_recovery(root)?;
+    let active = &recovery["active_manifest"];
+    verify_installed(active, root)?;
+    let entries = selector_entries(active)?.clone();
+    let manifest = manifest_path(root);
+    let before = recovery_manifest_bytes(&recovery, root)?;
+    let restored = match recovery["operation"].as_str() {
+        Some("install") => compensate(&entries, None, &manifest, before.as_deref()),
+        Some("rollback") => {
+            let release = text_path(active, "release_path")?;
+            compensate(&entries, Some(&release), &manifest, before.as_deref())
+        }
+        _ => false,
+    };
+    require(
+        restored,
+        "interrupted deployment recovery could not verify the restored state",
+    )?;
+    clear_recovery(root)?;
+    Ok(true)
+}
+
 fn load_manifest(root: &Path) -> Result<Value> {
     let path = manifest_path(root);
     let metadata = fs::symlink_metadata(&path).map_err(|error| error.to_string())?;
@@ -682,6 +853,7 @@ pub(crate) fn install(arguments: &[String]) -> Result<Value> {
     )?;
     ensure_dir(&options.state_root, 0o700)?;
     let _lock = installation_lock(&options.state_root, true)?;
+    recover_interrupted(&options.state_root)?;
     let manifest = manifest_path(&options.state_root);
     let before = match fs::symlink_metadata(&manifest) {
         Ok(_) => {
@@ -755,21 +927,28 @@ pub(crate) fn install(arguments: &[String]) -> Result<Value> {
         "release_qualified":false,"python_runtime_required":false
     });
     validate_manifest(&payload, &options.state_root)?;
+    begin_recovery(&options.state_root, "install", &payload, before.as_deref())?;
     let entries = selector_entries(&payload)?.clone();
-    for (index, entry) in entries.iter().enumerate() {
+    for entry in &entries {
         let selector = text_path(entry, "path")?;
         if atomic_link(&release, &selector).is_err() {
-            // Include the failing entry: rename can succeed before fsync fails.
-            let restored = compensate(&entries[..=index], None, &manifest, before.as_deref());
+            // Recovery uses the complete pre-mutation journal. Untouched entries
+            // are restored idempotently, while the failing entry is included
+            // because rename can succeed before directory fsync fails.
+            let restored = recover_interrupted(&options.state_root).unwrap_or(false);
             return Err(compensation_message("selector update", restored));
         }
     }
     if atomic_json(&manifest, &payload).is_err() || status_for_root(&options.state_root).is_err() {
-        let restored = compensate(&entries, None, &manifest, before.as_deref());
+        let restored = recover_interrupted(&options.state_root).unwrap_or(false);
         return Err(compensation_message(
             "manifest commit or postcheck",
             restored,
         ));
+    }
+    if clear_recovery(&options.state_root).is_err() {
+        let restored = recover_interrupted(&options.state_root).unwrap_or(false);
+        return Err(compensation_message("recovery journal cleanup", restored));
     }
     status_for_root(&options.state_root)
 }
@@ -777,12 +956,14 @@ pub(crate) fn install(arguments: &[String]) -> Result<Value> {
 pub(crate) fn status(arguments: &[String]) -> Result<Value> {
     let root = parse_state_root(arguments)?;
     let _lock = installation_lock(&root, false)?;
+    recover_interrupted(&root)?;
     status_for_root(&root)
 }
 
 pub(crate) fn rollback(arguments: &[String]) -> Result<Value> {
     let root = parse_state_root(arguments)?;
     let _lock = installation_lock(&root, false)?;
+    recover_interrupted(&root)?;
     let mut payload = load_manifest(&root)?;
     if payload["state"] == "previous_active" {
         return status_for_root(&root);
@@ -808,30 +989,25 @@ pub(crate) fn rollback(arguments: &[String]) -> Result<Value> {
             )?;
         }
     }
-    for (index, entry) in entries.iter().enumerate() {
+    begin_recovery(&root, "rollback", &payload, Some(&before))?;
+    for entry in &entries {
         let selector = text_path(entry, "path")?;
         if restore_one(&selector, &entry["previous"]).is_err() {
-            let restored = compensate(
-                &entries[..=index],
-                Some(&release),
-                &manifest_path(&root),
-                Some(&before),
-            );
+            let restored = recover_interrupted(&root).unwrap_or(false);
             return Err(compensation_message("rollback selector", restored));
         }
     }
     payload["state"] = Value::String("previous_active".to_owned());
     if atomic_json(&manifest_path(&root), &payload).is_err() || status_for_root(&root).is_err() {
-        let restored = compensate(
-            &entries,
-            Some(&release),
-            &manifest_path(&root),
-            Some(&before),
-        );
+        let restored = recover_interrupted(&root).unwrap_or(false);
         return Err(compensation_message(
             "rollback manifest or postcheck",
             restored,
         ));
+    }
+    if clear_recovery(&root).is_err() {
+        let restored = recover_interrupted(&root).unwrap_or(false);
+        return Err(compensation_message("rollback journal cleanup", restored));
     }
     status_for_root(&root)
 }
@@ -973,6 +1149,124 @@ mod tests {
                 & 0o777,
             0o600
         );
+        Ok(())
+    }
+
+    #[test]
+    fn interrupted_install_and_rollback_prefixes_recover_from_durable_journal() -> Result<()> {
+        let temp = tempfile::tempdir().map_err(|error| error.to_string())?;
+        let root = temp.path().join("state");
+        ensure_dir(&root, 0o700)?;
+        let deployment = root.join("deployment");
+        ensure_dir(&deployment, 0o700)?;
+
+        let source = temp.path().join("candidate");
+        atomic_bytes(&source, b"candidate-fixture", 0o755)?;
+        let hash = digest(&source)?;
+        let release = root
+            .join("releases")
+            .join("0.6.0-preview.1")
+            .join(&hash)
+            .join("mtm");
+        copy_release(&source, &release, &hash)?;
+
+        let old_target = temp.path().join("old-target");
+        atomic_bytes(&old_target, b"old-target", 0o755)?;
+        let first = temp.path().join("bin-a/mtm");
+        let second = temp.path().join("bin-b/mtm");
+        ensure_dir(first.parent().ok_or("first parent")?, 0o755)?;
+        ensure_dir(second.parent().ok_or("second parent")?, 0o755)?;
+        symlink(&old_target, &first).map_err(|error| error.to_string())?;
+        atomic_bytes(&second, b"old-selector-file", 0o744)?;
+
+        let rollback = deployment.join("rollback-v2/session");
+        let entries = vec![
+            json!({"path":first,"previous":previous(&first, &rollback, 0)?}),
+            json!({"path":second,"previous":previous(&second, &rollback, 1)?}),
+        ];
+        let active = json!({
+            "schema":SCHEMA,"state":"active","version":"0.6.0-preview.1",
+            "sha256":hash,"release_path":release,"selectors":entries,
+            "release_qualified":false,"python_runtime_required":false
+        });
+        validate_manifest(&active, &root)?;
+
+        // Simulate a killed first install after its recovery journal and first
+        // selector were durable, but before the second selector or manifest.
+        begin_recovery(&root, "install", &active, None)?;
+        atomic_link(&release, &first)?;
+        assert!(recover_interrupted(&root)?);
+        assert_eq!(
+            fs::read_link(&first).map_err(|error| error.to_string())?,
+            old_target
+        );
+        assert_eq!(
+            bounded_bytes(&second, MAX_BINARY_BYTES)?,
+            b"old-selector-file"
+        );
+        assert_eq!(
+            fs::metadata(&second)
+                .map_err(|error| error.to_string())?
+                .permissions()
+                .mode()
+                & 0o777,
+            0o744
+        );
+        assert!(fs::symlink_metadata(manifest_path(&root)).is_err());
+        assert!(fs::symlink_metadata(recovery_path(&root)).is_err());
+
+        // Simulate an interrupted rollback: the active manifest is durable and
+        // both selectors initially select the candidate, then only one selector
+        // is restored before termination. Recovery must put the active release
+        // back everywhere and restore the manifest byte-for-byte.
+        atomic_link(&release, &first)?;
+        atomic_link(&release, &second)?;
+        atomic_json(&manifest_path(&root), &active)?;
+        let before = bounded_bytes(&manifest_path(&root), MAX_MANIFEST_BYTES)?;
+        begin_recovery(&root, "rollback", &active, Some(&before))?;
+        restore_one(&first, &active["selectors"][0]["previous"])?;
+        assert!(recover_interrupted(&root)?);
+        assert!(selector_is_target(&first, &release)?);
+        assert!(selector_is_target(&second, &release)?);
+        assert_eq!(
+            bounded_bytes(&manifest_path(&root), MAX_MANIFEST_BYTES)?,
+            before
+        );
+        assert!(fs::symlink_metadata(recovery_path(&root)).is_err());
+        assert!(fs::symlink_metadata(recovery_manifest_backup(&root)).is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn malformed_recovery_never_mutates_selectors_and_orphan_backup_is_inert() -> Result<()> {
+        let temp = tempfile::tempdir().map_err(|error| error.to_string())?;
+        let root = temp.path().join("state");
+        ensure_dir(&root.join("deployment"), 0o700)?;
+        let selector = temp.path().join("bin/mtm");
+        ensure_dir(selector.parent().ok_or("selector parent")?, 0o755)?;
+        atomic_bytes(&selector, b"stable-selector", 0o755)?;
+        let before = bounded_bytes(&selector, MAX_BINARY_BYTES)?;
+
+        atomic_json(
+            &recovery_path(&root),
+            &json!({
+                "schema":RECOVERY_SCHEMA,"operation":"install",
+                "active_manifest":{},"manifest_before":{"kind":"missing"}
+            }),
+        )?;
+        assert!(recover_interrupted(&root).is_err());
+        assert_eq!(bounded_bytes(&selector, MAX_BINARY_BYTES)?, before);
+        fs::remove_file(recovery_path(&root)).map_err(|error| error.to_string())?;
+        sync_dir(&root.join("deployment"))?;
+
+        atomic_bytes(
+            &recovery_manifest_backup(&root),
+            b"orphan-backup-with-no-journal",
+            0o600,
+        )?;
+        assert!(!recover_interrupted(&root)?);
+        assert!(fs::symlink_metadata(recovery_manifest_backup(&root)).is_err());
+        assert_eq!(bounded_bytes(&selector, MAX_BINARY_BYTES)?, before);
         Ok(())
     }
 
