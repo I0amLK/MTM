@@ -119,6 +119,18 @@ Bubblewrap tests can fail. Report those failures and compare with the frozen
 baseline; never make the gate green by silently ignoring them. `audit --strict`
 must remain nonzero while first-party Python or legacy Rust references remain.
 
+## D8 local deployment and historical boundaries
+
+D8 consolidates target/release/install machinery; read
+`docs/MTM-016-D8-FAMILY-RETIREMENT.md`. `cargo xtask dist` stages exact bytes without
+executing them or validating its version label. The reviewed candidate's own
+`mtm install` selects only byte-identical self artifacts under an explicit state
+root and selectors. `mtm status --state-root` and `mtm rollback --state-root`
+verify local installation mechanics, never release qualification or database
+rollback. A retirement family with pending forward acceptance must retain that
+classification and list its gaps. Do not promote immutable historical target,
+browser, resource or release receipts into current acceptance.
+
 ## Historical local gate (before MTM-016)
 
 ```bash

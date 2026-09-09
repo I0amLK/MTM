@@ -46,6 +46,16 @@ fn records_cli_needs_git_but_neither_python_nor_a_reference_checkout() -> Result
         report["historical_releases"]["live_selectors_checked"],
         false
     );
+    assert_eq!(
+        report["historical_releases"]["mtm015_lifecycle_evidence"]
+            .as_object()
+            .map(|value| value.len()),
+        Some(3)
+    );
+    assert_eq!(
+        report["historical_releases"]["mtm015_lifecycle_evidence"]["candidate_stage"]["sha256"],
+        "5787fd9d54cb8eb918833ecc8fc8cba417adde9de0baa612577042abb506aed4"
+    );
     assert!(
         report["layout"]["sealed_observation_hashes_checked"]
             .as_u64()

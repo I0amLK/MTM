@@ -4,7 +4,7 @@
 use std::collections::BTreeSet;
 use std::fs::{self, File, OpenOptions};
 use std::io::{Read, Write};
-use std::os::unix::fs::{PermissionsExt, symlink};
+use std::os::unix::fs::{DirBuilderExt, OpenOptionsExt, PermissionsExt, symlink};
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -31,7 +31,82 @@ fn require(value: bool, message: &str) -> Result<()> {
 }
 
 fn absolute(path: &Path, label: &str) -> Result<()> {
-    require(path.is_absolute(), &format!("{label} must be absolute"))
+    let text = path
+        .to_str()
+        .ok_or_else(|| format!("{label} must be UTF-8"))?;
+    require(
+        path.is_absolute()
+            && text.len() <= 4096
+            && (text == "/"
+                || text
+                    .split('/')
+                    .skip(1)
+                    .all(|part| !matches!(part, "" | "." | ".."))),
+        &format!("{label} must be a normalized absolute path"),
+    )
+}
+
+// Static path guards and a cooperative installation lock, not a hostile same-UID
+// filesystem boundary. Never follow an existing directory symlink, even in-root.
+fn directory_chain(path: &Path) -> Result<()> {
+    absolute(path, "directory")?;
+    for ancestor in path.ancestors() {
+        match fs::symlink_metadata(ancestor) {
+            Ok(metadata) => require(
+                metadata.is_dir() && !metadata.file_type().is_symlink(),
+                "deployment directory is not a real directory",
+            )?,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(error) => return Err(error.to_string()),
+        }
+    }
+    Ok(())
+}
+
+fn bounded_bytes(path: &Path, limit: u64) -> Result<Vec<u8>> {
+    directory_chain(path.parent().ok_or("file parent missing")?)?;
+    let metadata = fs::symlink_metadata(path).map_err(|error| error.to_string())?;
+    require(
+        metadata.is_file() && !metadata.file_type().is_symlink() && metadata.len() <= limit,
+        "file must be bounded, regular and non-symlink",
+    )?;
+    let mut bytes = Vec::new();
+    File::open(path)
+        .map_err(|error| error.to_string())?
+        .take(limit + 1)
+        .read_to_end(&mut bytes)
+        .map_err(|error| error.to_string())?;
+    require(bytes.len() as u64 <= limit, "file grew beyond its bound")?;
+    Ok(bytes)
+}
+
+fn installation_lock(root: &Path, create: bool) -> Result<nix::fcntl::Flock<File>> {
+    directory_chain(root)?;
+    let parent = root.join("deployment");
+    if create {
+        ensure_dir(&parent, 0o700)?;
+    }
+    directory_chain(&parent)?;
+    let path = parent.join("install-v2.lock");
+    match fs::symlink_metadata(&path) {
+        Ok(metadata) => require(
+            metadata.is_file() && !metadata.file_type().is_symlink(),
+            "unsafe installation lock",
+        )?,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound && create => {}
+        Err(error) => return Err(error.to_string()),
+    }
+    let file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(create)
+        .truncate(false)
+        .mode(0o600)
+        .open(&path)
+        .map_err(|error| error.to_string())?;
+    // The inode stays permanent. Removing it would let later callers bypass a lock.
+    nix::fcntl::Flock::lock(file, nix::fcntl::FlockArg::LockExclusiveNonblock)
+        .map_err(|_| "installation busy or lock unavailable".to_owned())
 }
 
 fn safe_version(version: &str) -> Result<()> {
@@ -55,6 +130,7 @@ fn valid_sha256(value: &str) -> bool {
 }
 
 fn digest(path: &Path) -> Result<String> {
+    directory_chain(path.parent().ok_or("artifact parent missing")?)?;
     let metadata = fs::symlink_metadata(path).map_err(|error| error.to_string())?;
     require(
         metadata.is_file() && !metadata.file_type().is_symlink(),
@@ -67,17 +143,21 @@ fn digest(path: &Path) -> Result<String> {
     let mut file = File::open(path).map_err(|error| error.to_string())?;
     let mut hash = Sha256::new();
     let mut buffer = [0_u8; 64 * 1024];
+    let mut total = 0_u64;
     loop {
         let count = file.read(&mut buffer).map_err(|error| error.to_string())?;
         if count == 0 {
             break;
         }
+        total += count as u64;
+        require(total <= MAX_BINARY_BYTES, "artifact grew beyond its bound")?;
         hash.update(&buffer[..count]);
     }
     Ok(format!("{:x}", hash.finalize()))
 }
 
 fn ensure_dir(path: &Path, mode: u32) -> Result<()> {
+    directory_chain(path)?;
     if path.exists() {
         let metadata = fs::symlink_metadata(path).map_err(|error| error.to_string())?;
         require(
@@ -85,8 +165,10 @@ fn ensure_dir(path: &Path, mode: u32) -> Result<()> {
             "deployment directory must be a real directory",
         )?;
     } else {
-        fs::create_dir_all(path).map_err(|error| error.to_string())?;
-        fs::set_permissions(path, fs::Permissions::from_mode(mode))
+        fs::DirBuilder::new()
+            .recursive(true)
+            .mode(mode)
+            .create(path)
             .map_err(|error| error.to_string())?;
     }
     Ok(())
@@ -103,28 +185,19 @@ fn atomic_bytes(path: &Path, bytes: &[u8], mode: u32) -> Result<()> {
         .parent()
         .ok_or_else(|| "output has no parent".to_owned())?;
     ensure_dir(parent, 0o700)?;
-    let name = path
-        .file_name()
-        .and_then(|name| name.to_str())
-        .ok_or_else(|| "output filename is not UTF-8".to_owned())?;
-    let temporary = parent.join(format!(".{name}.{}.tmp", std::process::id()));
-    let result = (|| -> Result<()> {
-        let mut file = OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&temporary)
-            .map_err(|error| error.to_string())?;
-        file.write_all(bytes).map_err(|error| error.to_string())?;
-        file.sync_all().map_err(|error| error.to_string())?;
-        fs::set_permissions(&temporary, fs::Permissions::from_mode(mode))
-            .map_err(|error| error.to_string())?;
-        fs::rename(&temporary, path).map_err(|error| error.to_string())?;
-        sync_dir(parent)
-    })();
-    if temporary.exists() {
-        let _ = fs::remove_file(&temporary);
-    }
-    result
+    require(mode <= 0o777, "special permission bits are forbidden")?;
+    let mut file = tempfile::NamedTempFile::new_in(parent).map_err(|error| error.to_string())?;
+    // NamedTempFile starts owner-only before any backup or manifest bytes exist.
+    file.write_all(bytes).map_err(|error| error.to_string())?;
+    file.as_file()
+        .set_permissions(fs::Permissions::from_mode(mode))
+        .map_err(|error| error.to_string())?;
+    file.as_file()
+        .sync_all()
+        .map_err(|error| error.to_string())?;
+    file.persist(path)
+        .map_err(|error| error.error.to_string())?;
+    sync_dir(parent)
 }
 
 fn atomic_json(path: &Path, payload: &Value) -> Result<()> {
@@ -202,8 +275,25 @@ fn parse_install(arguments: &[String]) -> Result<InstallOptions> {
     let mut unique = BTreeSet::new();
     for selector in &options.selectors {
         absolute(selector, "selector")?;
+        require(
+            selector.file_name().is_some_and(|name| name == "mtm"),
+            "selector must be named mtm",
+        )?;
+        require(
+            !selector.starts_with(&options.state_root)
+                && !options.state_root.starts_with(selector)
+                && selector != &options.binary
+                && !options.binary.starts_with(selector),
+            "selector overlaps source or installation state",
+        )?;
+        directory_chain(selector.parent().ok_or("selector parent missing")?)?;
         require(unique.insert(selector), "duplicate selector")?;
     }
+    require(
+        options.state_root != Path::new("/"),
+        "state root cannot be filesystem root",
+    )?;
+    directory_chain(&options.state_root)?;
     Ok(options)
 }
 
@@ -223,46 +313,60 @@ fn copy_release(source: &Path, destination: &Path, expected: &str) -> Result<()>
     require(
         metadata.is_file()
             && !metadata.file_type().is_symlink()
-            && metadata.permissions().mode() & 0o111 != 0,
+            && metadata.permissions().mode() & 0o111 != 0
+            && metadata.permissions().mode() & 0o6000 == 0,
         "release source must be an executable regular non-symlink file",
     )?;
     require(
         digest(source)? == expected,
         "release source SHA-256 mismatch",
     )?;
-    if destination.exists() {
+    if fs::symlink_metadata(destination).is_ok() {
         return require(
-            digest(destination)? == expected,
+            digest(destination)? == expected
+                && fs::metadata(destination)
+                    .map_err(|error| error.to_string())?
+                    .permissions()
+                    .mode()
+                    & 0o7777
+                    == 0o755,
             "immutable release destination conflicts with selected SHA-256",
         );
     }
-    let mut source_file = File::open(source).map_err(|error| error.to_string())?;
+    let mut source_file = File::open(source)
+        .map_err(|error| error.to_string())?
+        .take(MAX_BINARY_BYTES + 1);
     let parent = destination
         .parent()
         .ok_or_else(|| "release destination has no parent".to_owned())?;
     ensure_dir(parent, 0o755)?;
-    let temporary = parent.join(format!(".mtm.{}.tmp", std::process::id()));
-    let result = (|| -> Result<()> {
-        let mut target = OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&temporary)
-            .map_err(|error| error.to_string())?;
-        std::io::copy(&mut source_file, &mut target).map_err(|error| error.to_string())?;
-        target.sync_all().map_err(|error| error.to_string())?;
-        fs::set_permissions(&temporary, fs::Permissions::from_mode(0o755))
-            .map_err(|error| error.to_string())?;
-        require(
-            digest(&temporary)? == expected,
-            "copied release SHA-256 mismatch",
-        )?;
-        fs::rename(&temporary, destination).map_err(|error| error.to_string())?;
-        sync_dir(parent)
-    })();
-    if temporary.exists() {
-        let _ = fs::remove_file(&temporary);
+    let mut target = tempfile::NamedTempFile::new_in(parent).map_err(|error| error.to_string())?;
+    let copied = std::io::copy(&mut source_file, &mut target).map_err(|error| error.to_string())?;
+    require(copied <= MAX_BINARY_BYTES, "release copy grew beyond bound")?;
+    target
+        .as_file()
+        .set_permissions(fs::Permissions::from_mode(0o755))
+        .map_err(|error| error.to_string())?;
+    target
+        .as_file()
+        .sync_all()
+        .map_err(|error| error.to_string())?;
+    require(
+        digest(target.path())? == expected && digest(source)? == expected,
+        "copied release SHA-256 mismatch",
+    )?;
+    // Unlike rename, no-clobber publication never overwrites a racing artifact.
+    match target.persist_noclobber(destination) {
+        Ok(_) => {}
+        Err(error) if error.error.kind() == std::io::ErrorKind::AlreadyExists => {
+            require(
+                digest(destination)? == expected,
+                "immutable release race conflict",
+            )?;
+        }
+        Err(error) => return Err(error.error.to_string()),
     }
-    result
+    sync_dir(parent)
 }
 
 fn previous(selector: &Path, rollback: &Path, index: usize) -> Result<Value> {
@@ -279,10 +383,9 @@ fn previous(selector: &Path, rollback: &Path, index: usize) -> Result<Value> {
             if backup.exists() {
                 return Err("rollback selector backup already exists".to_owned());
             }
-            fs::copy(selector, &backup).map_err(|error| error.to_string())?;
             let mode = metadata.permissions().mode() & 0o777;
-            fs::set_permissions(&backup, fs::Permissions::from_mode(mode))
-                .map_err(|error| error.to_string())?;
+            let bytes = bounded_bytes(selector, MAX_BINARY_BYTES)?;
+            atomic_bytes(&backup, &bytes, 0o600)?;
             Ok(json!({"kind":"file","backup":backup,"sha256":digest(&backup)?,"mode":mode}))
         }
         Ok(_) => Err("selector is neither a symlink nor regular file".to_owned()),
@@ -329,7 +432,11 @@ fn restore_one(selector: &Path, previous: &Value) -> Result<()> {
                 .as_u64()
                 .and_then(|value| u32::try_from(value).ok())
                 .ok_or_else(|| "rollback backup mode invalid".to_owned())?;
-            let bytes = fs::read(&backup).map_err(|error| error.to_string())?;
+            require(
+                mode <= 0o777,
+                "rollback mode contains special permission bits",
+            )?;
+            let bytes = bounded_bytes(&backup, MAX_BINARY_BYTES)?;
             atomic_bytes(selector, &bytes, mode)
         }
         _ => Err("unknown previous selector kind".to_owned()),
@@ -349,14 +456,104 @@ fn load_manifest(root: &Path) -> Result<Value> {
             && metadata.len() <= MAX_MANIFEST_BYTES,
         "deployment manifest is unsafe or oversized",
     )?;
-    let payload: Value =
-        serde_json::from_slice(&fs::read(&path).map_err(|error| error.to_string())?)
-            .map_err(|error| error.to_string())?;
-    require(
-        payload["schema"] == SCHEMA,
-        "unsupported deployment manifest schema",
-    )?;
+    let payload: Value = serde_json::from_slice(&bounded_bytes(&path, MAX_MANIFEST_BYTES)?)
+        .map_err(|error| error.to_string())?;
+    validate_manifest(&payload, root)?;
     Ok(payload)
+}
+
+fn exact_keys(value: &Value, expected: &[&str]) -> Result<()> {
+    let object = value.as_object().ok_or("manifest object required")?;
+    require(
+        object.len() == expected.len() && expected.iter().all(|key| object.contains_key(*key)),
+        "manifest fields differ from contract",
+    )
+}
+
+fn validate_manifest(payload: &Value, root: &Path) -> Result<()> {
+    exact_keys(
+        payload,
+        &[
+            "schema",
+            "state",
+            "version",
+            "sha256",
+            "release_path",
+            "selectors",
+            "release_qualified",
+            "python_runtime_required",
+        ],
+    )?;
+    require(
+        payload["schema"] == SCHEMA
+            && matches!(
+                payload["state"].as_str(),
+                Some("active" | "previous_active")
+            )
+            && payload["release_qualified"] == false
+            && payload["python_runtime_required"] == false,
+        "unsupported deployment identity or state",
+    )?;
+    let version = payload["version"]
+        .as_str()
+        .ok_or("manifest version missing")?;
+    safe_version(version)?;
+    let hash = payload["sha256"].as_str().ok_or("manifest hash missing")?;
+    require(valid_sha256(hash), "invalid manifest SHA-256")?;
+    require(
+        text_path(payload, "release_path")?
+            == root.join("releases").join(version).join(hash).join("mtm"),
+        "release path differs from exact content address",
+    )?;
+    let entries = selector_entries(payload)?;
+    require(
+        (1..=8).contains(&entries.len()),
+        "manifest needs one to eight selectors",
+    )?;
+    let mut paths = BTreeSet::new();
+    for (index, entry) in entries.iter().enumerate() {
+        exact_keys(entry, &["path", "previous"])?;
+        let path = text_path(entry, "path")?;
+        absolute(&path, "manifest selector")?;
+        require(
+            path.file_name().is_some_and(|name| name == "mtm")
+                && !path.starts_with(root)
+                && !root.starts_with(&path)
+                && paths.insert(path.clone()),
+            "invalid, duplicate or overlapping manifest selector",
+        )?;
+        directory_chain(path.parent().ok_or("selector parent missing")?)?;
+        let previous = &entry["previous"];
+        match previous["kind"].as_str() {
+            Some("missing") => exact_keys(previous, &["kind"])?,
+            Some("symlink") => {
+                exact_keys(previous, &["kind", "target"])?;
+                require(
+                    previous["target"]
+                        .as_str()
+                        .is_some_and(|text| !text.is_empty() && text.len() <= 4096),
+                    "invalid previous link target",
+                )?;
+            }
+            Some("file") => {
+                exact_keys(previous, &["kind", "backup", "sha256", "mode"])?;
+                let backup = text_path(previous, "backup")?;
+                absolute(&backup, "rollback backup")?;
+                require(
+                    backup.parent().and_then(Path::parent)
+                        == Some(root.join("deployment/rollback-v2").as_path())
+                        && backup.file_name().is_some_and(|name| {
+                            name == format!("selector-{index}.backup").as_str()
+                        })
+                        && previous["sha256"].as_str().is_some_and(valid_sha256)
+                        && previous["mode"].as_u64().is_some_and(|mode| mode <= 0o777),
+                    "invalid backup location, mode or hash",
+                )?;
+            }
+            _ => return Err("unsupported previous selector kind".into()),
+        }
+    }
+    Ok(())
 }
 
 fn selector_entries(payload: &Value) -> Result<&Vec<Value>> {
@@ -383,6 +580,15 @@ fn verify_installed(payload: &Value, state_root: &Path) -> Result<()> {
     require(
         digest(&release)? == expected,
         "installed release SHA-256 drifted",
+    )?;
+    require(
+        fs::metadata(&release)
+            .map_err(|error| error.to_string())?
+            .permissions()
+            .mode()
+            & 0o7777
+            == 0o755,
+        "installed release is not an ordinary executable",
     )?;
     Ok(())
 }
@@ -418,12 +624,15 @@ fn restored(previous: &Value, selector: &Path) -> Result<bool> {
                 && fs::read_link(selector).map_err(|error| error.to_string())?
                     == text_path(previous, "target")?)
         }
-        Some("file") => Ok(fs::symlink_metadata(selector)
-            .is_ok_and(|metadata| metadata.is_file() && !metadata.file_type().is_symlink())
-            && digest(selector)?
-                == previous["sha256"]
-                    .as_str()
-                    .ok_or_else(|| "backup hash missing".to_owned())?),
+        Some("file") => Ok(fs::symlink_metadata(selector).is_ok_and(|metadata| {
+            metadata.is_file()
+                && !metadata.file_type().is_symlink()
+                && previous["mode"].as_u64()
+                    == Some(u64::from(metadata.permissions().mode() & 0o777))
+        }) && digest(selector)?
+            == previous["sha256"]
+                .as_str()
+                .ok_or_else(|| "backup hash missing".to_owned())?),
         _ => Err("unknown previous selector kind".to_owned()),
     }
 }
@@ -460,7 +669,43 @@ fn status_for_root(root: &Path) -> Result<Value> {
 
 pub(crate) fn install(arguments: &[String]) -> Result<Value> {
     let options = parse_install(arguments)?;
+    // The selected candidate installs its own exact bytes. This binds the label
+    // without launching an unchecked external program or introducing a runner.
+    require(
+        options.version == env!("CARGO_PKG_VERSION"),
+        "run install through the intended versioned MTM artifact",
+    )?;
+    let running = std::env::current_exe().map_err(|error| error.to_string())?;
+    require(
+        digest(&options.binary)? == options.sha256 && digest(&running)? == options.sha256,
+        "install must select the running candidate's exact bytes",
+    )?;
     ensure_dir(&options.state_root, 0o700)?;
+    let _lock = installation_lock(&options.state_root, true)?;
+    let manifest = manifest_path(&options.state_root);
+    let before = match fs::symlink_metadata(&manifest) {
+        Ok(_) => {
+            let old = load_manifest(&options.state_root)?;
+            status_for_root(&options.state_root)?;
+            let old_paths: Vec<_> = selector_entries(&old)?
+                .iter()
+                .map(|entry| text_path(entry, "path"))
+                .collect::<Result<_>>()?;
+            require(
+                old_paths == options.selectors,
+                "existing installation selector set cannot change implicitly",
+            )?;
+            if old["state"] == "active"
+                && old["version"] == options.version
+                && old["sha256"] == options.sha256
+            {
+                return status_for_root(&options.state_root);
+            }
+            Some(bounded_bytes(&manifest, MAX_MANIFEST_BYTES)?)
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => None,
+        Err(error) => return Err(error.to_string()),
+    };
     let release = options
         .state_root
         .join("releases")
@@ -477,7 +722,17 @@ pub(crate) fn install(arguments: &[String]) -> Result<Value> {
         .parent()
         .ok_or_else(|| "release parent missing".to_owned())?
         .join("release.json");
-    atomic_json(&release_metadata_path, &release_metadata)?;
+    if fs::symlink_metadata(&release_metadata_path).is_ok() {
+        let existing: Value =
+            serde_json::from_slice(&bounded_bytes(&release_metadata_path, MAX_MANIFEST_BYTES)?)
+                .map_err(|error| error.to_string())?;
+        require(
+            existing == release_metadata,
+            "immutable release metadata conflicts",
+        )?;
+    } else {
+        atomic_json(&release_metadata_path, &release_metadata)?;
+    }
 
     let deployment = options.state_root.join("deployment");
     let nonce = SystemTime::now()
@@ -499,40 +754,40 @@ pub(crate) fn install(arguments: &[String]) -> Result<Value> {
         "sha256":options.sha256,"release_path":release,"selectors":selectors,
         "release_qualified":false,"python_runtime_required":false
     });
+    validate_manifest(&payload, &options.state_root)?;
     let entries = selector_entries(&payload)?.clone();
     for (index, entry) in entries.iter().enumerate() {
         let selector = text_path(entry, "path")?;
-        if let Err(error) = atomic_link(&release, &selector) {
-            for original in entries[..index].iter().rev() {
-                if let Ok(restored_selector) = text_path(original, "path") {
-                    let _ = restore_one(&restored_selector, &original["previous"]);
-                }
-            }
-            return Err(format!(
-                "selector update failed and was compensated: {error}"
-            ));
+        if atomic_link(&release, &selector).is_err() {
+            // Include the failing entry: rename can succeed before fsync fails.
+            let restored = compensate(&entries[..=index], None, &manifest, before.as_deref());
+            return Err(compensation_message("selector update", restored));
         }
     }
-    if let Err(error) = atomic_json(&manifest_path(&options.state_root), &payload) {
-        for entry in entries.iter().rev() {
-            if let Ok(selector) = text_path(entry, "path") {
-                let _ = restore_one(&selector, &entry["previous"]);
-            }
-        }
-        return Err(format!(
-            "manifest commit failed and selectors were compensated: {error}"
+    if atomic_json(&manifest, &payload).is_err() || status_for_root(&options.state_root).is_err() {
+        let restored = compensate(&entries, None, &manifest, before.as_deref());
+        return Err(compensation_message(
+            "manifest commit or postcheck",
+            restored,
         ));
     }
     status_for_root(&options.state_root)
 }
 
 pub(crate) fn status(arguments: &[String]) -> Result<Value> {
-    status_for_root(&parse_state_root(arguments)?)
+    let root = parse_state_root(arguments)?;
+    let _lock = installation_lock(&root, false)?;
+    status_for_root(&root)
 }
 
 pub(crate) fn rollback(arguments: &[String]) -> Result<Value> {
     let root = parse_state_root(arguments)?;
+    let _lock = installation_lock(&root, false)?;
     let mut payload = load_manifest(&root)?;
+    if payload["state"] == "previous_active" {
+        return status_for_root(&root);
+    }
+    let before = bounded_bytes(&manifest_path(&root), MAX_MANIFEST_BYTES)?;
     require(
         payload["state"] == "active",
         "rollback requires an active installation",
@@ -546,37 +801,180 @@ pub(crate) fn rollback(arguments: &[String]) -> Result<Value> {
             selector_is_target(&selector, &release)?,
             "selector drifted before rollback",
         )?;
+        if entry["previous"]["kind"] == "file" {
+            require(
+                digest(&text_path(&entry["previous"], "backup")?)? == entry["previous"]["sha256"],
+                "rollback backup drifted before mutation",
+            )?;
+        }
     }
     for (index, entry) in entries.iter().enumerate() {
         let selector = text_path(entry, "path")?;
-        if let Err(error) = restore_one(&selector, &entry["previous"]) {
-            for restored_entry in entries[..index].iter().rev() {
-                if let Ok(restored_selector) = text_path(restored_entry, "path") {
-                    let _ = atomic_link(&release, &restored_selector);
-                }
-            }
-            return Err(format!(
-                "rollback failed and active selectors were restored: {error}"
-            ));
+        if restore_one(&selector, &entry["previous"]).is_err() {
+            let restored = compensate(
+                &entries[..=index],
+                Some(&release),
+                &manifest_path(&root),
+                Some(&before),
+            );
+            return Err(compensation_message("rollback selector", restored));
         }
     }
     payload["state"] = Value::String("previous_active".to_owned());
-    if let Err(error) = atomic_json(&manifest_path(&root), &payload) {
-        for entry in &entries {
-            if let Ok(selector) = text_path(entry, "path") {
-                let _ = atomic_link(&release, &selector);
-            }
-        }
-        return Err(format!(
-            "rollback manifest failed and active selectors were restored: {error}"
+    if atomic_json(&manifest_path(&root), &payload).is_err() || status_for_root(&root).is_err() {
+        let restored = compensate(
+            &entries,
+            Some(&release),
+            &manifest_path(&root),
+            Some(&before),
+        );
+        return Err(compensation_message(
+            "rollback manifest or postcheck",
+            restored,
         ));
     }
     status_for_root(&root)
 }
 
+fn compensation_message(stage: &str, verified: bool) -> String {
+    format!("{stage} failed; compensation_verified={verified}; no release qualification is implied")
+}
+
+fn compensate(
+    entries: &[Value],
+    active: Option<&Path>,
+    manifest: &Path,
+    before: Option<&[u8]>,
+) -> bool {
+    let mut verified = true;
+    for entry in entries.iter().rev() {
+        let result = text_path(entry, "path").and_then(|selector| match active {
+            Some(target) => atomic_link(target, &selector),
+            None => restore_one(&selector, &entry["previous"]),
+        });
+        verified &= result.is_ok();
+    }
+    let restored_manifest = match before {
+        Some(bytes) => atomic_bytes(manifest, bytes, 0o600),
+        None => match fs::remove_file(manifest) {
+            Ok(()) => manifest
+                .parent()
+                .ok_or("manifest parent missing".into())
+                .and_then(sync_dir),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+            Err(error) => Err(error.to_string()),
+        },
+    };
+    verified &= restored_manifest.is_ok();
+    verified &= match before {
+        Some(bytes) => bounded_bytes(manifest, MAX_MANIFEST_BYTES).is_ok_and(|now| now == bytes),
+        None => fs::symlink_metadata(manifest)
+            .is_err_and(|error| error.kind() == std::io::ErrorKind::NotFound),
+    };
+    for entry in entries {
+        let checked = text_path(entry, "path").and_then(|selector| match active {
+            Some(target) => selector_is_target(&selector, target),
+            None => restored(&entry["previous"], &selector),
+        });
+        verified &= checked == Ok(true);
+    }
+    verified
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn compensation_reports_failure_without_hiding_successful_other_restores() -> Result<()> {
+        let temp = tempfile::tempdir().map_err(|error| error.to_string())?;
+        let first = temp.path().join("a/mtm");
+        let second = temp.path().join("b/mtm");
+        let manifest = temp.path().join("deployment/current-v2.json");
+        ensure_dir(first.parent().ok_or("parent")?, 0o700)?;
+        ensure_dir(second.parent().ok_or("parent")?, 0o700)?;
+        let entries = vec![
+            json!({"path":first,"previous":{"kind":"missing"}}),
+            json!({"path":second,"previous":{"kind":"missing"}}),
+        ];
+        atomic_link(Path::new("/unused-candidate"), &first)?;
+        atomic_link(Path::new("/unused-candidate"), &second)?;
+        assert!(compensate(&entries, None, &manifest, None));
+        atomic_link(Path::new("/unused-candidate"), &first)?;
+        ensure_dir(&second, 0o700)?;
+        assert!(!compensate(&entries, None, &manifest, None));
+        assert!(fs::symlink_metadata(&first).is_err());
+        assert!(second.is_dir());
+        assert!(compensation_message("fixture", false).contains("compensation_verified=false"));
+        Ok(())
+    }
+
+    #[test]
+    fn manifest_rejects_unknown_fields_backup_escape_and_special_modes() -> Result<()> {
+        let temp = tempfile::tempdir().map_err(|error| error.to_string())?;
+        let root = temp.path().join("state");
+        let hash = "a".repeat(64);
+        let value = json!({"schema":SCHEMA,"state":"active","version":"fixture",
+            "sha256":hash,"release_path":root.join("releases/fixture").join(&hash).join("mtm"),
+            "selectors":[{"path":temp.path().join("bin/mtm"),"previous":{"kind":"file",
+                "backup":root.join("deployment/rollback-v2/session/selector-0.backup"),"sha256":hash,"mode":448}}],
+            "release_qualified":false,"python_runtime_required":false});
+        validate_manifest(&value, &root)?;
+        for (pointer, replacement) in [
+            ("/selectors/0/path", json!(root.join("mtm"))),
+            (
+                "/selectors/0/previous/backup",
+                json!(temp.path().join("outside")),
+            ),
+            ("/selectors/0/previous/mode", json!(0o4755)),
+            ("/selectors/0/previous/mode", json!(448.0)),
+            ("/release_qualified", json!(true)),
+            ("/selectors", json!([])),
+            ("/state", json!("future")),
+        ] {
+            let mut changed = value.clone();
+            *changed.pointer_mut(pointer).ok_or("fixture pointer")? = replacement;
+            assert!(validate_manifest(&changed, &root).is_err());
+        }
+        let mut unknown = value.clone();
+        unknown["override"] = json!(true);
+        assert!(validate_manifest(&unknown, &root).is_err());
+        let mut duplicate = value.clone();
+        duplicate["selectors"] = json!([value["selectors"][0], value["selectors"][0]]);
+        assert!(validate_manifest(&duplicate, &root).is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn release_publication_preserves_conflicts_and_lock_inode_serializes_writers() -> Result<()> {
+        let temp = tempfile::tempdir().map_err(|error| error.to_string())?;
+        let source = temp.path().join("source");
+        let target = temp.path().join("mtm");
+        atomic_bytes(&source, b"fixture-only-not-an-installable-runtime", 0o755)?;
+        let expected = digest(&source)?;
+        copy_release(&source, &target, &expected)?;
+        copy_release(&source, &target, &expected)?;
+        atomic_bytes(&target, b"conflicting immutable artifact", 0o755)?;
+        assert!(copy_release(&source, &target, &expected).is_err());
+        assert_eq!(
+            bounded_bytes(&target, MAX_BINARY_BYTES)?,
+            b"conflicting immutable artifact"
+        );
+        let root = temp.path().join("state");
+        let first = installation_lock(&root, true)?;
+        assert!(installation_lock(&root, true).is_err());
+        drop(first);
+        let _second = installation_lock(&root, false)?;
+        assert_eq!(
+            fs::metadata(root.join("deployment/install-v2.lock"))
+                .map_err(|error| error.to_string())?
+                .permissions()
+                .mode()
+                & 0o777,
+            0o600
+        );
+        Ok(())
+    }
 
     #[test]
     fn parser_requires_explicit_bounded_absolute_inputs() {

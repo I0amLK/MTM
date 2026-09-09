@@ -24,7 +24,7 @@ fn run(arguments: &[String]) -> Result<Output, Box<dyn Error>> {
 
 fn fixture(root: &Path) -> Result<(String, Vec<String>), Box<dyn Error>> {
     let binary = root.join("candidate");
-    fs::write(&binary, b"reviewed mtm candidate bytes")?;
+    fs::copy(env!("CARGO_BIN_EXE_mtm"), &binary)?;
     fs::set_permissions(&binary, fs::Permissions::from_mode(0o755))?;
     let digest = sha(&binary)?;
     let state = root.join("state");
@@ -134,5 +134,90 @@ fn wrong_hash_drift_and_symlink_source_fail_closed() -> Result<(), Box<dyn Error
     let mut linked_args = args;
     linked_args[2] = linked.to_string_lossy().into_owned();
     assert_eq!(run(&linked_args)?.status.code(), Some(2));
+    Ok(())
+}
+
+#[test]
+fn repeat_install_preserves_the_original_rollback() -> Result<(), Box<dyn Error>> {
+    let root = tempfile::tempdir()?;
+    let (_, args) = fixture(root.path())?;
+    let first = root.path().join("bin-a/mtm");
+    fs::write(&first, b"original command")?;
+    assert!(run(&args)?.status.success());
+    let manifest = root.path().join("state/deployment/current-v2.json");
+    let before = fs::read(&manifest)?;
+    assert!(run(&args)?.status.success());
+    assert_eq!(fs::read(&manifest)?, before);
+    assert!(
+        run(&[
+            "rollback".into(),
+            "--state-root".into(),
+            root.path().join("state").to_string_lossy().into_owned(),
+        ])?
+        .status
+        .success()
+    );
+    assert_eq!(fs::read(&first)?, b"original command");
+    assert!(!root.path().join("bin-b/mtm").exists());
+    Ok(())
+}
+
+#[test]
+fn empty_manifest_selector_set_cannot_masquerade_as_success() -> Result<(), Box<dyn Error>> {
+    let root = tempfile::tempdir()?;
+    let (_, args) = fixture(root.path())?;
+    assert!(run(&args)?.status.success());
+    let manifest = root.path().join("state/deployment/current-v2.json");
+    let mut payload: Value = serde_json::from_slice(&fs::read(&manifest)?)?;
+    payload["selectors"] = serde_json::json!([]);
+    fs::write(&manifest, serde_json::to_vec(&payload)?)?;
+    for operation in ["status", "rollback"] {
+        assert_eq!(
+            run(&[
+                operation.into(),
+                "--state-root".into(),
+                root.path().join("state").to_string_lossy().into_owned(),
+            ])?
+            .status
+            .code(),
+            Some(2)
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn ancestor_symlinks_and_selectors_inside_the_release_root_are_rejected()
+-> Result<(), Box<dyn Error>> {
+    let root = tempfile::tempdir()?;
+    let (_, mut args) = fixture(root.path())?;
+    fs::create_dir(root.path().join("outside"))?;
+    symlink(root.path().join("outside"), root.path().join("link"))?;
+    args[8] = root
+        .path()
+        .join("link/state")
+        .to_string_lossy()
+        .into_owned();
+    assert_eq!(run(&args)?.status.code(), Some(2));
+    assert_eq!(fs::read_dir(root.path().join("outside"))?.count(), 0);
+    args[8] = root.path().join("state").to_string_lossy().into_owned();
+    args[10] = root.path().join("state/mtm").to_string_lossy().into_owned();
+    assert_eq!(run(&args)?.status.code(), Some(2));
+    assert!(!root.path().join("state").exists());
+    Ok(())
+}
+
+#[test]
+fn install_checks_its_own_artifact_and_version_before_writing() -> Result<(), Box<dyn Error>> {
+    let root = tempfile::tempdir()?;
+    let (_, mut args) = fixture(root.path())?;
+    args[6] = "unverified-version".into();
+    assert_eq!(run(&args)?.status.code(), Some(2));
+    assert!(!root.path().join("state").exists());
+    args[6] = env!("CARGO_PKG_VERSION").into();
+    fs::write(root.path().join("candidate"), b"not an MTM runtime")?;
+    args[4] = sha(&root.path().join("candidate"))?;
+    assert_eq!(run(&args)?.status.code(), Some(2));
+    assert!(!root.path().join("state").exists());
     Ok(())
 }

@@ -3,6 +3,10 @@
 /.cargo-home/
 /.rustup-home/
 /.cargo-cache/
+/.cargo/registry/
+/.cargo/.global-cache
+/.cargo/.package-cache
+/.cargo/.package-cache-mutate
 /.rustup/
 /.venv/
 /dist/

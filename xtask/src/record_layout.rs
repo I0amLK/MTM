@@ -291,6 +291,68 @@ fn historical_release_identity(
     Ok(())
 }
 
+fn historical_mtm015_lifecycle(root: &Path) -> Result<BTreeMap<&'static str, Value>> {
+    let mut evidence = BTreeMap::new();
+    for (name, filename, phase, expected_sha256, expected_count) in [
+        (
+            "target_qualification",
+            "target-qualification.json",
+            "target_qualification",
+            "6155b14f9e5c365b0049dd2436b5f6888f403ab4d2685eb45e5e5e8079e05da5",
+            Some(15_u64),
+        ),
+        (
+            "candidate_stage",
+            "candidate-stage.json",
+            "candidate_stage",
+            "5787fd9d54cb8eb918833ecc8fc8cba417adde9de0baa612577042abb506aed4",
+            Some(9_u64),
+        ),
+        (
+            "web_client",
+            "web-client.json",
+            "web_client",
+            "345d9bdb3bd7da994b7406038ca739a18140c9e581c0ba6761f4e9328ee0040f",
+            None,
+        ),
+    ] {
+        let path = format!("records/evidence/MTM-015/{filename}");
+        let bytes = read_bytes(root, &path, 8 * 1024 * 1024)?;
+        let actual_sha256 = format!("{:x}", Sha256::digest(&bytes));
+        require(
+            actual_sha256 == expected_sha256,
+            "MTM-015 lifecycle receipt digest changed",
+        )?;
+        let payload: Value = serde_json::from_slice(&bytes)?;
+        let candidate_sha256 = payload["candidate_binary_sha256"]
+            .as_str()
+            .or_else(|| payload["binary_sha256"].as_str());
+        require(
+            payload["schema_version"] == "1.0.0"
+                && payload["milestone"] == "MTM-015"
+                && payload["phase"] == phase
+                && payload["ok"] == true
+                && candidate_sha256
+                    == Some("2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a")
+                && payload["selector_changed"] == false
+                && payload["production_state_rewritten"] == false,
+            "MTM-015 lifecycle receipt identity changed",
+        )?;
+        if let Some(expected_count) = expected_count {
+            require(
+                payload["check_count"].as_u64() == Some(expected_count),
+                "MTM-015 lifecycle check count changed",
+            )?;
+        }
+        evidence.insert(
+            name,
+            json!({"path":path,"sha256":actual_sha256,"phase":phase,
+                "candidate_binary_sha256":"2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a"}),
+        );
+    }
+    Ok(evidence)
+}
+
 pub(super) fn historical_releases(root: &Path) -> Result<Value> {
     let mut target_evidence = BTreeMap::new();
     for (milestone, expected) in [
@@ -381,11 +443,13 @@ pub(super) fn historical_releases(root: &Path) -> Result<Value> {
                 "version":version,"binary_sha256":binary_sha256}),
         );
     }
+    let mtm015_lifecycle = historical_mtm015_lifecycle(root)?;
     Ok(
         json!({"historical_milestones":target_evidence.len()+release_evidence.len(),
         "historical_target_milestones":target_evidence.len(),
         "historical_release_milestones":release_evidence.len(),
         "target_evidence":target_evidence,"release_evidence":release_evidence,
+        "mtm015_lifecycle_evidence":mtm015_lifecycle,
         "scope":"immutable_historical_receipts_only","live_selectors_checked":false,
         "current_release_qualified":false}),
     )
