@@ -4,8 +4,8 @@ use std::sync::Arc;
 
 use mtm_contracts::{ErrorCategory, ReCtmError, WorkflowRole, WorkflowState};
 use mtm_storage::{
-    CapabilityAuthority, CapabilityClaims, CreationIdentity, CreationSlot, StateStore,
-    TransitionRun, default_permissions, role_for_state,
+    BranchPreparation, CapabilityAuthority, CapabilityClaims, CreationIdentity, CreationSlot,
+    PreparedBranch, StateStore, TransitionRun, default_permissions, role_for_state,
 };
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -1225,6 +1225,10 @@ impl WorkflowEngine {
                 WorkflowState::Finalize => run = self.finalize(&run, trace_id)?,
                 WorkflowState::Done => {
                     run = self.retry_pending_registry_promotion(&run)?;
+                    self.vault.ensure_manual_validation_manifest(
+                        text(&run, "run_id")?,
+                        &self.manual_validation_manifest(&run),
+                    )?;
                     return Ok(run);
                 }
                 _ => return Ok(run),
@@ -3203,66 +3207,45 @@ impl WorkflowEngine {
             .and_then(Value::as_i64)
             .unwrap_or_default()
             + 1;
-        let snapshot_id = format!(
-            "round-{next_round}-{}",
-            self.store.runtime().ids.token_hex(4)?
-        );
+        let run_id = text(run, "run_id")?;
+        let snapshot_suffix = sha256_text(&format!("{run_id}:{next_round}:branch_prepare"));
+        let snapshot_id = format!("round-{next_round}-{}", &snapshot_suffix[..8]);
         let mut generation_memory = Map::new();
         for channel in GENERATION_CHANNELS {
             if channel != "events" {
                 generation_memory.insert(
                     channel.to_owned(),
-                    Value::Array(
-                        self.vault
-                            .read_generation_memory(text(run, "run_id")?, channel)?,
-                    ),
+                    Value::Array(self.vault.read_generation_memory(run_id, channel)?),
                 );
             }
         }
         let snapshot_payload = serde_json::json!({
             "snapshot_id":snapshot_id,
-            "created_at":self.store.runtime().clock.now_iso()?,
-            "problem":self.vault.read_problem(text(run,"run_id")?)?,
-            "references_manifest":self.vault.read_references_manifest(text(run,"run_id")?)?,
+            "created_at":text(run,"updated_at")?,
+            "problem":self.vault.read_problem(run_id)?,
+            "references_manifest":self.vault.read_references_manifest(run_id)?,
             "generation_memory":generation_memory,
             "branch_requests":requests
         });
-        let snapshot =
-            self.vault
-                .create_snapshot(text(run, "run_id")?, &snapshot_id, &snapshot_payload)?;
+        let snapshot = self
+            .vault
+            .ensure_snapshot(run_id, &snapshot_id, &snapshot_payload)?;
+        let mut prepared = Vec::with_capacity(requests.len());
         for (index, plan) in requests.iter().enumerate() {
             let plan_id = plan
                 .get("plan_id")
                 .and_then(Value::as_str)
                 .filter(|value| !value.is_empty())
                 .ok_or_else(|| internal("branch request is missing plan_id"))?;
-            let branch_id = format!(
-                "branch-{next_round}-{}-{}",
-                index + 1,
-                self.store.runtime().ids.token_hex(3)?
-            );
+            let suffix = sha256_text(&format!("{run_id}:{next_round}:{}:{plan_id}", index + 1));
+            let branch_id = format!("branch-{next_round}-{}-{}", index + 1, &suffix[..6]);
             let domain_id = format!("branch-domain-{branch_id}");
-            self.store.create_domain(
-                &domain_id,
-                text(run, "run_id")?,
-                "branch",
-                Some(&snapshot_id),
-                Some(index as i64),
-                &serde_json::json!({
-                    "state":"branch_run","branch_id":branch_id,"snapshot_id":snapshot_id
-                }),
-            )?;
-            self.store.create_branch(
-                &branch_id,
-                text(run, "run_id")?,
-                plan_id,
-                &domain_id,
-                &snapshot_id,
-                index as i64,
-                &serde_json::json!({"plan":plan}),
-            )?;
-            self.vault.initialize_branch(
-                text(run, "run_id")?,
+            let domain_metadata = serde_json::json!({
+                "state":"branch_run","branch_id":branch_id,"snapshot_id":snapshot_id
+            });
+            let branch_metadata = serde_json::json!({"plan":plan});
+            self.vault.ensure_branch_assignment(
+                run_id,
                 &branch_id,
                 &serde_json::json!({
                     "branch_id":branch_id,
@@ -3271,27 +3254,38 @@ impl WorkflowEngine {
                     "snapshot_sha256":snapshot["sha256"]
                 }),
             )?;
+            prepared.push(PreparedBranch {
+                branch_id,
+                plan_id: plan_id.to_owned(),
+                domain_id,
+                snapshot_id: snapshot_id.clone(),
+                order_index: index as i64,
+                domain_metadata,
+                branch_metadata,
+            });
         }
-        self.update_metadata(
-            text(run, "run_id")?,
-            serde_json::json!({"active_snapshot_id":snapshot_id,"branch_requests":[]}),
-        )?;
         let evidence = serde_json::json!({
             "snapshot_id":snapshot_id,"branch_count":requests.len()
         });
-        self.transition(TransitionInput {
-            run_id: text(run, "run_id")?,
-            before: WorkflowState::BranchPrepare,
-            after: WorkflowState::BranchRun,
-            trace_id,
-            actor: "system",
-            reason: "frozen_snapshot_and_branch_domains_created",
-            evidence: &evidence,
-            latex_passed: None,
-            verdict: None,
-            status: None,
-            sealed: None,
-            round_delta: 1,
+        self.store.complete_branch_preparation(BranchPreparation {
+            transition: TransitionRun {
+                run_id,
+                expected_state: "branch_prepare",
+                after_state: "branch_run",
+                trace_id,
+                actor: "system",
+                reason: "frozen_snapshot_and_branch_domains_created",
+                evidence: &evidence,
+                increment_epoch: true,
+                status: None,
+                latex_passed: None,
+                verdict: None,
+                sealed: None,
+                round_delta: 1,
+            },
+            expected_branch_requests: &Value::Array(requests),
+            snapshot_id: &snapshot_id,
+            branches: &prepared,
         })
     }
 
@@ -3300,9 +3294,35 @@ impl WorkflowEngine {
         let proof = self.vault.read_proof(run_id)?;
         let workdir = self.vault.run_root(run_id)?.join("verification/latex");
         let result = self.latex_gate.validate(&proof, &workdir)?;
-        self.update_metadata(
-            run_id,
-            serde_json::json!({"latex_result":result.to_value()}),
+        let evidence = result.to_value();
+        let after = if result.gate_passed {
+            WorkflowState::Verify
+        } else {
+            WorkflowState::Repair
+        };
+        let reason = if result.gate_passed {
+            "latex_gate_passed"
+        } else {
+            "latex_gate_failed"
+        };
+        let updated = self.store.complete_latex_gate(
+            TransitionRun {
+                run_id,
+                expected_state: "latex_validate",
+                after_state: state_name(after),
+                trace_id,
+                actor: "latex_gate",
+                reason,
+                evidence: &evidence,
+                increment_epoch: true,
+                status: None,
+                latex_passed: Some(result.gate_passed),
+                verdict: None,
+                sealed: None,
+                round_delta: 0,
+            },
+            &run["metadata"],
+            &evidence,
         )?;
         self.emit(WorkflowEvent {
             event_type: "latex.gate_result".to_owned(),
@@ -3311,39 +3331,12 @@ impl WorkflowEngine {
             actor_role: None,
             domain_id: None,
             before_state: Some("latex_validate".to_owned()),
-            after_state: None,
+            after_state: Some(state_name(after).to_owned()),
             decision: if result.gate_passed { "allow" } else { "deny" }.to_owned(),
-            reason: if result.gate_passed {
-                "latex_gate_passed"
-            } else {
-                "latex_gate_failed"
-            }
-            .to_owned(),
-            details: result.to_value(),
+            reason: reason.to_owned(),
+            details: evidence,
         });
-        let evidence = result.to_value();
-        self.transition(TransitionInput {
-            run_id,
-            before: WorkflowState::LatexValidate,
-            after: if result.gate_passed {
-                WorkflowState::Verify
-            } else {
-                WorkflowState::Repair
-            },
-            trace_id,
-            actor: "latex_gate",
-            reason: if result.gate_passed {
-                "latex_gate_passed"
-            } else {
-                "latex_gate_failed"
-            },
-            evidence: &evidence,
-            latex_passed: Some(result.gate_passed),
-            verdict: None,
-            status: None,
-            sealed: None,
-            round_delta: 0,
-        })
+        Ok(updated)
     }
 
     fn finalize(&self, run: &Value, trace_id: &str) -> Result<Value, ReCtmError> {
@@ -3428,7 +3421,7 @@ impl WorkflowEngine {
         })?;
         let result = self.retry_pending_registry_promotion(&result)?;
         self.vault
-            .write_manual_validation_manifest(run_id, &self.manual_validation_manifest(&result))?;
+            .ensure_manual_validation_manifest(run_id, &self.manual_validation_manifest(&result))?;
         Ok(result)
     }
 

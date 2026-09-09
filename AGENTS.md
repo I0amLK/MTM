@@ -96,6 +96,16 @@ Schema 7 records explicit enrollment for four database-only actions; read
 revocation, transition and receipt commit together. Branch database sealing does
 not certify its earlier file effects. Never backfill atomic enrollment for old
 commit-ready work or run callbacks/observers/file I/O under a SQLite transaction.
+The following mechanical checkpoint keeps schema 7 and advances the model-facing
+contract to mtm-tools-v8; read `docs/MTM-016-E2-MECHANICAL-RECOVERY.md`. Branch
+preparation uses deterministic identities and exact private files before committing
+all branch/domain rows and the transition together. LaTeX execution stays outside
+SQLite while its result and transition commit together. Exact final proof bytes may
+be reused after the same finalization permit checks; conflicting bytes are never
+overwritten. Done reconnect may repair only the derived manual validation manifest
+and the existing promotion retry. Do not infer legacy partial branch rows, claim
+external compiler exactly-once behavior, or extend this rule to model-action file
+effects that remain pending.
 The checker retains inherited host integration tests; in a nested Native sandbox
 Bubblewrap tests can fail. Report those failures and compare with the frozen
 baseline; never make the gate green by silently ignoring them. `audit --strict`

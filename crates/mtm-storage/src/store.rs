@@ -20,8 +20,11 @@ use crate::schema::{
     V5_CREATION_INITIALIZATION_SQL, V6_CALLER_WRITE_JOURNAL_SQL, V7_ATOMIC_ACTION_SQL,
 };
 
+#[path = "mechanical_transitions.rs"]
+mod mechanical_transitions;
 #[path = "task_transitions.rs"]
 mod task_transitions;
+pub use mechanical_transitions::{BranchPreparation, PreparedBranch};
 pub use task_transitions::{BranchSeal, TaskTransition};
 
 #[path = "step_receipts.rs"]

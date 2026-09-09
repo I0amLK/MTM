@@ -1,6 +1,14 @@
 # MTM
 
-The current E2 action checkpoint uses schema 7 and `mtm-tools-v7`. Assessment,
+The current E2 mechanical checkpoint keeps schema 7 and uses `mtm-tools-v8`.
+Branch preparation now uses stable identities plus one database transaction; LaTeX
+result metadata and its transition commit together; exact final proof publication is
+restartable and a Done reconnect may restore only the derived manual-validation
+manifest. Conflicting existing private/final bytes fail closed. See
+`docs/MTM-016-E2-MECHANICAL-RECOVERY.md`. Planning/direct-screening/join/verification
+file-effect recovery remains pending. Development only: no deployment.
+
+The preceding E2 action checkpoint uses schema 7 and `mtm-tools-v7`. Assessment,
 exploration, proof submission/escalation and repair commit their database effects,
 domain seal and transition receipt together. Explicitly enrolled interrupted actions
 can be reconciled without executing them; caller writes remain retained. Branch

@@ -1814,6 +1814,72 @@
       "rust_only_ready": false,
       "release_qualified": false,
       "earlier_signature_mismatch_explained": false
+    },
+    {
+      "id": "MTM016-E2-MECHANICAL-RECOVERY-IMPLEMENTATION",
+      "delivery": "E2 restartable mechanical branch preparation, LaTeX state commit and terminal artifact completion",
+      "round": "1_of_final_5",
+      "status": "implementation_source_reviewed_candidate_built_commit_pending",
+      "milestone_status": "in_progress",
+      "stage_E_status": "in_progress",
+      "base_commit": "d5aa47937ca7f0aad2f540f7e6c2f03501354b6c",
+      "design": "docs/MTM-016-E2-MECHANICAL-RECOVERY.md",
+      "contract": {"state_schema": 7, "tool_contract": "mtm-tools-v8", "workflow_protocol": 3, "public_tools": 24, "hidden_aliases": 0},
+      "pre_fix_regressions": [
+        {"test": "interrupted_branch_preparation_leaves_no_partial_database_rows_and_reuses_one_plan", "exit_code": 101, "failure": "A failed branch assignment left database branch rows before the transition", "result_after_fix": "passes"},
+        {"test": "done_reconnect_repairs_only_the_missing_manual_manifest_without_republishing_proof", "exit_code": 101, "failure": "A run already in done did not restore its missing derived manual-validation manifest", "result_after_fix": "passes"}
+      ],
+      "implementation": [
+        "Branch preparation derives stable snapshot and branch ids from run/round/index/server plan id and uses byte-stable snapshot/assignment payloads",
+        "Missing snapshot/branch assignment files are published before database authority; exact existing bytes are reused and conflicts are refused",
+        "All new branch/domain rows, active snapshot metadata, branch-request clearing, epoch/state transition and transition record commit in one SQLite transaction",
+        "Current-round legacy partial branch rows are returned as MECHANICAL_LEGACY_PARTIAL_UNKNOWN and are neither adopted nor deleted",
+        "External LaTeX validation remains outside SQLite; its computed result metadata, latex_passed value and state transition commit together",
+        "The finalizer reuses an existing proof_verified.tex only when it exactly equals the verifier-approved draft and the existing finalization permit still matches",
+        "A Done reconnect may restore the derived manual-validation manifest and invoke the existing idempotent registry-promotion retry without republishing different proof bytes"
+      ],
+      "focused_validation": [
+        {"command": "cargo test -p mtm-storage --test mechanical_transitions --locked --offline", "exit_code": 0, "tests_passed": 4},
+        {"command": "cargo test -p mtm-workflow --lib finalization_permit_is_bound_to_exact_proof_bytes --locked --offline", "exit_code": 0, "tests_passed": 1},
+        {"command": "cargo test -p mtm-workflow --test workflow --locked --offline", "exit_code": 0, "tests_passed": 12},
+        {"command": "cargo test -p mtm-storage -p mtm-workflow -p mtm-gateway --locked --offline", "exit_code": 0},
+        {"command": "cargo fmt --check", "exit_code": 0},
+        {"command": "cargo clippy --workspace --all-targets --all-features --locked --offline -- -D warnings", "exit_code": 0}
+      ],
+      "source_gate": {
+        "command": "cargo xtask check --record",
+        "exit_code": 1,
+        "source_sha256": "014ac4f748487ead4c73f74fe2f98a0555822b00c384d063719ac7905098f5da",
+        "source_unchanged": true,
+        "format_passed": true,
+        "clippy_passed": true,
+        "diff_passed": true,
+        "rust_tests_passed": false,
+        "runtime": {"passed": 128, "failed": 10, "ignored": 1},
+        "interpretation": "The same ten named nested-Bubblewrap Runtime tests are the only failing target. No test was skipped or suppressed, and historical host evidence is not substituted for this candidate's final host qualification."
+      },
+      "validation_totals": {"storage_passed": 69, "workflow_passed": 105, "gateway_passed": 29, "public_fixture_functions_passed": 36, "inert_host_profile_functions": 2, "runtime_passed": 128, "runtime_failed": 10, "runtime_ignored": 1, "new_suppressions": 0},
+      "candidate": {
+        "path": "target/mtm016-e2-mechanical/release/mtm",
+        "sha256": "44eb052244b2a5075a8cc95b8d0c6f496ecd6dbbbf7a8b67bdb863580786b724",
+        "version": "0.6.0-preview.1",
+        "state_schema": 7,
+        "tool_contract": "mtm-tools-v8",
+        "workflow_protocol": 3,
+        "installed": false
+      },
+      "retirement_check": {"retired_python_files": 11, "python_files_remaining": 116, "rust_only_ready": false, "audit_strict_exit_code": 1, "audit_strict_nonzero_expected": true},
+      "environment_observation": "One cargo invocation without the repository-local CARGO_HOME/RUSTUP_HOME attempted to auto-install the already pinned Rust 1.98 toolchain and then failed offline dependency lookup. Subsequent validation used the repository-local caches with RUSTUP_AUTO_INSTALL=0. The repository toolchain pin, Cargo.lock and dependency versions were not changed by that event.",
+      "security_boundary": "Mechanical files use existing private atomic publication and exact-byte comparison, not caller capability journals. No hostile same-UID or power-loss claim is made. No SQLite transaction spans LaTeX, file publication, model/network work or observers.",
+      "remaining": ["Planning/direct-screening/join/verification and branch-result action file-effect recovery", "Legacy unknown outcomes", "Final exact-candidate host/browser/compiled-LaTeX/resource/install/upgrade/rollback acceptance", "First-party Python maintenance and remaining Re-CTM references", "Representative 30-task three-repeat research corpus"],
+      "new_packages_or_versions": 0,
+      "schema_migrations_added": 0,
+      "python_files_deleted": 0,
+      "python_files_remaining": 116,
+      "production_changed": false,
+      "rust_only_ready": false,
+      "release_qualified": false,
+      "earlier_signature_mismatch_explained": false
     }
   ],
   "remaining_acceptance": [

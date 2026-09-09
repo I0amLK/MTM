@@ -9,12 +9,14 @@ use sha2::{Digest, Sha256};
 mod schema;
 mod workflow_schema;
 
-pub const TOOL_CONTRACT_VERSION: &str = "mtm-tools-v7";
+pub const TOOL_CONTRACT_VERSION: &str = "mtm-tools-v8";
 pub const NATIVE_TOOL_COUNT: usize = 18;
 
 const DATABASE_WRITE_RECOVERY: &str = "New proof_manifest and reference_audit caller writes commit with their accepted-write checkpoint in one database transaction. A failed transaction retains neither the new record nor its count; committed writes can be included in the retained prefix. Historical opaque database journals remain unknown. Recovery never executes the action or grants verifier/finalizer authority. These database records are bounded to 1 MiB.";
 
-const ATOMIC_ACTION_RECOVERY: &str = "Only explicitly enrolled assessment_complete, exploration_complete, proof_submitted (including escalation), and repair_submitted actions have atomic database completion. recover_only=true can reconcile their interrupted transaction as SUBMISSION_INTERRUPTED without running the action; retain caller writes and fetch the current task separately for correction. Enrollment is not inferred from an unchanged state or an old commit_ready checkpoint. Branch/planning/join/verification file effects and mechanical finalization are not covered by this recovery rule.";
+const ATOMIC_ACTION_RECOVERY: &str = "Only explicitly enrolled assessment_complete, exploration_complete, proof_submitted (including escalation), and repair_submitted actions have atomic database completion. recover_only=true can reconcile their interrupted transaction as SUBMISSION_INTERRUPTED without running the action; retain caller writes and fetch the current task separately for correction. Enrollment is not inferred from an unchanged state or an old commit_ready checkpoint. Branch/planning/join/verification file effects are not covered by this recovery rule.";
+
+const MECHANICAL_RECOVERY: &str = "Run-only mechanical advancement is restartable at branch preparation, LaTeX gating, and terminal manifest completion. Branch preparation derives stable snapshot/branch identities, publishes only exact missing private files, then commits branch/domain rows, metadata and the transition together. LaTeX results and their transition commit together after compilation. Final proof publication is idempotent only for the exact verifier-approved bytes; conflicting existing artifacts fail closed. A Done reconnect may restore only the non-authorizing manual validation manifest and never republishes different proof bytes.";
 
 const CREATION_RECOVERY: &str = "For an interrupted keyed creation enrolled in the current initialization protocol, repeat the same key and input: MTM acquires exclusive initialization ownership, verifies existing bytes and database facts, and completes only missing initialization. It never creates a replacement run for that retry. Keyed input is bounded to 128 uniquely named references and 8 MiB of combined text. Conflicting input, active initialization or legacy pending work must not be bypassed by changing the key. Completed replies are historical receipts, not task authority.";
 
@@ -47,7 +49,7 @@ macro_rules! define_tools {
                     $(Self::$id => ($title, $description, $read, $destructive, $open, $idempotent)),+
                 };
                 let description = if matches!(self, Self::RethlasStep | Self::RethlasInspect | Self::RethlasRetrieve) {
-                    format!("{description} {CAPABILITY_LIFECYCLE} {DATABASE_WRITE_RECOVERY} {ATOMIC_ACTION_RECOVERY}")
+                    format!("{description} {CAPABILITY_LIFECYCLE} {DATABASE_WRITE_RECOVERY} {ATOMIC_ACTION_RECOVERY} {MECHANICAL_RECOVERY}")
                 } else if matches!(self, Self::RethlasStart) {
                     format!("{description} {CREATION_RECOVERY}")
                 } else {

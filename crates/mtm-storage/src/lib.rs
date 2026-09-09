@@ -9,9 +9,10 @@ pub use capability::{
     CapabilityObserver, authorize_role_resource, default_permissions, role_for_state,
 };
 pub use store::{
-    AtomicActionKind, BranchSeal, Clock, CreationIdentity, CreationInitialization, CreationReceipt,
-    CreationReference, CreationReservation, CreationSlot, FileEffectEvidence, FileImage, IdSource,
-    ReferenceAuditWrite, StateStore, StoreRuntime, SubmissionDisposition, SubmissionExecution,
-    SubmissionReceipt, SubmissionRecovery, SubmissionReservation, SubmissionResult, SubmissionSlot,
-    SystemClock, SystemIdSource, TaskTransition, TransitionRun,
+    AtomicActionKind, BranchPreparation, BranchSeal, Clock, CreationIdentity,
+    CreationInitialization, CreationReceipt, CreationReference, CreationReservation, CreationSlot,
+    FileEffectEvidence, FileImage, IdSource, PreparedBranch, ReferenceAuditWrite, StateStore,
+    StoreRuntime, SubmissionDisposition, SubmissionExecution, SubmissionReceipt,
+    SubmissionRecovery, SubmissionReservation, SubmissionResult, SubmissionSlot, SystemClock,
+    SystemIdSource, TaskTransition, TransitionRun,
 };

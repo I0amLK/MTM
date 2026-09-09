@@ -277,6 +277,44 @@ impl PrivateVault {
         }))
     }
 
+    pub(crate) fn ensure_snapshot(
+        &self,
+        run_id: &str,
+        snapshot_id: &str,
+        payload: &Value,
+    ) -> Result<Value, ReCtmError> {
+        let snapshot = require_safe_id(snapshot_id, "snapshot_id")?;
+        let target = self
+            .run_root(run_id)?
+            .join("snapshots")
+            .join(format!("{snapshot}.json"));
+        let serialized = pretty_json(payload)?;
+        if target.exists() {
+            if self.read_text(&target)? != serialized {
+                return Err(ReCtmError::new(
+                    "SNAPSHOT_CONFLICT",
+                    "Existing snapshot bytes differ from the deterministic branch-preparation snapshot.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        } else {
+            self.atomic_text(&target, &serialized)?;
+            set_read_only(&target)?;
+            if self.read_text(&target)? != serialized {
+                return Err(ReCtmError::new(
+                    "SNAPSHOT_CONFLICT",
+                    "Snapshot publication did not preserve deterministic bytes.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        }
+        Ok(serde_json::json!({
+            "snapshot_id": snapshot_id,
+            "sha256": sha256_text(&serialized),
+            "path": target,
+        }))
+    }
+
     pub fn read_snapshot(&self, run_id: &str, snapshot_id: &str) -> Result<Value, ReCtmError> {
         let snapshot = require_safe_id(snapshot_id, "snapshot_id")?;
         let value = self.read_json(
@@ -305,6 +343,39 @@ impl PrivateVault {
         create_private_dir(&root)?;
         create_private_dir(&root.join("memory"))?;
         self.atomic_json(&root.join("assignment.json"), payload)?;
+        Ok(root)
+    }
+
+    pub(crate) fn ensure_branch_assignment(
+        &self,
+        run_id: &str,
+        branch_id: &str,
+        payload: &Value,
+    ) -> Result<PathBuf, ReCtmError> {
+        let branch = require_safe_id(branch_id, "branch_id")?;
+        let root = self.run_root(run_id)?.join("branches").join(&branch);
+        create_private_dir(&root)?;
+        create_private_dir(&root.join("memory"))?;
+        let target = root.join("assignment.json");
+        let expected = pretty_json(payload)?;
+        if target.exists() {
+            if self.read_text(&target)? != expected {
+                return Err(ReCtmError::new(
+                    "BRANCH_ASSIGNMENT_CONFLICT",
+                    "Existing branch assignment differs from the deterministic preparation plan.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        } else {
+            self.atomic_text(&target, &expected)?;
+            if self.read_text(&target)? != expected {
+                return Err(ReCtmError::new(
+                    "BRANCH_ASSIGNMENT_CONFLICT",
+                    "Branch assignment publication did not preserve deterministic bytes.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        }
         Ok(root)
     }
 
@@ -439,8 +510,25 @@ impl PrivateVault {
             )
             .with_category(ErrorCategory::Conflict));
         }
-        self.atomic_text(&target, &proof)?;
-        set_read_only(&target)?;
+        if target.exists() {
+            if self.read_text(&target)? != proof {
+                return Err(ReCtmError::new(
+                    "FINAL_ARTIFACT_CONFLICT",
+                    "Existing final proof differs from the verifier-approved draft; it was not overwritten.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        } else {
+            self.atomic_text(&target, &proof)?;
+            set_read_only(&target)?;
+            if self.read_text(&target)? != proof {
+                return Err(ReCtmError::new(
+                    "FINAL_ARTIFACT_CONFLICT",
+                    "Final proof publication did not preserve verifier-approved bytes.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        }
         Ok(target)
     }
 
@@ -486,6 +574,64 @@ impl PrivateVault {
         let mut text = serde_json::to_string_pretty(&manifest).map_err(json_error)?;
         text.push('\n');
         self.atomic_text(&target, &text)?;
+        Ok(target)
+    }
+
+    pub(crate) fn ensure_manual_validation_manifest(
+        &self,
+        run_id: &str,
+        payload: &Value,
+    ) -> Result<PathBuf, ReCtmError> {
+        let target = self
+            .run_root(run_id)?
+            .join("debug/manual-validation-manifest.json");
+        let object = payload
+            .as_object()
+            .ok_or_else(|| validation("manual validation manifest must be an object"))?;
+        let manifest = ManualValidationManifest {
+            run_id: object
+                .get("run_id")
+                .and_then(Value::as_str)
+                .unwrap_or_default(),
+            state: object
+                .get("state")
+                .and_then(Value::as_str)
+                .unwrap_or_default(),
+            verdict: object.get("verdict").and_then(Value::as_str),
+            latex_passed: object
+                .get("latex_passed")
+                .and_then(Value::as_bool)
+                .unwrap_or(false),
+            transition_count: object
+                .get("transition_count")
+                .and_then(Value::as_i64)
+                .unwrap_or_default(),
+            manual_checks_still_required: object
+                .get("manual_checks_still_required")
+                .and_then(Value::as_array)
+                .map(|items| items.iter().filter_map(Value::as_str).collect::<Vec<_>>())
+                .unwrap_or_default(),
+        };
+        let mut text = serde_json::to_string_pretty(&manifest).map_err(json_error)?;
+        text.push('\n');
+        if target.exists() {
+            if self.read_text(&target)? != text {
+                return Err(ReCtmError::new(
+                    "MANUAL_VALIDATION_MANIFEST_CONFLICT",
+                    "Existing manual validation manifest differs from current terminal facts.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        } else {
+            self.atomic_text(&target, &text)?;
+            if self.read_text(&target)? != text {
+                return Err(ReCtmError::new(
+                    "MANUAL_VALIDATION_MANIFEST_CONFLICT",
+                    "Manual validation manifest publication did not preserve terminal facts.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        }
         Ok(target)
     }
 
@@ -913,6 +1059,26 @@ mod tests {
                 .run_root("run-a")?
                 .join("final/proof_verified.tex")
                 .exists()
+        );
+        vault.write_proof("run-a", "proof version one")?;
+        let permit =
+            decision.finalization_permit("run-a", true, &sha256_text("proof version one"), None)?;
+        let first = vault.finalize_proof("run-a", &permit)?;
+        let first_bytes = fs::read(&first).map_err(io_error)?;
+        assert_eq!(vault.finalize_proof("run-a", &permit)?, first);
+        assert_eq!(fs::read(&first).map_err(io_error)?, first_bytes);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            fs::set_permissions(&first, fs::Permissions::from_mode(0o600)).map_err(io_error)?;
+        }
+        fs::write(&first, "conflicting final bytes").map_err(io_error)?;
+        assert_eq!(
+            vault
+                .finalize_proof("run-a", &permit)
+                .err()
+                .map(|error| error.code),
+            Some("FINAL_ARTIFACT_CONFLICT".to_owned())
         );
         Ok(())
     }
