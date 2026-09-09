@@ -104,3 +104,22 @@ Revert the deletion commit to restore the frozen helpers, then the separate Rust
 replacement/fix commits as needed. No installed selector, production key, run
 database or research artifact is changed by this delivery. No push or release
 qualification is implied.
+
+## Sealed delivery
+
+Replacement repairs are committed as `45d6757`; the 49-file retirement is a separate
+commit `375c6b4`. Post-commit protocol qualification passed on candidate SHA-256
+`955b097c8fdbb781a5ae5d7da9797c1b57d5a84bf755502c25a856016439025f`, with
+500 normal assessment submissions, zero normal rejection/invalid results, three
+complete scripted flows, preserved copied-v1 migration and five Git-tool checks.
+The exact raw report is `records/evidence/MTM-016/candidate-protocol-d8-375c6b4.json`.
+The pre-commit composed source check remains sealed separately as failed for its
+ten inherited Native tests. Neither observation rewrites or overrides the other.
+
+The same candidate also passed byte-bound staging and empty-environment local
+self-install/status/repeat-install/rollback checks on two disposable selectors;
+repeat installation preserved the manifest SHA. The installation smoke is a
+reviewed aggregation of observed commands, not an installed-server health or
+production rollback qualification. Both final reports are SHA-bound in ITER-016.
+`audit --strict` still fails as required with 67 Python files and no pending Git
+deletions. This closes this family's delivery record, not all D or F.

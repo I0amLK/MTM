@@ -2151,6 +2151,49 @@
       "production_changed": false,
       "rust_only_ready": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-D8-DELIVERY",
+      "round": "3_of_final_5",
+      "status": "completed_for_declared_family_retirement_scope_not_full_D_or_release",
+      "stage_D_status": "in_progress",
+      "replacement_commit": "45d67572403bdbf45e82ce8e5e37aad055f339cc",
+      "retirement_commit": "375c6b4ad3a7740cf8cdd223af0429758ddf4a0c",
+      "sealed_reports": [
+        {"path": "records/evidence/MTM-016/candidate-protocol-d8-375c6b4.json", "sha256": "7065e831be6d9134dd19b88bd5107a21e7e10e6ed3559f1491e1a186935bddbc", "passed": true},
+        {"path": "records/evidence/MTM-016/install-dist-d8-375c6b4.json", "sha256": "9278144251302686356719dc7ad0084c631a86c934e12f70249ef902ac318152", "passed": true}
+      ],
+      "candidate": {"path": "target/mtm016-d8/release/mtm", "sha256": "955b097c8fdbb781a5ae5d7da9797c1b57d5a84bf755502c25a856016439025f", "version": "0.6.0-preview.1", "size_bytes": 13628560, "state_schema": 7, "tool_contract": "mtm-tools-v9", "workflow_protocol": 3, "production_installed": false},
+      "post_commit_protocol": {
+        "command": "cargo xtask qualify --profile protocol --binary target/mtm016-d8/release/mtm --sha256 955b097c8fdbb781a5ae5d7da9797c1b57d5a84bf755502c25a856016439025f --record",
+        "exit_code": 0,
+        "harness_commit": "375c6b4ad3a7740cf8cdd223af0429758ddf4a0c",
+        "harness_source_sha256": "26ad7abd211182ca608756eb298637173275d1ac1e1bb3599e90a52a757a12aa",
+        "source_and_original_snapshot_unchanged": true,
+        "candidate_launched": true,
+        "normal_assessment_roundtrips": 500,
+        "compact_assessments": 250,
+        "full_assessments": 250,
+        "normal_invalid": 0,
+        "normal_rejections": 0,
+        "complete_scripted_protocol_flows": 3,
+        "copied_v1_migration_and_new_run": true,
+        "git_tools_checked": 5,
+        "child_reaped": true,
+        "timed_out": false,
+        "output_limit_exceeded": false,
+        "python_invoked": false,
+        "scope": "Native disabled and LaTeX static-only. This tests exact artifact protocol, persistence and current-contract recovery, not new mathematical research, real browser, host target or release acceptance. The raw report retains delivery=D5, the original profile identifier, without relabelling it."
+      },
+      "exact_local_installation": {"dist_passed": true, "version_label_verified_by_dist": false, "self_install_identity_bound": true, "selectors": 2, "repeat_install_manifest_unchanged": true, "status_passed": true, "rollback_to_prior_missing_entries_passed": true, "post_rollback_status_passed": true, "installed_artifact_external_sha_verified": true, "empty_inherited_install_environment": true, "installed_server_endpoint_tested": false, "fixture_only": true},
+      "final_retirement_check": {"baseline_hashes_checked": 60, "deleted_this_round": 49, "retired_total": 60, "remaining_python_files": 67, "direct_rust_replacements": 8, "historical_comparisons_retired": 4, "consolidated_with_pending_acceptance": 48, "pending_git_deletions": 0, "uninspected_source_files": 0, "audit_strict_exit_code": 1, "expected_nonzero": true},
+      "completion_boundary": "The specified historical/current-caller family has been retired and committed with exact-artifact protocol and bounded installation-mechanics evidence. Full D still includes 67 Python files, legacy Rust references and residual governance migration. F gates, forward release-parser coverage and production upgrade/rollback remain blocked until their independent evidence exists.",
+      "preserved_failure_observations": "Full source gate remains nonzero for the same ten inherited Native/Bubblewrap failures. Residual Python discovery remains 39 passes, one assertion failure, two old-contract errors and one existing skip; the three failures were reproduced at the round baseline. No suppression or replacement of failed observations with historical passes occurred.",
+      "next_round": "4/5: complete real Native/compiled-LaTeX/browser/resource and installed upgrade/rollback acceptance without treating D8 deletion as those passes",
+      "production_changed": false,
+      "rust_only_ready": false,
+      "release_qualified": false,
+      "earlier_signature_mismatch_explained": false
     }
   ],
   "remaining_acceptance": [
