@@ -77,3 +77,20 @@ failed for the same ten inherited Native/Bubblewrap tests (128 Runtime passes,
 one existing ignored target-only test). The byte-preserved composed report and
 its unchanged source hash are sealed in the implementation receipt; they are not
 relabelled as a complete host pass.
+
+## Post-commit delivery
+
+Commit `569229d` passed the exact permissions qualifier on the retained clean-F1
+candidate SHA `496f83ba59578a61833d2bef40085bc6e5771a0d5edb0a30d5aeca7bbccc6183`.
+The committed harness and original/private candidate snapshots were unchanged.
+All 21 boundary checks and 100 measured changed-byte cycles passed: 86,710 ms
+measurement, RSS 13,172 -> 13,992 KiB (820 KiB growth), nine threads and 16 FDs
+throughout sampled checkpoints, zero retained children and 10 ms clean shutdown.
+The 102,500 ms overall runner also includes setup and the boundary regression;
+it is not the measured soak duration. No bound was changed after testing.
+
+The exact report is `records/evidence/MTM-016/candidate-permissions-f2-569229d.json`,
+sealed in `MTM016-F2-PERMISSION-DELIVERY`. F2 is complete only for its declared
+scripted consent and protected-patch scope. It does not discharge the separate
+command-grant soak, host resource comparison or independent browser/human checks.
+The failed full source-gate record and development failures remain preserved.

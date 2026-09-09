@@ -2329,6 +2329,39 @@
       "new_suppressions":0,"production_changed":false,
       "rust_only_ready":false,"release_qualified":false,
       "earlier_signature_mismatch_explained":false
+    },
+    {
+      "id": "MTM016-F2-PERMISSION-DELIVERY",
+      "round": "4_of_final_5",
+      "status": "completed_for_scripted_permission_and_protected_patch_scope_not_full_F_or_release",
+      "stage_D_status": "in_progress",
+      "stage_F_status": "in_progress",
+      "implementation_commit": "569229d3a03aef10d71be0d2a36a3ab0024d9342",
+      "sealed_reports": [
+        {"path":"records/evidence/MTM-016/candidate-permissions-f2-569229d.json","sha256":"cbeaf443d83522aed2b1242ebcf2f20eb3ed6bf664a6375968f219c9f1c8a92b","passed":true}
+      ],
+      "candidate_sha256":"496f83ba59578a61833d2bef40085bc6e5771a0d5edb0a30d5aeca7bbccc6183",
+      "harness_source_sha256":"f4a52f4cd88fe911029f5e194946d4f016ee7565a8f5a1d3b0ef150d5ed0d663",
+      "post_commit_qualification": {
+        "command":"cargo xtask qualify --profile permissions --binary target/mtm016-f1-clean-build/release/mtm --sha256 496f83ba59578a61833d2bef40085bc6e5771a0d5edb0a30d5aeca7bbccc6183 --record",
+        "exit_code":0,"candidate_launched":true,
+        "source_and_original_snapshot_unchanged":true,
+        "boundary_checks":21,"warmup_cycles":5,"measured_cycles":100,
+        "initial_permission_denials":100,"scripted_grants":100,"duplicate_prompts_suppressed":100,
+        "protected_patches_with_verified_changed_bytes":100,"consumed_grants_rechallenged":100,
+        "measurement_ms":86710,"runner_ms":102500,
+        "initial_rss_kib":13172,"max_sampled_rss_kib":13992,"rss_growth_kib":820,
+        "initial_and_max_threads":9,"initial_and_max_fds":16,"retained_children":0,
+        "shutdown_ms":10,"child_reaped":true,"pipes_closed":true,
+        "timed_out":false,"output_limit_exceeded":false,"python_invoked":false
+      },
+      "test_semantics":"Actual disposable OAuth/MCP and production protected apply_patch authorization; scripted form responses rather than human consent. All 100 cycles modify and verify file contents. Subsequent identical valid requests require a fresh challenge, proving once-grant consumption rather than relying on hunk failure.",
+      "source_gate":"Format/Clippy/diff, 4 installation unit, 6 deployment CLI, 44 capability/recovery functions (4 explicit profile entries inert), 66 maintenance unit and 12 maintenance CLI passed. Full source gate remains nonzero for the same 10 inherited Native cases (128 passes, one existing ignored test); its failed observation remains sealed separately.",
+      "retirement_check":{"retired_python_files":60,"remaining_python_files":67,"legacy_rust_reference_files":81,"pending_git_deletions":0,"audit_strict_exit":1,"expected_nonzero":true},
+      "scope":{"native_command_backend":"disabled","latex_policy":"static_only","protected_patch_execution_tested":true,"native_command_execution_tested":false,"web_client_tested":false,"human_consent_tested":false,"baseline_resource_comparison":false,"continuous_peak_resource_claim":false},
+      "remaining":["Capable-host Native command execution, safe/trusted/dangerous/TTY/CAS and full command-grant soak", "Compiled LaTeX and actual external retrieval", "Real browser and independent human consent", "Equivalent baseline/candidate resource comparison", "Approved production-state rehearsal and abrupt installation recovery", "Remaining D Python and legacy-reference retirement, release validation and 30-task x3 corpus"],
+      "production_changed":false,"product_source_changed":false,"python_files_deleted_this_round":0,
+      "rust_only_ready":false,"release_qualified":false,"earlier_signature_mismatch_explained":false
     }
   ],
   "remaining_acceptance": [
