@@ -118,6 +118,7 @@ fn commit(
             metadata_updates: &updates,
             project_mode: Some("compact"),
             branch: None,
+            restartable_action: None,
         },
     )
 }

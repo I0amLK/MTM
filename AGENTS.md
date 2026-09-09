@@ -96,6 +96,14 @@ Schema 7 records explicit enrollment for four database-only actions; read
 revocation, transition and receipt commit together. Branch database sealing does
 not certify its earlier file effects. Never backfill atomic enrollment for old
 commit-ready work or run callbacks/observers/file I/O under a SQLite transaction.
+The E2 action-file checkpoint keeps schema 7 and advances the MTM-owned tool
+contract to mtm-tools-v9; read `docs/MTM-016-E2-ACTION-FILE-RECOVERY.md`.
+Plans/direct proving/branch/join/failure/replan/verification actions must enroll
+before internal private effects. Corrected resubmission may reuse only exact
+sidecar-bound before/after bytes; sidecars store hashes/effect evidence, never
+model or proof bodies. Multiple records appended by one action to one JSONL file
+must be represented as one combined final effect. Do not infer or adopt legacy
+unmarked pending work, and do not execute actions from recover_only.
 The following mechanical checkpoint keeps schema 7 and advances the model-facing
 contract to mtm-tools-v8; read `docs/MTM-016-E2-MECHANICAL-RECOVERY.md`. Branch
 preparation uses deterministic identities and exact private files before committing

@@ -3,6 +3,60 @@ use super::*;
 
 const MAX_FILE_BYTES: u64 = 64 * 1024 * 1024;
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum RestartableActionKind {
+    PlansProposed,
+    DirectProvingComplete,
+    BranchComplete,
+    JoinComplete,
+    FailuresIdentified,
+    ReplanComplete,
+    VerificationSubmitted,
+}
+
+impl RestartableActionKind {
+    #[must_use]
+    pub fn parse(action: &str) -> Option<Self> {
+        match action {
+            "plans_proposed" => Some(Self::PlansProposed),
+            "direct_proving_complete" => Some(Self::DirectProvingComplete),
+            "branch_complete" => Some(Self::BranchComplete),
+            "join_complete" => Some(Self::JoinComplete),
+            "failures_identified" => Some(Self::FailuresIdentified),
+            "replan_complete" => Some(Self::ReplanComplete),
+            "verification_submitted" => Some(Self::VerificationSubmitted),
+            _ => None,
+        }
+    }
+
+    #[must_use]
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::PlansProposed => "plans_proposed",
+            Self::DirectProvingComplete => "direct_proving_complete",
+            Self::BranchComplete => "branch_complete",
+            Self::JoinComplete => "join_complete",
+            Self::FailuresIdentified => "failures_identified",
+            Self::ReplanComplete => "replan_complete",
+            Self::VerificationSubmitted => "verification_submitted",
+        }
+    }
+
+    #[must_use]
+    pub(crate) fn state(self) -> WorkflowState {
+        match self {
+            Self::PlansProposed => WorkflowState::ProposePlans,
+            Self::DirectProvingComplete => WorkflowState::DirectProving,
+            Self::BranchComplete => WorkflowState::BranchRun,
+            Self::JoinComplete => WorkflowState::BranchJoin,
+            Self::FailuresIdentified => WorkflowState::IdentifyFailures,
+            Self::ReplanComplete => WorkflowState::Replan,
+            Self::VerificationSubmitted => WorkflowState::Verify,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct FileImage {
@@ -44,6 +98,7 @@ impl FileEffectEvidence {
             ["draft", "proof.tex"]
                 | ["join", "result.json"]
                 | ["verification", "verification.json"]
+                | ["branches", _, "result.json"]
         ) || matches!(parts.as_slice(), ["memory", "generation" | "verifier", name] if name.ends_with(".jsonl"))
             || matches!(parts.as_slice(), ["branches", _, "memory", name] if name.ends_with(".jsonl"));
         if !supported || !parts.iter().all(|p| safe(p)) {
@@ -116,6 +171,7 @@ enum Marker {
     Between,
     Opaque,
     File { evidence: FileEffectEvidence },
+    RestartableAction { action: RestartableActionKind },
 }
 
 #[derive(Clone, Eq, PartialEq, Deserialize)]
@@ -192,11 +248,13 @@ pub(super) fn diagnostic(raw: Option<&str>, phase: &str) -> Result<Value, ReCtmE
         Some(Marker::Between) => "between_writes",
         Some(Marker::File { .. }) => "file_effect",
         Some(Marker::Opaque) => "opaque_effect",
+        Some(Marker::RestartableAction { .. }) => "restartable_action",
         None => "legacy_unknown",
     };
     Ok(
         serde_json::json!({"kind":kind,"recover_only_may_reconcile":phase=="prepared"
-        || (phase=="running" && matches!(marker,Some(Marker::Between | Marker::File { .. }))),
+        || (phase=="running" && matches!(marker,Some(Marker::Between | Marker::File { .. })))
+        || (phase=="commit_ready" && matches!(marker,Some(Marker::RestartableAction { .. }))),
         "automatic_retry":false,"grants_authority":false}),
     )
 }
@@ -234,7 +292,76 @@ pub(super) fn require_between(tx: &Transaction<'_>, fingerprint: &str) -> Result
     Ok(())
 }
 
+pub(super) fn require_restartable_action(
+    tx: &Transaction<'_>,
+    fingerprint: &str,
+    action: RestartableActionKind,
+) -> Result<(), ReCtmError> {
+    let expected = encode(&Marker::RestartableAction { action })?;
+    let matches: bool = tx
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM step_write_journals WHERE capability_sha256=? AND marker_json=?)",
+            params![fingerprint, expected],
+            |row| row.get(0),
+        )
+        .map_err(sql_error)?;
+    if !matches {
+        return Err(invalid_receipt());
+    }
+    Ok(())
+}
+
+pub(super) fn clear_restartable_action(
+    tx: &Transaction<'_>,
+    fingerprint: &str,
+    action: RestartableActionKind,
+) -> Result<(), ReCtmError> {
+    let changed = tx.execute(
+        "UPDATE step_write_journals SET marker_json=? WHERE capability_sha256=? AND marker_json=?",
+        params![
+            encode(&Marker::Between)?,
+            fingerprint,
+            encode(&Marker::RestartableAction { action })?
+        ],
+    ).map_err(sql_error)?;
+    if changed != 1 {
+        return Err(invalid_receipt());
+    }
+    Ok(())
+}
+
 impl StateStore {
+    pub fn enroll_restartable_action(
+        &self,
+        claims: &CapabilityClaims,
+        trace: &str,
+        action: RestartableActionKind,
+    ) -> Result<(), ReCtmError> {
+        if claims.issued_state() != action.state() {
+            return Err(invalid_receipt());
+        }
+        self.immediate(|tx| {
+            recheck_authority(tx, claims, self.runtime.clock.unix_seconds()?)?;
+            let Some(receipt) = super::atomic_actions::check_task(tx, claims, trace)? else {
+                return Ok(());
+            };
+            let changed = tx.execute(
+                "UPDATE step_write_journals SET marker_json=? WHERE capability_sha256=? AND marker_json=? AND EXISTS(SELECT 1 FROM step_checkpoints WHERE capability_sha256=? AND execution_id=? AND phase='commit_ready' AND expected_writes=accepted_writes)",
+                params![
+                    encode(&Marker::RestartableAction { action })?,
+                    receipt.row.capability_sha256,
+                    encode(&Marker::Between)?,
+                    receipt.row.capability_sha256,
+                    trace
+                ],
+            ).map_err(sql_error)?;
+            if changed != 1 {
+                return Err(invalid_receipt());
+            }
+            Ok(())
+        })
+    }
+
     pub fn begin_submission_write(
         &self,
         execution: &SubmissionExecution,
@@ -338,11 +465,21 @@ impl StateStore {
                 && current.expected_writes == Some(current.accepted_writes)
                 && recovery.marker == Some(Marker::Between)
                 && observed.is_none();
-            if current.phase != "running" && !atomic {
+            let restartable = current.phase == "commit_ready"
+                && current.atomic_action.is_none()
+                && current.expected_writes == Some(current.accepted_writes)
+                && matches!(
+                    recovery.marker,
+                    Some(Marker::RestartableAction { action })
+                        if action.state() == receipt.row.issued_state
+                )
+                && observed.is_none();
+            if current.phase != "running" && !atomic && !restartable {
                 return Err(checkpoints::unknown());
             }
             let extra = match (&recovery.marker, observed) {
                 (Some(Marker::Between), None) => 0,
+                (Some(Marker::RestartableAction { .. }), None) => 0,
                 (Some(Marker::File { evidence }), Some(actual)) => {
                     // An equal-byte overwrite has no evidence of whether it ran.
                     if evidence.before.as_ref() == Some(&evidence.after) {

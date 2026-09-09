@@ -71,6 +71,27 @@ pub(in crate::store) fn check_task(
     claims: &CapabilityClaims,
     trace: &str,
 ) -> Result<Option<SubmissionReceipt>, ReCtmError> {
+    check_task_with_marker(tx, claims, trace, None)
+}
+
+pub(in crate::store) fn consume_restartable_task(
+    tx: &Transaction<'_>,
+    claims: &CapabilityClaims,
+    trace: &str,
+    action: RestartableActionKind,
+) -> Result<(), ReCtmError> {
+    let Some(receipt) = check_task_with_marker(tx, claims, trace, Some(action))? else {
+        return Ok(());
+    };
+    write_journal::clear_restartable_action(tx, &receipt.row.capability_sha256, action)
+}
+
+fn check_task_with_marker(
+    tx: &Transaction<'_>,
+    claims: &CapabilityClaims,
+    trace: &str,
+    restartable: Option<RestartableActionKind>,
+) -> Result<Option<SubmissionReceipt>, ReCtmError> {
     let row = query_one_on(
         tx,
         "SELECT r.* FROM step_receipts r JOIN step_checkpoints c USING(capability_sha256) WHERE c.execution_id=?",
@@ -86,7 +107,11 @@ pub(in crate::store) fn check_task(
         if !ready {
             return Err(invalid_receipt());
         }
-        write_journal::require_between(tx, &receipt.row.capability_sha256)?;
+        if let Some(action) = restartable {
+            write_journal::require_restartable_action(tx, &receipt.row.capability_sha256, action)?;
+        } else {
+            write_journal::require_between(tx, &receipt.row.capability_sha256)?;
+        }
         Ok(Some(receipt))
     } else {
         let pending: bool = tx

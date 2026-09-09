@@ -1,5 +1,14 @@
 # MTM
 
+The current E2 action-file checkpoint keeps schema 7 and uses `mtm-tools-v9`.
+All state-changing model actions now have a current-contract interruption policy:
+four database-only actions commit atomically, while plans/direct proving/branch/
+join/failure/replan/verification actions use explicit restartable enrollment plus
+stable private file-effect evidence. `recover_only` never runs an action; corrected
+resubmission reuses exact internal bytes or fails closed on drift. Historical or
+unmarked unknown work remains unknown rather than being inferred. See
+`docs/MTM-016-E2-ACTION-FILE-RECOVERY.md`. Development only; not release-qualified.
+
 The current E2 mechanical checkpoint keeps schema 7 and uses `mtm-tools-v8`.
 Branch preparation now uses stable identities plus one database transaction; LaTeX
 result metadata and its transition commit together; exact final proof publication is

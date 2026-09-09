@@ -1,8 +1,8 @@
 {
   "audit_completed": true,
-  "base_head": "d5aa47937ca7f0aad2f540f7e6c2f03501354b6c",
+  "base_head": "19aec7a58e63b3d38a16ad174c67fd4df7845716",
   "interpretation": "Text references are retirement candidates, not proof of a runtime dependency. User Python tools are not forbidden.",
-  "legacy_rust_reference_file_count": 80,
+  "legacy_rust_reference_file_count": 81,
   "legacy_rust_reference_files": [
     "crates/mtm-cli/src/main.rs",
     "crates/mtm-contracts/src/error.rs",
@@ -70,6 +70,7 @@
     "crates/mtm-storage/tests/mechanical_transitions.rs",
     "crates/mtm-storage/tests/storage.rs",
     "crates/mtm-storage/tests/submission_receipts.rs",
+    "crates/mtm-workflow/src/action_effect.rs",
     "crates/mtm-workflow/src/action_transactions.rs",
     "crates/mtm-workflow/src/bin/mtm_workflow_shadow.rs",
     "crates/mtm-workflow/src/bin/target_validation.rs",
@@ -789,6 +790,6 @@
   ],
   "rust_only_ready": false,
   "schema_version": "1.0.0",
-  "tracked_and_unignored_file_count": 421,
+  "tracked_and_unignored_file_count": 425,
   "uninspected_source_files": []
 }

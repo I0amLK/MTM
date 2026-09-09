@@ -17,6 +17,9 @@ pub(crate) use creation_vault::PreparedInitialization;
 #[path = "file_effect.rs"]
 mod file_effect;
 
+#[path = "action_effect.rs"]
+mod action_effect;
+
 pub const GENERATION_CHANNELS: [&str; 10] = [
     "immediate_conclusions",
     "toy_examples",

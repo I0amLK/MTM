@@ -14,6 +14,7 @@ pub struct TaskTransition<'a> {
     pub metadata_updates: &'a Map<String, Value>,
     pub project_mode: Option<&'a str>,
     pub branch: Option<BranchSeal<'a>>,
+    pub restartable_action: Option<RestartableActionKind>,
 }
 
 impl StateStore {
@@ -36,7 +37,14 @@ impl StateStore {
         }
         self.immediate(|tx| {
             step_receipts::recheck_authority(tx, claims, self.runtime.clock.unix_seconds()?)?;
-            let _ = step_receipts::check_task(tx, claims, request.trace_id)?;
+            if let Some(action) = task.restartable_action {
+                if action.state() != claims.issued_state() {
+                    return Err(conflict());
+                }
+                step_receipts::consume_restartable_task(tx, claims, request.trace_id, action)?;
+            } else {
+                let _ = step_receipts::check_task(tx, claims, request.trace_id)?;
+            }
             let now = self.runtime.clock.now_iso()?;
             let before = run_on(tx, claims.run_id())?;
             if task.expected_metadata.is_some_and(|expected| before["metadata"] != *expected) {

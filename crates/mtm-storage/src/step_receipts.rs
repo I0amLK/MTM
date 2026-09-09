@@ -10,7 +10,7 @@ const MAX_RECEIPTS_TOTAL: i64 = 100_000;
 #[path = "atomic_actions.rs"]
 mod atomic_actions;
 pub use atomic_actions::AtomicActionKind;
-pub(super) use atomic_actions::check_task;
+pub(super) use atomic_actions::{check_task, consume_restartable_task};
 
 #[path = "step_database_write.rs"]
 mod database_write;
@@ -22,7 +22,7 @@ pub(super) use checkpoints::record_transition;
 
 #[path = "step_write_journal.rs"]
 mod write_journal;
-pub use write_journal::{FileEffectEvidence, FileImage, SubmissionRecovery};
+pub use write_journal::{FileEffectEvidence, FileImage, RestartableActionKind, SubmissionRecovery};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

@@ -30,8 +30,9 @@ pub use task_transitions::{BranchSeal, TaskTransition};
 #[path = "step_receipts.rs"]
 mod step_receipts;
 pub use step_receipts::{
-    AtomicActionKind, FileEffectEvidence, FileImage, SubmissionDisposition, SubmissionExecution,
-    SubmissionReceipt, SubmissionRecovery, SubmissionReservation, SubmissionResult, SubmissionSlot,
+    AtomicActionKind, FileEffectEvidence, FileImage, RestartableActionKind, SubmissionDisposition,
+    SubmissionExecution, SubmissionReceipt, SubmissionRecovery, SubmissionReservation,
+    SubmissionResult, SubmissionSlot,
 };
 
 #[path = "creation_receipts.rs"]
