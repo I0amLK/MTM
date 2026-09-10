@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-016",
+  "phase": "final_first_party_python_retirement_composed",
+  "base_commit": "14bbd961822fd3b6217e53def4e545402189d914",
+  "retirement_baseline_commit": "b3ab147b72d72aa546c9c41bdbe71924aa5ebb97",
+  "scope": "first_party_python_source_retirement_not_real_host_acceptance",
+  "python": {
+    "baseline_files": 127,
+    "previously_retired_files": 64,
+    "retired_this_wave": 63,
+    "retired_total": 127,
+    "remaining_files": 0,
+    "baseline_hashes_checked": 127,
+    "replaced_by_rust": 17,
+    "historical_comparisons_retired": 4,
+    "consolidated_with_pending_acceptance": 106,
+    "retirement_families": 8
+  },
+  "validation": {
+    "retirement": {
+      "passed": true,
+      "report": "records/validation/mtm016-retirement.json"
+    },
+    "inventory": {
+      "passed": true,
+      "report": "records/validation/mtm016-inventory.json",
+      "python_file_count": 0,
+      "legacy_rust_reference_file_count": 81,
+      "rust_only_ready": false
+    },
+    "record_integrity": {
+      "passed": true,
+      "report": "records/validation/mtm016-record-integrity.json"
+    },
+    "maintenance": {
+      "command": "cargo test --locked --offline -p mtm-xtask --no-fail-fast",
+      "exit_code": 0,
+      "unit_passed": 76,
+      "unit_failed": 0,
+      "cli_suites_passed": true
+    },
+    "workspace": {
+      "command": "cargo test --workspace --locked --offline --no-fail-fast",
+      "exit_code": 101,
+      "only_failed_target": "mtm-runtime --lib",
+      "mtm_cli_capability_recovery_passed": 47,
+      "mtm_cli_capability_recovery_failed": 0,
+      "deployment_passed": 8,
+      "deployment_failed": 0,
+      "runtime_passed": 128,
+      "runtime_failed": 10,
+      "runtime_ignored": 1,
+      "same_inherited_native_failure_set": true,
+      "python_retirement_regression_detected": false
+    },
+    "release_check": {
+      "exit_code": 1,
+      "report": "records/evidence/MTM-016/release-check-python-retirement-14bbd96.json",
+      "sha256": "cd7d69433f64ab8665ddc5644af608a7ed0de5fc1902171a80e4b72101768ff3",
+      "validated_gates": 8,
+      "blocked_gates": 9,
+      "remaining_python_files": 0,
+      "release_qualified": false
+    },
+    "diff_check_passed": true
+  },
+  "remaining": [
+    "81 legacy Rust reference files remain before rust_only_ready can become true",
+    "capable-host Native, target and resource qualification",
+    "compiled LaTeX full/compact/repair acceptance",
+    "real browser OAuth and independently observed human consent",
+    "operator-authorized copied production-state rehearsal",
+    "U16-U29 remaining corpus trials"
+  ],
+  "user_python_and_sage_prohibited": false,
+  "production_changed": false,
+  "product_runtime_source_changed": false,
+  "runtime_parity_proven": false,
+  "rust_only_ready": false,
+  "release_qualified": false
+}

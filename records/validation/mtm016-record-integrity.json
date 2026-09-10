@@ -102,12 +102,12 @@
   "layout": {
     "evidence_hashes_checked": 26,
     "evidence_milestone_count": 14,
-    "governance_record_count": 7,
+    "governance_record_count": 8,
     "iteration_record_count": 16,
     "observations_reexecuted": false,
     "relocation_count": 32,
     "root_json_count": 0,
-    "sealed_observation_hashes_checked": 28
+    "sealed_observation_hashes_checked": 66
   },
   "live_deployment_checked": false,
   "milestones": 16,

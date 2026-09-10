@@ -2649,11 +2649,31 @@
       "production_changed":false,"product_source_changed":false,"new_suppressions":0,
       "remaining_python_files":63,"legacy_rust_reference_files":81,
       "rust_only_ready":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-FINAL-PYTHON-RETIREMENT",
+      "status":"completed_first_party_python_source_retirement_real_gates_pending",
+      "round4_status":"in_progress_real_gates_pending",
+      "round5_status":"in_progress_48_of_90",
+      "stage_D_status":"in_progress_legacy_rust_references_remain",
+      "stage_F_status":"in_progress",
+      "base_commit":"14bbd961822fd3b6217e53def4e545402189d914",
+      "retirement_baseline_commit":"b3ab147b72d72aa546c9c41bdbe71924aa5ebb97",
+      "python_retirement":{"baseline_files":127,"previously_retired_files":64,"retired_this_wave":63,"retired_total":127,"remaining_python_files":0,"baseline_hashes_checked":127,"replaced_by_rust":17,"historical_comparisons_retired":4,"consolidated_with_pending_acceptance":106,"retirement_families":8},
+      "sealed_reports":[{"path":"records/evidence/MTM-016/python-retirement-final-composed.json","sha256":"8644b4003830741fdb760850c15465827f95f4ab521755197252b3645bbd61a4","passed":true},{"path":"records/evidence/MTM-016/release-check-python-retirement-14bbd96.json","sha256":"cd7d69433f64ab8665ddc5644af608a7ed0de5fc1902171a80e4b72101768ff3","passed":false}],
+      "validation_reports":{"inventory":"records/validation/mtm016-inventory.json","retirement":"records/validation/mtm016-retirement.json","record_integrity":"records/validation/mtm016-record-integrity.json","release_check":"records/evidence/MTM-016/release-check-python-retirement-14bbd96.json","post_commit_revalidated":true},
+      "rust_validation":{"maintenance_unit_passed":76,"maintenance_failed":0,"mtm_cli_capability_recovery_passed":47,"mtm_cli_capability_recovery_failed":0,"deployment_passed":8,"deployment_failed":0,"full_workspace_exit_code":101,"only_failed_target":"mtm-runtime --lib","runtime_passed":128,"runtime_failed":10,"runtime_ignored":1,"same_inherited_native_failure_set":true,"python_retirement_regression_detected":false},
+      "release_readiness":{"validated_gates":8,"blocked_gates":9,"remaining_python_files":0,"corpus_passed":48,"corpus_failed":0,"corpus_blocked":42,"release_qualified":false},
+      "acceptance_boundary":"All first-party Python implementation, conformance, historical orchestration and Python governance-test source has been removed with exact baseline provenance. Consolidated families preserve unresolved real-host and independent-research acceptance instead of claiming line-for-line parity. User Python/Sage remains allowed. Historical evidence bytes and commands remain immutable records.",
+      "remaining":["81 legacy Rust reference files before rust_only_ready", "capable-host Native/target/resource and command-grant acceptance", "compiled-LaTeX full/compact/repair", "real browser OAuth and independent human consent", "operator-authorized copied production-state rehearsal", "U16-U29 corpus trials"],
+      "product_runtime_source_changed":false,"production_changed":false,"new_suppressions":0,
+      "remaining_python_files":0,"legacy_rust_reference_files":81,
+      "rust_only_ready":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
     "Preserve the current E-stage evidenced-recovery/no-replay matrix through exact-candidate and final release qualification; never infer legacy opaque outcomes.",
-    "Port or retire Python suites with an explicit coverage map before deleting them.",
+    "Retire or reclassify the remaining legacy Rust references without changing current Rust product authority; first-party Python retirement is complete.",
     "Complete typed MTM-owned contracts and real-client validation after the Rust registry and legacy alias retirement checkpoint.",
     "Exercise exact candidate through Native isolation, full Rethlas, retrieval, LaTeX, reconnect and rollback.",
     "Complete the representative 30-task, three-repeat usability corpus."
