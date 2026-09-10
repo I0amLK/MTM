@@ -2893,6 +2893,17 @@
       "release_readiness":{"validated_gates":11,"blocked_gates":6,"source":"blocked_pending_new_full_real_host_receipt","native_commands":"validated","compiled_latex":"validated","release_check_exit_code":1},
       "acceptance_boundary":"Local unit, static and paired-build checks do not substitute for the formerly failing real-host integration test or the full source gate. Raw source/harness hashes remain changed and visible. No prior receipt is rewritten as a pass and no new release authority is granted.",
       "production_changed":false,"frozen_candidate_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-MAGMA-LATE-LOCAL-OBSERVATION",
+      "status":"late_worktree_observation_preserved_append_only_not_source_acceptance",
+      "follows_receipt":"MTM016-F6-MAGMA-SOURCE-SMOKE-REPAIR",
+      "follows_commit":"b84d3c2a4d533b576ed36f48efb4351e2af04add",
+      "origin":"A late local validation update appeared in the worktree after the original repair receipt had been committed. The record-integrity check rejected its in-place replacement; the committed receipt is restored and the new observation is appended here without discarding it.",
+      "reported_validation":{"format_passed":true,"workspace_clippy_warnings_denied_passed":true,"records_passed":true,"retirement_passed":true,"audit_strict_passed":true,"diff_check_passed":true,"local_full_workspace_run":{"exit_code":101,"elapsed_ms":356534,"mtm_xtask_unit_passed":82,"mtm_xtask_cli_passed":13,"capability_runtime_functions_passed":53,"capability_runtime_functions_failed":0,"deployment_cli_passed":8,"runtime_unit_passed":130,"runtime_unit_failed":10,"runtime_unit_existing_ignored":1,"initial_doc_targets_failed":7,"initial_doc_error":"E0463 dependency crate resolution with explicit repository RUSTC/RUSTDOC paths","local_integration_reached_magma":false,"source_success_claimed":false},"doc_only_recheck":{"command":"cargo test --locked --offline --workspace --doc with CARGO_HOME=/home/lk/.cargo and default pinned toolchain resolution","exit_code":0,"targets_completed":7,"doc_examples_executed":0,"source_code_changed_between_runs":false,"initial_doc_failure_cause_fully_established":false},"reviewed_inline_test_identity_regression_passed":true},
+      "observation_reexecuted_by_append":false,
+      "acceptance_boundary":"This late reported local result neither replaces the real-host 137/1/1 failure report nor satisfies the source gate. The separate boundary-review receipt records the later 83 maintenance unit tests and current strict checks. A fresh stable-commit capable-host source run is still required.",
+      "production_changed":false,"frozen_candidate_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
