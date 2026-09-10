@@ -1,9 +1,8 @@
 {
   "audit_completed": true,
-  "base_head": "14bbd961822fd3b6217e53def4e545402189d914",
-  "interpretation": "Text references are retirement candidates, not proof of a runtime dependency. User Python tools are not forbidden.",
-  "legacy_rust_reference_file_count": 81,
-  "legacy_rust_reference_files": [
+  "base_head": "e2efafd0666e09989df65aa92e5e784c765e371b",
+  "compatibility_rust_reference_file_count": 81,
+  "compatibility_rust_reference_files": [
     "crates/mtm-cli/src/main.rs",
     "crates/mtm-contracts/src/error.rs",
     "crates/mtm-contracts/src/lib.rs",
@@ -86,13 +85,25 @@
     "crates/mtm-workflow/src/verifier.rs",
     "crates/mtm-workflow/tests/workflow.rs"
   ],
+  "interpretation": "Rust-only readiness means no first-party Python source and no Rust launcher for a first-party repository Python entrypoint. Historical/wire-compatible Re-CTM spellings and user-requested Python commands are not runtime-authority dependencies and remain visible in separate diagnostics.",
+  "legacy_rust_reference_definition": "Rust sources that can launch a first-party repository Python entrypoint; compatibility names are reported separately.",
+  "legacy_rust_reference_file_count": 0,
+  "legacy_rust_reference_files": [],
+  "legacy_shadow_binary_cleanup": "informational; these Rust-only development binaries are not first-party Python authority and changing them belongs to a future candidate source cleanup",
+  "legacy_shadow_binary_file_count": 4,
+  "legacy_shadow_binary_files": [
+    "crates/mtm-native/src/bin/shadow.rs",
+    "crates/mtm-storage/src/bin/shadow.rs",
+    "crates/mtm-workflow/src/bin/mtm_workflow_shadow.rs",
+    "crates/mtm-workflow/src/bin/target_validation.rs"
+  ],
   "milestone": "MTM-016",
   "pending_deleted_file_count": 0,
   "pending_deleted_files": [],
   "python_file_count": 0,
   "python_files": [],
-  "rust_only_ready": false,
+  "rust_only_ready": true,
   "schema_version": "1.0.0",
-  "tracked_and_unignored_file_count": 391,
+  "tracked_and_unignored_file_count": 393,
   "uninspected_source_files": []
 }

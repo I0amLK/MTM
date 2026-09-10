@@ -2682,6 +2682,20 @@
       "validation":[{"command":"cargo fmt --all -- --check","exit_code":0},{"command":"cargo test --locked --offline -p mtm-xtask inventory::tests","exit_code":0,"tests_passed":6},{"command":"cargo clippy --locked --offline -p mtm-xtask --all-targets -- -D warnings","exit_code":0},{"command":"cargo xtask audit --record","exit_code":0,"rust_only_ready":true},{"command":"development release-check","exit_code":1,"validated_gates":9,"blocked_gates":8,"rust_only":"validated"}],
       "acceptance_boundary":"This corrects an over-broad text-marker audit. It does not claim 81 Rust files were deleted, does not rename frozen compatibility fields, and does not change the current product candidate. Real Native/target/resource/LaTeX/browser/operator/corpus gates remain independent.",
       "production_changed":false,"product_runtime_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-RUST-REFERENCE-AUDIT-DELIVERY",
+      "status":"semantic_rust_only_gate_validated_real_world_gates_pending",
+      "implementation_commit":"e2efafd0666e09989df65aa92e5e784c765e371b",
+      "candidate_source_commit":"cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+      "candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+      "sealed_reports":[{"path":"records/evidence/MTM-016/rust-reference-audit-e2efafd.json","sha256":"c3d67e013a22b8169e2ce8f80dcb59619d10e68919dff5a4b6d460a98cca1db8","passed":true},{"path":"records/evidence/MTM-016/release-check-rust-only-e2efafd.json","sha256":"7b75fa079bfc002a993b242aed4766a5db0070994a19c8b8f05bdff75ac4722f","passed":false}],
+      "inventory":{"python_file_count":0,"first_party_python_launcher_file_count":0,"legacy_rust_reference_file_count":0,"compatibility_rust_reference_file_count":81,"legacy_shadow_binary_file_count":4,"rust_only_ready":true},
+      "post_commit_validation":{"mtm_xtask_unit_tests_passed":79,"mtm_xtask_failed":0,"format_passed":true,"clippy_warnings_denied_passed":true,"records_passed":true,"retirement_passed":true},
+      "release_readiness":{"validated_gates":9,"blocked_gates":8,"rust_only":"validated","release_qualified":false},
+      "remaining_real_gates":["source on capable Native host","target","resource","native_commands","compiled_latex","browser_human","copied_operator_state","complete 30x3 corpus"],
+      "compatibility_boundary":"The 81 compatibility references are current Rust naming/wire/sandbox history and remain visible. The four no-caller Rust shadow binaries are deferred because deleting crates/ source would require a separately rebuilt and requalified candidate.",
+      "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
