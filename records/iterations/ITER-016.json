@@ -2536,6 +2536,33 @@
       "acceptance_boundary":"Aggregation does not create missing trials and does not turn corpus into a passed gate. U16-U29 remain blocked. Release readiness remains false.",
       "production_changed":false,"product_source_changed":false,"new_suppressions":0,
       "rust_only_ready":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F4-F5-U30-DELIVERY",
+      "status":"external_sigkill_sealed_corpus_48_of_90_round4_and_round5_still_in_progress",
+      "implementation_commits":["154aef24eb7955e90754a2eba919d83865323c66", "8b55ba0", "aa6527b"],
+      "candidate_source_commit":"cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+      "candidate_sha256":"589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8",
+      "sealed_reports":[
+        {"path":"records/evidence/MTM-016/candidate-install-sigkill-f4-154aef2.json","sha256":"3013ede7223f7f752031eb06a93127b596f6c60aa09d79e97103be07cb026b07","passed":true},
+        {"path":"records/evidence/MTM-016/clean-build-f5-cc17b16.json","sha256":"5acfce38c8a0d85e3565f90291c8aafa74d1ba850762625520e6c28575777c9e","passed":false},
+        {"path":"records/evidence/MTM-016/candidate-install-sigkill-f5-u30-r1-8b55ba0.json","sha256":"bf9d115cc9f5433d8483eba4cb351d829b5c26e8c0c20372d098c4264d65b27d","passed":true},
+        {"path":"records/evidence/MTM-016/candidate-install-sigkill-f5-u30-r2-8b55ba0.json","sha256":"05dc10d4afcf07d0763a6dd969ab298f0ac60bc2e57d74160fe04d66fb5bb54e","passed":true},
+        {"path":"records/evidence/MTM-016/candidate-install-sigkill-f5-u30-r3-8b55ba0.json","sha256":"1a33c64505dccc76a701569d288c070bc5423a182bcfd0ab65186ce77ef2f947","passed":true},
+        {"path":"records/evidence/MTM-016/corpus-f5-u30-aggregate.json","sha256":"db1174eabe1ddeae25235658a354485138ee1a8a2e9d37297dd3846804c318b9","passed":false},
+        {"path":"records/evidence/MTM-016/release-check-f5-u30-aa6527b.json","sha256":"d4a93c2c819e6894605a1ec6a821320ab1e5f51153d002f1b845981303215c70","passed":false}
+      ],
+      "release_input_manifest_sha256":"df57cda68dbac2a5b6abcb28bbb308c319a663b36bfb24e2b8c11334d09c32d5",
+      "install_sigkill":{"formal_profile_passed":true,"selector_count":8,"partial_prefix_observed":1,"kill_signal":9,"fresh_status_recovered_all_candidate_selectors":true,"final_rollback_restored_prior_bytes_and_modes":true,"physical_power_loss_tested":false,"production_changed":false},
+      "u30_three_repeat":{"independent_receipts":3,"distinct_receipt_hashes":3,"distinct_recorded_timestamps":3,"all_passed":true,"partial_restored_selectors_each":[1,1,1]},
+      "corpus_progress":{"declared_trials":90,"passed_trials":48,"failed_trials":0,"blocked_trials":42,"complete":false,"U30_passed":3,"U16_U29_blocked":42},
+      "clean_build":{"locked_offline_build_passed":true,"selected_sha256":"589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8","rebuilt_sha256":"512f0e1ba4d90c476b1e44141cc832eb3d3a1093d11b385f96b86bbae5fa3a05","exact_bytes_reproduced":false,"python_free_path_proven":false,"gate_passed":false},
+      "release_readiness":{"validated_gates":6,"blocked_gates":11,"install_sigkill":"validated","corpus":"validated_partial_blocked","clean_build":"validated_partial_blocked","all_14_evidence_adapters_implemented":true,"ready_for_release_review":false,"release_qualified":false},
+      "remaining":["Capable-host Native/TTY/CAS and permission-grant soak", "Required compiled-LaTeX and actual retrieval", "Real browser and independently observed human consent", "Explicitly authorized copied operator-state rehearsal", "Resolve or explicitly scope clean-build byte reproducibility and prove Python-free path", "U16-U29 three-repeat corpus trials", "Remaining 67 Python files/81 legacy references and final release authorization"],
+      "round4_complete":false,"round5_complete":false,"stage_D_status":"in_progress","stage_F_status":"in_progress",
+      "production_changed":false,"product_source_changed":false,"new_suppressions":0,
+      "remaining_python_files":67,"legacy_rust_reference_files":81,
+      "rust_only_ready":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

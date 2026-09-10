@@ -9,6 +9,8 @@
     "protocol": {"path":"records/evidence/MTM-016/candidate-protocol-f4-f5-d59e7f9.json","sha256":"83c601815437e1dbb6b3d4cce9b09c45471e74170cd70d371179dabbc6c4efbc"},
     "permissions": {"path":"records/evidence/MTM-016/candidate-permissions-f3-cc17b16.json","sha256":"a1281a45abd80336768e70cc678e20b801518364b6ca9678fe95a19664b7d17c"},
     "upgrade": {"path":"records/evidence/MTM-016/candidate-upgrade-f3-cc17b16.json","sha256":"8c606b37a4e26ece8173bf84347a7aff22616887f70772069fcb146ebd67828e"},
-    "corpus": {"path":"records/evidence/MTM-016/candidate-corpus-f5-d59e7f9.json","sha256":"4eda9d4710f42fcbd2cdae13b3ef00a0d30f854a754d9126f5adfe70fecde75e"}
+    "clean_build": {"path":"records/evidence/MTM-016/clean-build-f5-cc17b16.json","sha256":"5acfce38c8a0d85e3565f90291c8aafa74d1ba850762625520e6c28575777c9e"},
+    "install_sigkill": {"path":"records/evidence/MTM-016/candidate-install-sigkill-f5-u30-r3-8b55ba0.json","sha256":"1a33c64505dccc76a701569d288c070bc5423a182bcfd0ab65186ce77ef2f947"},
+    "corpus": {"path":"records/evidence/MTM-016/corpus-f5-u30-aggregate.json","sha256":"db1174eabe1ddeae25235658a354485138ee1a8a2e9d37297dd3846804c318b9"}
   }
 }

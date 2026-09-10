@@ -140,3 +140,17 @@ SHA-256 was `512f0e1ba4d90c476b1e44141cc832eb3d3a1093d11b385f96b86bbae5fa3a05`,
 not the selected F3 candidate SHA-256 `589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8`.
 The clean-build gate therefore remains blocked; no reproducible-build claim is
 made and Python-free PATH was not proven by that observation.
+
+The external-process SIGKILL profile was then rerun after its implementation
+commit and passed against the same exact F3 candidate. A later committed harness
+ran three additional independent U30 repeats. Each run observed a durable rollback
+journal and exactly one of eight selectors restored before the parent sent
+SIGKILL; each fresh recovery process returned all eight selectors to the active
+candidate and a final rollback restored the prior bytes and modes. The three
+receipts have distinct hashes and timestamps and are not copies of one result.
+
+The corpus release adapter now reopens the immutable 45/90 base matrix and all
+three U30 receipts, checks every nested hash and qualification scope, and derives
+48 passed / zero failed / 42 blocked trials. The corpus gate remains blocked:
+U16-U29 have not been replaced by these SIGKILL observations. This aggregation
+is evidence composition, not an additional execution of the other 87 rows.
