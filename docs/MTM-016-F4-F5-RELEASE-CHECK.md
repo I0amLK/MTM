@@ -26,6 +26,32 @@ integrity, not an independent witness or authenticity of a human observation.
 ## F5: declare all 30 tasks before running the three-repeat matrix
 
 Use one versioned static corpus with 30 distinct tasks and three repeats each.
+
+### Final-candidate freeze
+
+Do not treat a Cargo `target/.../release/mtm` path as an immutable candidate. Cargo
+may hard-link the binary to `release/deps/mtm-*` and later builds may replace those
+outputs. The final F5 local candidate is therefore copied through `cargo xtask dist`
+to the full-SHA content-addressed path before qualification.
+
+The selected final local candidate is SHA-256
+`46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724`.
+It was built twice from detached source commit
+`cc17b1688a2deda7db3dde4b2dbf63199bf48b13` into separate target directories with
+`--release --locked --offline`; `PATH` contained only the pinned Rust toolchain and
+did not contain Python. GCC/binutils were supplied by absolute paths and
+`COMPILER_PATH`, not by widening `PATH`. Both builds and the frozen dist copy have
+the exact same SHA. This is a same-source/same-clean-worktree reproducibility claim,
+not a claim that arbitrary checkout paths or hosts produce identical bytes.
+
+All locally executable final-candidate gates were rerun against the frozen copy:
+protocol, protected-patch permission soak, old-runtime upgrade/rollback, external
+SIGKILL recovery, and the portable 30-task matrix subset. U30 additionally has three
+independent SIGKILL receipts. The aggregate corpus is 48 passed, 0 failed and 42
+blocked; it remains incomplete. Current release readiness is 7 validated gates and
+10 blocked gates. The full source check remains blocked by the same ten inherited
+Native/Bubblewrap tests under the nested ENOSPC environment; format, Clippy and diff
+checks pass. None of these records changes production selectors or state.
 Initially execute the 15 portable public-MCP workspace/Git/workflow tasks, each in
 its own newly created disposable server. The other 15 explicitly require Native,
 research/compiled-LaTeX, external-client/human or operator-state/process-kill

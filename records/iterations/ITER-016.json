@@ -2563,6 +2563,39 @@
       "production_changed":false,"product_source_changed":false,"new_suppressions":0,
       "remaining_python_files":67,"legacy_rust_reference_files":81,
       "rust_only_ready":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F5-FROZEN-CLEAN-CANDIDATE-DELIVERY",
+      "status":"frozen_clean_candidate_requalified_round4_blocked_round5_48_of_90",
+      "round4_status":"in_progress",
+      "round5_status":"in_progress",
+      "candidate_source_commit":"cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+      "candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+      "candidate_path":"target/mtm016-f5-frozen/mtm-0.6.0-preview.1-46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724/mtm",
+      "candidate_identity":{"version":"0.6.0-preview.1","implementation":"rust","public_tools":24,"hidden_aliases":0,"state_schema":7,"workflow_protocol":3,"tool_contract":"mtm-tools-v9","python_runtime_required":false},
+      "artifact_correction":"Cargo target/release/mtm paths were found to be hard-linked to release/deps outputs and changed under later builds. Those mutable build outputs are no longer treated as immutable candidate locations. No historical evidence bytes were rewritten. The final local candidate is frozen through the full-SHA dist path before qualification.",
+      "clean_build":{"source_worktree":"detached clean cc17b16 worktree","builds":2,"distinct_target_directories":true,"release":true,"locked":true,"offline":true,"python_on_path":false,"cc":"absolute /usr/bin/cc","binutils_discovery":"COMPILER_PATH=/usr/bin","build_one_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724","build_two_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724","frozen_dist_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724","exact_bytes_reproduced":true,"scope":"same detached clean source path and toolchain; no arbitrary checkout-path or cross-host reproducibility claim"},
+      "exact_candidate_qualification":{"protocol":{"passed":true,"normal_roundtrips":500,"normal_invalid":0,"normal_rejections":0,"full_compact_repair":true},"permissions":{"passed":true,"boundary_checks":21,"protected_patch_iterations":100,"scripted_consent":true,"human_consent":false},"upgrade":{"passed":true,"baseline_sha256":"2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a","schema_path":[2,7,2],"production_state_modified":false},"install_sigkill":{"independent_runs":3,"all_passed":true,"selector_count":8,"kill_signal":9,"production_changed":false},"corpus":{"declared_trials":90,"passed_trials":48,"failed_trials":0,"blocked_trials":42,"complete":false,"U30_repeats_passed":3}},
+      "source_gate":{"exit_code":1,"format_passed":true,"clippy_passed":true,"diff_passed":true,"runtime_passed":128,"runtime_failed":10,"runtime_ignored":1,"only_failed_target":"mtm-runtime --lib","native_preflight":"namespace_limit_or_depth/ENOSPC","same_inherited_native_failure_set":true,"tests_skipped_by_preflight":false},
+      "release_readiness":{"validated_gates":7,"blocked_gates":10,"validated":["protocol","permissions","upgrade","clean_build","install_sigkill","record_integrity","retirement_provenance"],"blocked":["source","target","resource","native_commands","compiled_latex","retrieval","browser_human","copied_operator_state","corpus","rust_only"],"ready_for_release_review":false,"release_authorization_implemented":false,"release_qualified":false},
+      "sealed_reports":[
+        {"path":"records/evidence/MTM-016/candidate-protocol-f5-final-a5a3cde.json","sha256":"471da994af7b879092f191cd5788d0d927ff028620112a1ba3ebfb185a2ee5a3","passed":true},
+        {"path":"records/evidence/MTM-016/candidate-permissions-f5-final-a5a3cde.json","sha256":"cea40a8e37a73d8517c0b0996d06dd07ff0936e8d5b7b7c49698f4d518c9797b","passed":true},
+        {"path":"records/evidence/MTM-016/candidate-upgrade-f5-final-a5a3cde.json","sha256":"f3e46574d1a1c4ec273acf665316a649982a5cb04de43f33da7dd52ebcfff0bb","passed":true},
+        {"path":"records/evidence/MTM-016/candidate-corpus-f5-final-a5a3cde.json","sha256":"55dc2677f5be7c6c2612cb0be196ded917352e7f3febdd89b3a3f76e6988019e","passed":false},
+        {"path":"records/evidence/MTM-016/candidate-install-sigkill-f5-final-r1-a5a3cde.json","sha256":"d076ad8b0cfd459c844c1534758020359532bdcb81a276efa2f980e831f192e2","passed":true},
+        {"path":"records/evidence/MTM-016/candidate-install-sigkill-f5-final-r2-a5a3cde.json","sha256":"79672523b9ca03991f381a068bd89ea30c0a3d6f6cffee708c1e24e9beb9361a","passed":true},
+        {"path":"records/evidence/MTM-016/candidate-install-sigkill-f5-final-r3-a5a3cde.json","sha256":"1ee26e7229fdcccd70e4101b41bf0cec2ea0fe66bf1d3e70a3b6bcf9e0209f3e","passed":true},
+        {"path":"records/evidence/MTM-016/clean-build-f5-final-cc17b16.json","sha256":"333bb4f7e943046fd862376eb9ae50ee3766b46e113d73ae7dbb558d12d9fb1c","passed":true},
+        {"path":"records/evidence/MTM-016/corpus-f5-final-u30-aggregate.json","sha256":"19018177c5453fb2e9c902ed6265c2752e0d60a91bfc0e261202c24c71533ef0","passed":false},
+        {"path":"records/evidence/MTM-016/source-check-f5-final-a5a3cde.json","sha256":"71e92d2909905af0565acc7531f1ef7e10ca9facac250ca814ebf3f63ebfb8ee","passed":false},
+        {"path":"records/evidence/MTM-016/release-check-f5-final-a5a3cde.json","sha256":"46af9cbf5b3e4c1b78f89f9f19a4c724aa3c4f547d30417778573ab204e9ddb9","passed":false}
+      ],
+      "release_input_manifest_sha256":"4871081b364540bbd91fd3d0e0a910d2cb53d33699f5b8c526ca1f9e0483f647",
+      "remaining":["Capable-host Native/TTY/CAS plus target and resource qualification", "Required compiled-LaTeX full/compact/repair", "Actual external retrieval", "Real browser and independently observed human consent", "Explicit operator authorization for copied production-state rehearsal", "U16-U29 corpus trials", "Remaining 67 Python files and 81 legacy-reference files plus final release authorization"],
+      "product_source_changed":false,"production_changed":false,"new_suppressions":0,
+      "remaining_python_files":67,"legacy_rust_reference_files":81,
+      "rust_only_ready":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

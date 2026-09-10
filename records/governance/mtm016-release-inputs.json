@@ -1,16 +1,16 @@
 {
   "schema": "mtm-release-inputs-v1",
   "milestone": "MTM-016",
-  "candidate_sha256": "589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8",
+  "candidate_sha256": "46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
   "candidate_source_commit": "cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
   "baseline_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
   "evidence": {
-    "source": {"path":"records/evidence/MTM-016/source-check-f4-f5-composed.json","sha256":"0604f471da36aca00488218a6d1f3cd91c7949112aeeeca3df015af5c9e88dc3"},
-    "protocol": {"path":"records/evidence/MTM-016/candidate-protocol-f4-f5-d59e7f9.json","sha256":"83c601815437e1dbb6b3d4cce9b09c45471e74170cd70d371179dabbc6c4efbc"},
-    "permissions": {"path":"records/evidence/MTM-016/candidate-permissions-f3-cc17b16.json","sha256":"a1281a45abd80336768e70cc678e20b801518364b6ca9678fe95a19664b7d17c"},
-    "upgrade": {"path":"records/evidence/MTM-016/candidate-upgrade-f3-cc17b16.json","sha256":"8c606b37a4e26ece8173bf84347a7aff22616887f70772069fcb146ebd67828e"},
-    "clean_build": {"path":"records/evidence/MTM-016/clean-build-f5-cc17b16.json","sha256":"5acfce38c8a0d85e3565f90291c8aafa74d1ba850762625520e6c28575777c9e"},
-    "install_sigkill": {"path":"records/evidence/MTM-016/candidate-install-sigkill-f5-u30-r3-8b55ba0.json","sha256":"1a33c64505dccc76a701569d288c070bc5423a182bcfd0ab65186ce77ef2f947"},
-    "corpus": {"path":"records/evidence/MTM-016/corpus-f5-u30-aggregate.json","sha256":"db1174eabe1ddeae25235658a354485138ee1a8a2e9d37297dd3846804c318b9"}
+    "source": {"path":"records/evidence/MTM-016/source-check-f5-final-a5a3cde.json","sha256":"71e92d2909905af0565acc7531f1ef7e10ca9facac250ca814ebf3f63ebfb8ee"},
+    "protocol": {"path":"records/evidence/MTM-016/candidate-protocol-f5-final-a5a3cde.json","sha256":"471da994af7b879092f191cd5788d0d927ff028620112a1ba3ebfb185a2ee5a3"},
+    "permissions": {"path":"records/evidence/MTM-016/candidate-permissions-f5-final-a5a3cde.json","sha256":"cea40a8e37a73d8517c0b0996d06dd07ff0936e8d5b7b7c49698f4d518c9797b"},
+    "upgrade": {"path":"records/evidence/MTM-016/candidate-upgrade-f5-final-a5a3cde.json","sha256":"f3e46574d1a1c4ec273acf665316a649982a5cb04de43f33da7dd52ebcfff0bb"},
+    "clean_build": {"path":"records/evidence/MTM-016/clean-build-f5-final-cc17b16.json","sha256":"333bb4f7e943046fd862376eb9ae50ee3766b46e113d73ae7dbb558d12d9fb1c"},
+    "install_sigkill": {"path":"records/evidence/MTM-016/candidate-install-sigkill-f5-final-r3-a5a3cde.json","sha256":"1ee26e7229fdcccd70e4101b41bf0cec2ea0fe66bf1d3e70a3b6bcf9e0209f3e"},
+    "corpus": {"path":"records/evidence/MTM-016/corpus-f5-final-u30-aggregate.json","sha256":"19018177c5453fb2e9c902ed6265c2752e0d60a91bfc0e261202c24c71533ef0"}
   }
 }

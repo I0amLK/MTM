@@ -1,0 +1,15 @@
+{
+  "schema": "mtm-clean-build-evidence-v1",
+  "milestone": "MTM-016",
+  "source_commit": "cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+  "selected_candidate_sha256": "46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+  "clean_build_sha256": "46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+  "build_locked": true,
+  "build_offline": true,
+  "detached_clean_worktree": true,
+  "build_exit_code": 0,
+  "exact_candidate_bytes_reproduced": true,
+  "python_free_path_proven": true,
+  "production_changed": false,
+  "release_qualified": false
+}

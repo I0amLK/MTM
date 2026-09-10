@@ -1,0 +1,22 @@
+{
+  "schema": "mtm-usability-corpus-aggregate-v1",
+  "milestone": "MTM-016",
+  "candidate_sha256": "46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+  "candidate_source_commit": "cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+  "corpus_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861",
+  "base": {
+    "path": "records/evidence/MTM-016/candidate-corpus-f5-final-a5a3cde.json",
+    "sha256": "55dc2677f5be7c6c2612cb0be196ded917352e7f3febdd89b3a3f76e6988019e"
+  },
+  "supplements": [
+    {"task_id":"U30","repeat":1,"path":"records/evidence/MTM-016/candidate-install-sigkill-f5-final-r1-a5a3cde.json","sha256":"d076ad8b0cfd459c844c1534758020359532bdcb81a276efa2f980e831f192e2"},
+    {"task_id":"U30","repeat":2,"path":"records/evidence/MTM-016/candidate-install-sigkill-f5-final-r2-a5a3cde.json","sha256":"79672523b9ca03991f381a068bd89ea30c0a3d6f6cffee708c1e24e9beb9361a"},
+    {"task_id":"U30","repeat":3,"path":"records/evidence/MTM-016/candidate-install-sigkill-f5-final-r3-a5a3cde.json","sha256":"1ee26e7229fdcccd70e4101b41bf0cec2ea0fe66bf1d3e70a3b6bcf9e0209f3e"}
+  ],
+  "passed_trials": 48,
+  "failed_trials": 0,
+  "blocked_trials": 42,
+  "complete": false,
+  "production_changed": false,
+  "release_qualified": false
+}
