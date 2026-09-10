@@ -2842,6 +2842,26 @@
       "release_readiness":{"validated_gates":10,"blocked_gates":7,"native_commands":"validated","compiled_latex":"blocked_required_evidence_missing","release_qualified":false},
       "acceptance_boundary":"The diagnostic red/green comparison was performed on the same exact candidate through a static-only disposable server. It proves the corrected rejection expectation and persistence, not compiled-LaTeX acceptance. Required-policy full/compact/repair fixtures, summary requirements, Native evidence, product sources and frozen candidate bytes are unchanged. The capable host must rerun the fixed required-policy profile before its gate may be validated.",
       "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-COMPILED-LATEX-REAL-HOST-DELIVERY",
+      "status":"native_and_compiled_latex_gates_validated_remaining_release_gates_pending",
+      "harness_commit":"f9ed8211fc4a706d96221835fbe0d93f0ea199a3",
+      "harness_source_sha256":"f992eb5663ab58965152015243d4fbc9bd0b8114e09b93006be4698a84ca9f22",
+      "candidate_source_commit":"cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+      "candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+      "operator_receipt_recorded_unix_seconds":1789035039,
+      "compiled_latex":{"native_backend":"bubblewrap","hard_isolation_attested":true,"latex_policy":"required","latexmk_used":true,"pdflatex_used":true,"full_flow_compiled":true,"compact_flow_compiled":true,"repair_flow_compiled":true,"final_artifacts_verified":true,"three_flows_sealed_and_resumed_after_restart":true,"shell_escape_disabled":true,"shell_escape_probe_routed_to_repair":true,"independent_mathematical_verification":false,"browser_human_consent_tested":false},
+      "runner":{"exit_code":0,"elapsed_ms":8761,"child_reaped":true,"pipes_closed":true,"timed_out":false,"output_limit_exceeded":false},
+      "sealed_reports":[{"path":"records/evidence/MTM-016/candidate-compiled-latex-f6-f9ed821.json","sha256":"2994cdd7848a9a2d7e4a6f1a79d30a15ca203ac1249e61aff48499b10da0fb22","passed":true},{"path":"records/evidence/MTM-016/release-check-f6-latex-f9ed821.json","sha256":"ddffb7f98ae8fb15ce30201ac30d93743e2cd0bff8c47d572acd06fd4c076ffa","passed":false}],
+      "repository_validation":{"operator_receipt_copied_byte_for_byte":true,"same_rust_receipt_and_summary_validators_reused":true,"committed_harness_lineage_recomputed":true,"original_and_snapshot_unchanged":true,"local_operator_profile_reexecution":false,"mtm_xtask_unit_tests_passed":81,"mtm_xtask_cli_tests_passed":13,"format_passed":true,"records_passed":true,"retirement_passed":true,"audit_strict_passed":true,"diff_check_passed":true,"full_workspace_tests_rerun":false,"new_suppressions":0},
+      "release_readiness":{"validated_gates":11,"blocked_gates":6,"native_commands":"validated","compiled_latex":"validated","remaining_gates":["source","target","resource","browser_human","copied_operator_state","corpus"],"release_check_exit_code":1,"release_qualified":false},
+      "corpus":{"passed_trials":48,"failed_trials":0,"blocked_trials":42,"complete":false,"qualification_receipts_not_counted_as_three_corpus_repeats":true},
+      "pending_field_interpretation":"The compiled_latex receipt's pending list is the profile's fixed out-of-scope notice, not a live aggregate of release inputs. Its Native command notice does not revoke the separately sealed Native success. Keep the receipt bytes unchanged; release-check determines current gate status.",
+      "preserved_prior_evidence":{"native_commands_sha256":"00140fc56bcad8227154b899ffe644855fbd78c7ce317fc332657c6fe3b30cf0","failed_compiled_latex_sha256":"23b1a50ccb81b7155fb2f028e8fb4a8710812ee4ef7cf9c516d8e69edd28ecd8"},
+      "acceptance_boundary":"The operator executed the exact frozen candidate on a capable host through public OAuth/MCP with required compiled LaTeX. Repository-side revalidation checks the original receipt bytes, runner result, all three flow summaries, candidate identity and committed harness lineage without reexecuting the host test. Source, combined target, baseline resource, independent browser-human, authorized copied operator state and complete corpus remain independent release requirements. This closes the two F6 profile gates, not all of rounds 4/5 or 5/5 and not independent mathematical review.",
+      "operator_next_step":"Run cargo xtask check --record on the capable host with Native/compiled-LaTeX profile flags unset; preserve failures, then run exact target and baseline/candidate resource qualifications without concurrent builds or product source changes.",
+      "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
