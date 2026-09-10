@@ -2768,6 +2768,15 @@
       "change":"Add bounded fixed diagnostics for descendant kill outcome, delayed descendant leak presence, retained owned-child count, and post-success Sage/Magma output matching. Diagnostics expose only booleans/counts/status/signal fields and never command arguments, stdout/stderr bodies, tokens, capabilities or environment values.",
       "acceptance_boundary":"This is diagnostic-only harness work. Candidate bytes, process-group behavior, CAS executables, Native policy, production state and release qualification are unchanged.",
       "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-DESCENDANT-SCRIPT-RESOLVER-FIX",
+      "status":"harness_fix_pending_real_host_rerun",
+      "observed_on_real_host":"The separated descendant-cleanup fixture still failed before execution with stage=descendant_start and NATIVE_EXECUTABLE_UNRESOLVED.",
+      "root_cause":"F6 still expressed the background child and shell wait as a public cmd string. The Native executable resolver intentionally inspects statically resolvable shell segments before execution and fail-closed on the shell-control form. The accepted MTM-014 descendant fixture avoids this ambiguity by placing the bounded child logic in an executable workspace script and invoking that script via argv.",
+      "correction":"Write an owned executable spawn-descendant.sh in the disposable workspace with the same bounded background-child/readiness/wait logic as the accepted MTM-014 fixture, then invoke it through argv=[\"./spawn-descendant.sh\"]. Keep the explicit public kill_command termination and delayed leak-file/reap checks unchanged.",
+      "acceptance_boundary":"This aligns F6 with the already accepted resolver-safe descendant fixture shape. It does not widen PATH, relax executable resolution, modify candidate bytes, or change Native process-group semantics. A new capable-host run remains required.",
+      "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

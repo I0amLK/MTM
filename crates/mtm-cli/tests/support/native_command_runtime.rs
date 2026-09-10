@@ -287,11 +287,19 @@ fn tty_timeout_and_descendants(binary: &str) -> Result<(bool, bool, bool)> {
     )?;
 
     let leak = server.workspace_path().join("descendant-leak.txt");
+    let descendant_script = server.workspace_path().join("spawn-descendant.sh");
+    fs::write(
+        &descendant_script,
+        b"#!/bin/sh\n(sleep 1; printf leaked > descendant-leak.txt) &\nprintf ready\nwait\n",
+    )
+    .map_err(|_| "Native descendant fixture script write failed")?;
+    fs::set_permissions(&descendant_script, fs::Permissions::from_mode(0o755))
+        .map_err(|_| "Native descendant fixture script mode failed")?;
     let descendant = server.call(
         &owner,
         "exec_command",
         json!({
-            "cmd":"printf ready; (sleep 1; printf leaked > descendant-leak.txt) & wait",
+            "argv":["./spawn-descendant.sh"],
             "timeout_ms":5_000,"yield_time_ms":200
         }),
     )?;
