@@ -64,6 +64,14 @@ redirects across trust domains. The candidate must reject that final URL with
 the rejection code; returned research bodies, capabilities and OAuth credentials are
 not evidence fields. Native execution, compiled LaTeX, browser use and human consent
 remain false in this profile.
+
+The post-commit run for the frozen `46c1441b…` candidate completed successfully:
+three external retrieval requests returned results across LeanSearch and OpenAlex,
+and a fourth request exercised an HTTPS redirect whose final host changed and was
+rejected with `RESEARCH_REDIRECT_DENIED`. After sealing that receipt, the read-only
+release checklist has 8 validated gates and 9 blocked gates. Retrieval is no longer
+one of the blocked release inputs; U22 remains blocked because it additionally
+requires a full independently verified compiled research workflow.
 Initially execute the 15 portable public-MCP workspace/Git/workflow tasks, each in
 its own newly created disposable server. The other 15 explicitly require Native,
 research/compiled-LaTeX, external-client/human or operator-state/process-kill

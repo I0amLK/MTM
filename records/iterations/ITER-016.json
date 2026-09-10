@@ -2615,6 +2615,23 @@
       "product_source_changed":false,"production_changed":false,"new_suppressions":0,
       "remaining_python_files":67,"legacy_rust_reference_files":81,
       "rust_only_ready":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F4-RETRIEVAL-DELIVERY",
+      "status":"exact_external_retrieval_sealed_release_readiness_8_of_17",
+      "round4_status":"in_progress",
+      "round5_status":"in_progress",
+      "implementation_commit":"17ef81f0598bcbaf1f9b1b1dcd1b967f225468c7",
+      "candidate_source_commit":"cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+      "candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+      "retrieval":{"profile":"retrieval","passed":true,"candidate_launched":true,"runner_exit_code":0,"request_count":4,"successful_external_requests":3,"independent_source_count":2,"sources":["leansearch.net","api.openalex.org"],"theorem_result_count":2,"paper_result_count":2,"paper_lookup_count":1,"https_only":true,"redirect_policy_checked":true,"redirect_rejected_code":"RESEARCH_REDIRECT_DENIED","raw_retrieval_bodies_recorded":false,"raw_credentials_recorded":false,"native_execution_tested":false,"compiled_latex_tested":false,"web_client_tested":false,"human_consent_tested":false},
+      "sealed_reports":[{"path":"records/evidence/MTM-016/candidate-retrieval-f4-17ef81f.json","sha256":"017b661766575e42718c22e14df6fa03f9d40196152ace95531ddfd3aa3bee4d","passed":true},{"path":"records/evidence/MTM-016/release-check-f4-retrieval-17ef81f.json","sha256":"340461954f851a27d874d9c8b9a4f5ee5eb27c15aa1bea55550af668005a0a55","passed":false}],
+      "release_input_manifest_sha256":"1836682c365d135fc534f6c31d41d6e0f2f0696f8731992a7b606f38436b8aaa",
+      "release_readiness":{"validated_gates":8,"blocked_gates":9,"retrieval":"validated","blocked":["source","target","resource","native_commands","compiled_latex","browser_human","copied_operator_state","corpus","rust_only"],"ready_for_release_review":false,"release_qualified":false},
+      "corpus_boundary":"The retrieval gate does not convert U22 to passed. U22 requires a full research route with cited retrieval, required LaTeX and independent verification; corpus remains 48 passed, 0 failed, 42 blocked.",
+      "production_changed":false,"product_source_changed":false,"new_suppressions":0,
+      "remaining_python_files":67,"legacy_rust_reference_files":81,
+      "rust_only_ready":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

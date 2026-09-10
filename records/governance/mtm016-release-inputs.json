@@ -10,6 +10,7 @@
     "permissions": {"path":"records/evidence/MTM-016/candidate-permissions-f5-final-a5a3cde.json","sha256":"cea40a8e37a73d8517c0b0996d06dd07ff0936e8d5b7b7c49698f4d518c9797b"},
     "upgrade": {"path":"records/evidence/MTM-016/candidate-upgrade-f5-final-a5a3cde.json","sha256":"f3e46574d1a1c4ec273acf665316a649982a5cb04de43f33da7dd52ebcfff0bb"},
     "clean_build": {"path":"records/evidence/MTM-016/clean-build-f5-final-cc17b16.json","sha256":"333bb4f7e943046fd862376eb9ae50ee3766b46e113d73ae7dbb558d12d9fb1c"},
+    "retrieval": {"path":"records/evidence/MTM-016/candidate-retrieval-f4-17ef81f.json","sha256":"017b661766575e42718c22e14df6fa03f9d40196152ace95531ddfd3aa3bee4d"},
     "install_sigkill": {"path":"records/evidence/MTM-016/candidate-install-sigkill-f5-final-r3-a5a3cde.json","sha256":"1ee26e7229fdcccd70e4101b41bf0cec2ea0fe66bf1d3e70a3b6bcf9e0209f3e"},
     "corpus": {"path":"records/evidence/MTM-016/corpus-f5-final-u30-aggregate.json","sha256":"19018177c5453fb2e9c902ed6265c2752e0d60a91bfc0e261202c24c71533ef0"}
   }
