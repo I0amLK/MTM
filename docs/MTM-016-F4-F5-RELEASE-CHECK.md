@@ -53,12 +53,13 @@ entries without altering production state.
 ## Current implemented boundary
 
 The release checklist has 14 required evidence categories plus current record
-integrity, retirement provenance and Rust-only inventory. Nine evidence adapters
-now cover source/protocol/permissions/upgrade/target/resource, clean-build,
-install-SIGKILL and corpus reports. Clean-build and corpus can validate honest
-partial evidence without making their gates pass. The remaining five categories
-still require reviewed evidence adapters and cannot become accepted by adding a
-`passed` field or an override. This checkpoint is not a fully implemented release
+integrity, retirement provenance and Rust-only inventory. All 14 evidence
+categories now have explicit reviewed adapters. Source/protocol/permissions/
+upgrade/target/resource reuse their existing qualification validators; clean-build,
+install-SIGKILL, corpus, Native commands, compiled LaTeX, retrieval, browser/human
+consent and copied operator-state use strict dedicated schemas. Missing evidence
+stays `required_evidence_missing`, and clean-build/corpus can validate honest
+partial evidence without making their gates pass. This still is not a deployment
 authorization mechanism. Install and dist remain explicit local mechanics, not
 tools that confer release qualification.
 

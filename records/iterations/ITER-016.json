@@ -2505,6 +2505,23 @@
       "product_source_changed":false,"production_changed":false,"new_suppressions":0,
       "remaining_python_files":67,"legacy_rust_reference_files":81,
       "rust_only_ready":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F4-FORWARD-ADAPTERS-IMPLEMENTATION",
+      "status":"all_release_evidence_adapters_implemented_real_evidence_still_required",
+      "round4_status":"in_progress",
+      "round5_status":"in_progress",
+      "base_commit":"154aef24eb7955e90754a2eba919d83865323c66",
+      "release_evidence_categories":14,
+      "reviewed_adapters_implemented":14,
+      "adapters_added":["native_commands", "compiled_latex", "retrieval", "browser_human", "copied_operator_state"],
+      "required_boundaries":["Native evidence requires attested Bubblewrap, safe/trusted/dangerous, TTY/stdin, timeout/kill, descendant cleanup, functional Sage and functional Magma, plus permission-grant soak", "Compiled-LaTeX evidence requires attested Bubblewrap, required policy, latexmk/pdflatex, shell-escape disabled and full/compact/repair artifact verification", "Retrieval evidence requires real HTTPS retrieval, redirect-policy exercise and multiple independent sources without credential recording", "Browser evidence requires a real client, OAuth DCR/PKCE protected-resource path and independently observed human consent with zero normal invalid/rejection", "Copied operator-state evidence requires explicit operator authorization, copy-only source, untouched production, preserved pre-upgrade copy, candidate migration/resume and restored old-runtime resume"],
+      "validation":[{"command":"cargo test --locked --offline -p mtm-xtask release_check::tests","exit_code":0,"tests_passed":4},{"command":"cargo clippy --locked --offline -p mtm-xtask -- -D warnings","exit_code":0}],
+      "acceptance_boundary":"Adapter completion is not evidence completion. No synthetic fixture produced by these unit tests is a release input; each real-world gate remains blocked until a separately hash-pinned current-candidate evidence file exists.",
+      "pending":["Seal post-commit external SIGKILL qualification and update release readiness", "Real Native/LaTeX/retrieval/browser/operator-state evidence", "Clean-build exact-byte/Python-free proof", "45 blocked corpus trials, remaining D retirement and final release authorization"],
+      "product_source_changed":false,"production_changed":false,"new_suppressions":0,
+      "remaining_python_files":67,"legacy_rust_reference_files":81,
+      "rust_only_ready":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
