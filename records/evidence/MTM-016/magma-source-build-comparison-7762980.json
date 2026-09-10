@@ -1,0 +1,31 @@
+{
+  "schema": "mtm-reviewed-test-build-comparison-v1",
+  "milestone": "MTM-016",
+  "scope": "same_checkout_non_test_build_before_after_one_inline_test_amendment",
+  "base_commit": "77629807dfc6f01f14d76c69e54bb3baca216328",
+  "changed_product_file": "crates/mtm-runtime/src/native_authority.rs",
+  "before_file_sha256": "be4022a71733974860b806484e390c5ecac03bf0442cb3eb5b9ad53e695be2e5",
+  "after_file_sha256": "d4979559e8094ac9ce4bdcd91d2654162621b702e179e7ca5100a620de57515c",
+  "command": "cargo build --release --locked --offline -p mtm-cli --bin mtm",
+  "target_directory": "target/mtm016-f6-test-amendment",
+  "same_checkout_and_build_environment": true,
+  "same_target_directory": true,
+  "before_build_exit_code": 0,
+  "after_build_exit_code": 0,
+  "before_binary_sha256": "c6ec7a5712a159371fb3290fd389a8ea3b840a6d795211945b97b8a9914bf155",
+  "after_binary_sha256": "c6ec7a5712a159371fb3290fd389a8ea3b840a6d795211945b97b8a9914bf155",
+  "paired_binary_bytes_equal": true,
+  "selected_candidate_sha256": "46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+  "selected_candidate_replaced": false,
+  "selected_candidate_bytes_reproduced_by_this_comparison": false,
+  "new_magma_unit_tests_passed": 2,
+  "new_magma_unit_tests_failed": 0,
+  "capable_host_test_reexecuted": false,
+  "production_changed": false,
+  "release_qualified": false,
+  "limitations": [
+    "The local paired builds are equal to each other, not to the selected frozen artifact. They are a test-amendment diagnostic, not a new clean-build qualification.",
+    "This comparison does not substitute for the original integration test or the full source gate on the capable host.",
+    "The two-file-digest amendment is separately reviewed; no general exclusion of Rust source or cfg(test) content is authorized."
+  ]
+}

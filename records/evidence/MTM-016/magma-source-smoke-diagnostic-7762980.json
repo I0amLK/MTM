@@ -1,0 +1,43 @@
+{
+  "schema": "mtm-source-smoke-diagnostic-v1",
+  "milestone": "MTM-016",
+  "scope": "operator_log_and_launcher_comparison_not_source_qualification",
+  "base_commit": "77629807dfc6f01f14d76c69e54bb3baca216328",
+  "operator_log": {
+    "attachment_name": "Pasted text.txt",
+    "attachment_sha256": "1100ac35569cd45606260bf9b070e750f0933ca8704d2e2ab334b1b1755bb937",
+    "failed_target": "mtm-runtime --lib",
+    "failed_test": "native_authority::tests::exec_candidate_preserves_git_latex_sage_and_exposes_magma",
+    "runtime_passed": 137,
+    "runtime_failed": 1,
+    "runtime_existing_ignored": 1,
+    "capability_runtime_functions_passed": 53,
+    "source_report_sha256": "94ff2242763e58762aea2b0346908b00990205ba93fffa34e1cba2d504be5db6"
+  },
+  "launcher_comparison": {
+    "environment_cleared": true,
+    "path": "/usr/bin:/bin",
+    "magma_arguments": ["-b"],
+    "original_quit_only_exit_code": 0,
+    "original_quit_only_output_empty": true,
+    "arithmetic_input_exit_code": 0,
+    "arithmetic_output": "42",
+    "candidate_oauth_mcp_reexecuted": false,
+    "new_nested_bubblewrap_claimed": false,
+    "license_configuration_modified": false
+  },
+  "pure_regressions": {
+    "before_passed": 0,
+    "before_failed": 2,
+    "before_exit_code": 101,
+    "after_passed": 2,
+    "after_failed": 0,
+    "after_exit_code": 0,
+    "synthetic_results_are_not_real_CAS_evidence": true
+  },
+  "candidate_sha256": "46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+  "frozen_candidate_changed": false,
+  "production_changed": false,
+  "source_gate_passed": false,
+  "release_qualified": false
+}

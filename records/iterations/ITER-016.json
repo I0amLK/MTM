@@ -2862,6 +2862,37 @@
       "acceptance_boundary":"The operator executed the exact frozen candidate on a capable host through public OAuth/MCP with required compiled LaTeX. Repository-side revalidation checks the original receipt bytes, runner result, all three flow summaries, candidate identity and committed harness lineage without reexecuting the host test. Source, combined target, baseline resource, independent browser-human, authorized copied operator state and complete corpus remain independent release requirements. This closes the two F6 profile gates, not all of rounds 4/5 or 5/5 and not independent mathematical review.",
       "operator_next_step":"Run cargo xtask check --record on the capable host with Native/compiled-LaTeX profile flags unset; preserve failures, then run exact target and baseline/candidate resource qualifications without concurrent builds or product source changes.",
       "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-MAGMA-SOURCE-SMOKE-REPAIR",
+      "status":"inline_test_repaired_pending_capable_host_source_recheck",
+      "base_commit":"77629807dfc6f01f14d76c69e54bb3baca216328",
+      "operator_log":{"attachment":"Pasted text.txt","sha256":"1100ac35569cd45606260bf9b070e750f0933ca8704d2e2ab334b1b1755bb937","failed_target":"mtm-runtime --lib","runtime_passed":137,"runtime_failed":1,"runtime_existing_ignored":1,"failed_test":"native_authority::tests::exec_candidate_preserves_git_latex_sage_and_exposes_magma"},
+      "diagnosis":"The old optional source smoke invoked magma -b with quit only, then demanded a banner or authorization text. The installed launcher exited zero without output for that exact input and exited zero with stdout 42 when asked to print 6*7. The operator log identifies the banner assertion, not a new Bubblewrap preflight failure.",
+      "repair":"Keep the existing integration test and require bounded arithmetic output plus clean process status. Distinguish an explicitly recognized historical host-license denial from functional success. Empty output, banners alone, incorrect or repeated results, timeouts, signals and unrelated nonzero exits fail.",
+      "regressions":{"pure_tests_before_failed":2,"pure_tests_after_passed":2,"negative_cases":15,"new_ignored_tests":0,"real_candidate_profile_rerun_here":false},
+      "source_identity":{"raw_source_changed":true,"changes_within_existing_cfg_test_module_only":true,"production_prefix_unchanged":true,"reviewed_file":"crates/mtm-runtime/src/native_authority.rs","before_sha256":"be4022a71733974860b806484e390c5ecac03bf0442cb3eb5b9ad53e695be2e5","after_sha256":"d4979559e8094ac9ce4bdcd91d2654162621b702e179e7ca5100a620de57515c","release_check_policy":"one_exact_reviewed_whole_file_pair_not_a_general_test_or_source_exclusion","raw_harness_hashing_unchanged":true},
+      "sealed_reports":[{"path":"records/evidence/MTM-016/source-check-f6-7762980-failed.json","sha256":"94ff2242763e58762aea2b0346908b00990205ba93fffa34e1cba2d504be5db6","passed":false},{"path":"records/evidence/MTM-016/magma-source-smoke-diagnostic-7762980.json","sha256":"1a4eabb9bfc505e7a0ad1cc4a023095880f3616dd54c2fb999c6cdf1ec1ac77b"}],
+      "validation":{"format_passed":true,"workspace_clippy_warnings_denied_passed":true,"records_passed":true,"retirement_passed":true,"audit_strict_passed":true,"diff_check_passed":true,"local_full_workspace_run":"awaiting_completion"},
+      "release_readiness":{"validated_gates":11,"blocked_gates":6,"source":"blocked_real_host_failed_receipt_preserved","native_commands":"validated","compiled_latex":"validated","release_qualified":false},
+      "acceptance_boundary":"The runtime edit is test-only but changes the raw source identity; it is not hidden. Exact old/new file pins and a production-prefix regression permit revalidation of previously sealed candidate observations without weakening candidate SHA or harness lineage checks. Full source acceptance still needs a new committed capable-host run. The failed receipt was moved byte-for-byte from regenerable validation to immutable evidence. Earlier source, Native and LaTeX evidence is unchanged.",
+      "frozen_candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+      "frozen_candidate_changed":false,"production_logic_changed":false,"production_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-MAGMA-SOURCE-BOUNDARY-REVIEW",
+      "status":"reviewed_and_locally_validated_pending_committed_capable_host_source_run",
+      "base_commit":"77629807dfc6f01f14d76c69e54bb3baca216328",
+      "reviewed_runtime_file_sha256":"d4979559e8094ac9ce4bdcd91d2654162621b702e179e7ca5100a620de57515c",
+      "scope":"Review the same-scope inline test repair and preserve strict product-source identity for all other changes.",
+      "additional_checks":["A paired non-test release build before and after the amendment produced identical local executable bytes", "The fixed whole-file pair never exempts untracked product source", "Executable or special source-file permission bits are rejected", "A disposable Git repository regression verifies the accepted exact amendment and both refusal paths"],
+      "sealed_reports":[{"path":"records/evidence/MTM-016/magma-source-build-comparison-7762980.json","sha256":"f487925e96a175a0ae1ed7053d81aca6db63fed8a21a78e3f10ac089c726421d"}],
+      "validation":{"magma_unit_tests_passed":2,"magma_unit_tests_failed":0,"mtm_xtask_unit_tests_passed":83,"mtm_xtask_cli_tests_passed":13,"format_passed":true,"workspace_clippy_warnings_denied_passed":true,"records_passed":true,"retirement_passed":true,"audit_strict_passed":true,"diff_check_passed":true,"capable_host_integration_rerun":false},
+      "interrupted_local_tooling_attempt":{"stage":"rustup_toolchain_preparation_during_cargo_fmt","stopped_by_owned_command_term":true,"classified_as_test_pass":false,"recovery":"Use the existing explicit workspace RUSTUP_HOME and pinned toolchain; no auto-download is needed for the successful checks."},
+      "paired_build_boundary":"The two local release builds share SHA c6ec7a5712a159371fb3290fd389a8ea3b840a6d795211945b97b8a9914bf155. Neither is the selected frozen 46c1441b artifact, and neither replaces or qualifies it.",
+      "release_readiness":{"validated_gates":11,"blocked_gates":6,"source":"blocked_pending_new_full_real_host_receipt","native_commands":"validated","compiled_latex":"validated","release_check_exit_code":1},
+      "acceptance_boundary":"Local unit, static and paired-build checks do not substitute for the formerly failing real-host integration test or the full source gate. Raw source/harness hashes remain changed and visible. No prior receipt is rewritten as a pass and no new release authority is granted.",
+      "production_changed":false,"frozen_candidate_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

@@ -127,19 +127,56 @@ fn product_path(path: &str) -> bool {
         || (path.starts_with("crates/") && !path.contains("/tests/"))
 }
 
-fn same_product(root: &Path, commit: &str) -> Result<bool> {
+// One reviewed inline #[cfg(test)] repair, NOT a blanket src/ or test-module
+// exclusion. Both entire files are pinned, including every production byte.
+// See docs/MTM-016-F6-MAGMA-SOURCE-SMOKE.md. Source/harness hashing stays raw.
+const MAGMA_TEST_PATH: &str = "crates/mtm-runtime/src/native_authority.rs";
+const MAGMA_TEST_BEFORE: &str = "be4022a71733974860b806484e390c5ecac03bf0442cb3eb5b9ad53e695be2e5";
+const MAGMA_TEST_AFTER: &str = "d4979559e8094ac9ce4bdcd91d2654162621b702e179e7ca5100a620de57515c";
+
+fn reviewed_inline_test_edit(path: &str, before: &[u8], after: &[u8]) -> bool {
+    use sha2::{Digest, Sha256};
+    path == MAGMA_TEST_PATH
+        && format!("{:x}", Sha256::digest(before)) == MAGMA_TEST_BEFORE
+        && format!("{:x}", Sha256::digest(after)) == MAGMA_TEST_AFTER
+}
+
+fn product_test_edits(root: &Path, commit: &str) -> Result<Option<Vec<String>>> {
     git(root, &["merge-base", "--is-ancestor", commit, "HEAD"])?;
     // Include uncommitted product changes and untracked product files as blockers.
     let changed = git(root, &["diff", "--name-only", "-z", commit, "--"])?;
     let untracked = git(root, &["ls-files", "-z", "--others", "--exclude-standard"])?;
-    for bytes in [&changed, &untracked] {
+    let mut reviewed = BTreeSet::new();
+    for (bytes, untracked_input) in [(&changed, false), (&untracked, true)] {
         for name in bytes.split(|b| *b == 0).filter(|v| !v.is_empty()) {
-            if product_path(std::str::from_utf8(name)?) {
-                return Ok(false);
+            let name = std::str::from_utf8(name)?;
+            if product_path(name) {
+                if untracked_input || name != MAGMA_TEST_PATH {
+                    return Ok(None);
+                }
+                use std::os::unix::fs::PermissionsExt;
+                if std::fs::symlink_metadata(root.join(name))?
+                    .permissions()
+                    .mode()
+                    & 0o7111
+                    != 0
+                {
+                    return Ok(None);
+                }
+                let before = git(root, &["show", &format!("{commit}:{name}")])?;
+                let after = records::read_bytes(root, name, 128 * 1024)?;
+                if !reviewed_inline_test_edit(name, &before, &after) {
+                    return Ok(None);
+                }
+                reviewed.insert(name.to_owned());
             }
         }
     }
-    Ok(true)
+    Ok(Some(reviewed.into_iter().collect()))
+}
+
+fn same_product(root: &Path, commit: &str) -> Result<bool> {
+    Ok(product_test_edits(root, commit)?.is_some())
 }
 
 fn lineage(root: &Path, identity: &Value, cache: &mut BTreeMap<String, String>) -> Result<()> {
@@ -761,9 +798,8 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     let manifest = decode(&bytes)?;
     let binary = root.join(&options.binary);
     let actual = qualify::digest(&binary).map_err(|_| "release candidate is missing or unsafe")?;
-    if actual != manifest.candidate_sha256
-        || !same_product(root, &manifest.candidate_source_commit)?
-    {
+    let reviewed_tests = product_test_edits(root, &manifest.candidate_source_commit)?;
+    if actual != manifest.candidate_sha256 || reviewed_tests.is_none() {
         return Err(
             "release candidate or current product source differs from selected identity".into(),
         );
@@ -851,6 +887,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         json!({"schema":"mtm-release-check-v1","milestone":"MTM-016",
         "scope":"read_only_release_readiness_not_authorization","candidate_sha256":actual,
         "candidate_source_commit":manifest.candidate_source_commit,"inputs_unchanged":unchanged,
+        "reviewed_inline_test_edits":reviewed_tests,
         "passed":complete,"ready_for_release_review":complete,"release_qualified":false,
         "release_authorization_implemented":false,"production_changed":false,"evidence_reexecuted":false,
         "round4_complete":false,"round5_complete":false,"gates":gates,
@@ -865,6 +902,114 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn inline_test_equivalence_is_exact_and_preserves_the_production_prefix() -> Result<()> {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .ok_or("workspace root")?;
+        let before = git(
+            root,
+            &[
+                "show",
+                &format!("cc17b1688a2deda7db3dde4b2dbf63199bf48b13:{MAGMA_TEST_PATH}"),
+            ],
+        )?;
+        let after = records::read_bytes(root, MAGMA_TEST_PATH, 128 * 1024)?;
+        assert!(reviewed_inline_test_edit(MAGMA_TEST_PATH, &before, &after));
+        let before_text = std::str::from_utf8(&before)?;
+        let after_text = std::str::from_utf8(&after)?;
+        let boundary = "\n#[cfg(test)]\nmod tests {\n";
+        assert_eq!(before_text.matches(boundary).count(), 1);
+        assert_eq!(after_text.matches(boundary).count(), 1);
+        assert_eq!(
+            before_text.split_once(boundary).ok_or("old test guard")?.0,
+            after_text.split_once(boundary).ok_or("new test guard")?.0
+        );
+        for path in [
+            "crates/mtm-runtime/src/native_tools.rs",
+            "Cargo.toml",
+            "../native_authority.rs",
+        ] {
+            assert!(!reviewed_inline_test_edit(path, &before, &after));
+        }
+        for index in [0, before.len() - 1] {
+            let mut changed = before.clone();
+            changed[index] ^= 1;
+            assert!(!reviewed_inline_test_edit(
+                MAGMA_TEST_PATH,
+                &changed,
+                &after
+            ));
+        }
+        for index in [0, after.len() - 1] {
+            let mut changed = after.clone();
+            changed[index] ^= 1;
+            assert!(!reviewed_inline_test_edit(
+                MAGMA_TEST_PATH,
+                &before,
+                &changed
+            ));
+        }
+        let unguarded = after_text.replace("#[cfg(test)]", "#[cfg(not(test))]");
+        assert!(!reviewed_inline_test_edit(
+            MAGMA_TEST_PATH,
+            &before,
+            unguarded.as_bytes()
+        ));
+        assert!(!reviewed_inline_test_edit(MAGMA_TEST_PATH, &after, &before));
+        Ok(())
+    }
+
+    #[test]
+    fn reviewed_inline_edit_rejects_untracked_and_executable_source() -> Result<()> {
+        use std::os::unix::fs::PermissionsExt;
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .ok_or("workspace root")?;
+        let before = git(
+            root,
+            &[
+                "show",
+                &format!("cc17b1688a2deda7db3dde4b2dbf63199bf48b13:{MAGMA_TEST_PATH}"),
+            ],
+        )?;
+        let after = records::read_bytes(root, MAGMA_TEST_PATH, 128 * 1024)?;
+        let fixture = tempfile::tempdir()?;
+        let fixture_root = fixture.path();
+        let source = fixture_root.join(MAGMA_TEST_PATH);
+        std::fs::create_dir_all(source.parent().ok_or("test source parent")?)?;
+        std::fs::write(&source, before)?;
+        git(fixture_root, &["init", "--quiet"])?;
+        git(fixture_root, &["add", "--", MAGMA_TEST_PATH])?;
+        git(
+            fixture_root,
+            &[
+                "-c",
+                "user.name=Fixture",
+                "-c",
+                "user.email=fixture@example.invalid",
+                "commit",
+                "--no-gpg-sign",
+                "--quiet",
+                "-m",
+                "fixture",
+            ],
+        )?;
+        let commit = String::from_utf8(git(fixture_root, &["rev-parse", "HEAD"])?)?;
+        std::fs::write(&source, after)?;
+        std::fs::set_permissions(&source, std::fs::Permissions::from_mode(0o644))?;
+        assert!(product_test_edits(fixture_root, commit.trim())?.is_some());
+        std::fs::set_permissions(&source, std::fs::Permissions::from_mode(0o755))?;
+        assert!(product_test_edits(fixture_root, commit.trim())?.is_none());
+        std::fs::set_permissions(&source, std::fs::Permissions::from_mode(0o644))?;
+        git(
+            fixture_root,
+            &["rm", "--cached", "--quiet", "--", MAGMA_TEST_PATH],
+        )?;
+        assert!(product_test_edits(fixture_root, commit.trim())?.is_none());
+        Ok(())
+    }
 
     fn manifest() -> Value {
         json!({"schema":"mtm-release-inputs-v1","milestone":"MTM-016",
