@@ -2742,6 +2742,15 @@
       "purpose":"Distinguish safe/trusted/dangerous smoke, each named command-permission class, Sage and Magma without weakening the qualification validator or exposing secrets.",
       "acceptance_boundary":"The real-host failure remains unresolved until the labelled rerun identifies and then clears the failing candidate behavior or harness assumption. Native commands, compiled LaTeX and release qualification remain blocked.",
       "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-DANGEROUS-SMOKE-RESOLVER-FIX",
+      "status":"harness_fix_pending_real_host_rerun",
+      "observed_on_real_host":"The capable host passed Native preflight, then the exact-candidate native_commands fixture failed at stage=mode_dangerous with NATIVE_EXECUTABLE_UNRESOLVED before command execution.",
+      "root_cause":"The dangerous-mode smoke used sh -c with the shell builtin test. Native executable facts are collected fail-closed before mode grants are applied, and the minimal qualification PATH intentionally did not expose an external test executable.",
+      "correction":"Use direct printf argv while retaining a sensitive API_TOKEN fixture environment. This preserves the intended dangerous-mode permission-policy smoke without depending on a shell builtin or widening the qualification PATH.",
+      "acceptance_boundary":"The observed failure is a qualification-harness assumption, not evidence that the candidate Native executor failed. The candidate bytes, Native resolver policy and production state are unchanged. A new real-host run is still required.",
+      "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

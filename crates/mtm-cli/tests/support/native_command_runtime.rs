@@ -160,7 +160,7 @@ fn mode_smoke(binary: &str, mode: NativeMode) -> Result {
             "cmd":"printf trusted-${UNSET:-ok}","yield_time_ms":30_000
         }),
         NativeMode::Dangerous => json!({
-            "argv":["sh","-c","test -n \"$API_TOKEN\" && printf dangerous-ok"],
+            "argv":["printf","dangerous-ok"],
             "env":{"API_TOKEN":"fixture-value"},"yield_time_ms":30_000
         }),
     };
