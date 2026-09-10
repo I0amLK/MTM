@@ -195,6 +195,9 @@ pub(crate) fn run(root: &Path) -> Result<Value> {
     eprintln!("[capability] built-binary socket/OAuth/500-run regression");
     let output = Command::new(cargo)
         .env_remove("MTM_TEST_CORPUS_PROFILE")
+        .env_remove("MTM_TEST_INSTALL_SIGKILL_PROFILE")
+        .env_remove("MTM_TEST_DEPLOYMENT_CANDIDATE")
+        .env_remove("MTM_TEST_DEPLOYMENT_CANDIDATE_SHA256")
         .env_remove("MTM_TEST_CANDIDATE")
         .env_remove("MTM_TEST_CANDIDATE_SHA256")
         .env_remove("MTM_TEST_TARGET_PROFILE")

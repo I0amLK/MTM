@@ -19,6 +19,18 @@ mod summary;
 pub(crate) use receipt::validate as validate_receipt;
 const MAX_BINARY: u64 = 256 * 1024 * 1024;
 
+pub(crate) fn validate_corpus_summary(summaries: &Value, hash: &str) -> Result<bool> {
+    let corpus = summaries
+        .get("corpus")
+        .ok_or("corpus qualification summary missing")?;
+    let bytes = format!("MTM_USABILITY_CORPUS {corpus}\n").into_bytes();
+    let checked = summary::validate_corpus(&bytes, hash)?;
+    if &checked != summaries {
+        return Err("corpus qualification summary has extra or inconsistent fields".into());
+    }
+    Ok(corpus["passed"] == true)
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) enum Profile {
     Protocol,
@@ -27,6 +39,7 @@ pub(super) enum Profile {
     Upgrade,
     Permissions,
     Corpus,
+    InstallSigkill,
 }
 
 impl Profile {
@@ -38,7 +51,8 @@ impl Profile {
             "upgrade" => Ok(Self::Upgrade),
             "permissions" => Ok(Self::Permissions),
             "corpus" => Ok(Self::Corpus),
-            _ => Err("qualification profile must be protocol, target, resource, upgrade, permissions or corpus; release qualification is not implemented here".into()),
+            "install_sigkill" => Ok(Self::InstallSigkill),
+            _ => Err("qualification profile must be protocol, target, resource, upgrade, permissions, corpus or install_sigkill; release qualification is not implemented here".into()),
         }
     }
 
@@ -50,6 +64,7 @@ impl Profile {
             Self::Upgrade => "upgrade",
             Self::Permissions => "permissions",
             Self::Corpus => "corpus",
+            Self::InstallSigkill => "install_sigkill",
         }
     }
 
@@ -61,6 +76,7 @@ impl Profile {
             Self::Upgrade => "F1",
             Self::Permissions => "F2",
             Self::Corpus => "F5",
+            Self::InstallSigkill => "F4",
         }
     }
 
@@ -72,6 +88,7 @@ impl Profile {
             Self::Upgrade => "candidate-upgrade.json",
             Self::Permissions => "candidate-permissions.json",
             Self::Corpus => "candidate-corpus.json",
+            Self::InstallSigkill => "candidate-install-sigkill.json",
         }
     }
 }
@@ -141,7 +158,11 @@ impl Options {
                     );
                 }
             }
-            Profile::Protocol | Profile::Target | Profile::Permissions | Profile::Corpus => {
+            Profile::Protocol
+            | Profile::Target
+            | Profile::Permissions
+            | Profile::Corpus
+            | Profile::InstallSigkill => {
                 if baseline_binary.is_some() || baseline_sha256.is_some() {
                     return Err("baseline options require a resource or upgrade profile".into());
                 }
@@ -268,6 +289,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     let upgrade = options.profile == Profile::Upgrade;
     let permissions = options.profile == Profile::Permissions;
     let corpus = options.profile == Profile::Corpus;
+    let install_sigkill = options.profile == Profile::InstallSigkill;
     let paired = resource || upgrade;
     let needs_native = target || resource;
     let scope = match options.profile {
@@ -277,6 +299,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         Profile::Upgrade => "exact_candidate_installed_upgrade_fixture_not_release",
         Profile::Permissions => "exact_candidate_scripted_patch_permissions_not_release",
         Profile::Corpus => "exact_candidate_partial_usability_corpus_not_release",
+        Profile::InstallSigkill => "exact_candidate_external_sigkill_install_recovery_not_release",
     };
     let mut report = json!({"schema_version":"1.0.0","milestone":"MTM-016","delivery":options.profile.delivery(),
     "profile":options.profile.as_str(),"scope":scope,"passed":false,
@@ -292,6 +315,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         Profile::Upgrade => json!(["real Native and compiled LaTeX","resources and permission-grant soak","browser and human consent","operator-authorized production-state copy","abrupt installation interruption","Python retirement and full release gate"]),
         Profile::Permissions => json!(["real Native command execution and command-grant soak","compiled LaTeX and external retrieval","browser and independent human consent","baseline resource comparison","production upgrade and abrupt installation interruption","Python retirement and full release gate"]),
         Profile::Corpus => json!(["Native tasks U16-U20","independent research tasks U21-U25","external-client/operator tasks U26-U30","full release gates"]),
+        Profile::InstallSigkill => json!(["physical power-loss/device-cache durability","production selector drill","shared-filesystem semantics","full release gates"]),
     }});
     let mut stage = if needs_native {
         "native_preflight"
@@ -342,29 +366,55 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         if permissions {
             stage = "permission_test_runner";
         }
+        if install_sigkill {
+            stage = "install_sigkill_test_runner";
+        }
         let cargo = env::var_os("CARGO").unwrap_or_else(|| "cargo".into());
         let mut command = Command::new(cargo);
         command
-            .args([
-                "test",
-                "--locked",
-                "--offline",
-                "-p",
-                "mtm-cli",
-                "--test",
-                "capability_runtime",
-                "--",
-            ])
             .current_dir(root)
             .env_remove("MTM_TEST_CORPUS_PROFILE")
             .env_remove("MTM_TEST_PERMISSION_PROFILE")
+            .env_remove("MTM_TEST_INSTALL_SIGKILL_PROFILE")
+            .env_remove("MTM_TEST_DEPLOYMENT_CANDIDATE")
+            .env_remove("MTM_TEST_DEPLOYMENT_CANDIDATE_SHA256")
             .env_remove("MTM_TEST_UPGRADE_PROFILE")
             .env_remove("MTM_TEST_TARGET_PROFILE")
             .env_remove("MTM_TEST_RESOURCE_PROFILE")
             .env_remove("MTM_TEST_BASELINE")
-            .env_remove("MTM_TEST_BASELINE_SHA256")
-            .env("MTM_TEST_CANDIDATE", &snapshot.executable)
-            .env("MTM_TEST_CANDIDATE_SHA256", &snapshot.sha256);
+            .env_remove("MTM_TEST_BASELINE_SHA256");
+        if install_sigkill {
+            command
+                .args([
+                    "test",
+                    "--locked",
+                    "--offline",
+                    "-p",
+                    "mtm-cli",
+                    "--test",
+                    "deployment",
+                    "--",
+                    "external_sigkill_during_real_rollback_recovers_exact_candidate",
+                    "--exact",
+                ])
+                .env("MTM_TEST_INSTALL_SIGKILL_PROFILE", "1")
+                .env("MTM_TEST_DEPLOYMENT_CANDIDATE", &snapshot.executable)
+                .env("MTM_TEST_DEPLOYMENT_CANDIDATE_SHA256", &snapshot.sha256);
+        } else {
+            command
+                .args([
+                    "test",
+                    "--locked",
+                    "--offline",
+                    "-p",
+                    "mtm-cli",
+                    "--test",
+                    "capability_runtime",
+                    "--",
+                ])
+                .env("MTM_TEST_CANDIDATE", &snapshot.executable)
+                .env("MTM_TEST_CANDIDATE_SHA256", &snapshot.sha256);
+        }
         if paired {
             command
                 .arg(if upgrade {
@@ -451,7 +501,9 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             report["corpus_definition_sha256"] = json!(format!("{:x}", Sha256::digest(bytes)));
         }
         stage = "summary_validation";
-        let summaries = if corpus {
+        let summaries = if install_sigkill {
+            summary::validate_install_sigkill(&output.stdout, &snapshot.sha256)?
+        } else if corpus {
             summary::validate_corpus(&output.stdout, &snapshot.sha256)?
         } else if permissions {
             summary::validate_permissions(&output.stdout, &snapshot.sha256)?

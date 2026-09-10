@@ -169,8 +169,97 @@ fn lineage(root: &Path, identity: &Value, cache: &mut BTreeMap<String, String>) 
 fn supported(name: &str) -> bool {
     matches!(
         name,
-        "source" | "protocol" | "permissions" | "upgrade" | "target" | "resource"
+        "source"
+            | "protocol"
+            | "permissions"
+            | "upgrade"
+            | "target"
+            | "resource"
+            | "clean_build"
+            | "install_sigkill"
+            | "corpus"
     )
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CleanBuildEvidence {
+    schema: String,
+    milestone: String,
+    source_commit: String,
+    selected_candidate_sha256: String,
+    clean_build_sha256: String,
+    build_locked: bool,
+    build_offline: bool,
+    detached_clean_worktree: bool,
+    build_exit_code: i64,
+    exact_candidate_bytes_reproduced: bool,
+    python_free_path_proven: bool,
+    production_changed: bool,
+    release_qualified: bool,
+}
+
+fn validate_clean_build(value: &Value, manifest: &Manifest) -> Result<bool> {
+    let evidence: CleanBuildEvidence =
+        serde_json::from_value(value.clone()).map_err(|_| "clean build evidence schema invalid")?;
+    if evidence.schema != "mtm-clean-build-evidence-v1"
+        || evidence.milestone != "MTM-016"
+        || evidence.source_commit != manifest.candidate_source_commit
+        || evidence.selected_candidate_sha256 != manifest.candidate_sha256
+        || !hash(&evidence.clean_build_sha256, 64)
+        || !evidence.build_locked
+        || !evidence.build_offline
+        || !evidence.detached_clean_worktree
+        || evidence.build_exit_code != 0
+        || evidence.production_changed
+        || evidence.release_qualified
+        || evidence.exact_candidate_bytes_reproduced
+            != (evidence.clean_build_sha256 == evidence.selected_candidate_sha256)
+    {
+        return Err("clean build evidence identity, build result or scope invalid".into());
+    }
+    Ok(evidence.exact_candidate_bytes_reproduced && evidence.python_free_path_proven)
+}
+
+fn validate_corpus(value: &Value, manifest: &Manifest) -> Result<bool> {
+    if value["schema_version"] != "1.0.0"
+        || value["milestone"] != "MTM-016"
+        || value["profile"] != "corpus"
+        || value["delivery"] != "F5"
+        || value["scope"] != "exact_candidate_partial_usability_corpus_not_release"
+        || value["candidate_sha256"] != manifest.candidate_sha256
+        || value["candidate_launched"] != true
+        || !value["baseline_sha256"].is_null()
+        || !value["baseline_launched"].is_null()
+        || value["original_and_snapshot_unchanged"] != true
+        || value["production_selectors_changed"] != false
+        || value["production_state_modified"] != false
+        || value["python_invoked"] != false
+        || value["raw_test_output_recorded"] != false
+        || value["release_qualified"] != false
+        || value["selector_changed"] != false
+        || value["runner"]["exit_code"] != 0
+        || value["runner"]["child_reaped"] != true
+        || value["runner"]["pipes_closed"] != true
+        || value["runner"]["timed_out"] != false
+        || value["runner"]["output_limit_exceeded"] != false
+        || value["runner"]["raw_output_recorded"] != false
+        || !value["runner"]["signal"].is_null()
+    {
+        return Err("corpus receipt identity, runner or scope invalid".into());
+    }
+    let complete =
+        qualify::validate_corpus_summary(&value["summaries"], &manifest.candidate_sha256)?;
+    if value["corpus_definition_sha256"] != value["summaries"]["corpus"]["corpus_sha256"]
+        || value["passed"] != complete
+        || (!complete
+            && (value["failed_stage"] != "corpus_coverage"
+                || value["failure"]
+                    != "Corpus contains blocked or failed trials; completed trials remain recorded"))
+    {
+        return Err("corpus receipt completion state inconsistent".into());
+    }
+    Ok(complete)
 }
 
 fn validate_evidence(
@@ -179,7 +268,7 @@ fn validate_evidence(
     value: &Value,
     manifest: &Manifest,
     cache: &mut BTreeMap<String, String>,
-) -> Result<()> {
+) -> Result<bool> {
     if name == "source" {
         let identity = &value["source_identity"];
         let current = capability::source_hash(root)?;
@@ -203,7 +292,25 @@ fn validate_evidence(
         {
             return Err("current complete source gate has not passed".into());
         }
-        return Ok(());
+        return Ok(true);
+    }
+    if name == "corpus" {
+        let complete = validate_corpus(value, manifest)?;
+        lineage(root, &value["harness_source_identity"], cache)?;
+        return Ok(complete);
+    }
+    if name == "clean_build" {
+        return validate_clean_build(value, manifest);
+    }
+    if name == "install_sigkill" {
+        qualify::validate_receipt(
+            value,
+            &manifest.candidate_sha256,
+            &manifest.baseline_sha256,
+            name,
+        )?;
+        lineage(root, &value["harness_source_identity"], cache)?;
+        return Ok(true);
     }
     qualify::validate_receipt(
         value,
@@ -211,7 +318,8 @@ fn validate_evidence(
         &manifest.baseline_sha256,
         name,
     )?;
-    lineage(root, &value["harness_source_identity"], cache)
+    lineage(root, &value["harness_source_identity"], cache)?;
+    Ok(true)
 }
 
 fn item(name: &str, status: &str, reason: &str) -> Value {
@@ -246,7 +354,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             ));
             continue;
         }
-        let result = (|| -> Result<()> {
+        let result = (|| -> Result<bool> {
             let bytes = records::read_bytes(root, &reference.path, 1024 * 1024)?;
             use sha2::{Digest, Sha256};
             if format!("{:x}", Sha256::digest(&bytes)) != reference.sha256 {
@@ -260,15 +368,15 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
                 &mut cache,
             )
         })();
+        let complete = result.as_ref().is_ok_and(|value| *value);
+        let partial = result.as_ref().is_ok_and(|value| !*value);
         gates.push(item(
             name,
-            if result.is_ok() {
-                "validated"
-            } else {
-                "blocked"
-            },
-            if result.is_ok() {
+            if complete { "validated" } else { "blocked" },
+            if complete {
                 "sealed_scope_revalidated_not_reexecuted"
+            } else if partial {
+                "validated_partial_scope_not_required_real_world_acceptance"
             } else {
                 "evidence_failed_identity_integrity_or_scope"
             },
@@ -348,15 +456,32 @@ mod tests {
             assert!(decode(&serde_json::to_vec(&value)?).is_err());
             assert!(Options::parse(&[format!("--{key}")]).is_err());
         }
-        for name in [
-            "browser_human",
-            "native_commands",
-            "copied_operator_state",
-            "install_sigkill",
-        ] {
+        for name in ["browser_human", "native_commands", "copied_operator_state"] {
             assert!(!supported(name));
             assert!(GATES.contains(&name));
         }
+        assert!(supported("install_sigkill"));
+        assert!(supported("corpus"));
+        assert!(supported("clean_build"));
+        Ok(())
+    }
+
+    #[test]
+    fn incomplete_clean_build_evidence_is_valid_but_never_a_release_pass() -> Result<()> {
+        let selected: Manifest = serde_json::from_value(manifest())?;
+        let build = json!({
+            "schema":"mtm-clean-build-evidence-v1","milestone":"MTM-016",
+            "source_commit":selected.candidate_source_commit,
+            "selected_candidate_sha256":selected.candidate_sha256,
+            "clean_build_sha256":"e".repeat(64),"build_locked":true,"build_offline":true,
+            "detached_clean_worktree":true,"build_exit_code":0,
+            "exact_candidate_bytes_reproduced":false,"python_free_path_proven":false,
+            "production_changed":false,"release_qualified":false
+        });
+        assert!(!validate_clean_build(&build, &selected)?);
+        let mut lie = build.clone();
+        lie["exact_candidate_bytes_reproduced"] = json!(true);
+        assert!(validate_clean_build(&lie, &selected).is_err());
         Ok(())
     }
 

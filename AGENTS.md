@@ -158,6 +158,16 @@ locked `status`, `install` or `rollback` conservatively restores the pre-operati
 state before continuing. Never delete the journal before the final postcheck or
 describe persisted-prefix tests as a physical power-loss qualification.
 
+## F4/F5 release blockers and corpus
+
+Read `docs/MTM-016-F4-F5-RELEASE-CHECK.md`. `release-check` is read-only and
+fail-closed; partial evidence may be structurally valid while its gate remains
+blocked. `qualify --profile install_sigkill` is the exact-artifact external-process
+SIGKILL drill on disposable selectors. It is not physical power-loss evidence.
+Ordinary source/capability gates must clear all SIGKILL/deployment candidate test
+environment variables. The fixed 30 x 3 corpus never promotes blocked Native,
+research, browser/human or operator-state rows into passes.
+
 ## F4/F5 release blockers and task matrix
 
 Read `docs/MTM-016-F4-F5-RELEASE-CHECK.md`. `release-check --binary <artifact>

@@ -55,6 +55,7 @@ struct Receipt {
     test_stderr_sha256: String,
     test_stdout_sha256: String,
     native_preflight: Option<Value>,
+    corpus_definition_sha256: Option<String>,
 }
 
 pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) -> Result<()> {
@@ -68,7 +69,8 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
         Profile::Resource => "exact_candidate_resource_not_release",
         Profile::Upgrade => "exact_candidate_installed_upgrade_fixture_not_release",
         Profile::Permissions => "exact_candidate_scripted_patch_permissions_not_release",
-        Profile::Corpus => return Err("partial corpus is not a completed release gate".into()),
+        Profile::Corpus => "exact_candidate_partial_usability_corpus_not_release",
+        Profile::InstallSigkill => "exact_candidate_external_sigkill_install_recovery_not_release",
     };
     let runner = &report.runner;
     let source = &report.harness_source_identity;
@@ -120,6 +122,12 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
             } else {
                 None
             }
+        || (profile == Profile::Corpus
+            && !report
+                .corpus_definition_sha256
+                .as_deref()
+                .is_some_and(valid_hash))
+        || (profile != Profile::Corpus && report.corpus_definition_sha256.is_some())
     {
         return Err("qualification receipt identity, result or scope inconsistent".into());
     }
@@ -146,6 +154,10 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
             line("permissions", "MTM_PERMISSION_RUNTIME")?;
             summary::validate_permissions(&bytes, hash)?
         }
+        Profile::InstallSigkill => {
+            line("install_sigkill", "MTM_INSTALL_SIGKILL")?;
+            summary::validate_install_sigkill(&bytes, hash)?
+        }
         Profile::Upgrade => {
             line("upgrade", "MTM_UPGRADE_RUNTIME")?;
             summary::validate_upgrade(&bytes, hash, baseline)?
@@ -163,7 +175,19 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
             }
             summary::validate(&bytes, hash, profile)?
         }
-        Profile::Corpus => return Err("partial corpus is not a completed release gate".into()),
+        Profile::Corpus => {
+            line("corpus", "MTM_USABILITY_CORPUS")?;
+            let checked = summary::validate_corpus(&bytes, hash)?;
+            if checked["corpus"]["passed"] != true
+                || report.corpus_definition_sha256.as_deref()
+                    != checked["corpus"]["corpus_sha256"].as_str()
+            {
+                return Err(
+                    "corpus receipt is valid partial evidence, not a completed release gate".into(),
+                );
+            }
+            checked
+        }
     };
     if &checked != summaries {
         return Err("qualification summary has extra or inconsistent fields".into());

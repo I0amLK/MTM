@@ -6,6 +6,10 @@ use serde::Deserialize;
 mod corpus;
 pub(super) use corpus::validate as validate_corpus;
 
+#[path = "install_sigkill_summary.rs"]
+mod install_sigkill;
+pub(super) use install_sigkill::validate as validate_install_sigkill;
+
 #[path = "permission_summary.rs"]
 mod permissions;
 pub(super) use permissions::validate as validate_permissions;

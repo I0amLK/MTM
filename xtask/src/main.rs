@@ -160,6 +160,9 @@ fn run() -> Result<()> {
                 eprintln!("[source-check] {label}");
                 let status = Command::new(&cargo)
                     .env_remove("MTM_TEST_CORPUS_PROFILE")
+                    .env_remove("MTM_TEST_INSTALL_SIGKILL_PROFILE")
+                    .env_remove("MTM_TEST_DEPLOYMENT_CANDIDATE")
+                    .env_remove("MTM_TEST_DEPLOYMENT_CANDIDATE_SHA256")
                     .env_remove("MTM_TEST_CANDIDATE")
                     .env_remove("MTM_TEST_CANDIDATE_SHA256")
                     .env_remove("MTM_TEST_TARGET_PROFILE")
@@ -210,6 +213,9 @@ fn run() -> Result<()> {
             }
         }
         "help" | "--help" | "-h" => {
+            println!(
+                "cargo xtask qualify --profile install_sigkill --binary <artifact> --sha256 <sha256> [--record]"
+            );
             println!(
                 "cargo xtask qualify --profile corpus --binary <artifact> --sha256 <sha256> [--record]"
             );

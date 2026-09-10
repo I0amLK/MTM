@@ -2488,6 +2488,23 @@
       "remaining_python_files":67,"legacy_rust_reference_files":81,"python_files_deleted_this_round":0,
       "product_source_changed":false,"production_changed":false,"new_suppressions":0,
       "rust_only_ready":false,"release_qualified":false,"earlier_signature_mismatch_explained":false
+    },
+    {
+      "id":"MTM016-F4-SIGKILL-ADAPTER-IMPLEMENTATION",
+      "status":"implemented_pending_post_commit_exact_qualification",
+      "round4_status":"in_progress",
+      "round5_status":"in_progress",
+      "base_commit":"6d2bd4a7e04b79431d3090d77e160693ae25caa5",
+      "candidate_source_commit":"cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+      "candidate_sha256":"589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8",
+      "changes":["Release-check validates partial corpus, clean-build and install-interruption evidence without promoting incomplete scopes", "Exact-artifact install_sigkill profile runs a real external rollback child, observes a strict partial durable selector prefix and sends SIGKILL from the parent", "A fresh status process must recover all eight selectors to the active candidate and clear the journal; final rollback must restore original selector bytes and modes", "Source/capability gates clear install-SIGKILL and deployment-candidate environment variables so specialized profiles cannot contaminate ordinary tests"],
+      "development_validation":[{"command":"cargo test --locked --offline -p mtm-xtask","exit_code":0,"unit_tests":74},{"command":"cargo clippy --locked --offline -p mtm-xtask -p mtm-cli --tests -- -D warnings","exit_code":0},{"command":"direct exact F3 external SIGKILL test","exit_code":0,"selector_count":8,"partial_restored_selectors":1,"kill_signal":9,"recovered_all_candidate_selectors":true,"final_previous_bytes_and_modes_restored":true}],
+      "clean_build_observation":{"source_commit":"cc17b1688a2deda7db3dde4b2dbf63199bf48b13","locked":true,"offline":true,"build_exit_code":0,"selected_candidate_sha256":"589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8","clean_build_sha256":"512f0e1ba4d90c476b1e44141cc832eb3d3a1093d11b385f96b86bbae5fa3a05","exact_candidate_bytes_reproduced":false,"python_free_path_proven":false},
+      "acceptance_boundary":"Development SIGKILL success is not sealed release evidence until rerun after this harness commit. Clean build is valid negative evidence and remains blocked because bytes differ and Python-free PATH was not proven. Physical power loss, shared filesystems and production selectors remain outside scope.",
+      "pending":["Commit harness then rerun exact install_sigkill qualification and seal its receipt", "Re-run release-check with true install-SIGKILL evidence", "Capable-host Native/TTY/CAS, compiled LaTeX, retrieval, browser/human consent and operator-state evidence", "45 blocked corpus trials, remaining D retirement and final release authorization"],
+      "product_source_changed":false,"production_changed":false,"new_suppressions":0,
+      "remaining_python_files":67,"legacy_rust_reference_files":81,
+      "rust_only_ready":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

@@ -53,12 +53,14 @@ entries without altering production state.
 ## Current implemented boundary
 
 The release checklist has 14 required evidence categories plus current record
-integrity, retirement provenance and Rust-only inventory. Six evidence adapters
-currently revalidate source/protocol/permissions/upgrade/target/resource reports.
-The other eight require further reviewed evidence adapters and cannot become
-accepted by adding a `passed` field or an override. This checkpoint is not a fully
-implemented release authorization mechanism. Install and dist remain explicit
-local mechanics, not tools that confer release qualification.
+integrity, retirement provenance and Rust-only inventory. Nine evidence adapters
+now cover source/protocol/permissions/upgrade/target/resource, clean-build,
+install-SIGKILL and corpus reports. Clean-build and corpus can validate honest
+partial evidence without making their gates pass. The remaining five categories
+still require reviewed evidence adapters and cannot become accepted by adding a
+`passed` field or an override. This checkpoint is not a fully implemented release
+authorization mechanism. Install and dist remain explicit local mechanics, not
+tools that confer release qualification.
 
 The initial matrix yielded 42 successful portable trials, three U15 failures and
 45 blocked trials. U15 used a malformed handle that the public JSON schema
@@ -119,3 +121,21 @@ not discharge the incomplete source/Native/full-corpus/retirement gates. Eight
 forward evidence adapters remain unfinished. The delivery receipt is
 `MTM016-F4-F5-DELIVERY` in `records/iterations/ITER-016.json`. No push, installation
 selector switch, production database read/write or secret change occurred.
+
+Subsequent F4 work adds an exact-artifact `install_sigkill` qualification profile.
+It starts the selected candidate as an external process, installs eight disposable
+regular-file selectors, starts a real rollback, waits until the durable recovery
+journal and a strict partial selector prefix are simultaneously observable, then
+sends SIGKILL from the parent test process. The next separately started `status`
+must reconstruct the active candidate on every selector and remove the journal;
+a final rollback must then reproduce every original selector byte hash and mode.
+This is process-kill evidence, not physical power-loss, controller-cache or shared
+filesystem evidence. The profile environment is explicitly cleared from ordinary
+source/capability gates so it cannot alter unrelated tests.
+
+A detached clean worktree at source commit `cc17b16` was also built with the
+locked dependency graph in offline mode. The build succeeded, but its artifact
+SHA-256 was `512f0e1ba4d90c476b1e44141cc832eb3d3a1093d11b385f96b86bbae5fa3a05`,
+not the selected F3 candidate SHA-256 `589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8`.
+The clean-build gate therefore remains blocked; no reproducible-build claim is
+made and Python-free PATH was not proven by that observation.
