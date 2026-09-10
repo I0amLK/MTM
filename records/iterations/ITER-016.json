@@ -2802,11 +2802,26 @@
       "candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
       "acceptance_boundary":"The actual launcher comparison is diagnostic evidence, not a new exact-candidate OAuth/MCP/Bubblewrap qualification. Synthetic regression tests exercise the actual PATH builder but use no Magma license or algebra engine. The full Native gate remains blocked until its explicit real-host run passes. Existing operator validation files and earlier evidence remain unchanged.",
       "whole_host_path_inherited":false,"license_configuration_modified":false,"production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-NATIVE-COMMANDS-REAL-HOST-DELIVERY",
+      "status":"native_commands_gate_validated_compiled_latex_pending",
+      "harness_commit":"a323ed8058160db772ec01d5633e5a6c6f3a707c",
+      "harness_source_sha256":"58a4684933afebcfe786cc84c8d4aa2ec72de9ef292f1d7d116c5aa02bc784b0",
+      "candidate_source_commit":"cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+      "candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+      "real_host_preflight":{"passed":true,"ready_for_native_tests":true,"native_backend":"bubblewrap","new_user_namespace":true,"new_mnt_namespace":true,"new_net_namespace":true,"new_pid_namespace":true,"new_ipc_namespace":true,"new_uts_namespace":true,"workspace_not_mounted":true,"capabilities_dropped":true,"environment_cleared":true,"further_user_namespace_denied":true},
+      "native_commands":{"safe_mode_passed":true,"trusted_mode_passed":true,"dangerous_mode_passed":true,"permission_kinds_granted":7,"permission_soak_cycles":32,"permission_grant_soak_passed":true,"tty_stdin_passed":true,"timeout_kill_passed":true,"descendant_cleanup_passed":true,"sage_functional_passed":true,"magma_functional_passed":true,"scripted_consent_only":true,"browser_human_consent_tested":false},
+      "runner":{"exit_code":0,"elapsed_ms":15949,"child_reaped":true,"pipes_closed":true,"timed_out":false,"output_limit_exceeded":false},
+      "sealed_reports":[{"path":"records/evidence/MTM-016/candidate-native-commands-f6-a323ed8.json","sha256":"00140fc56bcad8227154b899ffe644855fbd78c7ce317fc332657c6fe3b30cf0","passed":true},{"path":"records/evidence/MTM-016/release-check-f6-native-a323ed8.json","sha256":"1cb5581a71d18093a23123ac91f78d76f520ac151ecba7dadb168f2abcdd882a","passed":false}],
+      "release_readiness":{"validated_gates":10,"blocked_gates":7,"native_commands":"validated","compiled_latex":"blocked_required_evidence_missing","source":"blocked_existing_failed_scope","release_qualified":false},
+      "acceptance_boundary":"This is exact-candidate capable-host Native command evidence through the public OAuth/MCP boundary. Scripted consent is not human consent. The source, target, resource, compiled-LaTeX, browser-human, copied-operator-state and incomplete corpus gates remain independent. No production selector or production state was changed.",
+      "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
     "Preserve the current E-stage evidenced-recovery/no-replay matrix through exact-candidate and final release qualification; never infer legacy opaque outcomes.",
-    "Preserve visibility of 81 compatibility-name references and defer four obsolete Rust shadow binaries to a separately rebuilt candidate; neither is first-party Python authority.",
+    "Preserve visibility of 82 compatibility-name references and defer four obsolete Rust shadow binaries to a separately rebuilt candidate; neither is first-party Python authority.",
     "Complete typed MTM-owned contracts and real-client validation after the Rust registry and legacy alias retirement checkpoint.",
     "Exercise exact candidate through Native isolation, full Rethlas, retrieval, LaTeX, reconnect and rollback.",
     "Complete the representative 30-task, three-repeat usability corpus."
