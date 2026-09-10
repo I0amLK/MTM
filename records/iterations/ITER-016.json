@@ -2904,6 +2904,26 @@
       "observation_reexecuted_by_append":false,
       "acceptance_boundary":"This late reported local result neither replaces the real-host 137/1/1 failure report nor satisfies the source gate. The separate boundary-review receipt records the later 83 maintenance unit tests and current strict checks. A fresh stable-commit capable-host source run is still required.",
       "production_changed":false,"frozen_candidate_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-SOURCE-REAL-HOST-DELIVERY",
+      "status":"source_gate_validated_target_resource_and_remaining_release_gates_pending",
+      "harness_commit":"cbf581238435c4ade1525f957a48e8e6551be7ec",
+      "harness_source_sha256":"9c9f60f113b951bf671537e52f1cd78c0af2eff75029cf990300d42cb7873fad",
+      "candidate_source_commit":"cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+      "candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+      "operator_receipt_recorded_unix_seconds":1789049688,
+      "source_run":{"scope":"rust_source_with_inherited_host_tests","format_exit_code":0,"clippy_exit_code":0,"rust_tests_exit_code":0,"diff_exit_code":0,"native_environment_ready":true,"source_unchanged":true,"interpretation":"workspace_command_passed_with_native_prerequisites","tests_skipped_by_preflight":false,"commit_hook_executable_checked":true},
+      "operator_log":{"attachment":"Pasted text(2).txt","sha256":"e9074db745baad5cdb790b82b08111f08cd51bf501ad659075ee13935004a607","terminal_excerpt_starts_mid_runtime_output":true,"contains_complete_source_receipt":true,"runtime_passed":140,"runtime_failed":0,"runtime_existing_ignored":1,"formerly_failing_magma_source_test":"ok","workflow_unit_passed":95,"workflow_integration_passed":12,"maintenance_unit_passed":83,"maintenance_cli_passed":13,"doc_targets_completed":7,"doc_examples_executed":0,"whole_workspace_test_count_inferred":false},
+      "sealed_reports":[{"path":"records/evidence/MTM-016/source-check-f6-cbf5812.json","sha256":"0dd42579c2a9f3f391cc5a14506ae1e6225603e499edd15a749312239f819898","passed":true},{"path":"records/evidence/MTM-016/release-check-f6-source-cbf5812.json","sha256":"773409dae7dd8d032eff7fd2698a437662452391cc6a9c7ee229b642f58b420f","passed":false}],
+      "repository_review":{"source_report_archived_byte_for_byte_from_validation":true,"current_raw_source_hash_revalidated_by_existing_source_adapter":true,"source_tree_matches_report_commit":true,"source_tests_reexecuted_during_sealing":false,"candidate_bytes_unchanged":true,"runtime_or_harness_code_changed_during_sealing":false,"release_check_policy_changed_during_sealing":false,"previous_source_failure_preserved":true},
+      "release_readiness":{"validated_gates":12,"blocked_gates":5,"source":"validated","native_commands":"validated","compiled_latex":"validated","remaining_gates":["target","resource","browser_human","copied_operator_state","corpus"],"release_check_exit_code":1,"release_qualified":false},
+      "corpus":{"passed_trials":48,"failed_trials":0,"blocked_trials":42,"complete":false,"source_profile_functions_not_counted_as_explicit_corpus_or_target_trials":true},
+      "pending_field_interpretation":"The source report and retirement-family pending strings are fixed scope notices, not a live aggregate of release inputs. Preserve their original bytes; the current release-check, independently sealed profile receipts and remaining corpus determine readiness.",
+      "preserved_prior_evidence":{"failed_source_sha256":"94ff2242763e58762aea2b0346908b00990205ba93fffa34e1cba2d504be5db6","native_commands_sha256":"00140fc56bcad8227154b899ffe644855fbd78c7ce317fc332657c6fe3b30cf0","compiled_latex_sha256":"2994cdd7848a9a2d7e4a6f1a79d30a15ca203ac1249e61aff48499b10da0fb22"},
+      "acceptance_boundary":"This seals the operator's stable-commit complete source command on the capable host. The original optional real-DNS/HTTPS test remains ignored, not counted as a pass. Dedicated profile functions in ordinary source tests are not explicit exact-candidate qualifications. No independent mathematical, browser-human, copied operator-state, resource or complete-corpus acceptance is inferred. Earlier failed source observations remain failed and immutable. This evidence-only change grants no deployment authority.",
+      "operator_next_step":"Run exact-candidate qualify --profile target --record on the capable host; retain its bounded report and do not change source or run concurrent Cargo workloads. Resource qualification remains a separate explicit candidate/baseline comparison.",
+      "production_changed":false,"frozen_candidate_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
