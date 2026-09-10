@@ -2817,6 +2817,15 @@
       "release_readiness":{"validated_gates":10,"blocked_gates":7,"native_commands":"validated","compiled_latex":"blocked_required_evidence_missing","source":"blocked_existing_failed_scope","release_qualified":false},
       "acceptance_boundary":"This is exact-candidate capable-host Native command evidence through the public OAuth/MCP boundary. Scripted consent is not human consent. The source, target, resource, compiled-LaTeX, browser-human, copied-operator-state and incomplete corpus gates remain independent. No production selector or production state was changed.",
       "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-COMPILED-LATEX-STAGE-DIAGNOSTICS",
+      "status":"diagnostics_added_after_real_host_compiled_latex_runner_failure",
+      "observed_real_host_boundary":{"candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724","native_preflight_passed":true,"runner_exit_code":101,"runner_elapsed_ms":5536,"failed_stage":"summary_validation","raw_diagnostics_withheld":true},
+      "change":"Add bounded fixed MTM_COMPILED_LATEX_DIAGNOSTIC stage labels for environment, latexmk execution/output, pdflatex execution/artifact, compact/full/repair workflow calls and each shell-escape transition. Executable failures include only ok/status/exit_code/signal/error_code; workflow failures expose only fixed stage names.",
+      "purpose":"Identify the first failing compiled-LaTeX boundary on the capable host without recording proof text, command output bodies, tokens, capabilities or private state.",
+      "acceptance_boundary":"Diagnostic labels do not weaken required-LaTeX policy or count as compiled-LaTeX evidence. The failed receipt remains failed until a committed harness is rerun successfully on the capable host.",
+      "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
