@@ -27,6 +27,26 @@ mod permission_client;
 
 const MAX_RESPONSE: usize = 2 * 1024 * 1024;
 const IO_TIMEOUT: Duration = Duration::from_secs(5);
+// Magma's installed launcher resolves its symlink, sibling executable and
+// platform with these three utilities. Do not inherit the entire host PATH.
+const NATIVE_COMMAND_TOOLS: &[&str] = &[
+    "cat", "curl", "dirname", "magma", "printf", "readlink", "rm", "sage", "script", "sh", "sleep",
+    "true", "uname",
+];
+
+fn link_profile_tools(tools: &Path, names: &[&str], search_path: &std::ffi::OsStr) -> Result {
+    for name in names {
+        let program = std::env::split_paths(search_path)
+            .map(|path| path.join(name))
+            .find(|path| path.is_file())
+            .ok_or("required test executable is unavailable")?
+            .canonicalize()
+            .map_err(|_| "test executable cannot be resolved")?;
+        std::os::unix::fs::symlink(program, tools.join(name))
+            .map_err(|_| "minimal test PATH setup failed")?;
+    }
+    Ok(())
+}
 
 struct HttpPayload<'a> {
     content_type: &'a str,
@@ -188,9 +208,7 @@ impl Server {
             false,
             mode.as_str(),
             None,
-            &[
-                "cat", "curl", "magma", "printf", "rm", "sage", "script", "sh", "sleep", "true",
-            ],
+            NATIVE_COMMAND_TOOLS,
         )
     }
 
@@ -361,19 +379,9 @@ impl Server {
         names.extend(extra_tools.iter().copied());
         names.sort_unstable();
         names.dedup();
-        for name in names {
-            let program = std::env::var_os("PATH")
-                .and_then(|paths| {
-                    std::env::split_paths(&paths)
-                        .map(|path| path.join(name))
-                        .find(|path| path.is_file())
-                })
-                .ok_or("required test executable is unavailable")?
-                .canonicalize()
-                .map_err(|_| "test executable cannot be resolved")?;
-            std::os::unix::fs::symlink(program, tools.join(name))
-                .map_err(|_| "minimal test PATH setup failed")?;
-        }
+        let search_path =
+            std::env::var_os("PATH").ok_or("required test executable is unavailable")?;
+        link_profile_tools(&tools, &names, &search_path)?;
         let mut random = [0_u8; 32];
         getrandom::fill(&mut random).map_err(|_| "test randomness unavailable")?;
         let mut server = Self {
@@ -844,6 +852,98 @@ pub fn sha256_file(path: &Path) -> Result<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::os::unix::fs::{PermissionsExt, symlink};
+
+    // No Magma installation, license, CAS result, server or Bubblewrap is used.
+    // This exercises the real PATH builder with a symlinked launcher whose
+    // three bootstrap dependencies match the installed Magma shell launcher.
+    fn launcher_fixture() -> Result<tempfile::TempDir> {
+        let root = tempfile::tempdir().map_err(|_| "launcher fixture directory")?;
+        let stack = root.path().join("tool stack with spaces");
+        let available = root.path().join("available");
+        fs::create_dir(&stack).map_err(|_| "launcher stack directory")?;
+        fs::create_dir(&available).map_err(|_| "launcher search directory")?;
+        for (name, body) in [
+            (
+                "magma",
+                "#!/bin/sh\nFULLPATH=$(readlink -f -- \"$0\" 2>/dev/null) || exit 1\nROOT=$(dirname \"$FULLPATH\") || exit 2\nPLATFORM=$(uname) || exit 3\n[ \"$PLATFORM\" = Linux ] || exit 4\nexec \"$ROOT/worker\"\n",
+            ),
+            ("worker", "#!/bin/sh\nprintf 'launcher-bootstrap-ok\\n'\n"),
+        ] {
+            let file = stack.join(name);
+            fs::write(&file, body).map_err(|_| "launcher fixture write")?;
+            fs::set_permissions(&file, fs::Permissions::from_mode(0o700))
+                .map_err(|_| "launcher fixture mode")?;
+        }
+        let names = NATIVE_COMMAND_TOOLS
+            .iter()
+            .copied()
+            .chain(["readlink", "dirname", "uname", "not_requested"])
+            .collect::<std::collections::BTreeSet<_>>();
+        for name in names {
+            let target = match name {
+                "magma" => stack.join("magma"),
+                "readlink" | "dirname" | "uname" => Path::new("/usr/bin").join(name),
+                _ => PathBuf::from("/bin/true"),
+            };
+            symlink(target, available.join(name)).map_err(|_| "launcher available tool")?;
+        }
+        Ok(root)
+    }
+
+    fn run_launcher(root: &Path, label: &str, names: &[&str]) -> Result<std::process::Output> {
+        let tools = root.join(label);
+        fs::create_dir(&tools).map_err(|_| "launcher tool directory")?;
+        link_profile_tools(&tools, names, root.join("available").as_os_str())?;
+        require(
+            !tools.join("not_requested").exists()
+                && fs::read_dir(&tools)
+                    .map_err(|_| "launcher PATH entries")?
+                    .count()
+                    == names.len(),
+            "minimal PATH unexpectedly inherited unlisted tools",
+        )?;
+        Command::new(tools.join("magma"))
+            .env_clear()
+            .env("PATH", &tools)
+            .env("HOME", root)
+            .current_dir(root)
+            .stdin(Stdio::null())
+            .output()
+            .map_err(|_| "launcher fixture execution")
+    }
+
+    #[test]
+    fn native_profile_supplies_symlinked_launcher_bootstrap_dependencies() -> Result {
+        let root = launcher_fixture()?;
+        let output = run_launcher(root.path(), "native-path", NATIVE_COMMAND_TOOLS)?;
+        require(
+            output.status.success(),
+            "Native profile omitted launcher bootstrap tools",
+        )?;
+        require(
+            output.stdout == b"launcher-bootstrap-ok\n" && output.stderr.is_empty(),
+            "launcher bootstrap or sibling resolution failed",
+        )
+    }
+
+    #[test]
+    fn missing_each_launcher_dependency_fails_without_inheriting_host_path() -> Result {
+        let root = launcher_fixture()?;
+        for (index, missing) in ["readlink", "dirname", "uname"].into_iter().enumerate() {
+            let names = NATIVE_COMMAND_TOOLS
+                .iter()
+                .copied()
+                .filter(|name| *name != missing)
+                .collect::<Vec<_>>();
+            let output = run_launcher(root.path(), missing, &names)?;
+            require(
+                output.status.code() == Some((index + 1) as i32) && output.stdout.is_empty(),
+                "missing launcher dependency did not fail at its own stage",
+            )?;
+        }
+        Ok(())
+    }
 
     #[test]
     fn ambiguous_truncated_or_non_http_responses_fail_closed() {

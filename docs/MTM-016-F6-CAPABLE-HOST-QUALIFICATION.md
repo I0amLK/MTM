@@ -52,7 +52,28 @@ command grant mechanics only and never satisfy the independent browser/human-con
 gate.
 
 Required host commands include `bwrap`, `curl`, `git`, `script`, `cat`, `sh`,
-`sleep`, `printf`, `rm`, `sage`, and `magma`.
+`sleep`, `printf`, `rm`, `sage`, `magma`, `readlink`, `dirname`, and `uname`.
+The last three are bootstrap dependencies of the inspected Magma launcher, not
+extra CAS implementations. The Native test profile links only the named programs;
+it does not inherit the full host PATH or copy host license settings.
+
+### Magma launcher PATH regression
+
+The operator's batch-mode rerun still returned exit code 1, disproving the earlier
+claim that changing file input to `magma -b` alone fixed the failure. The launcher
+uses `readlink -f` to resolve its symlink, `dirname` to find its sibling installation,
+and `uname` to select the platform. The original F6 PATH omitted all three.
+
+A disposable comparison in the existing MTM execution sandbox reproduced exit 1
+with the exact original F6 program list, then exit 0 and output `42` after adding
+only these three utilities, with the same launcher, input and cleared environment.
+This is startup-path diagnostic evidence, not an exact-candidate Native gate pass.
+
+The permanent regression exercises the same tool-link builder and Native tool list
+with a synthetic symlinked launcher in a directory containing spaces. Its positive
+case failed before the fix. Negative cases remove each helper separately and must
+fail rather than resolve it from the inherited host PATH. They use no Magma license
+or algebra engine and cannot serve as functional CAS evidence.
 
 ## Compiled-LaTeX profile
 

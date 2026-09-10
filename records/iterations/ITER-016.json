@@ -2787,6 +2787,21 @@
       "correction":"Invoke argv=[\"magma\",\"-b\"] with bounded stdin containing the fixed arithmetic fixture and require exit 0 plus an exact output line 42. Remove the unnecessary workspace Magma source file.",
       "acceptance_boundary":"This aligns F6 with the existing accepted Magma CLI contract. Candidate bytes, Bubblewrap isolation, Native permissions, process lifecycle and production state are unchanged. A new capable-host exact-candidate run remains required.",
       "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-MAGMA-BOOTSTRAP-PATH-REPAIR",
+      "status":"harness_repaired_exact_candidate_real_host_rerun_pending",
+      "base_commit":"79ed52861ba8d33bc43b0209a28d2c5b0f50a1f4",
+      "corrects_root_cause_of":"MTM016-F6-MAGMA-BATCH-INVOCATION-FIX",
+      "correction_to_prior_attribution":"The operator reran magma -b through the frozen candidate and still observed stage=magma, ok=true, status=exited, exit_code=1. The previous assertion that file input versus batch stdin was the root cause was not established and is superseded by this controlled PATH comparison. It is not evidence of a license failure.",
+      "root_cause_reproduced":"The installed Magma shell launcher needs readlink -f, dirname and uname to locate its real installation and select its executable. All three were absent from the F6 Native profile's minimal tool PATH. The same real launcher and batch input, in an environment-cleared disposable directory inside the existing MTM exec sandbox, returned 1 with the exact original F6 tool list and returned 0 with exact output 42 after adding only those three utilities.",
+      "sealed_reports":[{"path":"records/evidence/MTM-016/magma-bootstrap-path-comparison-79ed528.json","sha256":"814eecf2ef663061db2c9e14c424a395f4d35ff95e611db2a60f5c441468555c"}],
+      "changes":["Declare readlink, dirname and uname in the Native qualification tool list only", "Reuse the same profile tool-link builder in permanent symlinked-launcher regression tests", "Exercise a tool installation path containing spaces and verify that unlisted host tools are not inherited", "Remove each bootstrap utility separately in negative tests"],
+      "regression":{"positive_test_failed_before_fix":true,"before_exit_code":101,"after_targeted_tests_passed":3,"after_targeted_tests_failed":0,"synthetic_test_is_CAS_evidence":false},
+      "validation":{"format_exit_code":0,"workspace_clippy_warnings_denied_exit_code":0,"mtm_xtask_unit_tests_passed":81,"mtm_xtask_cli_tests_passed":13,"capability_runtime_exit_code":0,"capability_runtime_functions_passed":51,"capability_runtime_functions_failed":0,"explicit_real_host_profiles_enabled":false,"records_exit_code":0,"retirement_exit_code":0,"audit_strict_exit_code":0,"diff_check_exit_code":0,"full_workspace_tests_rerun":false},
+      "candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+      "acceptance_boundary":"The actual launcher comparison is diagnostic evidence, not a new exact-candidate OAuth/MCP/Bubblewrap qualification. Synthetic regression tests exercise the actual PATH builder but use no Magma license or algebra engine. The full Native gate remains blocked until its explicit real-host run passes. Existing operator validation files and earlier evidence remain unchanged.",
+      "whole_host_path_inherited":false,"license_configuration_modified":false,"production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

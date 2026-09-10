@@ -1,0 +1,24 @@
+{
+  "schema": "mtm-magma-bootstrap-path-diagnostic-v1",
+  "milestone": "MTM-016",
+  "scope": "launcher_path_comparison_not_exact_candidate_qualification",
+  "source_commit_before_fix": "79ed52861ba8d33bc43b0209a28d2c5b0f50a1f4",
+  "launcher_script_sha256": "4a3b6cfae16e7c4a0a6d26c094aa157adf57ded5f7faa7af645a06a5104f292e",
+  "execution_context": "existing_MTM_native_exec_sandbox",
+  "candidate_launched": false,
+  "original_path_programs": ["bwrap", "cat", "curl", "git", "magma", "printf", "rm", "sage", "script", "sh", "sleep", "true"],
+  "added_path_programs": ["readlink", "dirname", "uname"],
+  "same_launcher_and_batch_input": true,
+  "environment_cleared": true,
+  "home_and_tmpdir": "owned_disposable_directories",
+  "per_invocation_timeout_seconds": 10,
+  "observations": [
+    {"case": "original_minimal_path", "exit_code": 1, "root_setup_error": true, "output_is_exact_42": false},
+    {"case": "plus_three_bootstrap_tools", "exit_code": 0, "root_setup_error": false, "output_is_exact_42": true}
+  ],
+  "raw_stdout_stderr_recorded": false,
+  "license_configuration_modified": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "limitations": ["This comparison does not launch the frozen candidate through OAuth/MCP or qualify its Bubblewrap path.", "A new exact-candidate real-host Native run is still required; no license failure or batch-input root cause is inferred from exit code 1 alone."]
+}
