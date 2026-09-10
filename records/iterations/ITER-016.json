@@ -2732,6 +2732,16 @@
       "operator_next_step":"Run the same committed checkout on a capable host; overwrite the validation preflight with a positive real-host result, then run exact native_commands and compiled_latex qualification receipts without hand editing JSON.",
       "acceptance_boundary":"The nested-environment ENOSPC observation is negative environment evidence only. It neither fails the frozen candidate nor satisfies any Native/LaTeX gate. Real-host receipts remain required and release_qualified stays false.",
       "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-NATIVE-STAGE-DIAGNOSTICS",
+      "status":"diagnostic_labels_added_after_real_host_runner_failure",
+      "base_commit":"fb825b12d4fd36f6d8c378a34a2080ce4198b89b",
+      "observed_real_host_boundary":{"native_preflight_passed":true,"ready_for_native_tests":true,"candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724","runner_exit_code":101,"runner_elapsed_ms":6758,"failed_stage":"summary_validation","candidate_launched_claim_withheld":true},
+      "change":"The Native qualification harness now emits a bounded fixed MTM_NATIVE_DIAGNOSTIC stage label plus ok/status/exit_code/signal/error_code only when a public exec_command does not exit successfully. It never prints command arguments, stdout/stderr, tokens, capabilities or environment values.",
+      "purpose":"Distinguish safe/trusted/dangerous smoke, each named command-permission class, Sage and Magma without weakening the qualification validator or exposing secrets.",
+      "acceptance_boundary":"The real-host failure remains unresolved until the labelled rerun identifies and then clears the failing candidate behavior or harness assumption. Native commands, compiled LaTeX and release qualification remain blocked.",
+      "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

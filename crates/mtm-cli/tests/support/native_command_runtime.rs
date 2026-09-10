@@ -103,19 +103,36 @@ fn permission_required(server: &Server, owner: &Client, arguments: &Value) -> Re
     )
 }
 
-fn completed_exec(server: &Server, owner: &Client, arguments: &Value) -> Result<Value> {
+fn completed_exec(
+    server: &Server,
+    owner: &Client,
+    stage: &'static str,
+    arguments: &Value,
+) -> Result<Value> {
     let result = server.call(owner, "exec_command", arguments.clone())?;
-    require(
-        result["ok"] == true && result["status"] == "exited" && result["exit_code"] == 0,
-        "Native command did not exit successfully",
-    )?;
+    if !(result["ok"] == true && result["status"] == "exited" && result["exit_code"] == 0) {
+        eprintln!(
+            "MTM_NATIVE_DIAGNOSTIC stage={stage} ok={} status={} exit_code={} signal={} error_code={}",
+            result["ok"],
+            result["status"],
+            result["exit_code"],
+            result["signal"],
+            result["error"]["code"]
+        );
+        return Err("Native command did not exit successfully");
+    }
     Ok(result)
 }
 
-fn exact_once_case(server: &Server, owner: &Client, kind: &str, arguments: &Value) -> Result {
+fn exact_once_case(
+    server: &Server,
+    owner: &Client,
+    kind: &'static str,
+    arguments: &Value,
+) -> Result {
     permission_required(server, owner, arguments)?;
     grant_once(server, owner, kind, arguments)?;
-    completed_exec(server, owner, arguments)?;
+    completed_exec(server, owner, kind, arguments)?;
     permission_required(server, owner, arguments)
 }
 
@@ -147,7 +164,12 @@ fn mode_smoke(binary: &str, mode: NativeMode) -> Result {
             "env":{"API_TOKEN":"fixture-value"},"yield_time_ms":30_000
         }),
     };
-    let result = completed_exec(&server, &owner, &arguments)?;
+    let stage = match mode {
+        NativeMode::Safe => "mode_safe",
+        NativeMode::Trusted => "mode_trusted",
+        NativeMode::Dangerous => "mode_dangerous",
+    };
+    let result = completed_exec(&server, &owner, stage, &arguments)?;
     require(
         text(&result, "stdout")?.contains("ok"),
         "Native mode smoke returned unexpected output",
@@ -297,6 +319,7 @@ fn cas_functions(binary: &str) -> Result<(bool, bool)> {
     let sage = completed_exec(
         &server,
         &owner,
+        "sage",
         &json!({"argv":["sage","-c","print(6*7)"],"timeout_ms":120_000,"yield_time_ms":30_000}),
     )?;
     require(
@@ -314,6 +337,7 @@ fn cas_functions(binary: &str) -> Result<(bool, bool)> {
     let magma = completed_exec(
         &server,
         &owner,
+        "magma",
         &json!({"argv":["magma","magma-check.m"],"timeout_ms":120_000,"yield_time_ms":30_000}),
     )?;
     require(
