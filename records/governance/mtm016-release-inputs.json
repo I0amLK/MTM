@@ -10,6 +10,7 @@
     "permissions": {"path":"records/evidence/MTM-016/candidate-permissions-f5-final-a5a3cde.json","sha256":"cea40a8e37a73d8517c0b0996d06dd07ff0936e8d5b7b7c49698f4d518c9797b"},
     "upgrade": {"path":"records/evidence/MTM-016/candidate-upgrade-f5-final-a5a3cde.json","sha256":"f3e46574d1a1c4ec273acf665316a649982a5cb04de43f33da7dd52ebcfff0bb"},
     "target": {"path":"records/evidence/MTM-016/candidate-target-f6-e829a16.json","sha256":"031b53a53fcf829eaeb0779cfdc9e274a93b9352e56d1fc5608de8e719a321c1"},
+    "resource": {"path":"records/evidence/MTM-016/candidate-resource-f6-af2b4e2-failed.json","sha256":"cca505d40d148509646896dda0c6a875389aa2793e10c9c452751036d0605f1f"},
     "clean_build": {"path":"records/evidence/MTM-016/clean-build-f5-final-cc17b16.json","sha256":"333bb4f7e943046fd862376eb9ae50ee3766b46e113d73ae7dbb558d12d9fb1c"},
     "native_commands": {"path":"records/evidence/MTM-016/candidate-native-commands-f6-a323ed8.json","sha256":"00140fc56bcad8227154b899ffe644855fbd78c7ce317fc332657c6fe3b30cf0"},
     "compiled_latex": {"path":"records/evidence/MTM-016/candidate-compiled-latex-f6-f9ed821.json","sha256":"2994cdd7848a9a2d7e4a6f1a79d30a15ca203ac1249e61aff48499b10da0fb22"},
