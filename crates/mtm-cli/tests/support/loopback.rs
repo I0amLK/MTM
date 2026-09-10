@@ -162,6 +162,7 @@ pub struct Server {
     native_backend: &'static str,
     native_mode: &'static str,
     latex_policy: &'static str,
+    theorem_search_url: Option<String>,
     directory: tempfile::TempDir,
     deadline: Instant,
 }
@@ -185,6 +186,17 @@ impl Server {
 
     pub fn start_permissions(binary: &str, mode: mtm_contracts::NativeMode) -> Result<Self> {
         Self::start_profile(binary, true, false, false, mode.as_str())
+    }
+
+    pub fn start_retrieval_redirect(binary: &str, theorem_search_url: &str) -> Result<Self> {
+        Self::start_profile_with_theorem(
+            binary,
+            false,
+            false,
+            false,
+            "safe",
+            Some(theorem_search_url),
+        )
     }
 
     pub fn workspace_path(&self) -> std::path::PathBuf {
@@ -264,6 +276,24 @@ impl Server {
         compiled_latex: bool,
         native_mode: &'static str,
     ) -> Result<Self> {
+        Self::start_profile_with_theorem(
+            binary,
+            git_enabled,
+            native_enabled,
+            compiled_latex,
+            native_mode,
+            None,
+        )
+    }
+
+    fn start_profile_with_theorem(
+        binary: &str,
+        git_enabled: bool,
+        native_enabled: bool,
+        compiled_latex: bool,
+        native_mode: &'static str,
+        theorem_search_url: Option<&str>,
+    ) -> Result<Self> {
         let directory = tempfile::tempdir().map_err(|_| "temporary server directory failed")?;
         fs::create_dir(directory.path().join("workspace")).map_err(|_| "workspace setup failed")?;
         // Keep the capability suite curl-only. Workspace qualification adds the
@@ -315,6 +345,7 @@ impl Server {
             } else {
                 "static_only"
             },
+            theorem_search_url: theorem_search_url.map(str::to_owned),
             directory,
             deadline: Instant::now() + Duration::from_secs(240),
         };
@@ -328,7 +359,8 @@ impl Server {
             "candidate changed before server start",
         )?;
         let root = self.directory.path();
-        let child = Command::new(&self.binary)
+        let mut command = Command::new(&self.binary);
+        command
             .env_clear()
             .env("PATH", root.join("tool-bin"))
             .env("HOME", root)
@@ -342,7 +374,11 @@ impl Server {
             .env("MTM_LATEX_POLICY", self.latex_policy)
             .env("MTM_NATIVE_EXEC_ALLOW_ROOTS", "")
             .env("MTM_WORKFLOW_PROTOCOL_VERSION", "3")
-            .env("MTM_OAUTH_PASSWORD", &self.password)
+            .env("MTM_OAUTH_PASSWORD", &self.password);
+        if let Some(url) = &self.theorem_search_url {
+            command.env("MTM_THEOREM_SEARCH_URL", url);
+        }
+        let child = command
             .args([
                 "serve",
                 "--host",

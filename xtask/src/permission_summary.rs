@@ -68,6 +68,7 @@ pub(crate) fn validate(stdout: &[u8], hash: &str) -> Result<Value> {
         "MTM_TARGET_RUNTIME ",
         "MTM_RESOURCE_RUNTIME ",
         "MTM_UPGRADE_RUNTIME ",
+        "MTM_RETRIEVAL_RUNTIME ",
         "MTM_CANDIDATE_LIFECYCLE ",
         "MTM_USABILITY_CORPUS ",
     ]

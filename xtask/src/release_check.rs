@@ -693,6 +693,16 @@ fn validate_evidence(
         return validate_compiled_latex(value, manifest);
     }
     if name == "retrieval" {
+        if value["schema_version"] == "1.0.0" && value["profile"] == "retrieval" {
+            qualify::validate_receipt(
+                value,
+                &manifest.candidate_sha256,
+                &manifest.baseline_sha256,
+                name,
+            )?;
+            lineage(root, &value["harness_source_identity"], cache)?;
+            return Ok(true);
+        }
         return validate_retrieval(value, manifest);
     }
     if name == "browser_human" {

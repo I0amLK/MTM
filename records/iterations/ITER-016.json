@@ -2596,6 +2596,25 @@
       "product_source_changed":false,"production_changed":false,"new_suppressions":0,
       "remaining_python_files":67,"legacy_rust_reference_files":81,
       "rust_only_ready":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F4-RETRIEVAL-IMPLEMENTATION",
+      "status":"implemented_source_tested_pending_post_commit_exact_receipt",
+      "round4_status":"in_progress",
+      "round5_status":"in_progress",
+      "base_commit":"33e9b04",
+      "candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+      "scope":"Exact candidate launches its real CurlResearchProvider on disposable workflow state. The profile performs three successful external HTTPS requests across LeanSearch and OpenAlex and one real cross-domain redirect denial. It records no returned research bodies or credentials.",
+      "successful_requests":["LeanSearch theorem_search","OpenAlex paper_search","OpenAlex paper_lookup"],
+      "redirect_test":"A second disposable candidate uses an HTTPS httpbin redirect endpoint targeting example.com; the candidate must reject the changed final host with RESEARCH_REDIRECT_DENIED.",
+      "development_failure":{"exit_code":101,"classification":"qualification_harness_request_schema_error","cause":"paper_lookup test request incorrectly supplied num_results, which the public schema rejects before the product lookup path","repair":"remove unsupported test field only; product schema and implementation unchanged","evidence":"records/evidence/MTM-016/retrieval-f4-development-observation.json","sha256":"2324e139befcf9f162e904233be52b99b455cf337be1d6d28c3f1f7d1073e4b4"},
+      "development_retest":{"exit_code":0,"request_count":4,"successful_external_requests":3,"independent_source_count":2,"redirect_policy_checked":true,"raw_retrieval_bodies_recorded":false,"raw_credentials_recorded":false},
+      "validation":[{"command":"cargo fmt --all -- --check","exit_code":0},{"command":"cargo test --locked --offline -p mtm-xtask --no-fail-fast","exit_code":0,"unit_tests":76},{"command":"cargo clippy --locked --offline -p mtm-xtask -p mtm-cli --all-targets -- -D warnings","exit_code":0},{"command":"exact development retrieval integration test","exit_code":0}],
+      "acceptance_boundary":"This is external retrieval and redirect-policy evidence only. It does not prove Native execution, compiled LaTeX, browser interoperability, human consent, independent mathematical correctness or full U22 research workflow finalization.",
+      "pending":["Commit the retrieval harness then rerun qualify --profile retrieval against the frozen candidate and seal it", "Update release inputs/readiness", "Native/target/resource and compiled-LaTeX", "Browser/human consent and copied operator-state", "Remaining corpus and Rust-only retirement"],
+      "product_source_changed":false,"production_changed":false,"new_suppressions":0,
+      "remaining_python_files":67,"legacy_rust_reference_files":81,
+      "rust_only_ready":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

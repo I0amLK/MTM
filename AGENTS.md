@@ -158,6 +158,14 @@ locked `status`, `install` or `rollback` conservatively restores the pre-operati
 state before continuing. Never delete the journal before the final postcheck or
 describe persisted-prefix tests as a physical power-loss qualification.
 
+## F4 exact external retrieval
+
+`cargo xtask qualify --profile retrieval --binary <artifact> --sha256 <sha256>`
+uses the selected candidate's real `CurlResearchProvider` against LeanSearch and
+OpenAlex and checks a real cross-domain HTTPS redirect denial. It is external-network
+evidence only. Do not infer compiled LaTeX, Native, browser, independent mathematics
+or human consent from it, and do not record returned research bodies or credentials.
+
 ## F4/F5 release blockers and corpus
 
 Read `docs/MTM-016-F4-F5-RELEASE-CHECK.md`. `release-check` is read-only and

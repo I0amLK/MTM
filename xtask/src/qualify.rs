@@ -40,6 +40,7 @@ pub(super) enum Profile {
     Permissions,
     Corpus,
     InstallSigkill,
+    Retrieval,
 }
 
 impl Profile {
@@ -52,7 +53,8 @@ impl Profile {
             "permissions" => Ok(Self::Permissions),
             "corpus" => Ok(Self::Corpus),
             "install_sigkill" => Ok(Self::InstallSigkill),
-            _ => Err("qualification profile must be protocol, target, resource, upgrade, permissions, corpus or install_sigkill; release qualification is not implemented here".into()),
+            "retrieval" => Ok(Self::Retrieval),
+            _ => Err("qualification profile must be protocol, target, resource, upgrade, permissions, corpus, install_sigkill or retrieval; release qualification is not implemented here".into()),
         }
     }
 
@@ -65,6 +67,7 @@ impl Profile {
             Self::Permissions => "permissions",
             Self::Corpus => "corpus",
             Self::InstallSigkill => "install_sigkill",
+            Self::Retrieval => "retrieval",
         }
     }
 
@@ -77,6 +80,7 @@ impl Profile {
             Self::Permissions => "F2",
             Self::Corpus => "F5",
             Self::InstallSigkill => "F4",
+            Self::Retrieval => "F4",
         }
     }
 
@@ -89,6 +93,7 @@ impl Profile {
             Self::Permissions => "candidate-permissions.json",
             Self::Corpus => "candidate-corpus.json",
             Self::InstallSigkill => "candidate-install-sigkill.json",
+            Self::Retrieval => "candidate-retrieval.json",
         }
     }
 }
@@ -162,7 +167,8 @@ impl Options {
             | Profile::Target
             | Profile::Permissions
             | Profile::Corpus
-            | Profile::InstallSigkill => {
+            | Profile::InstallSigkill
+            | Profile::Retrieval => {
                 if baseline_binary.is_some() || baseline_sha256.is_some() {
                     return Err("baseline options require a resource or upgrade profile".into());
                 }
@@ -290,6 +296,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     let permissions = options.profile == Profile::Permissions;
     let corpus = options.profile == Profile::Corpus;
     let install_sigkill = options.profile == Profile::InstallSigkill;
+    let retrieval = options.profile == Profile::Retrieval;
     let paired = resource || upgrade;
     let needs_native = target || resource;
     let scope = match options.profile {
@@ -300,6 +307,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         Profile::Permissions => "exact_candidate_scripted_patch_permissions_not_release",
         Profile::Corpus => "exact_candidate_partial_usability_corpus_not_release",
         Profile::InstallSigkill => "exact_candidate_external_sigkill_install_recovery_not_release",
+        Profile::Retrieval => "exact_candidate_real_external_retrieval_not_release",
     };
     let mut report = json!({"schema_version":"1.0.0","milestone":"MTM-016","delivery":options.profile.delivery(),
     "profile":options.profile.as_str(),"scope":scope,"passed":false,
@@ -316,6 +324,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         Profile::Permissions => json!(["real Native command execution and command-grant soak","compiled LaTeX and external retrieval","browser and independent human consent","baseline resource comparison","production upgrade and abrupt installation interruption","Python retirement and full release gate"]),
         Profile::Corpus => json!(["Native tasks U16-U20","independent research tasks U21-U25","external-client/operator tasks U26-U30","full release gates"]),
         Profile::InstallSigkill => json!(["physical power-loss/device-cache durability","production selector drill","shared-filesystem semantics","full release gates"]),
+        Profile::Retrieval => json!(["compiled-LaTeX research workflow","independent mathematical verification","browser/human consent","Native target/resource gates","full corpus and release gates"]),
     }});
     let mut stage = if needs_native {
         "native_preflight"
@@ -369,6 +378,9 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         if install_sigkill {
             stage = "install_sigkill_test_runner";
         }
+        if retrieval {
+            stage = "retrieval_test_runner";
+        }
         let cargo = env::var_os("CARGO").unwrap_or_else(|| "cargo".into());
         let mut command = Command::new(cargo);
         command
@@ -376,6 +388,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             .env_remove("MTM_TEST_CORPUS_PROFILE")
             .env_remove("MTM_TEST_PERMISSION_PROFILE")
             .env_remove("MTM_TEST_INSTALL_SIGKILL_PROFILE")
+            .env_remove("MTM_TEST_RETRIEVAL_PROFILE")
             .env_remove("MTM_TEST_DEPLOYMENT_CANDIDATE")
             .env_remove("MTM_TEST_DEPLOYMENT_CANDIDATE_SHA256")
             .env_remove("MTM_TEST_UPGRADE_PROFILE")
@@ -450,6 +463,11 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
                 .arg("corpus_runtime::exact_candidate_three_repeat_usability_matrix")
                 .arg("--exact")
                 .env("MTM_TEST_CORPUS_PROFILE", "1");
+        } else if retrieval {
+            command
+                .arg("retrieval_runtime::exact_candidate_real_external_retrieval_and_redirect_policy")
+                .arg("--exact")
+                .env("MTM_TEST_RETRIEVAL_PROFILE", "1");
         } else if permissions {
             command
                 .arg("permission_runtime::exact_candidate_permission_patch_soak")
@@ -503,6 +521,8 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         stage = "summary_validation";
         let summaries = if install_sigkill {
             summary::validate_install_sigkill(&output.stdout, &snapshot.sha256)?
+        } else if retrieval {
+            summary::validate_retrieval(&output.stdout, &snapshot.sha256)?
         } else if corpus {
             summary::validate_corpus(&output.stdout, &snapshot.sha256)?
         } else if permissions {

@@ -71,6 +71,7 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
         Profile::Permissions => "exact_candidate_scripted_patch_permissions_not_release",
         Profile::Corpus => "exact_candidate_partial_usability_corpus_not_release",
         Profile::InstallSigkill => "exact_candidate_external_sigkill_install_recovery_not_release",
+        Profile::Retrieval => "exact_candidate_real_external_retrieval_not_release",
     };
     let runner = &report.runner;
     let source = &report.harness_source_identity;
@@ -157,6 +158,10 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
         Profile::InstallSigkill => {
             line("install_sigkill", "MTM_INSTALL_SIGKILL")?;
             summary::validate_install_sigkill(&bytes, hash)?
+        }
+        Profile::Retrieval => {
+            line("retrieval", "MTM_RETRIEVAL_RUNTIME")?;
+            summary::validate_retrieval(&bytes, hash)?
         }
         Profile::Upgrade => {
             line("upgrade", "MTM_UPGRADE_RUNTIME")?;

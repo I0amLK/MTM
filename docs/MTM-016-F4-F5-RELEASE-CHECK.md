@@ -52,6 +52,18 @@ blocked; it remains incomplete. Current release readiness is 7 validated gates a
 10 blocked gates. The full source check remains blocked by the same ten inherited
 Native/Bubblewrap tests under the nested ENOSPC environment; format, Clippy and diff
 checks pass. None of these records changes production selectors or state.
+
+### Exact external retrieval profile
+
+`qualify --profile retrieval` launches the exact selected candidate with its normal
+`CurlResearchProvider` and a minimal PATH containing real `curl`. It performs a
+LeanSearch theorem query, an OpenAlex paper search and an OpenAlex paper lookup, then
+uses a second disposable candidate instance whose configured HTTPS theorem endpoint
+redirects across trust domains. The candidate must reject that final URL with
+`RESEARCH_REDIRECT_DENIED`. The summary stores only counts, trust-domain names and
+the rejection code; returned research bodies, capabilities and OAuth credentials are
+not evidence fields. Native execution, compiled LaTeX, browser use and human consent
+remain false in this profile.
 Initially execute the 15 portable public-MCP workspace/Git/workflow tasks, each in
 its own newly created disposable server. The other 15 explicitly require Native,
 research/compiled-LaTeX, external-client/human or operator-state/process-kill

@@ -1,0 +1,19 @@
+{
+  "schema": "mtm-development-observation-v1",
+  "milestone": "MTM-016",
+  "area": "F4 exact-candidate real retrieval",
+  "candidate_sha256": "46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+  "first_test_exit_code": 101,
+  "first_failure": "MCP protocol failure before paper_lookup execution",
+  "classification": "qualification_harness_request_schema_error",
+  "root_cause": "The test supplied num_results to paper_lookup although the public paper_lookup schema accepts only operation, capability and query.",
+  "repair": "Remove the unsupported field; do not change the product schema or retrieval implementation.",
+  "retest_exit_code": 0,
+  "retest_actual_external_requests": 3,
+  "retest_independent_sources": 2,
+  "retest_redirect_denied": true,
+  "raw_retrieval_bodies_recorded": false,
+  "raw_credentials_recorded": false,
+  "production_changed": false,
+  "release_qualified": false
+}

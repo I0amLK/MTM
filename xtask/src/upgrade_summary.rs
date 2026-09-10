@@ -56,6 +56,7 @@ pub(super) fn validate(stdout: &[u8], candidate: &str, baseline: &str) -> Result
         || std::str::from_utf8(stdout)?.contains("MTM_USABILITY_CORPUS ")
         || std::str::from_utf8(stdout)?.contains("MTM_RESOURCE_RUNTIME ")
         || std::str::from_utf8(stdout)?.contains("MTM_PERMISSION_RUNTIME ")
+        || std::str::from_utf8(stdout)?.contains("MTM_RETRIEVAL_RUNTIME ")
     {
         return Err("upgrade output contains a foreign qualification profile".into());
     }

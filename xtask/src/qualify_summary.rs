@@ -10,6 +10,10 @@ pub(super) use corpus::validate as validate_corpus;
 mod install_sigkill;
 pub(super) use install_sigkill::validate as validate_install_sigkill;
 
+#[path = "retrieval_summary.rs"]
+mod retrieval;
+pub(super) use retrieval::validate as validate_retrieval;
+
 #[path = "permission_summary.rs"]
 mod permissions;
 pub(super) use permissions::validate as validate_permissions;
@@ -174,6 +178,7 @@ pub(super) fn validate_resource(
         "MTM_UPGRADE_RUNTIME ",
         "MTM_PERMISSION_RUNTIME ",
         "MTM_USABILITY_CORPUS ",
+        "MTM_RETRIEVAL_RUNTIME ",
     ]
     .iter()
     .any(|marker| std::str::from_utf8(stdout).is_ok_and(|text| text.contains(marker)))
@@ -209,6 +214,7 @@ pub(super) fn validate(stdout: &[u8], hash: &str, profile: Profile) -> Result<Va
         "MTM_UPGRADE_RUNTIME ",
         "MTM_PERMISSION_RUNTIME ",
         "MTM_USABILITY_CORPUS ",
+        "MTM_RETRIEVAL_RUNTIME ",
     ]
     .iter()
     .any(|marker| std::str::from_utf8(stdout).is_ok_and(|text| text.contains(marker)))
