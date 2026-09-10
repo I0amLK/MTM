@@ -219,3 +219,20 @@ permission form responses are scripted mechanics evidence and do not count as hu
 consent. The compiled-LaTeX mathematical submissions are fixed fixtures and do not
 count as independent mathematical verification. Ordinary source tests must keep both
 profile flags inert.
+
+## Cargo cache ownership across the host and MTM mount
+
+Read `docs/MTM-016-F6-CARGO-CACHE-OWNERSHIP.md` before any Cargo invocation.
+The host checkout and the MTM `/workspace` mount share files, not absolute paths.
+Compiled `CARGO_BIN_EXE_*` and `CARGO_MANIFEST_DIR` locators are not relocatable.
+Reserve the default `target/debug` and `target/release` caches for the operator.
+Every MTM-side Cargo invocation, including Cargo called by Git hooks, must set
+`CARGO_TARGET_DIR=/workspace/mtm-native-016/target/mtm-tool` explicitly. Reuse that
+one tool cache; do not create a new full build directory per turn. Read-only use of
+an existing binary must also respect its compiled checkout root. Never consume an
+operator-built maintenance executable inside the differently mounted checkout.
+Do not fix cache contamination with `/workspace` symlinks, runtime path fallbacks,
+test skips, source touches or edits to receipt identities. On the host, the reviewed
+recovery is a package-scoped `cargo clean --profile dev` for `mtm-cli` and
+`mtm-xtask`, followed by rebuilding/testing there. Never clean all of `target`:
+it also contains immutable qualification candidates and baselines.

@@ -1,0 +1,65 @@
+{
+  "schema": "mtm-cargo-cache-path-diagnostic-v1",
+  "milestone": "MTM-016",
+  "scope": "cross_mount_compiled_locator_diagnostic_not_source_acceptance",
+  "source_commit": "e8e665911a54dedb6ee4a0b8607ce48aec679215",
+  "source_sha256": "7b8a371b022e3e32931d1663b5a6b1650111abac178ab9c4020521e75364da15",
+  "operator_log": {
+    "attachment": "Pasted text(3).txt",
+    "sha256": "87cb712afa0d1157d114caa3b3461118608923c891d1827bf2b735e2869e5854",
+    "failed_targets": 11,
+    "not_found_errors": 27,
+    "capability_runtime_function_results_passed": 55,
+    "runtime_passed": 140,
+    "runtime_failed": 0,
+    "runtime_existing_ignored": 1,
+    "maintenance_unit_passed": 83,
+    "dedicated_resource_ran": false
+  },
+  "path_observations": {
+    "tool_checkout": "/workspace/mtm-native-016",
+    "operator_checkout": "/home/lk/桌面/MTM/mtm-native-016",
+    "failed_test_embedded_programs": [
+      "/workspace/mtm-native-016/target/debug/mtm",
+      "/workspace/mtm-native-016/target/debug/mtm-xtask"
+    ],
+    "all_eleven_failed_target_executables_scanned": true,
+    "affected_targets": [
+      "mtm-cli:deployment", "mtm-cli:identity", "mtm-cli:policy_cli",
+      "mtm-xtask:commit_cli", "mtm-xtask:dist_cli", "mtm-xtask:native_preflight_cli",
+      "mtm-xtask:permissions_cli", "mtm-xtask:qualify_cli", "mtm-xtask:qualify_resource_cli",
+      "mtm-xtask:records_cli", "mtm-xtask:release_check_cli"
+    ],
+    "rebuilt_capability_runtime_embeds_operator_program_path": true,
+    "host_built_maintenance_embeds_operator_manifest_path": true,
+    "identity_replay_at_tool_build_root_passed": 2,
+    "cached_commit_cli_replay_passed": 1,
+    "cached_commit_cli_replay_failed": 1,
+    "host_built_maintenance_start_in_tool_mount": "exit_1_compiled_root_not_found"
+  },
+  "recovery": {
+    "operator_cache": "target",
+    "tool_cache": "target/mtm-tool",
+    "clean_command": "cargo clean --locked --offline --profile dev --target-dir target -p mtm-cli -p mtm-xtask --dry-run --verbose",
+    "clean_dry_run_exit_code": 0,
+    "clean_dry_run_file_count": 7142,
+    "clean_dry_run_size_display": "2.3GiB",
+    "clean_dry_run_warning": "read-only Cargo registry last-use database; dry-run still completed without deleting files",
+    "host_cache_cleaned_by_tool": false,
+    "isolated_maintenance_build_exit_code": 0,
+    "isolated_maintenance_build_elapsed_ms": 6129,
+    "isolated_cache_size_display": "231M",
+    "initial_isolated_build_exit_code": 101,
+    "initial_isolated_build_reason": "rustup shim had no default in registry working directories",
+    "toolchain_recovery": "existing explicit pinned rustc/rustdoc paths and RUSTUP_TOOLCHAIN; no installation or compiler version change",
+    "host_source_reexecution": false,
+    "host_resource_reexecution": false
+  },
+  "candidate_sha256": "46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+  "baseline_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+  "candidate_and_baseline_unchanged": true,
+  "product_and_harness_source_changed": false,
+  "tests_skipped_or_thresholds_changed": false,
+  "production_changed": false,
+  "release_qualified": false
+}
