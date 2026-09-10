@@ -2777,6 +2777,16 @@
       "correction":"Write an owned executable spawn-descendant.sh in the disposable workspace with the same bounded background-child/readiness/wait logic as the accepted MTM-014 fixture, then invoke it through argv=[\"./spawn-descendant.sh\"]. Keep the explicit public kill_command termination and delayed leak-file/reap checks unchanged.",
       "acceptance_boundary":"This aligns F6 with the already accepted resolver-safe descendant fixture shape. It does not widen PATH, relax executable resolution, modify candidate bytes, or change Native process-group semantics. A new capable-host run remains required.",
       "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-MAGMA-BATCH-INVOCATION-FIX",
+      "status":"harness_fix_pending_real_host_rerun",
+      "observed_on_real_host":"After mode, permission/grant soak, TTY, timeout, descendant cleanup and Sage progressed, the exact-candidate Native qualification reached Magma through the public candidate boundary and returned ok=true, status=exited, exit_code=1.",
+      "host_probe":"The same exposed /home/lk/magma/magma executable succeeds outside the candidate with magma -b and stdin 'print 6*7; quit;', returning exit 0 and stdout 42, so the host license/tool is functional.",
+      "root_cause":"F6 invoked Magma with a workspace input file argument even though the already accepted MTM-014 target fixture and this host installation use batch stdin via magma -b. The failure therefore reflects a qualification-harness invocation mismatch, not a Native executor or host-license failure.",
+      "correction":"Invoke argv=[\"magma\",\"-b\"] with bounded stdin containing the fixed arithmetic fixture and require exit 0 plus an exact output line 42. Remove the unnecessary workspace Magma source file.",
+      "acceptance_boundary":"This aligns F6 with the existing accepted Magma CLI contract. Candidate bytes, Bubblewrap isolation, Native permissions, process lifecycle and production state are unchanged. A new capable-host exact-candidate run remains required.",
+      "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

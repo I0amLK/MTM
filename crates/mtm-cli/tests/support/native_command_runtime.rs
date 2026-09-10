@@ -383,16 +383,16 @@ fn cas_functions(binary: &str) -> Result<(bool, bool)> {
         return Err("Sage functional fixture did not return 42");
     }
 
-    fs::write(
-        server.workspace_path().join("magma-check.m"),
-        b"print 6*7;\nquit;\n",
-    )
-    .map_err(|_| "Magma fixture write failed")?;
     let magma = completed_exec(
         &server,
         &owner,
         "magma",
-        &json!({"argv":["magma","magma-check.m"],"timeout_ms":120_000,"yield_time_ms":30_000}),
+        &json!({
+            "argv":["magma","-b"],
+            "stdin":"print 6*7;\nquit;\n",
+            "timeout_ms":120_000,
+            "yield_time_ms":30_000
+        }),
     )?;
     if !magma["stdout"]
         .as_str()
