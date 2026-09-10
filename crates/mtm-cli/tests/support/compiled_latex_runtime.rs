@@ -118,10 +118,19 @@ fn shell_escape_rejected(server: &mut Server, owner: &Client) -> Result {
     )?;
     let mut submission = candidate_lifecycle::fixture_submission(&assemble, "compact", false)?;
     replace_proof(&mut submission, UNSAFE_PROOF)?;
-    let rejected = server.call(owner, "rethlas_step", submission)?;
+    let verify = server.call(owner, "rethlas_step", submission)?;
+    require(
+        verify["ok"] == true && verify["state"] == "verify",
+        "unsafe shell-escape proof bypassed verifier staging",
+    )?;
+    let rejected = server.call(
+        owner,
+        "rethlas_step",
+        candidate_lifecycle::fixture_submission(&verify, "compact", false)?,
+    )?;
     require(
         rejected["ok"] == true && rejected["state"] == "repair",
-        "unsafe shell-escape proof did not route to repair",
+        "unsafe shell-escape proof did not route to repair after verification",
     )?;
     require(
         !server.workspace_path().join(export).exists()

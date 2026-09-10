@@ -2709,6 +2709,16 @@
       "acceptance_boundary":"Local compilation and ordinary regression tests prove only that the capable-host harness is integrated and inert by default. They do not satisfy Native, CAS or compiled-LaTeX acceptance. Scripted permission form responses are not human consent; fixed mathematical submissions are not independent mathematical verification. No production selector, state, key or database is touched.",
       "pending":["Commit this harness so future real-host receipts bind to an immutable source identity", "On a capable host run native-preflight then exact native_commands and compiled_latex qualifications", "Hash-seal successful receipts and update release inputs only after repository-side validation", "Remaining target/resource, browser-human, operator-state and corpus gates"],
       "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-COMPILED-LATEX-FLOW-REVIEW-FIX",
+      "status":"review_fix_ready_pending_commit_and_real_host_execution",
+      "base_commit":"4906daf591c6308ec78c86809a685383699bdbac",
+      "issue":"The first F6 shell-escape negative fixture expected the required-LaTeX repair transition immediately after assembly, but the workflow deliberately stages verifier review before the mechanical LaTeX gate.",
+      "correction":"The fixture now requires assemble -> verify, submits the fixed verifier audit, then requires the unsafe shell-escape proof to route to repair with neither a final artifact nor the delayed shell side-effect file.",
+      "validation":[{"command":"cargo fmt --all -- --check","exit_code":0},{"command":"cargo test --locked --offline -p mtm-xtask qualify::summary::compiled_latex::tests with CARGO_HOME=/home/lk/.cargo","exit_code":0,"tests_passed":1,"tests_failed":0},{"command":"cargo clippy --locked --offline --workspace --all-targets -- -D warnings with CARGO_HOME=/home/lk/.cargo","exit_code":0},{"command":"git diff --check","exit_code":0}],
+      "acceptance_boundary":"This fixes harness sequencing before any real-host F6 receipt exists. It changes no candidate bytes, production state, verifier authority or LaTeX policy and is not compiled-LaTeX acceptance by itself.",
+      "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
