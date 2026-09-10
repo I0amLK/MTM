@@ -295,6 +295,40 @@ struct CopiedOperatorStateEvidence {
     release_qualified: bool,
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CorpusAggregateRef {
+    path: String,
+    sha256: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CorpusSupplementRef {
+    task_id: String,
+    repeat: u64,
+    path: String,
+    sha256: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CorpusAggregate {
+    schema: String,
+    milestone: String,
+    candidate_sha256: String,
+    candidate_source_commit: String,
+    corpus_sha256: String,
+    base: CorpusAggregateRef,
+    supplements: Vec<CorpusSupplementRef>,
+    passed_trials: u64,
+    failed_trials: u64,
+    blocked_trials: u64,
+    complete: bool,
+    production_changed: bool,
+    release_qualified: bool,
+}
+
 fn identity_matches(
     candidate_sha256: &str,
     candidate_source_commit: &str,
@@ -530,6 +564,85 @@ fn validate_corpus(value: &Value, manifest: &Manifest) -> Result<bool> {
     Ok(complete)
 }
 
+fn checked_evidence(root: &Path, path: &str, expected: &str) -> Result<Value> {
+    if !path.starts_with("records/evidence/MTM-016/") || !hash(expected, 64) {
+        return Err("aggregate evidence reference is outside current milestone".into());
+    }
+    let bytes = records::read_bytes(root, path, 1024 * 1024)?;
+    use sha2::{Digest, Sha256};
+    if format!("{:x}", Sha256::digest(&bytes)) != expected {
+        return Err("aggregate evidence hash mismatch".into());
+    }
+    evidence_json::decode(&bytes)
+}
+
+fn validate_corpus_aggregate(
+    root: &Path,
+    value: &Value,
+    manifest: &Manifest,
+    cache: &mut BTreeMap<String, String>,
+) -> Result<bool> {
+    let aggregate: CorpusAggregate =
+        serde_json::from_value(value.clone()).map_err(|_| "corpus aggregate schema invalid")?;
+    if aggregate.schema != "mtm-usability-corpus-aggregate-v1"
+        || aggregate.milestone != "MTM-016"
+        || aggregate.candidate_sha256 != manifest.candidate_sha256
+        || aggregate.candidate_source_commit != manifest.candidate_source_commit
+        || !hash(&aggregate.corpus_sha256, 64)
+        || aggregate.supplements.len() != 3
+        || aggregate.failed_trials != 0
+        || aggregate.passed_trials + aggregate.failed_trials + aggregate.blocked_trials != 90
+        || aggregate.production_changed
+        || aggregate.release_qualified
+    {
+        return Err("corpus aggregate identity or counts invalid".into());
+    }
+    let base = checked_evidence(root, &aggregate.base.path, &aggregate.base.sha256)?;
+    let base_complete = validate_corpus(&base, manifest)?;
+    if base_complete
+        || base["summaries"]["corpus"]["passed_trials"] != 45
+        || base["summaries"]["corpus"]["failed_trials"] != 0
+        || base["summaries"]["corpus"]["blocked_trials"] != 45
+        || base["summaries"]["corpus"]["corpus_sha256"] != aggregate.corpus_sha256
+    {
+        return Err("corpus aggregate base is not the exact 45/45 partial matrix".into());
+    }
+    lineage(root, &base["harness_source_identity"], cache)?;
+
+    let mut repeats = BTreeSet::new();
+    let mut receipt_times = BTreeSet::new();
+    let mut receipt_hashes = BTreeSet::new();
+    for supplement in &aggregate.supplements {
+        if supplement.task_id != "U30"
+            || !(1..=3).contains(&supplement.repeat)
+            || !repeats.insert(supplement.repeat)
+            || !receipt_hashes.insert(&supplement.sha256)
+        {
+            return Err("corpus U30 supplements are duplicate or misidentified".into());
+        }
+        let receipt = checked_evidence(root, &supplement.path, &supplement.sha256)?;
+        qualify::validate_receipt(
+            &receipt,
+            &manifest.candidate_sha256,
+            &manifest.baseline_sha256,
+            "install_sigkill",
+        )?;
+        lineage(root, &receipt["harness_source_identity"], cache)?;
+        let recorded = receipt["recorded_unix_seconds"]
+            .as_u64()
+            .ok_or("U30 receipt timestamp missing")?;
+        if !receipt_times.insert(recorded) {
+            return Err("U30 repeats do not have distinct receipt timestamps".into());
+        }
+    }
+    if aggregate.passed_trials != 48 || aggregate.blocked_trials != 42 || aggregate.complete {
+        return Err(
+            "corpus aggregate did not preserve the exact partial completion boundary".into(),
+        );
+    }
+    Ok(false)
+}
+
 fn validate_evidence(
     root: &Path,
     name: &str,
@@ -563,6 +676,9 @@ fn validate_evidence(
         return Ok(true);
     }
     if name == "corpus" {
+        if value["schema"] == "mtm-usability-corpus-aggregate-v1" {
+            return validate_corpus_aggregate(root, value, manifest, cache);
+        }
         let complete = validate_corpus(value, manifest)?;
         lineage(root, &value["harness_source_identity"], cache)?;
         return Ok(complete);

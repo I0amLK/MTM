@@ -2522,6 +2522,20 @@
       "product_source_changed":false,"production_changed":false,"new_suppressions":0,
       "remaining_python_files":67,"legacy_rust_reference_files":81,
       "rust_only_ready":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F5-U30-AGGREGATION-IMPLEMENTATION",
+      "status":"implemented_pending_post_commit_release_check",
+      "round4_status":"in_progress",
+      "round5_status":"in_progress",
+      "base_commit":"8b55ba0",
+      "candidate_sha256":"589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8",
+      "aggregation_rule":"Release-check reopens and SHA-validates the immutable 45/90 base corpus plus three distinct exact-artifact U30 install_sigkill qualification receipts. It reuses strict corpus and SIGKILL receipt validators, requires repeats 1/2/3 and distinct receipt hashes/timestamps, and derives only the fixed 48-pass/42-blocked boundary.",
+      "u30_repeats":[{"repeat":1,"sha256":"bf9d115cc9f5433d8483eba4cb351d829b5c26e8c0c20372d098c4264d65b27d","partial_restored_selectors":1},{"repeat":2,"sha256":"05dc10d4afcf07d0763a6dd969ab298f0ac60bc2e57d74160fe04d66fb5bb54e","partial_restored_selectors":1},{"repeat":3,"sha256":"1a33c64505dccc76a701569d288c070bc5423a182bcfd0ab65186ce77ef2f947","partial_restored_selectors":1}],
+      "validation":[{"command":"cargo fmt --all -- --check","exit_code":0},{"command":"cargo test --locked --offline -p mtm-xtask release_check::tests","exit_code":0,"tests_passed":4},{"command":"cargo clippy --locked --offline -p mtm-xtask -- -D warnings","exit_code":0},{"command":"development release-check with aggregate","exit_code":1,"validated_gates":6,"blocked_gates":11,"corpus_scope":"48 passed, 0 failed, 42 blocked; gate remains blocked"}],
+      "acceptance_boundary":"Aggregation does not create missing trials and does not turn corpus into a passed gate. U16-U29 remain blocked. Release readiness remains false.",
+      "production_changed":false,"product_source_changed":false,"new_suppressions":0,
+      "rust_only_ready":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
