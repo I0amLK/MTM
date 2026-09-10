@@ -1,6 +1,6 @@
 {
   "audit_completed": true,
-  "base_head": "d9129f05a14228f218f7a8beb7de733217c45db9",
+  "base_head": "5f375a3da79c5d517a9574d9421369d8a53aeb03",
   "interpretation": "Text references are retirement candidates, not proof of a runtime dependency. User Python tools are not forbidden.",
   "legacy_rust_reference_file_count": 81,
   "legacy_rust_reference_files": [
@@ -87,9 +87,14 @@
     "crates/mtm-workflow/tests/workflow.rs"
   ],
   "milestone": "MTM-016",
-  "pending_deleted_file_count": 0,
-  "pending_deleted_files": [],
-  "python_file_count": 67,
+  "pending_deleted_file_count": 4,
+  "pending_deleted_files": [
+    "tests/test_mtm014_capacity_evidence.py",
+    "tests/test_mtm014_elicitation_evidence.py",
+    "tests/test_mtm014_public_authority_evidence.py",
+    "tests/test_mtm014_target_evidence.py"
+  ],
+  "python_file_count": 63,
   "python_files": [
     {
       "bytes": 12643,
@@ -468,34 +473,10 @@
       "disposition": "port behavior and negative tests to the responsible Rust crate",
       "lines": 1118,
       "path": "tests/test_governance.py"
-    },
-    {
-      "bytes": 2843,
-      "disposition": "port behavior and negative tests to the responsible Rust crate",
-      "lines": 55,
-      "path": "tests/test_mtm014_capacity_evidence.py"
-    },
-    {
-      "bytes": 2277,
-      "disposition": "port behavior and negative tests to the responsible Rust crate",
-      "lines": 56,
-      "path": "tests/test_mtm014_elicitation_evidence.py"
-    },
-    {
-      "bytes": 4831,
-      "disposition": "port behavior and negative tests to the responsible Rust crate",
-      "lines": 112,
-      "path": "tests/test_mtm014_public_authority_evidence.py"
-    },
-    {
-      "bytes": 6350,
-      "disposition": "port behavior and negative tests to the responsible Rust crate",
-      "lines": 155,
-      "path": "tests/test_mtm014_target_evidence.py"
     }
   ],
   "rust_only_ready": false,
   "schema_version": "1.0.0",
-  "tracked_and_unignored_file_count": 400,
+  "tracked_and_unignored_file_count": 452,
   "uninspected_source_files": []
 }

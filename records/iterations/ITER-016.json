@@ -2632,6 +2632,23 @@
       "production_changed":false,"product_source_changed":false,"new_suppressions":0,
       "remaining_python_files":67,"legacy_rust_reference_files":81,
       "rust_only_ready":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-TEST-CLEANUP",
+      "status":"obsolete_python_parser_tests_retired_and_build_test_artifacts_pruned",
+      "round4_status":"in_progress",
+      "round5_status":"in_progress_48_of_90",
+      "base_commit":"5f375a3da79c5d517a9574d9421369d8a53aeb03",
+      "tracked_test_cleanup":{"deleted_files":["tests/test_mtm014_target_evidence.py","tests/test_mtm014_public_authority_evidence.py","tests/test_mtm014_capacity_evidence.py","tests/test_mtm014_elicitation_evidence.py"],"deleted_lines":378,"reason":"Frozen MTM-014 Python report-parser mutation tests are superseded by current Rust record, qualification-receipt, permission-summary and release-check validation. Historical evidence remains immutable and current Native/browser/human acceptance remains independently required."},
+      "retirement":{"baseline_commit":"b3ab147b72d72aa546c9c41bdbe71924aa5ebb97","baseline_hashes_checked":64,"retired_python_files":64,"replaced_by_rust":12,"remaining_python_files":63,"runtime_parity_proven":false},
+      "disk_cleanup":{"repository_before_approx_gib":28,"target_before_approx_gib":27,"repository_after_approx_gib":3.2,"target_after_approx_gib":2.5,"cargo_package_artifacts_removed_gib":18.9,"f1_clean_build_removed_gib":2.0,"additional_historical_target_artifacts_removed_gib_approx":4.5,"removed_generated_artifacts_tracked_by_git":false,"preserved_current_frozen_candidate":true,"preserved_f3_candidate_and_baseline_directory":true},
+      "remaining_source_test_sizes":{"root_tests_kib":144,"mtm_cli_tests_kib":344,"mtm_storage_tests_kib":132,"mtm_workflow_tests_kib":64,"xtask_tests_kib":40,"conformance_kib":148},
+      "validation":[{"command":"cargo xtask retirement","exit_code":0,"baseline_hashes_checked":64,"retired_python_files":64,"remaining_python_files":63},{"command":"cargo xtask records","exit_code":0,"sealed_observation_hashes_checked":64},{"command":"cargo test -p mtm-xtask --locked --offline with explicit repository Cargo cache","exit_code":0,"unit_tests":76},{"command":"git diff --check","exit_code":0}],
+      "acceptance_boundary":"Generated build/test pruning changes no tracked source, evidence, production selector, database or key. The four tracked Python deletions are explicitly retirement-ledgered and do not discharge current Native, compiled-LaTeX, browser/human, resource, operator-state or corpus acceptance.",
+      "current_release_readiness":{"validated_gates":8,"blocked_gates":9,"corpus_passed":48,"corpus_blocked":42,"release_qualified":false},
+      "production_changed":false,"product_source_changed":false,"new_suppressions":0,
+      "remaining_python_files":63,"legacy_rust_reference_files":81,
+      "rust_only_ready":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

@@ -98,6 +98,38 @@
       "rationale": "The last external-binary Python caller was the now-retired MTM-015 target family. Rust capability owns current-source checks, while qualify explicitly snapshots and hashes a chosen artifact. Independent Rust tests replace the frozen Python mutation harness and require 500 normal assessments, persisted-secret restart, invalid/revoked/cross-owner handling and no blind replay. The optional historical 1-2000 sample selector is not a forward API; the current fixed 500-case gate remains mandatory. Historical harness hashes remain immutable.",
       "replacements": ["xtask/src/capability.rs", "xtask/src/qualify.rs", "xtask/src/qualify_summary.rs", "crates/mtm-cli/tests/capability_runtime.rs"],
       "verification": ["cargo xtask capability --record", "cargo xtask qualify --profile protocol --binary <exact candidate> --sha256 <reviewed hash> --record", "cargo xtask retirement"]
+    },
+    {
+      "path": "tests/test_mtm014_target_evidence.py",
+      "baseline_sha256": "02609ff1467a4e1613125975e0f29f4f91c61b208f4e02c7fe3c9ed900f8c975",
+      "disposition": "replaced_by_rust",
+      "rationale": "This test only mutation-tested the frozen MTM-014 target-evidence Python parser. Historical accepted bytes and check counts are now hash-bound by Rust record validation, while current target evidence is validated through the exact-candidate qualification and release-check Rust schemas. Removing this test does not reuse MTM-014 evidence as current Native acceptance.",
+      "replacements": ["xtask/src/record_layout.rs", "xtask/src/record_layout_tests.rs", "xtask/src/qualification_receipt.rs", "xtask/src/release_check.rs"],
+      "verification": ["cargo test -p mtm-xtask --locked", "cargo xtask records", "cargo xtask retirement", "Current capable-host target qualification remains independently required"]
+    },
+    {
+      "path": "tests/test_mtm014_public_authority_evidence.py",
+      "baseline_sha256": "e343c75848cadf2ab75e1877f0b2c7761c14052955d7a0e8a2299f9498dcf803",
+      "disposition": "replaced_by_rust",
+      "rationale": "This historical parser test guarded MTM-014 public-authority report scope and evidence hygiene. Current Rust qualification receipts reject scope widening, wrong candidate identity, runner failure and release claims; release-check separately requires current Native/browser evidence. Frozen MTM-014 evidence remains immutable through records validation.",
+      "replacements": ["xtask/src/qualification_receipt.rs", "xtask/src/permission_summary.rs", "xtask/src/release_check.rs", "xtask/src/record_layout.rs"],
+      "verification": ["cargo test -p mtm-xtask --locked", "cargo xtask records", "cargo xtask retirement"]
+    },
+    {
+      "path": "tests/test_mtm014_capacity_evidence.py",
+      "baseline_sha256": "491e4979e034eff1180f072ec2aa87225992e9a068aa3dff593a2f50e65e7405",
+      "disposition": "replaced_by_rust",
+      "rationale": "This synthetic Python fixture tested the old MTM-014 capacity-report parser rather than live product behavior. Native permission capacity, exact grant consumption and bounded permission-soak summaries are now exercised and validated in Rust; synthetic reports cannot satisfy the current release gate.",
+      "replacements": ["crates/mtm-runtime/src/native_authority.rs", "crates/mtm-cli/tests/support/permission_runtime.rs", "xtask/src/permission_summary.rs", "xtask/src/release_check.rs"],
+      "verification": ["cargo test -p mtm-runtime native_authority::tests --locked", "cargo test -p mtm-xtask --locked", "cargo xtask retirement"]
+    },
+    {
+      "path": "tests/test_mtm014_elicitation_evidence.py",
+      "baseline_sha256": "8ab3c415e25e90ae1a6078a06e8945c020932cc7be462bf274d8e1f4a56edbe6",
+      "disposition": "replaced_by_rust",
+      "rationale": "This test revalidated one frozen MTM-014 human-elicitation receipt through the historical Python parser. Current Rust permission tests cover accept/decline/cancel and authority boundaries, record validation preserves the accepted historical receipt, and release-check still requires independently observed current browser/human evidence. Scripted consent is never promoted to human evidence.",
+      "replacements": ["crates/mtm-runtime/src/native_authority.rs", "crates/mtm-cli/tests/support/permission_runtime.rs", "xtask/src/permission_summary.rs", "xtask/src/record_layout.rs", "xtask/src/release_check.rs"],
+      "verification": ["cargo test -p mtm-xtask --locked", "cargo xtask records", "cargo xtask retirement", "Current browser/human-consent release gate remains blocked until real evidence exists"]
     }
   ],
   "families": [
