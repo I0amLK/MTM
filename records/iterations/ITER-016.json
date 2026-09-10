@@ -2669,11 +2669,24 @@
       "product_runtime_source_changed":false,"production_changed":false,"new_suppressions":0,
       "remaining_python_files":0,"legacy_rust_reference_files":81,
       "rust_only_ready":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-RUST-REFERENCE-AUDIT-IMPLEMENTATION",
+      "status":"semantic_rust_only_inventory_implemented_pending_post_commit_evidence",
+      "base_commit":"e6e1f13810144e96ca15ec1dd2a810c4ad32d530",
+      "old_inventory_issue":"The previous legacy Rust counter classified any crates/*.rs file containing ReCtm/re_ctm/re-ctm/Re-CTM as a live legacy dependency, conflating current Rust type/wire/sandbox compatibility names with runtime authority.",
+      "new_blocking_definition":"rust_only_ready requires zero first-party Python source, zero Rust launchers for repository Python entrypoints, and zero unreadable inventory source files.",
+      "development_audit":{"python_file_count":0,"legacy_rust_reference_file_count":0,"compatibility_rust_reference_file_count":81,"legacy_shadow_binary_file_count":4,"rust_only_ready":true},
+      "legacy_shadow_binaries":["crates/mtm-native/src/bin/shadow.rs","crates/mtm-storage/src/bin/shadow.rs","crates/mtm-workflow/src/bin/mtm_workflow_shadow.rs","crates/mtm-workflow/src/bin/target_validation.rs"],
+      "shadow_cleanup_boundary":"The four Rust-only development binaries have no current source caller found, but deleting them would alter the crates/ source identity bound to the frozen candidate. They remain visible and are deferred to a separately rebuilt/requalified candidate rather than being hidden or deleted to satisfy this gate.",
+      "validation":[{"command":"cargo fmt --all -- --check","exit_code":0},{"command":"cargo test --locked --offline -p mtm-xtask inventory::tests","exit_code":0,"tests_passed":6},{"command":"cargo clippy --locked --offline -p mtm-xtask --all-targets -- -D warnings","exit_code":0},{"command":"cargo xtask audit --record","exit_code":0,"rust_only_ready":true},{"command":"development release-check","exit_code":1,"validated_gates":9,"blocked_gates":8,"rust_only":"validated"}],
+      "acceptance_boundary":"This corrects an over-broad text-marker audit. It does not claim 81 Rust files were deleted, does not rename frozen compatibility fields, and does not change the current product candidate. Real Native/target/resource/LaTeX/browser/operator/corpus gates remain independent.",
+      "production_changed":false,"product_runtime_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
     "Preserve the current E-stage evidenced-recovery/no-replay matrix through exact-candidate and final release qualification; never infer legacy opaque outcomes.",
-    "Retire or reclassify the remaining legacy Rust references without changing current Rust product authority; first-party Python retirement is complete.",
+    "Preserve visibility of 81 compatibility-name references and defer four obsolete Rust shadow binaries to a separately rebuilt candidate; neither is first-party Python authority.",
     "Complete typed MTM-owned contracts and real-client validation after the Rust registry and legacy alias retirement checkpoint.",
     "Exercise exact candidate through Native isolation, full Rethlas, retrieval, LaTeX, reconnect and rollback.",
     "Complete the representative 30-task, three-repeat usability corpus."

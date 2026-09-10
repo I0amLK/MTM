@@ -818,9 +818,9 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             "blocked"
         },
         if audit["rust_only_ready"] == true {
-            "current_inventory_empty"
+            "no_first_party_python_source_or_runtime_launcher"
         } else {
-            "first_party_python_or_legacy_references_remain"
+            "first_party_python_source_or_runtime_launcher_remains"
         },
     ));
     let unchanged = qualify::digest(&binary)? == actual
@@ -836,7 +836,9 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         "round4_complete":false,"round5_complete":false,"gates":gates,
         "validated_gates":validated,"blocked_gates":gates.len()-validated,
         "remaining_python_files":audit["python_file_count"],
-        "legacy_rust_reference_files":audit["legacy_rust_reference_file_count"]}),
+        "legacy_rust_reference_files":audit["legacy_rust_reference_file_count"],
+        "compatibility_rust_reference_files":audit["compatibility_rust_reference_file_count"],
+        "legacy_shadow_binary_files":audit["legacy_shadow_binary_file_count"]}),
     )
 }
 

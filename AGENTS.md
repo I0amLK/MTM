@@ -199,3 +199,12 @@ cargo xtask retirement
 The old `python3 scripts/run_checks.py` command is historical evidence only and
 its implementation is retired in MTM-016. Local Rust success is still not
 target/browser/CAS/LaTeX acceptance.
+
+After complete first-party Python retirement, read
+`docs/MTM-016-RUST-REFERENCE-AUDIT.md` before changing the Rust-only inventory.
+Old Re-CTM spellings used by current Rust types, wire fields or sandbox protocol
+constants are compatibility references, not Python runtime authority. Keep them
+visible in audit output. A real Rust launcher for a repository Python entrypoint
+must still block `rust_only_ready`. Do not delete the remaining Rust shadow
+binaries from the source identity of the frozen candidate merely to reduce a
+counter; that requires a separately rebuilt and requalified candidate.
