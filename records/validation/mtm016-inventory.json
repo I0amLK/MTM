@@ -1,9 +1,10 @@
 {
   "audit_completed": true,
-  "base_head": "e2efafd0666e09989df65aa92e5e784c765e371b",
-  "compatibility_rust_reference_file_count": 81,
+  "base_head": "1feb3482660ef1e20f1825e3e68f2f90d46ac692",
+  "compatibility_rust_reference_file_count": 82,
   "compatibility_rust_reference_files": [
     "crates/mtm-cli/src/main.rs",
+    "crates/mtm-cli/tests/support/native_command_runtime.rs",
     "crates/mtm-contracts/src/error.rs",
     "crates/mtm-contracts/src/lib.rs",
     "crates/mtm-core/src/command_policy.rs",
@@ -104,6 +105,6 @@
   "python_files": [],
   "rust_only_ready": true,
   "schema_version": "1.0.0",
-  "tracked_and_unignored_file_count": 393,
+  "tracked_and_unignored_file_count": 399,
   "uninspected_source_files": []
 }

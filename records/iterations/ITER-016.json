@@ -2719,6 +2719,19 @@
       "validation":[{"command":"cargo fmt --all -- --check","exit_code":0},{"command":"cargo test --locked --offline -p mtm-xtask qualify::summary::compiled_latex::tests with CARGO_HOME=/home/lk/.cargo","exit_code":0,"tests_passed":1,"tests_failed":0},{"command":"cargo clippy --locked --offline --workspace --all-targets -- -D warnings with CARGO_HOME=/home/lk/.cargo","exit_code":0},{"command":"git diff --check","exit_code":0}],
       "acceptance_boundary":"This fixes harness sequencing before any real-host F6 receipt exists. It changes no candidate bytes, production state, verifier authority or LaTeX policy and is not compiled-LaTeX acceptance by itself.",
       "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-CAPABLE-HOST-HARNESS-READY",
+      "status":"committed_harness_ready_for_operator_real_host_execution",
+      "implementation_commit":"4906daf591c6308ec78c86809a685383699bdbac",
+      "review_fix_commit":"1feb3482660ef1e20f1825e3e68f2f90d46ac692",
+      "candidate_source_commit":"cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+      "candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+      "post_commit_validation":{"mtm_xtask_passed":81,"mtm_xtask_failed":0,"format_passed":true,"records_passed":true,"retirement_passed":true,"rust_only_ready":true,"inventory_sha256":"dbef083ba9458e367f83133bbfcb9443b8550bd9ba7dadfd9386b299c6830290"},
+      "current_environment_preflight":{"path":"records/validation/mtm016-native-preflight.json","sha256":"645227a9a06b32554d90025dd3e268cbb3768d6020edb10e4fd725f733dfe4c7","exit_code":1,"passed":false,"classification":"namespace_limit_or_depth","errno":"ENOSPC","host_context_proven":false,"candidate_defect_attribution":"not_evaluated_by_preflight","candidate_launched":false},
+      "operator_next_step":"Run the same committed checkout on a capable host; overwrite the validation preflight with a positive real-host result, then run exact native_commands and compiled_latex qualification receipts without hand editing JSON.",
+      "acceptance_boundary":"The nested-environment ENOSPC observation is negative environment evidence only. It neither fails the frozen candidate nor satisfies any Native/LaTeX gate. Real-host receipts remain required and release_qualified stays false.",
+      "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
