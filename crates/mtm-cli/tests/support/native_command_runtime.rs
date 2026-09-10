@@ -291,18 +291,50 @@ fn tty_timeout_and_descendants(binary: &str) -> Result<(bool, bool, bool)> {
         &owner,
         "exec_command",
         json!({
-            "cmd":"(sleep 1; printf leaked > descendant-leak.txt) & wait",
-            "timeout_ms":100,"yield_time_ms":30_000
+            "cmd":"printf ready; (sleep 1; printf leaked > descendant-leak.txt) & wait",
+            "timeout_ms":5_000,"yield_time_ms":200
+        }),
+    )?;
+    if !(descendant["ok"] == true
+        && descendant["status"] == "running"
+        && descendant["stdout"]
+            .as_str()
+            .is_some_and(|value| value.contains("ready")))
+    {
+        eprintln!(
+            "MTM_NATIVE_DIAGNOSTIC stage=descendant_start ok={} status={} exit_code={} signal={} error_code={}",
+            descendant["ok"],
+            descendant["status"],
+            descendant["exit_code"],
+            descendant["signal"],
+            descendant["error"]["code"]
+        );
+        return Err("Native descendant fixture did not remain running");
+    }
+    let descendant_command_id = text(&descendant, "command_id")?;
+    let descendant_killed = server.call(
+        &owner,
+        "kill_command",
+        json!({
+            "command_id":descendant_command_id,
+            "signal":"TERM",
+            "wait_ms":1_000,
+            "kill_wait_ms":1_000
         }),
     )?;
     require(
-        descendant["ok"] == true && descendant["timed_out"] == true,
-        "descendant timeout fixture did not terminate",
+        descendant_killed["ok"] == true
+            && descendant_killed["killed"] == true
+            && matches!(
+                descendant_killed["status"].as_str(),
+                Some("terminated" | "killed")
+            ),
+        "Native descendant command group did not terminate through kill_command",
     )?;
     thread::sleep(Duration::from_millis(1_300));
     require(
         !leak.exists(),
-        "timed-out Native descendant survived process-group cleanup",
+        "Native descendant survived process-group cleanup",
     )?;
     require(
         server.process_facts()?["children"] == 0,

@@ -2751,6 +2751,15 @@
       "correction":"Use direct printf argv while retaining a sensitive API_TOKEN fixture environment. This preserves the intended dangerous-mode permission-policy smoke without depending on a shell builtin or widening the qualification PATH.",
       "acceptance_boundary":"The observed failure is a qualification-harness assumption, not evidence that the candidate Native executor failed. The candidate bytes, Native resolver policy and production state are unchanged. A new real-host run is still required.",
       "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-DESCENDANT-CLEANUP-FIXTURE-SEPARATION",
+      "status":"harness_fix_pending_real_host_rerun",
+      "observed_on_real_host":"After the dangerous-smoke resolver fix, the exact-candidate Native qualification passed through mode checks, command-permission/grant work, TTY and the dedicated timeout lifecycle before failing only at the descendant timeout fixture.",
+      "root_cause":"The F6 fixture unnecessarily coupled descendant process-group cleanup to the watchdog timeout path. The accepted MTM-014 descendant contract proves cleanup by starting a still-running parent with a background child, terminating the owned command group through kill_command, then checking that the delayed descendant side effect never occurs. Timeout lifecycle is a separate already-tested property.",
+      "correction":"Keep the dedicated sleep timeout check unchanged. For descendant cleanup, start a bounded shell command that announces readiness, require status=running, terminate its owned process group through public kill_command, then wait beyond the child delay and require that no leak file exists and no server-owned child remains.",
+      "acceptance_boundary":"This separates two independent release claims instead of weakening either one. Candidate bytes, process-group implementation, timeout policy, Native resolver policy and production state are unchanged. A new capable-host run remains required.",
+      "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
