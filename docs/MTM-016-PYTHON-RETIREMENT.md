@@ -1,5 +1,27 @@
 # Python retirement: reviewed responsibilities, not a line-count target
 
+## Final first-party Python source retirement
+
+The final MTM-016 source-retirement wave removes the remaining first-party Python
+files under `scripts/`, `conformance/` and `tests/`. The deletion baseline remains
+`b3ab147b72d72aa546c9c41bdbe71924aa5ebb97`; every removed path is bound to an
+exact baseline SHA-256 and named Rust replacement in
+`records/governance/python-retirement.json`.
+
+The final wave groups responsibilities rather than claiming line-for-line parity:
+legacy differential shadows/runtime measurements; historical MTM-009/011 math and
+research evaluation; historical TUI/web-client helpers; MTM-014 permission/target
+helpers; and the old governance/local-gate Python layer. Families whose current
+behavior still depends on capable-host Native, compiled LaTeX, independent
+research, browser/human consent or other real-world acceptance remain explicitly
+`consolidated_with_pending_acceptance` after their obsolete Python executables are
+removed.
+
+Historical evidence is not rewritten merely because its recorded command points
+to a retired Python file. User-authored Python, Sage and Python executables used as
+Native command inputs also remain supported; "Python-free" means MTM first-party
+implementation and maintenance authority, not a user-tool ban.
+
 ## Current D8 grouped-retirement checkpoint
 
 Round 3/5 removes 49 target/release/install-family files, including the now-orphaned

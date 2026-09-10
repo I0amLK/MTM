@@ -188,10 +188,14 @@ Never count blocked rows, inert profile functions or protocol fixtures as resear
 or independent browser/consent acceptance. Clear `MTM_TEST_CORPUS_PROFILE` in
 ordinary checks. An incomplete corpus and blocked release checklist exit nonzero.
 
-## Historical local gate (before MTM-016)
+## Current local gate and retired Python gate
 
 ```bash
-python3 scripts/run_checks.py
+cargo xtask check --record
+cargo xtask records
+cargo xtask retirement
 ```
 
-Local success is not target/browser/CAS/LaTeX acceptance.
+The old `python3 scripts/run_checks.py` command is historical evidence only and
+its implementation is retired in MTM-016. Local Rust success is still not
+target/browser/CAS/LaTeX acceptance.

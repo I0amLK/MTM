@@ -421,11 +421,14 @@ authenticated loopback OAuth/MCP mixed workload under eight concurrent clients. 
 not a general claim about external research, CAS workloads, LaTeX, or mathematical
 proof-generation time.
 
-Run the complete local gate from a source checkout with:
+Run the current Rust source gate from a source checkout with:
 
 ```bash
-python3 scripts/run_checks.py
+cargo xtask check --record
 ```
+
+The pre-MTM-016 Python gate is retired. Its historical command/output remains in
+the immutable validation records; it is not a current executable prerequisite.
 
 See also:
 

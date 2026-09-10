@@ -138,7 +138,7 @@
       "disposition": "consolidated_with_pending_acceptance",
       "pending_acceptance": [
         "F: exact current candidate on a capable Native host, safe/trusted/dangerous permission suites, TTY/timeout/descendant cleanup and available CAS tools",
-        "F: required compiled-LaTeX full/compact/repair flows, real retrieval and browser OAuth/consent; protocol-only tests do not discharge these",
+        "F: required compiled-LaTeX full/compact/repair flows and browser OAuth/independent human consent; completed external retrieval does not discharge these",
         "F: operator-authorized copied production state and old-run resume/rollback; the existing synthetic v1 fixture is not equivalent"
       ],
       "rationale": "MTM-003 through MTM-008 target runners are immutable historical qualification machinery, and the MTM-015 target runner is superseded by the current Rust target profile. Rust records binds the accepted historical target identities/counts and the exact MTM-015 target receipt bytes; cargo xtask qualify --profile target is the only forward target qualifier. This deletion does not claim that D6 has been executed successfully on the final candidate in an ordinary host environment.",
@@ -165,11 +165,10 @@
       "name": "release_install_cutover_and_candidate_staging",
       "disposition": "consolidated_with_pending_acceptance",
       "pending_acceptance": [
-        "F: clean-clone Python-free locked build/test/distribution and exact candidate identity",
-        "F: equivalent baseline/candidate resource samples and a 60-90 second permission-grant soak with at least 100 iterations",
+        "F: equivalent baseline/candidate resource samples and capable-host Native command/grant behavior remain pending despite completed frozen Python-free clean-build evidence",
         "F: independently observed real web-client roundtrips and human consent where required, never inferred from frozen historical evidence",
-        "F: reversible installed-runtime upgrade using verified previous artifacts and pre-upgrade database copies; install/status/rollback here test selector mechanics only",
-        "F: abrupt process interruption or power-loss during multi-selector/manifest update is not covered by ordinary error compensation"
+        "F: operator-authorized copied production-state upgrade/old-run resume/rollback remains distinct from completed prepared-copy upgrade and external SIGKILL tests",
+        "F: physical power-loss/device-cache and shared-filesystem semantics remain outside the completed process-SIGKILL scope"
       ],
       "rationale": "The milestone-specific Python release, deployment, public-install, cutover, qualification and candidate-stage machinery is retired as one authority family. Current mechanics are explicit Rust mtm install/status/rollback plus byte-bound cargo xtask dist and the independent qualify profiles; historical target/release/lifecycle receipts are byte/hash bound by Rust records without reading live selectors. Retained browser helpers resolve the frozen MTM-015 candidate receipt only and explicitly do not revalidate installation. No production selector is changed and current release_qualified remains false.",
       "replacements": ["crates/mtm-cli/src/deployment.rs", "crates/mtm-cli/tests/deployment.rs", "xtask/src/dist.rs", "xtask/src/qualify.rs", "xtask/src/record_layout.rs", "xtask/tests/dist_cli.rs", "xtask/tests/records_cli.rs"],
@@ -213,7 +212,7 @@
       "name": "release_deployment_python_tests",
       "disposition": "consolidated_with_pending_acceptance",
       "pending_acceptance": [
-        "F: validate complete current release evidence schema and mandatory target/browser/resource/soak gates before any release verdict",
+        "F: all forward evidence adapters now exist, but mandatory target/browser/resource/Native/LaTeX/corpus evidence must actually pass before any release verdict",
         "F: old resource/soak/qualification-parser mutation fixtures are preserved at the baseline; Rust frozen-byte checks protect history but do not claim forward parser equivalence"
       ],
       "rationale": "The Python unit suites exercised the retired deployment/release helpers rather than current product authority. Rust now executes real CLI install/status/rollback and dist commands against disposable paths, including exact-byte identity, rollback of prior symlink and regular-file selectors, wrong-hash rejection, drift rejection and non-symlink source requirements.",
@@ -222,6 +221,131 @@
       "members": [
         {"path": "tests/test_mtm008_deployment.py", "baseline_sha256": "b6b05a0e90a9b9813cb0ce823cab358597e9d0460cf369e2a59b0f083db4a28b"},
         {"path": "tests/test_mtm014_preview_release.py", "baseline_sha256": "977cf1b133d2ae9eeaf78fb80dc128fd56463b4fade378336b2f41d132ec11a0"}
+      ]
+    },
+    {
+      "name": "legacy_shadow_conformance_and_runtime_measurements",
+      "disposition": "consolidated_with_pending_acceptance",
+      "pending_acceptance": [
+        "F: capable-host Native/TTY/CAS and target/resource qualification remains independent; deleting Python shadows is not parity evidence",
+        "F: U16-U25 real-world corpus rows remain independently required and historical resource measurements are not reused as current measurements"
+      ],
+      "rationale": "These files are pre-Rust-authority reference shadows, differential conformance runners, HTTP/runtime smoke harnesses and historical performance/resource drivers. Current product behavior is owned and tested in Rust across core policy, storage, workflow, gateway, exact-candidate protocol/retrieval and release qualification. The historical Python/Rust differential outputs remain immutable records; deleting their executable sources does not certify pending Native, CAS, compiled-LaTeX or resource gates.",
+      "replacements": ["crates/mtm-core/src/command_policy.rs", "crates/mtm-core/src/native_permission.rs", "crates/mtm-storage/tests/storage.rs", "crates/mtm-workflow/tests/workflow.rs", "crates/mtm-gateway/tests/http_contract.rs", "crates/mtm-cli/tests/capability_runtime.rs", "crates/mtm-cli/tests/support/corpus_runtime.rs", "xtask/src/qualify.rs", "xtask/src/release_check.rs"],
+      "verification": ["cargo test --workspace --locked --no-fail-fast", "cargo xtask records", "cargo xtask retirement", "cargo xtask audit --strict remains allowed to fail only for non-Python legacy references or uninspected source"],
+      "members": [
+        {"path":"conformance/mtm004_scenario.py","baseline_sha256":"473fbfe9f8b8e4009c6c750320a252b1a7ef5d69dc4a627bbc27e81ef0b62863"},
+        {"path":"conformance/python_native_shadow.py","baseline_sha256":"bcc28ad3089e4673586f0a9588d89e436fd04010fdb2904c570195e91b8243cc"},
+        {"path":"conformance/python_storage_shadow.py","baseline_sha256":"7b7925e51d33e4ac5c920dcb106f74c7fdb6bf6a59a6c9d7c53b133fd663468e"},
+        {"path":"conformance/python_workflow_shadow.py","baseline_sha256":"1b54d6f681f8acd3d05a237469471c91ba6d6f9dedb182cff0fd8bdaa2abdac4"},
+        {"path":"scripts/mtm008_runtime_harness.py","baseline_sha256":"481c5bbf95a6a21a7608e1b5f6d9c5174a17934c460d3c26e60d9f4910759f73"},
+        {"path":"scripts/run_mtm003_conformance.py","baseline_sha256":"6070e7c0b87b04cc9c085f0f963097b981635212dfafcb7529dc37192b7ba5c2"},
+        {"path":"scripts/run_mtm004_conformance.py","baseline_sha256":"fec016d86ce9afd32bc32e0ea047564483661764d11f424e7be92bc3f535cd80"},
+        {"path":"scripts/run_mtm006_conformance.py","baseline_sha256":"27b28b579cb4e174ecc5c822fbb16c1af413e741d39b579ecf71164236b55680"},
+        {"path":"scripts/run_mtm007_conformance.py","baseline_sha256":"54e038a7e0bcbc5d4a3608151b5ac55dbf631c1e15885739870484a9e279b28c"},
+        {"path":"scripts/run_mtm007_http_smoke.py","baseline_sha256":"fd116bcbd5d08a56ed64570177de3c5d5234cadf196c79fa1cd5e2e4b5e3d8fd"},
+        {"path":"scripts/run_mtm008_performance.py","baseline_sha256":"62cdf097b90f08a43162f9467515a189be28e89f22414de2336ec6c4b259c4f7"},
+        {"path":"scripts/run_mtm008_soak.py","baseline_sha256":"c544ba60edf88851155c5258e520ded1c077cb8b1918638c3ef7968cdc2d3911"},
+        {"path":"scripts/run_mtm010_native_resolver.py","baseline_sha256":"292e5b0eaf6dad1f72f46809294f39e92e81bc842928d39e024bc92b63918bc7"},
+        {"path":"scripts/validate_mtm010_native_resolver.py","baseline_sha256":"77208b521ae2bc2e6d9ca80c428c644505be18eb4f4244d65a9ea97238ddeac0"},
+        {"path":"scripts/run_mtm013_exact_stable_semantic_regression.py","baseline_sha256":"d3885927dc95438f192aeeafd17f437b4935ac13040cd442969c6c53912166d6"},
+        {"path":"scripts/validate_mtm013_exact_stable_semantic_regression.py","baseline_sha256":"2c1a378b16cc36e408b67aa778086fe3955d8771cf1bbf8feaab8b2e5dd36598"},
+        {"path":"scripts/run_mtm013_runtime_hardening.py","baseline_sha256":"0e14509d7c259e19af77196a52f3b6142c69ebdca8b445f20888837ff1eade0c"},
+        {"path":"scripts/validate_mtm013_runtime_hardening.py","baseline_sha256":"4907c6033956d5762b8927b35d75789238475542a640de7d85c7de3d8f3aec83"},
+        {"path":"scripts/run_mtm013_stable_resource.py","baseline_sha256":"c519793b105c170c97fa8023b463540e8ff11179c0018aa0255d6c7e94950a09"},
+        {"path":"scripts/validate_mtm013_stable_resource.py","baseline_sha256":"af8e5b0cf3a924dd9535cfb0231a4354983874c8a28fbd404cee4fdfe7d8e2dd"}
+      ]
+    },
+    {
+      "name": "historical_research_math_and_web_evaluation",
+      "disposition": "consolidated_with_pending_acceptance",
+      "pending_acceptance": [
+        "F: U21-U25 require new independent research, compiled proof, repair, branch-join and CAS trials on the current candidate",
+        "F: historical MTM-009/011 blind scores, web treatments and resource bindings remain immutable history and are not forward acceptance evidence"
+      ],
+      "rationale": "The MTM-009/011 Python files orchestrated historical blind bundles, web-treatment ledgers, mathematical evaluation summaries, research-resource measurements and protocol rollback receipts. Their accepted or rejected outcomes are preserved in immutable records. Current Rust workflow/storage tests, retrieval qualification and the 30x3 corpus own forward mechanics, while independent research correctness and compiled-proof acceptance remain explicitly pending rather than being inferred from these historical scripts.",
+      "replacements": ["crates/mtm-workflow/tests/workflow.rs", "crates/mtm-storage/tests/submission_receipts.rs", "crates/mtm-cli/tests/support/retrieval_runtime.rs", "crates/mtm-cli/tests/support/corpus_runtime.rs", "xtask/src/retrieval_summary.rs", "xtask/src/corpus_summary.rs", "xtask/src/record_layout.rs", "xtask/src/release_check.rs"],
+      "verification": ["cargo test -p mtm-workflow -p mtm-storage --locked", "cargo test -p mtm-xtask --locked", "cargo xtask records", "cargo xtask retirement", "No historical mathematical score is promoted to a current candidate verdict"],
+      "members": [
+        {"path":"scripts/bind_mtm011_resource_evidence.py","baseline_sha256":"53c487f1ff6b2630d52aceed50c7f31a83d064e57942b182e9fffec972982c46"},
+        {"path":"scripts/finalize_mtm009_math_evaluation.py","baseline_sha256":"92ef23c7a2e1f1f29811c2955dcd01e4c181cb7575d21f8fc3e85aecf5a87587"},
+        {"path":"scripts/finalize_mtm011_math_evaluation.py","baseline_sha256":"0569169b8885c360602f7cbae93a616dc4da78a61a814018bdc958fca1a6fdff"},
+        {"path":"scripts/next_mtm009_web_treatment.py","baseline_sha256":"e10726e68974c80d84175e99fb851186cbbac0b53b81ed09d59897f93ca9ac88"},
+        {"path":"scripts/next_mtm011_web_treatment.py","baseline_sha256":"879097350e073375762022013675369796341fda8e674ea398fbd537a54e2028"},
+        {"path":"scripts/prepare_mtm009_blind_bundle.py","baseline_sha256":"4f65224c01e4af4e2a28d28a9a7e1c5017c067c38236784b5cee7155ef554f50"},
+        {"path":"scripts/prepare_mtm011_blind_bundle.py","baseline_sha256":"c301d148c8a8efd2dc9aa41ef23a74fe4c3e759ed63b670cc25a1107cef846fe"},
+        {"path":"scripts/record_mtm009_blind_score.py","baseline_sha256":"ea6fd0e3871d010fcbbeb7adb1bd0fa12760a286bcff968dc3098d77127f6eb2"},
+        {"path":"scripts/record_mtm009_web_run.py","baseline_sha256":"57228e4fcbbdbd9d236efa220eb438e53486d461b71cd5609cb4b77a587b211f"},
+        {"path":"scripts/record_mtm011_blind_score.py","baseline_sha256":"37c8d94d70f80fd9b00a76336ed86a1436c3e008ed6ef6c58daded9b5631bad1"},
+        {"path":"scripts/record_mtm011_web_run.py","baseline_sha256":"9de8c35ea2bb4322644469752168982425e0525895bd15b78d0a96de9cb8cf75"},
+        {"path":"scripts/run_mtm009_protocol3_rollback.py","baseline_sha256":"0fbb9298ded2039f4fc1bb7a28bbb8763ed6854b1559177e0314e9f3ee0aaf1d"},
+        {"path":"scripts/run_mtm009_research_resource.py","baseline_sha256":"91bfe27c5f1010e8e668d34468a98f44e6321c8e600090b8fb7d7c90019773e0"},
+        {"path":"scripts/run_mtm011_research_resource.py","baseline_sha256":"30701376abc4a02078478514e71bf4a8aa05b9137511b22558c7fd5c4ff64a18"},
+        {"path":"scripts/validate_mtm009_math_corpus.py","baseline_sha256":"ca3a765681061ee5000bc58b47b6b8c275048627f021e74c268c90f485afbd87"},
+        {"path":"scripts/validate_mtm009_math_evaluation.py","baseline_sha256":"3d0c7a4c4d4c9eb5c1eeffb86423ce76427c3d03ca4b70d9f3b0cdae0011709b"},
+        {"path":"scripts/validate_mtm009_math_simulation.py","baseline_sha256":"11ecd2dd812fb19cea4e6b708b46889efe334490704b64980b5ffb5bcc4a1dd9"},
+        {"path":"scripts/validate_mtm009_research_contract.py","baseline_sha256":"1cf15f478f571496fc61d9ac1dba4a51ee1b9ecb3217e22655836ba9c3a930e8"},
+        {"path":"scripts/validate_mtm009_research_resource.py","baseline_sha256":"0fa2a02cac699e5b679463f95e2c535f87c6e8e8c68ae68d4f3cfc89d086df38"},
+        {"path":"scripts/validate_mtm011_math_corpus.py","baseline_sha256":"942cb24af7f7c65200d1416bb3728a18dc597789047a099e341b002e1d3c1b2c"},
+        {"path":"scripts/validate_mtm011_math_evaluation.py","baseline_sha256":"3b76b38d1fbddc7ae65f3148c2c0da1905f9d53fde66f15aaac812330a0b6a4c"},
+        {"path":"scripts/validate_mtm011_research_resource.py","baseline_sha256":"48d87a01cf0b2b357144cef53ba380c63ddd98fecd2fd4c57f7d5a067c7fc63e"}
+      ]
+    },
+    {
+      "name": "historical_tui_and_web_client_helpers",
+      "disposition": "consolidated_with_pending_acceptance",
+      "pending_acceptance": [
+        "F: current real browser DCR/PKCE reconnect and independent human-consent evidence remains required",
+        "F: current TUI/operator visibility may be exercised separately; historical MTM-009/012/015 scripts are not a forward client implementation"
+      ],
+      "rationale": "These files launched or diagnosed historical web candidates, recorded MTM-015 web-client observations and exercised old TUI visibility checks. Current CLI/TUI serving, Rust OAuth/MCP/router tests and exact-candidate loopback qualification replace executable mechanics. The current browser/human gate remains deliberately separate, so deleting these historical helpers cannot satisfy it.",
+      "replacements": ["crates/mtm-cli/src/main.rs", "crates/mtm-gateway/src/oauth.rs", "crates/mtm-gateway/src/mcp.rs", "crates/mtm-gateway/tests/http_contract.rs", "crates/mtm-cli/tests/capability_runtime.rs", "xtask/src/release_check.rs"],
+      "verification": ["cargo test -p mtm-cli -p mtm-gateway --locked", "cargo xtask records", "cargo xtask retirement", "browser_human release gate remains blocked without new current evidence"],
+      "members": [
+        {"path":"scripts/diagnose_mtm015_cross_session_capability.py","baseline_sha256":"33bf48da6b9d19a4a54e6d87ddc0fee0826c678b9c0a9fa80b7ec42cf16d1197"},
+        {"path":"scripts/launch_mtm015_web_candidate.py","baseline_sha256":"2203ca8aaba169b3691bcc591ed16b65040edf656c71b92a87d9131afe63379e"},
+        {"path":"scripts/record_mtm015_web_client_evidence.py","baseline_sha256":"560df12a65132694ce44797210214f1ad01627ca9821d22c0bd6ccb47e6d64c2"},
+        {"path":"scripts/run_mtm009_tui_visibility.py","baseline_sha256":"259066e3d5c3756202e6a49d87471bfc9310615de8a4c031867f0ee0565f4fe3"},
+        {"path":"scripts/run_mtm012_tui_validation.py","baseline_sha256":"f5489f12ef4d2302f8d87a55acf9e06497c99a9543fdd9c2360ef82d9a10978b"},
+        {"path":"scripts/validate_mtm012_tui_validation.py","baseline_sha256":"3ba14a2298981531e8cdefbd0fe5dcdb69e676160237fb682c3570cd7f16807a"},
+        {"path":"scripts/validate_mtm015_candidate_stage.py","baseline_sha256":"658b508b0ad784e0d64ddffb59436137596738d8b124d70004ea8d51da5b3758"},
+        {"path":"scripts/validate_mtm015_web_client.py","baseline_sha256":"e75adf8f2ce53c9ffd65720a44d05d90347e9ea3d6cc00c93885bb59d0a934ef"}
+      ]
+    },
+    {
+      "name": "historical_mtm014_permission_target_helpers",
+      "disposition": "consolidated_with_pending_acceptance",
+      "pending_acceptance": [
+        "F: capable-host Native command/TTY/CAS, target/resource and compiled-LaTeX gates remain required on the current candidate",
+        "F: real browser and independent human consent remain required; scripted Rust permission tests are not human evidence"
+      ],
+      "rationale": "These MTM-014 scripts and validators drove the historical permission-capacity, MRTR, Native target and post-cutover public-authority qualification. Current permission classification, grant ledger, protected patch soak, target profile and release evidence schemas are Rust-owned and fail closed. Historical receipts remain immutable, while current capable-host and human evidence remains independently pending.",
+      "replacements": ["crates/mtm-core/src/native_permission.rs", "crates/mtm-runtime/src/native_authority.rs", "crates/mtm-cli/tests/support/permission_runtime.rs", "crates/mtm-cli/tests/support/target_runtime.rs", "xtask/src/permission_summary.rs", "xtask/src/qualification_receipt.rs", "xtask/src/release_check.rs"],
+      "verification": ["cargo test -p mtm-core -p mtm-runtime --locked --no-fail-fast", "cargo test -p mtm-xtask --locked", "cargo xtask records", "cargo xtask retirement", "Expected current-host Native failures are not converted into passes by retirement"],
+      "members": [
+        {"path":"scripts/run_mtm014_capacity_validation.py","baseline_sha256":"f321920034fa9290db017762833fd77f08dcdef3cdf469b24ac3190d3dfc7f97"},
+        {"path":"scripts/run_mtm014_mrtr_permission_validation.py","baseline_sha256":"711f94b628a7e8a0a8688c76d795c80550ea3ad510dd70465302901461726d2a"},
+        {"path":"scripts/run_mtm014_native_permission_target.py","baseline_sha256":"4a558c8376f184a794da290d0402ef0486b53dec90884c2e1d61bb0ca5ea3771"},
+        {"path":"scripts/run_mtm014_public_authority_target.py","baseline_sha256":"bc3d46cb5db09720cbddf6ac785af86febee65fd54aa1b3cb5a4fc345b769340"},
+        {"path":"scripts/validate_mtm014_capacity_validation.py","baseline_sha256":"c0b9403353c83d2e7993a324ab9ecb1955e53e73d0c35d73b56b570f824a93fe"},
+        {"path":"scripts/validate_mtm014_elicitation_capability.py","baseline_sha256":"f207d8e42230e9cdadddf8b367066dffceaf2d93203fd37c6e493f1a4daded38"},
+        {"path":"scripts/validate_mtm014_native_permission_target.py","baseline_sha256":"5ee5ed19d0df390edad313ee055fe8a47267b27aadadb2d9346b33bdd6885ae0"},
+        {"path":"scripts/validate_mtm014_public_authority_target.py","baseline_sha256":"35db36dacf193b938e525fa4fc7f07ccf8af8a14e6e7cf81d7a36ed07018b70b"}
+      ]
+    },
+    {
+      "name": "legacy_governance_and_local_gate_python",
+      "disposition": "replaced_by_rust",
+      "pending_acceptance": [],
+      "rationale": "The remaining Python governance glue loaded migration/engineering graphs, resolved repository record paths, composed the pre-MTM-016 local gate and asserted historical contract details. Rust records, architecture, commit policy, retirement and release-check now own the active validation surfaces with bounded input, path/symlink checks, append-only receipts and historical hash binding. The historical local-validation JSON remains evidence of what the old Python gate ran; its commands are not re-executable current instructions.",
+      "replacements": ["xtask/src/records.rs", "xtask/src/record_layout.rs", "xtask/src/architecture.rs", "xtask/src/commit_message.rs", "xtask/src/retirement.rs", "xtask/src/release_check.rs", "xtask/tests/records_cli.rs"],
+      "verification": ["cargo test -p mtm-xtask --locked", "cargo xtask records", "cargo xtask retirement", "git diff --check"],
+      "members": [
+        {"path":"scripts/record_paths.py","baseline_sha256":"7c5da2a27a64c1465cdf3362d4d3871331d12b770171b0846f8642132896fd8e"},
+        {"path":"scripts/run_checks.py","baseline_sha256":"5ee0feb8f547e781a74ee96f6531044617141ac1d2f30bd371f597a2a80ab2fc"},
+        {"path":"scripts/validate_engineering_graph.py","baseline_sha256":"f7b67909e1fb352703b51d536272ccd2108bab1defc3cf3a0866641abe05cf8d"},
+        {"path":"scripts/validate_migration_graph.py","baseline_sha256":"c501825e572e0a7cb64f0a278bdc1c7ac2afc9a15634a0299ae4ae5f095f691c"},
+        {"path":"tests/test_governance.py","baseline_sha256":"f2fbba34e869eb675fc6cce20819f0eda55d9f1290a43e37a3bce851a6c30584"}
       ]
     }
   ]
