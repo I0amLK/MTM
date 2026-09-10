@@ -3,6 +3,7 @@
 use std::env;
 use std::fs;
 
+use mtm_contracts::LatexPolicy;
 use serde_json::{Value, json};
 
 use crate::candidate_lifecycle;
@@ -113,7 +114,30 @@ fn replace_proof(submission: &mut Value, proof: &str) -> Result {
     Ok(())
 }
 
-fn shell_escape_rejected(server: &mut Server, owner: &Client) -> Result {
+fn check_shell_escape_task(task: &Value, policy: LatexPolicy) -> Result {
+    let latex = &task["context"]["latex_result"];
+    require_stage(
+        task["ok"] == true
+            && task["state"] == "repair"
+            && task["role"] == "repair"
+            && task["context"]["repair_source"] == "latex_gate"
+            && latex["policy"] == policy.as_str()
+            && latex["static_valid"] == false
+            && latex["gate_passed"] == false
+            && latex["compile_attempted"] == false
+            && latex["compile_passed"] == false
+            && latex["compiler_output"] == ""
+            && latex["errors"].as_array().is_some_and(|errors| {
+                errors
+                    .iter()
+                    .any(|error| error == "forbidden LaTeX operation: shell_escape")
+            }),
+        "shell_escape_static_repair",
+        "unsafe shell-escape proof was not rejected before compiler and verifier",
+    )
+}
+
+fn shell_escape_rejected(server: &mut Server, owner: &Client, policy: LatexPolicy) -> Result {
     let export = "qualification/shell-escape/proof_verified.tex";
     let started = server.call(
         owner,
@@ -150,21 +174,29 @@ fn shell_escape_rejected(server: &mut Server, owner: &Client) -> Result {
     )?;
     let mut submission = candidate_lifecycle::fixture_submission(&assemble, "compact", false)?;
     replace_proof(&mut submission, UNSAFE_PROOF)?;
-    let verify = server.call(owner, "rethlas_step", submission)?;
+    // Assembly enters the mechanical LaTeX gate BEFORE verifier staging.
+    // Forbidden source must go straight to repair, with no compiler attempt.
+    let rejected = server.call(owner, "rethlas_step", submission)?;
     require_stage(
-        verify["ok"] == true && verify["state"] == "verify",
-        "shell_escape_verify",
-        "unsafe shell-escape proof bypassed verifier staging",
+        rejected["run_id"] == run_id
+            && rejected["submission"]["ok"] == true
+            && rejected["writes_applied"].as_u64() == Some(2),
+        "shell_escape_submission",
+        "shell-escape fixture did not reach the mechanical LaTeX gate",
     )?;
-    let rejected = server.call(
+    check_shell_escape_task(&rejected, policy)?;
+    let before = server.call(
         owner,
-        "rethlas_step",
-        candidate_lifecycle::fixture_submission(&verify, "compact", false)?,
+        "rethlas_inspect",
+        json!({"operation":"status","run_id":run_id}),
     )?;
     require_stage(
-        rejected["ok"] == true && rejected["state"] == "repair",
-        "shell_escape_repair",
-        "unsafe shell-escape proof did not route to repair after verification",
+        before["ok"] == true
+            && before["state"] == "repair"
+            && before["sealed"] == false
+            && before["latex_passed"] == false,
+        "shell_escape_not_finalized",
+        "unsafe shell-escape proof was sealed or accepted by the LaTeX gate",
     )?;
     require_stage(
         !server.workspace_path().join(export).exists()
@@ -174,7 +206,88 @@ fn shell_escape_rejected(server: &mut Server, owner: &Client) -> Result {
                 .exists(),
         "shell_escape_side_effect",
         "unsafe shell-escape proof produced a final artifact or command side effect",
+    )?;
+    server.restart()?;
+    let resumed = server.call(owner, "rethlas_step", json!({"run_id":run_id}))?;
+    check_shell_escape_task(&resumed, policy)?;
+    let after = server.call(
+        owner,
+        "rethlas_inspect",
+        json!({"operation":"status","run_id":run_id}),
+    )?;
+    require_stage(
+        resumed["run_id"] == run_id
+            && after["ok"] == true
+            && after["state"] == "repair"
+            && after["sealed"] == false
+            && after["latex_passed"] == false
+            && before["transition_seq"].as_u64().is_some()
+            && before["transition_seq"] == after["transition_seq"]
+            && !server.workspace_path().join(export).exists()
+            && !server
+                .workspace_path()
+                .join("shell-escape-leak.txt")
+                .exists(),
+        "shell_escape_restart",
+        "restarting an unsafe proof advanced, sealed or published it",
     )
+}
+
+#[test]
+fn shell_escape_repair_requires_specific_static_denial() -> Result {
+    let good = json!({
+        "ok":true,"state":"repair","role":"repair",
+        "context":{"repair_source":"latex_gate","latex_result":{
+            "policy":"required","static_valid":false,"gate_passed":false,
+            "compile_attempted":false,"compile_passed":false,"compiler_output":"",
+            "errors":["forbidden LaTeX operation: shell_escape"]
+        }}
+    });
+    check_shell_escape_task(&good, LatexPolicy::Required)?;
+    for (pointer, replacement) in [
+        ("/ok", json!(false)),
+        ("/state", json!("verify")),
+        ("/state", json!("done")),
+        ("/role", json!("verifier")),
+        ("/context/repair_source", json!("verification_report")),
+        ("/context/latex_result/policy", json!("static_only")),
+        ("/context/latex_result/static_valid", json!(true)),
+        ("/context/latex_result/gate_passed", json!(true)),
+        ("/context/latex_result/compile_attempted", json!(true)),
+        ("/context/latex_result/compile_passed", json!(true)),
+        (
+            "/context/latex_result/compiler_output",
+            json!("compiler ran"),
+        ),
+        ("/context/latex_result/errors", json!([])),
+        (
+            "/context/latex_result/errors",
+            json!(["missing documentclass"]),
+        ),
+    ] {
+        for bad_value in [replacement, Value::Null] {
+            let mut bad = good.clone();
+            *bad.pointer_mut(pointer)
+                .ok_or("shell-escape fixture field missing")? = bad_value;
+            require(
+                check_shell_escape_task(&bad, LatexPolicy::Required).is_err(),
+                "shell-escape acceptance allowed missing or inconsistent gate evidence",
+            )?;
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn shell_escape_static_rejection_regression() -> Result {
+    // Exercises the same public candidate boundary without a compiler. This
+    // regression must never emit compiled-LaTeX qualification evidence.
+    let candidate = candidate::select()?;
+    let mut server = Server::start(&candidate.path)?;
+    let owner = server.login()?;
+    shell_escape_rejected(&mut server, &owner, LatexPolicy::StaticOnly)?;
+    server.stop()?;
+    candidate.unchanged()
 }
 
 #[test]
@@ -207,7 +320,7 @@ fn exact_candidate_required_latex_full_compact_and_repair() -> Result {
             eprintln!("MTM_COMPILED_LATEX_DIAGNOSTIC stage=repair_flow");
             "compiled-LaTeX repair flow failed"
         })?;
-    shell_escape_rejected(&mut server, &owner).map_err(|_| {
+    shell_escape_rejected(&mut server, &owner, LatexPolicy::Required).map_err(|_| {
         eprintln!("MTM_COMPILED_LATEX_DIAGNOSTIC stage=shell_escape_flow");
         "compiled-LaTeX shell-escape flow failed"
     })?;

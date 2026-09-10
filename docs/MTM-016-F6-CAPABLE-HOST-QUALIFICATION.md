@@ -86,8 +86,20 @@ or algebra engine and cannot serve as functional CAS evidence.
 - required-LaTeX full workflow finalization;
 - required-LaTeX repair workflow finalization;
 - exact final `.tex` artifact byte checks for all three routes;
-- an unsafe `\\write18` proof that must route to repair and must not create either
-  a final artifact or its delayed shell side-effect file.
+- an unsafe `\\write18` proof that must route directly from assembly through the
+  mechanical LaTeX gate to repair, before compiler invocation or verifier staging;
+- a specific static shell-escape denial, no compiler attempt/output, no final
+  artifact or shell side-effect file, and unchanged repair state after restart.
+
+The permanent `shell_escape_static_rejection_regression` exercises this rejection
+through the same public candidate endpoint under the explicit static-only test
+profile, including restart. It can run without a Native-capable host because unsafe
+source must be rejected before any compiler is started. It emits no compiled-LaTeX
+qualification summary. The real `compiled_latex` profile still uses `required`
+policy for all three positive compilation flows and the same negative check.
+Negative reply mutations reject verifier/done states, unrelated LaTeX errors,
+missing fields, compiler attempts and policy mismatches; generic failure is not
+accepted as a shell-escape pass.
 
 The workflow submissions are fixed scripted mathematical fixtures. This proves the
 runtime/LaTeX gate, not independent mathematical correctness.

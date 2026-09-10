@@ -2826,6 +2826,22 @@
       "purpose":"Identify the first failing compiled-LaTeX boundary on the capable host without recording proof text, command output bodies, tokens, capabilities or private state.",
       "acceptance_boundary":"Diagnostic labels do not weaken required-LaTeX policy or count as compiled-LaTeX evidence. The failed receipt remains failed until a committed harness is rerun successfully on the capable host.",
       "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-SHELL-ESCAPE-GATE-ORDER-REPAIR",
+      "status":"harness_repair_reproduced_pending_capable_host_receipt",
+      "base_commit":"42740a817d9bb9565a5f0a4f50ccad6a18eed8ee",
+      "corrects":"MTM016-F6-COMPILED-LATEX-FLOW-REVIEW-FIX",
+      "correction_to_prior_attribution":"The earlier assertion that verifier staging precedes the mechanical LaTeX gate was wrong. The unchanged product commit_proof_submitted transitions to latex_validate; run_latex_gate selects verify only on a passing gate and otherwise selects repair. The former F6 test incorrectly demanded verify for source containing a forbidden write18 operation.",
+      "operator_observation":"The exact compiled-LaTeX test reached stage=shell_escape_verify and failed. Earlier toolchain and compact/full/repair calls precede this assertion, but this failed run is not a complete compiled-LaTeX qualification.",
+      "candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+      "reproduction":{"test":"compiled_latex_runtime::shell_escape_static_rejection_regression","uses_same_frozen_candidate":true,"uses_real_oauth_mcp":true,"latex_policy":"static_only","native_exec_backend":"disabled","before_exit_code":101,"before_observed_immediate_repair":true,"before_observed_specific_shell_escape_denial":true,"before_observed_compile_not_attempted":true,"after_exit_code":0,"after_restart_preserves_repair_unsealed_and_no_artifact":true},
+      "changes":["Require immediate latex_gate repair instead of generating a verifier verdict for forbidden source", "Require the exact shell-escape error, static/gate failure and zero compiler attempt/output", "Require successful owned proof submission so unrelated request errors cannot pass", "Check no final artifact before and after restart and stable transition sequence", "Add a permanent static-only endpoint regression and 26 negative reply mutations; neither emits compiled qualification evidence"],
+      "sealed_reports":[{"path":"records/evidence/MTM-016/candidate-compiled-latex-f6-f886efa-failed.json","sha256":"23b1a50ccb81b7155fb2f028e8fb4a8710812ee4ef7cf9c516d8e69edd28ecd8","passed":false},{"path":"records/evidence/MTM-016/shell-escape-gate-order-f6-42740a8.json","sha256":"77696e1df9d11a4faa74bd061935fb2291bcb8dad61c9735c452461ad44c7f09","passed":true}],
+      "validation":{"format_exit_code":0,"workspace_clippy_warnings_denied_exit_code":0,"mtm_xtask_unit_tests_passed":81,"mtm_xtask_cli_tests_passed":13,"capability_runtime_exit_code":0,"capability_runtime_functions_passed":53,"capability_runtime_functions_failed":0,"capability_runtime_elapsed_seconds":283.61,"explicit_real_host_profiles_enabled":false,"negative_reply_mutations":26,"records_exit_code":0,"retirement_exit_code":0,"audit_strict_exit_code":0,"diff_check_exit_code":0,"full_workspace_tests_rerun":false,"new_suppressions":0},
+      "release_readiness":{"validated_gates":10,"blocked_gates":7,"native_commands":"validated","compiled_latex":"blocked_required_evidence_missing","release_qualified":false},
+      "acceptance_boundary":"The diagnostic red/green comparison was performed on the same exact candidate through a static-only disposable server. It proves the corrected rejection expectation and persistence, not compiled-LaTeX acceptance. Required-policy full/compact/repair fixtures, summary requirements, Native evidence, product sources and frozen candidate bytes are unchanged. The capable host must rerun the fixed required-policy profile before its gate may be validated.",
+      "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
