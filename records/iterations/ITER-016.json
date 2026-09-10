@@ -2696,6 +2696,19 @@
       "remaining_real_gates":["source on capable Native host","target","resource","native_commands","compiled_latex","browser_human","copied_operator_state","complete 30x3 corpus"],
       "compatibility_boundary":"The 81 compatibility references are current Rust naming/wire/sandbox history and remain visible. The four no-caller Rust shadow binaries are deferred because deleting crates/ source would require a separately rebuilt and requalified candidate.",
       "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-CAPABLE-HOST-HARNESS-IMPLEMENTATION",
+      "status":"implemented_pending_real_host_execution",
+      "base_commit":"aa45341bc79765fcce5f58bd1677fffe0b310455",
+      "candidate_source_commit":"cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+      "candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+      "profiles":{"native_commands":"safe/trusted/dangerous, seven exact command permission kinds, 32-cycle once-grant soak, TTY/stdin, timeout/kill, descendant cleanup, Sage and Magma through the public OAuth/MCP candidate boundary","compiled_latex":"required-LaTeX compact/full/repair candidate flows, latexmk and pdflatex execution, exact final artifacts and shell-escape rejection through the public OAuth/MCP candidate boundary"},
+      "receipt_authority":"cargo xtask qualify snapshots the exact SHA-selected candidate, requires positive Native preflight, captures bounded runner output, strictly parses the profile summary, rechecks exact candidate bytes and source identity, and emits no release authorization.",
+      "local_validation":[{"command":"cargo fmt --all -- --check","exit_code":0},{"command":"cargo test --locked --offline -p mtm-xtask with CARGO_HOME=/home/lk/.cargo","exit_code":0,"tests_passed":81,"tests_failed":0},{"command":"cargo test --locked --offline -p mtm-cli --test capability_runtime with CARGO_HOME=/home/lk/.cargo","exit_code":0,"tests_passed":49,"tests_failed":0,"profile_tests_inert_without_explicit_flags":true},{"command":"cargo clippy --locked --offline --workspace --all-targets -- -D warnings with CARGO_HOME=/home/lk/.cargo","exit_code":0},{"command":"git diff --check","exit_code":0}],
+      "acceptance_boundary":"Local compilation and ordinary regression tests prove only that the capable-host harness is integrated and inert by default. They do not satisfy Native, CAS or compiled-LaTeX acceptance. Scripted permission form responses are not human consent; fixed mathematical submissions are not independent mathematical verification. No production selector, state, key or database is touched.",
+      "pending":["Commit this harness so future real-host receipts bind to an immutable source identity", "On a capable host run native-preflight then exact native_commands and compiled_latex qualifications", "Hash-seal successful receipts and update release inputs only after repository-side validation", "Remaining target/resource, browser-human, operator-state and corpus gates"],
+      "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

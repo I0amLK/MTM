@@ -31,6 +31,12 @@ mod workspace_smoke;
 #[path = "support/target_runtime.rs"]
 mod target_runtime;
 
+#[path = "support/native_command_runtime.rs"]
+mod native_command_runtime;
+
+#[path = "support/compiled_latex_runtime.rs"]
+mod compiled_latex_runtime;
+
 #[path = "support/resource_runtime.rs"]
 mod resource_runtime;
 

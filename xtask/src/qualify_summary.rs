@@ -18,6 +18,14 @@ pub(super) use retrieval::validate as validate_retrieval;
 mod permissions;
 pub(super) use permissions::validate as validate_permissions;
 
+#[path = "native_command_summary.rs"]
+mod native_commands;
+pub(super) use native_commands::validate as validate_native_commands;
+
+#[path = "compiled_latex_summary.rs"]
+mod compiled_latex;
+pub(super) use compiled_latex::validate as validate_compiled_latex;
+
 #[path = "upgrade_summary.rs"]
 mod upgrade;
 

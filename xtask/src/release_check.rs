@@ -687,9 +687,29 @@ fn validate_evidence(
         return validate_clean_build(value, manifest);
     }
     if name == "native_commands" {
+        if value["schema_version"] == "1.0.0" && value["profile"] == "native_commands" {
+            qualify::validate_receipt(
+                value,
+                &manifest.candidate_sha256,
+                &manifest.baseline_sha256,
+                "native_commands",
+            )?;
+            lineage(root, &value["harness_source_identity"], cache)?;
+            return Ok(true);
+        }
         return validate_native_commands(value, manifest);
     }
     if name == "compiled_latex" {
+        if value["schema_version"] == "1.0.0" && value["profile"] == "compiled_latex" {
+            qualify::validate_receipt(
+                value,
+                &manifest.candidate_sha256,
+                &manifest.baseline_sha256,
+                "compiled_latex",
+            )?;
+            lineage(root, &value["harness_source_identity"], cache)?;
+            return Ok(true);
+        }
         return validate_compiled_latex(value, manifest);
     }
     if name == "retrieval" {

@@ -42,6 +42,17 @@ fn selection_requires_explicit_profile_artifact_and_digest() -> Result<()> {
     let mut target = good.clone();
     target[1] = "target".to_owned();
     assert_eq!(Options::parse(&target)?.profile, Profile::Target);
+    for (name, profile) in [
+        ("native_commands", Profile::NativeCommands),
+        ("compiled_latex", Profile::CompiledLatex),
+    ] {
+        let mut changed = good.clone();
+        changed[1] = name.to_owned();
+        let parsed = Options::parse(&changed)?;
+        assert_eq!(parsed.profile, profile);
+        assert!(parsed.baseline_binary.is_none());
+        assert!(parsed.baseline_sha256.is_none());
+    }
     let mut resource = [
         good.to_vec(),
         vec![

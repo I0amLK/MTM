@@ -233,7 +233,7 @@ fn run() -> Result<()> {
                 "cargo xtask qualify --profile upgrade --binary <artifact> --sha256 <sha256> --baseline <artifact> --baseline-sha256 <sha256> [--record]"
             );
             println!(
-                "cargo xtask qualify --profile <protocol|target> --binary <artifact> --sha256 <sha256> [--record]\ncargo xtask qualify --profile resource --binary <artifact> --sha256 <sha256> --baseline <artifact> --baseline-sha256 <sha256> [--record]\ncargo xtask dist --binary <artifact> --sha256 <sha256> --version <version> --out <absolute-directory>"
+                "cargo xtask qualify --profile <protocol|target|native_commands|compiled_latex> --binary <artifact> --sha256 <sha256> [--record]\ncargo xtask qualify --profile resource --binary <artifact> --sha256 <sha256> --baseline <artifact> --baseline-sha256 <sha256> [--record]\ncargo xtask dist --binary <artifact> --sha256 <sha256> --version <version> --out <absolute-directory>"
             );
             println!(
                 "cargo xtask audit [--strict] [--record]\ncargo xtask records [--record]\ncargo xtask retirement [--record]\ncargo xtask capability [--record]\ncargo xtask native-preflight [--record]\ncargo xtask check [--record]\ncargo xtask commit-message <file|--stdin>\n\ncheck is NOT release qualification. Orchestration is Rust; inherited host/toolchain tests are not skipped. A blocked preflight never suppresses a test failure."

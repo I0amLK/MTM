@@ -35,6 +35,8 @@ pub(crate) fn validate_corpus_summary(summaries: &Value, hash: &str) -> Result<b
 pub(super) enum Profile {
     Protocol,
     Target,
+    NativeCommands,
+    CompiledLatex,
     Resource,
     Upgrade,
     Permissions,
@@ -48,13 +50,15 @@ impl Profile {
         match value {
             "protocol" => Ok(Self::Protocol),
             "target" => Ok(Self::Target),
+            "native_commands" => Ok(Self::NativeCommands),
+            "compiled_latex" => Ok(Self::CompiledLatex),
             "resource" => Ok(Self::Resource),
             "upgrade" => Ok(Self::Upgrade),
             "permissions" => Ok(Self::Permissions),
             "corpus" => Ok(Self::Corpus),
             "install_sigkill" => Ok(Self::InstallSigkill),
             "retrieval" => Ok(Self::Retrieval),
-            _ => Err("qualification profile must be protocol, target, resource, upgrade, permissions, corpus, install_sigkill or retrieval; release qualification is not implemented here".into()),
+            _ => Err("qualification profile must be protocol, target, native_commands, compiled_latex, resource, upgrade, permissions, corpus, install_sigkill or retrieval; release qualification is not implemented here".into()),
         }
     }
 
@@ -62,6 +66,8 @@ impl Profile {
         match self {
             Self::Protocol => "protocol",
             Self::Target => "target",
+            Self::NativeCommands => "native_commands",
+            Self::CompiledLatex => "compiled_latex",
             Self::Resource => "resource",
             Self::Upgrade => "upgrade",
             Self::Permissions => "permissions",
@@ -75,6 +81,7 @@ impl Profile {
         match self {
             Self::Protocol => "D5",
             Self::Target => "D6",
+            Self::NativeCommands | Self::CompiledLatex => "F6",
             Self::Resource => "D7",
             Self::Upgrade => "F1",
             Self::Permissions => "F2",
@@ -88,6 +95,8 @@ impl Profile {
         match self {
             Self::Protocol => "candidate-protocol.json",
             Self::Target => "candidate-target.json",
+            Self::NativeCommands => "candidate-native-commands.json",
+            Self::CompiledLatex => "candidate-compiled-latex.json",
             Self::Resource => "candidate-resource.json",
             Self::Upgrade => "candidate-upgrade.json",
             Self::Permissions => "candidate-permissions.json",
@@ -165,6 +174,8 @@ impl Options {
             }
             Profile::Protocol
             | Profile::Target
+            | Profile::NativeCommands
+            | Profile::CompiledLatex
             | Profile::Permissions
             | Profile::Corpus
             | Profile::InstallSigkill
@@ -291,6 +302,8 @@ impl Snapshot {
 
 pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     let target = options.profile == Profile::Target;
+    let native_commands = options.profile == Profile::NativeCommands;
+    let compiled_latex = options.profile == Profile::CompiledLatex;
     let resource = options.profile == Profile::Resource;
     let upgrade = options.profile == Profile::Upgrade;
     let permissions = options.profile == Profile::Permissions;
@@ -298,10 +311,12 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     let install_sigkill = options.profile == Profile::InstallSigkill;
     let retrieval = options.profile == Profile::Retrieval;
     let paired = resource || upgrade;
-    let needs_native = target || resource;
+    let needs_native = target || native_commands || compiled_latex || resource;
     let scope = match options.profile {
         Profile::Protocol => "exact_candidate_protocol_not_release",
         Profile::Target => "exact_candidate_target_not_release",
+        Profile::NativeCommands => "exact_candidate_capable_host_native_commands_not_release",
+        Profile::CompiledLatex => "exact_candidate_required_compiled_latex_not_release",
         Profile::Resource => "exact_candidate_resource_not_release",
         Profile::Upgrade => "exact_candidate_installed_upgrade_fixture_not_release",
         Profile::Permissions => "exact_candidate_scripted_patch_permissions_not_release",
@@ -319,6 +334,8 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     "pending":match options.profile {
         Profile::Protocol => json!(["Native host","compiled LaTeX","browser","resources","upgrade and rollback","Python retirement"]),
         Profile::Target => json!(["browser","resources","upgrade and rollback","Python retirement"]),
+        Profile::NativeCommands => json!(["compiled LaTeX","baseline resource comparison","browser and independent human consent","operator-authorized copied production state","remaining corpus and release gates"]),
+        Profile::CompiledLatex => json!(["capable-host Native command/CAS and permission soak","baseline resource comparison","browser and independent human consent","operator-authorized copied production state","remaining corpus and release gates"]),
         Profile::Resource => json!(["compiled-LaTeX target pass","permission-grant soak","browser","upgrade and rollback","Python retirement"]),
         Profile::Upgrade => json!(["real Native and compiled LaTeX","resources and permission-grant soak","browser and human consent","operator-authorized production-state copy","abrupt installation interruption","Python retirement and full release gate"]),
         Profile::Permissions => json!(["real Native command execution and command-grant soak","compiled LaTeX and external retrieval","browser and independent human consent","baseline resource comparison","production upgrade and abrupt installation interruption","Python retirement and full release gate"]),
@@ -393,6 +410,8 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             .env_remove("MTM_TEST_DEPLOYMENT_CANDIDATE_SHA256")
             .env_remove("MTM_TEST_UPGRADE_PROFILE")
             .env_remove("MTM_TEST_TARGET_PROFILE")
+            .env_remove("MTM_TEST_NATIVE_COMMAND_PROFILE")
+            .env_remove("MTM_TEST_COMPILED_LATEX_PROFILE")
             .env_remove("MTM_TEST_RESOURCE_PROFILE")
             .env_remove("MTM_TEST_BASELINE")
             .env_remove("MTM_TEST_BASELINE_SHA256");
@@ -473,6 +492,18 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
                 .arg("permission_runtime::exact_candidate_permission_patch_soak")
                 .arg("--exact")
                 .env("MTM_TEST_PERMISSION_PROFILE", "1");
+        } else if native_commands {
+            stage = "native_command_test_runner";
+            command
+                .arg("native_command_runtime::exact_candidate_capable_host_native_commands_and_permission_soak")
+                .arg("--exact")
+                .env("MTM_TEST_NATIVE_COMMAND_PROFILE", "1");
+        } else if compiled_latex {
+            stage = "compiled_latex_test_runner";
+            command
+                .arg("compiled_latex_runtime::exact_candidate_required_latex_full_compact_and_repair")
+                .arg("--exact")
+                .env("MTM_TEST_COMPILED_LATEX_PROFILE", "1");
         } else if target {
             command.env("MTM_TEST_TARGET_PROFILE", "1");
             command.env_remove("MTM_TEST_RESOURCE_PROFILE");
@@ -527,6 +558,10 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             summary::validate_corpus(&output.stdout, &snapshot.sha256)?
         } else if permissions {
             summary::validate_permissions(&output.stdout, &snapshot.sha256)?
+        } else if native_commands {
+            summary::validate_native_commands(&output.stdout, &snapshot.sha256)?
+        } else if compiled_latex {
+            summary::validate_compiled_latex(&output.stdout, &snapshot.sha256)?
         } else if upgrade {
             summary::validate_upgrade(
                 &output.stdout,

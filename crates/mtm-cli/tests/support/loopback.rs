@@ -180,6 +180,32 @@ impl Server {
         Self::start_profile(binary, true, true, true, "dangerous")
     }
 
+    pub fn start_native_commands(binary: &str, mode: mtm_contracts::NativeMode) -> Result<Self> {
+        Self::start_profile_with_tools(
+            binary,
+            true,
+            true,
+            false,
+            mode.as_str(),
+            None,
+            &[
+                "cat", "curl", "magma", "printf", "rm", "sage", "script", "sh", "sleep", "true",
+            ],
+        )
+    }
+
+    pub fn start_compiled_latex(binary: &str) -> Result<Self> {
+        Self::start_profile_with_tools(
+            binary,
+            true,
+            true,
+            true,
+            "dangerous",
+            None,
+            &["latexmk", "pdflatex", "printf"],
+        )
+    }
+
     pub fn start_resource(binary: &str) -> Result<Self> {
         Self::start_profile(binary, false, true, false, "dangerous")
     }
@@ -294,6 +320,26 @@ impl Server {
         native_mode: &'static str,
         theorem_search_url: Option<&str>,
     ) -> Result<Self> {
+        Self::start_profile_with_tools(
+            binary,
+            git_enabled,
+            native_enabled,
+            compiled_latex,
+            native_mode,
+            theorem_search_url,
+            &[],
+        )
+    }
+
+    fn start_profile_with_tools(
+        binary: &str,
+        git_enabled: bool,
+        native_enabled: bool,
+        compiled_latex: bool,
+        native_mode: &'static str,
+        theorem_search_url: Option<&str>,
+        extra_tools: &[&str],
+    ) -> Result<Self> {
         let directory = tempfile::tempdir().map_err(|_| "temporary server directory failed")?;
         fs::create_dir(directory.path().join("workspace")).map_err(|_| "workspace setup failed")?;
         // Keep the capability suite curl-only. Workspace qualification adds the
@@ -312,6 +358,9 @@ impl Server {
         if compiled_latex {
             names.extend(["latexmk", "pdflatex"]);
         }
+        names.extend(extra_tools.iter().copied());
+        names.sort_unstable();
+        names.dedup();
         for name in names {
             let program = std::env::var_os("PATH")
                 .and_then(|paths| {

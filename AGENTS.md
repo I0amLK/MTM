@@ -208,3 +208,14 @@ visible in audit output. A real Rust launcher for a repository Python entrypoint
 must still block `rust_only_ready`. Do not delete the remaining Rust shadow
 binaries from the source identity of the frozen candidate merely to reduce a
 counter; that requires a separately rebuilt and requalified candidate.
+
+## F6 capable-host Native and compiled-LaTeX profiles
+
+Read `docs/MTM-016-F6-CAPABLE-HOST-QUALIFICATION.md`. The explicit
+`qualify --profile native_commands` and `qualify --profile compiled_latex` entries
+require a positive Native preflight and the exact frozen candidate. Never skip a
+missing Bubblewrap, Sage, Magma, TTY, process-lifecycle or LaTeX requirement. Native
+permission form responses are scripted mechanics evidence and do not count as human
+consent. The compiled-LaTeX mathematical submissions are fixed fixtures and do not
+count as independent mathematical verification. Ordinary source tests must keep both
+profile flags inert.

@@ -66,6 +66,8 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
     let scope = match profile {
         Profile::Protocol => "exact_candidate_protocol_not_release",
         Profile::Target => "exact_candidate_target_not_release",
+        Profile::NativeCommands => "exact_candidate_capable_host_native_commands_not_release",
+        Profile::CompiledLatex => "exact_candidate_required_compiled_latex_not_release",
         Profile::Resource => "exact_candidate_resource_not_release",
         Profile::Upgrade => "exact_candidate_installed_upgrade_fixture_not_release",
         Profile::Permissions => "exact_candidate_scripted_patch_permissions_not_release",
@@ -132,7 +134,10 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
     {
         return Err("qualification receipt identity, result or scope inconsistent".into());
     }
-    if matches!(profile, Profile::Target | Profile::Resource) {
+    if matches!(
+        profile,
+        Profile::Target | Profile::NativeCommands | Profile::CompiledLatex | Profile::Resource
+    ) {
         let native = report
             .native_preflight
             .as_ref()
@@ -154,6 +159,14 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
         Profile::Permissions => {
             line("permissions", "MTM_PERMISSION_RUNTIME")?;
             summary::validate_permissions(&bytes, hash)?
+        }
+        Profile::NativeCommands => {
+            line("native_commands", "MTM_NATIVE_COMMAND_RUNTIME")?;
+            summary::validate_native_commands(&bytes, hash)?
+        }
+        Profile::CompiledLatex => {
+            line("compiled_latex", "MTM_COMPILED_LATEX_RUNTIME")?;
+            summary::validate_compiled_latex(&bytes, hash)?
         }
         Profile::InstallSigkill => {
             line("install_sigkill", "MTM_INSTALL_SIGKILL")?;
