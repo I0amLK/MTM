@@ -2760,6 +2760,14 @@
       "correction":"Keep the dedicated sleep timeout check unchanged. For descendant cleanup, start a bounded shell command that announces readiness, require status=running, terminate its owned process group through public kill_command, then wait beyond the child delay and require that no leak file exists and no server-owned child remains.",
       "acceptance_boundary":"This separates two independent release claims instead of weakening either one. Candidate bytes, process-group implementation, timeout policy, Native resolver policy and production state are unchanged. A new capable-host run remains required.",
       "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-DESCENDANT-AND-CAS-DIAGNOSTICS",
+      "status":"diagnostics_added_pending_real_host_rerun",
+      "observed_on_real_host":"The separated descendant-cleanup qualification still exited nonzero after approximately 11.37 seconds, but the captured terminal tail omitted both the fixed Error line and any stage diagnostic, so the failing descendant/CAS assertion could not be distinguished without another labelled run.",
+      "change":"Add bounded fixed diagnostics for descendant kill outcome, delayed descendant leak presence, retained owned-child count, and post-success Sage/Magma output matching. Diagnostics expose only booleans/counts/status/signal fields and never command arguments, stdout/stderr bodies, tokens, capabilities or environment values.",
+      "acceptance_boundary":"This is diagnostic-only harness work. Candidate bytes, process-group behavior, CAS executables, Native policy, production state and release qualification are unchanged.",
+      "production_changed":false,"candidate_product_source_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

@@ -322,24 +322,37 @@ fn tty_timeout_and_descendants(binary: &str) -> Result<(bool, bool, bool)> {
             "kill_wait_ms":1_000
         }),
     )?;
-    require(
-        descendant_killed["ok"] == true
-            && descendant_killed["killed"] == true
-            && matches!(
-                descendant_killed["status"].as_str(),
-                Some("terminated" | "killed")
-            ),
-        "Native descendant command group did not terminate through kill_command",
-    )?;
+    if !(descendant_killed["ok"] == true
+        && descendant_killed["killed"] == true
+        && matches!(
+            descendant_killed["status"].as_str(),
+            Some("terminated" | "killed")
+        ))
+    {
+        eprintln!(
+            "MTM_NATIVE_DIAGNOSTIC stage=descendant_kill ok={} status={} killed={} exit_code={} signal={} signal_sent={}",
+            descendant_killed["ok"],
+            descendant_killed["status"],
+            descendant_killed["killed"],
+            descendant_killed["exit_code"],
+            descendant_killed["signal"],
+            descendant_killed["signal_sent"]
+        );
+        return Err("Native descendant command group did not terminate through kill_command");
+    }
     thread::sleep(Duration::from_millis(1_300));
-    require(
-        !leak.exists(),
-        "Native descendant survived process-group cleanup",
-    )?;
-    require(
-        server.process_facts()?["children"] == 0,
-        "Native command profile retained an owned child",
-    )?;
+    if leak.exists() {
+        eprintln!("MTM_NATIVE_DIAGNOSTIC stage=descendant_leak leak_exists=true");
+        return Err("Native descendant survived process-group cleanup");
+    }
+    let process_facts = server.process_facts()?;
+    if process_facts["children"] != 0 {
+        eprintln!(
+            "MTM_NATIVE_DIAGNOSTIC stage=descendant_reap children={}",
+            process_facts["children"]
+        );
+        return Err("Native command profile retained an owned child");
+    }
     server.stop()?;
     Ok((true, true, true))
 }
@@ -354,12 +367,13 @@ fn cas_functions(binary: &str) -> Result<(bool, bool)> {
         "sage",
         &json!({"argv":["sage","-c","print(6*7)"],"timeout_ms":120_000,"yield_time_ms":30_000}),
     )?;
-    require(
-        sage["stdout"]
-            .as_str()
-            .is_some_and(|value| value.lines().any(|line| line.trim() == "42")),
-        "Sage functional fixture did not return 42",
-    )?;
+    if !sage["stdout"]
+        .as_str()
+        .is_some_and(|value| value.lines().any(|line| line.trim() == "42"))
+    {
+        eprintln!("MTM_NATIVE_DIAGNOSTIC stage=sage_output matched_42=false");
+        return Err("Sage functional fixture did not return 42");
+    }
 
     fs::write(
         server.workspace_path().join("magma-check.m"),
@@ -372,12 +386,13 @@ fn cas_functions(binary: &str) -> Result<(bool, bool)> {
         "magma",
         &json!({"argv":["magma","magma-check.m"],"timeout_ms":120_000,"yield_time_ms":30_000}),
     )?;
-    require(
-        magma["stdout"]
-            .as_str()
-            .is_some_and(|value| value.lines().any(|line| line.trim() == "42")),
-        "Magma functional fixture did not return 42",
-    )?;
+    if !magma["stdout"]
+        .as_str()
+        .is_some_and(|value| value.lines().any(|line| line.trim() == "42"))
+    {
+        eprintln!("MTM_NATIVE_DIAGNOSTIC stage=magma_output matched_42=false");
+        return Err("Magma functional fixture did not return 42");
+    }
     server.stop()?;
     Ok((true, true))
 }
