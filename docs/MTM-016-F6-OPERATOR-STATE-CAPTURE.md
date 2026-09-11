@@ -56,6 +56,12 @@ the archive, extracted databases, keys, raw logs, or original run/proof contents
 Failed partial captures remain there for operator-controlled cleanup and are not
 usable acceptance inputs. A successful archive is made owner-read-only.
 
+Bound failures publish only one fixed metadata category plus aggregate entry/byte
+counts, never the rejected path or private content. Current categories are
+`entry_limit`, `depth_limit`, `cross_device`, `special_mode`,
+`unsupported_file_type`, `regular_file_hardlink`, `single_file_size`, and
+`total_file_size`. These diagnostics do not relax the bound or trigger a retry.
+
 Two identical source streams show observed byte stability, not a transactional
 multi-database snapshot or proof that a live writer was stopped. Before use, verify
 SQLite recovery/integrity on a separate extracted working copy, retain the original

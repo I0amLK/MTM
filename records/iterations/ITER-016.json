@@ -3054,6 +3054,19 @@
       "release_readiness":{"validated_gates":15,"blocked_gates":2,"copied_operator_state":"required_evidence_missing","corpus":"incomplete","release_qualified":false},
       "operator_next_step":"At the new committed HEAD, rerun the same host capture command once. If it fails, return only capture_complete and the new MTM_COPY_DIAGNOSTIC stage; do not upload the private session. If it succeeds, return only capture-summary JSON.",
       "product_harness_and_validator_source_changed":false,"production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-OPERATOR-CAPTURE-SOURCE-BOUNDS-DIAGNOSTIC",
+      "status":"host_capture_passed_readonly_mount_then_failed_source_bounds_before_first_archive",
+      "base_commit":"8383758ac9cf13ef5728101cf6db3cf54e4d89c7",
+      "operator_observation":{"capture_complete":false,"failed_stage":"source_bounds","private_failure_session_retained_outside_repository":true,"automatic_retry":false,"first_archive_started":false},
+      "failure_boundary":"The second host capture passed both refined readonly_mount_options and readonly_mount_layout, proving the selected source was mounted read-only and both expected databases were visible inside the isolation boundary. It then failed the metadata bounds scan before first_copy, so no archive was sealed, no SQLite database was opened, no migration ran, and no production original was modified.",
+      "repair":{"fixed_reason_categories":["entry_limit","depth_limit","cross_device","special_mode","unsupported_file_type","regular_file_hardlink","single_file_size","total_file_size"],"diagnostic_exposes_paths":false,"diagnostic_exposes_private_bytes":false,"diagnostic_exposes_only_aggregate_counts":true,"limits_changed":false,"automatic_retry_added":false,"writable_probe_added":false},
+      "changed_files":{"capture_helper":{"path":"scripts/mtm016-capture-operator-state.sh","sha256":"564aeff821d82a0acc4c13dd916d379a38a075e35a84704cc2c186e3cf9af474"},"transport_tests":{"path":"conformance/mtm016-operator-capture-tests.sh","sha256":"88fdd32e1dfcf87481191309765a88c00ffd15502efd1de8b7c0880d482f79c2"},"documentation":{"path":"docs/MTM-016-F6-OPERATOR-STATE-CAPTURE.md","sha256":"d97ef5a169794cca68a91fc37e23fa36f7368aa257ef45b6090c0be8704d4351"}},
+      "validation":{"capture_helper_shell_syntax_exit_code":0,"transport_test_shell_syntax_exit_code":0,"transport_tests_exit_code":0,"bound_reason_regressions_passed":true,"diff_check_exit_code":0,"full_host_capture_reexecuted":false},
+      "release_readiness":{"validated_gates":15,"blocked_gates":2,"copied_operator_state":"required_evidence_missing","corpus":"incomplete","release_qualified":false},
+      "operator_next_step":"At the next committed HEAD, run the same host capture exactly once. On failure return capture_complete, MTM_COPY_BOUND_FAIL and MTM_COPY_DIAGNOSTIC only; on success return only capture-summary JSON. Do not upload the private session or archive.",
+      "production_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

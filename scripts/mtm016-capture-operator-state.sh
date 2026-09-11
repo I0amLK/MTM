@@ -10,11 +10,29 @@ fail() { printf 'MTM_COPY_CAPTURE_ERROR %s\n' "$1" >&2; exit 1; }
 mtm_copy_tree_bounds() {
   /usr/bin/find "$1" -maxdepth 33 -printf '%y %s %n %m %d %D\n' |
     /usr/bin/awk '
+      function reject(reason) {
+        if (!failed) {
+          printf "MTM_COPY_BOUND_FAIL reason=%s entries=%d bytes=%.0f\n", reason, n, total > "/dev/stderr"
+        }
+        failed=1
+        exit 1
+      }
       NR == 1 { device=$6 }
-      { n++; if (n>20000 || $5>=33 || $6!=device || length($4)>3) exit 1 }
-      $1 != "f" && $1 != "d" { exit 1 }
-      $1 == "f" { if ($3!=1 || $2>134217728) exit 1; total+=$2; if(total>268435456) exit 1 }
-      END { if(n<=20000 && total<=268435456) printf "%d %.0f\n", n, total }
+      {
+        n++
+        if (n>20000) reject("entry_limit")
+        if ($5>=33) reject("depth_limit")
+        if ($6!=device) reject("cross_device")
+        if (length($4)>3) reject("special_mode")
+        if ($1 != "f" && $1 != "d") reject("unsupported_file_type")
+        if ($1 == "f") {
+          if ($3!=1) reject("regular_file_hardlink")
+          if ($2>134217728) reject("single_file_size")
+          total+=$2
+          if(total>268435456) reject("total_file_size")
+        }
+      }
+      END { if(!failed) printf "%d %.0f\n", n, total }
     '
 }
 
