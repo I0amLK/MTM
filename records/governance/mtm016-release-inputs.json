@@ -16,6 +16,7 @@
     "compiled_latex": {"path":"records/evidence/MTM-016/candidate-compiled-latex-f6-f9ed821.json","sha256":"2994cdd7848a9a2d7e4a6f1a79d30a15ca203ac1249e61aff48499b10da0fb22"},
     "retrieval": {"path":"records/evidence/MTM-016/candidate-retrieval-f4-17ef81f.json","sha256":"017b661766575e42718c22e14df6fa03f9d40196152ace95531ddfd3aa3bee4d"},
     "browser_human": {"path":"records/evidence/MTM-016/candidate-browser-human-f6-e9d12f1.json","sha256":"1497d2c304856632b6f9dda16c6f682efd4fa8fbd62b256414f04606bf2ac1bb"},
+    "copied_operator_state": {"path":"records/evidence/MTM-016/candidate-copied-operator-state-f6-f875f1b.json","sha256":"e5f198ae37007c7959199416321f478ae74ab87611f65e7f82e6689ee562a3a9"},
     "install_sigkill": {"path":"records/evidence/MTM-016/candidate-install-sigkill-f5-final-r3-a5a3cde.json","sha256":"1ee26e7229fdcccd70e4101b41bf0cec2ea0fe66bf1d3e70a3b6bcf9e0209f3e"},
     "corpus": {"path":"records/evidence/MTM-016/corpus-f5-final-u30-aggregate.json","sha256":"19018177c5453fb2e9c902ed6265c2752e0d60a91bfc0e261202c24c71533ef0"}
   }
