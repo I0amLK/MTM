@@ -144,6 +144,7 @@ if ! /usr/bin/timeout --signal=TERM --kill-after=5s 180s \
     /bin/bash --noprofile --norc /capture-script --internal-readonly-capture \
     > "$session/process.stdout" 2> "$session/process.stderr"; then
   printf 'capture_complete=false\nprivate_session=%s\n' "$session"
+  /usr/bin/grep -E '^MTM_COPY_BOUND_FAIL reason=(entry_limit|depth_limit|cross_device|special_mode|unsupported_file_type|regular_file_hardlink|single_file_size|total_file_size) entries=[0-9]+ bytes=[0-9]+$' "$session/process.stderr" || true
   /usr/bin/grep -E '^MTM_COPY_DIAGNOSTIC stage=[a-z_]+$' "$session/process.stderr" || true
   fail capture_failed_private_diagnostics_retained_no_retry
 fi

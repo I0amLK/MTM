@@ -3067,6 +3067,16 @@
       "release_readiness":{"validated_gates":15,"blocked_gates":2,"copied_operator_state":"required_evidence_missing","corpus":"incomplete","release_qualified":false},
       "operator_next_step":"At the next committed HEAD, run the same host capture exactly once. On failure return capture_complete, MTM_COPY_BOUND_FAIL and MTM_COPY_DIAGNOSTIC only; on success return only capture-summary JSON. Do not upload the private session or archive.",
       "production_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-OPERATOR-CAPTURE-BOUND-DIAGNOSTIC-FORWARDING",
+      "status":"fixed_bound_reason_is_forwarded_without_private_path_or_bytes",
+      "base_commit":"e2e8bfab986bc4bc4fefd928fa869ca67bd9c70d",
+      "capture_helper":{"path":"scripts/mtm016-capture-operator-state.sh","sha256":"fb692e94e2402de035e62e187a3b7a673d4b2210e898b8990f0379b90e320648"},
+      "change":"Forward only the previously generated fixed MTM_COPY_BOUND_FAIL category and aggregate counts from the private helper stderr to the host terminal. Do not expose paths, names, file contents, credentials, or arbitrary stderr.",
+      "validation":{"capture_helper_shell_syntax_exit_code":0,"transport_tests_exit_code":0,"records_append_only_guard_observed":true,"prior_committed_receipt_restored_unchanged":true},
+      "acceptance_boundary":"This diagnostic-forwarding fix is not copied_operator_state acceptance and does not authorize another fallback. The next host attempt remains one bounded read-only capture attempt.",
+      "production_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
