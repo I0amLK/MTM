@@ -12,6 +12,8 @@ use crate::{Result, capability, git, native_preflight, native_preflight::process
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
+#[path = "native_corpus_summary.rs"]
+pub(crate) mod native_corpus;
 #[path = "qualification_receipt.rs"]
 mod receipt;
 #[path = "qualify_summary.rs"]
@@ -41,6 +43,7 @@ pub(super) enum Profile {
     Upgrade,
     Permissions,
     Corpus,
+    CorpusNative,
     InstallSigkill,
     Retrieval,
 }
@@ -56,9 +59,10 @@ impl Profile {
             "upgrade" => Ok(Self::Upgrade),
             "permissions" => Ok(Self::Permissions),
             "corpus" => Ok(Self::Corpus),
+            "corpus_native" => Ok(Self::CorpusNative),
             "install_sigkill" => Ok(Self::InstallSigkill),
             "retrieval" => Ok(Self::Retrieval),
-            _ => Err("qualification profile must be protocol, target, native_commands, compiled_latex, resource, upgrade, permissions, corpus, install_sigkill or retrieval; release qualification is not implemented here".into()),
+            _ => Err("qualification profile must be protocol, target, native_commands, compiled_latex, resource, upgrade, permissions, corpus, corpus_native, install_sigkill or retrieval; release qualification is not implemented here".into()),
         }
     }
 
@@ -72,6 +76,7 @@ impl Profile {
             Self::Upgrade => "upgrade",
             Self::Permissions => "permissions",
             Self::Corpus => "corpus",
+            Self::CorpusNative => "corpus_native",
             Self::InstallSigkill => "install_sigkill",
             Self::Retrieval => "retrieval",
         }
@@ -81,7 +86,7 @@ impl Profile {
         match self {
             Self::Protocol => "D5",
             Self::Target => "D6",
-            Self::NativeCommands | Self::CompiledLatex => "F6",
+            Self::NativeCommands | Self::CompiledLatex | Self::CorpusNative => "F6",
             Self::Resource => "D7",
             Self::Upgrade => "F1",
             Self::Permissions => "F2",
@@ -101,6 +106,7 @@ impl Profile {
             Self::Upgrade => "candidate-upgrade.json",
             Self::Permissions => "candidate-permissions.json",
             Self::Corpus => "candidate-corpus.json",
+            Self::CorpusNative => "candidate-corpus-native.json",
             Self::InstallSigkill => "candidate-install-sigkill.json",
             Self::Retrieval => "candidate-retrieval.json",
         }
@@ -178,6 +184,7 @@ impl Options {
             | Profile::CompiledLatex
             | Profile::Permissions
             | Profile::Corpus
+            | Profile::CorpusNative
             | Profile::InstallSigkill
             | Profile::Retrieval => {
                 if baseline_binary.is_some() || baseline_sha256.is_some() {
@@ -308,10 +315,11 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     let upgrade = options.profile == Profile::Upgrade;
     let permissions = options.profile == Profile::Permissions;
     let corpus = options.profile == Profile::Corpus;
+    let corpus_native = options.profile == Profile::CorpusNative;
     let install_sigkill = options.profile == Profile::InstallSigkill;
     let retrieval = options.profile == Profile::Retrieval;
     let paired = resource || upgrade;
-    let needs_native = target || native_commands || compiled_latex || resource;
+    let needs_native = target || native_commands || compiled_latex || resource || corpus_native;
     let scope = match options.profile {
         Profile::Protocol => "exact_candidate_protocol_not_release",
         Profile::Target => "exact_candidate_target_not_release",
@@ -321,6 +329,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         Profile::Upgrade => "exact_candidate_installed_upgrade_fixture_not_release",
         Profile::Permissions => "exact_candidate_scripted_patch_permissions_not_release",
         Profile::Corpus => "exact_candidate_partial_usability_corpus_not_release",
+        Profile::CorpusNative => "exact_candidate_native_corpus_u16_u20_not_release",
         Profile::InstallSigkill => "exact_candidate_external_sigkill_install_recovery_not_release",
         Profile::Retrieval => "exact_candidate_real_external_retrieval_not_release",
     };
@@ -340,6 +349,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         Profile::Upgrade => json!(["real Native and compiled LaTeX","resources and permission-grant soak","browser and human consent","operator-authorized production-state copy","abrupt installation interruption","Python retirement and full release gate"]),
         Profile::Permissions => json!(["real Native command execution and command-grant soak","compiled LaTeX and external retrieval","browser and independent human consent","baseline resource comparison","production upgrade and abrupt installation interruption","Python retirement and full release gate"]),
         Profile::Corpus => json!(["Native tasks U16-U20","independent research tasks U21-U25","external-client/operator tasks U26-U30","full release gates"]),
+        Profile::CorpusNative => json!(["independent research tasks U21-U25","browser and human tasks U26-U28","copied-state repeated trials U29","complete corpus aggregation and release review"]),
         Profile::InstallSigkill => json!(["physical power-loss/device-cache durability","production selector drill","shared-filesystem semantics","full release gates"]),
         Profile::Retrieval => json!(["compiled-LaTeX research workflow","independent mathematical verification","browser/human consent","Native target/resource gates","full corpus and release gates"]),
     }});
@@ -375,7 +385,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             None
         };
         let before = capability::source_hash(root)?;
-        let corpus_before = if corpus {
+        let corpus_before = if corpus || corpus_native {
             Some(crate::records::read_bytes(
                 root,
                 "conformance/mtm016-usability-corpus.json",
@@ -403,6 +413,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         command
             .current_dir(root)
             .env_remove("MTM_TEST_CORPUS_PROFILE")
+            .env_remove("MTM_TEST_NATIVE_CORPUS_PROFILE")
             .env_remove("MTM_TEST_PERMISSION_PROFILE")
             .env_remove("MTM_TEST_INSTALL_SIGKILL_PROFILE")
             .env_remove("MTM_TEST_RETRIEVAL_PROFILE")
@@ -477,6 +488,12 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
                         .sha256,
                 )
                 .env_remove("MTM_TEST_TARGET_PROFILE");
+        } else if corpus_native {
+            stage = "native_corpus_test_runner";
+            command
+                .arg("native_corpus::exact_candidate_three_repeat_native_matrix")
+                .arg("--exact")
+                .env("MTM_TEST_NATIVE_CORPUS_PROFILE", "1");
         } else if corpus {
             command
                 .arg("corpus_runtime::exact_candidate_three_repeat_usability_matrix")
@@ -554,6 +571,8 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             summary::validate_install_sigkill(&output.stdout, &snapshot.sha256)?
         } else if retrieval {
             summary::validate_retrieval(&output.stdout, &snapshot.sha256)?
+        } else if corpus_native {
+            native_corpus::validate(&output.stdout, &snapshot.sha256)?
         } else if corpus {
             summary::validate_corpus(&output.stdout, &snapshot.sha256)?
         } else if permissions {
@@ -583,13 +602,21 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         } else {
             summary::validate(&output.stdout, &snapshot.sha256, options.profile)?
         };
-        if corpus {
-            if report["corpus_definition_sha256"] != summaries["corpus"]["corpus_sha256"] {
+        if corpus || corpus_native {
+            let summary_key = if corpus_native {
+                "corpus_native"
+            } else {
+                "corpus"
+            };
+            if report["corpus_definition_sha256"] != summaries[summary_key]["corpus_sha256"] {
                 return Err("compiled corpus differs from current input file".into());
             }
             // Preserve validated partial rows even if a portable scenario fails.
             // This does not turn the failing runner or incomplete matrix green.
             report["summaries"] = summaries.clone();
+        }
+        if corpus_native && summaries["corpus_native"]["passed"] != true {
+            return Err("Native corpus includes failed trials".into());
         }
         if !output.complete() {
             return Err("qualification runner failed or did not finish cleanly".into());

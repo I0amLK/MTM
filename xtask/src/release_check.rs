@@ -9,6 +9,9 @@ use crate::{
     Result, capability, check_report, evidence_json, git, inventory, qualify, records, retirement,
 };
 
+#[path = "release_native_corpus.rs"]
+mod native_corpus_aggregate;
+
 const GATES: [&str; 14] = [
     "source",
     "protocol",
@@ -713,6 +716,9 @@ fn validate_evidence(
         return Ok(true);
     }
     if name == "corpus" {
+        if value["schema"] == "mtm-usability-corpus-aggregate-v2" {
+            return native_corpus_aggregate::validate(root, value, manifest, cache);
+        }
         if value["schema"] == "mtm-usability-corpus-aggregate-v1" {
             return validate_corpus_aggregate(root, value, manifest, cache);
         }

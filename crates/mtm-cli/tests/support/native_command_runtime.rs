@@ -72,7 +72,7 @@ fn permission_challenge(
     text(&result, "requestState").map(str::to_owned)
 }
 
-fn grant_once(server: &Server, owner: &Client, kind: &str, arguments: &Value) -> Result {
+pub(super) fn grant_once(server: &Server, owner: &Client, kind: &str, arguments: &Value) -> Result {
     let request = permission_request(kind, arguments);
     let state = permission_challenge(server, owner, kind, arguments)?;
     let result = server.permission_message(
@@ -95,7 +95,7 @@ fn grant_once(server: &Server, owner: &Client, kind: &str, arguments: &Value) ->
     Ok(())
 }
 
-fn permission_required(server: &Server, owner: &Client, arguments: &Value) -> Result {
+pub(super) fn permission_required(server: &Server, owner: &Client, arguments: &Value) -> Result {
     let result = server.call(owner, "exec_command", arguments.clone())?;
     require(
         result["ok"] == false && result["error"]["code"] == "PERMISSION_REQUIRED",
@@ -136,7 +136,7 @@ fn exact_once_case(
     permission_required(server, owner, arguments)
 }
 
-fn check_environment(server: &Server, owner: &Client, mode: NativeMode) -> Result {
+pub(super) fn check_environment(server: &Server, owner: &Client, mode: NativeMode) -> Result {
     let environment = server.call(owner, "check_exec_environment", json!({}))?;
     require(
         environment["ok"] == true

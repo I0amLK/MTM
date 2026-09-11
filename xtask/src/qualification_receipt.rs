@@ -72,6 +72,7 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
         Profile::Upgrade => "exact_candidate_installed_upgrade_fixture_not_release",
         Profile::Permissions => "exact_candidate_scripted_patch_permissions_not_release",
         Profile::Corpus => "exact_candidate_partial_usability_corpus_not_release",
+        Profile::CorpusNative => "exact_candidate_native_corpus_u16_u20_not_release",
         Profile::InstallSigkill => "exact_candidate_external_sigkill_install_recovery_not_release",
         Profile::Retrieval => "exact_candidate_real_external_retrieval_not_release",
     };
@@ -125,18 +126,23 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
             } else {
                 None
             }
-        || (profile == Profile::Corpus
+        || (matches!(profile, Profile::Corpus | Profile::CorpusNative)
             && !report
                 .corpus_definition_sha256
                 .as_deref()
                 .is_some_and(valid_hash))
-        || (profile != Profile::Corpus && report.corpus_definition_sha256.is_some())
+        || (!matches!(profile, Profile::Corpus | Profile::CorpusNative)
+            && report.corpus_definition_sha256.is_some())
     {
         return Err("qualification receipt identity, result or scope inconsistent".into());
     }
     if matches!(
         profile,
-        Profile::Target | Profile::NativeCommands | Profile::CompiledLatex | Profile::Resource
+        Profile::Target
+            | Profile::NativeCommands
+            | Profile::CompiledLatex
+            | Profile::Resource
+            | Profile::CorpusNative
     ) {
         let native = report
             .native_preflight
@@ -156,6 +162,17 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
         Ok(())
     };
     let checked = match profile {
+        Profile::CorpusNative => {
+            line("corpus_native", "MTM_NATIVE_CORPUS")?;
+            let checked = native_corpus::validate(&bytes, hash)?;
+            if checked["corpus_native"]["passed"] != true
+                || report.corpus_definition_sha256.as_deref()
+                    != checked["corpus_native"]["corpus_sha256"].as_str()
+            {
+                return Err("Native corpus receipt is not a complete fifteen-trial batch".into());
+            }
+            checked
+        }
         Profile::Permissions => {
             line("permissions", "MTM_PERMISSION_RUNTIME")?;
             summary::validate_permissions(&bytes, hash)?
@@ -216,6 +233,40 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn native_corpus_receipt_rechecks_matrix_identity_preflight_and_runner() -> Result<()> {
+        let mut good: Value = serde_json::from_str(include_str!(
+            "../../records/evidence/MTM-016/candidate-native-commands-f6-a323ed8.json"
+        ))?;
+        let selected = good["candidate_sha256"]
+            .as_str()
+            .ok_or("fixture hash")?
+            .to_owned();
+        let matrix = native_corpus::fixture(&selected);
+        good["profile"] = json!("corpus_native");
+        good["scope"] = json!("exact_candidate_native_corpus_u16_u20_not_release");
+        good["corpus_definition_sha256"] = matrix["corpus_sha256"].clone();
+        good["summaries"] = json!({"corpus_native":matrix});
+        validate(&good, &selected, &"b".repeat(64), "corpus_native")?;
+        for (pointer, value) in [
+            ("/runner/exit_code", json!(101)),
+            ("/runner/child_reaped", json!(false)),
+            ("/native_preflight/ready_for_native_tests", json!(false)),
+            ("/corpus_definition_sha256", json!("b".repeat(64))),
+            ("/summaries/corpus_native/rows/0/repeat", json!(2)),
+            ("/summaries/corpus_native/passed_trials", json!(14)),
+            ("/summaries/corpus_native/passed", json!(false)),
+            ("/passed", json!(false)),
+        ] {
+            let mut bad = good.clone();
+            *bad.pointer_mut(pointer)
+                .ok_or("Native corpus fixture pointer")? = value;
+            assert!(validate(&bad, &selected, &"b".repeat(64), "corpus_native").is_err());
+        }
+        assert!(validate(&good, &selected, &"b".repeat(64), "native_commands").is_err());
+        Ok(())
+    }
 
     #[test]
     fn sealed_protocol_rechecks_nested_counts_and_runner_not_just_passed() -> Result<()> {

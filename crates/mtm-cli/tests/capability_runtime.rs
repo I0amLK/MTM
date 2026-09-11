@@ -7,6 +7,9 @@ mod support;
 #[path = "support/corpus_runtime.rs"]
 mod corpus_runtime;
 
+#[path = "support/native_corpus.rs"]
+mod native_corpus;
+
 #[path = "support/retrieval_runtime.rs"]
 mod retrieval_runtime;
 

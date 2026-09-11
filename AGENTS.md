@@ -236,3 +236,14 @@ test skips, source touches or edits to receipt identities. On the host, the revi
 recovery is a package-scoped `cargo clean --profile dev` for `mtm-cli` and
 `mtm-xtask`, followed by rebuilding/testing there. Never clean all of `target`:
 it also contains immutable qualification candidates and baselines.
+
+## F6 task-specific Native corpus
+
+Read `docs/MTM-016-F6-NATIVE-CORPUS.md`. The `corpus_native` profile executes
+U16-U20 three times each using fresh exact-candidate instances; its separate
+fifteen-row summary never substitutes the old broad Native/CAS gate or scripted
+consent for human trials. Ordinary source/capability/qualification commands must
+clear `MTM_TEST_NATIVE_CORPUS_PROFILE`. The v2 corpus aggregate accepts only the
+validated Native batch plus the immutable 48/42 v1 base, preserves 63/27 partial
+coverage and cannot authorize release. Changed harness source requires a new
+capable-host source receipt, not an edit to an already sealed receipt.

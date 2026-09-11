@@ -212,6 +212,19 @@ impl Server {
         )
     }
 
+    /// U16-U20 need real command tools, not an unrelated CAS installation.
+    pub fn start_native_corpus(binary: &str, mode: mtm_contracts::NativeMode) -> Result<Self> {
+        Self::start_profile_with_tools(
+            binary,
+            true,
+            true,
+            false,
+            mode.as_str(),
+            None,
+            &["cat", "curl", "printf", "readlink", "script", "sh", "sleep"],
+        )
+    }
+
     pub fn start_compiled_latex(binary: &str) -> Result<Self> {
         Self::start_profile_with_tools(
             binary,

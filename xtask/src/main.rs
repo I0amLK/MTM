@@ -160,6 +160,7 @@ fn run() -> Result<()> {
                 eprintln!("[source-check] {label}");
                 let status = Command::new(&cargo)
                     .env_remove("MTM_TEST_CORPUS_PROFILE")
+                    .env_remove("MTM_TEST_NATIVE_CORPUS_PROFILE")
                     .env_remove("MTM_TEST_INSTALL_SIGKILL_PROFILE")
                     .env_remove("MTM_TEST_RETRIEVAL_PROFILE")
                     .env_remove("MTM_TEST_DEPLOYMENT_CANDIDATE")
