@@ -3134,6 +3134,25 @@
       "acceptance_boundary":"A successful preinspection is not a coordinated multi-database snapshot, proof that an old owner can authenticate, schema migration, old-run continuation, restored-baseline continuation or a release verdict. Aggregate counts may expose blockers and do not authorize repairing owners or stripping WAL. The helper can be run on the real archive only after the new complete synthetic namespace test succeeds on the capable host. The earlier capture namespace pass is not substituted for this SQLite path. Existing release inputs and historical receipts are unchanged.",
       "operator_next_step":"At the committed checkout, run the source-free conformance test with --host-isolation and the explicit host SQLite, then use shell && to run the inspector with the selected archive SHA only on test success. Production clients need not be paused. Return only the printed preinspection JSON or fixed diagnostics, never private archives, databases, keys, run IDs or raw logs.",
       "production_modified_by_this_work":false,"frozen_candidate_changed":false,"baseline_changed":false,"rust_product_harness_and_validator_source_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-OPERATOR-COPY-HOST-PREINSPECTION-SUCCESS",
+      "status":"operator_reported_preinspection_passed_upgrade_resume_and_rollback_pending",
+      "source_commit":"7a49ae328aadcd6b9420991f7549b40ce8fd5347",
+      "observation_source":"current_conversation_operator_pasted_sanitized_output_not_original_report_bytes",
+      "synthetic_host_isolation_passed":true,
+      "archive_sha256":"2d448c5ba1a6f61f8139775c254ad85316b05bf82c0ff6c9d8a0f98805893d8e",
+      "inspection_complete":true,"archive_unchanged":true,"extracted_entries":4523,"extracted_file_bytes":26126712,
+      "database_summary":{"sqlite_version":"3.51.2","schema_before":2,"state_integrity_passed":true,"oauth_integrity_passed":true,"foreign_key_checks_passed":true,"run_count":133,"active_unsealed_runs":34,"done_runs":88,"oauth_client_count":30,"runs_with_missing_owner":0,"active_public_client_runs":34,"active_confidential_client_runs":0,"assess_public_client_runs":9,"owner_credentials_examined":false,"old_owner_authentication_tested":false},
+      "production_source_mounted":false,"production_modified":false,"database_opened_on_working_copy_only":true,
+      "original_modes_requested":true,"foreign_ownership_restored":false,"transactional_snapshot_claimed":false,
+      "migration_executed":false,"old_run_resumed":false,"rollback_executed":false,
+      "raw_private_state_published":false,"archive_read_by_assistant":false,"release_qualified":false,
+      "sealed_reports":[{"path":"records/evidence/MTM-016/operator-copy-preinspection-reported-7a49ae3.json","sha256":"56bfb07b5bb041aa4281522710c868ca71c224e7c7c4c371a41f5faf26368288","scope":"reconstructed_operator_report_not_original_bytes_not_release_evidence"}],
+      "rehearsal_plan":"docs/MTM-016-F6-OPERATOR-COPY-REHEARSAL-PLAN.md",
+      "drafts":{"paths":["scripts/mtm016-rehearse-operator-copy.sh","scripts/mtm016-run-copy-rehearsal.sh"],"committed":false,"executable_entries_disabled":true,"stop_reason":"draft_not_validated","real_archive_opened":false,"migration_executed":false},
+      "validation":{"first_composed_trial":"platform_blocked_safety_status_undetermined_not_executed","blocked_trial_retried_or_routed_around":false,"later_syntax_only_checks_exit_code":0,"records_exit_code":0,"retirement_exit_code":0,"audit_strict_exit_code":0,"diff_check_exit_code":0,"rust_source_unchanged":true,"release_check_exit_code":1,"validated_gates":15,"blocked_gates":2,"full_workspace_tests_rerun":false,"operator_rerun_requested":false},
+      "boundary":"Successful preinspection is not migration, owner authentication, old-run continuation, rollback or release evidence. Nine assess runs with public clients are potential rehearsal inputs only. Do not replace the old owner, register a new owner, manufacture capabilities or claim independent mathematical review. All subsequent mutations must remain inside a fresh disposable extraction; preserve the original archive. No release input is changed by this checkpoint."
     }
   ],
   "remaining_acceptance": [
