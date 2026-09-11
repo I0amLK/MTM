@@ -60,9 +60,51 @@ ss_wait_gone() {
   ! ss_still_exact "$proc_root" "$candidate" "$pid" "$role"
 }
 
+ss_start_ticks() {
+  local proc_root=$1 pid=$2 value rest
+  IFS= read -r value < "$proc_root/$pid/stat" || return 1
+  rest=${value#*) }
+  set -- $rest
+  (( $# >= 20 )) || return 1
+  [[ ${20} =~ ^[0-9]+$ ]] || return 1
+  printf '%s' "${20}"
+}
+
+ss_status_value() {
+  local proc_root=$1 pid=$2 key=$3 value
+  value=$(/usr/bin/awk -F: -v wanted="$key" '$1 == wanted {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2; found=1; exit} END {if (!found) exit 1}' "$proc_root/$pid/status" 2>/dev/null) || return 1
+  [[ -n $value && $value != *$'\n'* ]] || return 1
+  printf '%s' "$value"
+}
+
+ss_diagnostic() {
+  local proc_root=$1 candidate=$2 pid=$3 role=$4
+  local state ppid threads sigpnd shdpnd sigblk sigign sigcgt start wchan
+  ss_still_exact "$proc_root" "$candidate" "$pid" "$role" || return 1
+  state=$(ss_status_value "$proc_root" "$pid" State) || state=unknown
+  ppid=$(ss_status_value "$proc_root" "$pid" PPid) || ppid=unknown
+  threads=$(ss_status_value "$proc_root" "$pid" Threads) || threads=unknown
+  sigpnd=$(ss_status_value "$proc_root" "$pid" SigPnd) || sigpnd=unknown
+  shdpnd=$(ss_status_value "$proc_root" "$pid" ShdPnd) || shdpnd=unknown
+  sigblk=$(ss_status_value "$proc_root" "$pid" SigBlk) || sigblk=unknown
+  sigign=$(ss_status_value "$proc_root" "$pid" SigIgn) || sigign=unknown
+  sigcgt=$(ss_status_value "$proc_root" "$pid" SigCgt) || sigcgt=unknown
+  start=$(ss_start_ticks "$proc_root" "$pid") || start=unknown
+  if [[ -r $proc_root/$pid/wchan ]]; then
+    IFS= read -r wchan < "$proc_root/$pid/wchan" || wchan=unknown
+  else
+    wchan=unavailable
+  fi
+  [[ $wchan =~ ^[A-Za-z0-9_.?+-]{1,96}$ ]] || wchan=redacted
+  printf 'RESEARCH_STOP_DIAGNOSTIC role=%s pid=%s state=%q ppid=%s threads=%s start_ticks=%s wchan=%s sigpnd=%s shdpnd=%s sigblk=%s sigign=%s sigcgt=%s\n' \
+    "$role" "$pid" "$state" "$ppid" "$threads" "$start" "$wchan" "$sigpnd" "$shdpnd" "$sigblk" "$sigign" "$sigcgt"
+}
+
 ss_main() {
-  [[ $# == 3 && $1 == --session && $2 == /* && $3 == --operator-confirmed-stop ]] || { ss_fail usage; return 1; }
-  local session=$2 home parent tail candidate pid
+  [[ $# == 3 && $1 == --session && $2 == /* && ( $3 == --operator-confirmed-stop || $3 == --operator-confirmed-force-stop ) ]] || { ss_fail usage; return 1; }
+  local session=$2 home parent tail candidate pid initial_start state
+  local force=false
+  [[ $3 != --operator-confirmed-force-stop ]] || force=true
   local proc_root=/proc
   home=$(/usr/bin/readlink -e -- "${HOME:-}") || { ss_fail home_unavailable; return 1; }
   parent=$home/.mtm-acceptance/MTM-016/research
@@ -80,12 +122,23 @@ ss_main() {
 
   if (( ${#ss_tui[@]} == 1 )); then
     pid=${ss_tui[0]}
+    initial_start=$(ss_start_ticks "$proc_root" "$pid") || { ss_fail tui_start_identity; return 1; }
     printf 'RESEARCH_STOP signal=INT role=tui pid=%s\n' "$pid"
     ss_signal "$proc_root" "$candidate" "$pid" tui INT || { ss_fail tui_int_signal; return 1; }
     if ! ss_wait_gone "$proc_root" "$candidate" "$pid" tui 20; then
       printf 'RESEARCH_STOP signal=TERM role=tui pid=%s\n' "$pid"
       ss_signal "$proc_root" "$candidate" "$pid" tui TERM || { ss_fail tui_term_signal; return 1; }
-      ss_wait_gone "$proc_root" "$candidate" "$pid" tui 5 || { ss_fail tui_still_running_after_term; return 1; }
+      if ! ss_wait_gone "$proc_root" "$candidate" "$pid" tui 5; then
+        ss_diagnostic "$proc_root" "$candidate" "$pid" tui || true
+        [[ $force == true ]] || { ss_fail tui_still_running_after_term; return 1; }
+        [[ $(ss_start_ticks "$proc_root" "$pid" 2>/dev/null) == "$initial_start" ]] || { ss_fail tui_pid_identity_changed; return 1; }
+        state=$(ss_status_value "$proc_root" "$pid" State 2>/dev/null) || { ss_fail tui_state_unavailable; return 1; }
+        [[ $state != D* ]] || { ss_fail tui_uninterruptible_state_no_kill; return 1; }
+        ss_still_exact "$proc_root" "$candidate" "$pid" tui || { ss_fail tui_identity_changed_before_kill; return 1; }
+        printf 'RESEARCH_STOP signal=KILL role=tui pid=%s explicit_force=true\n' "$pid"
+        kill -s KILL -- "$pid" || { ss_fail tui_kill_signal; return 1; }
+        ss_wait_gone "$proc_root" "$candidate" "$pid" tui 5 || { ss_diagnostic "$proc_root" "$candidate" "$pid" tui || true; ss_fail tui_still_running_after_kill; return 1; }
+      fi
     fi
   fi
 

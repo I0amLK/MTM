@@ -156,6 +156,17 @@ remaining exact process is preserved as a blocker instead of broadening process
 authority. This helper never signals the installed production binary or a process
 selected only by name.
 
+If the exact TUI remains after both INT and TERM, the helper emits only bounded
+procfs diagnostics: process state, parent, thread count, start-time ticks, wait
+channel and signal masks. It does not publish environment, file descriptors,
+credentials or the raw command line. Normal `--operator-confirmed-stop` still
+fails at this point. The separate `--operator-confirmed-force-stop` acknowledgement
+permits SIGKILL only after the executable, uid, `tui` argv role and original proc
+start-time have all been revalidated, and only when Linux does not report the task
+in uninterruptible `D` state. There is no PID/name fallback, and helper/probe or
+unknown roles do not receive this KILL path. Abruptly stopping the disposable
+runtime is a recovery action only; it never makes a workflow or corpus row pass.
+
 ## Recovery of the first U21-r1 compiler-path interruption
 
 The operator reported an accepted assembly entering `repair` before verification.

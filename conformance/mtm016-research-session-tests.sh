@@ -249,4 +249,26 @@ rm -rf "$proc_fixture/104"
 ss_scan "$proc_fixture" "$candidate_fixture"
 [[ ${#ss_unknown[@]} == 0 && ${#ss_tui[@]} == 1 && ${#ss_helper[@]} == 1 && ${#ss_probe[@]} == 1 ]]
 printf 'RESEARCH_SESSION_TEST exact_candidate_process_roles_are_classified_without_signals=passed\n'
+
+mkdir -p "$proc_fixture/201"
+ln -s "$candidate_fixture" "$proc_fixture/201/exe"
+printf '%s\0%s\0' "$candidate_fixture" tui > "$proc_fixture/201/cmdline"
+cat > "$proc_fixture/201/status" <<'EOF'
+Name: candidate
+State: S (sleeping)
+PPid: 77
+Threads: 4
+SigPnd: 0000000000000000
+ShdPnd: 0000000000000000
+SigBlk: 0000000000000000
+SigIgn: 0000000000000002
+SigCgt: 0000000100004000
+EOF
+printf '201 (candidate) S 77 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 999 0 0\n' > "$proc_fixture/201/stat"
+printf 'ep_poll\n' > "$proc_fixture/201/wchan"
+[[ $(ss_status_value "$proc_fixture" 201 State) == 'S (sleeping)' ]]
+[[ $(ss_start_ticks "$proc_fixture" 201) == 999 ]]
+[[ $(ss_status_value "$proc_fixture" 201 SigIgn) == 0000000000000002 ]]
+deny ss_status_value "$proc_fixture" 201 MissingField
+printf 'RESEARCH_SESSION_TEST bounded_proc_state_diagnostic_parser=passed\n'
 printf 'RESEARCH_SESSION_TEST negative_cases=%s production_source_accessed=false runtime_config_only=true runtime_server_started=false research_trials_executed=0 tunnel_started=false\n' "$negative"

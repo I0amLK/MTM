@@ -3298,6 +3298,20 @@
       "operator_next_step":"Run the exact-session stop helper against U21-r1.7RCUGv7x with --operator-confirmed-stop. If it reports complete=true, immediately run the resume entry --check-only and then the normal resume entry. If it reports an unknown role, multiple TUI or a process surviving TERM, stop and return only the fixed RESEARCH_STOP lines; do not use broader process matching.",
       "corpus_boundary":{"passed_trials":63,"failed_trials":0,"blocked_trials":27,"newly_accepted_trials":0},
       "production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-RESEARCH-EXACT-SESSION-FORCE-STOP-DIAGNOSTICS",
+      "status":"exact_tui_survived_int_and_term_force_path_added_with_proc_identity_revalidation",
+      "base_commit":"659482d7ee3f2c7e210ba17c257b0b937361e111",
+      "operator_observation":{"scan":"tui=1 helper=0 probe=0 unknown=0","tui_pid_reported":2146290,"sigint_sent":true,"sigterm_sent":true,"result":"tui_still_running_after_term","sigkill_sent":false,"resume_attempted_after_failure":false,"research_trial_advanced":false},
+      "interpretation":"The host stop helper matched one exact private-session TUI and successfully issued INT and TERM, but the process remained visible with the same candidate role after both bounded waits. This does not establish why the process survived: graceful shutdown may be blocked, the task may be in an uninterruptible kernel wait, or another host-specific lifecycle condition may apply. Do not infer a product workflow failure or use a broad kill command.",
+      "implementation":{"entry":"scripts/mtm016-stop-research-session.sh","ordinary_stop_behavior_unchanged":"INT then TERM then fail","new_diagnostic":"bounded proc state/parent/thread/starttime/wchan/signal masks only; no environment/fds/raw cmdline/credentials","new_force_acknowledgement":"--operator-confirmed-force-stop","force_selection":"same exact session candidate executable, current uid, tui argv role and original proc start-time","uninterruptible_D_state":"refuse KILL","sigkill_scope":"only the same revalidated exact tui after INT and TERM both fail","helper_probe_unknown_force_kill":false,"pid_or_process_name_fallback":false,"production_binary_targeted":false},
+      "validation":{"shell_syntax_exit_code":0,"research_session_conformance_exit_code":0,"negative_cases":83,"bounded_proc_diagnostic_parser_tested":true,"synthetic_starttime_binding_tested":true,"host_sigkill_executed_by_tests":false,"runtime_server_started_by_tests":false,"research_trials_executed":0,"production_source_accessed":false,"records_retirement_audit_diff_exit_code":0},
+      "delivered_file_hashes":{"stop_entry":"7a11d88cfcd552d5b3f0e648ade99a2912281a900f283496a1c24f814cb950e5","conformance":"284db4f7112718f79a9a16df88ed8a1e0cfadbb31bb6c3aab7e79cfbede4dd30","documentation":"a180ae99184761938a0fbfad7bd20d5f6397f62d92ca0c3bdc487fce9c6b2bed"},
+      "acceptance_boundary":"No live SIGKILL has been issued or validated by this delivery. The force option is an explicit recovery acknowledgement for one disposable session only and remains fail-closed on identity drift or uninterruptible state. An abrupt stop cannot make the run correct, cannot count U21, and cannot substitute for later independent mathematical review. The private state directory and original run remain preserved.",
+      "operator_next_step":"Run the committed stop helper once with --operator-confirmed-force-stop. Preserve and return its RESEARCH_STOP_DIAGNOSTIC line. If it reports D state or any identity error, do not issue another signal. If it reports complete=true, run the existing resume --check-only then normal resume entry against the same U21-r1 session and original run.",
+      "corpus_boundary":{"passed_trials":63,"failed_trials":0,"blocked_trials":27,"newly_accepted_trials":0},
+      "production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
