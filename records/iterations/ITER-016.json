@@ -3040,6 +3040,20 @@
       "acceptance_boundary":"This records authorization and a prepared host capture entry only. Two equal source byte streams are an observed-stability check, not a coordinated live multi-database snapshot. A later working copy must pass SQLite recovery/integrity checks, retain its original run owners, authenticate without forged authority, migrate to schema 7, resume an old run, and restore the original pre-upgrade copy before the old runtime resumes. Source mode preparation is allowed only on the working copy. The original private archive must not enter repository evidence. Neither capture-summary JSON nor synthetic tests can satisfy the copied_operator_state release adapter.",
       "operator_next_step":"On the real host, select the actual production data root (default HOME/.mtm only when that was the production configuration), pause client requests, run the committed capture script with --operator-confirmed-quiescent, and return only its sanitized capture summary. Do not upload private archives, databases, keys or raw process diagnostics.",
       "product_harness_and_validator_source_changed":false,"production_state_contents_read":false,"production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-OPERATOR-COPY-READONLY-MOUNT-DIAGNOSTIC",
+      "status":"first_host_capture_failed_before_archive_readonly_check_refined_for_retry",
+      "base_commit":"e59d244c51b0ea05307ab9e494e4323147c02b4e",
+      "operator_observation":{"capture_complete":false,"diagnostic_stage":"readonly_mount","private_failure_session_retained_outside_repository":true,"automatic_retry":false},
+      "failure_boundary":"The isolated helper started but failed before source_bounds, first_copy or archive sealing. No copied_operator_state acceptance, archive success, migration, old-run resume or rollback is inferred. The production source was selected and mounted for the failed check, but no private file body was published and the production original was not modified.",
+      "diagnostic_ambiguity":"The original readonly_mount stage covered both raw mountinfo option parsing and in-mount database visibility, so that single label could not distinguish the two without another safe observation.",
+      "repair":{"mount_option_source":"util-linux findmnt exact mountpoint VFS-OPTIONS","requires_exact_ro_token":true,"write_probe_used":false,"stages":["readonly_mount_options","readonly_mount_layout"],"source_fallback_added":false,"writable_fallback_added":false,"limits_changed":false},
+      "changed_files":{"capture_helper":{"path":"scripts/mtm016-capture-operator-state.sh","sha256":"621fc7edfa2a153433a57ff6b782133f6f010872456e7b1f5da8432f75c37925"},"transport_tests":{"path":"conformance/mtm016-operator-capture-tests.sh","sha256":"adcbab9fbd626a1e7b2416072a018e8039b12d2e3a1f2baae053467ce71d39dd"},"documentation":{"path":"docs/MTM-016-F6-OPERATOR-STATE-CAPTURE.md","sha256":"50dd6082e3c6cf404977ae32ec3c0efa4c301b6b3f2755fbbf873248b2aceb0c"}},
+      "validation":{"capture_helper_shell_syntax_exit_code":0,"transport_test_shell_syntax_exit_code":0,"transport_tests_exit_code":0,"readonly_vfs_option_parser_passed":true,"unsafe_tree_and_archive_regressions_preserved":true,"diff_check_exit_code":0,"records_exit_code":0,"retirement_exit_code":0,"audit_strict_exit_code":0,"release_check_exit_code":1,"validated_gates":15,"blocked_gates":2,"pinned_toolchain_rerun_used":true,"full_host_capture_reexecuted":false},
+      "release_readiness":{"validated_gates":15,"blocked_gates":2,"copied_operator_state":"required_evidence_missing","corpus":"incomplete","release_qualified":false},
+      "operator_next_step":"At the new committed HEAD, rerun the same host capture command once. If it fails, return only capture_complete and the new MTM_COPY_DIAGNOSTIC stage; do not upload the private session. If it succeeds, return only capture-summary JSON.",
+      "product_harness_and_validator_source_changed":false,"production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

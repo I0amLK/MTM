@@ -4,6 +4,17 @@ set -euo pipefail
 repo=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)
 script=$repo/scripts/mtm016-capture-operator-state.sh
 source "$script"
+mtm_vfs_options_are_readonly 'ro,nosuid,nodev'
+mtm_vfs_options_are_readonly 'nosuid,ro,nodev'
+if mtm_vfs_options_are_readonly 'rw,nosuid,nodev'; then
+  printf 'TRANSPORT_TEST writable_vfs_options_unexpectedly_accepted\n' >&2
+  exit 1
+fi
+if mtm_vfs_options_are_readonly 'errors=remount-ro,rw'; then
+  printf 'TRANSPORT_TEST substring_ro_unexpectedly_accepted\n' >&2
+  exit 1
+fi
+printf 'TRANSPORT_TEST readonly_vfs_option_parser=passed\n'
 root=$(/usr/bin/mktemp -d /tmp/mtm-capture-test.XXXXXXXX)
 trap '/usr/bin/rm -rf -- "$root"' EXIT
 /usr/bin/mkdir -m 700 "$root/tree" "$root/tree/private" "$root/restored" "$root/home"

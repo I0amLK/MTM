@@ -42,6 +42,14 @@ special files/modes, nested devices, depth >=33, >20,000 entries, >128 MiB files
 the host command has a 180-second timeout with bounded termination. No failure
 automatically retries, falls back to writable access or raises a limit.
 
+The first real host attempt reached the isolated helper but stopped at its initial
+read-only mount check before any archive was created. The original check parsed one
+raw `/proc/self/mountinfo` field directly. The follow-up keeps the same fail-closed
+requirement but asks util-linux `findmnt` for the exact mountpoint's VFS options and
+requires a standalone `ro` option. It also separates `readonly_mount_options` from
+`readonly_mount_layout`, so a later failure distinguishes mount semantics from
+database visibility without probing the production source by writing to it.
+
 All files, including SQLite journals/WAL/SHM and private keys, remain in a private
 archive under `$HOME/.mtm-acceptance/MTM-016/`, outside the repository. Do not upload
 the archive, extracted databases, keys, raw logs, or original run/proof contents.

@@ -26,15 +26,32 @@ mtm_copy_archive() {
     --numeric-owner --atime-preserve=system -C "$1" -cf - .
 }
 
+mtm_vfs_options_are_readonly() {
+  local options=${1-}
+  local item
+  IFS=',' read -r -a items <<< "$options"
+  for item in "${items[@]}"; do
+    [[ $item == ro ]] && return 0
+  done
+  return 1
+}
+
+mtm_mount_is_readonly() {
+  local options
+  options=$(/usr/bin/findmnt -n -M "$1" -o VFS-OPTIONS) || return 1
+  mtm_vfs_options_are_readonly "$options"
+}
+
 # Sourcing loads only transport primitives for disposable-fixture tests.
 # The actual host entry always requires explicit source selection and a RO mount.
 if [[ ${BASH_SOURCE[0]} != "$0" ]]; then return 0; fi
 
 if [[ ${1-} == --internal-readonly-capture ]]; then
   [[ $# == 1 ]] || fail invalid_internal_arguments
-  stage=readonly_mount
+  stage=readonly_mount_options
   trap 'rc=$?; if (( rc != 0 )); then printf "MTM_COPY_DIAGNOSTIC stage=%s\n" "$stage" >&2; fi' EXIT
-  /usr/bin/awk '$5 == "/source" && $6 ~ /^ro(,|$)/ { found=1 } END { exit !found }' /proc/self/mountinfo
+  mtm_mount_is_readonly /source
+  stage=readonly_mount_layout
   [[ -f /source/oauth.sqlite3 && -f /source/private/state.sqlite3 ]]
   # A hard limit on each generated archive; no automatic retry or limit increase.
   ulimit -f 524288
@@ -64,7 +81,7 @@ fi
 [[ $# == 3 && $1 == --source && $3 == --operator-confirmed-quiescent ]] ||
   fail 'usage: bash scripts/mtm016-capture-operator-state.sh --source ABSOLUTE_DATA_ROOT --operator-confirmed-quiescent'
 [[ $2 == /* && ${HOME-} == /* ]] || fail absolute_paths_required
-for program in /usr/bin/bwrap /usr/bin/timeout /usr/bin/tar /usr/bin/find /usr/bin/awk /usr/bin/sha256sum /usr/bin/mktemp /usr/bin/readlink /usr/bin/stat /usr/bin/sync; do
+for program in /usr/bin/bwrap /usr/bin/timeout /usr/bin/tar /usr/bin/find /usr/bin/findmnt /usr/bin/awk /usr/bin/sha256sum /usr/bin/mktemp /usr/bin/readlink /usr/bin/stat /usr/bin/sync; do
   [[ -x $program ]] || fail required_host_tool_missing
 done
 source=$(/usr/bin/readlink -e -- "$2") || fail source_unavailable
