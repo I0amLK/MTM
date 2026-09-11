@@ -8,6 +8,7 @@ repo=$(cd -- "$(/usr/bin/dirname -- "${BASH_SOURCE[0]}")/.." && /usr/bin/pwd -P)
 sqlite=$(/usr/bin/readlink -e -- "$2")
 [[ -f $sqlite && -x $sqlite ]] || exit 1
 source "$repo/scripts/mtm016-research-session.sh"
+source "$repo/scripts/mtm016-stop-research-session.sh"
 tmp=$(/usr/bin/mktemp -d /tmp/mtm-research-primitives.XXXXXXXX)
 trap '/usr/bin/rm -rf -- "$tmp"' EXIT
 negative=0
@@ -226,4 +227,26 @@ HOME="$fake_home" rr_main --session "$session" --sqlite "$sqlite" --operator-con
 [[ $(sha256sum "$session/session.json" "$session/candidate" "$session/operator-key.txt" "$session/operator.log" "$session/task.md") == "$before_resume" ]]
 [[ ! -e $session/research-resume.lock ]]
 printf 'RESEARCH_SESSION_TEST stopped_session_metadata_strict_and_check_only_readonly=passed\n'
+
+# Process classification is tested against a fake proc tree. No host process is
+# signalled here. Symlinked exe entries and NUL-delimited argv mirror procfs.
+proc_fixture=$tmp/proc-fixture
+candidate_fixture=$tmp/process-candidate
+cp /usr/bin/true "$candidate_fixture"
+chmod 500 "$candidate_fixture"
+for spec in '101 tui' '102 __native-helper' '103 --sandbox-probe' '104 unknown-role'; do
+  read -r pid role <<< "$spec"
+  mkdir -p "$proc_fixture/$pid"
+  ln -s "$candidate_fixture" "$proc_fixture/$pid/exe"
+  printf '%s\0%s\0' "$candidate_fixture" "$role" > "$proc_fixture/$pid/cmdline"
+done
+ss_scan "$proc_fixture" "$candidate_fixture"
+[[ ${#ss_tui[@]} == 1 && ${ss_tui[0]} == 101 ]]
+[[ ${#ss_helper[@]} == 1 && ${ss_helper[0]} == 102 ]]
+[[ ${#ss_probe[@]} == 1 && ${ss_probe[0]} == 103 ]]
+[[ ${#ss_unknown[@]} == 1 && ${ss_unknown[0]} == 104 ]]
+rm -rf "$proc_fixture/104"
+ss_scan "$proc_fixture" "$candidate_fixture"
+[[ ${#ss_unknown[@]} == 0 && ${#ss_tui[@]} == 1 && ${#ss_helper[@]} == 1 && ${#ss_probe[@]} == 1 ]]
+printf 'RESEARCH_SESSION_TEST exact_candidate_process_roles_are_classified_without_signals=passed\n'
 printf 'RESEARCH_SESSION_TEST negative_cases=%s production_source_accessed=false runtime_config_only=true runtime_server_started=false research_trials_executed=0 tunnel_started=false\n' "$negative"

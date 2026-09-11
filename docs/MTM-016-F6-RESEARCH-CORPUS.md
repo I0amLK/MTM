@@ -136,6 +136,26 @@ Future Rust collector changes will require their own source check. U26-U29 and
 the complete research importer remain explicitly unfinished. The current corpus
 aggregate deliberately continues to reject complete/release claims.
 
+### Exact-session stop and interrupted-session recovery
+
+If a foreground research TUI or an internal `__native-helper` remains after an
+interrupted session, do not use `pkill mtm`, `killall`, executable-name matching,
+or delete the state directory. `scripts/mtm016-stop-research-session.sh` accepts
+only one canonical private research session and the explicit
+`--operator-confirmed-stop` acknowledgement. It scans procfs for processes whose
+executable is the session's exact frozen candidate, rechecks process ownership and
+classifies only `tui`, `__native-helper` and `--sandbox-probe` argv roles. Unknown
+roles or multiple TUI processes fail before signalling.
+
+The stop helper sends SIGINT to one exact TUI first so the runtime can use its
+existing Ctrl-C shutdown path. After a bounded wait it may send TERM to that same
+revalidated TUI. Once no TUI remains, exact stale helper/probe processes may receive
+TERM; the Native Bubblewrap command includes `--die-with-parent`, so owned sandbox
+children are not deliberately detached. There is no automatic KILL fallback. A
+remaining exact process is preserved as a blocker instead of broadening process
+authority. This helper never signals the installed production binary or a process
+selected only by name.
+
 ## Recovery of the first U21-r1 compiler-path interruption
 
 The operator reported an accepted assembly entering `repair` before verification.

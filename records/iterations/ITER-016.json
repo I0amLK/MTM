@@ -3284,6 +3284,20 @@
       "operator_next_step":"Stop the old disposable TUI, retain its log and state, run primitive tests and the synthetic compiler host test, then use the explicit stopped-session resume entry. Reconnect as the original owner, inspect the same run, read workspace/task.md and obtain the current repair task. Compile through the normal repair contract and stop at verify for independent review. Do not repeat source/Native/copy gates or capture production again.",
       "corpus_boundary":{"passed_trials":63,"failed_trials":0,"blocked_trials":27,"newly_accepted_trials":0},
       "production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-RESEARCH-EXACT-SESSION-PROCESS-STOP",
+      "status":"exact_candidate_process_roles_classified_and_bounded_stop_entry_delivered_after_resume_guard_block",
+      "base_commit":"abbaa5332f021a03e250e53f7ea92bf00baefcbd",
+      "operator_observation":{"synthetic_session_tests_passed":true,"synthetic_latex_host_test_passed":true,"old_unmounted_alias_reproduced":true,"fixed_helper_compiled_with_narrow_readonly_root":true,"resume_error":"resume_runtime_still_running","research_trial_advanced":false},
+      "analysis":"The old resume guard matched every process whose executable was the private session candidate, including the foreground TUI and internal current-executable Native helper/probe roles. The connector became unavailable while the guard still observed a matching executable, so process-name assumptions are insufficient. Do not weaken the guard or use pkill/killall.",
+      "implementation":{"entry":"scripts/mtm016-stop-research-session.sh","scope":"one canonical owner-private U21-U25 research session","selection":"exact /proc executable target equals session/candidate plus current uid plus argv role","recognized_roles":["tui","__native-helper","--sandbox-probe"],"unknown_role_policy":"fail_before_signal","multiple_tui_policy":"fail_before_signal","tui_shutdown":"SIGINT then bounded wait, TERM only to the same revalidated exact process if still present","stale_helper_probe_shutdown":"TERM only after no TUI remains and exact role is revalidated","kill_fallback":false,"production_name_matching":false,"production_binary_targeted":false,"state_or_database_modified":false},
+      "native_child_boundary":"The existing Bubblewrap command includes --die-with-parent. The stop helper still signals only the exact candidate helper/probe rather than scanning arbitrary sandbox descendants; a process that survives bounded TERM remains a blocker.",
+      "validation":{"shell_syntax_exit_code":0,"research_session_conformance_exit_code":0,"negative_cases":82,"synthetic_proc_roles":{"tui":1,"helper":1,"probe":1,"unknown_rejected":true},"host_process_signals_sent_by_toolside_tests":false,"runtime_server_started_by_tests":false,"research_trials_executed":0,"production_source_accessed":false},
+      "acceptance_boundary":"This is lifecycle plumbing for one disposable research session, not evidence that the observed live host process has already stopped. It creates no corpus pass, does not change the frozen candidate or Rust product source, does not replace the independent review requirement and does not authorize force-killing an unknown process. The operator must run the committed exact-session stop entry on the host and only then retry the existing read-only resume check and resume entry.",
+      "operator_next_step":"Run the exact-session stop helper against U21-r1.7RCUGv7x with --operator-confirmed-stop. If it reports complete=true, immediately run the resume entry --check-only and then the normal resume entry. If it reports an unknown role, multiple TUI or a process surviving TERM, stop and return only the fixed RESEARCH_STOP lines; do not use broader process matching.",
+      "corpus_boundary":{"passed_trials":63,"failed_trials":0,"blocked_trials":27,"newly_accepted_trials":0},
+      "production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
