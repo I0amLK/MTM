@@ -3077,6 +3077,20 @@
       "validation":{"capture_helper_shell_syntax_exit_code":0,"transport_tests_exit_code":0,"records_append_only_guard_observed":true,"prior_committed_receipt_restored_unchanged":true},
       "acceptance_boundary":"This diagnostic-forwarding fix is not copied_operator_state acceptance and does not authorize another fallback. The next host attempt remains one bounded read-only capture attempt.",
       "production_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-OPERATOR-CAPTURE-SOURCE-SCAN-DIAGNOSTIC",
+      "status":"third_host_capture_failed_source_bounds_without_classified_bound_reason_scan_errors_now_fail_closed_explicitly",
+      "base_commit":"b5ba7019a36bbcc644db03dc9b25944feec1a515",
+      "operator_observation":{"capture_complete":false,"failed_stage":"source_bounds","fixed_bound_reason_observed":false,"private_failure_session_retained_outside_repository":true,"first_archive_started":false,"automatic_retry":false},
+      "failure_boundary":"The third host capture again passed read-only mount and database-layout checks but stopped in source_bounds before first_copy. Because no MTM_COPY_BOUND_FAIL line was emitted, the existing eight metadata categories did not explain the failure. No archive success, SQLite open, migration, old-run continuation, rollback or production mutation is inferred.",
+      "diagnosis":"The tree-bound function previously streamed find directly into the classifier. A failure of the metadata walk itself, such as an untraversable entry or other find error, bypasses the classifier's reject categories and can fail the pipeline with only the stage label. This is a diagnostic coverage gap, not evidence that any bound should be relaxed.",
+      "repair":{"metadata_scan_is_completed_before_classification":true,"scan_file_contains_metadata_only_no_paths":true,"new_fixed_reason":"source_scan_error","source_scan_error_exposes_paths":false,"source_scan_error_exposes_private_bytes":false,"source_scan_error_entries":0,"source_scan_error_bytes":0,"existing_bounds_unchanged":true,"writable_probe_added":false,"permission_or_mode_change_added":false,"automatic_retry_added":false},
+      "changed_files":{"capture_helper":{"path":"scripts/mtm016-capture-operator-state.sh","sha256":"9f2fdf090aee6343b92e541c2996e20df53e3167d086085f210d2b85f92f05e6"},"transport_tests":{"path":"conformance/mtm016-operator-capture-tests.sh","sha256":"5d27f756042f5fe2ded2b894afdbf205fe4752a60d3a2d32a50c552c7425388e"},"documentation":{"path":"docs/MTM-016-F6-OPERATOR-STATE-CAPTURE.md","sha256":"067e1a6c80634e1efca8bac75c7d81977f449a38c5c676b3839588d14e6dbe45"}},
+      "validation":{"capture_helper_shell_syntax_exit_code":0,"transport_test_shell_syntax_exit_code":0,"transport_tests_exit_code":0,"source_scan_error_category_passed":true,"existing_bound_reason_regressions_passed":true,"production_source_accessed_by_tests":false,"full_host_capture_reexecuted":false},
+      "release_readiness":{"validated_gates":15,"blocked_gates":2,"copied_operator_state":"required_evidence_missing","corpus":"incomplete","release_qualified":false},
+      "operator_next_step":"After this diagnostic-only change is committed, run the same host capture exactly once. A source metadata walk failure will now return MTM_COPY_BOUND_FAIL reason=source_scan_error without a path; an ordinary bound failure retains its existing fixed category. Do not upload the private session.",
+      "production_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

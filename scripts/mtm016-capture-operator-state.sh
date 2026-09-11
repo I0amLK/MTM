@@ -8,8 +8,17 @@ export LC_ALL=C
 fail() { printf 'MTM_COPY_CAPTURE_ERROR %s\n' "$1" >&2; exit 1; }
 
 mtm_copy_tree_bounds() {
-  /usr/bin/find "$1" -maxdepth 33 -printf '%y %s %n %m %d %D\n' |
-    /usr/bin/awk '
+  local scan
+  scan=$(/usr/bin/mktemp /tmp/mtm-tree-bounds.XXXXXXXX) || {
+    printf 'MTM_COPY_BOUND_FAIL reason=source_scan_error entries=0 bytes=0\n' >&2
+    return 1
+  }
+  if ! /usr/bin/find "$1" -maxdepth 33 -printf '%y %s %n %m %d %D\n' > "$scan"; then
+    printf 'MTM_COPY_BOUND_FAIL reason=source_scan_error entries=0 bytes=0\n' >&2
+    /usr/bin/rm -f -- "$scan"
+    return 1
+  fi
+  if ! /usr/bin/awk '
       function reject(reason) {
         if (!failed) {
           printf "MTM_COPY_BOUND_FAIL reason=%s entries=%d bytes=%.0f\n", reason, n, total > "/dev/stderr"
@@ -33,7 +42,11 @@ mtm_copy_tree_bounds() {
         }
       }
       END { if(!failed) printf "%d %.0f\n", n, total }
-    '
+    ' "$scan"; then
+    /usr/bin/rm -f -- "$scan"
+    return 1
+  fi
+  /usr/bin/rm -f -- "$scan"
 }
 
 mtm_copy_archive() {
@@ -99,7 +112,7 @@ fi
 [[ $# == 3 && $1 == --source && $3 == --operator-confirmed-quiescent ]] ||
   fail 'usage: bash scripts/mtm016-capture-operator-state.sh --source ABSOLUTE_DATA_ROOT --operator-confirmed-quiescent'
 [[ $2 == /* && ${HOME-} == /* ]] || fail absolute_paths_required
-for program in /usr/bin/bwrap /usr/bin/timeout /usr/bin/tar /usr/bin/find /usr/bin/findmnt /usr/bin/awk /usr/bin/sha256sum /usr/bin/mktemp /usr/bin/readlink /usr/bin/stat /usr/bin/sync; do
+for program in /usr/bin/bwrap /usr/bin/timeout /usr/bin/tar /usr/bin/find /usr/bin/findmnt /usr/bin/awk /usr/bin/sha256sum /usr/bin/mktemp /usr/bin/readlink /usr/bin/rm /usr/bin/stat /usr/bin/sync; do
   [[ -x $program ]] || fail required_host_tool_missing
 done
 source=$(/usr/bin/readlink -e -- "$2") || fail source_unavailable
@@ -144,7 +157,7 @@ if ! /usr/bin/timeout --signal=TERM --kill-after=5s 180s \
     /bin/bash --noprofile --norc /capture-script --internal-readonly-capture \
     > "$session/process.stdout" 2> "$session/process.stderr"; then
   printf 'capture_complete=false\nprivate_session=%s\n' "$session"
-  /usr/bin/grep -E '^MTM_COPY_BOUND_FAIL reason=(entry_limit|depth_limit|cross_device|special_mode|unsupported_file_type|regular_file_hardlink|single_file_size|total_file_size) entries=[0-9]+ bytes=[0-9]+$' "$session/process.stderr" || true
+  /usr/bin/grep -E '^MTM_COPY_BOUND_FAIL reason=(source_scan_error|entry_limit|depth_limit|cross_device|special_mode|unsupported_file_type|regular_file_hardlink|single_file_size|total_file_size) entries=[0-9]+ bytes=[0-9]+$' "$session/process.stderr" || true
   /usr/bin/grep -E '^MTM_COPY_DIAGNOSTIC stage=[a-z_]+$' "$session/process.stderr" || true
   fail capture_failed_private_diagnostics_retained_no_retry
 fi

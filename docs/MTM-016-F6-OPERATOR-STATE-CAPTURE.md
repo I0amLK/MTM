@@ -58,9 +58,11 @@ usable acceptance inputs. A successful archive is made owner-read-only.
 
 Bound failures publish only one fixed metadata category plus aggregate entry/byte
 counts, never the rejected path or private content. Current categories are
-`entry_limit`, `depth_limit`, `cross_device`, `special_mode`,
+`source_scan_error`, `entry_limit`, `depth_limit`, `cross_device`, `special_mode`,
 `unsupported_file_type`, `regular_file_hardlink`, `single_file_size`, and
-`total_file_size`. These diagnostics do not relax the bound or trigger a retry.
+`total_file_size`. `source_scan_error` means the metadata walk itself could not be
+completed (for example because an entry is not traversable); it never prints the
+entry path. These diagnostics do not relax the bound or trigger a retry.
 
 Two identical source streams show observed byte stability, not a transactional
 multi-database snapshot or proof that a live writer was stopped. Before use, verify

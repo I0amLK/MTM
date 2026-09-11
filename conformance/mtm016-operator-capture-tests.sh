@@ -78,6 +78,13 @@ reject_tree entry_limit
 /usr/bin/rm -rf "$root/tree/many"
 printf 'TRANSPORT_TEST entry_limit_exact_boundary=passed\n'
 
+if mtm_copy_tree_bounds "$root/does-not-exist" > /dev/null 2> "$root/scan-error.log"; then
+  printf 'TRANSPORT_TEST missing_tree_unexpectedly_accepted\n' >&2
+  exit 1
+fi
+grep -qx 'MTM_COPY_BOUND_FAIL reason=source_scan_error entries=0 bytes=0' "$root/scan-error.log"
+printf 'TRANSPORT_TEST source_scan_error_category=passed\n'
+
 if /bin/bash "$script" > "$root/invalid.log" 2>&1; then exit 1; fi
 if /usr/bin/env HOME="$root/home" /bin/bash "$script" --source "$root/missing" --operator-confirmed-quiescent > "$root/missing.log" 2>&1; then exit 1; fi
 [[ ! -e $root/home/.mtm-acceptance ]]
