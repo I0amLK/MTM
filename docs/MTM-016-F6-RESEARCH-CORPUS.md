@@ -208,3 +208,21 @@ No mathematical review has taken place in this maintenance conversation. Once
 connected as the original owner, use the current repair task (not the consumed
 assembly submission) to retry compilation, and stop at verify for a separate
 reviewer. This infrastructure repair does not count as U23's seeded logical gap.
+
+The first U21-r1 recovery did not preserve the OAuth owner. After the exact TUI
+was stopped (including an explicit, identity-bound force stop) and the same state
+roots were relaunched, the recovered endpoint authenticated a newly registered
+OAuth client. `rethlas_inspect(status)` on the preserved run correctly returned
+`RUN_OWNER_MISMATCH`. In this runtime the workflow owner is the OAuth `client_id`;
+reusing the data directory, operator password and signing key therefore does not
+authorize a newly registered client to adopt the run. Do not edit `runs.owner_id`,
+copy capabilities, or mint a replacement verifier token to salvage this attempt.
+
+Treat that original session as a retained, non-counting infrastructure-invalid
+attempt. It is structurally ineligible for U21 acceptance anyway: it used the old
+launcher with the unmounted LaTeX alias and a problem_id different from the fixed
+case registry. A replacement U21-r1 acceptance attempt must start from a fresh
+session under the repaired launcher and keep the same live OAuth connection from
+generation through independent review/finalization. If that live connection is
+lost again, retain the attempt and do not silently convert a restarted quick
+tunnel registration into the old owner.

@@ -3312,6 +3312,18 @@
       "operator_next_step":"Run the committed stop helper once with --operator-confirmed-force-stop. Preserve and return its RESEARCH_STOP_DIAGNOSTIC line. If it reports D state or any identity error, do not issue another signal. If it reports complete=true, run the existing resume --check-only then normal resume entry against the same U21-r1 session and original run.",
       "corpus_boundary":{"passed_trials":63,"failed_trials":0,"blocked_trials":27,"newly_accepted_trials":0},
       "production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-RESEARCH-U21-R1-OWNER-CONTINUITY-FAILURE",
+      "status":"original_u21_r1_preserved_noncounting_after_recovered_endpoint_registered_new_oauth_owner",
+      "base_commit":"b5dfd6bf0fa77c1f55f3b217577f7ef558a776fa",
+      "operator_observation":{"force_stop_scan":"tui=1 helper=0 probe=0 unknown=0","sigint_sent":true,"sigterm_sent":true,"bounded_process_state":"T_stopped","sigkill_sent_with_explicit_force":true,"stop_complete":true,"production_processes_targeted":false,"resume_check_passed":true,"recovery_runtime_started":true},
+      "connector_observation":{"connection":"MTM6","version":"0.6.0-preview.1","tool_contract":"mtm-tools-v9","schema":7,"native_mode":"safe","workspace":"expected disposable U21-r1 workspace","explicit_toolchain_root_count":1,"old_run_id":"run-dimension_sum_intersection-e58e3ce0a140","status_request_result":"RUN_OWNER_MISMATCH","workflow_state_not_advanced_by_status_check":true},
+      "authority_analysis":"Workflow owner_id is the authenticated OAuth client_id. The recovered endpoint authenticated a newly registered client, so preserving the state roots, operator password, candidate bytes and signing key does not authorize that client to adopt the old run. The mismatch is the expected fail-closed behavior; no run owner, capability or database row may be rewritten to make the attempt pass.",
+      "attempt_disposition":{"counted_as_u21_repeat_1":false,"counted_as_failed_mathematical_review":false,"classification":"infrastructure_invalid_noncounting_preserved_attempt","reasons":["original launcher exposed an unmounted LaTeX alias","original problem_id differed from prescribed case_id","restarted quick-tunnel connection did not preserve OAuth client identity"],"original_state_deleted":false,"replacement_run_created":false,"verifier_submission_performed":false,"finalizer_invoked":false},
+      "replacement_boundary":"A new U21-r1 acceptance attempt may be created only from the repaired launcher as a fresh disposable session. Its live OAuth owner must remain continuous from generation through independent review/finalization. The preserved invalid attempt remains auditable and is not hidden or relabelled as one of the three corpus repetitions.",
+      "corpus_boundary":{"passed_trials":63,"failed_trials":0,"blocked_trials":27,"newly_accepted_trials":0},
+      "production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
