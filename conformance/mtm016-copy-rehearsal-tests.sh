@@ -22,6 +22,106 @@ reject() {
   negative=$((negative+1))
 }
 
+# Exercise the actual restoration function without a runtime or a namespace.
+# A deliberately old nanosecond timestamp prevents a fast test from hiding a
+# failure to restore the archive's existing root-directory metadata.
+mkdir -m 700 "$root/restore-source" "$root/restore-source/private"
+printf 'synthetic database\n' > "$root/restore-source/private/state.sqlite3"
+printf 'synthetic wal\n' > "$root/restore-source/private/state.sqlite3-wal"
+printf 'synthetic shm\n' > "$root/restore-source/private/state.sqlite3-shm"
+printf 'synthetic key\n' > "$root/restore-source/oauth-token-secret.hex"
+printf 'synthetic unicode name\n' > "$root/restore-source/含 空格"$'\n'"name"
+long_name=$(printf '%0180d' 1)
+printf 'synthetic long name\n' > "$root/restore-source/private/$long_name"
+chmod 750 "$root/restore-source"
+touch -m -d @1700000000.123456789 "$root/restore-source" "$root/restore-source/private"
+mtm_copy_archive "$root/restore-source" > "$root/restore-original.tar"
+restore_digest=$(copy_digest "$root/restore-original.tar")
+chmod 400 "$root/restore-original.tar"
+(
+  r_archive=$root/restore-original.tar
+  r_archive_sha=$restore_digest
+  r_data=$root/restore-result
+  r_extract
+)
+mtm_copy_archive "$root/restore-result" > "$root/restore-result.tar"
+cmp -s "$root/restore-original.tar" "$root/restore-result.tar"
+[[ $(copy_digest "$root/restore-original.tar") == "$restore_digest" ]]
+printf 'COPY_REHEARSAL_TEST exact_archive_root_metadata_roundtrip=passed\n'
+
+fixture_restore() (
+  r_data=$1
+  r_archive=${2:-$root/restore-original.tar}
+  r_archive_sha=${3:-$restore_digest}
+  r_pid=${4-}
+  r_extract
+)
+fixture_compare_restored() (
+  r_data=$root/restore-result
+  r_archive_sha=$restore_digest
+  r_check_restored_archive
+)
+fixture_compare_restored
+reject fixture_restore "$root/restore-result"
+mkdir -m 700 "$root/existing-empty"
+reject fixture_restore "$root/existing-empty"
+ln -s "$root/restore-result" "$root/destination-link"
+reject fixture_restore "$root/destination-link"
+ln -s "$root/absent-target" "$root/dangling-destination"
+reject fixture_restore "$root/dangling-destination"
+reject fixture_restore "$root/active-restore" "$root/restore-original.tar" "$restore_digest" 1
+[[ ! -e $root/active-restore ]]
+reject fixture_restore "$root/wrong-hash-restore" "$root/restore-original.tar" 0000000000000000000000000000000000000000000000000000000000000000
+[[ ! -e $root/wrong-hash-restore ]]
+fixture_compare_restored
+printf 'COPY_REHEARSAL_TEST restore_existing_paths_active_child_and_identity_denied=passed\n'
+
+# Every mutation is followed by a positive comparison after exact repair of
+# this synthetic fixture, so one stale earlier mismatch cannot mask another.
+printf 'synthetic databasf\n' > "$root/restore-result/private/state.sqlite3"
+touch -r "$root/restore-source/private/state.sqlite3" "$root/restore-result/private/state.sqlite3"
+[[ $(stat -c %s "$root/restore-result/private/state.sqlite3") == $(stat -c %s "$root/restore-source/private/state.sqlite3") ]]
+reject fixture_compare_restored
+cp -p "$root/restore-source/private/state.sqlite3" "$root/restore-result/private/state.sqlite3"
+fixture_compare_restored
+chmod 640 "$root/restore-result/private/state.sqlite3"
+reject fixture_compare_restored
+chmod 600 "$root/restore-result/private/state.sqlite3"
+fixture_compare_restored
+chmod 700 "$root/restore-result"
+reject fixture_compare_restored
+chmod 750 "$root/restore-result"
+fixture_compare_restored
+touch -m -d @1700000000.123456790 "$root/restore-result"
+reject fixture_compare_restored
+touch -r "$root/restore-source" "$root/restore-result"
+fixture_compare_restored
+printf 'extra synthetic entry\n' > "$root/restore-result/extra"
+reject fixture_compare_restored
+rm "$root/restore-result/extra"
+touch -r "$root/restore-source" "$root/restore-result"
+fixture_compare_restored
+mv "$root/restore-result/private/state.sqlite3-wal" "$root/moved-wal"
+reject fixture_compare_restored
+mv "$root/moved-wal" "$root/restore-result/private/state.sqlite3-wal"
+touch -r "$root/restore-source/private" "$root/restore-result/private"
+fixture_compare_restored
+printf 'COPY_REHEARSAL_TEST exact_comparison_rejects_content_modes_time_and_entries=passed\n'
+
+# A repeated archive member must still fail the first no-clobber extraction;
+# the root-only metadata pass must not turn this into an overwrite policy.
+cp "$root/restore-original.tar" "$root/duplicate.tar"
+chmod 600 "$root/duplicate.tar"
+mkdir -m 700 "$root/duplicate-source" "$root/duplicate-source/private"
+printf 'duplicate must not overwrite\n' > "$root/duplicate-source/private/state.sqlite3"
+tar --append -f "$root/duplicate.tar" -C "$root/duplicate-source" ./private/state.sqlite3
+duplicate_digest=$(copy_digest "$root/duplicate.tar")
+reject fixture_restore "$root/duplicate-result" "$root/duplicate.tar" "$duplicate_digest"
+cmp -s "$root/restore-source/private/state.sqlite3" "$root/duplicate-result/private/state.sqlite3"
+grep -qx 'MTM_COPY_REHEARSAL_ERROR reason=restore_extraction' "$root/rejected.stderr"
+[[ $(copy_digest "$root/restore-original.tar") == "$restore_digest" ]]
+printf 'COPY_REHEARSAL_TEST duplicate_archive_member_no_clobber=passed\n'
+
 for payload in '{}' '{"a":[{"x":1},{"x":2}],"b":true}'; do
   printf '%s' "$payload" > "$root/json"
   r_check_json "$root/json"

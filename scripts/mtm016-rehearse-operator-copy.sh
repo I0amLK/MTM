@@ -222,11 +222,23 @@ r_check_schema() {
 }
 r_extract() {
   [[ -z $r_pid ]] || r_fail extraction_while_runtime_running
-  /usr/bin/mkdir -m 700 /work/runtime/data
-  /usr/bin/tar -xf "$r_archive" -C /work/runtime/data --no-same-owner --same-permissions --keep-old-files --delay-directory-restore
-  mtm_copy_tree_bounds /work/runtime/data > /work/restored-bounds
+  [[ $r_data == /* && ! -e $r_data && ! -L $r_data ]] || r_fail restoration_destination_not_new
+  [[ $r_archive_sha =~ ^[0-9a-f]{64}$ && $(copy_digest "$r_archive") == "$r_archive_sha" ]] || r_fail restore_input_identity
+  /usr/bin/mkdir -m 700 -- "$r_data" || r_fail restoration_destination_create
+  /usr/bin/tar -xf "$r_archive" -C "$r_data" --no-same-owner --same-permissions --keep-old-files --delay-directory-restore || r_fail restore_extraction
+  mtm_copy_tree_bounds "$r_data" > "$r_wire/restored-bounds" || r_fail restored_tree_bounds
+  # --keep-old-files preserves the already-created extraction root, including
+  # its new mtime/mode. Restore ONLY the archived '.' directory metadata after
+  # the no-clobber extraction. --no-recursion and the exact member prevent this
+  # second pass from visiting or replacing children. Never use --overwrite.
+  /usr/bin/tar -xf "$r_archive" -C "$r_data" --no-same-owner --same-permissions \
+    --no-recursion --overwrite-dir --delay-directory-restore -- . || r_fail restore_root_metadata
+  mtm_copy_tree_bounds "$r_data" > "$r_wire/restored-bounds" || r_fail restored_tree_bounds
+  r_check_restored_archive
+}
+r_check_restored_archive() {
   local restored
-  restored=$(mtm_copy_archive /work/runtime/data | /usr/bin/sha256sum)
+  restored=$(mtm_copy_archive "$r_data" | /usr/bin/sha256sum) || r_fail restored_archive_read
   [[ ${restored%% *} == "$r_archive_sha" ]] || r_fail restored_archive_bytes_or_modes
 }
 r_select_old() {

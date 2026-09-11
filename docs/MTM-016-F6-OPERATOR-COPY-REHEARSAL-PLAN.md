@@ -127,6 +127,48 @@ working databases and raw logs must not be uploaded. A later evidence review is
 required before the existing Rust release adapter can validate copied_operator_state.
 Neither report supplies missing independent corpus trials.
 
+## Exact restoration of the extraction root
+
+The first capable-host rehearsal at `c9653ed` passed the 76 primitive negative
+cases, then stopped in the synthetic prerequisite at `preupgrade_extraction`
+with `restored_archive_bytes_or_modes`. The captured-state leg was not reached.
+The operator's fixed diagnostic is not a new failure of the real archive's
+previous integrity inspection, nor is it evidence of candidate migration failure.
+
+A source-free local reproduction with the same extraction options identified a
+root-directory metadata mismatch: the script precreated the destination, and
+`--keep-old-files` left that directory's new mtime instead of the archived `.`
+mtime. Child bytes and child metadata matched in the observed reproduction, but
+the normalized PAX archive did not. A deterministic regression sets the source
+root to a known old nanosecond timestamp and mode 0750; the previous restoration
+function fails the exact SHA comparison. This is a reproduced helper defect;
+the original private host diagnostics were not independently read.
+
+Restoration still requires a nonexistent destination and no running owned runtime.
+It rechecks the selected input digest, creates the new private directory, and
+extracts with `--keep-old-files`. Unsafe trees fail before the next pass. A separate
+non-recursive extraction selects only the exact archived `.` member and restores
+that new root's metadata with `--overwrite-dir`; it never uses `--overwrite`,
+recursively replaces children or changes the production root. Bounds are checked
+again, then the entire re-created archive SHA must still equal the original SHA.
+No timestamp, mode, ownership, file or archive header is omitted from that comparison.
+The original capture and preinspection helpers and their pinned hashes are unchanged.
+
+The 89-negative-case conformance suite now exercises the actual restoration path
+without needing a runtime or namespace. It verifies exact root timestamp/mode and
+long/Unicode/newline-name round trips; rejects preexisting, linked and active-runtime
+destinations; rejects wrong archive identity; preserves no-clobber refusal for a
+duplicate archive member; and rejects same-size content changes, permission changes,
+a one-nanosecond root time change, missing WAL and extra entries. Each isolated
+comparison mutation is repaired on the synthetic fixture and followed by a passing
+comparison, preventing a stale mismatch from masking a later failed assertion.
+These are restoration regressions, not a completed synthetic or real migration.
+
+GNU tar directory metadata and member-selection semantics reviewed:
+https://www.gnu.org/software/tar/manual/html_node/Directory-Modification-Times-and-Permissions.html
+https://www.gnu.org/software/tar/manual/html_node/Overwrite-Old-Files.html
+https://www.gnu.org/software/tar/manual/tar.html
+
 External semantics reviewed: GNU Bash signal/wait rules and GNU env signal-reset
 options; curl's no-redirect, header-file, timeout and size-bound options; SQLite's
 json_tree object traversal. References: https://www.gnu.org/software/bash/manual/bash.html,
