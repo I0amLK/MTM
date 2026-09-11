@@ -247,3 +247,14 @@ clear `MTM_TEST_NATIVE_CORPUS_PROFILE`. The v2 corpus aggregate accepts only the
 validated Native batch plus the immutable 48/42 v1 base, preserves 63/27 partial
 coverage and cannot authorize release. Changed harness source requires a new
 capable-host source receipt, not an edit to an already sealed receipt.
+
+## F6 operator-driven research sessions
+
+Read `docs/MTM-016-F6-RESEARCH-CORPUS.md`. The research session launcher and
+fifteen-case registry prepare disposable exact-candidate sessions only; they never
+submit proofs, verifier reports, grant responses or acceptance evidence. Stop
+generation at verify and record the separate reviewing session and exact draft.
+A `correct` label, prepared session or clean process exit is not independent
+mathematical review. Keep U23's seeded gaps explicit. The research collector and
+release adapter remain pending; do not increase the sealed 63/90 corpus count
+from task cards or reuse old compiled-LaTeX/retrieval/CAS fixtures as new research.

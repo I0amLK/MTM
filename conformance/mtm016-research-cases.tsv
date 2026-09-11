@@ -1,0 +1,16 @@
+# mtm-research-cases-v1: task<TAB>repeat<TAB>case_id<TAB>mode<TAB>problem<TAB>special_requirement
+U21	1	u21-r1-subspace-dimension	compact	设 V 为域 F 上有限维向量空间，U,W 为子空间。证明 dim(U+W)+dim(U∩W)=dim U+dim W，包含退化子空间情形。	不以有限例子代替证明；在 verify 停止并交给独立复核会话。
+U21	2	u21-r2-cauchy-schwarz	compact	对任意实向量 x,y∈R^n 证明 (∑x_i y_i)^2≤(∑x_i^2)(∑y_i^2)，并准确给出等号条件，包括零向量。	明确零向量边界；在 verify 停止并交给独立复核会话。
+U21	3	u21-r3-monotone-limit	compact	证明每个有上界的单调递增实数列都收敛到其取值集合的上确界，写明所用实数完备性。	区分存在上确界与满足收敛定义；在 verify 停止并交给独立复核会话。
+U22	1	u22-r1-chinese-remainder	full	对互素正整数 m,n 证明映射 Z/(mn)→Z/m×Z/n 是环同构，说明 m=1 或 n=1 的情形。	实际使用 rethlas_retrieve 获取相关原始或权威来源，核对原文适用条件，正文引用并保留引用审计；检索命中本身不算证明。
+U22	2	u22-r2-finite-polynomial-roots	full	证明域上非零 n 次多项式至多有 n 个互异根，解释零多项式为何必须排除。	实际使用 rethlas_retrieve 获取相关来源，核对原文与正文引用及引用审计；不把摘要当作已经读过完整原文。
+U22	3	u22-r3-orbit-stabilizer	full	设有限群 G 作用在集合 X 上。证明任意 x∈X 的轨道大小等于 [G:G_x]，明确陪集与轨道的对应。	实际检索与核查群作用来源，将真实获得的引用 ID 绑定到证明和引用审计；不能预填或虚构来源。
+U23	1	u23-r1-uniform-continuity-gap	compact	证明每个连续函数 f:[0,1]→R 一致连续。	标为故意植入的修复挑战：首份可编译草稿故意从逐点连续直接取一个共同 delta，遗漏紧性步骤；独立 verifier 必须定位这一具体量词漏洞后进入 repair，再由真实修复和复核结束。
+U23	2	u23-r2-finite-domain-gap	compact	证明每个有限整环都是域，采用 1≠0 的整环约定。	标为故意植入的修复挑战：首份可编译草稿声称任意 a 的乘法映射都可消去，遗漏 a≠0 限制；独立 verifier 必须指出这一具体错误，而非只提交预制 wrong 标签。
+U23	3	u23-r3-matrix-inverse-gap	compact	对域 F 上 n×n 矩阵 A,B，证明 AB=I 蕴含 BA=I。	标为故意植入的修复挑战：首份可编译草稿从 AB=I 直接引用 A 的逆来左乘，没有证明逆存在；独立 verifier 识别循环论证，修复后重新编译和复核。
+U24	1	u24-r1-geometric-series	full	对 n≥0 和实数 x 证明 (x-1)∑_{k=0}^n x^k=x^{n+1}-1，并说明 x=1。	创建至少两个真实独立分支，分别研究归纳与代数消去路线；这些是替代证明路线，不把 branch join 误当作任意子引理自动拼接。
+U24	2	u24-r2-idempotent-decomposition	full	设 V 为域 F 上有限维向量空间，线性映射 P 满足 P²=P。证明 V=ker P⊕im P。	以直接分解与选取适配基为两条真实分支路线；分支会话不得读取兄弟私有域，所有所需分支封存后才 join 和最终复核。
+U24	3	u24-r3-sum-of-squares	full	对整数 n≥0 证明 ∑_{k=1}^n k²=n(n+1)(2n+1)/6。	以归纳与有限差分为两条独立分支路线；记录真实 branch、join、seal 顺序，不能用串行 direct_proving 冒充分支验收。
+U25	1	u25-r1-rank-nullity	full	证明域 F 上线性映射 T:F^n→F^m 满足 dim ker T+rank T=n，并计算 A(t)=[[1,t,0],[0,1,t],[1,t+1,t]] 在 Q 上若干参数的秩和零空间维数。	实际调用 Sage 与 Magma，对 t=-1,0,1,2 给出可重放输入和输出；一般定理的证明与有限参数检查分开，差异必须解释而非删除。
+U25	2	u25-r2-finite-field-roots	full	对素数 p 证明 F_p 上 X^p-X 恰有 p 个互异根，并以导数或其他严谨方法处理重根。	实际调用 Sage 与 Magma，分别对 p=2,3,5 验证根与因式分解；记录工具版本、命令和结果，有限计算不是一般证明。
+U25	3	u25-r3-polynomial-gcd	full	在 Q[X] 中求 gcd(X^4-1,X^3-1)，并给出可逐项核验的 Bezout 等式，约定最大公因式首一。	实际调用 Sage 与 Magma 核对 gcd 与 Bezout 等式；独立证明应检查等式本身，不能仅依赖软件返回标签。
