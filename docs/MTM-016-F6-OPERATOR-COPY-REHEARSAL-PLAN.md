@@ -50,19 +50,85 @@ classified by this summary; do not assign them an inferred status.
    satisfy the existing Rust release adapter. Neither this rehearsal nor the
    browser equality fixtures supply missing independent corpus trials.
 
-## Draft implementation and validation boundary
+## Reviewed implementation and ordered host entry
 
-`scripts/mtm016-rehearse-operator-copy.sh` and
-`scripts/mtm016-run-copy-rehearsal.sh` are uncommitted drafts, not operator entry
-points. Their executable entries explicitly stop with `draft_not_validated`.
-The first composed syntax/rehearsal tool invocation was blocked by the platform
-because its safety status could not be determined. It did not return an execution
-receipt; no constituent test result or rehearsal completion is inferred. That
-composed trial was not retried or routed through a different executor or the host.
+The former drafts stopped at `draft_not_validated`. The first historical composed
+trial was blocked by the platform, returned no execution receipt, and is not a
+successful test. Following the operator's request to continue, the scripts were
+reviewed and revised independently; that historical observation remains unchanged.
 
-Static review and future synthetic-only validation must settle process ownership,
-HTTP request/reply binding, task/run binding, callback validation, strict failure
-handling, source provenance, secret hygiene and exact restoration before enabling
-any real-archive entry. Draft code does not change the release validator or supply
-evidence that those checks passed. Keep the existing production capture and
-inspection results; no operator rerun is requested for this checkpoint.
+`scripts/mtm016-run-copy-rehearsal.sh` now has two bounded modes. `--synthetic`
+creates an old-runtime-owned disposable run, then exercises the same extraction,
+migration, owner authentication, one transition, restart and original-state
+restoration used by the captured-state mode. `--archive-sha256` first runs that
+complete synthetic mode and validates its typed report. Only its success permits
+locating the previously captured archive by exact SHA. A failed synthetic leg does
+not inspect the private capture or run a captured-state leg. No automatic retry,
+latest-directory guess, alternative owner or alternative run is used.
+
+From the reviewed checkout, on the capable host:
+
+```sh
+bash conformance/mtm016-copy-rehearsal-tests.sh --sqlite /home/lk/miniconda3/bin/sqlite3 &&
+bash scripts/mtm016-run-copy-rehearsal.sh --archive-sha256 2d448c5ba1a6f61f8139775c254ad85316b05bf82c0ff6c9d8a0f98805893d8e --sqlite /home/lk/miniconda3/bin/sqlite3
+```
+
+The second command performs its own synthetic prerequisite; do not add another
+synthetic launch before it. Production clients need not pause. Do not recapture
+production, run either binary on the original data directory, or edit files while
+the rehearsal runs. Both binaries and helper identities are rechecked, and the
+original capture/inspection helpers are pinned without modifying them.
+
+## Verification and limits
+
+The conformance script accepts only an explicit SQLite executable and creates its
+own temporary fixtures. It checks nested/duplicate/malformed JSON, HTTP framing and
+length, MCP request IDs and boolean outcomes, registered-callback/nonce binding,
+preserved-owner selection, exact transition counts, missing/extra/incorrect report
+fields, rejection of non-loopback origins, and owned-child shutdown. In captured
+mode, a new DCR registration, a new run, and Native tool requests are forbidden.
+These primitive tests do not launch the actual candidate and cannot replace the
+complete host synthetic leg. A real namespace setup failure is failed, not skipped.
+
+The only durable writable host mount in either leg is its new private `/work`.
+Production state, host network, other processes and installation selectors are not
+mounted. OAuth tokens, capabilities, raw protocol replies, selected identifiers and
+runtime startup logs stay under a private tmpfs scratch directory. The registered
+callback is checked but never visited. The owner and registrations are preserved;
+no owner rewrite, borrowed live token, direct signing, confidential-secret guessing
+or newly registered substitute is permitted. Public-client authentication is a
+scripted copied-state test, not a second browser or independent-human test.
+
+The runner checks both databases again, normalizes private modes on the fresh copy
+only and compares content before/after that preparation. It checks all run/owner
+associations, all OAuth registration fields and the persisted OAuth signing-key
+file after candidate restart, original restoration, and baseline continuation.
+This key claim concerns the copied persisted key and its normal derived capability
+key; it does not certify production secrets supplied exclusively through a live
+process environment. Original archive bytes, modes and numeric ownership must
+round-trip exactly before the restored database is opened. Mismatches block the
+rehearsal; there is no user_version edit or permission relaxation to make it pass.
+
+Native is disabled, LaTeX is static-only, and candidate and baseline endpoint facts
+must agree with the selected versions and safe/disabled Native settings. Only one
+explicitly non-mathematical assessment transition is submitted per leg. The selected
+run must remain active and unsealed, and no final `.tex` is published into the new
+workspace. No original proof is replaced. Failure leaves private copies for
+diagnosis; shutdown targets only the runner's own child. An outer 240-second
+deadline with TERM/KILL escalation bounds each namespace leg. The rehearsal uses
+two Tokio workers and a 1 GiB virtual-address limit; these are not resource-gate
+measurements or performance claims.
+
+Success prints two `mtm-operator-copy-rehearsal-v1` reports, first with
+`synthetic_only=true` and then with `synthetic_only=false`. Each strict 30-field
+report still has `release_qualified=false`. Return only those reports or fixed
+`MTM_COPY_REHEARSAL_ERROR` / `MTM_COPY_REHEARSAL_DIAGNOSTIC` lines. Private archives,
+working databases and raw logs must not be uploaded. A later evidence review is
+required before the existing Rust release adapter can validate copied_operator_state.
+Neither report supplies missing independent corpus trials.
+
+External semantics reviewed: GNU Bash signal/wait rules and GNU env signal-reset
+options; curl's no-redirect, header-file, timeout and size-bound options; SQLite's
+json_tree object traversal. References: https://www.gnu.org/software/bash/manual/bash.html,
+https://curl.se/docs/manpage.html, https://www.sqlite.org/json1.html. They explain
+mechanics, not whether the actual operator archive passed this rehearsal.
