@@ -3324,6 +3324,19 @@
       "replacement_boundary":"A new U21-r1 acceptance attempt may be created only from the repaired launcher as a fresh disposable session. Its live OAuth owner must remain continuous from generation through independent review/finalization. The preserved invalid attempt remains auditable and is not hidden or relabelled as one of the three corpus repetitions.",
       "corpus_boundary":{"passed_trials":63,"failed_trials":0,"blocked_trials":27,"newly_accepted_trials":0},
       "production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-RESEARCH-OWNER-CONTINUITY-TASKCARD",
+      "status":"fresh_research_taskcard_requires_same_live_oauth_client_through_independent_review",
+      "base_commit":"933bee9f0cd7ee087b3ae2d4d6e78e278e4e99af",
+      "scope":"Prevent a fresh U21-U25 acceptance attempt from repeating the quick-tunnel owner-continuity failure. This changes only shell-driven task-card instructions/tests/documentation, not Rust runtime authority or accepted corpus counts.",
+      "procedure":{"generator_records_server_info_oauth_client_id_locally":true,"tui_and_tunnel_remain_live_at_verify_handoff":true,"reviewer_reuses_existing_connected_mtm_endpoint":true,"connector_delete_reconnect_or_reregister_forbidden_during_handoff":true,"reviewer_rechecks_same_oauth_client_id_before_run_access":true,"client_id_mismatch_policy":"stop_without_reading_or_submitting_original_run","database_owner_rewrite_forbidden":true,"capability_copy_or_mint_forbidden":true},
+      "validation":{"research_session_conformance_exit_code":0,"negative_cases":83,"taskcard_contains_oauth_client_continuity_check":true,"taskcard_contains_no_reconnect_rule":true,"runtime_server_started_by_tests":false,"research_trials_executed":0,"production_source_accessed":false,"rust_source_changed":false,"release_inputs_changed":false},
+      "delivered_file_hashes":{"launcher":"4c540bf0c65bf0c34cf8fb34e44fe57ed9c539920b56f08afb9b4adc380ecebe","conformance":"da2fe7978ad2e26f27a9c52262b5115891add37d84e44b040f040b83d0ee4bd1","documentation":"5c96c57f2f579b07312cb709074c5763f9d7e280f640eaed8e3b8996400b3e45"},
+      "acceptance_boundary":"This is a prevention rule for future fresh sessions, not proof that any reviewer is independent or that OAuth continuity will hold. A fresh U21-r1 remains blocked until its actual compact proof compiles, the same owner reaches verify, an independent review is submitted, finalization succeeds and the pending research collector validates the complete private evidence. No corpus row is advanced by this change.",
+      "operator_next_step":"Stop the currently recovered wrong-owner U21-r1 endpoint, retain the invalid session, then start a new U21-r1 with the current committed launcher. Keep that new TUI/quick-tunnel alive from generation through reviewer handoff and verify the same oauth_client_id before the reviewer accesses the run.",
+      "corpus_boundary":{"passed_trials":63,"failed_trials":0,"blocked_trials":27,"newly_accepted_trials":0},
+      "production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

@@ -136,6 +136,8 @@ deny manifest_wrong_case
 rs_taskcard "$tmp/task.md" "$trial"
 grep -F 'dim(U+W)' "$tmp/task.md" > /dev/null
 grep -F 'verify' "$tmp/task.md" > /dev/null
+grep -F 'oauth_client_id' "$tmp/task.md" > /dev/null
+grep -F '不要删除、重连或重新注册 connector' "$tmp/task.md" > /dev/null
 task_before=$(rs_hash "$tmp/task.md")
 deny rs_taskcard "$tmp/task.md" "$trial"
 [[ $(rs_hash "$tmp/task.md") == "$task_before" ]]

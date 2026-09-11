@@ -46,6 +46,15 @@ separate repair/generation conversation, then receives a new independent review.
 U24 branch work likewise uses separate conversations and the actual branch
 capabilities. No task card supplies capabilities or authorizes cross-domain reads.
 
+For quick-tunnel sessions, "same disposable connection" means the same already
+registered OAuth client, not merely the same data directory or operator password.
+Before creating the run, record the session's `server_info.oauth_client_id`
+locally. Keep the TUI/tunnel alive through the generator-to-reviewer handoff. The
+reviewing conversation must reuse the existing connected MTM endpoint without
+deleting/reconnecting/re-registering it, and must confirm the same client ID before
+requesting the verifier task. A different client ID is a hard owner-continuity
+failure; do not repair it by changing database ownership or copying capabilities.
+
 This is a procedural handoff, not technical proof that two people or models are
 independent. Record who/what reviewed, the separate session boundary and the exact
 draft reviewed. A pseudonym or file hash alone is not an authenticated witness.
