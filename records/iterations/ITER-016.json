@@ -3223,6 +3223,27 @@
       "acceptance_boundary":"This delivers test execution and evidence validation, not fifteen successful Native trials. The local explicit profile stopped at Native preflight without launching the candidate. The workspace attempt retained its ten Native-related failures, and edits made before final targeted revalidation mean that run is not represented as a clean final-source gate. Old source success remains immutable but cannot qualify the changed test/maintenance source. A new capable-host source check and exact-candidate Native matrix are required. No 63/27 aggregate is created or activated without the actual successful fifteen-trial receipt. Remaining research, browser/human and copied-state corpus repeats are not waived.",
       "operator_next_step":"At the committed implementation HEAD, use the host-owned Cargo target directory, clear explicit Native/compiled-LaTeX profile flags, run cargo xtask check --record and only on success run cargo xtask qualify --profile corpus_native with the unchanged frozen candidate and its exact SHA. Do not recapture production or repeat the already sealed copied-state gate. Preserve new reports and any failure diagnostics.",
       "production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-NATIVE-CORPUS-U16-U20-HOST-ACCEPTANCE",
+      "status":"capable_host_source_and_native_corpus_passed_partial_corpus_advanced_to_63_of_90",
+      "implementation_commit":"45e808b2cde9ae918e97eac78cd3d3aa40e4dd28",
+      "observation_source":"shared_host_generated_validation_reports_read_and_byte_for_byte_sealed_after_operator_reported_completion",
+      "source_gate":{"passed":true,"commit":"45e808b2cde9ae918e97eac78cd3d3aa40e4dd28","source_sha256":"1bce4f753e30fb9df0e7283773eb9ca057fa33dfd25660ba12acd694439e476f","native_preflight_ready":true,"format_clippy_rust_tests_diff_passed":true,"tests_skipped_by_preflight":false},
+      "native_corpus":{"profile":"corpus_native","candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724","corpus_sha256":"9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861","task_ids":["U16","U17","U18","U19","U20"],"tasks":5,"repeats":3,"passed_trials":15,"failed_trials":0,"unique_trial_ids":15,"candidate_launched":true,"native_backend":"bubblewrap","scripted_consent_only":true,"human_consent_tested":false,"independent_research_tested":false,"production_changed":false,"release_qualified":false},
+      "sealed_reports":[
+        {"path":"records/evidence/MTM-016/source-check-f6-45e808b.json","sha256":"e5293070a8145ec5bcdf530ba5af1f3452e68342f902be4ee17d14bc439e350e","scope":"byte_identical_capable_host_source_check_for_current_test_and_maintenance_source"},
+        {"path":"records/evidence/MTM-016/candidate-corpus-native-f6-45e808b.json","sha256":"8f218bfb8383c00d3a922a8c027cb1d8b8665cb7fbc75f9d5fb289a4253fb2f0","scope":"byte_identical_exact_candidate_u16_u20_fifteen_trial_host_receipt"},
+        {"path":"records/evidence/MTM-016/corpus-f6-native-u16-u20-aggregate.json","sha256":"35cfd8b7c0e63089187a941d46867867b338433068ed8fe818edae43c35ad2f3","scope":"strict_63_passed_0_failed_27_blocked_partial_corpus_v2"},
+        {"path":"records/evidence/MTM-016/release-check-f6-native-u16-u20-45e808b.json","sha256":"235db8bcb76d5ce5005fdba79e7bc706109b5ef8b3cd337cc045f5c0be7117e8","scope":"readonly_release_check_sixteen_validated_one_blocked_after_native_partial_ingestion"}
+      ],
+      "release_inputs":{"path":"records/governance/mtm016-release-inputs.json","sha256":"63d6aa808dc51c95332e90899adb9cd36e0857ddab7d39d17f885b20671ab88e","source_updated_to_current_host_receipt":true,"corpus_updated_to_v2_partial_aggregate":true,"other_evidence_references_changed":false},
+      "release_check":{"exit_code":1,"validated_gates":16,"blocked_gates":1,"source":"validated","corpus":"validated_partial_scope_not_required_real_world_acceptance","release_qualified":false,"production_changed":false},
+      "corpus_boundary":{"passed_trials":63,"failed_trials":0,"blocked_trials":27,"complete":false,"newly_accepted_trials":15,"remaining_task_ids":"U21-U29, three repeats each","u30_already_in_immutable_base":true},
+      "compatibility_inventory":{"compatibility_rust_reference_files":83,"legacy_rust_reference_files":0,"legacy_shadow_binary_files":4,"remaining_python_files":0,"note":"The extra compatibility-name reference is the new Rust test source and does not add Python runtime authority."},
+      "acceptance_boundary":"The fifteen U16-U20 rows are new capable-host executions, not copies of the previously sealed broad Native gate. The v2 aggregate remains deliberately incomplete and the release corpus gate remains blocked. No U21-U29 trial is inferred from Native, browser, copied-state or historical evidence; no production state or selector changed.",
+      "operator_next_step":"Implement and execute U21-U25 as independent research/compiled-proof trials on the exact frozen candidate, with three distinct repetitions per task and strict evidence ingestion. Do not reuse the compiled-LaTeX or retrieval gate receipts as corpus repetitions.",
+      "production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
