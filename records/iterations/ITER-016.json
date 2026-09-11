@@ -3260,6 +3260,15 @@
       "operator_next_step":"At the committed entry run the synthetic conformance tests, then start --task U21 --repeat 1 in a host terminal. Read task.md and the temporary operator key only locally, connect the new disposable endpoint, stop generation at verify and hand off to the independent reviewer. Do not repeat source, Native corpus or copied-state gates for this shell-only delivery. Report only sanitized workflow status or fixed launcher errors; do not upload private logs or credentials.",
       "corpus_boundary":{"passed_trials":63,"failed_trials":0,"blocked_trials":27,"newly_accepted_trials":0,"research_collector_and_release_adapter_implemented":false},
       "production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-RESEARCH-SESSION-SYNTHETIC-GIT-ENVIRONMENT",
+      "status":"synthetic_entry_conformance_independent_of_operator_git_environment",
+      "base_commit":"0becef22068383dd2d0f18917ddf0889d1a7211a",
+      "scope":"Only the newly created conformance Git fixture uses an empty environment/configuration and no hooks/signing. The real checkout's commit hook, author settings and repository configuration are unchanged.",
+      "conformance":{"path":"conformance/mtm016-research-session-tests.sh","before_sha256":"83e6447c50c360cc7b850910cddeca41a176bb63a1b5b84676ccc73d5429f2b5","after_sha256":"a883a80162b7061c6965f16881e13865bc2f3f55ebc2dc25141971237080daf4","exit_code":0,"negative_cases":43,"inherited_git_dir_and_worktree_sentinels_not_created":true,"actual_prepare_entry_passed":true,"exact_candidate_configuration_only_passed":true,"runtime_server_started":false,"research_trials_executed":0,"production_source_accessed":false},
+      "acceptance_boundary":"This removes an avoidable dependency on operator-global Git hooks, signing and repository override environment from the synthetic test. It does not skip the real project's hooks or any release gate, run a proof, test the public tunnel or complete a research evidence collector. The preparation launcher, cases, Rust source, accepted evidence and release-input manifest are byte-unchanged from the previous delivery.",
+      "production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [

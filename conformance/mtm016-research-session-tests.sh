@@ -13,6 +13,12 @@ trap '/usr/bin/rm -rf -- "$tmp"' EXIT
 negative=0
 deny() { if ( "$@" ) > "$tmp/denial.stdout" 2> "$tmp/denial.stderr"; then printf 'RESEARCH_SESSION_TEST_ERROR unexpected_acceptance function=%s\n' "$1" >&2; exit 1; fi; ((negative+=1)); }
 sql() { "$sqlite" -batch -init /dev/null -noheader ':memory:' "$1"; }
+fixture_git() {
+  # Only the new synthetic repository uses this empty configuration. Never
+  # disable the real checkout's hooks or inherit a caller's GIT_DIR/index.
+  /usr/bin/env -i PATH=/usr/bin:/bin "HOME=$tmp/git-home" GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null \
+    /usr/bin/git -c core.hooksPath=/dev/null -c commit.gpgsign=false "$@"
+}
 registry=$repo/conformance/mtm016-research-cases.tsv
 
 for id in U21 U22 U23 U24 U25; do
@@ -139,9 +145,11 @@ cp "$repo/$frozen" "$fixture/$frozen"
 for tool in bwrap curl latexmk pdflatex cloudflared sh cat printf sleep readlink dirname uname; do
   ln -s /usr/bin/true "$tmp/inventory/$tool"
 done
-/usr/bin/git -C "$fixture" init -q
-/usr/bin/git -C "$fixture" add scripts conformance
-/usr/bin/git -C "$fixture" -c user.name='Synthetic test' -c user.email='fixture@example.invalid' commit -qm 'temporary research entry fixture'
+GIT_DIR="$tmp/must-not-be-created" GIT_WORK_TREE="$tmp/must-not-be-used" fixture_git -C "$fixture" init -q
+[[ ! -e $tmp/must-not-be-created && ! -e $tmp/must-not-be-used ]]
+fixture_git -C "$fixture" add scripts conformance
+fixture_git -C "$fixture" -c user.name='Synthetic test' -c user.email='fixture@example.invalid' commit -qm 'temporary research entry fixture'
+printf 'RESEARCH_SESSION_TEST synthetic_git_ignores_inherited_repository_and_signing=passed\n'
 HOME="$fake_home" PATH="$tmp/inventory" /bin/bash "$fixture/scripts/mtm016-research-session.sh" --task U21 --repeat 1 --prepare-only > "$tmp/prepared.stdout"
 session_line=$(/usr/bin/head -n 1 "$tmp/prepared.stdout")
 session=${session_line#private_session=}
