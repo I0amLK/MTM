@@ -87,14 +87,27 @@ rs_tool() {
 
 rs_environment() {
   local session=$1
+  # PATH lookup happens outside the fixed compiler helper. Safe mode deliberately
+  # disables auto-discovery, so expose only these links, not their parent session.
+  [[ $session == /* && $session != *:* && $session != *$'\n'* && $session != *$'\r'* ]] || return 1
   rs_env=(/usr/bin/env -i
     "HOME=$session/home" "PATH=$session/tool-bin" LC_ALL=C LANG=C.UTF-8
     "TMPDIR=$session/tmp" "XDG_CACHE_HOME=$session/home/.cache"
     "MTM_WORKSPACE=$session/workspace" "MTM_DATA_ROOT=$session/data"
     "MTM_PRIVATE_ROOT=$session/data/private" "MTM_DEBUG_ROOT=$session/data/debug"
     MTM_DEBUG=1 MTM_TRACE_PAYLOADS=0 MTM_NATIVE_EXEC_BACKEND=bubblewrap
+    "MTM_NATIVE_EXEC_ALLOW_ROOTS=$session/tool-bin"
     MTM_NATIVE_MODE=safe MTM_LATEX_POLICY=required MTM_WORKFLOW_PROTOCOL_VERSION=3
     TOKIO_WORKER_THREADS=2)
+}
+
+rs_visible_taskcard() {
+  local session=$1 before
+  rs_regular "$session/task.md" 32768 && rs_private_dir "$session/workspace" || return 1
+  [[ ! -e $session/workspace/task.md && ! -L $session/workspace/task.md ]] || return 1
+  before=$(rs_hash "$session/task.md") || return 1
+  (umask 077; set -o noclobber; /usr/bin/cat -- "$session/task.md" > "$session/workspace/task.md") || return 1
+  [[ $(rs_hash "$session/task.md") == "$before" && $(rs_hash "$session/workspace/task.md") == "$before" ]]
 }
 
 rs_snapshot() {
@@ -185,13 +198,14 @@ rs_main() {
   rs_snapshot "$candidate" "$session/candidate" "$RS_CANDIDATE_SHA" || { rs_fail snapshot_mismatch; return 1; }
   rs_manifest "$session/session.json" "$trial" "$commit" "$launcher_hash" "$registry_hash" || { rs_fail manifest; return 1; }
   rs_taskcard "$session/task.md" "$trial" || { rs_fail task_card; return 1; }
+  rs_visible_taskcard "$session" || { rs_fail visible_task_card; return 1; }
   (set -o noclobber; printf '%s\n' "$password" > "$session/operator-key.txt")
   printf 'private_session=%s\n' "$session"
   /usr/bin/cat -- "$session/session.json"
   printf '\n本机查看任务卡：cat %q\n本机查看本次 OAuth key：cat %q\n不要上传 key、URL 或原始日志。\n' "$session/task.md" "$session/operator-key.txt"
   [[ $rs_prepare_only == false ]] || return 0
-  before=$(/usr/bin/sha256sum -- "$script" "$registry" "$corpus" "$candidate" "$session/candidate")
-  rs_environment "$session"
+  before=$(/usr/bin/sha256sum -- "$script" "$registry" "$corpus" "$candidate" "$session/candidate" "$session/task.md" "$session/workspace/task.md")
+  rs_environment "$session" || { rs_fail session_path_encoding; return 1; }
   # Exact CLI attestation precedes the public tunnel. Only new disposable state
   # roots are configured; no production path is accepted or discovered.
   if ! /usr/bin/timeout --signal=TERM --kill-after=3s 20s "${rs_env[@]}" "$session/candidate" attest-native --workspace "$session/workspace" --native-mode safe --latex-policy required > "$session/native-preflight.json" 2> "$session/native-preflight.stderr"; then
@@ -203,7 +217,7 @@ rs_main() {
   pipe_status=("${PIPESTATUS[@]}")
   set -e
   password=
-  after=$(/usr/bin/sha256sum -- "$script" "$registry" "$corpus" "$candidate" "$session/candidate")
+  after=$(/usr/bin/sha256sum -- "$script" "$registry" "$corpus" "$candidate" "$session/candidate" "$session/task.md" "$session/workspace/task.md")
   [[ $before == "$after" && $commit == "$(/usr/bin/git -C "$repo" rev-parse HEAD)" ]] || { rs_fail session_input_changed; return 1; }
   [[ ${#pipe_status[@]} == 2 && ${pipe_status[1]} == 0 ]] || { rs_fail log_capture_failed; return 1; }
   rc=${pipe_status[0]}

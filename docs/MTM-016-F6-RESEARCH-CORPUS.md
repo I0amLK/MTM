@@ -80,6 +80,15 @@ Sage and Magma. `Native=safe`, `LaTeX=required`, workflow protocol 3 and disable
 payload tracing are explicit. Native CLI attestation runs before the tunnel;
 failure retains private diagnostics and stops without retry or fallback.
 
+Safe mode does not auto-discover the foreground process's PATH directories.
+The launcher now declares only the new session's `tool-bin` as an explicit
+read-only tool root. It never declares the parent session, HOME, data or private
+directory. This is necessary because the fixed compiler helper receives the
+absolute alias found on the foreground PATH; an unmounted alias can fail even
+when `/usr/bin/latexmk` works. This change does not enable host-PATH inheritance,
+change Native modes or disable the required compilation gate. Non-system CAS
+dependencies remain a separate U25 prerequisite, not acceptance from this repair.
+
 The TUI is a foreground host process, not an additional outer OS sandbox. Its
 Native commands and LaTeX retain the existing candidate's isolation. Do not infer
 that the TUI itself has no host filesystem privileges. Disposable configured
@@ -92,6 +101,9 @@ read `task.md` and `operator-key.txt`. The latter is mode 0600 and is the passwo
 for this session's OAuth page; `configured externally` refers to that key. Read
 it in a second local terminal. It is not printed by the script or included in the
 public manifest. Only the newly displayed tunnel URL is used in the real client.
+A byte-identical, no-clobber copy of `task.md` is now published in the disposable
+workspace so a client can read the prescribed case ID and handoff rules. The
+operator key and session manifest remain outside that writable workspace.
 Do not paste the URL, key, credentials or raw operator log into a conversation.
 If the TUI reports an unavailable tunnel or the client denies a call, stop and
 retain that observation; do not route around the failed authorization path.
@@ -123,3 +135,45 @@ scope; existing source/Native/copy gates need not be rerun for this launcher.
 Future Rust collector changes will require their own source check. U26-U29 and
 the complete research importer remain explicitly unfinished. The current corpus
 aggregate deliberately continues to reject complete/release claims.
+
+## Recovery of the first U21-r1 compiler-path interruption
+
+The operator reported an accepted assembly entering `repair` before verification.
+Read-only inspection confirmed `repair`, sequence 4, no pending submission,
+no verdict and no sealing. A direct `/usr/bin/latexmk -v` worked on the actual
+research connection, while its private tool-bin alias was not executable in the
+Native namespace. The original task card was outside the workspace. These are
+launcher-path defects, not a mathematical verifier finding or missing host package.
+
+The new host regression first checks Native prerequisites and then calls the
+frozen candidate's fixed compiler helper on harmless synthetic TeX. It checks
+failure without the alias root and successful compilation with that one read-only
+root, while retaining safe network isolation and private-vault exclusion. It does
+not launch a workflow, certify mathematics or use the operator's real state.
+
+`scripts/mtm016-resume-research-session.sh` accepts an explicit stopped U21-r1
+session made by the original launcher at `1d1fcb7`, an explicit SQLite CLI for
+reading its preparation JSON, and `--operator-confirmed-stopped`. It does not
+search for the latest session. It checks all twenty manifest fields, exact
+artifact/case identities, private directories, the saved key and original log.
+`--check-only` performs metadata validation without starting a runtime or writing
+the session. The foreground recovery requires a terminal, uses an exclusive
+recovery lock and additionally refuses a visible running candidate at that path;
+this does not replace the operator's stopped-service confirmation.
+
+It preserves the original state roots, candidate, key, preparation receipt and
+failure log. New logs/observations go to `compiler-recovery.XXXXXXXX`. It only
+adds the missing public task card and restarts the same candidate with the narrow
+tool root. It never reads a workflow database directly, creates a run, submits
+proofs, edits an owner or certifies success. After reconnect, inspect the existing
+run first. If the client registers a different owner or reports RUN_OWNER_MISMATCH,
+stop; reusing state and keys does not guarantee that a web client preserves its
+OAuth registration when a quick-tunnel URL changes. Do not alter database owners.
+
+The original run used a different problem_id from the task card's prescribed
+case_id. Retain that procedural discrepancy and the infrastructure failure in
+future collection; never rename the database record or silently credit the trial.
+No mathematical review has taken place in this maintenance conversation. Once
+connected as the original owner, use the current repair task (not the consumed
+assembly submission) to retry compilation, and stop at verify for a separate
+reviewer. This infrastructure repair does not count as U23's seeded logical gap.

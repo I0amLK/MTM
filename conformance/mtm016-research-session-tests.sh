@@ -102,8 +102,21 @@ grep -Fx "HOME=$tmp/private/home" "$tmp/child-environment" > /dev/null
 grep -Fx "MTM_DATA_ROOT=$tmp/private/data" "$tmp/child-environment" > /dev/null
 grep -Fx 'MTM_NATIVE_MODE=safe' "$tmp/child-environment" > /dev/null
 grep -Fx 'MTM_LATEX_POLICY=required' "$tmp/child-environment" > /dev/null
+grep -Fx "MTM_NATIVE_EXEC_ALLOW_ROOTS=$tmp/private/tool-bin" "$tmp/child-environment" > /dev/null
 if grep -E 'never-use|synthetic-test|MTM_TOKEN_SECRET|MTM_OAUTH_PASSWORD|MTM_CAPABILITY_SECRET' "$tmp/child-environment" > /dev/null; then exit 1; fi
 printf 'RESEARCH_SESSION_TEST inherited_roots_and_secrets_removed=passed\n'
+deny rs_environment '/tmp/session:another-root'
+deny rs_environment $'/tmp/session\nextra'
+deny rs_environment relative
+mkdir -m 700 "$tmp/card-session" "$tmp/card-session/workspace"
+printf '%s\n' 'Public input, no credential.' > "$tmp/card-session/task.md"
+rs_visible_taskcard "$tmp/card-session"
+cmp "$tmp/card-session/task.md" "$tmp/card-session/workspace/task.md"
+deny rs_visible_taskcard "$tmp/card-session"
+rm "$tmp/card-session/workspace/task.md"
+ln -s "$tmp/card-session/task.md" "$tmp/card-session/workspace/task.md"
+deny rs_visible_taskcard "$tmp/card-session"
+printf 'RESEARCH_SESSION_TEST visible_task_no_clobber_and_single_tool_root=passed\n'
 
 rs_args --task U21 --repeat 1 --prepare-only
 rs_registry "$registry" U21 1
@@ -157,6 +170,8 @@ session=${session_line#private_session=}
 rs_private_dir "$session"
 [[ $(stat -c %a "$session/operator-key.txt") == 600 && ! -e $session/operator.log && ! -e $session/close.json ]]
 [[ $(rs_hash "$session/candidate") == "$RS_CANDIDATE_SHA" ]]
+[[ -f $session/workspace/task.md && ! -L $session/workspace/task.md ]]
+[[ $(rs_hash "$session/task.md") == "$(rs_hash "$session/workspace/task.md")" ]]
 IFS= read -r fixture_key < "$session/operator-key.txt"
 [[ $fixture_key =~ ^[0-9a-f]{64}$ ]]
 if grep -Fq "$fixture_key" "$tmp/prepared.stdout"; then exit 1; fi
@@ -183,4 +198,32 @@ shopt -s nullglob
 sessions=("$fake_home"/.mtm-acceptance/MTM-016/research/*)
 [[ ${#sessions[@]} == 1 ]]
 printf 'RESEARCH_SESSION_TEST changed_inputs_and_missing_tool_stop_before_new_session=passed\n'
+source "$repo/scripts/mtm016-resume-research-session.sh"
+rs_args --task U21 --repeat 1 --prepare-only
+rs_registry "$registry" U21 1
+rs_manifest "$tmp/resume-good.json" "$trial" 1d1fcb737039b10ae0dea1683a8ccaf90c296941 e4e2a30175976c7bd1db7874db12699d5589203b381248036829c488db7a2b91 "$RS_CASES_SHA"
+rr_metadata "$tmp/resume-good.json" "$sqlite"
+for field in schema milestone task_id repeat case_id workflow_mode trial_id candidate_sha256 candidate_source_commit launcher_source_commit launcher_sha256 case_registry_sha256 corpus_sha256 native_mode latex_policy session_prepared runtime_executed independent_review_recorded research_trial_passed release_qualified; do
+  sql "SELECT json_remove(CAST(readfile('$tmp/resume-good.json') AS TEXT),'\$.$field');" > "$tmp/resume-bad.json"
+  deny rr_metadata "$tmp/resume-bad.json" "$sqlite"
+done
+for mutation in "'\$.extra',1" "'\$.repeat',1.0" "'\$.repeat',2" "'\$.session_prepared',1" "'\$.runtime_executed',json('true')" "'\$.trial_id','../../escape'" "'\$.candidate_sha256','unknown'" "'\$.native_mode','dangerous'" "'\$.latex_policy','static_only'" "'\$.research_trial_passed',json('true')"; do
+  sql "SELECT json_set(CAST(readfile('$tmp/resume-good.json') AS TEXT),$mutation);" > "$tmp/resume-bad.json"
+  deny rr_metadata "$tmp/resume-bad.json" "$sqlite"
+done
+sed 's/"repeat":1/"repeat":1,"repeat":1/' "$tmp/resume-good.json" > "$tmp/resume-bad.json"
+deny rr_metadata "$tmp/resume-bad.json" "$sqlite"
+printf 'broken' > "$tmp/resume-bad.json"
+deny rr_metadata "$tmp/resume-bad.json" "$sqlite"
+deny rr_main --session /never-read-production --sqlite "$sqlite" --operator-confirmed-stopped --check-only
+deny rr_main --session "$session" --sqlite "$sqlite"
+# A synthetic historical manifest is used only to test read-only validation;
+# no assertion that these temporary files contain an executed research run.
+cp "$tmp/resume-good.json" "$session/session.json"
+printf '%s\n' 'Synthetic previous log.' > "$session/operator.log"
+before_resume=$(sha256sum "$session/session.json" "$session/candidate" "$session/operator-key.txt" "$session/operator.log" "$session/task.md")
+HOME="$fake_home" rr_main --session "$session" --sqlite "$sqlite" --operator-confirmed-stopped --check-only
+[[ $(sha256sum "$session/session.json" "$session/candidate" "$session/operator-key.txt" "$session/operator.log" "$session/task.md") == "$before_resume" ]]
+[[ ! -e $session/research-resume.lock ]]
+printf 'RESEARCH_SESSION_TEST stopped_session_metadata_strict_and_check_only_readonly=passed\n'
 printf 'RESEARCH_SESSION_TEST negative_cases=%s production_source_accessed=false runtime_config_only=true runtime_server_started=false research_trials_executed=0 tunnel_started=false\n' "$negative"
