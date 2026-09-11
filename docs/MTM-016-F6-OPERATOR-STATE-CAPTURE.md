@@ -64,6 +64,40 @@ counts, never the rejected path or private content. Current categories are
 completed (for example because an entry is not traversable); it never prints the
 entry path. These diagnostics do not relax the bound or trigger a retry.
 
+### Corrected classifier dependency and source-free host check
+
+Repeated `stage=source_bounds` without a bound reason does not prove a filesystem
+limit or a failed `find`. Review after `00c424c` identified a separate concrete
+dependency defect: on the observed system `/usr/bin/awk` points through
+`/etc/alternatives/awk` to `/usr/bin/mawk`. The capture namespace binds `/usr` but
+creates an otherwise empty `/etc` (apart from `ld.so.cache`), so the generic awk
+link cannot resolve there. The earlier primitive tests ran outside that namespace
+and missed this. The original private host stderr has not been re-read; do not
+claim its exact error text was observed or infer anything about source contents.
+
+The namespace constructor now resolves the selected system awk before entry and
+binds that one regular executable read-only at `/capture-awk`. It does not expose
+`/etc/alternatives` or the rest of `/etc`. The internal entry exercises the bound
+interpreter before scanning any source metadata. Missing and failed classifiers
+produce fixed `classifier_unavailable` and `classifier_execution_error` categories
+rather than being reported as tree violations; original limits remain unchanged.
+
+Before another production capture, run the complete source-free host check:
+
+```sh
+bash conformance/mtm016-operator-capture-tests.sh --host-isolation
+```
+
+This creates synthetic files in its own temporary directory and uses the exact
+same namespace constructor and internal capture entry. It verifies an identical
+read-only archived copy and an unsafe-link rejection before archive creation.
+It prints only fixed diagnostics and booleans, including whether the old generic
+awk link is executable inside the namespace. It never selects `$HOME/.mtm`, mounts
+production data, opens SQLite, stops a production service, or counts as copied-state
+acceptance. A namespace failure fails the check; it is not silently skipped.
+Only after this check passes should the separately authorized production capture
+be considered again. Keep previous private failure sessions unchanged.
+
 Two identical source streams show observed byte stability, not a transactional
 multi-database snapshot or proof that a live writer was stopped. Before use, verify
 SQLite recovery/integrity on a separate extracted working copy, retain the original

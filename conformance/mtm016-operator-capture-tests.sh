@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Transport-only regressions on self-created disposable bytes, never real state.
 set -euo pipefail
+[[ $# == 0 || ( $# == 1 && $1 == --host-isolation ) ]] || {
+  printf 'TRANSPORT_TEST invalid_arguments\n' >&2; exit 1
+}
+host_isolation=${1-}
 repo=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)
 script=$repo/scripts/mtm016-capture-operator-state.sh
 source "$script"
@@ -85,9 +89,60 @@ fi
 grep -qx 'MTM_COPY_BOUND_FAIL reason=source_scan_error entries=0 bytes=0' "$root/scan-error.log"
 printf 'TRANSPORT_TEST source_scan_error_category=passed\n'
 
+# The former code always invoked /usr/bin/awk. Primitive tests on the host
+# therefore missed a broken alternatives link inside the capture namespace.
+/usr/bin/ln -s "$root/absent-alternatives/awk" "$root/broken-awk"
+if (mtm_capture_awk=$root/broken-awk; mtm_copy_tree_bounds "$root/tree") > "$root/awk-out" 2> "$root/awk-error"; then
+  printf 'TRANSPORT_TEST unavailable_classifier_unexpectedly_accepted\n' >&2; exit 1
+fi
+[[ ! -s $root/awk-out ]]
+grep -qx 'MTM_COPY_BOUND_FAIL reason=classifier_unavailable entries=0 bytes=0' "$root/awk-error"
+if (mtm_capture_awk=/usr/bin/false; mtm_copy_tree_bounds "$root/tree") > "$root/awk-out" 2> "$root/awk-error"; then
+  printf 'TRANSPORT_TEST failed_classifier_unexpectedly_accepted\n' >&2; exit 1
+fi
+[[ ! -s $root/awk-out ]]
+grep -qx 'MTM_COPY_BOUND_FAIL reason=classifier_execution_error entries=0 bytes=0' "$root/awk-error"
+canonical_awk=$(/usr/bin/readlink -e /usr/bin/awk)
+(mtm_capture_awk=$canonical_awk; mtm_copy_tree_bounds "$root/tree") > "$root/canonical-bounds"
+mtm_copy_tree_bounds "$root/tree" > "$root/default-bounds"
+/usr/bin/cmp -s "$root/canonical-bounds" "$root/default-bounds"
+printf 'TRANSPORT_TEST classifier_missing_failed_and_canonical=passed\n'
+
 if /bin/bash "$script" > "$root/invalid.log" 2>&1; then exit 1; fi
 if /usr/bin/env HOME="$root/home" /bin/bash "$script" --source "$root/missing" --operator-confirmed-quiescent > "$root/missing.log" 2>&1; then exit 1; fi
 [[ ! -e $root/home/.mtm-acceptance ]]
 if /bin/bash "$script" --internal-readonly-capture > "$root/unguarded.log" 2>&1; then exit 1; fi
 printf 'TRANSPORT_TEST malformed_missing_source_and_missing_ro_mount_rejected=passed\n'
-printf 'TRANSPORT_TEST production_source_accessed=false full_host_capture_tested=false\n'
+if [[ $host_isolation == --host-isolation ]]; then
+  # Same namespace constructor and internal entry as real capture. Only this
+  # test's self-created tree and output directories can be supplied here.
+  /usr/bin/mkdir -m 700 "$root/isolated-good" "$root/isolated-bad"
+  isolated_rc=0
+  mtm_copy_isolated_capture "$root/tree" "$root/isolated-good" "$script" > "$root/host-out" 2> "$root/host-error" || isolated_rc=$?
+  if (( isolated_rc != 0 )); then
+    printf 'TRANSPORT_TEST isolated_capture=failed production_source_accessed=false\n' >&2
+    printf 'TRANSPORT_TEST isolated_exit_code=%s\n' "$isolated_rc" >&2
+    if /usr/bin/grep -Fq 'bwrap: Creating new namespace failed:' "$root/host-error"; then
+      printf 'TRANSPORT_TEST namespace_setup=failed\n' >&2
+    fi
+    /usr/bin/grep -E '^MTM_COPY_(DIAGNOSTIC stage=[a-z_]+|BOUND_FAIL reason=[a-z_]+ entries=[0-9]+ bytes=[0-9]+|CAPTURE_ERROR [a-z_]+)$' "$root/host-error" >&2 || true
+    exit 1
+  fi
+  (cd "$root/isolated-good"; /usr/bin/sha256sum --check --status archive.sha256)
+  grep -q '"capture_complete":true' "$root/isolated-good/capture-summary.json"
+  [[ $(/usr/bin/stat -c %a "$root/isolated-good/preupgrade.tar") == 400 ]]
+  mtm_copy_archive "$root/tree" > "$root/host-source.tar"
+  /usr/bin/cmp -s "$root/host-source.tar" "$root/isolated-good/preupgrade.tar"
+  /usr/bin/grep -E '^MTM_COPY_TOOLCHAIN awk_functional=true legacy_awk_visible=(true|false)$' "$root/host-out"
+  /usr/bin/ln -s oauth.sqlite3 "$root/tree/rejected-link"
+  if mtm_copy_isolated_capture "$root/tree" "$root/isolated-bad" "$script" > "$root/host-bad-out" 2> "$root/host-bad-error"; then
+    printf 'TRANSPORT_TEST isolated_unsafe_tree_unexpectedly_accepted\n' >&2; exit 1
+  fi
+  grep -qx 'MTM_COPY_BOUND_FAIL reason=unsupported_file_type entries=[0-9][0-9]* bytes=[0-9][0-9]*' "$root/host-bad-error"
+  [[ ! -e $root/isolated-bad/preupgrade.partial.tar && ! -e $root/isolated-bad/preupgrade.tar && ! -e $root/isolated-bad/capture-summary.json ]]
+  printf 'TRANSPORT_TEST isolated_capture_and_exact_archive=passed\n'
+  printf 'TRANSPORT_TEST isolated_unsafe_tree_denial_before_archive=passed\n'
+  printf 'TRANSPORT_TEST production_source_accessed=false full_host_capture_tested=true synthetic_only=true\n'
+else
+  printf 'TRANSPORT_TEST production_source_accessed=false full_host_capture_tested=false\n'
+fi

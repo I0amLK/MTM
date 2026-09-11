@@ -4,11 +4,18 @@
 set -euo pipefail
 umask 077
 export LC_ALL=C
+# Never inherit an interpreter selection from the operator environment. Sourced
+# fixture tests use the host tool; the isolated entry uses one explicit RO bind.
+mtm_capture_awk=/usr/bin/awk
 
 fail() { printf 'MTM_COPY_CAPTURE_ERROR %s\n' "$1" >&2; exit 1; }
 
 mtm_copy_tree_bounds() {
-  local scan
+  local scan classifier_rc
+  if [[ ! -f $mtm_capture_awk || ! -x $mtm_capture_awk ]]; then
+    printf 'MTM_COPY_BOUND_FAIL reason=classifier_unavailable entries=0 bytes=0\n' >&2
+    return 1
+  fi
   scan=$(/usr/bin/mktemp /tmp/mtm-tree-bounds.XXXXXXXX) || {
     printf 'MTM_COPY_BOUND_FAIL reason=source_scan_error entries=0 bytes=0\n' >&2
     return 1
@@ -18,13 +25,13 @@ mtm_copy_tree_bounds() {
     /usr/bin/rm -f -- "$scan"
     return 1
   fi
-  if ! /usr/bin/awk '
+  if "$mtm_capture_awk" '
       function reject(reason) {
         if (!failed) {
           printf "MTM_COPY_BOUND_FAIL reason=%s entries=%d bytes=%.0f\n", reason, n, total > "/dev/stderr"
         }
         failed=1
-        exit 1
+        exit 10
       }
       NR == 1 { device=$6 }
       {
@@ -43,6 +50,14 @@ mtm_copy_tree_bounds() {
       }
       END { if(!failed) printf "%d %.0f\n", n, total }
     ' "$scan"; then
+    :
+  else
+    classifier_rc=$?
+    # Exit 10 means the classifier already emitted a fixed metadata rejection.
+    # Missing loaders, execution errors and parser crashes are NOT tree bounds.
+    if (( classifier_rc != 10 )); then
+      printf 'MTM_COPY_BOUND_FAIL reason=classifier_execution_error entries=0 bytes=0\n' >&2
+    fi
     /usr/bin/rm -f -- "$scan"
     return 1
   fi
@@ -73,14 +88,44 @@ mtm_mount_is_readonly() {
   mtm_vfs_options_are_readonly "$options"
 }
 
+mtm_copy_isolated_capture() {
+  local source=$1 destination=$2 helper=$3 awk_executable
+  # /usr/bin/awk can point through /etc/alternatives, which is deliberately
+  # absent from this namespace. Bind its resolved system executable, not /etc.
+  awk_executable=$(/usr/bin/readlink -e /usr/bin/awk) || {
+    printf 'MTM_COPY_CAPTURE_ERROR capture_awk_unavailable\n' >&2; return 1
+  }
+  [[ $awk_executable == /usr/bin/* && -f $awk_executable && -x $awk_executable && ! -L $awk_executable ]] || {
+    printf 'MTM_COPY_CAPTURE_ERROR capture_awk_invalid\n' >&2; return 1
+  }
+  /usr/bin/timeout --signal=TERM --kill-after=5s 180s \
+    /usr/bin/bwrap --unshare-all --new-session --die-with-parent --cap-drop ALL \
+      --ro-bind /usr /usr --ro-bind /bin /bin --ro-bind /lib /lib \
+      --ro-bind-try /lib64 /lib64 --dir /etc --ro-bind-try /etc/ld.so.cache /etc/ld.so.cache \
+      --ro-bind "$awk_executable" /capture-awk \
+      --ro-bind "$source" /source --bind "$destination" /capture \
+      --ro-bind "$helper" /capture-script --tmpfs /tmp --proc /proc --dev /dev \
+      --chdir /capture --clearenv --setenv PATH /usr/bin:/bin --setenv LC_ALL C \
+      /bin/bash --noprofile --norc /capture-script --internal-readonly-capture
+}
+
 # Sourcing loads only transport primitives for disposable-fixture tests.
 # The actual host entry always requires explicit source selection and a RO mount.
 if [[ ${BASH_SOURCE[0]} != "$0" ]]; then return 0; fi
 
 if [[ ${1-} == --internal-readonly-capture ]]; then
   [[ $# == 1 ]] || fail invalid_internal_arguments
-  stage=readonly_mount_options
+  stage=capture_tools
   trap 'rc=$?; if (( rc != 0 )); then printf "MTM_COPY_DIAGNOSTIC stage=%s\n" "$stage" >&2; fi' EXIT
+  mtm_capture_awk=/capture-awk
+  [[ -f $mtm_capture_awk && -x $mtm_capture_awk ]] || fail capture_awk_unavailable
+  if ! awk_probe=$("$mtm_capture_awk" 'BEGIN { print 6*7 }') || [[ $awk_probe != 42 ]]; then
+    fail capture_awk_probe_failed
+  fi
+  legacy_awk_visible=false
+  if [[ -x /usr/bin/awk ]]; then legacy_awk_visible=true; fi
+  printf 'MTM_COPY_TOOLCHAIN awk_functional=true legacy_awk_visible=%s\n' "$legacy_awk_visible"
+  stage=readonly_mount_options
   mtm_mount_is_readonly /source
   stage=readonly_mount_layout
   [[ -f /source/oauth.sqlite3 && -f /source/private/state.sqlite3 ]]
@@ -147,17 +192,11 @@ done
 session=$(/usr/bin/mktemp -d -- "$parent/copied-state.XXXXXXXX")
 # Keep failure diagnostics private too. No live-service stop, process attachment,
 # /proc/<other-pid>/root access or alternative path into the hidden Native vault.
-if ! /usr/bin/timeout --signal=TERM --kill-after=5s 180s \
-  /usr/bin/bwrap --unshare-all --new-session --die-with-parent --cap-drop ALL \
-    --ro-bind /usr /usr --ro-bind /bin /bin --ro-bind /lib /lib \
-    --ro-bind-try /lib64 /lib64 --dir /etc --ro-bind-try /etc/ld.so.cache /etc/ld.so.cache \
-    --ro-bind "$source" /source --bind "$session" /capture \
-    --ro-bind "$script" /capture-script --tmpfs /tmp --proc /proc --dev /dev \
-    --chdir /capture --clearenv --setenv PATH /usr/bin:/bin --setenv LC_ALL C \
-    /bin/bash --noprofile --norc /capture-script --internal-readonly-capture \
+if ! mtm_copy_isolated_capture "$source" "$session" "$script" \
     > "$session/process.stdout" 2> "$session/process.stderr"; then
   printf 'capture_complete=false\nprivate_session=%s\n' "$session"
-  /usr/bin/grep -E '^MTM_COPY_BOUND_FAIL reason=(source_scan_error|entry_limit|depth_limit|cross_device|special_mode|unsupported_file_type|regular_file_hardlink|single_file_size|total_file_size) entries=[0-9]+ bytes=[0-9]+$' "$session/process.stderr" || true
+  /usr/bin/grep -E '^MTM_COPY_CAPTURE_ERROR capture_awk_(unavailable|invalid|probe_failed)$' "$session/process.stderr" || true
+  /usr/bin/grep -E '^MTM_COPY_BOUND_FAIL reason=(classifier_unavailable|classifier_execution_error|source_scan_error|entry_limit|depth_limit|cross_device|special_mode|unsupported_file_type|regular_file_hardlink|single_file_size|total_file_size) entries=[0-9]+ bytes=[0-9]+$' "$session/process.stderr" || true
   /usr/bin/grep -E '^MTM_COPY_DIAGNOSTIC stage=[a-z_]+$' "$session/process.stderr" || true
   fail capture_failed_private_diagnostics_retained_no_retry
 fi
