@@ -3005,6 +3005,27 @@
       "acceptance_boundary":"The new capable-host full source command and exact paired resource profile passed at a stable commit after the documented host/tool cache separation. The prior source failure has the same raw source hash and remains failed; earlier uploaded logs are not reused as this run's individual test counts. Resource acceptance is limited to the declared fixed public workload, sample counts, process sampling and unchanged bounds. The candidate startup measurements are higher than the baseline, even though all declared bounds pass; lower observed RSS and nearly equal request P95 are not A6 performance claims. Fixed pending notices in raw reports are not the live release aggregate. Neither the three resource starts nor previously sealed qualification profiles supply missing independent corpus repeats, real browser/human observations, or authorized production-state-copy evidence. No installation or production-state authority is granted.",
       "operator_next_step":"Proceed to exact-candidate real-browser and independent-human acceptance, operator-authorized copied-state upgrade/resume/rollback, and independently recorded remaining corpus trials. Do not repeat successful source/resource gates while their source and artifact identities remain unchanged. Do not open or mutate production state merely to prepare the next plan.",
       "production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"product_or_harness_source_changed":false,"performance_claim":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-BROWSER-HUMAN-REAL-CLIENT-DELIVERY",
+      "status":"browser_human_gate_validated_copied_state_and_corpus_pending",
+      "harness_commit":"e9d12f1ea89eb7f07bd183bbe3112725f81d5f80",
+      "candidate_source_commit":"cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+      "candidate_sha256":"46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+      "operator_confirmed_real_browser":true,
+      "operator_confirmed_manual_authorize":true,
+      "operator_confirmed_independent_observer":true,
+      "operator_confirmed_five_compact_runs_done_correct":true,
+      "accepted_session_log_sha256":"be498dcc12af8912c8f719e48e559e9b0db6eca1c1b44e2d5f1f15d532e70e1c",
+      "paired_roundtrips":15,
+      "capability_invalid_count":0,
+      "submission_rejection_count":0,
+      "rethlas_start_done":5,
+      "rethlas_step_done":20,
+      "rethlas_step_error":0,
+      "sealed_reports":[{"path":"records/evidence/MTM-016/candidate-browser-human-f6-e9d12f1.json","sha256":"1497d2c304856632b6f9dda16c6f682efd4fa8fbd62b256414f04606bf2ac1bb","passed":true},{"path":"records/evidence/MTM-016/release-check-f6-browser-human-e9d12f1.json","sha256":"da5b687a15fcea87db0bdc163377a9a7758c2174b3c58b839bc23fa9d2022d2c","passed":false}],
+      "release_readiness":{"validated_gates":15,"blocked_gates":2,"browser_human":"validated","remaining_gates":["copied_operator_state","corpus"],"release_check_exit_code":1,"release_qualified":false},
+      "production_changed":false,"frozen_candidate_changed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
