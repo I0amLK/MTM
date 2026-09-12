@@ -23,6 +23,8 @@ mod records;
 #[cfg(target_os = "linux")]
 mod release_check;
 #[cfg(target_os = "linux")]
+mod research_collect;
+#[cfg(target_os = "linux")]
 mod research_precheck;
 mod retirement;
 
@@ -58,6 +60,15 @@ fn run() -> Result<()> {
         .map_or(("help", &[][..]), |(name, tail)| (name.as_str(), tail));
     if name == "commit-message" {
         return commit_message::run(options);
+    }
+    #[cfg(target_os = "linux")]
+    if name == "research-collect" {
+        let options = research_collect::Options::parse(options)?;
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&research_collect::run(&root, &options)?)?
+        );
+        return Ok(());
     }
     #[cfg(target_os = "linux")]
     if name == "research-precheck" {
@@ -227,6 +238,9 @@ fn run() -> Result<()> {
             }
         }
         "help" | "--help" | "-h" => {
+            println!(
+                "cargo xtask research-collect --session <absolute-private-session> --run-id <run-id>\n  Create and precheck a private evidence bundle from one sealed disposable research run; NOT corpus acceptance."
+            );
             println!(
                 "cargo xtask research-precheck --bundle <absolute-private-directory>\n  Read-only evidence integrity/checklist, NOT mathematical acceptance or corpus import."
             );

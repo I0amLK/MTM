@@ -26,6 +26,13 @@ Every successful inventory, including a fully populated synthetic fixture,
 explicitly keeps `research_trial_passed=false`, `accepted_trials_delta=0`,
 `release_qualified=false` and `manual_validation_required=true`.
 
+The normal producer for a sealed real run is the host-side Rust collector in
+`docs/MTM-016-F6-RESEARCH-COLLECTOR.md`. Precheck remains independently callable
+for synthetic/negative fixtures, but a release-bound real trial must not be
+assembled by hand from guessed server facts. The collector invokes this same
+precheck before publishing its private bundle and still receives no acceptance or
+release authority.
+
 ## Private bundle boundary
 
 Select one explicit directory with mode 0700. Keep real research bundles outside

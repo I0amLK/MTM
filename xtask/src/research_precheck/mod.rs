@@ -13,10 +13,13 @@ mod files;
 #[cfg(test)]
 mod tests;
 
-const CANDIDATE_SHA: &str = "46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724";
-const CANDIDATE_SOURCE: &str = "cc17b1688a2deda7db3dde4b2dbf63199bf48b13";
-const CORPUS_SHA: &str = "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861";
-const REGISTRY_SHA: &str = "cd6d6a758e667fca21d2a04d2eba9a015c1d156350b34438660dd8bd16ae1bb9";
+pub(crate) const CANDIDATE_SHA: &str =
+    "46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724";
+pub(crate) const CANDIDATE_SOURCE: &str = "cc17b1688a2deda7db3dde4b2dbf63199bf48b13";
+pub(crate) const CORPUS_SHA: &str =
+    "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861";
+pub(crate) const REGISTRY_SHA: &str =
+    "cd6d6a758e667fca21d2a04d2eba9a015c1d156350b34438660dd8bd16ae1bb9";
 const JSON_LIMIT: u64 = 1024 * 1024;
 const FILE_LIMIT: u64 = 4 * 1024 * 1024;
 const TOTAL_LIMIT: usize = 32 * 1024 * 1024;
@@ -300,6 +303,10 @@ fn inspect(directory: &files::Directory, registry: &[u8]) -> Result<Value> {
 }
 
 pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
+    validate_bundle(root, &options.bundle)
+}
+
+pub(crate) fn validate_bundle(root: &Path, bundle: &Path) -> Result<Value> {
     let registry = records::read_bytes(root, "conformance/mtm016-research-cases.tsv", 32768)
         .map_err(|_| "frozen research registry unavailable")?;
     let corpus = records::read_bytes(root, "conformance/mtm016-usability-corpus.json", 65536)
@@ -312,7 +319,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         qualify::digest(&candidate)? == CANDIDATE_SHA,
         "selected candidate digest mismatch",
     )?;
-    let mut report = inspect(&files::Directory::open(&options.bundle)?, &registry)?;
+    let mut report = inspect(&files::Directory::open(bundle)?, &registry)?;
     report["selected_candidate_bytes_checked"] = json!(true);
     report["candidate_sha256"] = json!(CANDIDATE_SHA);
     // This is not an attestation that a running process used those bytes.

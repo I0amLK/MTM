@@ -153,6 +153,13 @@ receipts exist, the active corpus remains 63 passed / 0 failed / 27 blocked. A
 future complete research batch advances only to the deliberately partial 78/12
 boundary; U26-U29 remain independently required.
 
+The host-side bridge from one sealed private session into the precheck format is
+`docs/MTM-016-F6-RESEARCH-COLLECTOR.md`. It is intentionally unable to run through
+the connected maintenance Native sandbox because that sandbox does not expose the
+private acceptance-session root. Do not widen Native mounts for collection. Run
+the collector from the host checkout against the explicit disposable session and
+retain its bundle under that private session rather than repository evidence.
+
 ### Exact-session stop and interrupted-session recovery
 
 If a foreground research TUI or an internal `__native-helper` remains after an
