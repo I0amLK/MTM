@@ -16,6 +16,7 @@ mod tests;
 pub(crate) const CANDIDATE_SHA: &str =
     "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034";
 pub(crate) const CANDIDATE_SOURCE: &str = "c67484319f12c458cd25c538e35bbb25023915a5";
+const CANDIDATE_STAGE: &str = "mtm016-f6-frozen";
 pub(crate) const CORPUS_SHA: &str =
     "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861";
 pub(crate) const REGISTRY_SHA: &str =
@@ -313,7 +314,7 @@ pub(crate) fn validate_bundle(root: &Path, bundle: &Path) -> Result<Value> {
         .map_err(|_| "frozen research corpus unavailable")?;
     require(hash(&corpus) == CORPUS_SHA, "research corpus hash mismatch")?;
     let candidate = root.join(format!(
-        "target/mtm016-f5-frozen/mtm-0.6.0-preview.1-{CANDIDATE_SHA}/mtm"
+        "target/{CANDIDATE_STAGE}/mtm-0.6.0-preview.1-{CANDIDATE_SHA}/mtm"
     ));
     require(
         qualify::digest(&candidate)? == CANDIDATE_SHA,

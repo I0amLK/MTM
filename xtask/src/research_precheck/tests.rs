@@ -17,6 +17,7 @@ fn frozen_research_identity_matches_selected_release_candidate() -> Result<()> {
     let manifest: Value = serde_json::from_str(RELEASE_INPUTS)?;
     assert_eq!(manifest["candidate_sha256"], CANDIDATE_SHA);
     assert_eq!(manifest["candidate_source_commit"], CANDIDATE_SOURCE);
+    assert_eq!(CANDIDATE_STAGE, "mtm016-f6-frozen");
     Ok(())
 }
 
@@ -680,7 +681,7 @@ fn command_options_and_pinned_inputs_cannot_be_overridden() -> Result<()> {
         CORPUS,
     )?;
     let binary = root.path().join(format!(
-        "target/mtm016-f5-frozen/mtm-0.6.0-preview.1-{CANDIDATE_SHA}/mtm"
+        "target/{CANDIDATE_STAGE}/mtm-0.6.0-preview.1-{CANDIDATE_SHA}/mtm"
     ));
     fs::create_dir_all(binary.parent().ok_or("fixture parent missing")?)?;
     let mut wrong_candidate = vec![0_u8; 128];
