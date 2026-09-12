@@ -359,7 +359,7 @@ fn plans_direct_and_verification_actions_resume_exact_internal_files_after_resta
         drop(db);
         server.force_restart()?;
         request["recover_only"] = json!(true);
-        retained_result(&server.call(&owner, "rethlas_step", request.clone())?, 1)?;
+        retained_result(&server.call(&owner, "rethlas_step", request.clone())?, 0)?;
         let current = server.call(&owner, "rethlas_step", json!({"run_id":task["run_id"]}))?;
         request
             .as_object_mut()
