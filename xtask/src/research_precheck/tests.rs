@@ -10,6 +10,15 @@ use super::*;
 
 const REGISTRY: &[u8] = include_bytes!("../../../conformance/mtm016-research-cases.tsv");
 const CORPUS: &[u8] = include_bytes!("../../../conformance/mtm016-usability-corpus.json");
+const RELEASE_INPUTS: &str = include_str!("../../../records/governance/mtm016-release-inputs.json");
+
+#[test]
+fn frozen_research_identity_matches_selected_release_candidate() -> Result<()> {
+    let manifest: Value = serde_json::from_str(RELEASE_INPUTS)?;
+    assert_eq!(manifest["candidate_sha256"], CANDIDATE_SHA);
+    assert_eq!(manifest["candidate_source_commit"], CANDIDATE_SOURCE);
+    Ok(())
+}
 
 struct Fixture {
     directory: TempDir,

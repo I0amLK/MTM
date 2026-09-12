@@ -14,8 +14,8 @@ mod files;
 mod tests;
 
 pub(crate) const CANDIDATE_SHA: &str =
-    "46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724";
-pub(crate) const CANDIDATE_SOURCE: &str = "cc17b1688a2deda7db3dde4b2dbf63199bf48b13";
+    "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034";
+pub(crate) const CANDIDATE_SOURCE: &str = "c67484319f12c458cd25c538e35bbb25023915a5";
 pub(crate) const CORPUS_SHA: &str =
     "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861";
 pub(crate) const REGISTRY_SHA: &str =
