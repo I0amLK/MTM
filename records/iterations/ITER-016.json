@@ -3425,6 +3425,17 @@
       "operator_next_step":"Commit this shell/docs/governance hardening through the normal commit-message policy, run a fresh capable-host source check for the new commit, then launch the next real U21-U25 disposable session from an ordinary host terminal. The generator must persist run-handoff.json before verify handoff and the independent reviewer must validate it before requesting verifier authority.",
       "corpus_boundary":{"passed_trials":63,"failed_trials":0,"blocked_trials":27,"validated_research_receipts":1,"required_research_receipts":15,"maintenance_u22_diagnostic_counted":false,"newly_counted_corpus_trials":0},
       "release_inputs_changed":false,"accepted_historical_evidence_rewritten":false,"production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"git_commit_created":false,"git_push_performed":false,"release_qualified":false
+    },
+    {
+      "id":"MTM016-F6-RESEARCH-HANDOFF-POLICY-CORRECTION",
+      "status":"append_only_correction_release_source_recheck_not_required_only_corpus_blocked",
+      "base_commit":"2ad4a6e7077c00ae4f4dab0ceeb69d1c1effb1f8",
+      "corrects_checkpoint":"MTM016-F6-RESEARCH-RUN-HANDOFF-HARDENING",
+      "correction":"The prior checkpoint was deliberately left byte-identical after commit. Its statements that a fresh capable-host source receipt was required for the shell/docs research-launcher hardening were over-conservative. MTM-016-F6-RESEARCH-CORPUS explicitly places script/case/documentation launcher changes outside the raw Rust source-hash scope and says the existing source/Native/copy gates need not be rerun for this launcher. This object supersedes only those pending-source statements; it does not change the handoff design, validation results or corpus boundary.",
+      "read_only_release_check":{"command":"cargo xtask release-check --binary target/mtm016-f5-frozen/mtm-0.6.0-preview.1-46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724/mtm --manifest records/governance/mtm016-release-inputs.json","exit_code":1,"validated_gates":16,"blocked_gates":1,"only_blocked_gate":"corpus","source_gate_status":"validated","source_gate_reason":"sealed_scope_revalidated_not_reexecuted","inputs_unchanged":true,"production_changed":false,"release_qualified":false},
+      "current_operator_next_step":"Use committed hardening 2ad4a6e for the next real U21-U25 disposable session in an ordinary interactive host terminal. No new source-gate receipt is required solely for this shell/docs launcher change. Persist run-handoff.json immediately after rethlas_start, then perform the independent reviewer handoff on the same live OAuth connection and collect the sanitized receipt. Continue until all fifteen U21-U25 receipts exist; never count the maintenance U22 diagnostic.",
+      "corpus_boundary":{"passed_trials":63,"failed_trials":0,"blocked_trials":27,"validated_research_receipts":1,"required_research_receipts":15,"newly_counted_corpus_trials":0},
+      "accepted_historical_evidence_rewritten":false,"release_inputs_changed":false,"production_changed":false,"frozen_candidate_changed":false,"baseline_changed":false,"git_push_performed":false,"release_qualified":false
     }
   ],
   "remaining_acceptance": [
