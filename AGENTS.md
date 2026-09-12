@@ -271,9 +271,11 @@ is 90/0. Never reuse broad Native/browser/copied-state qualification receipts as
 corpus repetitions.
 
 Use `cargo xtask research-collect --session <absolute-private-session> --run-id
-<run-id>` only from the ordinary host checkout; read
+<run-id> --sqlite <absolute-sqlite3>` only from the ordinary host checkout; read
 `docs/MTM-016-F6-RESEARCH-COLLECTOR.md`. The maintenance Native sandbox must remain
 unable to see the parent acceptance-state root. The collector uses read-only
-schema-7 SQLite and immutable private/workspace proof files, never OAuth storage,
-operator keys/logs or production data, and publishes a private bundle only after
-the internal precheck succeeds without granting acceptance.
+schema-7 SQLite through the explicitly selected bounded host sqlite3 CLI and
+immutable private/workspace proof files, never OAuth storage, operator keys/logs
+or production data, and publishes a private bundle only after the internal
+precheck succeeds without granting acceptance. Do not add a direct maintenance
+SQLite dependency if it changes the frozen Cargo.lock identity.

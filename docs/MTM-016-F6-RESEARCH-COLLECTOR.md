@@ -2,9 +2,9 @@
 
 ## Purpose
 
-`cargo xtask research-collect --session <absolute-session> --run-id <run-id>`
-converts one already sealed disposable U21-U25 research run into the private bundle
-consumed by `cargo xtask research-precheck`.
+`cargo xtask research-collect --session <absolute-session> --run-id <run-id>
+--sqlite <absolute-sqlite3>` converts one already sealed disposable U21-U25
+research run into the private bundle consumed by `cargo xtask research-precheck`.
 
 The collector is maintenance/evidence plumbing only. It does not start or resume a
 runtime, issue or consume a capability, submit a workflow action, edit an owner,
@@ -33,10 +33,20 @@ MTM-016 candidate and retain mode 0500.
 
 ## Database read boundary
 
-The collector opens only `<session>/data/private/state.sqlite3` with SQLite
-`READ_ONLY` plus `query_only=ON`. Schema 7 is mandatory. It reads only the selected
-run, ordered transitions, proof manifest and, for U22, registered references and
-reference audits. It refuses a pending step receipt.
+The collector never links a new SQLite library into the maintenance crate. The
+operator supplies one explicit absolute `sqlite3` executable. The collector
+canonicalizes and hashes that bounded regular executable, records its version, and
+invokes only fixed `sqlite3 -readonly -json -batch` queries with `query_only=ON`.
+The run id is restricted to the existing identifier alphabet before it can enter a
+fixed SQL string. No caller-provided SQL or database path other than the fixed
+selected session database is accepted.
+
+The collector reads only `<session>/data/private/state.sqlite3`. Schema 7 is
+mandatory. It reads only the selected run, ordered transitions, proof manifest and,
+for U22, registered references and reference audits. It refuses a pending step
+receipt. The bounded sqlite3 child has a cleared environment, fixed timeout/output
+limit and owned process-group cleanup. A sqlite3 error or stderr is a collection
+failure; there is no writable fallback.
 
 The run/database evidence is collected twice around private-file collection and
 must be byte-semantically identical. The immutable session manifest and candidate

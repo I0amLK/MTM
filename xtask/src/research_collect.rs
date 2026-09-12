@@ -4,13 +4,14 @@ use std::fs::{self, DirBuilder, File, OpenOptions};
 use std::io::{Read, Write};
 use std::os::unix::fs::{DirBuilderExt, MetadataExt, OpenOptionsExt, PermissionsExt};
 use std::path::{Component, Path, PathBuf};
+use std::process::Command;
+use std::time::Duration;
 
-use rusqlite::{Connection, OpenFlags, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
-use crate::{Result, evidence_json, research_precheck};
+use crate::{Result, evidence_json, native_preflight::process, research_precheck};
 
 const FILE_LIMIT: u64 = 4 * 1024 * 1024;
 const JSON_LIMIT: u64 = 1024 * 1024;
@@ -18,23 +19,30 @@ const JSON_LIMIT: u64 = 1024 * 1024;
 pub(crate) struct Options {
     session: PathBuf,
     run_id: String,
+    sqlite: PathBuf,
 }
 
 impl Options {
     pub(crate) fn parse(args: &[String]) -> Result<Self> {
-        if args.len() != 4 || args[0] != "--session" || args[2] != "--run-id" {
+        if args.len() != 6
+            || args[0] != "--session"
+            || args[2] != "--run-id"
+            || args[4] != "--sqlite"
+        {
             return Err(
-                "use research-collect --session <absolute-private-session> --run-id <run-id>"
+                "use research-collect --session <absolute-private-session> --run-id <run-id> --sqlite <absolute-sqlite3>"
                     .into(),
             );
         }
         let session = PathBuf::from(&args[1]);
-        if !session.is_absolute() || !safe_id(&args[3], 256) {
+        let sqlite = PathBuf::from(&args[5]);
+        if !session.is_absolute() || !safe_id(&args[3], 256) || !sqlite.is_absolute() {
             return Err("research collection selector is invalid".into());
         }
         Ok(Self {
             session,
             run_id: args[3].clone(),
+            sqlite,
         })
     }
 }
@@ -242,149 +250,268 @@ fn validate_session_manifest(value: &SessionManifest, session_name: &str) -> Res
     )
 }
 
-fn open_database(path: &Path) -> Result<Connection> {
+struct SqliteTool {
+    path: PathBuf,
+    sha256: String,
+    version: String,
+}
+
+fn executable_digest(path: &Path, limit: u64) -> Result<String> {
+    let metadata = fs::symlink_metadata(path).map_err(|_| "sqlite3 executable unavailable")?;
+    require(
+        metadata.is_file()
+            && !metadata.file_type().is_symlink()
+            && metadata.len() > 0
+            && metadata.len() <= limit
+            && metadata.mode() & 0o111 != 0
+            && metadata.mode() & 0o6000 == 0,
+        "sqlite3 must resolve to a bounded regular executable",
+    )?;
+    let mut file = File::open(path)?;
+    let mut hasher = Sha256::new();
+    let mut buffer = [0_u8; 65_536];
+    let mut total = 0_u64;
+    loop {
+        let count = file.read(&mut buffer)?;
+        if count == 0 {
+            break;
+        }
+        total += count as u64;
+        require(total <= limit, "sqlite3 executable grew beyond its bound")?;
+        hasher.update(&buffer[..count]);
+    }
+    Ok(format!("{:x}", hasher.finalize()))
+}
+
+fn validate_sqlite(path: &Path) -> Result<SqliteTool> {
+    require(
+        path.is_absolute()
+            && path.as_os_str().len() <= 4096
+            && path
+                .components()
+                .all(|part| matches!(part, Component::RootDir | Component::Normal(_))),
+        "sqlite3 selector must be an absolute non-traversing path",
+    )?;
+    let canonical = path
+        .canonicalize()
+        .map_err(|_| "sqlite3 executable unavailable")?;
+    let name = canonical
+        .file_name()
+        .and_then(|value| value.to_str())
+        .ok_or("sqlite3 executable name unavailable")?;
+    require(name == "sqlite3", "selected database tool is not sqlite3")?;
+    let sha256 = executable_digest(&canonical, 64 * 1024 * 1024)?;
+    let mut command = Command::new(&canonical);
+    command
+        .arg("--version")
+        .env_clear()
+        .env("LANG", "C")
+        .env("LC_ALL", "C")
+        .current_dir("/");
+    let output = process::capture_command(&mut command, Duration::from_secs(5), 4096, true)?;
+    require(
+        output.complete() && output.stderr.is_empty(),
+        "sqlite3 version probe failed",
+    )?;
+    let version = std::str::from_utf8(&output.stdout)
+        .map_err(|_| "sqlite3 version output is not UTF-8")?
+        .trim();
+    require(
+        !version.is_empty() && version.len() <= 512,
+        "sqlite3 version output is invalid",
+    )?;
+    Ok(SqliteTool {
+        path: canonical,
+        sha256,
+        version: version.to_owned(),
+    })
+}
+
+fn validate_database(path: &Path, owner: u32) -> Result<()> {
     let metadata = fs::symlink_metadata(path).map_err(|_| "research state database unavailable")?;
     require(
-        metadata.is_file() && !metadata.file_type().is_symlink() && metadata.nlink() == 1,
-        "research state database must be a regular unlinked file",
-    )?;
-    let connection = Connection::open_with_flags(
-        path,
-        OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
-    )?;
-    connection.pragma_update(None, "query_only", true)?;
-    let version: i64 = connection.query_row("PRAGMA user_version", [], |row| row.get(0))?;
+        metadata.is_file()
+            && !metadata.file_type().is_symlink()
+            && metadata.nlink() == 1
+            && metadata.uid() == owner
+            && metadata.mode() & 0o0022 == 0,
+        "research state database must be an owned non-writable regular file",
+    )
+}
+
+fn sqlite_json(tool: &SqliteTool, database: &Path, sql: &str) -> Result<Value> {
     require(
-        version == 7,
-        "research state schema is not the frozen schema 7",
+        sql.len() <= 65_536 && !sql.contains('\0'),
+        "sqlite query exceeds fixed collector bounds",
     )?;
-    Ok(connection)
+    let database = database
+        .to_str()
+        .ok_or("research database path is not UTF-8")?;
+    let mut command = Command::new(&tool.path);
+    command
+        .args(["-readonly", "-json", "-batch", database, sql])
+        .env_clear()
+        .env("LANG", "C")
+        .env("LC_ALL", "C")
+        .current_dir("/");
+    let output = process::capture_command(
+        &mut command,
+        Duration::from_secs(10),
+        JSON_LIMIT as usize,
+        true,
+    )?;
+    require(
+        output.complete() && output.stderr.is_empty(),
+        "read-only sqlite3 query failed",
+    )?;
+    if output.stdout.is_empty() {
+        return Ok(Value::Array(Vec::new()));
+    }
+    evidence_json::decode(&output.stdout)
+}
+
+fn rows(value: Value) -> Result<Vec<Value>> {
+    value
+        .as_array()
+        .cloned()
+        .ok_or_else(|| "sqlite3 JSON result must be an array".into())
+}
+
+fn exactly_one(value: Value, message: &'static str) -> Result<Value> {
+    let mut values = rows(value)?;
+    require(values.len() == 1, message)?;
+    values.pop().ok_or_else(|| message.into())
+}
+
+fn bool_field(value: &Value, key: &str) -> Result<bool> {
+    match value[key].as_i64() {
+        Some(0) => Ok(false),
+        Some(1) => Ok(true),
+        _ => Err("sqlite boolean field is invalid".into()),
+    }
 }
 
 fn collect_database(
-    connection: &Connection,
+    tool: &SqliteTool,
+    database: &Path,
     run_id: &str,
     include_references: bool,
 ) -> Result<RunEvidence> {
-    let row = connection
-        .query_row(
-            "SELECT problem_id,owner_id,state,status,round_index,transition_seq,latex_passed,verdict,sealed,metadata_json FROM runs WHERE run_id=?",
-            [run_id],
-            |row| {
-                Ok((
-                    row.get::<_, String>(0)?,
-                    row.get::<_, String>(1)?,
-                    row.get::<_, String>(2)?,
-                    row.get::<_, String>(3)?,
-                    row.get::<_, i64>(4)?,
-                    row.get::<_, i64>(5)?,
-                    row.get::<_, i64>(6)?,
-                    row.get::<_, Option<String>>(7)?,
-                    row.get::<_, i64>(8)?,
-                    row.get::<_, String>(9)?,
-                ))
-            },
-        )
-        .optional()?
-        .ok_or("selected research run is absent")?;
-    let metadata: Value = serde_json::from_str(&row.9)?;
-    let pending: i64 = connection.query_row(
-        "SELECT COUNT(*) FROM step_receipts WHERE run_id=? AND status='pending'",
-        [run_id],
-        |result| result.get(0),
+    require(safe_id(run_id, 256), "unsafe research run id")?;
+    let version = exactly_one(
+        sqlite_json(tool, database, "PRAGMA query_only=ON; PRAGMA user_version;")?,
+        "research schema version result is invalid",
     )?;
     require(
-        pending == 0,
+        version["user_version"] == 7,
+        "research state schema is not the frozen schema 7",
+    )?;
+    let run_sql = format!(
+        "PRAGMA query_only=ON; SELECT problem_id,owner_id,state,status,round_index,transition_seq,latex_passed,verdict,sealed,metadata_json FROM runs WHERE run_id='{run_id}';"
+    );
+    let run = exactly_one(
+        sqlite_json(tool, database, &run_sql)?,
+        "selected research run is absent or ambiguous",
+    )?;
+    let metadata_text = run["metadata_json"]
+        .as_str()
+        .ok_or("research run metadata is not text")?;
+    let metadata: Value = evidence_json::decode(metadata_text.as_bytes())?;
+    let owner_id = run["owner_id"]
+        .as_str()
+        .filter(|value| !value.is_empty() && value.len() <= 512)
+        .ok_or("research run owner is invalid")?
+        .to_owned();
+    let pending_sql = format!(
+        "PRAGMA query_only=ON; SELECT COUNT(*) AS pending FROM step_receipts WHERE run_id='{run_id}' AND status='pending';"
+    );
+    let pending = exactly_one(
+        sqlite_json(tool, database, &pending_sql)?,
+        "pending-submission count is invalid",
+    )?;
+    require(
+        pending["pending"] == 0,
         "sealed research run still has a pending submission",
     )?;
     let status = json!({
-        "ok":true,"run_id":run_id,"problem_id":row.0,"state":row.2,"status":row.3,
-        "round_index":row.4,"transition_seq":row.5,"latex_passed":row.6==1,
-        "verdict":row.7,"sealed":row.8==1,"manual_validation_required":true,
+        "ok":true,"run_id":run_id,"problem_id":run["problem_id"],"state":run["state"],
+        "status":run["status"],"round_index":run["round_index"],"transition_seq":run["transition_seq"],
+        "latex_passed":bool_field(&run,"latex_passed")?,"verdict":run["verdict"],
+        "sealed":bool_field(&run,"sealed")?,"manual_validation_required":true,
         "pending_submission":Value::Null
     });
 
-    let mut statement = connection.prepare(
-        "SELECT sequence,before_state,after_state,actor,reason,evidence_json,created_at FROM transitions WHERE run_id=? ORDER BY sequence",
+    let transition_sql = format!(
+        "PRAGMA query_only=ON; SELECT sequence,before_state,after_state,actor,reason,evidence_json,created_at FROM transitions WHERE run_id='{run_id}' ORDER BY sequence;"
+    );
+    let transition_rows = rows(sqlite_json(tool, database, &transition_sql)?)?;
+    require(
+        !transition_rows.is_empty() && transition_rows.len() <= 256,
+        "research transition log is empty or oversized",
     )?;
-    let rows = statement.query_map([run_id], |row| {
-        Ok((
-            row.get::<_, i64>(0)?,
-            row.get::<_, String>(1)?,
-            row.get::<_, String>(2)?,
-            row.get::<_, String>(3)?,
-            row.get::<_, String>(4)?,
-            row.get::<_, String>(5)?,
-            row.get::<_, String>(6)?,
-        ))
-    })?;
-    let mut transitions = Vec::new();
-    for row in rows {
-        let row = row?;
+    let mut transitions = Vec::with_capacity(transition_rows.len());
+    for row in transition_rows {
+        let evidence = row["evidence_json"]
+            .as_str()
+            .ok_or("transition evidence is not text")?;
         transitions.push(json!({
-            "run_id":run_id,"sequence":row.0,"before_state":row.1,"after_state":row.2,
-            "actor":row.3,"reason":row.4,"evidence":serde_json::from_str::<Value>(&row.5)?,
-            "created_at":row.6
+            "run_id":run_id,"sequence":row["sequence"],"before_state":row["before_state"],
+            "after_state":row["after_state"],"actor":row["actor"],"reason":row["reason"],
+            "evidence":evidence_json::decode(evidence.as_bytes())?,"created_at":row["created_at"]
         }));
     }
 
-    let manifest_row = connection
-        .query_row(
-            "SELECT manifest_json,sha256 FROM proof_manifests WHERE run_id=?",
-            [run_id],
-            |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
-        )
-        .optional()?
-        .ok_or("selected research run has no proof manifest")?;
+    let manifest_sql = format!(
+        "PRAGMA query_only=ON; SELECT manifest_json,sha256 FROM proof_manifests WHERE run_id='{run_id}';"
+    );
+    let manifest_row = exactly_one(
+        sqlite_json(tool, database, &manifest_sql)?,
+        "selected research run has no unique proof manifest",
+    )?;
+    let manifest_text = manifest_row["manifest_json"]
+        .as_str()
+        .ok_or("proof manifest is not text")?;
+    let manifest_sha256 = manifest_row["sha256"]
+        .as_str()
+        .ok_or("proof manifest digest is missing")?
+        .to_owned();
     require(
-        hash(manifest_row.0.as_bytes()) == manifest_row.1,
+        hash(manifest_text.as_bytes()) == manifest_sha256,
         "proof manifest database digest mismatch",
     )?;
-    let manifest: Value = serde_json::from_str(&manifest_row.0)?;
+    let manifest = evidence_json::decode(manifest_text.as_bytes())?;
 
     let reference_audit = if include_references {
-        let mut references_stmt = connection.prepare(
-            "SELECT reference_id,provider,title,paper_id,arxiv_id,doi,theorem_id,source_uri,source_state,source_sha256,content_sha256 FROM references_registry WHERE run_id=? ORDER BY reference_id",
-        )?;
-        let references = references_stmt
-            .query_map([run_id], |row| {
-                Ok(json!({
-                    "reference_id":row.get::<_,String>(0)?,"provider":row.get::<_,String>(1)?,
-                    "title":row.get::<_,String>(2)?,"paper_id":row.get::<_,String>(3)?,
-                    "arxiv_id":row.get::<_,String>(4)?,"doi":row.get::<_,String>(5)?,
-                    "theorem_id":row.get::<_,String>(6)?,"source_uri":row.get::<_,String>(7)?,
-                    "source_state":row.get::<_,String>(8)?,"source_sha256":row.get::<_,String>(9)?,
-                    "content_sha256":row.get::<_,String>(10)?
-                }))
-            })?
-            .collect::<std::result::Result<Vec<_>, _>>()?;
-        let mut audits_stmt = connection.prepare(
-            "SELECT reference_id,disposition,evidence_basis,evidence_locator,verifier_domain_id,proof_sha256,proof_manifest_sha256,material,assumptions_checked,notation_checked,source_checked,independently_rederived,notes FROM reference_audits WHERE run_id=? ORDER BY reference_id",
-        )?;
-        let audits = audits_stmt
-            .query_map([run_id], |row| {
-                Ok(json!({
-                    "reference_id":row.get::<_,String>(0)?,"disposition":row.get::<_,String>(1)?,
-                    "evidence_basis":row.get::<_,String>(2)?,"evidence_locator":row.get::<_,String>(3)?,
-                    "verifier_domain_id":row.get::<_,String>(4)?,"proof_sha256":row.get::<_,String>(5)?,
-                    "proof_manifest_sha256":row.get::<_,String>(6)?,"material":row.get::<_,i64>(7)?==1,
-                    "assumptions_checked":row.get::<_,i64>(8)?==1,"notation_checked":row.get::<_,i64>(9)?==1,
-                    "source_checked":row.get::<_,i64>(10)?==1,"independently_rederived":row.get::<_,i64>(11)?==1,
-                    "notes":row.get::<_,String>(12)?
-                }))
-            })?
-            .collect::<std::result::Result<Vec<_>, _>>()?;
+        let references_sql = format!(
+            "PRAGMA query_only=ON; SELECT reference_id,provider,title,paper_id,arxiv_id,doi,theorem_id,source_uri,source_state,source_sha256,content_sha256 FROM references_registry WHERE run_id='{run_id}' ORDER BY reference_id;"
+        );
+        let references = rows(sqlite_json(tool, database, &references_sql)?)?;
+        let audits_sql = format!(
+            "PRAGMA query_only=ON; SELECT reference_id,disposition,evidence_basis,evidence_locator,verifier_domain_id,proof_sha256,proof_manifest_sha256,material,assumptions_checked,notation_checked,source_checked,independently_rederived,notes FROM reference_audits WHERE run_id='{run_id}' ORDER BY reference_id;"
+        );
+        let mut audits = rows(sqlite_json(tool, database, &audits_sql)?)?;
+        for audit in &mut audits {
+            for key in [
+                "material",
+                "assumptions_checked",
+                "notation_checked",
+                "source_checked",
+                "independently_rederived",
+            ] {
+                audit[key] = Value::Bool(bool_field(audit, key)?);
+            }
+        }
         json!({"references":references,"audits":audits})
     } else {
         json!({"references":[],"audits":[]})
     };
     Ok(RunEvidence {
         status,
-        owner_id: row.1,
+        owner_id,
         metadata,
         transitions,
         manifest,
-        manifest_sha256: manifest_row.1,
+        manifest_sha256,
         reference_audit,
     })
 }
@@ -563,8 +690,14 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     )?;
 
     let database_path = session.join("data/private/state.sqlite3");
-    let connection = open_database(&database_path)?;
-    let before = collect_database(&connection, &options.run_id, manifest.task_id == "U22")?;
+    validate_database(&database_path, owner)?;
+    let sqlite = validate_sqlite(&options.sqlite)?;
+    let before = collect_database(
+        &sqlite,
+        &database_path,
+        &options.run_id,
+        manifest.task_id == "U22",
+    )?;
     require(
         before.status["problem_id"] == manifest.case_id
             && before.status["state"] == "done"
@@ -636,7 +769,12 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         }
     }
 
-    let after = collect_database(&connection, &options.run_id, manifest.task_id == "U22")?;
+    let after = collect_database(
+        &sqlite,
+        &database_path,
+        &options.run_id,
+        manifest.task_id == "U22",
+    )?;
     require(
         evidence_fingerprint(&before)? == evidence_fingerprint(&after)?,
         "research run changed while evidence was collected",
@@ -720,6 +858,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         "bundle_manifest_sha256":hash(&bundle),"final_tex_sha256":hash(&final_tex),
         "verification_report_sha256":hash(&verification),"proof_manifest_sha256":before.manifest_sha256,
         "owner_fingerprint":hash(before.owner_id.as_bytes()),"required_material_present":true,
+        "sqlite3_sha256":sqlite.sha256,"sqlite3_version":sqlite.version,
         "precheck_consistent":true,"research_trial_passed":false,"accepted_trials_delta":0,
         "mathematical_review_authenticated_by_collector":false,"production_state_modified":false,
         "workflow_mutations":0,"release_qualified":false
@@ -737,9 +876,22 @@ mod tests {
         assert!(
             Options::parse(&[
                 "--session".into(),
+                "/tmp/x".into(),
+                "--run-id".into(),
+                "run-a".into(),
+                "--sqlite".into(),
+                "/usr/bin/sqlite3".into()
+            ])
+            .is_ok()
+        );
+        assert!(
+            Options::parse(&[
+                "--session".into(),
                 "relative".into(),
                 "--run-id".into(),
-                "run-a".into()
+                "run-a".into(),
+                "--sqlite".into(),
+                "/usr/bin/sqlite3".into()
             ])
             .is_err()
         );
@@ -748,7 +900,9 @@ mod tests {
                 "--session".into(),
                 "/tmp/x".into(),
                 "--run-id".into(),
-                "../run".into()
+                "../run".into(),
+                "--sqlite".into(),
+                "/usr/bin/sqlite3".into()
             ])
             .is_err()
         );
@@ -758,6 +912,19 @@ mod tests {
                 "/tmp/x".into(),
                 "--run-id".into(),
                 "run-a".into(),
+                "--sqlite".into(),
+                "relative/sqlite3".into()
+            ])
+            .is_err()
+        );
+        assert!(
+            Options::parse(&[
+                "--session".into(),
+                "/tmp/x".into(),
+                "--run-id".into(),
+                "run-a".into(),
+                "--sqlite".into(),
+                "/usr/bin/sqlite3".into(),
                 "--accept".into()
             ])
             .is_err()
@@ -837,76 +1004,39 @@ mod tests {
     fn database_collection_is_read_only_and_binds_the_exact_sealed_run() -> Result<()> {
         let root = tempdir()?;
         let database = root.path().join("state.sqlite3");
-        let connection = Connection::open(&database)?;
-        connection.execute_batch(
-            "PRAGMA user_version=7;
-             CREATE TABLE runs(
-               run_id TEXT PRIMARY KEY, problem_id TEXT NOT NULL, owner_id TEXT NOT NULL,
-               state TEXT NOT NULL, status TEXT NOT NULL, round_index INTEGER NOT NULL,
-               transition_seq INTEGER NOT NULL, latex_passed INTEGER NOT NULL,
-               verdict TEXT, sealed INTEGER NOT NULL, metadata_json TEXT NOT NULL
-             );
-             CREATE TABLE step_receipts(run_id TEXT NOT NULL,status TEXT NOT NULL);
-             CREATE TABLE transitions(
-               run_id TEXT NOT NULL, sequence INTEGER NOT NULL, before_state TEXT NOT NULL,
-               after_state TEXT NOT NULL, actor TEXT NOT NULL, reason TEXT NOT NULL,
-               evidence_json TEXT NOT NULL, created_at TEXT NOT NULL
-             );
-             CREATE TABLE proof_manifests(
-               run_id TEXT PRIMARY KEY, manifest_json TEXT NOT NULL, sha256 TEXT NOT NULL
-             );",
-        )?;
+        fs::write(&database, b"synthetic sqlite placeholder")?;
+        fs::set_permissions(&database, fs::Permissions::from_mode(0o600))?;
         let manifest = r#"{"computational_evidence":[],"conditional_hypotheses":[],"dependency_revision_ids":[],"reference_ids":[],"target_statement_tex":"Synthetic target"}"#;
-        connection.execute(
-            "INSERT INTO runs VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-            rusqlite::params![
-                "run-a",
-                "u21-r1-subspace-dimension",
-                "owner-a",
-                "done",
-                "done",
-                0_i64,
-                2_i64,
-                1_i64,
-                "correct",
-                1_i64,
-                r#"{"workspace_export_path":"rethlas-output/run-a/proof_verified.tex"}"#
-            ],
-        )?;
-        connection.execute(
-            "INSERT INTO transitions VALUES(?,?,?,?,?,?,?,?)",
-            rusqlite::params![
-                "run-a",
-                1_i64,
-                "created",
-                "latex_validate",
-                "assembler",
-                "proof_submitted",
-                "{}",
-                "2026-09-11T00:00:00Z"
-            ],
-        )?;
-        connection.execute(
-            "INSERT INTO transitions VALUES(?,?,?,?,?,?,?,?)",
-            rusqlite::params![
-                "run-a",
-                2_i64,
-                "latex_validate",
-                "done",
-                "finalizer_gate",
-                "done",
-                r#"{"sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}"#,
-                "2026-09-11T00:00:01Z"
-            ],
-        )?;
-        connection.execute(
-            "INSERT INTO proof_manifests VALUES(?,?,?)",
-            rusqlite::params!["run-a", manifest, hash(manifest.as_bytes())],
-        )?;
-        drop(connection);
+        let sqlite = root.path().join("sqlite3");
+        let script = r#"#!/bin/sh
+if [ "$1" = "--version" ]; then
+  printf '%s\n' '3.99.0 synthetic'
+  exit 0
+fi
+[ "$1" = "-readonly" ] && [ "$2" = "-json" ] && [ "$3" = "-batch" ] || exit 9
+sql=$5
+case "$sql" in
+  *"PRAGMA user_version"*) printf '%s\n' '[{"user_version":7}]' ;;
+  *"FROM runs"*)
+    case "$sql" in *"run_id='missing'"*) printf '%s\n' '[]' ;;
+    *) printf '%s\n' '[{"problem_id":"u21-r1-subspace-dimension","owner_id":"owner-a","state":"done","status":"done","round_index":0,"transition_seq":2,"latex_passed":1,"verdict":"correct","sealed":1,"metadata_json":"{\"workspace_export_path\":\"rethlas-output/run-a/proof_verified.tex\"}"}]' ;;
+    esac ;;
+  *"FROM step_receipts"*)
+    case "$sql" in *"run_id='run-pending'"*) printf '%s\n' '[{"pending":1}]' ;;
+    *) printf '%s\n' '[{"pending":0}]' ;;
+    esac ;;
+  *"FROM transitions"*) printf '%s\n' '[{"sequence":1,"before_state":"created","after_state":"latex_validate","actor":"assembler","reason":"proof_submitted","evidence_json":"{}","created_at":"2026-09-11T00:00:00Z"},{"sequence":2,"before_state":"latex_validate","after_state":"done","actor":"finalizer_gate","reason":"done","evidence_json":"{\"sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}","created_at":"2026-09-11T00:00:01Z"}]' ;;
+  *"FROM proof_manifests"*) printf '%s\n' '[{"manifest_json":"{\"computational_evidence\":[],\"conditional_hypotheses\":[],\"dependency_revision_ids\":[],\"reference_ids\":[],\"target_statement_tex\":\"Synthetic target\"}","sha256":"MANIFEST_SHA"}]' ;;
+  *) exit 8 ;;
+esac
+"#
+        .replace("MANIFEST_SHA", &hash(manifest.as_bytes()));
+        fs::write(&sqlite, script.as_bytes())?;
+        fs::set_permissions(&sqlite, fs::Permissions::from_mode(0o700))?;
+        let tool = validate_sqlite(&sqlite)?;
+        validate_database(&database, fs::metadata(root.path())?.uid())?;
         let before = fs::read(&database)?;
-        let readonly = open_database(&database)?;
-        let evidence = collect_database(&readonly, "run-a", false)?;
+        let evidence = collect_database(&tool, &database, "run-a", false)?;
         assert_eq!(evidence.status["state"], "done");
         assert_eq!(evidence.status["problem_id"], "u21-r1-subspace-dimension");
         assert_eq!(evidence.owner_id, "owner-a");
@@ -916,15 +1046,8 @@ mod tests {
             "Synthetic target"
         );
         assert_eq!(fs::read(&database)?, before);
-        assert!(readonly.execute("DELETE FROM runs", []).is_err());
-        drop(readonly);
-
-        let connection = Connection::open(&database)?;
-        connection.execute("INSERT INTO step_receipts VALUES('run-a','pending')", [])?;
-        drop(connection);
-        let readonly = open_database(&database)?;
-        assert!(collect_database(&readonly, "run-a", false).is_err());
-        assert!(collect_database(&readonly, "other-run", false).is_err());
+        assert!(collect_database(&tool, &database, "run-pending", false).is_err());
+        assert!(collect_database(&tool, &database, "missing", false).is_err());
         Ok(())
     }
 

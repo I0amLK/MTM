@@ -10,7 +10,6 @@ serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
 tempfile.workspace = true
-rusqlite.workspace = true
 
 [target.'cfg(target_os = "linux")'.dependencies]
 # Maintenance probes only: safe syscall and bounded nonblocking child capture.

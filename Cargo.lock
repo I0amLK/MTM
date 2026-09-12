@@ -683,7 +683,6 @@ name = "mtm-xtask"
 version = "0.1.0"
 dependencies = [
  "nix",
- "rusqlite",
  "serde",
  "serde_json",
  "sha2",

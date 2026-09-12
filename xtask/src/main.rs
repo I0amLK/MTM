@@ -239,7 +239,7 @@ fn run() -> Result<()> {
         }
         "help" | "--help" | "-h" => {
             println!(
-                "cargo xtask research-collect --session <absolute-private-session> --run-id <run-id>\n  Create and precheck a private evidence bundle from one sealed disposable research run; NOT corpus acceptance."
+                "cargo xtask research-collect --session <absolute-private-session> --run-id <run-id> --sqlite <absolute-sqlite3>\n  Create and precheck a private evidence bundle from one sealed disposable research run using explicit read-only sqlite3; NOT corpus acceptance."
             );
             println!(
                 "cargo xtask research-precheck --bundle <absolute-private-directory>\n  Read-only evidence integrity/checklist, NOT mathematical acceptance or corpus import."
