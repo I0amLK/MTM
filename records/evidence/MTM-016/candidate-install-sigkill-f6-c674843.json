@@ -1,0 +1,69 @@
+{
+  "baseline_launched": null,
+  "baseline_sha256": null,
+  "candidate_launched": true,
+  "candidate_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "delivery": "F4",
+  "harness_source_identity": {
+    "after_sha256": "981a06d44df346c3ba395ede06ab078b46c35b067d798a67b1b9b4af1494d873",
+    "before_sha256": "981a06d44df346c3ba395ede06ab078b46c35b067d798a67b1b9b4af1494d873",
+    "commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+    "unchanged": true
+  },
+  "milestone": "MTM-016",
+  "original_and_snapshot_unchanged": true,
+  "passed": true,
+  "pending": [
+    "physical power-loss/device-cache durability",
+    "production selector drill",
+    "shared-filesystem semantics",
+    "full release gates"
+  ],
+  "production_selectors_changed": false,
+  "production_state_modified": false,
+  "profile": "install_sigkill",
+  "python_invoked": false,
+  "raw_test_output_recorded": false,
+  "recorded_unix_seconds": 1789215662,
+  "release_qualified": false,
+  "runner": {
+    "child_reaped": true,
+    "elapsed_ms": 18614,
+    "exit_code": 0,
+    "output_limit_exceeded": false,
+    "pipes_closed": true,
+    "raw_output_recorded": false,
+    "signal": null,
+    "stderr_bytes_retained": 235,
+    "stdout_bytes_retained": 843,
+    "timed_out": false
+  },
+  "schema_version": "1.0.0",
+  "scope": "exact_candidate_external_sigkill_install_recovery_not_release",
+  "selector_changed": false,
+  "summaries": {
+    "install_sigkill": {
+      "all_candidate_selectors_recovered": true,
+      "binary_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+      "elapsed_ms": 9705,
+      "external_process_sigkill": true,
+      "final_state": "previous_active",
+      "kill_signal": 9,
+      "ok": true,
+      "partial_restored_selectors": 1,
+      "pending_journal_cleared": true,
+      "pending_journal_observed_before_kill": true,
+      "physical_power_loss_tested": false,
+      "previous_selector_bytes_and_modes_restored": true,
+      "production_selectors_changed": false,
+      "production_state_modified": false,
+      "recovered_state": "active",
+      "release_qualified": false,
+      "schema": "mtm-install-sigkill-v1",
+      "selector_count": 8,
+      "shared_filesystem_tested": false
+    }
+  },
+  "test_stderr_sha256": "97ce9153a3493f2acd7b68d69299c24cf575768d6730d84f7e7b647e55e79488",
+  "test_stdout_sha256": "79f411812653a8dfba59f801b038321dd6e6c3d144db8260ac5343b9396ee0c0"
+}
