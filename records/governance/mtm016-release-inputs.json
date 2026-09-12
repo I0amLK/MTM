@@ -1,23 +1,23 @@
 {
   "schema": "mtm-release-inputs-v1",
   "milestone": "MTM-016",
-  "candidate_sha256": "46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
-  "candidate_source_commit": "cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+  "candidate_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "candidate_source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
   "baseline_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
   "evidence": {
-    "source": {"path":"records/evidence/MTM-016/source-check-f6-f3f1a75.json","sha256":"c4ff154ff03bb741f23ea8ea81e66fbb0e71fdaa5c5b8969a1560146671bf636"},
-    "protocol": {"path":"records/evidence/MTM-016/candidate-protocol-f5-final-a5a3cde.json","sha256":"471da994af7b879092f191cd5788d0d927ff028620112a1ba3ebfb185a2ee5a3"},
-    "permissions": {"path":"records/evidence/MTM-016/candidate-permissions-f5-final-a5a3cde.json","sha256":"cea40a8e37a73d8517c0b0996d06dd07ff0936e8d5b7b7c49698f4d518c9797b"},
-    "upgrade": {"path":"records/evidence/MTM-016/candidate-upgrade-f5-final-a5a3cde.json","sha256":"f3e46574d1a1c4ec273acf665316a649982a5cb04de43f33da7dd52ebcfff0bb"},
+    "source": {"path":"records/evidence/MTM-016/source-check-f6-78993c6.json","sha256":"00012a196485886f67b1d994aa1a336d13193f25c0371b7236a9362a58d75aa8"},
+    "protocol": {"path":"records/evidence/MTM-016/candidate-protocol-f6-c674843.json","sha256":"b5dc197a286da7db5e8639a1ecf30edb39255e573930d92e948de299e666c87c"},
+    "permissions": {"path":"records/evidence/MTM-016/candidate-permissions-f6-c674843.json","sha256":"39c502a5e613085b24bcdcc5fc43623ba84142ef687475b09845f355f0635706"},
+    "upgrade": {"path":"records/evidence/MTM-016/candidate-upgrade-f6-c674843.json","sha256":"cc6cc4fd33b24bbcaedfe532a10fe684fa4aa8bfd4ce391ce664e55c2d460011"},
     "target": {"path":"records/evidence/MTM-016/candidate-target-f6-e829a16.json","sha256":"031b53a53fcf829eaeb0779cfdc9e274a93b9352e56d1fc5608de8e719a321c1"},
     "resource": {"path":"records/evidence/MTM-016/candidate-resource-f6-86a13d6.json","sha256":"7043e3d34ab498535eb1a9c5295eb01e4c9c709ede4899c8e8d80ef91093be19"},
-    "clean_build": {"path":"records/evidence/MTM-016/clean-build-f5-final-cc17b16.json","sha256":"333bb4f7e943046fd862376eb9ae50ee3766b46e113d73ae7dbb558d12d9fb1c"},
+    "clean_build": {"path":"records/evidence/MTM-016/clean-build-f6-c674843.json","sha256":"1077112e1962458c89fcfd239f725a0a3beedce0f5404dc2841585b4b450b8a7"},
     "native_commands": {"path":"records/evidence/MTM-016/candidate-native-commands-f6-a323ed8.json","sha256":"00140fc56bcad8227154b899ffe644855fbd78c7ce317fc332657c6fe3b30cf0"},
     "compiled_latex": {"path":"records/evidence/MTM-016/candidate-compiled-latex-f6-f9ed821.json","sha256":"2994cdd7848a9a2d7e4a6f1a79d30a15ca203ac1249e61aff48499b10da0fb22"},
-    "retrieval": {"path":"records/evidence/MTM-016/candidate-retrieval-f4-17ef81f.json","sha256":"017b661766575e42718c22e14df6fa03f9d40196152ace95531ddfd3aa3bee4d"},
+    "retrieval": {"path":"records/evidence/MTM-016/candidate-retrieval-f6-c674843.json","sha256":"dc2771579b7805250157a66f68ad41005743f8c9b08c3db7c8c1d6299ca7f248"},
     "browser_human": {"path":"records/evidence/MTM-016/candidate-browser-human-f6-e9d12f1.json","sha256":"1497d2c304856632b6f9dda16c6f682efd4fa8fbd62b256414f04606bf2ac1bb"},
     "copied_operator_state": {"path":"records/evidence/MTM-016/candidate-copied-operator-state-f6-f875f1b.json","sha256":"e5f198ae37007c7959199416321f478ae74ab87611f65e7f82e6689ee562a3a9"},
-    "install_sigkill": {"path":"records/evidence/MTM-016/candidate-install-sigkill-f5-final-r3-a5a3cde.json","sha256":"1ee26e7229fdcccd70e4101b41bf0cec2ea0fe66bf1d3e70a3b6bcf9e0209f3e"},
+    "install_sigkill": {"path":"records/evidence/MTM-016/candidate-install-sigkill-f6-c674843.json","sha256":"e2d9ded282591f8d4da5d16ab6a27a5324b9b8fc4286f8ab82352549416c87b5"},
     "corpus": {"path":"records/evidence/MTM-016/corpus-f6-native-u16-u20-aggregate.json","sha256":"35cfd8b7c0e63089187a941d46867867b338433068ed8fe818edae43c35ad2f3"}
   }
 }
