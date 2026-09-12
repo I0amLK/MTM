@@ -16,7 +16,7 @@
     "compiled_latex": {"path":"records/evidence/MTM-016/candidate-compiled-latex-f6-df4feca.json","sha256":"4ab3db3fb5adf3c18fbfcfec176491ccffbe5d203ee775829382d8f76571b187"},
     "retrieval": {"path":"records/evidence/MTM-016/candidate-retrieval-f6-c674843.json","sha256":"dc2771579b7805250157a66f68ad41005743f8c9b08c3db7c8c1d6299ca7f248"},
     "browser_human": {"path":"records/evidence/MTM-016/candidate-browser-human-f6-e9d12f1.json","sha256":"1497d2c304856632b6f9dda16c6f682efd4fa8fbd62b256414f04606bf2ac1bb"},
-    "copied_operator_state": {"path":"records/evidence/MTM-016/candidate-copied-operator-state-f6-f875f1b.json","sha256":"e5f198ae37007c7959199416321f478ae74ab87611f65e7f82e6689ee562a3a9"},
+    "copied_operator_state": {"path":"records/evidence/MTM-016/candidate-copied-operator-state-f6-f263155.json","sha256":"76a48b8a20573010861ffc97e02784287dc3e70da3bd26cb1c8f3aa6d7cdf356"},
     "install_sigkill": {"path":"records/evidence/MTM-016/candidate-install-sigkill-f6-c674843.json","sha256":"e2d9ded282591f8d4da5d16ab6a27a5324b9b8fc4286f8ab82352549416c87b5"},
     "corpus": {"path":"records/evidence/MTM-016/corpus-f6-c674843-native-u16-u20-aggregate.json","sha256":"3dfb957302e3de11dde4b19b661ba4a2997e85dee30adc93d9305f4d9983b0b4"}
   }
