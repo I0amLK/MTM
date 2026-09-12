@@ -160,7 +160,7 @@ fake_home="$tmp/home with 'quotes'"
 mkdir -m 700 "$fixture" "$fixture/scripts" "$fixture/conformance" "$fake_home" "$tmp/inventory"
 cp "$repo/scripts/mtm016-research-session.sh" "$fixture/scripts/"
 cp "$registry" "$repo/conformance/mtm016-usability-corpus.json" "$fixture/conformance/"
-frozen=target/mtm016-f5-frozen/mtm-0.6.0-preview.1-$RS_CANDIDATE_SHA/mtm
+frozen=target/mtm016-f6-frozen/mtm-0.6.0-preview.1-$RS_CANDIDATE_SHA/mtm
 mkdir -p "$fixture/${frozen%/mtm}"
 cp "$repo/$frozen" "$fixture/$frozen"
 for tool in bwrap curl latexmk pdflatex cloudflared sh cat printf sleep readlink dirname uname; do

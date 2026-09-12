@@ -4,7 +4,7 @@
 set -euo pipefail
 umask 077
 export LC_ALL=C
-r_candidate_sha=46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724
+r_candidate_sha=f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034
 r_baseline_sha=2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a
 r_pid=
 r_wire=/tmp/mtm-copy-wire

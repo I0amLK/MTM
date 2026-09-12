@@ -113,7 +113,10 @@ ss_main() {
   [[ $(/usr/bin/readlink -e -- "$session") == "$session" ]] || { ss_fail session_identity; return 1; }
   [[ -d $session && ! -L $session && $(/usr/bin/stat -c %a -- "$session") == 700 ]] || { ss_fail session_private; return 1; }
   candidate=$session/candidate
-  [[ -f $candidate && ! -L $candidate && -x $candidate && $(/usr/bin/sha256sum -- "$candidate") == "46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724  $candidate" ]] || { ss_fail candidate_identity; return 1; }
+  local candidate_digest
+  candidate_digest=$(/usr/bin/sha256sum -- "$candidate" 2>/dev/null) || { ss_fail candidate_identity; return 1; }
+  candidate_digest=${candidate_digest%% *}
+  [[ -f $candidate && ! -L $candidate && -x $candidate && ( $candidate_digest == f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034 || $candidate_digest == 46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724 ) ]] || { ss_fail candidate_identity; return 1; }
 
   ss_scan "$proc_root" "$candidate"
   printf 'RESEARCH_STOP_SCAN tui=%s helper=%s probe=%s unknown=%s\n' "${#ss_tui[@]}" "${#ss_helper[@]}" "${#ss_probe[@]}" "${#ss_unknown[@]}"

@@ -70,8 +70,8 @@ Run from the reviewed committed checkout, using the host-owned Cargo cache:
 ```sh
 cargo xtask check --record &&
 cargo xtask qualify --profile corpus_native \
-  --binary target/mtm016-f5-frozen/mtm-0.6.0-preview.1-46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724/mtm \
-  --sha256 46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724 --record
+  --binary target/mtm016-f6-frozen/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm \
+  --sha256 f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034 --record
 ```
 
 Do not parallelize compilation with qualification, weaken isolation, install the

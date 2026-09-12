@@ -26,7 +26,7 @@ sqlite=$(/usr/bin/readlink -e -- "$sqlite_arg") || r_fail sqlite_unavailable
 copy_sqlite=$sqlite
 prefix=${sqlite%/bin/sqlite3}
 [[ -d $prefix/lib ]] || r_fail sqlite_libraries
-candidate=$repo/target/mtm016-f5-frozen/mtm-0.6.0-preview.1-$r_candidate_sha/mtm
+candidate=$repo/target/mtm016-f6-frozen/mtm-0.6.0-preview.1-$r_candidate_sha/mtm
 baseline=$repo/target/mtm016-f3/baseline/mtm
 [[ $(copy_digest "$candidate") == "$r_candidate_sha" && $(copy_digest "$baseline") == "$r_baseline_sha" ]] || r_fail reviewed_artifact_mismatch
 [[ $(copy_digest "$transport") == 0072b4126bf5f55495863e35c0b501ad42e95222068222843da5cd81c9eb9e82 && $(copy_digest "$inspector") == da6aca5e0a4fec09fec6ffefe2d8d6c7630a7bd01b37ee5857e9de162e19d6ef ]] || r_fail reviewed_helpers_changed

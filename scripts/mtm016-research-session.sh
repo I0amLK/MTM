@@ -2,8 +2,8 @@
 # Disposable operator-driven research only. Never submits workflow results.
 # Sourcing defines primitives for synthetic tests and does not create a session.
 
-readonly RS_CANDIDATE_SHA=46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724
-readonly RS_CANDIDATE_SOURCE=cc17b1688a2deda7db3dde4b2dbf63199bf48b13
+readonly RS_CANDIDATE_SHA=f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034
+readonly RS_CANDIDATE_SOURCE=c67484319f12c458cd25c538e35bbb25023915a5
 readonly RS_CORPUS_SHA=9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861
 readonly RS_CASES_SHA=cd6d6a758e667fca21d2a04d2eba9a015c1d156350b34438660dd8bd16ae1bb9
 
@@ -164,7 +164,7 @@ rs_main() {
   script=$repo/scripts/mtm016-research-session.sh
   registry=$repo/conformance/mtm016-research-cases.tsv
   corpus=$repo/conformance/mtm016-usability-corpus.json
-  candidate=$repo/target/mtm016-f5-frozen/mtm-0.6.0-preview.1-$RS_CANDIDATE_SHA/mtm
+  candidate=$repo/target/mtm016-f6-frozen/mtm-0.6.0-preview.1-$RS_CANDIDATE_SHA/mtm
   [[ $(/usr/bin/git -C "$repo" rev-parse --show-toplevel) == "$repo" ]] || { rs_fail repository_identity; return 1; }
   /usr/bin/git -C "$repo" ls-files --error-unmatch -- scripts/mtm016-research-session.sh conformance/mtm016-research-cases.tsv > /dev/null 2>&1 || { rs_fail uncommitted_session_entry; return 1; }
   /usr/bin/git -C "$repo" diff --quiet HEAD -- scripts/mtm016-research-session.sh conformance/mtm016-research-cases.tsv conformance/mtm016-usability-corpus.json || { rs_fail changed_session_inputs; return 1; }

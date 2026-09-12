@@ -18,7 +18,7 @@ for name in bwrap latexmk pdflatex sh cat printf sleep; do
   target=$(rs_tool "$name" "${PATH:-}")
   /usr/bin/ln -s -- "$target" "$session/tool-bin/$name"
 done
-candidate=$repo/target/mtm016-f5-frozen/mtm-0.6.0-preview.1-$RS_CANDIDATE_SHA/mtm
+candidate=$repo/target/mtm016-f6-frozen/mtm-0.6.0-preview.1-$RS_CANDIDATE_SHA/mtm
 rs_snapshot "$candidate" "$session/candidate" "$RS_CANDIDATE_SHA"
 rs_environment "$session"
 printf '%s\n' '\documentclass{article}' '\begin{document}Compiler transport fixture only.\end{document}' > "$session/workspace/proof.tex"

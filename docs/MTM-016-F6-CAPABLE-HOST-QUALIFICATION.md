@@ -22,9 +22,9 @@ production database, production key, or browser-human claim is introduced here.
 The current MTM-016 release-input candidate remains:
 
 ```text
-target/mtm016-f5-frozen/mtm-0.6.0-preview.1-46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724/mtm
-SHA-256: 46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724
-source commit: cc17b1688a2deda7db3dde4b2dbf63199bf48b13
+target/mtm016-f6-frozen/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm
+SHA-256: f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034
+source commit: c67484319f12c458cd25c538e35bbb25023915a5
 ```
 
 Do not substitute another build with the same version label. The profiles select
@@ -109,8 +109,8 @@ runtime/LaTeX gate, not independent mathematical correctness.
 Run from the repository root on the capable host:
 
 ```bash
-export CANDIDATE='target/mtm016-f5-frozen/mtm-0.6.0-preview.1-46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724/mtm'
-export CANDIDATE_SHA='46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724'
+export CANDIDATE='target/mtm016-f6-frozen/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm'
+export CANDIDATE_SHA='f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034'
 
 sha256sum "$CANDIDATE"
 cargo xtask native-preflight --record
