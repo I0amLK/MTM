@@ -2600,7 +2600,15 @@ impl WorkflowEngine {
         payload: &Value,
         trace_id: &str,
     ) -> Result<Value, ReCtmError> {
-        self.require_generation_records(claims.run_id(), "proof_steps")?;
+        let protocol = metadata_i64(run, "workflow_protocol_version", 1);
+        // Protocol 3 derives and persists the canonical direct-screening record
+        // inside this action. Requiring a pre-existing proof_steps record here
+        // creates a circular contract for a fresh direct_proving task. Preserve
+        // the legacy precondition only for older protocol runs whose task
+        // contract still expects caller-authored proof_steps memory.
+        if protocol < 3 {
+            self.require_generation_records(claims.run_id(), "proof_steps")?;
+        }
         let active_plans = run
             .get("metadata")
             .and_then(Value::as_object)
@@ -2611,7 +2619,6 @@ impl WorkflowEngine {
             .get("metadata")
             .and_then(Value::as_object)
             .and_then(|metadata| metadata.get("direct_screening_progress"));
-        let protocol = metadata_i64(run, "workflow_protocol_version", 1);
         let (screening, progress, missing) =
             merge_direct_screening(payload.get("screening"), &active_plans, previous, protocol)?;
         if !missing.is_empty() {

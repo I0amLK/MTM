@@ -118,10 +118,22 @@ pub(super) fn fixture_submission(task: &Value, mode: &str, report_gap: bool) -> 
                 screening.insert(text(plan, "plan_id")?.to_owned(), Value::Object(results));
             }
             args["payload"] = json!({"screening":screening,"selected_plan_id":text(&plans[0],"plan_id")?,"proof_route":"Apply reflexivity"});
-            args["writes"] = json!([write(
-                "memory:generation:proof_steps",
-                json!({"summary":"Screened the fixed two routes"})
-            )]);
+            let caller_proof_steps =
+                task["task"]["write_contract"]
+                    .as_array()
+                    .is_some_and(|contracts| {
+                        contracts
+                            .iter()
+                            .any(|contract| contract["resource"] == "memory:generation:proof_steps")
+                    });
+            args["writes"] = if caller_proof_steps {
+                json!([write(
+                    "memory:generation:proof_steps",
+                    json!({"summary":"Screened the fixed two routes"})
+                )])
+            } else {
+                json!([])
+            };
         }
         "assemble" | "repair" => {
             args["payload"] = if state == "assemble" {

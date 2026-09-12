@@ -965,13 +965,6 @@ fn protocol_three_structured_research_contract_reaches_same_tex_finalizer() -> R
         first_subgoals[1]["depends_on"],
         Value::Array(vec![Value::String(base_node_id)])
     );
-    engine.write(
-        "owner",
-        capability(&direct)?,
-        "memory:generation:proof_steps",
-        &serde_json::json!({"summary":"Screened both structured routes."}),
-        Some("trace-p3-direct-write"),
-    )?;
     let mut first_results = serde_json::Map::new();
     first_results.insert(
         base_id,
@@ -1005,6 +998,17 @@ fn protocol_three_structured_research_contract_reaches_same_tex_finalizer() -> R
     assert!(shadow["research_state"]["plan_routes"].is_object());
 
     let assembler = engine.next_task("owner", &run_id, Some("trace-p3-assemble"))?;
+    let proof_steps = engine.read(
+        "owner",
+        capability(&assembler)?,
+        "memory:generation:proof_steps",
+        None,
+    )?;
+    assert_eq!(
+        proof_steps["content"].as_array().map(Vec::len),
+        Some(1),
+        "protocol-3 direct screening must persist its canonical proof_steps record"
+    );
     let proof = r"\begin{proof}By reflexivity, $1=1$.\end{proof}";
     engine.write(
         "owner",
