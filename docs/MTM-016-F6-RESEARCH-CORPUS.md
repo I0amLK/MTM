@@ -55,6 +55,21 @@ deleting/reconnecting/re-registering it, and must confirm the same client ID bef
 requesting the verifier task. A different client ID is a hard owner-continuity
 failure; do not repair it by changing database ownership or copying capabilities.
 
+Every fresh task card also supplies one deterministic, trial-scoped
+`creation_key`. It is not authentication and grants no workflow authority. Its only
+purpose is fail-closed recovery of the *same* intended `rethlas_start`: after a
+lost start response, generation may repeat the exact same start input with that
+same key, but may not rotate the key to create a replacement run. Immediately
+after a successful start response, generation writes `workspace/run-handoff.json`
+with schema `mtm-research-run-handoff-v1`. The handoff contains only the immutable
+trial/task/case/mode/problem identities, the exact returned `run_id`, and
+`non_authorizing:true`; it must not contain the creation key, OAuth client ID,
+operator key/token, capability, tunnel URL or operator log. The independent
+reviewer reads and validates this handoff before requesting the verifier task.
+Missing/conflicting handoff data is a stop condition, never permission to guess,
+enumerate or create a run. The handoff is a recovery locator, not review or pass
+evidence.
+
 This is a procedural handoff, not technical proof that two people or models are
 independent. Record who/what reviewed, the separate session boundary and the exact
 draft reviewed. A pseudonym or file hash alone is not an authenticated witness.

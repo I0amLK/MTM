@@ -138,6 +138,11 @@ grep -F 'dim(U+W)' "$tmp/task.md" > /dev/null
 grep -F 'verify' "$tmp/task.md" > /dev/null
 grep -F 'oauth_client_id' "$tmp/task.md" > /dev/null
 grep -F '不要删除、重连或重新注册 connector' "$tmp/task.md" > /dev/null
+grep -F 'creation_key 必须逐字使用 `mtm016-0123456789abcdef0123456789abcdef-u21-r1-subspace-dimension`' "$tmp/task.md" > /dev/null
+grep -F '`run-handoff.json`' "$tmp/task.md" > /dev/null
+grep -F '`mtm-research-run-handoff-v1`' "$tmp/task.md" > /dev/null
+grep -F '`non_authorizing:true`' "$tmp/task.md" > /dev/null
+grep -F 'handoff 缺失、字段冲突或 run 不匹配都必须停止' "$tmp/task.md" > /dev/null
 task_before=$(rs_hash "$tmp/task.md")
 deny rs_taskcard "$tmp/task.md" "$trial"
 [[ $(rs_hash "$tmp/task.md") == "$task_before" ]]

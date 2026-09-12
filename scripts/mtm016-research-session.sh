@@ -137,16 +137,18 @@ rs_manifest() {
 }
 
 rs_taskcard() {
-  local destination=$1 trial=$2
+  local destination=$1 trial=$2 creation_key
   [[ ! -e $destination && ! -L $destination ]] || return 1
+  creation_key="mtm016-${trial}-${rs_case}"
+  [[ $creation_key =~ ^[A-Za-z0-9_-]{16,128}$ ]] || return 1
   (
     set -o noclobber
     exec > "$destination" || exit 1
     printf '# MTM-016 %s repeat %s\n\n试次编号：`%s`。本文件是任务输入，不是通过证据。\n\n## 生成会话\n\n' "$rs_task" "$rs_repeat" "$trial"
-    printf '仅使用本次一次性验收连接，新建一个 `%s` workflow，problem_id 使用 `%s`，register_result=false。不要使用旧连接、旧 run 或已有专项测试结论。\n\n' "$rs_mode" "$rs_case"
+    printf '仅使用本次一次性验收连接，新建一个 `%s` workflow，problem_id 使用 `%s`，register_result=false，creation_key 必须逐字使用 `%s`。该 creation_key 只用于同一意图的幂等创建恢复，不是认证凭据；若 rethlas_start 回包丢失，只能以完全相同输入和该 key 重试，不得换 key 制造第二个 run。不要使用旧连接、旧 run 或已有专项测试结论。\n\n' "$rs_mode" "$rs_case" "$creation_key"
     printf '%s\n\n专项要求：%s\n\n' "$rs_problem" "$rs_requirement"
-    printf '%s\n\n' '严格按 rethlas_start / rethlas_step 实际返回的任务契约工作。不得伪造 capability、引用 ID 或 verification_report；不得绕过失败。最终证明必须经 required LaTeX 编译。开始生成前读取 server_info 并在本机记录本次 oauth_client_id；不要把它作为密钥发布。到 verify 后停止生成，但保持本次 TUI/隧道运行，由独立复核会话继续；不要替自己提交“无错误”报告。'
-    printf '## 独立复核会话\n\n%s\n\n' '保持生成阶段的 TUI/隧道在线。在新的会话中复用已经连接的同一 MTM 验收连接，不要删除、重连或重新注册 connector。先读取 server_info，要求 oauth_client_id 与生成阶段本机记录完全相同；不相同就停止，不读取或提交原 run。身份连续时再根据 run ID 获取当前 verifier 任务。只依据该角色合法返回的题目、证明与文献审计材料逐步核查；不要读取生成会话的结论标签或兄弟分支私有域。由复核者形成具体意见，再通过当前任务契约提交。若需要 repair，退回生成/修复会话，完成后由复核会话重新检查，同时继续保持同一 OAuth owner。'
+    printf '%s\n\n' '严格按 rethlas_start / rethlas_step 实际返回的任务契约工作。不得伪造 capability、引用 ID 或 verification_report；不得绕过失败。rethlas_start 成功取得 run_id 后，必须立即在 workspace 根目录写入 `run-handoff.json`，schema 为 `mtm-research-run-handoff-v1`，只包含 trial_id、task_id、repeat、case_id、workflow_mode、problem_id、run_id 和 `non_authorizing:true`；其中 run_id 必须逐字来自本次 start 回包。该文件不得包含 creation_key、oauth_client_id、OAuth key/token、capability、URL 或 operator.log。它只是恢复定位符，不是授权或通过证据。最终证明必须经 required LaTeX 编译。开始生成前读取 server_info 并在本机记录本次 oauth_client_id；不要把它作为密钥发布。到 verify 后停止生成，但保持本次 TUI/隧道运行，由独立复核会话继续；不要替自己提交“无错误”报告。'
+    printf '## 独立复核会话\n\n%s\n\n' '保持生成阶段的 TUI/隧道在线。在新的会话中复用已经连接的同一 MTM 验收连接，不要删除、重连或重新注册 connector。先读取 server_info，要求 oauth_client_id 与生成阶段本机记录完全相同；不相同就停止，不读取或提交原 run。身份连续时先读取 workspace 根目录的 `run-handoff.json`，要求 schema、trial_id、task_id、repeat、case_id、workflow_mode、problem_id 均与当前 task.md 一致，再逐字使用其中 run_id 获取当前 verifier 任务；handoff 缺失、字段冲突或 run 不匹配都必须停止，不得猜测、枚举或新建 run。只依据该角色合法返回的题目、证明与文献审计材料逐步核查；不要读取生成会话的结论标签或兄弟分支私有域。由复核者形成具体意见，再通过当前任务契约提交。若需要 repair，退回生成/修复会话，完成后由复核会话重新检查，同时继续保持同一 OAuth owner。'
     printf '%s\n\n' '对 U23，保留故意植入的首稿及首次具体缺陷报告，并明确这是种子修复挑战；不得把它说成自然发现的产品错误。对 U24，两个分支使用不同会话，按实际分支契约工作并等待所需分支封存。对 U25，CAS 命令仍须遵循 safe 模式的真实权限请求，不切换 dangerous。'
     printf '## 完成后保留\n\n%s\n\n' '保留该会话的私有 run ID、状态序列、所有候选稿与最终 tex、编译结果、引用审计、CAS 输入输出及独立复核意见。不得上传 OAuth key、token、capability 或 operator.log。只报告脱敏状态与计数；后续收集器仍需核对最终字节及各任务专属证据。'
     printf '%s\n' '本启动器不创建或推进 run、不提交 verifier 报告、不判断数学正确性、不更新 corpus 计数、不授权发布。启动成功、correct 字符串或 Ctrl-C 正常退出均不能单独判定试次通过。'
