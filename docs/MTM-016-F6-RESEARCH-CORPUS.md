@@ -145,6 +145,14 @@ Future Rust collector changes will require their own source check. U26-U29 and
 the complete research importer remain explicitly unfinished. The current corpus
 aggregate deliberately continues to reject complete/release claims.
 
+Later MTM-016 maintenance work adds the read-only private-bundle consistency gate
+in `docs/MTM-016-F6-RESEARCH-PRECHECK.md` and the closed U21-U25 release adapter in
+`docs/MTM-016-F6-RESEARCH-AGGREGATION.md`. Those layers do not retroactively turn
+this launcher into an evidence collector. Until fifteen real reviewed trial
+receipts exist, the active corpus remains 63 passed / 0 failed / 27 blocked. A
+future complete research batch advances only to the deliberately partial 78/12
+boundary; U26-U29 remain independently required.
+
 ### Exact-session stop and interrupted-session recovery
 
 If a foreground research TUI or an internal `__native-helper` remains after an
@@ -235,3 +243,14 @@ session under the repaired launcher and keep the same live OAuth connection from
 generation through independent review/finalization. If that live connection is
 lost again, retain the attempt and do not silently convert a restarted quick
 tunnel registration into the old owner.
+
+## Read-only evidence preparation entry
+
+`cargo xtask research-precheck --bundle <absolute-private-directory>` now checks
+bounded supplied evidence and reports missing U21-U25 material. Its contract and
+normalization rules are in `docs/MTM-016-F6-RESEARCH-PRECHECK.md`. It never imports
+a research trial, authenticates independent reviewers or authorizes release;
+every inventory keeps accepted-trial delta zero and manual validation required.
+Route-specific semantic checking and the research corpus importer remain pending.
+This Rust maintenance change requires a fresh source gate; earlier shell-only
+source-equivalence observations must not be reused to cover it automatically.

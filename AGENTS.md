@@ -258,3 +258,14 @@ A `correct` label, prepared session or clean process exit is not independent
 mathematical review. Keep U23's seeded gaps explicit. The research collector and
 release adapter remain pending; do not increase the sealed 63/90 corpus count
 from task cards or reuse old compiled-LaTeX/retrieval/CAS fixtures as new research.
+
+The later `cargo xtask research-precheck --bundle <absolute-private-directory>` is
+read-only evidence preparation; read `docs/MTM-016-F6-RESEARCH-PRECHECK.md`. A
+green precheck still grants no corpus pass. The closed release adapters in
+`docs/MTM-016-F6-RESEARCH-AGGREGATION.md` and
+`docs/MTM-016-F6-EXTERNAL-CORPUS.md` accept only complete, distinct U21-U25 and
+U26-U29 batches. Their synthetic fixtures are parser tests, never release evidence.
+Keep the active corpus at 63/27 until real trial receipts exist; then the only
+permitted intermediate research aggregate is 78/12 and the only complete aggregate
+is 90/0. Never reuse broad Native/browser/copied-state qualification receipts as
+corpus repetitions.

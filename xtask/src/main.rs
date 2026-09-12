@@ -22,6 +22,8 @@ mod qualify;
 mod records;
 #[cfg(target_os = "linux")]
 mod release_check;
+#[cfg(target_os = "linux")]
+mod research_precheck;
 mod retirement;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
@@ -56,6 +58,16 @@ fn run() -> Result<()> {
         .map_or(("help", &[][..]), |(name, tail)| (name.as_str(), tail));
     if name == "commit-message" {
         return commit_message::run(options);
+    }
+    #[cfg(target_os = "linux")]
+    if name == "research-precheck" {
+        let options = research_precheck::Options::parse(options)?;
+        let report = research_precheck::run(&root, &options)?;
+        println!("{}", serde_json::to_string_pretty(&report)?);
+        if report["required_material_present"] != true {
+            return Err("research evidence is incomplete; no corpus row accepted".into());
+        }
+        return Ok(());
     }
     if name == "dist" {
         let options = dist::Options::parse(options)?;
@@ -215,6 +227,9 @@ fn run() -> Result<()> {
             }
         }
         "help" | "--help" | "-h" => {
+            println!(
+                "cargo xtask research-precheck --bundle <absolute-private-directory>\n  Read-only evidence integrity/checklist, NOT mathematical acceptance or corpus import."
+            );
             println!(
                 "cargo xtask qualify --profile retrieval --binary <artifact> --sha256 <sha256> [--record]"
             );

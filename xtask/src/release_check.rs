@@ -9,8 +9,12 @@ use crate::{
     Result, capability, check_report, evidence_json, git, inventory, qualify, records, retirement,
 };
 
+#[path = "release_external_corpus.rs"]
+mod external_corpus_aggregate;
 #[path = "release_native_corpus.rs"]
 mod native_corpus_aggregate;
+#[path = "release_research_corpus.rs"]
+mod research_corpus_aggregate;
 
 const GATES: [&str; 14] = [
     "source",
@@ -716,6 +720,12 @@ fn validate_evidence(
         return Ok(true);
     }
     if name == "corpus" {
+        if value["schema"] == "mtm-usability-corpus-aggregate-v4" {
+            return external_corpus_aggregate::validate(root, value, manifest, cache);
+        }
+        if value["schema"] == "mtm-usability-corpus-aggregate-v3" {
+            return research_corpus_aggregate::validate(root, value, manifest, cache);
+        }
         if value["schema"] == "mtm-usability-corpus-aggregate-v2" {
             return native_corpus_aggregate::validate(root, value, manifest, cache);
         }
