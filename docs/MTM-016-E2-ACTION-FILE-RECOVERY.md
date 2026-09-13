@@ -142,4 +142,3 @@ With the successful exact-artifact run, Stage E is complete for the current cont
 new current-schema state-changing paths have either evidenced recovery or an explicit
 deterministic no-replay result. Historical opaque/unmarked work remains
 `RESULT_UNKNOWN`. This Stage-E completion is not release qualification.
-
