@@ -1,0 +1,33 @@
+{
+  "schema": "mtm-external-corpus-trial-evidence-v1",
+  "milestone": "MTM-016",
+  "task_id": "U27",
+  "scenario": "human_consent_decline",
+  "repeat": 2,
+  "trial_id": "ae6f999564b80c4f4daad718b831409b",
+  "candidate_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "candidate_source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+  "corpus_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861",
+  "witness_observation_sha256": "4da68d135ccdc1f5e3efe5096799c4ee8f4e9dab91adceb8e4f4937b0215e6d5",
+  "candidate_exact_observed": true,
+  "real_browser_observed": true,
+  "independent_human_observed": true,
+  "operator_authorized_copy": false,
+  "production_original_read_only": false,
+  "original_copy_unchanged": false,
+  "normal_invalid_count": 0,
+  "submission_rejection_count": 0,
+  "protected_effect_count": 0,
+  "route_checks": [
+    "real_browser",
+    "independent_human",
+    "decline_observed",
+    "cancel_observed",
+    "zero_protected_effects",
+    "exact_candidate"
+  ],
+  "raw_private_state_recorded": false,
+  "production_changed": false,
+  "release_qualified": false,
+  "recorded_unix_seconds": 1789307059
+}

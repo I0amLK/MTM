@@ -3641,6 +3641,88 @@
       "corpus":{"passed_trials":63,"failed_trials":0,"blocked_trials":27,"complete":false,"counts_changed":false},
       "remaining":"Complete U26-U28 with actual browser and human observations and the fourteen remaining U21-U25 research trials. Only a complete twelve-trial external batch and complete fifteen-trial research batch may feed the v4 90/0 aggregate. The referenced full handoff file is still unavailable and must be read before final delivery.",
       "product_source_changed":false,"test_source_changed":false,"candidate_bytes_changed":false,"source_gate_rerun_required_for_this_evidence_only_change":false,"release_inputs_changed":false,"accepted_historical_evidence_rewritten":false,"production_changed":false,"selector_changed":false,"git_push_performed":false,"release_qualified":false
+    },
+    {
+      "id": "MTM016-F6-C674-U27-THREE-HUMAN-TRIALS",
+      "status": "three_independently_operated_decline_cancel_trials_sealed_external_batch_incomplete",
+      "base_commit": "3247302a173bdd827644f530da44e08fdba4ac2f",
+      "candidate": {
+        "source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+        "sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034"
+      },
+      "client": {
+        "name": "MCP Inspector",
+        "version": "2.5.0",
+        "protocol": "2026-07-28",
+        "native_mode": "safe",
+        "native_backend": "bubblewrap",
+        "latex_policy": "static_only"
+      },
+      "trials": [
+        {
+          "task_id": "U27",
+          "repeat": 1,
+          "trial_id": "71254d976dfca1768b31f4c6f6498a41",
+          "path": "records/evidence/MTM-016/external-u27-r1-71254d976dfca1768b31f4c6f6498a41.json",
+          "sha256": "58b65f27ffcea265597b3d5cc6d2dafe42963a44c5d70e2afc0eecbad8594fae",
+          "witness_observation_sha256": "b676afcf4084d681e982bc9712d14b35a0b60199673be1e5ca6c1ab83279c799",
+          "recorded_unix_seconds": 1789305270
+        },
+        {
+          "task_id": "U27",
+          "repeat": 2,
+          "trial_id": "ae6f999564b80c4f4daad718b831409b",
+          "path": "records/evidence/MTM-016/external-u27-r2-ae6f999564b80c4f4daad718b831409b.json",
+          "sha256": "3446ba6ee5ca004a02ce5ba8081cd963b4241a5d576d7b7231c39a0d4733bb68",
+          "witness_observation_sha256": "4da68d135ccdc1f5e3efe5096799c4ee8f4e9dab91adceb8e4f4937b0215e6d5",
+          "recorded_unix_seconds": 1789307059
+        },
+        {
+          "task_id": "U27",
+          "repeat": 3,
+          "trial_id": "0b6057a3ec7e4548dce5a4f45297a941",
+          "path": "records/evidence/MTM-016/external-u27-r3-0b6057a3ec7e4548dce5a4f45297a941.json",
+          "sha256": "7b6d5c1476559ebf3fecb48b9d34f26d8d6f0089d77d4ded690cea697b4d73f4",
+          "witness_observation_sha256": "94812f9b70000f36b958b0b4823b03376095ca2d16a1f8d6914bc090d9908842",
+          "recorded_unix_seconds": 1789307657
+        }
+      ],
+      "observed_scope": {
+        "distinct_prospectively_prepared_trials": 3,
+        "logical_tool_calls": 18,
+        "actual_request_response_pairs": 24,
+        "human_declines": 3,
+        "human_cancels": 3,
+        "operator_personally_confirmed_all_six_ui_decisions": true,
+        "grants_issued": 0,
+        "expected_permission_required_command_results": 12,
+        "protected_effect_count": 0,
+        "normal_invalid_count": 0,
+        "submission_rejection_count": 0,
+        "normal_count_scope": "Only the three declared eight-pair intervals are counted. Their expected permission denials are negative checks; no workflow capability or submission was sent. The earlier malformed UI setup request is retained as a separate non-counting infrastructure-invalid attempt."
+      },
+      "human_boundary": "The assistant prepared and invoked requests and inspected actual UI and exported protocol observations; the operator independently clicked Decline and Cancel in client-owned forms and explicitly confirmed all six actions. The assistant generated no consent response and performed no UI action during the six challenge-to-response intervals. This is an observed procedure, not cryptographic attestation of physical clicks.",
+      "scope_limits": "U27 only. This does not establish U26 OAuth reconnect repetitions, U28 positive once/session/expiry/restart acceptance, independent mathematics, compiled LaTeX or release qualification. Earlier unsupported and malformed-parameter materials remain preserved.",
+      "external_trials_completed_on_current_candidate": 6,
+      "external_trials_required": 12,
+      "research_trials_completed_on_current_candidate": 1,
+      "research_trials_required": 15,
+      "corpus": {
+        "passed_trials": 63,
+        "failed_trials": 0,
+        "blocked_trials": 27,
+        "complete": false,
+        "counts_changed": false
+      },
+      "product_source_changed": false,
+      "test_source_changed": false,
+      "candidate_bytes_changed": false,
+      "release_inputs_changed": false,
+      "accepted_historical_evidence_rewritten": false,
+      "production_changed": false,
+      "selector_changed": false,
+      "git_push_performed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
