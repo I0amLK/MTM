@@ -4342,6 +4342,38 @@
       "selector_changed": false,
       "git_push_performed": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-F6-U28-THREE-EXTERNAL-TRIALS",
+      "status": "u28_three_external_receipts_sealed_external_scope_12_of_12_v4_waits_for_u25",
+      "base_commit": "bcb29db1579d4f23a29436ce4201143fb630d916",
+      "sealed_reports": [
+        {"path": "records/evidence/MTM-016/external-u28-r1-e69795934fea42509f788fb6bcb346b2.json", "sha256": "d1af333d84e3f30fef6eaf532008331ab03a6095259f586e3adbbb5e36442dee"},
+        {"path": "records/evidence/MTM-016/external-u28-r2-3caf0a831473d1ea00040e2866073a25.json", "sha256": "ab3858454eda8067e824631851cbd9dc9f817679d7f1cd078cbc6023b9e7d19a"},
+        {"path": "records/evidence/MTM-016/external-u28-r3-5dba8b1258f6ab32ef7b79a35b6e0b35.json", "sha256": "fa7ef456e9cfcbd797032b63621283c965eff94a4985d4a2f6e43c22489cdb09"}
+      ],
+      "external_trials_completed_on_current_candidate": 12,
+      "external_trials_required": 12,
+      "accepted_trials_delta": 3,
+      "research_trials_completed_on_current_candidate": 12,
+      "research_trials_required": 15,
+      "corpus": {
+        "passed_trials": 63,
+        "failed_trials": 0,
+        "blocked_trials": 27,
+        "complete": false,
+        "counts_changed": false
+      },
+      "formal_v4_adapter_pending_research_v3_base": true,
+      "product_source_changed": false,
+      "test_source_changed": false,
+      "candidate_bytes_changed": false,
+      "release_inputs_changed": false,
+      "accepted_historical_evidence_rewritten": false,
+      "production_changed": false,
+      "selector_changed": false,
+      "git_push_performed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
