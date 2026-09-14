@@ -1,0 +1,117 @@
+{
+  "schema": "mtm016-u25-cas-prerequisite-diagnostic-v1",
+  "milestone": "MTM-016",
+  "candidate_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "candidate_source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+  "case_registry_sha256": "cd6d6a758e667fca21d2a04d2eba9a015c1d156350b34438660dd8bd16ae1bb9",
+  "recorded_unix_seconds": 1789343783,
+  "trials": [
+    {
+      "task_id": "U25",
+      "repeat": 1,
+      "case_id": "u25-r1-rank-nullity",
+      "trial_id": "950cf14908115e1dfe70e132879a81e5",
+      "observation_sha256": "f6806642ff7ae36a64edbc34c8531b11120d600f4ec87d03df627582cadfb9a4",
+      "input_and_attempt_bindings": [
+        {
+          "tool": "sage",
+          "input_sha256": "795268f4ee260f3aa27e8054fb3d120c5d387d200f2ea12da2d9dbce432eef88",
+          "response_sha256": "743e0c9256a683c7e6e73d21b27de3b60addcfe333d2e740bde3b00a5d3ceccc",
+          "error_code": "NATIVE_EXECUTABLE_PATH_DENIED"
+        },
+        {
+          "tool": "magma",
+          "input_sha256": "656221045765381012f197c72b4989ec211561538dd42156546ffeba2130c62c",
+          "response_sha256": "cb7f1dfcd053068d09fc902a06c9e0cab7592e763dd50f26f5aa605eac8c6259",
+          "error_code": "NATIVE_EXECUTABLE_PATH_DENIED"
+        }
+      ],
+      "workflow_started": false,
+      "cas_execution_succeeded": false,
+      "permission_requested": false,
+      "accepted_trials_delta": 0,
+      "exact_runtime_stopped": true,
+      "launcher_inputs_unchanged": true
+    },
+    {
+      "task_id": "U25",
+      "repeat": 2,
+      "case_id": "u25-r2-finite-field-roots",
+      "trial_id": "d672ef3e6ee7cc9b337a1927411e3085",
+      "observation_sha256": "865261b36083ee5001da2e80602628402f5715b634402d7dcf7456718114da7b",
+      "input_and_attempt_bindings": [
+        {
+          "tool": "sage",
+          "input_sha256": "7eba42dbbec763a4c06629e00dfa2f007950b54fcebbadc5a14ef9849a57aa12",
+          "response_sha256": "d0b0c63f34d2a67d7de54eedfbff19f9d10841f7df163866dc85ed96b7afd6fb",
+          "error_code": "NATIVE_EXECUTABLE_PATH_DENIED"
+        },
+        {
+          "tool": "magma",
+          "input_sha256": "4206a289ceb6499f0047b4fcd6712565033679366e7e64616f391359b4d52f1f",
+          "response_sha256": "0f300c890ff17cdc41178fec812ac35b79af4c984fc75118bbf73fd5b374d1c0",
+          "error_code": "NATIVE_EXECUTABLE_PATH_DENIED"
+        }
+      ],
+      "workflow_started": false,
+      "cas_execution_succeeded": false,
+      "permission_requested": false,
+      "accepted_trials_delta": 0,
+      "exact_runtime_stopped": true,
+      "launcher_inputs_unchanged": true
+    },
+    {
+      "task_id": "U25",
+      "repeat": 3,
+      "case_id": "u25-r3-polynomial-gcd",
+      "trial_id": "e2e460b3950544881395a54ff7bb6d1c",
+      "observation_sha256": "79c1069980a99539321b68b130b61de77ff51eefe1d6e32185cda7e877e06de8",
+      "input_and_attempt_bindings": [
+        {
+          "tool": "sage",
+          "input_sha256": "39afcbac768712f3420f40921f411c526f9ac2251de01ec5b27ce2170e860a68",
+          "response_sha256": "4f1b6a8a83f1a8022544e925eadca3a62f1328be15edc67aef21015d904d7d94",
+          "error_code": "NATIVE_EXECUTABLE_PATH_DENIED"
+        },
+        {
+          "tool": "magma",
+          "input_sha256": "6ffdb45bc22f309c438a20788ad35dfbcb48b9d7575aa56bbe3266c10d7b8213",
+          "response_sha256": "6a8830b7e43526e473dc75fd51a18641ca0602061d07168758c8e86b4d2635af",
+          "error_code": "NATIVE_EXECUTABLE_PATH_DENIED"
+        }
+      ],
+      "workflow_started": false,
+      "cas_execution_succeeded": false,
+      "permission_requested": false,
+      "accepted_trials_delta": 0,
+      "exact_runtime_stopped": true,
+      "launcher_inputs_unchanged": true
+    }
+  ],
+  "finding": "The three unmodified research launchers exposed their private tool-bin only. The resolved Sage and Magma installations were outside that explicit read-only tool scope; all six task-specific Native calls were denied before execution.",
+  "isolated_configuration_diagnostic": {
+    "observation_sha256": "43421e8724695cd6552f515e8c965fcf3859a58fe6365315c6f21c59fc27dfa9",
+    "separate_disposable_frozen_helper": true,
+    "readonly_installation_roots_declared": 2,
+    "network_isolated": true,
+    "private_vault_hidden": true,
+    "sage_version_exit_code": 0,
+    "magma_start_exit_code": 1,
+    "magma_machine_authorization_rejected": true,
+    "helper_stdin_field_supported": false,
+    "scope": "Configuration diagnosis only; not a research workflow or Native consent observation."
+  },
+  "remaining_requirements": [
+    "Reviewed CAS toolchain configuration for the research launcher.",
+    "Actual authorized Sage/Magma execution and exact task input/output/version bindings, including the Magma machine-authorization prerequisite.",
+    "Actual safe-mode permission observations and independent full workflow review for each U25 repetition."
+  ],
+  "original_launchers_or_modes_changed": false,
+  "human_consent_responses_authored": false,
+  "host_calculations_substituted_for_u25": false,
+  "raw_private_state_recorded": false,
+  "accepted_trials_delta": 0,
+  "corpus_counts_changed": false,
+  "production_changed": false,
+  "release_qualified": false
+}

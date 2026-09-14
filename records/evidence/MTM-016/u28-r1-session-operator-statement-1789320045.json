@@ -1,0 +1,9 @@
+{
+  "schema": "mtm016-operator-session-statement-v1",
+  "recorded_unix_seconds": 1789320045,
+  "source": "user_message",
+  "statement": "U28-r1 scope=session 已实测通过：正确使用 request_permissions 后成功获得 session grant；同一进程内相同 exec_command 可连续复用；重启临时 candidate 后、不重新授权，再执行相同命令返回 PERMISSION_REQUIRED。session grant issuance / in-process reuse / restart invalidation 均 PASS。此前 oneOf 报错是调用形状问题，不是 session scope 问题。",
+  "scope": "U28-r1 session portion only",
+  "trial_identity_binding_pending": true,
+  "accepted_trials_delta": 0
+}

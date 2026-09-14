@@ -3723,6 +3723,316 @@
       "selector_changed": false,
       "git_push_performed": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-F6-C674-NONHUMAN-CONTINUATION",
+      "status": "reviewed_research_and_browser_receipts_sealed_cas_and_human_scope_blockers_retained",
+      "base_commit": "9813868fbeb16d055d91eaf93dff535d875cd7f5",
+      "candidate": {
+        "source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+        "sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034"
+      },
+      "new_research_trials": [
+        {
+          "task_id": "U21",
+          "repeat": 2,
+          "trial_id": "8d1b6f9d891714769c73d6f127c5c1b0",
+          "recorded_unix_seconds": 1789328591,
+          "case_id": "u21-r2-cauchy-schwarz",
+          "bundle_sha256": "9dc43c38d8d8c44602e78bd0240ab7870b4b225db9061dceb7b6a41da76d754e",
+          "reviewer_statement_checks": 12,
+          "path": "records/evidence/MTM-016/research-u21-r2-8d1b6f9d891714769c73d6f127c5c1b0.json",
+          "sha256": "884c00933f6ff2fc2629fad3be59cb1f7acee3d854dbbb142aeeefd86eb595fc"
+        },
+        {
+          "task_id": "U21",
+          "repeat": 3,
+          "trial_id": "d709b459a4ddb8f2d180027b8c48559a",
+          "recorded_unix_seconds": 1789333022,
+          "case_id": "u21-r3-monotone-limit",
+          "bundle_sha256": "18688c0f26fbcc870aa39ad1158300627b80808d9d129b157a391f1a8cd6af37",
+          "reviewer_statement_checks": 13,
+          "path": "records/evidence/MTM-016/research-u21-r3-d709b459a4ddb8f2d180027b8c48559a.json",
+          "sha256": "ded1e2483a9525bb94c5fdbbcb0b196ae61cd66e848960bb3072e58279567758"
+        },
+        {
+          "task_id": "U22",
+          "repeat": 1,
+          "trial_id": "35a340d2facdfa914b5ddb2ff9df0a13",
+          "recorded_unix_seconds": 1789333023,
+          "case_id": "u22-r1-chinese-remainder",
+          "bundle_sha256": "977b5b44071de69e88ff09b19ddeaffc28c105e56049d0b00c18e466e49bec01",
+          "reviewer_statement_checks": 10,
+          "path": "records/evidence/MTM-016/research-u22-r1-35a340d2facdfa914b5ddb2ff9df0a13.json",
+          "sha256": "25d81100acdb4334796ace6e669fa3a26a2b195c113443618870a4bb0203d1c3"
+        },
+        {
+          "task_id": "U22",
+          "repeat": 2,
+          "trial_id": "db88902481ea551b1c931556a9729dff",
+          "recorded_unix_seconds": 1789337801,
+          "case_id": "u22-r2-finite-polynomial-roots",
+          "bundle_sha256": "f86c1b90c8c9df3bf577d5d7d3588fcbdcc6f7929d87cbe33f8edfc345d90544",
+          "reviewer_statement_checks": 10,
+          "path": "records/evidence/MTM-016/research-u22-r2-db88902481ea551b1c931556a9729dff.json",
+          "sha256": "0007cafb60bd12419d0fd3e521795b1d7d94e9f27f5a2ad6012b074d6010a13b"
+        },
+        {
+          "task_id": "U22",
+          "repeat": 3,
+          "trial_id": "de0c19616ceb63f141e99e4e80f51f18",
+          "recorded_unix_seconds": 1789338001,
+          "case_id": "u22-r3-orbit-stabilizer",
+          "bundle_sha256": "6b5ef2b47c3e922cd279800af8710f320954738e7765081b7a8b9038d1d107ee",
+          "reviewer_statement_checks": 11,
+          "path": "records/evidence/MTM-016/research-u22-r3-de0c19616ceb63f141e99e4e80f51f18.json",
+          "sha256": "a7628435972d8a8eab30b687c6f79aaacb7e7d0874feaaf896b09fb214f57df5"
+        },
+        {
+          "task_id": "U23",
+          "repeat": 1,
+          "trial_id": "bcacdc8300d4d2b64f70b4ca18210c0c",
+          "recorded_unix_seconds": 1789338002,
+          "case_id": "u23-r1-uniform-continuity-gap",
+          "bundle_sha256": "ea2ff3358b7682f583c3fb1fa10c75289f1f532c7d6f40e45688ae920897aae7",
+          "reviewer_statement_checks": 9,
+          "path": "records/evidence/MTM-016/research-u23-r1-bcacdc8300d4d2b64f70b4ca18210c0c.json",
+          "sha256": "58132fb6ce812fee7af50be48ea2c6f331aec52b6d8351419cfc05bfbc028d2e"
+        },
+        {
+          "task_id": "U23",
+          "repeat": 2,
+          "trial_id": "9f703a30b6eedfb12b56baf2584a0b9e",
+          "recorded_unix_seconds": 1789340636,
+          "case_id": "u23-r2-finite-domain-gap",
+          "bundle_sha256": "cb2e780f1ca9d099bc893804a383cd15ccd9073c80726c68bab5736b8e0079ac",
+          "reviewer_statement_checks": 7,
+          "path": "records/evidence/MTM-016/research-u23-r2-9f703a30b6eedfb12b56baf2584a0b9e.json",
+          "sha256": "61935ae091ff73ee15b290799e2b0e6445174a8c9d5ce2d78196ca4d53bec128"
+        },
+        {
+          "task_id": "U23",
+          "repeat": 3,
+          "trial_id": "17fbbc76351fa5185defe6ea788724e7",
+          "recorded_unix_seconds": 1789343222,
+          "case_id": "u23-r3-matrix-inverse-gap",
+          "bundle_sha256": "fc3016d96b1823d0c3f4b11e67185572a32618d15280f7a5e5aa4efce94da8d1",
+          "reviewer_statement_checks": 11,
+          "path": "records/evidence/MTM-016/research-u23-r3-17fbbc76351fa5185defe6ea788724e7.json",
+          "sha256": "071fcc1d7a5909a83434b3cc224144901ec31b0bb495e1eab09a542b0c4681ba"
+        },
+        {
+          "task_id": "U24",
+          "repeat": 1,
+          "trial_id": "4bd5fcec18d8a6bf88d193097ad3739f",
+          "recorded_unix_seconds": 1789348363,
+          "case_id": "u24-r1-geometric-series",
+          "bundle_sha256": "679522a04bce22eee4e0818647b9bfa4667553b630ecc2e74a248eeb3a663506",
+          "reviewer_statement_checks": 9,
+          "path": "records/evidence/MTM-016/research-u24-r1-4bd5fcec18d8a6bf88d193097ad3739f.json",
+          "sha256": "08a1df5d3c479691a31ab4ede196c8dc8c14009ba49018cad213bcb8f9af346f"
+        },
+        {
+          "task_id": "U24",
+          "repeat": 2,
+          "trial_id": "d0083ee37b512ee00ad3711905bdb428",
+          "recorded_unix_seconds": 1789350245,
+          "case_id": "u24-r2-idempotent-decomposition",
+          "bundle_sha256": "4207cf531322e77a6b0ca59c381c107bb89eeae2f05638efbc7a75bf1ef97493",
+          "reviewer_statement_checks": 10,
+          "path": "records/evidence/MTM-016/research-u24-r2-d0083ee37b512ee00ad3711905bdb428.json",
+          "sha256": "1a5a20a32a996f8cdaa0482da194de5209a985f1c799cd056c4010bbbb2b55af"
+        },
+        {
+          "task_id": "U24",
+          "repeat": 3,
+          "trial_id": "4e862e08b45665a99b1d936794933e3b",
+          "recorded_unix_seconds": 1789350247,
+          "case_id": "u24-r3-sum-of-squares",
+          "bundle_sha256": "2865724357e2159d7cc29a95ffaab4f8c21176e52dc41c1f663d76d0f6dd235d",
+          "reviewer_statement_checks": 8,
+          "path": "records/evidence/MTM-016/research-u24-r3-4e862e08b45665a99b1d936794933e3b.json",
+          "sha256": "948df3649ce925aa8aa1a73b5041eb4daadebe86b4664585c08a14da21a1d0b0"
+        }
+      ],
+      "new_external_trials": [
+        {
+          "task_id": "U26",
+          "repeat": 1,
+          "trial_id": "58c2a040ef4a6e891c1dbdcfe0ab50ad",
+          "recorded_unix_seconds": 1789334508,
+          "witness_observation_sha256": "0ddf18f7987320ea5597bb60b6bc74c7c0fd010052fa7564be8f4013644ff5c0",
+          "path": "records/evidence/MTM-016/external-u26-r1-58c2a040ef4a6e891c1dbdcfe0ab50ad.json",
+          "sha256": "08a760bfa7572a3fdeae81e161a2f7b7563ddc5fa53def743ba693863cb1aa85"
+        },
+        {
+          "task_id": "U26",
+          "repeat": 2,
+          "trial_id": "4e4706b8418d8c808979f91e18be67de",
+          "recorded_unix_seconds": 1789334776,
+          "witness_observation_sha256": "158d5de3be5677045f690468486e0fc2a43019827f5cbc8fcd93535b9204e56a",
+          "path": "records/evidence/MTM-016/external-u26-r2-4e4706b8418d8c808979f91e18be67de.json",
+          "sha256": "1b1413ead728e1e236f6fdf9b32310860b3d0a4babe7bc0c65ab09bc237acd2f"
+        },
+        {
+          "task_id": "U26",
+          "repeat": 3,
+          "trial_id": "968a711120bbef4de9dc08aafcee6b92",
+          "recorded_unix_seconds": 1789334939,
+          "witness_observation_sha256": "969613b3c9030d01ca051512b8305fd7a13d0a0b3164d1f68f9ab89c814da4f6",
+          "path": "records/evidence/MTM-016/external-u26-r3-968a711120bbef4de9dc08aafcee6b92.json",
+          "sha256": "0f96df4c110c01836c8ec3450788409e47aea8acf186839afcff5fdd37850e61"
+        }
+      ],
+      "non_counting_observations": [
+        {
+          "path": "records/evidence/MTM-016/u25-cas-prerequisite-blockers-c674843-1789343783.json",
+          "sha256": "272430ed123656cf2c9f58f5e3ca7dab7faf7c0b8514adf04d150e2a5c2fa02d",
+          "accepted_trials_delta": 0
+        },
+        {
+          "path": "records/evidence/MTM-016/u28-r1-session-operator-statement-1789320045.json",
+          "sha256": "d2025e99bc87b14e6edbde2dcc788555b0ec585f284857ef443da7b1358f59d5",
+          "accepted_trials_delta": 0
+        }
+      ],
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-016/research-u21-r2-8d1b6f9d891714769c73d6f127c5c1b0.json",
+          "sha256": "884c00933f6ff2fc2629fad3be59cb1f7acee3d854dbbb142aeeefd86eb595fc"
+        },
+        {
+          "path": "records/evidence/MTM-016/research-u21-r3-d709b459a4ddb8f2d180027b8c48559a.json",
+          "sha256": "ded1e2483a9525bb94c5fdbbcb0b196ae61cd66e848960bb3072e58279567758"
+        },
+        {
+          "path": "records/evidence/MTM-016/research-u22-r1-35a340d2facdfa914b5ddb2ff9df0a13.json",
+          "sha256": "25d81100acdb4334796ace6e669fa3a26a2b195c113443618870a4bb0203d1c3"
+        },
+        {
+          "path": "records/evidence/MTM-016/research-u22-r2-db88902481ea551b1c931556a9729dff.json",
+          "sha256": "0007cafb60bd12419d0fd3e521795b1d7d94e9f27f5a2ad6012b074d6010a13b"
+        },
+        {
+          "path": "records/evidence/MTM-016/research-u22-r3-de0c19616ceb63f141e99e4e80f51f18.json",
+          "sha256": "a7628435972d8a8eab30b687c6f79aaacb7e7d0874feaaf896b09fb214f57df5"
+        },
+        {
+          "path": "records/evidence/MTM-016/research-u23-r1-bcacdc8300d4d2b64f70b4ca18210c0c.json",
+          "sha256": "58132fb6ce812fee7af50be48ea2c6f331aec52b6d8351419cfc05bfbc028d2e"
+        },
+        {
+          "path": "records/evidence/MTM-016/research-u23-r2-9f703a30b6eedfb12b56baf2584a0b9e.json",
+          "sha256": "61935ae091ff73ee15b290799e2b0e6445174a8c9d5ce2d78196ca4d53bec128"
+        },
+        {
+          "path": "records/evidence/MTM-016/research-u23-r3-17fbbc76351fa5185defe6ea788724e7.json",
+          "sha256": "071fcc1d7a5909a83434b3cc224144901ec31b0bb495e1eab09a542b0c4681ba"
+        },
+        {
+          "path": "records/evidence/MTM-016/research-u24-r1-4bd5fcec18d8a6bf88d193097ad3739f.json",
+          "sha256": "08a1df5d3c479691a31ab4ede196c8dc8c14009ba49018cad213bcb8f9af346f"
+        },
+        {
+          "path": "records/evidence/MTM-016/research-u24-r2-d0083ee37b512ee00ad3711905bdb428.json",
+          "sha256": "1a5a20a32a996f8cdaa0482da194de5209a985f1c799cd056c4010bbbb2b55af"
+        },
+        {
+          "path": "records/evidence/MTM-016/research-u24-r3-4e862e08b45665a99b1d936794933e3b.json",
+          "sha256": "948df3649ce925aa8aa1a73b5041eb4daadebe86b4664585c08a14da21a1d0b0"
+        },
+        {
+          "path": "records/evidence/MTM-016/external-u26-r1-58c2a040ef4a6e891c1dbdcfe0ab50ad.json",
+          "sha256": "08a760bfa7572a3fdeae81e161a2f7b7563ddc5fa53def743ba693863cb1aa85"
+        },
+        {
+          "path": "records/evidence/MTM-016/external-u26-r2-4e4706b8418d8c808979f91e18be67de.json",
+          "sha256": "1b1413ead728e1e236f6fdf9b32310860b3d0a4babe7bc0c65ab09bc237acd2f"
+        },
+        {
+          "path": "records/evidence/MTM-016/external-u26-r3-968a711120bbef4de9dc08aafcee6b92.json",
+          "sha256": "0f96df4c110c01836c8ec3450788409e47aea8acf186839afcff5fdd37850e61"
+        },
+        {
+          "path": "records/evidence/MTM-016/u25-cas-prerequisite-blockers-c674843-1789343783.json",
+          "sha256": "272430ed123656cf2c9f58f5e3ca7dab7faf7c0b8514adf04d150e2a5c2fa02d"
+        },
+        {
+          "path": "records/evidence/MTM-016/u28-r1-session-operator-statement-1789320045.json",
+          "sha256": "d2025e99bc87b14e6edbde2dcc788555b0ec585f284857ef443da7b1358f59d5"
+        }
+      ],
+      "research_observed_scope": {
+        "new_completed_trials": 11,
+        "substantive_statement_checks": 110,
+        "actual_separate_generator_and_reviewer_contexts_each_trial": true,
+        "same_live_oauth_owner_each_trial": true,
+        "required_compilation_and_exact_reviewed_final_bytes_each_trial": true,
+        "u22_real_retrieval_original_source_inspection_and_bound_audit": 3,
+        "u23_seeded_gap_independently_found_repaired_recompiled_and_reverified": 3,
+        "u24_independent_alternative_branch_contexts": 6,
+        "u24_actual_sibling_private_read_denials": 6,
+        "u24_all_required_branches_sealed_before_lawful_join": 3,
+        "u24_branch_and_join_hashes_measured_from_stored_bytes": true,
+        "collection_not_used_as_sole_mathematical_acceptance_basis": true,
+        "completed_u21_r1_reexecuted": false,
+        "prior_failures_and_expired_capability_observations_retained": true
+      },
+      "u26_observed_scope": {
+        "browser": "Firefox 152.0.3",
+        "visible_browser": true,
+        "client": "MCP Inspector 2.5.0",
+        "protocol": "2026-07-28",
+        "new_distinct_trials": 3,
+        "authenticated_connections": 6,
+        "authenticated_responses_checked": 24,
+        "actual_dcr_s256_protected_resource_and_reconnect_each_trial": true,
+        "same_oauth_owner_before_and_after_each_reconnect": true,
+        "normal_invalid_count": 0,
+        "submission_rejection_count": 0,
+        "initial_unauthenticated_bootstrap_errors_retained_separately": 3,
+        "independent_human_observed": false,
+        "native_permission_responses_authored": 0
+      },
+      "u25_scope": "Three actual task-specific prerequisite attempts retained six NATIVE_EXECUTABLE_PATH_DENIED results before execution. A separate safe, network-isolated helper diagnostic with explicit read-only installation roots allowed Sage version execution but Magma rejected machine authorization. No CAS research pass, permission grant, host-computation substitution or licensing workaround is claimed.",
+      "u28_scope": "The operator reports U28-r1 session grant issuance, in-process reuse and restart invalidation PASS; the earlier oneOf error was a request-shape issue. Preserve that report without reclassifying it as a session-scope failure. Full trial identity/restart linkage, once/expiry observations and all three full repetitions remain incomplete. No new human prompt or consent response was generated in this continuation.",
+      "cleanup": {
+        "new_completed_research_sessions_closed": 11,
+        "blocked_u25_sessions_closed": 3,
+        "u26_exact_browser_inspector_runtime_cleanup_complete": 3,
+        "all_research_launcher_inputs_unchanged_at_close": true,
+        "force_used": false,
+        "existing_operator_u28_client_untouched": true
+      },
+      "research_trials_completed_on_current_candidate": 12,
+      "research_trials_required": 15,
+      "external_trials_completed_on_current_candidate": 9,
+      "external_trials_required": 12,
+      "corpus": {
+        "passed_trials": 63,
+        "failed_trials": 0,
+        "blocked_trials": 27,
+        "complete": false,
+        "counts_changed": false
+      },
+      "acceptance_boundary": "These are reviewed per-trial receipts, not a partial corpus import. U25 and U28 remain missing from the complete fifteen-trial research and twelve-trial external batches; the only admissible aggregate transitions remain 78/12 then 90/0. Browser automation is not a human consent witness, and distinct model contexts are a recorded procedure rather than cryptographic independence.",
+      "remaining": [
+        "U25 reviewed CAS configuration, machine authorization, actual safe-mode permission observations and complete independently reviewed workflows.",
+        "U28 full real human consent-scope trials and complete evidence linkage; current-candidate broad browser/human gate.",
+        "Full original handoff review when the referenced missing file is available.",
+        "Complete corpus batches and all original release conditions before the already authorized non-forced push."
+      ],
+      "original_validation_files_preserved_byte_for_byte": 19,
+      "product_source_changed": false,
+      "test_source_changed": false,
+      "candidate_bytes_changed": false,
+      "source_gate_rerun_required_for_this_evidence_only_change": false,
+      "release_inputs_changed": false,
+      "accepted_historical_evidence_rewritten": false,
+      "production_changed": false,
+      "selector_changed": false,
+      "git_push_performed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [

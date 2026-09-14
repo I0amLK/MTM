@@ -1,0 +1,33 @@
+{
+  "schema": "mtm-external-corpus-trial-evidence-v1",
+  "milestone": "MTM-016",
+  "task_id": "U26",
+  "scenario": "browser_oauth_reconnect",
+  "repeat": 2,
+  "trial_id": "4e4706b8418d8c808979f91e18be67de",
+  "candidate_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "candidate_source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+  "corpus_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861",
+  "witness_observation_sha256": "158d5de3be5677045f690468486e0fc2a43019827f5cbc8fcd93535b9204e56a",
+  "candidate_exact_observed": true,
+  "real_browser_observed": true,
+  "independent_human_observed": false,
+  "operator_authorized_copy": false,
+  "production_original_read_only": false,
+  "original_copy_unchanged": false,
+  "normal_invalid_count": 0,
+  "submission_rejection_count": 0,
+  "protected_effect_count": 0,
+  "route_checks": [
+    "real_browser",
+    "dcr_pkce",
+    "protected_resource",
+    "reconnect_exact_candidate",
+    "normal_invalid_zero",
+    "submission_rejections_zero"
+  ],
+  "raw_private_state_recorded": false,
+  "production_changed": false,
+  "release_qualified": false,
+  "recorded_unix_seconds": 1789334776
+}
