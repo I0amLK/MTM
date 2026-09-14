@@ -78,6 +78,12 @@ ln -s /usr/bin/true "$tmp/tools/stub"
 [[ $(rs_tool stub "$tmp/tools") == /usr/bin/true ]]
 deny rs_tool stub '.:relative:'
 deny rs_tool absent "$tmp/tools"
+mkdir -p "$tmp/cas prefix/bin" "$tmp/cas-flat"
+cp /usr/bin/true "$tmp/cas prefix/bin/sage"
+cp /usr/bin/true "$tmp/cas-flat/magma"
+[[ $(rs_tool_root "$tmp/cas prefix/bin/sage") == "$tmp/cas prefix" ]]
+[[ $(rs_tool_root "$tmp/cas-flat/magma") == "$tmp/cas-flat" ]]
+deny rs_tool_root "$tmp/cas prefix"
 printf 'RESEARCH_SESSION_TEST private_directory_and_minimal_path_guards=passed\n'
 
 cp /usr/bin/true "$tmp/artifact"
@@ -106,6 +112,12 @@ grep -Fx 'MTM_LATEX_POLICY=required' "$tmp/child-environment" > /dev/null
 grep -Fx "MTM_NATIVE_EXEC_ALLOW_ROOTS=$tmp/private/tool-bin" "$tmp/child-environment" > /dev/null
 if grep -E 'never-use|synthetic-test|MTM_TOKEN_SECRET|MTM_OAUTH_PASSWORD|MTM_CAPABILITY_SECRET' "$tmp/child-environment" > /dev/null; then exit 1; fi
 printf 'RESEARCH_SESSION_TEST inherited_roots_and_secrets_removed=passed\n'
+rs_environment "$tmp/private" "$tmp/cas prefix" "$tmp/cas-flat" "$tmp/cas prefix"
+"${rs_env[@]}" /usr/bin/env > "$tmp/cas-child-environment"
+grep -Fx "MTM_NATIVE_EXEC_ALLOW_ROOTS=$tmp/private/tool-bin:$tmp/cas prefix:$tmp/cas-flat" "$tmp/cas-child-environment" > /dev/null
+deny rs_environment "$tmp/private" relative
+deny rs_environment "$tmp/private" '/tmp/invalid:root'
+printf 'RESEARCH_SESSION_TEST u25_explicit_tool_roots_are_bounded_and_deduplicated=passed\n'
 deny rs_environment '/tmp/session:another-root'
 deny rs_environment $'/tmp/session\nextra'
 deny rs_environment relative

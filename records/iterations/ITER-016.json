@@ -4033,6 +4033,101 @@
       "selector_changed": false,
       "git_push_performed": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-F6-U25-CAS-TOOLCHAIN-ROOT-REPAIR",
+      "status": "research_launcher_u25_explicit_cas_roots_repaired_shell_conformance_passed_host_trial_pending",
+      "base_commit": "b65210e5b13558bf436f43e4850f9c1f63ee8610",
+      "scope": "Repair only the U25 research launcher's safe-mode visibility of the already resolved Sage and Magma installations. Do not change Native mode, grant semantics, frozen candidate bytes, production state, existing research receipts or corpus counts.",
+      "diagnosis": "The three retained U25 prerequisite attempts failed before CAS execution with NATIVE_EXECUTABLE_PATH_DENIED because the launcher symlinked Sage and Magma into the private session tool-bin while declaring only that symlink directory as an explicit Native toolchain root. Native executable resolution follows the symlink to the real installation, which was outside the declared read-only roots.",
+      "repair": {
+        "u25_only": true,
+        "resolved_executable_root_rule": "A resolved executable under bin, sbin or executables maps to the directory above that component; a flat executable maps to its containing directory.",
+        "environment_rule": "Append only the canonical U25 CAS installation roots to the existing private tool-bin in MTM_NATIVE_EXEC_ALLOW_ROOTS; reject relative, colon-containing, newline-containing, missing and non-directory roots and deduplicate exact canonical roots.",
+        "u21_u24_extra_roots": 0,
+        "native_mode": "safe",
+        "toolchain_mount_mode": "read_only",
+        "host_path_inherited": false,
+        "network_or_vault_policy_changed": false,
+        "permission_or_consent_policy_changed": false
+      },
+      "host_diagnostics": {
+        "sage_resolved_installation_family": "miniconda3",
+        "magma_resolved_installation_family": "magma",
+        "magma_version": "V2.29-8",
+        "direct_magma_arithmetic_exit_code": 0,
+        "direct_magma_arithmetic_output": "2",
+        "interpretation": "The current host-visible Magma executable can perform arithmetic in this maintenance context. This does not establish safe-mode U25 execution or supersede the retained isolated machine-authorization failure."
+      },
+      "validation": {
+        "shell_syntax_exit_code": 0,
+        "research_session_conformance_exit_code": 0,
+        "negative_cases": 86,
+        "path_with_spaces_tested": true,
+        "duplicate_root_dedup_tested": true,
+        "runtime_server_started": false,
+        "research_trials_executed": 0,
+        "tunnel_started": false,
+        "production_source_accessed": false,
+        "nested_exact_candidate_probe": {
+          "passed": false,
+          "classified_as_product_failure": false,
+          "error_code": "NATIVE_HELPER_ATTESTATION_FAILED",
+          "platform_boundary": "nested Bubblewrap namespace creation returned ENOSPC before an ordinary-host U25 acceptance run could be established",
+          "acceptance_claimed": false
+        },
+        "repository_static_gates": {
+          "records_exit_code": 0,
+          "historical_hashes_checked": 26,
+          "sealed_observation_hashes_checked": 116,
+          "retirement_exit_code": 0,
+          "retired_python_files": 127,
+          "audit_strict_exit_code": 0,
+          "rust_only_ready": true,
+          "diff_check_exit_code": 0
+        },
+        "toolchain_note": {
+          "initial_records_run_exit_code": 0,
+          "initial_default_rustup_home_missing_toolchain": true,
+          "initial_rustup_auto_install_observed": true,
+          "initial_run_counted_as_acceptance_basis": false,
+          "subsequent_cargo_rustup_home": "/workspace/.mtm-rustup-cache",
+          "subsequent_rustup_auto_install_disabled": true,
+          "records_reexecuted_with_project_cache_exit_code": 0,
+          "first_commit_hook_attempt_exit_code": 1,
+          "first_commit_hook_failure": "offline Cargo invocation used the empty sandbox-default Cargo home and could not resolve the cached serde package",
+          "first_commit_created": false,
+          "recovery": "Reuse the existing /home/lk/.cargo package cache with the same isolated target directory and project Rustup cache; do not enable network or weaken the hook."
+        }
+      },
+      "delivered_file_hashes": {
+        "scripts/mtm016-research-session.sh": "9e5a143ec137246b4644b0df676419dc61b1592c9e4612463be35ae8b24eda79",
+        "conformance/mtm016-research-session-tests.sh": "a72c2ba28ffb7cb7e69e332a0ee6df5645e14c159d996a738dbd0d6a4b05716c",
+        "docs/MTM-016-F6-RESEARCH-CORPUS.md": "9ad29f1f36df20dd9ecbe1a6438fe9bd0d1d162e23545bb9d6281488066737fc"
+      },
+      "acceptance_boundary": "This closes the reviewed launcher-path defect only. The nested maintenance environment cannot substitute for a fresh ordinary-host U25 candidate session. Each U25 repetition still requires successful exact-candidate Native preflight, actual safe-mode Sage and Magma execution with any required human grant, exact version/input/output bindings, a proof independent of finite computation and independent mathematical review.",
+      "research_trials_completed_on_current_candidate": 12,
+      "research_trials_required": 15,
+      "external_trials_completed_on_current_candidate": 9,
+      "external_trials_required": 12,
+      "accepted_trials_delta": 0,
+      "corpus": {
+        "passed_trials": 63,
+        "failed_trials": 0,
+        "blocked_trials": 27,
+        "complete": false,
+        "counts_changed": false
+      },
+      "product_source_changed": false,
+      "test_source_changed": true,
+      "candidate_bytes_changed": false,
+      "release_inputs_changed": false,
+      "accepted_historical_evidence_rewritten": false,
+      "human_consent_responses_authored": false,
+      "production_changed": false,
+      "selector_changed": false,
+      "git_push_performed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [

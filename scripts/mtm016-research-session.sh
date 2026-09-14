@@ -85,18 +85,49 @@ rs_tool() {
   return 1
 }
 
+rs_tool_root() {
+  local executable=$1 directory leaf root resolved
+  [[ $executable == /* && -f $executable && -x $executable ]] || return 1
+  executable=$(/usr/bin/readlink -e -- "$executable") || return 1
+  directory=${executable%/*}
+  [[ -n $directory ]] || directory=/
+  leaf=${directory##*/}
+  case $leaf in
+    bin|sbin|executables)
+      root=${directory%/*}
+      [[ -n $root ]] || root=/
+      ;;
+    *) root=$directory ;;
+  esac
+  resolved=$(/usr/bin/readlink -e -- "$root") || return 1
+  [[ $resolved == /* && -d $resolved ]] || return 1
+  printf '%s' "$resolved"
+}
+
 rs_environment() {
-  local session=$1
+  local session=$1 root resolved allow_roots
+  shift
   # PATH lookup happens outside the fixed compiler helper. Safe mode deliberately
-  # disables auto-discovery, so expose only these links, not their parent session.
+  # disables auto-discovery, so every non-system addition is an explicit
+  # read-only toolchain root rather than inherited host PATH state.
   [[ $session == /* && $session != *:* && $session != *$'\n'* && $session != *$'\r'* ]] || return 1
+  allow_roots=$session/tool-bin
+  for root in "$@"; do
+    [[ $root == /* && $root != *:* && $root != *$'\n'* && $root != *$'\r'* ]] || return 1
+    resolved=$(/usr/bin/readlink -e -- "$root") || return 1
+    [[ -d $resolved ]] || return 1
+    case :$allow_roots: in
+      *:"$resolved":*) ;;
+      *) allow_roots=$allow_roots:$resolved ;;
+    esac
+  done
   rs_env=(/usr/bin/env -i
     "HOME=$session/home" "PATH=$session/tool-bin" LC_ALL=C LANG=C.UTF-8
     "TMPDIR=$session/tmp" "XDG_CACHE_HOME=$session/home/.cache"
     "MTM_WORKSPACE=$session/workspace" "MTM_DATA_ROOT=$session/data"
     "MTM_PRIVATE_ROOT=$session/data/private" "MTM_DEBUG_ROOT=$session/data/debug"
     MTM_DEBUG=1 MTM_TRACE_PAYLOADS=0 MTM_NATIVE_EXEC_BACKEND=bubblewrap
-    "MTM_NATIVE_EXEC_ALLOW_ROOTS=$session/tool-bin"
+    "MTM_NATIVE_EXEC_ALLOW_ROOTS=$allow_roots"
     MTM_NATIVE_MODE=safe MTM_LATEX_POLICY=required MTM_WORKFLOW_PROTOCOL_VERSION=3
     TOKIO_WORKER_THREADS=2)
 }
@@ -158,8 +189,8 @@ rs_taskcard() {
 rs_main() {
   rs_args "$@" || { rs_fail usage_task_U21_to_U25_repeat_1_to_3_optional_prepare_only; return 1; }
   local repo script registry corpus candidate commit launcher_hash registry_hash before after
-  local home parent session trial password name resolved rc
-  local -a names tools pipe_status
+  local home parent session trial password name resolved existing seen rc
+  local -a names tools pipe_status cas_roots
   repo=$(cd -- "$(/usr/bin/dirname -- "${BASH_SOURCE[0]}")/.." && /usr/bin/pwd -P) || return 1
   script=$repo/scripts/mtm016-research-session.sh
   registry=$repo/conformance/mtm016-research-cases.tsv
@@ -181,6 +212,17 @@ rs_main() {
     resolved=$(rs_tool "$name" "${PATH:-}") || { printf 'MTM_RESEARCH_SESSION_DIAGNOSTIC tool=%s\n' "$name" >&2; rs_fail required_tool_unavailable; return 1; }
     tools+=("$resolved")
   done
+  cas_roots=()
+  if [[ $rs_task == U25 ]]; then
+    for ((rc=${#tools[@]}-2; rc<${#tools[@]}; rc++)); do
+      resolved=$(rs_tool_root "${tools[$rc]}") || { rs_fail cas_tool_root; return 1; }
+      seen=false
+      for existing in "${cas_roots[@]}"; do
+        [[ $existing != "$resolved" ]] || { seen=true; break; }
+      done
+      [[ $seen == true ]] || cas_roots+=("$resolved")
+    done
+  fi
   if [[ $rs_prepare_only == false ]]; then
     [[ -t 0 && -t 1 && -t 2 ]] || { rs_fail interactive_terminal_required; return 1; }
   fi
@@ -207,7 +249,7 @@ rs_main() {
   printf '\n本机查看任务卡：cat %q\n本机查看本次 OAuth key：cat %q\n不要上传 key、URL 或原始日志。\n' "$session/task.md" "$session/operator-key.txt"
   [[ $rs_prepare_only == false ]] || return 0
   before=$(/usr/bin/sha256sum -- "$script" "$registry" "$corpus" "$candidate" "$session/candidate" "$session/task.md" "$session/workspace/task.md")
-  rs_environment "$session" || { rs_fail session_path_encoding; return 1; }
+  rs_environment "$session" "${cas_roots[@]}" || { rs_fail session_path_encoding; return 1; }
   # Exact CLI attestation precedes the public tunnel. Only new disposable state
   # roots are configured; no production path is accepted or discovered.
   if ! /usr/bin/timeout --signal=TERM --kill-after=3s 20s "${rs_env[@]}" "$session/candidate" attest-native --workspace "$session/workspace" --native-mode safe --latex-policy required > "$session/native-preflight.json" 2> "$session/native-preflight.stderr"; then

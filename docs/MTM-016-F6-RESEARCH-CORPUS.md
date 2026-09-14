@@ -266,6 +266,18 @@ generation through independent review/finalization. If that live connection is
 lost again, retain the attempt and do not silently convert a restarted quick
 tunnel registration into the old owner.
 
+U25 has one additional toolchain requirement. The launcher resolves `sage` and
+`magma` before the disposable runtime starts and derives a narrow installation root
+for each resolved executable: an executable under `bin`, `sbin`, or `executables`
+maps to the directory above that component; a flat executable maps to its containing
+directory. Only for U25, those resolved directories are added to the existing
+session `tool-bin` in `MTM_NATIVE_EXEC_ALLOW_ROOTS`. The runtime still uses Native
+safe mode, read-only toolchain mounts, an isolated network namespace and a hidden
+private vault; U21--U24 receive no extra CAS roots and the host PATH is not inherited.
+This repairs executable visibility only. It does not authorize a command, alter a
+Magma licence, substitute a host calculation, or satisfy the required U25 CAS and
+independent-review evidence.
+
 ## Read-only evidence preparation entry
 
 `cargo xtask research-precheck --bundle <absolute-private-directory>` now checks
