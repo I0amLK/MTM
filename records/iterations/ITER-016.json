@@ -4554,6 +4554,77 @@
       "selector_changed": false,
       "git_push_performed": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-U25-R1-DANGEROUS-V2-SEALED",
+      "status": "u25_r1_dangerous_v2_reviewed_collected_and_sealed_research_13_of_15",
+      "base_commit": "856d07c40cedf5990127c0256a0a8e136dc61f6f",
+      "trial_id": "33e1ccd25dc93f57f33c109e1dbfb0c1",
+      "task_id": "U25",
+      "repeat": 1,
+      "case_id": "u25-r1-rank-nullity",
+      "workflow_mode": "full",
+      "native_mode": "dangerous",
+      "candidate": {
+        "source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+        "sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034"
+      },
+      "collector": {
+        "schema": "mtm-research-collection-v1",
+        "bundle_manifest_sha256": "aabd17497b1c27da99a56a4dc333c3383e4514cb2eb28a45d52fdd9f3059e09d",
+        "final_tex_sha256": "536f2cfeaf1ba4388056ea7ec444e63f8a1efba171d8c5ad0f04d20997a347db",
+        "verification_report_sha256": "cc6478e0d6600122872370e7c2b18d8049b27f0e0eec8578eaba1d49f14f68ec",
+        "proof_manifest_sha256": "9bf7112c2a4ac24f732d5fcd508a56c373a00204a04030df929ada65ce531927",
+        "required_material_present": true,
+        "precheck_consistent": true,
+        "workflow_mutations": 0,
+        "research_trial_passed_by_collector": false,
+        "mathematical_review_authenticated_by_collector": false
+      },
+      "reviewed_scope": {
+        "independent_review_observed": true,
+        "same_live_oauth_owner_observed": true,
+        "reviewer_statement_checks": 5,
+        "required_latex_passed": true,
+        "final_artifact_sealed": true,
+        "external_reference_count": 0,
+        "sage_version": "10.9",
+        "magma_version": "2.29-8",
+        "sage_and_magma_outputs_agree": true,
+        "general_proof_independent_of_finite_computation": true,
+        "initial_verifier_capability_invalid_writes_applied": 0,
+        "initial_verifier_capability_invalid_writes_retained": false,
+        "recoverable_resubmission_used_fresh_capability": true,
+        "duplicate_verifier_writes_observed": false
+      },
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-016/research-u25-r1-33e1ccd25dc93f57f33c109e1dbfb0c1.json",
+          "sha256": "1b2434f6f1a1816d8656becac49cb5adf90bde23d6f1258f7ca570aee4c12c58"
+        }
+      ],
+      "research_trials_completed_on_current_candidate": 13,
+      "research_trials_required": 15,
+      "external_trials_completed_on_current_candidate": 12,
+      "external_trials_required": 12,
+      "accepted_trials_delta": 1,
+      "corpus": {
+        "passed_trials": 63,
+        "failed_trials": 0,
+        "blocked_trials": 27,
+        "complete": false,
+        "counts_changed": false
+      },
+      "acceptance_boundary": "This seals one reviewed U25 v2 dangerous-Native research trial. The collector is non-authorizing; acceptance follows the separately reviewed mathematical evidence and the closed public trial receipt. Corpus counts remain 63/0/27 until all fifteen U21-U25 cells form the v2 research batch, at which point the only permitted intermediate aggregate is 78/0/12.",
+      "product_source_changed": false,
+      "test_source_changed": false,
+      "candidate_bytes_changed": false,
+      "release_inputs_changed": false,
+      "accepted_historical_evidence_rewritten": false,
+      "production_changed": false,
+      "selector_changed": false,
+      "git_push_performed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
