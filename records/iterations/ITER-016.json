@@ -4256,6 +4256,92 @@
       "selector_changed": false,
       "git_push_performed": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-F6-U25-POST-ROOT-REPAIR-DIAGNOSTIC",
+      "status": "launcher_root_fix_revalidated_three_prepare_only_sessions_created_outer_cas_crosscheck_passed_nested_native_preflight_blocked",
+      "base_commit": "e67cd29cd275dd8394d98e1eb4a516b12db12271",
+      "candidate": {
+        "source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+        "sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034"
+      },
+      "launcher": {
+        "sha256": "9e5a143ec137246b4644b0df676419dc61b1592c9e4612463be35ae8b24eda79",
+        "blob_unchanged_from_8e74793": true,
+        "conformance_exit_code": 0,
+        "negative_cases": 86,
+        "u25_explicit_tool_roots_bounded_and_deduplicated": true,
+        "u21_u24_extra_cas_roots": 0
+      },
+      "prepare_only_trials": [
+        {"repeat": 1, "trial_id": "490b832b3cab9569ea8109890688cdd2", "case_id": "u25-r1-rank-nullity", "runtime_executed": false},
+        {"repeat": 2, "trial_id": "fde5223f647ad7a3bd9ffa80e40b80a3", "case_id": "u25-r2-finite-field-roots", "runtime_executed": false},
+        {"repeat": 3, "trial_id": "412d2b99bf72c9db113760dd3323c495", "case_id": "u25-r3-polynomial-gcd", "runtime_executed": false}
+      ],
+      "resolved_cas_roots": {
+        "sage": "/home/lk/miniconda3",
+        "magma": "/home/lk/magma",
+        "mount_mode": "read_only"
+      },
+      "exact_candidate_native_preflight": {
+        "repeat_probed": 1,
+        "passed": false,
+        "error_code": "NATIVE_HELPER_ATTESTATION_FAILED",
+        "bubblewrap_errno": "ENOSPC",
+        "failure_stage": "namespace_attestation_before_cas_execution_or_permission_request",
+        "classified_as_product_failure": false,
+        "classified_as_research_trial_failure": false,
+        "r2_r3_repeated_same_environment_probe": false
+      },
+      "outer_cas_diagnostic": {
+        "acceptance_claimed": false,
+        "sage_version": "10.9",
+        "magma_version": "V2.29-8",
+        "sage_and_magma_invocations": 6,
+        "all_exit_zero": true,
+        "r1_semantic_agreement": "t=-1,0,1,2 each rank=2 nullity=1",
+        "r2_semantic_agreement": "p=2,3,5 all field elements simple roots and gcd(f,fprime)=1",
+        "r3_semantic_agreement": "gcd=x-1 and explicit Bezout identity verified"
+      },
+      "commit_validation": {
+        "standard_hook_attempt_exit_code": 1,
+        "standard_hook_failure": "offline Cargo hook used a sandbox-default package cache without serde; no commit was created",
+        "standard_hook_policy_changed": false,
+        "network_enabled_for_recovery": false,
+        "staged_files_changed_after_hook_failure": true,
+        "fallback_validator": "current built mtm-xtask commit-message against the exact workspace-stored commit message",
+        "fallback_validator_exit_code": 0,
+        "fallback_validator_ok": true,
+        "fallback_scope": "evidence-only commit after direct execution of the same Rust commit-message policy; not a release or acceptance bypass"
+      },
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-016/u25-post-root-repair-diagnostic-e67cd29.json",
+          "sha256": "0d6eb1216a9a38feb942960d02c3951351cc9f96f0fc06f8004f7d6c4263ce05",
+          "accepted_trials_delta": 0
+        }
+      ],
+      "research_trials_completed_on_current_candidate": 12,
+      "research_trials_required": 15,
+      "external_trials_completed_on_current_candidate": 9,
+      "external_trials_required": 12,
+      "corpus": {
+        "passed_trials": 63,
+        "failed_trials": 0,
+        "blocked_trials": 27,
+        "complete": false,
+        "counts_changed": false
+      },
+      "next_required_action": "Run fresh ordinary-host U25 r1/r2/r3 sessions from the unchanged launcher. Each counted trial still requires successful exact-candidate safe Native preflight, real Sage and Magma calls through the candidate permission boundary, exact input/output bindings, required LaTeX, proof independent of finite computation, separate reviewer session and collection. Do not promote the prepare-only trial ids or outer CAS diagnostics.",
+      "product_source_changed": false,
+      "test_source_changed": false,
+      "candidate_bytes_changed": false,
+      "release_inputs_changed": false,
+      "accepted_historical_evidence_rewritten": false,
+      "production_changed": false,
+      "selector_changed": false,
+      "git_push_performed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
