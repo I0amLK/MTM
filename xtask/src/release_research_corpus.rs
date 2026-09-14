@@ -163,7 +163,7 @@ fn expected_route_checks(task: &str) -> Result<Vec<&'static str>> {
         "U25" => &[
             "sage_executed",
             "magma_executed",
-            "safe_mode_permission_observed",
+            "dangerous_native_observed",
             "cas_bound_to_inputs_outputs",
             "general_proof_independent",
         ],
@@ -182,10 +182,11 @@ fn marker(value: &str) -> bool {
 }
 
 fn trial(value: &Value, manifest: &Manifest, task: &str, repeat: u64) -> Result<u64> {
+    let policy = crate::research_precheck::research_policy(task)?;
     let evidence: TrialEvidence = serde_json::from_value(value.clone())
         .map_err(|_| "research trial evidence schema invalid")?;
     let expected_checks = expected_route_checks(task)?;
-    if evidence.schema != "mtm-research-trial-evidence-v1"
+    if evidence.schema != policy.trial_schema
         || evidence.milestone != "MTM-016"
         || evidence.task_id != task
         || evidence.scenario != scenario(task)?
@@ -234,7 +235,7 @@ fn trial(value: &Value, manifest: &Manifest, task: &str, repeat: u64) -> Result<
 fn batch(root: &Path, value: &Value, manifest: &Manifest) -> Result<()> {
     let batch: ResearchBatch = serde_json::from_value(value.clone())
         .map_err(|_| "research corpus batch schema invalid")?;
-    if batch.schema != "mtm-research-corpus-batch-v1"
+    if batch.schema != "mtm-research-corpus-batch-v2"
         || batch.milestone != "MTM-016"
         || !identity_matches(
             &batch.candidate_sha256,
@@ -363,7 +364,7 @@ mod tests {
 
     fn trial_fixture(task: &str, repeat: u64) -> Result<Value> {
         Ok(json!({
-            "schema":"mtm-research-trial-evidence-v1","milestone":"MTM-016",
+            "schema":crate::research_precheck::research_policy(task)?.trial_schema,"milestone":"MTM-016",
             "task_id":task,"scenario":scenario(task)?,"repeat":repeat,"case_id":expected_case(task,repeat)?,
             "trial_id":format!("{:032x}",(task.as_bytes()[2]-b'0') as u64*10+repeat),
             "candidate_sha256":"a".repeat(64),"candidate_source_commit":"b".repeat(40),
@@ -404,6 +405,34 @@ mod tests {
                     "mutated {pointer}"
                 );
             }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn u25_requires_v2_and_cannot_import_a_legacy_permission_receipt() -> Result<()> {
+        let manifest = manifest();
+        let good = trial_fixture("U25", 1)?;
+        assert_eq!(good["schema"], "mtm-research-trial-evidence-v2");
+        for (key, value) in [
+            ("schema", json!("mtm-research-trial-evidence-v1")),
+            ("independent_review_observed", json!(false)),
+            ("required_latex_passed", json!(false)),
+            ("final_artifact_sealed", json!(false)),
+        ] {
+            let mut bad = good.clone();
+            bad[key] = value;
+            assert!(trial(&bad, &manifest, "U25", 1).is_err());
+        }
+        let mut legacy_route = good.clone();
+        legacy_route["route_checks"][7] = json!("safe_mode_permission_observed");
+        assert!(trial(&legacy_route, &manifest, "U25", 1).is_err());
+        for task in ["U21", "U22", "U23", "U24"] {
+            let mut good = trial_fixture(task, 1)?;
+            assert_eq!(good["schema"], "mtm-research-trial-evidence-v1");
+            trial(&good, &manifest, task, 1)?;
+            good["schema"] = json!("mtm-research-trial-evidence-v2");
+            assert!(trial(&good, &manifest, task, 1).is_err());
         }
         Ok(())
     }
@@ -459,7 +488,7 @@ mod tests {
             }
         }
         let good = json!({
-            "schema":"mtm-research-corpus-batch-v1","milestone":"MTM-016",
+            "schema":"mtm-research-corpus-batch-v2","milestone":"MTM-016",
             "candidate_sha256":manifest.candidate_sha256,"candidate_source_commit":manifest.candidate_source_commit,
             "corpus_sha256":corpus_sha(),"case_registry_sha256":cases_sha(),"trials":refs,
             "tasks":5,"repeats":3,"passed_trials":15,"failed_trials":0,
@@ -467,6 +496,7 @@ mod tests {
         });
         batch(root.path(), &good, &manifest)?;
         for (pointer, replacement) in [
+            ("/schema", json!("mtm-research-corpus-batch-v1")),
             ("/passed_trials", json!(14)),
             ("/complete_for_research_scope", json!(false)),
             ("/trials/1/repeat", json!(1)),

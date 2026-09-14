@@ -91,7 +91,9 @@ that cannot be reconstructed safely from the database/vault:
 - U22: `retrieval.json`, `sources.json`; reference-audit rows come from SQLite.
 - U23: `seeded_draft.tex`, `first_findings.json`, `repair_history.json`.
 - U24: `branches.json`.
-- U25: Sage/Magma input/output files and `cas_observation.json`.
+- U25: Sage/Magma input/output files and `cas_observation.json` using
+  `mtm-research-cas-observation-v2`, from a fresh U25 v2 dangerous-Native session.
+  Permission observations are not required; independent review and exact bytes are.
 
 Missing route files stop collection. There is no fabricated default or partial
 success bundle.
@@ -111,7 +113,8 @@ collector summary exposes hashes/counts, the relative bundle-directory name and 
 owner fingerprint only; it never emits proof text, run-owner bytes, OAuth secrets,
 capabilities, databases or raw compiler/retrieval/CAS bodies.
 
-Successful collection still does not create `mtm-research-trial-evidence-v1` or a
-corpus pass. Substantive review of the private bundle and the separately reviewed
+Successful collection still does not create a public research-trial receipt
+(v1 for U21-U24, v2 for U25) or a corpus pass. Substantive review of the private
+bundle and the separately reviewed
 sanitized trial receipt remain required before the v3 research aggregate can
 advance from 63/27 to 78/12.

@@ -4374,6 +4374,102 @@
       "selector_changed": false,
       "git_push_performed": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-U25-DANGEROUS-REAL-WORKFLOW-V2",
+      "status": "acceptance_contract_amended_validation_and_fresh_u25_trials_pending",
+      "base_commit": "114b23fc2f3fbb228f1aac5cffce437832d0d290",
+      "operator_approved": true,
+      "design": "docs/MTM-016-U25-DANGEROUS-V2.md",
+      "scope": "U25 uses the existing dangerous Native research path; no new permission gate.",
+      "versions": {
+        "u25_session": "mtm-research-session-v2",
+        "u25_cas": "mtm-research-cas-observation-v2",
+        "u25_trial": "mtm-research-trial-evidence-v2",
+        "research_batch": "mtm-research-corpus-batch-v2"
+      },
+      "unchanged": [
+        "U21-U24 v1 session and trial contracts",
+        "External trial and batch contracts",
+        "U28 human evidence",
+        "Native permission implementation",
+        "OAuth, workflow capabilities, verifier and finalizer",
+        "required LaTeX",
+        "frozen candidate, corpus and case registry"
+      ],
+      "prior_safe_u25": {
+        "trial_id": "59a608d5c7608064ab25623032d9d3cc",
+        "disposition": "retain_as_diagnostic_not_relabelled_or_counted",
+        "accepted_trials_delta": 0,
+        "runtime_stop_not_claimed": true
+      },
+      "validation": {
+        "execution_status": "pending",
+        "new_capable_host_source_receipt_required": true,
+        "old_source_receipt_rewrite_allowed": false,
+        "synthetic_tests_are_real_trial_evidence": false
+      },
+      "candidate_bytes_changed": false,
+      "candidate_source_commit_changed": false,
+      "product_source_changed": false,
+      "acceptance_source_changed": true,
+      "new_release_gates": 0,
+      "release_inputs_changed": false,
+      "accepted_historical_evidence_rewritten": false,
+      "accepted_trials_delta": 0,
+      "research_trials_completed_on_current_candidate": 12,
+      "research_trials_required": 15,
+      "external_trials_completed_on_current_candidate": 12,
+      "external_trials_required": 12,
+      "corpus": {
+        "passed_trials": 63,
+        "failed_trials": 0,
+        "blocked_trials": 27,
+        "counts_changed": false
+      },
+      "production_changed": false,
+      "selector_changed": false,
+      "git_push_performed": false,
+      "release_qualified": false
+    },
+    {
+      "id": "MTM016-U25-DANGEROUS-V2-MTM-VALIDATION",
+      "status": "package_applied_contract_tests_passed_capable_host_source_gate_pending",
+      "base_commit": "114b23fc2f3fbb228f1aac5cffce437832d0d290",
+      "package_patch_sha256": "bce7eb3883f3ff78683a94e063e12286a34bed776f31a0068d968f3da688450f",
+      "validation": {
+        "shell_syntax_exit_code": 0,
+        "research_session_conformance_exit_code": 0,
+        "research_session_negative_cases": 91,
+        "format_check_exit_code": 0,
+        "mtm_xtask_unit_tests_passed": 121,
+        "mtm_xtask_unit_tests_failed": 0,
+        "mtm_xtask_cli_tests_failed": 0,
+        "mtm_xtask_clippy_exit_code": 0,
+        "records_exit_code": 0,
+        "retirement_exit_code": 0,
+        "audit_strict_exit_code": 0,
+        "diff_check_exit_code": 0,
+        "capable_host_source_gate_executed": false,
+        "capable_host_source_gate_blocker": "direct xtask check invocation blocked before execution by platform safety layer in maintenance session"
+      },
+      "frozen_inputs_changed": false,
+      "product_source_changed": false,
+      "candidate_bytes_changed": false,
+      "release_inputs_changed": false,
+      "accepted_historical_evidence_rewritten": false,
+      "real_u25_v2_trials_executed": 0,
+      "accepted_trials_delta": 0,
+      "corpus": {
+        "passed_trials": 63,
+        "failed_trials": 0,
+        "blocked_trials": 27,
+        "counts_changed": false
+      },
+      "production_changed": false,
+      "selector_changed": false,
+      "git_push_performed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [

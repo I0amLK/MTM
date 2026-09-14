@@ -17,8 +17,10 @@ still leaves the release corpus gate blocked for U26-U29.
 
 ## Per-trial evidence
 
-Each public sanitized receipt uses schema `mtm-research-trial-evidence-v1` and is
-stored under `records/evidence/MTM-016/`. It binds the frozen candidate/source,
+U21-U24 sanitized receipts retain schema `mtm-research-trial-evidence-v1`.
+New U25 receipts use `mtm-research-trial-evidence-v2`; old U25 v1 receipts cannot
+be relabelled or imported into the active batch. Each receipt is stored under
+`records/evidence/MTM-016/`. It binds the frozen candidate/source,
 corpus and research-case registry plus one task/repeat/case/trial. It records only
 hashes and bounded procedural facts, never a run id, OAuth client id, capability,
 operator key, proof body, source body, CAS body, database or transport log.
@@ -42,9 +44,10 @@ common checks. U22 additionally requires retrieval, original/authoritative-sourc
 inspection and bound reference audits. U23 requires preservation of the seeded
 gap, a specific independent finding, repaired recompilation and re-verification.
 U24 requires at least two branch routes with distinct domains, observed sibling
-privacy denial and sealing before join. U25 requires actual Sage and Magma use,
-safe-mode permission observation, exact I/O binding and a proof independent of
-finite computation.
+privacy denial and sealing before join. U25 requires actual Sage and Magma use
+under dangerous Native, exact I/O binding and a proof independent of finite
+computation. Its route includes `dangerous_native_observed`, not a safe-mode
+permission observation. Reviewer and finalizer requirements are unchanged.
 
 These fields are evidence claims that must be produced from the retained private
 trial. The release adapter validates their closed shape and cross-trial identity;
@@ -54,8 +57,9 @@ are structurally valid.
 
 ## Research batch
 
-`mtm-research-corpus-batch-v1` contains exactly fifteen references to the fifteen
-per-trial receipts. It requires each U21-U25 x repeat 1-3 cell exactly once, fifteen
+`mtm-research-corpus-batch-v2` contains exactly fifteen references: twelve
+unchanged U21-U24 v1 receipts and three fresh U25 v2 receipts. It requires each
+U21-U25 x repeat 1-3 cell exactly once, fifteen
 distinct evidence paths/hashes, fifteen distinct trial ids and fifteen distinct
 recording timestamps. Every referenced receipt is reopened and revalidated; a
 caller cannot supply only aggregate counts.

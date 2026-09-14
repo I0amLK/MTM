@@ -211,6 +211,7 @@ fn strict_json<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T> {
 }
 
 fn validate_session_manifest(value: &SessionManifest, session_name: &str) -> Result<()> {
+    let policy = research_precheck::research_policy(&value.task_id)?;
     let expected_mode = if matches!(value.task_id.as_str(), "U21" | "U23") {
         "compact"
     } else {
@@ -218,7 +219,7 @@ fn validate_session_manifest(value: &SessionManifest, session_name: &str) -> Res
     };
     let expected_prefix = format!("{}-r{}.", value.task_id, value.repeat);
     require(
-        value.schema == "mtm-research-session-v1"
+        value.schema == policy.session_schema
             && value.milestone == "MTM-016"
             && matches!(
                 value.task_id.as_str(),
@@ -238,7 +239,7 @@ fn validate_session_manifest(value: &SessionManifest, session_name: &str) -> Res
             && hex(&value.launcher_sha256, 64)
             && value.case_registry_sha256 == research_precheck::REGISTRY_SHA
             && value.corpus_sha256 == research_precheck::CORPUS_SHA
-            && value.native_mode == "safe"
+            && value.native_mode == policy.native_mode
             && value.latex_policy == "required"
             && value.session_prepared
             && !value.runtime_executed
@@ -958,6 +959,7 @@ mod tests {
         validate_session_manifest(&base, "U21-r1.ABCdef12")?;
         let mut bad = serde_json::to_value(&base)?;
         for (pointer, value) in [
+            ("/schema", json!("mtm-research-session-v2")),
             ("/native_mode", json!("dangerous")),
             ("/latex_policy", json!("static_only")),
             ("/runtime_executed", json!(true)),
@@ -969,6 +971,27 @@ mod tests {
             *value_bad.pointer_mut(pointer).ok_or("fixture pointer")? = value;
             let parsed: SessionManifest = serde_json::from_value(value_bad)?;
             assert!(validate_session_manifest(&parsed, "U21-r1.ABCdef12").is_err());
+        }
+        // Only newly prepared U25 v2 sessions may use dangerous Native.
+        let mut u25 = serde_json::to_value(&base)?;
+        u25["schema"] = json!("mtm-research-session-v2");
+        u25["task_id"] = json!("U25");
+        u25["case_id"] = json!("u25-r1-rank-nullity");
+        u25["workflow_mode"] = json!("full");
+        u25["native_mode"] = json!("dangerous");
+        let parsed: SessionManifest = serde_json::from_value(u25.clone())?;
+        validate_session_manifest(&parsed, "U25-r1.ABCdef12")?;
+        for (key, replacement) in [
+            ("schema", json!("mtm-research-session-v1")),
+            ("native_mode", json!("safe")),
+            ("native_mode", json!("trusted")),
+            ("latex_policy", json!("static_only")),
+            ("independent_review_recorded", json!(true)),
+        ] {
+            let mut changed = u25.clone();
+            changed[key] = replacement;
+            let parsed: SessionManifest = serde_json::from_value(changed)?;
+            assert!(validate_session_manifest(&parsed, "U25-r1.ABCdef12").is_err());
         }
         bad["extra"] = json!(true);
         assert!(serde_json::from_value::<SessionManifest>(bad).is_err());

@@ -100,18 +100,17 @@ hash checked before execution. `env -i` removes inherited production roots,
 tokens, server URLs, debug configuration and dangerous-mode settings. The new
 HOME, workspace, data, private and debug roots are all under the fresh session.
 The minimal PATH contains reviewed resolved host tool executables; U25 alone adds
-Sage and Magma. `Native=safe`, `LaTeX=required`, workflow protocol 3 and disabled
-payload tracing are explicit. Native CLI attestation runs before the tunnel;
+Sage and Magma. U21-U24 use `Native=safe`; fresh U25 v2 sessions use
+`Native=dangerous`. `LaTeX=required`, workflow protocol 3 and disabled payload
+tracing remain explicit. Native CLI attestation runs before the tunnel;
 failure retains private diagnostics and stops without retry or fallback.
 
-Safe mode does not auto-discover the foreground process's PATH directories.
-The launcher now declares only the new session's `tool-bin` as an explicit
-read-only tool root. It never declares the parent session, HOME, data or private
-directory. This is necessary because the fixed compiler helper receives the
-absolute alias found on the foreground PATH; an unmounted alias can fail even
-when `/usr/bin/latexmk` works. This change does not enable host-PATH inheritance,
-change Native modes or disable the required compilation gate. Non-system CAS
-dependencies remain a separate U25 prerequisite, not acceptance from this repair.
+For U21-U24, safe mode does not auto-discover foreground PATH directories.
+The session's `tool-bin` is an explicit read-only alias root; the parent session,
+HOME, data and private roots are never declared as toolchain roots. The fixed
+compiler helper can therefore resolve its alias without weakening required
+compilation. U25 additionally exposes its resolved CAS installations as described
+below; neither alias visibility nor a successful preparation is CAS acceptance.
 
 The TUI is a foreground host process, not an additional outer OS sandbox. Its
 Native commands and LaTeX retain the existing candidate's isolation. Do not infer
@@ -271,12 +270,14 @@ U25 has one additional toolchain requirement. The launcher resolves `sage` and
 for each resolved executable: an executable under `bin`, `sbin`, or `executables`
 maps to the directory above that component; a flat executable maps to its containing
 directory. Only for U25, those resolved directories are added to the existing
-session `tool-bin` in `MTM_NATIVE_EXEC_ALLOW_ROOTS`. The runtime still uses Native
-safe mode, read-only toolchain mounts, an isolated network namespace and a hidden
-private vault; U21--U24 receive no extra CAS roots and the host PATH is not inherited.
-This repairs executable visibility only. It does not authorize a command, alter a
-Magma licence, substitute a host calculation, or satisfy the required U25 CAS and
-independent-review evidence.
+session `tool-bin` in `MTM_NATIVE_EXEC_ALLOW_ROOTS`. Fresh U25 v2 sessions use the
+existing dangerous Native mode, including its shared network namespace and
+read-only discovery from the curated session PATH. They keep a hidden private
+vault and all workflow/verifier/finalizer authorization checks. U21-U24 retain
+safe mode and receive no extra CAS roots; the host login PATH is not inherited.
+No Inspector grant or artificial network marker is required for U25. This does
+not alter a Magma licence or substitute a host calculation for a trial execution.
+See `docs/MTM-016-U25-DANGEROUS-V2.md` for the versioned acceptance amendment.
 
 ## Read-only evidence preparation entry
 

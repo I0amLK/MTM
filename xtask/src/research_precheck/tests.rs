@@ -113,13 +113,15 @@ fn fixture(task: &str, repeat: u8) -> Result<Fixture> {
     }).collect();
     for kind in required(task)? {
         let value = match kind {
-            Kind::Session => json!({"schema":"mtm-research-session-v1","milestone":"MTM-016",
+            Kind::Session => {
+                json!({"schema":research_policy(task)?.session_schema,"milestone":"MTM-016",
                 "task_id":task,"repeat":repeat,"case_id":case.id,"workflow_mode":case.mode,
                 "trial_id":bundle.trial_id,"candidate_sha256":CANDIDATE_SHA,"candidate_source_commit":CANDIDATE_SOURCE,
                 "launcher_source_commit":"c".repeat(40),"launcher_sha256":"d".repeat(64),
                 "case_registry_sha256":REGISTRY_SHA,"corpus_sha256":CORPUS_SHA,
-                "native_mode":"safe","latex_policy":"required","session_prepared":true,
-                "runtime_executed":false,"independent_review_recorded":false,"research_trial_passed":false,"release_qualified":false}),
+                "native_mode":research_policy(task)?.native_mode,"latex_policy":"required","session_prepared":true,
+                "runtime_executed":false,"independent_review_recorded":false,"research_trial_passed":false,"release_qualified":false})
+            }
             Kind::Status => json!({"ok":true,"run_id":bundle.run_id,"problem_id":case.id,
                 "state":"done","status":"done","sealed":true,"verdict":"correct","latex_passed":true,
                 "manual_validation_required":true,"pending_submission":null,"transition_seq":transitions.len()}),
@@ -174,15 +176,13 @@ fn fixture(task: &str, repeat: u8) -> Result<Fixture> {
                     "result_sha256":"6".repeat(64)}})
             }
             Kind::CasObservation => {
-                json!({"schema":"mtm-research-cas-observation-v1","run_id":bundle.run_id,
-                "native_mode":"safe","general_proof_independent":true,"raw_credentials_recorded":false,
+                json!({"schema":"mtm-research-cas-observation-v2","run_id":bundle.run_id,
+                "native_mode":"dangerous","general_proof_independent":true,"raw_credentials_recorded":false,
                 "tools":[
                     {"name":"sage","version":"synthetic-sage","input_sha256":hash(sage_input),
-                        "output_sha256":hash(sage_output),"exit_code":0,
-                        "permission_challenge_observed":true,"permission_granted":true},
+                        "output_sha256":hash(sage_output),"exit_code":0},
                     {"name":"magma","version":"synthetic-magma","input_sha256":hash(magma_input),
-                        "output_sha256":hash(magma_output),"exit_code":0,
-                        "permission_challenge_observed":true,"permission_granted":true}]})
+                        "output_sha256":hash(magma_output),"exit_code":0}]})
             }
             _ => {
                 json!({"synthetic_material":"Presence only. Route semantics are NOT verified by this fixture."})
@@ -523,16 +523,26 @@ fn branch_route_requires_distinct_sealed_isolated_branches_and_join_order() -> R
 }
 
 #[test]
-fn cas_route_requires_safe_permissioned_sage_and_magma_bound_to_exact_io() -> Result<()> {
+fn cas_route_requires_dangerous_sage_and_magma_bound_to_exact_io() -> Result<()> {
     for (pointer, value) in [
-        ("/native_mode", json!("dangerous")),
+        ("/schema", json!("mtm-research-cas-observation-v1")),
+        ("/schema", json!("mtm-research-cas-observation-v99")),
+        ("/native_mode", json!("safe")),
+        ("/native_mode", json!("trusted")),
+        ("/run_id", json!("other-run")),
         ("/general_proof_independent", json!(false)),
         ("/raw_credentials_recorded", json!(true)),
-        ("/tools/0/permission_challenge_observed", json!(false)),
-        ("/tools/0/permission_granted", json!(false)),
+        ("/tools", json!([])),
         ("/tools/0/exit_code", json!(1)),
+        ("/tools/1/exit_code", json!(-1)),
+        ("/tools/0/version", json!(" ")),
+        ("/tools/1/version", json!("v".repeat(257))),
         ("/tools/0/input_sha256", json!("f".repeat(64))),
+        ("/tools/0/output_sha256", json!("f".repeat(64))),
+        ("/tools/1/input_sha256", json!("f".repeat(64))),
+        ("/tools/1/output_sha256", json!("short")),
         ("/tools/1/name", json!("sage")),
+        ("/tools/0/name", json!("magma")),
     ] {
         let mut fixture = fixture("U25", 1)?;
         let mut object: Value = serde_json::from_slice(
@@ -551,6 +561,103 @@ fn cas_route_requires_safe_permissioned_sage_and_magma_bound_to_exact_io() -> Re
     let mut fixture = fixture("U25", 1)?;
     fixture.change(Kind::ProofManifest, "computational_evidence", json!([]))?;
     assert!(fixture.inspect().is_err());
+    Ok(())
+}
+
+#[test]
+fn u25_session_epoch_is_explicit_and_does_not_change_other_tasks() -> Result<()> {
+    assert!(research_policy("U26").is_err());
+    for task in ["U21", "U22", "U23", "U24", "U25"] {
+        for repeat in 1..=3 {
+            let policy = research_policy(task)?;
+            let fixture = fixture(task, repeat)?;
+            let report = fixture.inspect()?;
+            assert_eq!(report["required_material_present"], true);
+            assert_eq!(report["research_trial_passed"], false);
+            assert_eq!(report["accepted_trials_delta"], 0);
+            assert_eq!(report["release_qualified"], false);
+            assert_eq!(
+                policy.native_mode,
+                if task == "U25" { "dangerous" } else { "safe" }
+            );
+        }
+    }
+    for (key, value) in [
+        ("schema", json!("mtm-research-session-v1")),
+        ("native_mode", json!("safe")),
+        ("native_mode", json!("trusted")),
+        ("latex_policy", json!("static_only")),
+    ] {
+        let mut fixture = fixture("U25", 1)?;
+        fixture.change(Kind::Session, key, value)?;
+        assert!(fixture.inspect().is_err());
+    }
+    Ok(())
+}
+
+#[test]
+fn cas_v2_rejects_legacy_grants_and_unbound_or_empty_material() -> Result<()> {
+    for field in ["permission_challenge_observed", "permission_granted"] {
+        let mut fixture = fixture("U25", 1)?;
+        let bytes = fixture
+            .material
+            .get(&Kind::CasObservation)
+            .ok_or("CAS fixture")?;
+        let mut value: Value = serde_json::from_slice(bytes)?;
+        value["tools"][0][field] = json!(true);
+        fixture
+            .material
+            .insert(Kind::CasObservation, serde_json::to_vec(&value)?);
+        fixture.persist()?;
+        assert!(fixture.inspect().is_err());
+    }
+    for kind in [
+        Kind::SageInput,
+        Kind::SageOutput,
+        Kind::MagmaInput,
+        Kind::MagmaOutput,
+    ] {
+        for bytes in [b"".as_slice(), b"changed material\n"] {
+            let mut fixture = fixture("U25", 1)?;
+            fixture.material.insert(kind, bytes.to_vec());
+            fixture.persist()?;
+            assert!(fixture.inspect().is_err());
+        }
+    }
+    // Missing files are still reported as blockers, not authenticated failures.
+    // The existing all-task missing-material regression covers each CAS file.
+    Ok(())
+}
+
+#[test]
+fn dangerous_observation_never_substitutes_for_review_or_finalization() -> Result<()> {
+    for (kind, key, value) in [
+        (
+            Kind::Review,
+            "reviewer_session",
+            json!("private-generator-marker"),
+        ),
+        (
+            Kind::Review,
+            "reviewer_owner_fingerprint",
+            json!("f".repeat(64)),
+        ),
+        (Kind::Review, "statement_checks", json!([])),
+        (Kind::Review, "reviewed_before_finalization", json!(false)),
+        (Kind::Status, "state", json!("verify")),
+        (Kind::Status, "sealed", json!(false)),
+        (Kind::Status, "latex_passed", json!(false)),
+        (Kind::Compiler, "exit_code", json!(1)),
+        (
+            Kind::CasObservation,
+            "workflow_authority_inherited",
+            json!(true),
+        ),
+    ] {
+        let mut fixture = fixture("U25", 1)?;
+        fixture.change(kind, key, value)?;
+        assert!(fixture.inspect().is_err());
+    }
     Ok(())
 }
 

@@ -33,6 +33,23 @@ rs_args() {
   [[ $# == 4 ]] || rs_prepare_only=true
 }
 
+# Acceptance selectors only. No arbitrary mode override is accepted.
+rs_native_mode() {
+  case ${1:-} in
+    U21|U22|U23|U24) printf safe ;;
+    U25) printf dangerous ;;
+    *) return 1 ;;
+  esac
+}
+
+rs_session_schema() {
+  case ${1:-} in
+    U21|U22|U23|U24) printf mtm-research-session-v1 ;;
+    U25) printf mtm-research-session-v2 ;;
+    *) return 1 ;;
+  esac
+}
+
 rs_registry() {
   local LC_ALL=C
   local file=$1 wanted=$2 repetition=$3 line id rep case_id mode problem requirement rest expected input size
@@ -105,11 +122,12 @@ rs_tool_root() {
 }
 
 rs_environment() {
-  local session=$1 root resolved allow_roots
+  local session=$1 root resolved allow_roots native_mode
   shift
-  # PATH lookup happens outside the fixed compiler helper. Safe mode deliberately
-  # disables auto-discovery, so every non-system addition is an explicit
-  # read-only toolchain root rather than inherited host PATH state.
+  native_mode=$(rs_native_mode "${rs_task:-}") || return 1
+  # U25 uses existing dangerous semantics. Discovery sees only the curated
+  # session PATH below, never the caller's login PATH or inherited state roots.
+  # U21-U24 retain safe mode; all modes retain read-only tools and a hidden vault.
   [[ $session == /* && $session != *:* && $session != *$'\n'* && $session != *$'\r'* ]] || return 1
   allow_roots=$session/tool-bin
   for root in "$@"; do
@@ -128,7 +146,7 @@ rs_environment() {
     "MTM_PRIVATE_ROOT=$session/data/private" "MTM_DEBUG_ROOT=$session/data/debug"
     MTM_DEBUG=1 MTM_TRACE_PAYLOADS=0 MTM_NATIVE_EXEC_BACKEND=bubblewrap
     "MTM_NATIVE_EXEC_ALLOW_ROOTS=$allow_roots"
-    MTM_NATIVE_MODE=safe MTM_LATEX_POLICY=required MTM_WORKFLOW_PROTOCOL_VERSION=3
+    "MTM_NATIVE_MODE=$native_mode" MTM_LATEX_POLICY=required MTM_WORKFLOW_PROTOCOL_VERSION=3
     TOKIO_WORKER_THREADS=2)
 }
 
@@ -152,18 +170,20 @@ rs_snapshot() {
 }
 
 rs_manifest() {
-  local destination=$1 trial=$2 commit=$3 launcher=$4 registry=$5 expected=full
+  local destination=$1 trial=$2 commit=$3 launcher=$4 registry=$5 expected=full native_mode schema
   [[ ! -e $destination && ! -L $destination ]] || return 1
   [[ $trial =~ ^[0-9a-f]{32}$ && $commit =~ ^[0-9a-f]{40}$ && $launcher =~ ^[0-9a-f]{64}$ && $registry =~ ^[0-9a-f]{64}$ ]] || return 1
   [[ $rs_task =~ ^U2[1-5]$ && $rs_repeat =~ ^[1-3]$ && $rs_mode =~ ^(full|compact)$ && $rs_case =~ ^u2[1-5]-r[1-3]-[a-z-]+$ ]] || return 1
   [[ $rs_task != U21 && $rs_task != U23 ]] || expected=compact
   [[ $rs_case == "${rs_task,,}-r$rs_repeat-"* && $rs_mode == "$expected" ]] || return 1
+  native_mode=$(rs_native_mode "$rs_task") || return 1
+  schema=$(rs_session_schema "$rs_task") || return 1
   # All interpolated fields are restricted ASCII identities, never shell paths,
   # problem text, URLs, private workflow identifiers or authority handles.
   (
     set -o noclobber
-    printf '{"schema":"mtm-research-session-v1","milestone":"MTM-016","task_id":"%s","repeat":%s,"case_id":"%s","workflow_mode":"%s","trial_id":"%s","candidate_sha256":"%s","candidate_source_commit":"%s","launcher_source_commit":"%s","launcher_sha256":"%s","case_registry_sha256":"%s","corpus_sha256":"%s","native_mode":"safe","latex_policy":"required","session_prepared":true,"runtime_executed":false,"independent_review_recorded":false,"research_trial_passed":false,"release_qualified":false}\n' \
-      "$rs_task" "$rs_repeat" "$rs_case" "$rs_mode" "$trial" "$RS_CANDIDATE_SHA" "$RS_CANDIDATE_SOURCE" "$commit" "$launcher" "$registry" "$RS_CORPUS_SHA" > "$destination"
+    printf '{"schema":"%s","milestone":"MTM-016","task_id":"%s","repeat":%s,"case_id":"%s","workflow_mode":"%s","trial_id":"%s","candidate_sha256":"%s","candidate_source_commit":"%s","launcher_source_commit":"%s","launcher_sha256":"%s","case_registry_sha256":"%s","corpus_sha256":"%s","native_mode":"%s","latex_policy":"required","session_prepared":true,"runtime_executed":false,"independent_review_recorded":false,"research_trial_passed":false,"release_qualified":false}\n' \
+      "$schema" "$rs_task" "$rs_repeat" "$rs_case" "$rs_mode" "$trial" "$RS_CANDIDATE_SHA" "$RS_CANDIDATE_SOURCE" "$commit" "$launcher" "$registry" "$RS_CORPUS_SHA" "$native_mode" > "$destination"
   )
 }
 
@@ -180,7 +200,13 @@ rs_taskcard() {
     printf '%s\n\n专项要求：%s\n\n' "$rs_problem" "$rs_requirement"
     printf '%s\n\n' '严格按 rethlas_start / rethlas_step 实际返回的任务契约工作。不得伪造 capability、引用 ID 或 verification_report；不得绕过失败。rethlas_start 成功取得 run_id 后，必须立即在 workspace 根目录写入 `run-handoff.json`，schema 为 `mtm-research-run-handoff-v1`，只包含 trial_id、task_id、repeat、case_id、workflow_mode、problem_id、run_id 和 `non_authorizing:true`；其中 run_id 必须逐字来自本次 start 回包。该文件不得包含 creation_key、oauth_client_id、OAuth key/token、capability、URL 或 operator.log。它只是恢复定位符，不是授权或通过证据。最终证明必须经 required LaTeX 编译。开始生成前读取 server_info 并在本机记录本次 oauth_client_id；不要把它作为密钥发布。到 verify 后停止生成，但保持本次 TUI/隧道运行，由独立复核会话继续；不要替自己提交“无错误”报告。'
     printf '## 独立复核会话\n\n%s\n\n' '保持生成阶段的 TUI/隧道在线。在新的会话中复用已经连接的同一 MTM 验收连接，不要删除、重连或重新注册 connector。先读取 server_info，要求 oauth_client_id 与生成阶段本机记录完全相同；不相同就停止，不读取或提交原 run。身份连续时先读取 workspace 根目录的 `run-handoff.json`，要求 schema、trial_id、task_id、repeat、case_id、workflow_mode、problem_id 均与当前 task.md 一致，再逐字使用其中 run_id 获取当前 verifier 任务；handoff 缺失、字段冲突或 run 不匹配都必须停止，不得猜测、枚举或新建 run。只依据该角色合法返回的题目、证明与文献审计材料逐步核查；不要读取生成会话的结论标签或兄弟分支私有域。由复核者形成具体意见，再通过当前任务契约提交。若需要 repair，退回生成/修复会话，完成后由复核会话重新检查，同时继续保持同一 OAuth owner。'
-    printf '%s\n\n' '对 U23，保留故意植入的首稿及首次具体缺陷报告，并明确这是种子修复挑战；不得把它说成自然发现的产品错误。对 U24，两个分支使用不同会话，按实际分支契约工作并等待所需分支封存。对 U25，CAS 命令仍须遵循 safe 模式的真实权限请求，不切换 dangerous。'
+    if [[ $rs_task == U25 ]]; then
+      printf '%s\n\n' '本轮 U25 使用 dangerous Native 的真实研究路径。直接执行 Sage 与 Magma，不要求 Inspector、人工 grant、sh -c 包装或人为 network 标记。保留可重放输入、实际输出、工具版本、退出码和输入输出 SHA-256，使用 mtm-research-cas-observation-v2；一般证明必须独立于有限计算。dangerous 仅是 Native 模式，不授予 workflow、verifier 或 finalizer 权限；仍须同一 OAuth owner、独立 reviewer、required LaTeX 和 collector。旧 safe 试次不得改标或复用。'
+    else
+      # Keep historical U21-U24 task-card bytes identical for bounded resume.
+      # Their old U25 note is inapplicable; U25 now has its own versioned card.
+      printf '%s\n\n' '对 U23，保留故意植入的首稿及首次具体缺陷报告，并明确这是种子修复挑战；不得把它说成自然发现的产品错误。对 U24，两个分支使用不同会话，按实际分支契约工作并等待所需分支封存。对 U25，CAS 命令仍须遵循 safe 模式的真实权限请求，不切换 dangerous。'
+    fi
     printf '## 完成后保留\n\n%s\n\n' '保留该会话的私有 run ID、状态序列、所有候选稿与最终 tex、编译结果、引用审计、CAS 输入输出及独立复核意见。不得上传 OAuth key、token、capability 或 operator.log。只报告脱敏状态与计数；后续收集器仍需核对最终字节及各任务专属证据。'
     printf '%s\n' '本启动器不创建或推进 run、不提交 verifier 报告、不判断数学正确性、不更新 corpus 计数、不授权发布。启动成功、correct 字符串或 Ctrl-C 正常退出均不能单独判定试次通过。'
   )
@@ -188,7 +214,7 @@ rs_taskcard() {
 
 rs_main() {
   rs_args "$@" || { rs_fail usage_task_U21_to_U25_repeat_1_to_3_optional_prepare_only; return 1; }
-  local repo script registry corpus candidate commit launcher_hash registry_hash before after
+  local repo script registry corpus candidate commit launcher_hash registry_hash before after native_mode
   local home parent session trial password name resolved existing seen rc
   local -a names tools pipe_status cas_roots
   repo=$(cd -- "$(/usr/bin/dirname -- "${BASH_SOURCE[0]}")/.." && /usr/bin/pwd -P) || return 1
@@ -204,6 +230,7 @@ rs_main() {
   launcher_hash=$(rs_hash "$script"); registry_hash=$(rs_hash "$registry")
   [[ $(rs_hash "$corpus") == "$RS_CORPUS_SHA" && $registry_hash == "$RS_CASES_SHA" ]] || { rs_fail corpus_or_case_identity; return 1; }
   rs_registry "$registry" "$rs_task" "$rs_repeat" || { rs_fail case_registry; return 1; }
+  native_mode=$(rs_native_mode "$rs_task") || { rs_fail task_native_policy; return 1; }
   rs_regular "$candidate" 268435456 && [[ -x $candidate && $(rs_hash "$candidate") == "$RS_CANDIDATE_SHA" ]] || { rs_fail frozen_candidate_identity; return 1; }
   names=(bwrap curl latexmk pdflatex cloudflared sh cat printf sleep readlink dirname uname)
   [[ $rs_task != U25 ]] || names+=(sage magma)
@@ -252,12 +279,12 @@ rs_main() {
   rs_environment "$session" "${cas_roots[@]}" || { rs_fail session_path_encoding; return 1; }
   # Exact CLI attestation precedes the public tunnel. Only new disposable state
   # roots are configured; no production path is accepted or discovered.
-  if ! /usr/bin/timeout --signal=TERM --kill-after=3s 20s "${rs_env[@]}" "$session/candidate" attest-native --workspace "$session/workspace" --native-mode safe --latex-policy required > "$session/native-preflight.json" 2> "$session/native-preflight.stderr"; then
+  if ! /usr/bin/timeout --signal=TERM --kill-after=3s 20s "${rs_env[@]}" "$session/candidate" attest-native --workspace "$session/workspace" --native-mode "$native_mode" --latex-policy required > "$session/native-preflight.json" 2> "$session/native-preflight.stderr"; then
     rs_fail native_preflight_failed_private_diagnostics_retained; return 1
   fi
   printf '\n只连接这次 TUI 显示的新验收地址。先完成生成阶段，到 verify 后换独立复核会话。\n'
   set +e
-  (cd -- "$session" && exec "${rs_env[@]}" "MTM_OAUTH_PASSWORD=$password" "$session/candidate" tui --quick-tunnel --verbose --host 127.0.0.1 --port 0 --workspace "$session/workspace" --native-mode safe --latex-policy required) 2>&1 | /usr/bin/tee -- "$session/operator.log"
+  (cd -- "$session" && exec "${rs_env[@]}" "MTM_OAUTH_PASSWORD=$password" "$session/candidate" tui --quick-tunnel --verbose --host 127.0.0.1 --port 0 --workspace "$session/workspace" --native-mode "$native_mode" --latex-policy required) 2>&1 | /usr/bin/tee -- "$session/operator.log"
   pipe_status=("${PIPESTATUS[@]}")
   set -e
   password=

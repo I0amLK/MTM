@@ -30,8 +30,17 @@ for id in U21 U22 U23 U24 U25; do
     [[ $rs_prepare_only == true ]]
     rs_registry "$registry" "$id" "$repeat"
     [[ $rs_case == "${id,,}-r$repeat-"* && -n $rs_problem && -n $rs_requirement ]]
+    expected_native=safe; expected_schema=mtm-research-session-v1
+    [[ $id != U25 ]] || { expected_native=dangerous; expected_schema=mtm-research-session-v2; }
+    [[ $(rs_native_mode "$id") == "$expected_native" ]]
+    [[ $(rs_session_schema "$id") == "$expected_schema" ]]
   done
 done
+deny rs_native_mode U26
+deny rs_native_mode
+deny rs_session_schema U20
+deny rs_args --task U25 --repeat 1 --native-mode safe
+deny rs_args --task U21 --repeat 1 --native-mode dangerous
 deny rs_args
 deny rs_args --task U20 --repeat 1
 deny rs_args --task U26 --repeat 1
@@ -102,6 +111,7 @@ ln "$tmp/artifact" "$tmp/hardlink"
 deny rs_snapshot "$tmp/artifact" "$tmp/hardlinked-copy" "$artifact_hash"
 printf 'RESEARCH_SESSION_TEST exact_snapshot_no_clobber_and_special_file_denials=passed\n'
 
+rs_args --task U21 --repeat 1 --prepare-only
 rs_environment "$tmp/private"
 MTM_DATA_ROOT=/never-use-production MTM_PRIVATE_ROOT=/never-use-vault MTM_TOKEN_SECRET=synthetic-test-secret MTM_OAUTH_PASSWORD=synthetic-test-password MTM_NATIVE_MODE=dangerous \
   "${rs_env[@]}" /usr/bin/env > "$tmp/child-environment"
@@ -112,8 +122,12 @@ grep -Fx 'MTM_LATEX_POLICY=required' "$tmp/child-environment" > /dev/null
 grep -Fx "MTM_NATIVE_EXEC_ALLOW_ROOTS=$tmp/private/tool-bin" "$tmp/child-environment" > /dev/null
 if grep -E 'never-use|synthetic-test|MTM_TOKEN_SECRET|MTM_OAUTH_PASSWORD|MTM_CAPABILITY_SECRET' "$tmp/child-environment" > /dev/null; then exit 1; fi
 printf 'RESEARCH_SESSION_TEST inherited_roots_and_secrets_removed=passed\n'
+rs_args --task U25 --repeat 1 --prepare-only
 rs_environment "$tmp/private" "$tmp/cas prefix" "$tmp/cas-flat" "$tmp/cas prefix"
-"${rs_env[@]}" /usr/bin/env > "$tmp/cas-child-environment"
+MTM_NATIVE_MODE=safe "${rs_env[@]}" /usr/bin/env > "$tmp/cas-child-environment"
+grep -Fx 'MTM_NATIVE_MODE=dangerous' "$tmp/cas-child-environment" > /dev/null
+grep -Fx "PATH=$tmp/private/tool-bin" "$tmp/cas-child-environment" > /dev/null
+grep -Fx 'MTM_LATEX_POLICY=required' "$tmp/cas-child-environment" > /dev/null
 grep -Fx "MTM_NATIVE_EXEC_ALLOW_ROOTS=$tmp/private/tool-bin:$tmp/cas prefix:$tmp/cas-flat" "$tmp/cas-child-environment" > /dev/null
 deny rs_environment "$tmp/private" relative
 deny rs_environment "$tmp/private" '/tmp/invalid:root'
@@ -207,7 +221,30 @@ for expected in "$session/workspace" "$session/data" "$session/data/private"; do
 [[ ! -e $session/data/oauth.sqlite3 && ! -e $session/data/private/state.sqlite3 ]]
 printf 'RESEARCH_SESSION_TEST frozen_candidate_configuration_only_no_database_or_server=passed\n'
 
-# Missing inventory and modified task input fail before a second session exists.
+# New U25 metadata is created prospectively. The fake CAS tools are inventory
+# only; check-config does not execute them or attest a real research trial.
+for tool in sage magma; do ln -s /usr/bin/true "$tmp/inventory/$tool"; done
+for repeat in 1 2 3; do
+  HOME="$fake_home" PATH="$tmp/inventory" /bin/bash "$fixture/scripts/mtm016-research-session.sh" --task U25 --repeat "$repeat" --prepare-only > "$tmp/u25-prepared.stdout"
+  session_line=$(/usr/bin/head -n 1 "$tmp/u25-prepared.stdout")
+  u25_session=${session_line#private_session=}
+  rs_private_dir "$u25_session"
+  cp "$u25_session/session.json" "$tmp/u25-session.json"
+  [[ $(sql "SELECT json_extract(readfile('$tmp/u25-session.json'),'$.schema')='mtm-research-session-v2' AND json_extract(readfile('$tmp/u25-session.json'),'$.native_mode')='dangerous' AND json_extract(readfile('$tmp/u25-session.json'),'$.runtime_executed')=0 AND json_extract(readfile('$tmp/u25-session.json'),'$.release_qualified')=0;") == 1 ]]
+  grep -F 'mtm-research-cas-observation-v2' "$u25_session/task.md" > /dev/null
+  grep -F 'dangerous 仅是 Native 模式' "$u25_session/task.md" > /dev/null
+  if grep -F 'CAS 命令仍须遵循 safe' "$u25_session/task.md" > /dev/null; then exit 1; fi
+  cmp "$u25_session/task.md" "$u25_session/workspace/task.md"
+  rs_args --task U25 --repeat "$repeat" --prepare-only
+  rs_environment "$u25_session" /usr
+  "${rs_env[@]}" "$u25_session/candidate" check-config --workspace "$u25_session/workspace" --native-mode "$(rs_native_mode U25)" --latex-policy required > "$tmp/u25-config.json"
+  [[ $(sql "SELECT json_extract(readfile('$tmp/u25-config.json'),'$.ok')=1 AND json_extract(readfile('$tmp/u25-config.json'),'$.native_mode')='dangerous' AND json_extract(readfile('$tmp/u25-config.json'),'$.latex_policy')='required';") == 1 ]]
+  [[ ! -e $u25_session/data/oauth.sqlite3 && ! -e $u25_session/data/private/state.sqlite3 ]]
+done
+rs_args --task U21 --repeat 1 --prepare-only
+printf 'RESEARCH_SESSION_TEST u25_v2_prepare_and_config_all_three_without_authority=passed\n'
+
+# Missing inventory and modified task input fail before another session exists.
 rm "$tmp/inventory/cloudflared"
 actual_prepare() { HOME="$fake_home" PATH="$tmp/inventory" /bin/bash "$fixture/scripts/mtm016-research-session.sh" --task U21 --repeat 2 --prepare-only; }
 deny actual_prepare
@@ -216,7 +253,7 @@ printf '\n' >> "$fixture/conformance/mtm016-research-cases.tsv"
 deny actual_prepare
 shopt -s nullglob
 sessions=("$fake_home"/.mtm-acceptance/MTM-016/research/*)
-[[ ${#sessions[@]} == 1 ]]
+[[ ${#sessions[@]} == 4 ]]
 printf 'RESEARCH_SESSION_TEST changed_inputs_and_missing_tool_stop_before_new_session=passed\n'
 source "$repo/scripts/mtm016-resume-research-session.sh"
 rs_args --task U21 --repeat 1 --prepare-only

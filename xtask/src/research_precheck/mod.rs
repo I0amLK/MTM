@@ -25,6 +25,29 @@ const JSON_LIMIT: u64 = 1024 * 1024;
 const FILE_LIMIT: u64 = 4 * 1024 * 1024;
 const TOTAL_LIMIT: usize = 32 * 1024 * 1024;
 
+/// Acceptance metadata only: this type grants no Native or workflow authority.
+pub(crate) struct ResearchPolicy {
+    pub(crate) session_schema: &'static str,
+    pub(crate) native_mode: &'static str,
+    pub(crate) trial_schema: &'static str,
+}
+
+pub(crate) fn research_policy(task: &str) -> Result<ResearchPolicy> {
+    match task {
+        "U21" | "U22" | "U23" | "U24" => Ok(ResearchPolicy {
+            session_schema: "mtm-research-session-v1",
+            native_mode: "safe",
+            trial_schema: "mtm-research-trial-evidence-v1",
+        }),
+        "U25" => Ok(ResearchPolicy {
+            session_schema: "mtm-research-session-v2",
+            native_mode: "dangerous",
+            trial_schema: "mtm-research-trial-evidence-v2",
+        }),
+        _ => Err("unsupported research acceptance policy".into()),
+    }
+}
+
 pub(crate) struct Options {
     bundle: PathBuf,
 }

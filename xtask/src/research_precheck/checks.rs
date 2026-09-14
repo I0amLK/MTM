@@ -6,7 +6,7 @@ use serde_json::Value;
 
 use super::{
     Bundle, CANDIDATE_SHA, CANDIDATE_SOURCE, CORPUS_SHA, Case, Kind, REGISTRY_SHA, decode, hash,
-    hex, require,
+    hex, require, research_policy,
 };
 use crate::{Result, evidence_json};
 
@@ -41,12 +41,13 @@ fn matches_file(value: &Value, key: &str, material: &Material, kind: Kind) -> Re
 }
 
 fn session(value: &Value, bundle: &Bundle, case: &Case) -> Result<()> {
+    let policy = research_policy(&bundle.task_id)?;
     require(
         value.as_object().is_some_and(|fields| fields.len() == 20),
         "preparation schema mismatch",
     )?;
     require(
-        value["schema"] == "mtm-research-session-v1"
+        value["schema"] == policy.session_schema
             && value["milestone"] == "MTM-016"
             && value["task_id"] == bundle.task_id
             && value["repeat"] == bundle.repeat
@@ -57,7 +58,7 @@ fn session(value: &Value, bundle: &Bundle, case: &Case) -> Result<()> {
             && value["candidate_source_commit"] == CANDIDATE_SOURCE
             && value["case_registry_sha256"] == REGISTRY_SHA
             && value["corpus_sha256"] == CORPUS_SHA
-            && value["native_mode"] == "safe"
+            && value["native_mode"] == policy.native_mode
             && value["latex_policy"] == "required"
             && value["session_prepared"] == true
             && value["runtime_executed"] == false
@@ -562,8 +563,6 @@ struct CasToolObservation {
     input_sha256: String,
     output_sha256: String,
     exit_code: i64,
-    permission_challenge_observed: bool,
-    permission_granted: bool,
 }
 
 #[derive(Deserialize)]
@@ -584,9 +583,9 @@ fn cas_route(bundle: &Bundle, material: &Material) -> Result<()> {
             .ok_or("CAS observation missing")?,
     )?;
     require(
-        observation.schema == "mtm-research-cas-observation-v1"
+        observation.schema == "mtm-research-cas-observation-v2"
             && observation.run_id == bundle.run_id
-            && observation.native_mode == "safe"
+            && observation.native_mode == "dangerous"
             && observation.general_proof_independent
             && !observation.raw_credentials_recorded
             && observation.tools.len() == 2,
@@ -600,10 +599,8 @@ fn cas_route(bundle: &Bundle, material: &Material) -> Result<()> {
                 && tool.version.len() <= 256
                 && hex(&tool.input_sha256, 64)
                 && hex(&tool.output_sha256, 64)
-                && tool.exit_code == 0
-                && tool.permission_challenge_observed
-                && tool.permission_granted,
-            "CAS tool execution or safe-mode permission observation invalid",
+                && tool.exit_code == 0,
+            "CAS tool execution observation invalid",
         )?;
         require(
             names.insert(tool.name.clone()),

@@ -181,13 +181,16 @@ This validates the branch topology and isolation observations, not the mathemati
 quality of the alternative proofs.
 
 When all U25 CAS material is present, `cas_observation.json` uses
-`mtm-research-cas-observation-v1`. It must record `native_mode="safe"`, separate
-general-proof reasoning, no raw credentials, and exactly one Sage plus one Magma
-execution. Each tool needs a bounded version, exact input/output hashes, zero exit,
-and observed/granted permission challenge. The proof manifest must retain at least
-two computational-evidence entries. These checks prove correspondence between the
-retained files and the observation; they never promote finite computations into a
-general proof.
+`mtm-research-cas-observation-v2`. It must record `native_mode="dangerous"`,
+`general_proof_independent=true`, `raw_credentials_recorded=false`, and exactly
+one Sage plus one Magma execution. Each tool needs a bounded nonempty version,
+exact input/output hashes and integer zero exit. Permission-challenge and grant
+fields are no longer part of this closed schema, and are rejected as unknown.
+The U25 session must be a fresh `mtm-research-session-v2`; U21-U24 keep their
+existing v1 safe-session contract. The proof manifest must retain at least two
+computational-evidence entries. These checks establish file correspondence, not
+authentication of execution or proof of mathematics. Self-consistent invented
+observations are not made authentic by hashes. Independent review remains required.
 
 All route-specific semantic checks are deliberately conditional on the complete
 set of files needed for that check. A missing file remains a readable
