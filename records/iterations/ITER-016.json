@@ -4128,6 +4128,134 @@
       "selector_changed": false,
       "git_push_performed": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-F6-C674-U28-SANITIZED-FACTS-AND-BROWSER-HUMAN",
+      "status": "u28_three_sanitized_fact_receipts_sealed_browser_human_validated_external_adapter_fields_pending",
+      "base_commit": "8e74793766bf626fbfc14fe7879e10d08272a6f1",
+      "candidate": {
+        "source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+        "sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+        "version": "0.6.0-preview.1",
+        "corpus_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861"
+      },
+      "operator_fact_source": "sanitized_current_conversation_fact_package_no_sensitive_oauth_permission_identifiers_or_private_protocol_payloads",
+      "u28_supporting_receipts": [
+        {
+          "task_id": "U28",
+          "repeat": 1,
+          "trial_id": "e69795934fea42509f788fb6bcb346b2",
+          "path": "records/evidence/MTM-016/u28-r1-sanitized-operator-facts-e6979593.json",
+          "sha256": "f3a9b04a13c16662b725f80b16e42368c4ac918c1337d0777ebbfa58ea3cb879",
+          "old_pid": 1581301,
+          "new_pid": 3079150,
+          "once_expiry_session_restart_passed": true,
+          "same_oauth_owner": true,
+          "same_workspace": true,
+          "exact_candidate": true,
+          "accepted_trials_delta": 0
+        },
+        {
+          "task_id": "U28",
+          "repeat": 2,
+          "trial_id": "3caf0a831473d1ea00040e2866073a25",
+          "path": "records/evidence/MTM-016/u28-r2-sanitized-operator-facts-3caf0a83.json",
+          "sha256": "c3545ed1d9c56e03416dddd357013ed4011dae1871b4a6891af266864038e58c",
+          "old_pid": 3079150,
+          "new_pid": 3105405,
+          "once_expiry_session_restart_passed": true,
+          "same_oauth_owner": true,
+          "same_workspace": true,
+          "exact_candidate": true,
+          "accepted_trials_delta": 0
+        },
+        {
+          "task_id": "U28",
+          "repeat": 3,
+          "trial_id": "5dba8b1258f6ab32ef7b79a35b6e0b35",
+          "path": "records/evidence/MTM-016/u28-r3-sanitized-operator-facts-5dba8b12.json",
+          "sha256": "98237d4ea14e430f0d724bc627ea933b89bd86ad1780a897ea86841f83a898ae",
+          "old_pid": 3105405,
+          "new_pid": 3131497,
+          "once_expiry_session_restart_passed": true,
+          "same_oauth_owner": true,
+          "same_workspace": true,
+          "exact_candidate": true,
+          "post_restart_safe_bubblewrap_network_disabled": true,
+          "accepted_trials_delta": 0
+        }
+      ],
+      "u28_external_adapter_boundary": {
+        "trial_schema": "mtm-external-corpus-trial-evidence-v1",
+        "deny_unknown_fields": true,
+        "fixed_route_checks": [
+          "real_browser",
+          "independent_human",
+          "once_grant_consumed",
+          "session_grant_reused",
+          "expiry_observed",
+          "restart_invalidation",
+          "exact_candidate"
+        ],
+        "public_trial_release_qualified_must_be_false": true,
+        "locally_recomputed_corpus_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861",
+        "missing_per_trial_fields": [
+          "witness_observation_sha256_from_actual_private_witness",
+          "recorded_unix_seconds_from_actual_private_witness"
+        ],
+        "private_trial_roots_visible_to_current_mtm_workspace": false,
+        "chat_values_used_for_missing_fields": false,
+        "adapter_trials_published": 0,
+        "external_trials_completed_on_current_candidate": 9,
+        "external_trials_required": 12,
+        "accepted_trials_delta": 0
+      },
+      "browser_human": {
+        "current_candidate_receipt": {
+          "path": "records/evidence/MTM-016/candidate-browser-human-f6-c674843-u28.json",
+          "sha256": "40e304d018989223f90e3833baba17f3535941063959364e51ad974680d8bb71"
+        },
+        "evidence_composition": "Current-candidate U26 real Firefox/MCP Inspector DCR-S256/protected-resource/reconnect observations plus independently operated current-candidate U28 positive human consent facts; no U28 corpus repetition is inferred from this broad gate.",
+        "paired_roundtrips": 24,
+        "capability_invalid_count": 0,
+        "submission_rejection_count": 0,
+        "release_input_manifest_sha256": "08ef5322f8a41f182000d206ac5584fe4c8a3b9dd9be62ce4b0ae1a930024697",
+        "release_check": {
+          "path": "records/evidence/MTM-016/release-check-f6-browser-human-c674843-u28.json",
+          "sha256": "056a71bc99840acfc17362384a43ed7689b3e013524b54b95ae64c373d8d14bb",
+          "exit_code": 1,
+          "validated_gates": 16,
+          "blocked_gates": 1,
+          "browser_human": "validated",
+          "only_blocked_gate": "corpus",
+          "release_qualified": false
+        }
+      },
+      "corpus": {
+        "passed_trials": 63,
+        "failed_trials": 0,
+        "blocked_trials": 27,
+        "complete": false,
+        "counts_changed": false
+      },
+      "next_required_action": "Recover or copy only the three actual private U28 witness summaries into a bounded MTM-readable handoff, recompute each witness_observation_sha256 and recorded_unix_seconds locally, then generate the three fixed-schema external trial receipts and validate the complete twelve-cell external batch. Do not rerun human consent.",
+      "sealed_reports": [
+        {"path": "records/evidence/MTM-016/u28-r1-sanitized-operator-facts-e6979593.json", "sha256": "f3a9b04a13c16662b725f80b16e42368c4ac918c1337d0777ebbfa58ea3cb879"},
+        {"path": "records/evidence/MTM-016/u28-r2-sanitized-operator-facts-3caf0a83.json", "sha256": "c3545ed1d9c56e03416dddd357013ed4011dae1871b4a6891af266864038e58c"},
+        {"path": "records/evidence/MTM-016/u28-r3-sanitized-operator-facts-5dba8b12.json", "sha256": "98237d4ea14e430f0d724bc627ea933b89bd86ad1780a897ea86841f83a898ae"},
+        {"path": "records/evidence/MTM-016/candidate-browser-human-f6-c674843-u28.json", "sha256": "40e304d018989223f90e3833baba17f3535941063959364e51ad974680d8bb71"},
+        {"path": "records/evidence/MTM-016/release-check-f6-browser-human-c674843-u28.json", "sha256": "056a71bc99840acfc17362384a43ed7689b3e013524b54b95ae64c373d8d14bb"}
+      ],
+      "product_source_changed": false,
+      "test_source_changed": false,
+      "candidate_bytes_changed": false,
+      "release_inputs_changed": true,
+      "accepted_historical_evidence_rewritten": false,
+      "human_consent_responses_authored": false,
+      "production_changed": false,
+      "selector_changed": false,
+      "git_push_performed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [

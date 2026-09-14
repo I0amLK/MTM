@@ -15,7 +15,7 @@
     "native_commands": {"path":"records/evidence/MTM-016/candidate-native-commands-f6-df4feca.json","sha256":"3e4d7673ff838e53f775d2696023659ebcd7975bef4d82b4ed20651f8c7a69f0"},
     "compiled_latex": {"path":"records/evidence/MTM-016/candidate-compiled-latex-f6-df4feca.json","sha256":"4ab3db3fb5adf3c18fbfcfec176491ccffbe5d203ee775829382d8f76571b187"},
     "retrieval": {"path":"records/evidence/MTM-016/candidate-retrieval-f6-c674843.json","sha256":"dc2771579b7805250157a66f68ad41005743f8c9b08c3db7c8c1d6299ca7f248"},
-    "browser_human": {"path":"records/evidence/MTM-016/candidate-browser-human-f6-e9d12f1.json","sha256":"1497d2c304856632b6f9dda16c6f682efd4fa8fbd62b256414f04606bf2ac1bb"},
+    "browser_human": {"path":"records/evidence/MTM-016/candidate-browser-human-f6-c674843-u28.json","sha256":"40e304d018989223f90e3833baba17f3535941063959364e51ad974680d8bb71"},
     "copied_operator_state": {"path":"records/evidence/MTM-016/candidate-copied-operator-state-f6-f263155.json","sha256":"76a48b8a20573010861ffc97e02784287dc3e70da3bd26cb1c8f3aa6d7cdf356"},
     "install_sigkill": {"path":"records/evidence/MTM-016/candidate-install-sigkill-f6-c674843.json","sha256":"e2d9ded282591f8d4da5d16ab6a27a5324b9b8fc4286f8ab82352549416c87b5"},
     "corpus": {"path":"records/evidence/MTM-016/corpus-f6-c674843-native-u16-u20-aggregate.json","sha256":"3dfb957302e3de11dde4b19b661ba4a2997e85dee30adc93d9305f4d9983b0b4"}
