@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-016",
+  "scope": "rust_source_with_inherited_host_tests",
+  "checks": [
+    {"exit_code":0,"name":"format","passed":true},
+    {"exit_code":0,"name":"clippy","passed":true},
+    {"exit_code":0,"name":"rust_tests","passed":true},
+    {"exit_code":0,"name":"diff","passed":true}
+  ],
+  "native_environment": {
+    "passed": true,
+    "ready_for_native_tests": true,
+    "classification": "ready_for_native_tests_not_qualified",
+    "production_state_modified": false,
+    "release_qualified": false,
+    "tests_skipped_by_preflight": false
+  },
+  "passed": true,
+  "source_identity": {
+    "before_sha256": "dcb488ba61923f7e729099774652351de6669cac402b5cf5bf98a25024a5aaaa",
+    "after_sha256": "dcb488ba61923f7e729099774652351de6669cac402b5cf5bf98a25024a5aaaa",
+    "commit_before": "3c7e01df48df7464a913191951ea93e0395fc67b",
+    "commit_after": "3c7e01df48df7464a913191951ea93e0395fc67b",
+    "hash_scope": "mtm-rust-source-v1",
+    "unchanged": true
+  },
+  "tests_skipped_by_preflight": false,
+  "production_state_modified": false,
+  "production_selector_changed": false,
+  "release_qualified": false,
+  "recorded_unix_seconds": 1789372943
+}

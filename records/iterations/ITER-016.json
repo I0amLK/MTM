@@ -4510,6 +4510,50 @@
       "selector_changed": false,
       "git_push_performed": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-U25-DANGEROUS-V2-CAPABLE-HOST-SOURCE-PASS",
+      "status": "capable_host_source_pass_sealed_release_source_gate_validated_16_of_17",
+      "base_commit": "3c7e01df48df7464a913191951ea93e0395fc67b",
+      "source_sha256": "dcb488ba61923f7e729099774652351de6669cac402b5cf5bf98a25024a5aaaa",
+      "host_source_check": {
+        "passed": true,
+        "format_exit_code": 0,
+        "clippy_exit_code": 0,
+        "rust_tests_exit_code": 0,
+        "diff_exit_code": 0,
+        "native_environment_ready": true,
+        "tests_skipped_by_preflight": false,
+        "source_unchanged": true
+      },
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-016/source-check-u25-dangerous-v2-host-3c7e01d.json",
+          "sha256": "5ac7f39e9c8305e34eb4a18edb96229950d3979024ef8f2d83476da35e8f4fa1"
+        }
+      ],
+      "release_input_manifest_sha256": "31220937e58959c2121477f53a7e8b529d7d26b25aa117b9dd8e96b748868004",
+      "release_check": {
+        "validated_gates": 16,
+        "blocked_gates": 1,
+        "source": "validated",
+        "only_blocked_gate": "corpus",
+        "production_changed": false,
+        "release_qualified": false
+      },
+      "capable_host_source_receipt_required": false,
+      "real_u25_v2_trials_executed": 0,
+      "accepted_trials_delta": 0,
+      "corpus": {
+        "passed_trials": 63,
+        "failed_trials": 0,
+        "blocked_trials": 27,
+        "counts_changed": false
+      },
+      "production_changed": false,
+      "selector_changed": false,
+      "git_push_performed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
