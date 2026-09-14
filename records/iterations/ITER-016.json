@@ -4470,6 +4470,46 @@
       "selector_changed": false,
       "git_push_performed": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-U25-DANGEROUS-V2-NESTED-SOURCE-DIAGNOSTIC",
+      "status": "full_source_check_executed_nested_native_failures_retained_capable_host_pass_pending",
+      "base_commit": "0d79d4a7279733953ba396d529d0b81f7ceaa504",
+      "source_sha256": "dcb488ba61923f7e729099774652351de6669cac402b5cf5bf98a25024a5aaaa",
+      "source_check": {
+        "executed": true,
+        "passed": false,
+        "format_exit_code": 0,
+        "clippy_exit_code": 0,
+        "rust_tests_exit_code": 101,
+        "diff_exit_code": 0,
+        "native_environment_classification": "namespace_limit_or_depth",
+        "user_namespace_errno": 28,
+        "tests_skipped_by_preflight": false,
+        "mtm_runtime_passed": 130,
+        "mtm_runtime_failed": 10,
+        "mtm_runtime_ignored": 1
+      },
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-016/source-check-u25-dangerous-v2-mtm-nested-0d79d4a.json",
+          "sha256": "14b407b607e92652cc8990317a430d6be69bb4597d04e3d81363a5a17eae14b5"
+        }
+      ],
+      "failure_interpretation": "The maintenance environment reproduced the inherited nested-Bubblewrap Native authority failure family. This receipt is diagnostic evidence only and does not establish a capable-host source pass.",
+      "capable_host_source_receipt_required": true,
+      "real_u25_v2_trials_executed": 0,
+      "accepted_trials_delta": 0,
+      "corpus": {
+        "passed_trials": 63,
+        "failed_trials": 0,
+        "blocked_trials": 27,
+        "counts_changed": false
+      },
+      "production_changed": false,
+      "selector_changed": false,
+      "git_push_performed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
