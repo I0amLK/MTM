@@ -16,8 +16,35 @@ use time::macros::format_description;
 
 use crate::schema::{
     SCHEMA_MIGRATIONS_TABLE_SQL, STATE_SCHEMA_VERSION, V1_WORKFLOW_SCHEMA_SQL,
-    V2_RESEARCH_SCHEMA_SQL,
+    V2_RESEARCH_SCHEMA_SQL, V3_SUBMISSION_RECEIPTS_SQL, V4_RECOVERY_SQL,
+    V5_CREATION_INITIALIZATION_SQL, V6_CALLER_WRITE_JOURNAL_SQL, V7_ATOMIC_ACTION_SQL,
 };
+
+#[path = "mechanical_transitions.rs"]
+mod mechanical_transitions;
+#[path = "task_transitions.rs"]
+mod task_transitions;
+pub use mechanical_transitions::{BranchPreparation, PreparedBranch};
+pub use task_transitions::{BranchSeal, TaskTransition};
+
+#[path = "step_receipts.rs"]
+mod step_receipts;
+pub use step_receipts::{
+    AtomicActionKind, FileEffectEvidence, FileImage, RestartableActionKind, SubmissionDisposition,
+    SubmissionExecution, SubmissionReceipt, SubmissionRecovery, SubmissionReservation,
+    SubmissionResult, SubmissionSlot,
+};
+
+#[path = "creation_receipts.rs"]
+mod creation_receipts;
+pub use creation_receipts::{
+    CreationIdentity, CreationInitialization, CreationReceipt, CreationReference,
+    CreationReservation, CreationSlot,
+};
+
+#[path = "research_writes.rs"]
+mod research_writes;
+pub use research_writes::ReferenceAuditWrite;
 
 const REGISTRY_ID_MAX_BYTES: usize = 128;
 
@@ -168,6 +195,26 @@ impl StateStore {
             self.migrate_1_to_2()?;
             version = 2;
         }
+        if version == 2 {
+            self.migrate_2_to_3()?;
+            version = 3;
+        }
+        if version == 3 {
+            self.migrate_3_to_4()?;
+            version = 4;
+        }
+        if version == 4 {
+            self.migrate_4_to_5()?;
+            version = 5;
+        }
+        if version == 5 {
+            self.migrate_5_to_6()?;
+            version = 6;
+        }
+        if version == 6 {
+            self.migrate_6_to_7()?;
+            version = 7;
+        }
         if version != STATE_SCHEMA_VERSION {
             return Err(ReCtmError::new(
                 "STATE_SCHEMA_MIGRATION_FAILED",
@@ -228,6 +275,62 @@ impl StateStore {
             transaction
                 .execute_batch("PRAGMA user_version = 2;")
                 .map_err(sql_error)?;
+            Ok(())
+        })
+    }
+
+    fn migrate_2_to_3(&self) -> Result<(), ReCtmError> {
+        let applied_at = self.runtime.clock.now_iso()?;
+        self.immediate(|transaction| {
+            transaction.execute_batch(V3_SUBMISSION_RECEIPTS_SQL).map_err(sql_error)?;
+            transaction.execute(
+                "INSERT INTO schema_migrations(version, applied_at, description) VALUES(3, ?, 'MTM durable step submission receipts')",
+                [applied_at],
+            ).map_err(sql_error)?;
+            transaction.execute_batch("PRAGMA user_version=3;").map_err(sql_error)?;
+            Ok(())
+        })
+    }
+
+    fn migrate_3_to_4(&self) -> Result<(), ReCtmError> {
+        let applied_at = self.runtime.clock.now_iso()?;
+        self.immediate(|transaction| {
+            transaction.execute_batch(V4_RECOVERY_SQL).map_err(sql_error)?;
+            transaction.execute(
+                "INSERT INTO schema_migrations(version, applied_at, description) VALUES(4, ?, 'MTM creation identity and submission checkpoints')",
+                [applied_at],
+            ).map_err(sql_error)?;
+            transaction.execute_batch("PRAGMA user_version=4;").map_err(sql_error)?;
+            Ok(())
+        })
+    }
+
+    fn migrate_4_to_5(&self) -> Result<(), ReCtmError> {
+        let now = self.runtime.clock.now_iso()?;
+        self.immediate(|tx| {
+            tx.execute_batch(V5_CREATION_INITIALIZATION_SQL).map_err(sql_error)?;
+            tx.execute("INSERT INTO schema_migrations(version,applied_at,description) VALUES(5,?,'Restartable immutable keyed initialization')", [now]).map_err(sql_error)?;
+            tx.execute_batch("PRAGMA user_version=5").map_err(sql_error)?;
+            Ok(())
+        })
+    }
+
+    fn migrate_5_to_6(&self) -> Result<(), ReCtmError> {
+        let now = self.runtime.clock.now_iso()?;
+        self.immediate(|tx| {
+            tx.execute_batch(V6_CALLER_WRITE_JOURNAL_SQL).map_err(sql_error)?;
+            tx.execute("INSERT INTO schema_migrations(version,applied_at,description) VALUES(6,?,'Bounded caller-write reconciliation journals')", [now]).map_err(sql_error)?;
+            tx.execute_batch("PRAGMA user_version=6").map_err(sql_error)?;
+            Ok(())
+        })
+    }
+
+    fn migrate_6_to_7(&self) -> Result<(), ReCtmError> {
+        let now = self.runtime.clock.now_iso()?;
+        self.immediate(|tx| {
+            tx.execute_batch(V7_ATOMIC_ACTION_SQL).map_err(sql_error)?;
+            tx.execute("INSERT INTO schema_migrations(version,applied_at,description) VALUES(7,?,'Explicit atomic action enrollment; legacy work unchanged')", [now]).map_err(sql_error)?;
+            tx.execute_batch("PRAGMA user_version=7").map_err(sql_error)?;
             Ok(())
         })
     }
@@ -336,65 +439,7 @@ impl StateStore {
 
     pub fn transition_run(&self, request: TransitionRun<'_>) -> Result<Value, ReCtmError> {
         let now = self.runtime.clock.now_iso()?;
-        self.immediate(|transaction| {
-            let row = query_one_on(
-                transaction,
-                "SELECT * FROM runs WHERE run_id = ?",
-                [request.run_id],
-                &["metadata_json"],
-            )?
-            .ok_or_else(|| {
-                ReCtmError::new("RUN_NOT_FOUND", format!("Unknown run: {}", request.run_id))
-                    .with_category(ErrorCategory::NotFound)
-            })?;
-            let object = row.as_object().ok_or_else(internal_row_error)?;
-            let actual_state = text_value(object, "state")?;
-            if actual_state != request.expected_state {
-                return Err(ReCtmError::new(
-                    "STATE_CONFLICT",
-                    "The run changed state before this transition was committed.",
-                )
-                .with_category(ErrorCategory::Conflict)
-                .with_retryable(true)
-                .with_details(serde_json::json!({
-                    "run_id": request.run_id,
-                    "expected": request.expected_state,
-                    "actual": actual_state,
-                })));
-            }
-            let sequence = integer_value(object, "transition_seq")? + 1;
-            let epoch = integer_value(object, "epoch")? + i64::from(request.increment_epoch);
-            let round_index = integer_value(object, "round_index")? + request.round_delta;
-            let status = request.status.unwrap_or(text_value(object, "status")?);
-            let latex_passed = request
-                .latex_passed
-                .map(i64::from)
-                .unwrap_or(boolean_storage_value(object, "latex_passed")?);
-            let verdict = request
-                .verdict
-                .map(ToOwned::to_owned)
-                .or_else(|| optional_text_value(object, "verdict"));
-            let sealed = request
-                .sealed
-                .map(i64::from)
-                .unwrap_or(boolean_storage_value(object, "sealed")?);
-            transaction.execute(
-                "UPDATE runs SET state=?, epoch=?, transition_seq=?, round_index=?, updated_at=?, status=?, latex_passed=?, verdict=?, sealed=? WHERE run_id=?",
-                params![request.after_state, epoch, sequence, round_index, now, status, latex_passed, verdict, sealed, request.run_id],
-            ).map_err(sql_error)?;
-            transaction.execute(
-                "INSERT INTO transitions(run_id, sequence, trace_id, before_state, after_state, actor, reason, evidence_json, created_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                params![request.run_id, sequence, request.trace_id, request.expected_state, request.after_state, request.actor, request.reason, canonical_json(request.evidence)?, now],
-            ).map_err(sql_error)?;
-            if request.increment_epoch {
-                transaction.execute(
-                    "UPDATE capabilities SET revoked=1, revoked_at=?, revoke_reason='run_epoch_advanced' WHERE run_id=? AND revoked=0",
-                    params![now, request.run_id],
-                ).map_err(sql_error)?;
-            }
-            Ok(())
-        })?;
-        self.get_run(request.run_id)
+        self.immediate(|tx| task_transitions::transition_on(tx, &request, &now))
     }
 
     pub fn create_domain(
@@ -1086,11 +1131,7 @@ impl StateStore {
         let digest = sha256_text(&canonical);
         let now = self.runtime.clock.now_iso()?;
         self.immediate(|transaction| {
-            transaction.execute(
-                "INSERT INTO proof_manifests(run_id, manifest_json, sha256, created_at, updated_at) VALUES(?, ?, ?, ?, ?) ON CONFLICT(run_id) DO UPDATE SET manifest_json=excluded.manifest_json, sha256=excluded.sha256, updated_at=excluded.updated_at",
-                params![run_id, canonical, digest, now, now],
-            ).map_err(sql_error)?;
-            Ok(())
+            research_writes::manifest_on(transaction, run_id, &canonical, &digest, &now)
         })?;
         Ok(serde_json::json!({
             "run_id": run_id,
@@ -1262,14 +1303,22 @@ impl StateStore {
             .with_category(ErrorCategory::Validation));
         }
         let now = self.runtime.clock.now_iso()?;
-        self.immediate(|transaction| {
-            transaction.execute(
-                "INSERT INTO reference_audits(run_id, reference_id, disposition, evidence_basis, evidence_locator, verifier_domain_id, proof_sha256, proof_manifest_sha256, material, assumptions_checked, notation_checked, source_checked, independently_rederived, notes, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(run_id, reference_id) DO UPDATE SET disposition=excluded.disposition, evidence_basis=excluded.evidence_basis, evidence_locator=excluded.evidence_locator, verifier_domain_id=excluded.verifier_domain_id, proof_sha256=excluded.proof_sha256, proof_manifest_sha256=excluded.proof_manifest_sha256, material=excluded.material, assumptions_checked=excluded.assumptions_checked, notation_checked=excluded.notation_checked, source_checked=excluded.source_checked, independently_rederived=excluded.independently_rederived, notes=excluded.notes, updated_at=excluded.updated_at",
-                params![run_id, reference_id, disposition, evidence_basis, evidence_locator, verifier_domain_id, proof_sha256, proof_manifest_sha256, i64::from(material), i64::from(assumptions_checked), i64::from(notation_checked), i64::from(source_checked), i64::from(independently_rederived), notes, now, now],
-            ).map_err(sql_error)?;
-            Ok(())
-        })?;
-        self.get_reference_audit(run_id, reference_id)
+        let audit = ReferenceAuditWrite {
+            reference_id: reference_id.into(),
+            disposition: disposition.into(),
+            evidence_basis: evidence_basis.into(),
+            evidence_locator: evidence_locator.into(),
+            verifier_domain_id: verifier_domain_id.into(),
+            proof_sha256: proof_sha256.into(),
+            proof_manifest_sha256: proof_manifest_sha256.into(),
+            material,
+            assumptions_checked,
+            notation_checked,
+            source_checked,
+            independently_rederived,
+            notes: notes.into(),
+        };
+        self.immediate(|tx| research_writes::audit_on(tx, run_id, &audit, &now))
     }
 
     pub fn get_reference_audit(

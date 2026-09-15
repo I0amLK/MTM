@@ -1,0 +1,51 @@
+{
+  "schema": "mtm016-u25-dangerous-v2-source-diagnostic-v1",
+  "milestone": "MTM-016",
+  "commit": "0d79d4a7279733953ba396d529d0b81f7ceaa504",
+  "source_sha256": "dcb488ba61923f7e729099774652351de6669cac402b5cf5bf98a25024a5aaaa",
+  "scope": "maintenance_nested_environment_source_check_diagnostic_only",
+  "source_check_executed": true,
+  "source_check_passed": false,
+  "checks": {
+    "format_exit_code": 0,
+    "clippy_exit_code": 0,
+    "rust_tests_exit_code": 101,
+    "diff_exit_code": 0
+  },
+  "native_environment": {
+    "classification": "namespace_limit_or_depth",
+    "user_namespace_created": false,
+    "user_namespace_errno": 28,
+    "user_namespace_errno_name": "ENOSPC",
+    "ready_for_native_tests": false,
+    "tests_skipped_by_preflight": false
+  },
+  "mtm_runtime_test_block": {
+    "passed": 130,
+    "failed": 10,
+    "ignored": 1,
+    "failed_tests": [
+      "native_authority::tests::exec_candidate_covers_all_seven_permission_kinds_on_real_bubblewrap",
+      "native_authority::tests::exec_candidate_cross_owner_and_workspace_fail_without_consuming_grant",
+      "native_authority::tests::exec_candidate_enforces_timeout_boundary_and_sensitive_env_binding",
+      "native_authority::tests::exec_candidate_multi_risk_is_atomic_and_has_one_concurrent_winner",
+      "native_authority::tests::exec_candidate_preserves_git_latex_sage_and_exposes_magma",
+      "native_authority::tests::exec_candidate_preserves_trusted_and_dangerous_profiles",
+      "native_authority::tests::exec_candidate_preserves_tty_stdin_and_descendant_cleanup",
+      "native_authority::tests::exec_candidate_preserves_tty_timeout_and_kill_lifecycle",
+      "native_authority::tests::exec_candidate_session_grant_reuses_in_process_and_restart_invalidates",
+      "native_tools::tests::authority_exec_exact_once_grant_runs_once_when_bubblewrap_is_available"
+    ]
+  },
+  "u25_acceptance_contract_tests": {
+    "mtm_xtask_unit_tests_passed": 121,
+    "mtm_xtask_unit_tests_failed": 0,
+    "research_session_conformance_negative_cases": 91
+  },
+  "source_identity_unchanged_during_check": true,
+  "capable_host_source_pass_claimed": false,
+  "accepted_trials_delta": 0,
+  "production_changed": false,
+  "release_qualified": false,
+  "recorded_unix_seconds": 1789372093
+}

@@ -1,0 +1,294 @@
+{
+  "baseline_launched": null,
+  "baseline_sha256": null,
+  "candidate_launched": true,
+  "candidate_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "delivery": "D6",
+  "harness_source_identity": {
+    "after_sha256": "981a06d44df346c3ba395ede06ab078b46c35b067d798a67b1b9b4af1494d873",
+    "before_sha256": "981a06d44df346c3ba395ede06ab078b46c35b067d798a67b1b9b4af1494d873",
+    "commit": "df4fecae89ac1370a99a6ffb178643f2b83d39b2",
+    "unchanged": true
+  },
+  "milestone": "MTM-016",
+  "native_preflight": {
+    "bubblewrap_probe": {
+      "binary_sha256": "52231e1caf55bcbc667b269f49c63599a6f7db4767ae6a039580d0ff853db712",
+      "diagnostic_hint": "none",
+      "found": true,
+      "isolation_checks": {
+        "capabilities_dropped": true,
+        "environment_cleared": true,
+        "further_user_namespace_denied": true,
+        "new_ipc_namespace": true,
+        "new_mnt_namespace": true,
+        "new_net_namespace": true,
+        "new_pid_namespace": true,
+        "new_user_namespace": true,
+        "new_uts_namespace": true,
+        "no_new_privileges": true,
+        "protocol_valid": true,
+        "workspace_not_mounted": true
+      },
+      "process": {
+        "child_reaped": true,
+        "elapsed_ms": 5,
+        "exit_code": 0,
+        "output_limit_exceeded": false,
+        "pipes_closed": true,
+        "raw_output_recorded": false,
+        "signal": null,
+        "stderr_bytes_retained": 0,
+        "stdout_bytes_retained": 906,
+        "timed_out": false
+      }
+    },
+    "candidate_defect_attribution": "not_evaluated_by_preflight",
+    "classification": "ready_for_native_tests_not_qualified",
+    "context": {
+      "ancestor_limits_inspected": false,
+      "bounding_caps_zero": false,
+      "effective_caps_zero": true,
+      "gid_map_shape": "initial_like_not_host_proof",
+      "host_context_proven": false,
+      "namespace_occupancy_measured": false,
+      "no_new_privs": false,
+      "permitted_caps_zero": true,
+      "same_user_namespace_as_visible_pid1": null,
+      "seccomp_mode": 0,
+      "uid_map_shape": "initial_like_not_host_proof",
+      "visible_limits": {
+        "apparmor_restrict_unprivileged_userns": null,
+        "max_ipc_namespaces": 55803,
+        "max_mnt_namespaces": 55803,
+        "max_net_namespaces": 55803,
+        "max_pid_namespaces": 55803,
+        "max_user_namespaces": 55803,
+        "max_uts_namespaces": 55803,
+        "unprivileged_userns_clone": null
+      }
+    },
+    "host_settings_modified": false,
+    "limitations": [
+      "Positive visible namespace limits do not reveal ancestor quotas or current occupancy.",
+      "Restricted UID mappings and namespace equality to visible PID 1 do not identify the host or prove nesting depth.",
+      "ENOSPC/EUSERS alone cannot distinguish a configured nesting prohibition from depth/quota exhaustion.",
+      "Passing this probe is not full Native, TTY, external-tool, private-vault, workflow or release qualification."
+    ],
+    "maintenance_binary_sha256": "c83189384d91513793020058753f784763218825f0dd01a2abd4487f7ace7f2e",
+    "milestone": "MTM-016",
+    "native_product_runtime_tested": false,
+    "passed": true,
+    "probe_identities_unchanged": true,
+    "production_state_modified": false,
+    "python_invoked": false,
+    "raw_output_recorded": false,
+    "ready_for_native_tests": true,
+    "recorded_unix_seconds": 1789217992,
+    "recovery": {
+      "action": "run_product_tests_in_this_environment",
+      "automatic_retry": false,
+      "do_not_disable_isolation_or_raise_sysctls_automatically": true
+    },
+    "release_qualified": false,
+    "schema_version": "1.0.0",
+    "scope": "current_environment_native_prerequisites_only",
+    "source_tests_passed": null,
+    "supported": true,
+    "tests_skipped_by_preflight": false,
+    "user_namespace_probe": {
+      "classification": "available",
+      "measurement": {
+        "created": true,
+        "errno": null,
+        "errno_name": null,
+        "operation": "unshare_user",
+        "protocol": 1
+      },
+      "process": {
+        "child_reaped": true,
+        "elapsed_ms": 5,
+        "exit_code": 0,
+        "output_limit_exceeded": false,
+        "pipes_closed": true,
+        "raw_output_recorded": false,
+        "signal": null,
+        "stderr_bytes_retained": 0,
+        "stdout_bytes_retained": 88,
+        "timed_out": false
+      }
+    }
+  },
+  "original_and_snapshot_unchanged": true,
+  "passed": true,
+  "pending": [
+    "browser",
+    "resources",
+    "upgrade and rollback",
+    "Python retirement"
+  ],
+  "production_selectors_changed": false,
+  "production_state_modified": false,
+  "profile": "target",
+  "python_invoked": false,
+  "raw_test_output_recorded": false,
+  "recorded_unix_seconds": 1789218173,
+  "release_qualified": false,
+  "runner": {
+    "child_reaped": true,
+    "elapsed_ms": 177622,
+    "exit_code": 0,
+    "output_limit_exceeded": false,
+    "pipes_closed": true,
+    "raw_output_recorded": false,
+    "signal": null,
+    "stderr_bytes_retained": 4256,
+    "stdout_bytes_retained": 8666,
+    "timed_out": false
+  },
+  "schema_version": "1.0.0",
+  "scope": "exact_candidate_target_not_release",
+  "selector_changed": false,
+  "summaries": {
+    "capability": {
+      "adversarial_checks": {
+        "cross_owner_refresh_denied": true,
+        "cross_run_denied": true,
+        "fresh_submission_advances": true,
+        "invalid_inspect_and_retrieve_denied": true,
+        "invalid_submission_zero_memory_changes": true,
+        "mutated_and_truncated_signature": true,
+        "revoked_inspect_and_retrieve_denied": true,
+        "used_capability_revoked": true
+      },
+      "binary_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+      "binary_unchanged": true,
+      "bounded_clean_shutdown": true,
+      "child_path_policy": "curl_only_no_python",
+      "external_retrieval_tested": false,
+      "independent_normal_runs": 500,
+      "kind": "rust_current_binary_loopback_capability_regression",
+      "latex_policy": "static_only",
+      "lost_outcome_no_automatic_replay": true,
+      "native_backend": "disabled",
+      "normal_invalid": 0,
+      "normal_modes": {
+        "compact": 250,
+        "full": 250
+      },
+      "normal_rejections": 0,
+      "normal_roundtrips": 500,
+      "ok": true,
+      "production_state_modified": false,
+      "raw_capability_recorded": false,
+      "raw_oauth_token_recorded": false,
+      "release_qualified": false,
+      "same_identity_and_capability_survive_restart": true,
+      "samples_requested": 500,
+      "schema_version": "1.0.0",
+      "version": "0.6.0-preview.1",
+      "web_client_tested": false
+    },
+    "lifecycle": {
+      "binary_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+      "changed_key_old_bearer_denied": true,
+      "changed_key_old_capability_zero_writes": true,
+      "clean_shutdown": true,
+      "copied_v1_state_migrated": true,
+      "flows": {
+        "compact": {
+          "artifact_matches": true,
+          "restart_resumed": true,
+          "sealed": true,
+          "states": [
+            "assess",
+            "assemble",
+            "verify",
+            "done"
+          ]
+        },
+        "full": {
+          "artifact_matches": true,
+          "restart_resumed": true,
+          "sealed": true,
+          "states": [
+            "assess",
+            "explore",
+            "propose_plans",
+            "direct_proving",
+            "assemble",
+            "verify",
+            "done"
+          ]
+        },
+        "repair": {
+          "artifact_matches": true,
+          "restart_resumed": true,
+          "sealed": true,
+          "states": [
+            "assess",
+            "assemble",
+            "verify",
+            "repair",
+            "verify",
+            "done"
+          ]
+        }
+      },
+      "independent_mathematical_verification": false,
+      "latex_policy": "static_only",
+      "legacy_row_preserved": true,
+      "native_execution_tested": false,
+      "new_run_after_migration": true,
+      "no_premature_artifact": true,
+      "ok": true,
+      "persisted_secret_owner_only": true,
+      "release_qualified": false,
+      "same_key_restart": true,
+      "same_owner_fresh_recovery": true,
+      "verifier_firewall": true,
+      "web_client_tested": false
+    },
+    "target": {
+      "binary_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+      "compiled_latex_tested": true,
+      "flow": {
+        "artifact_matches": true,
+        "restart_resumed": true,
+        "sealed": true,
+        "states": [
+          "assess",
+          "assemble",
+          "verify",
+          "done"
+        ]
+      },
+      "hard_isolation_attested": true,
+      "independent_mathematical_verification": false,
+      "install_or_selector_changed": false,
+      "latex_policy": "required",
+      "native_backend": "bubblewrap",
+      "native_execution_tested": true,
+      "native_mode": "dangerous",
+      "ok": true,
+      "private_vault_visible": false,
+      "release_qualified": false,
+      "resource_non_regression_tested": false,
+      "web_client_tested": false
+    },
+    "workspace": {
+      "binary_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+      "blame_continuation_preserved": true,
+      "changed_file_denied": true,
+      "child_path": "curl_and_git_only",
+      "git_tools_checked": 5,
+      "native_execution_tested": false,
+      "ok": true,
+      "release_qualified": false,
+      "utf8_continuation_lossless": true,
+      "web_client_tested": false
+    }
+  },
+  "test_stderr_sha256": "6d05aeed0b08f9b6ea60e59b881d9a29964848e7ccd66336ee5625cb4919719c",
+  "test_stdout_sha256": "c66ffd37e0f3f6f7eaebabc4b8694a069b0b3ba6c43568835c29833390151a90"
+}

@@ -10,9 +10,22 @@ name = "mtm"
 path = "src/main.rs"
 
 [dependencies]
-mtm-contracts = { version = "=0.5.0-preview.2", path = "../mtm-contracts" }
-mtm-runtime = { version = "=0.5.0-preview.2", path = "../mtm-runtime" }
+mtm-contracts = { version = "=0.6.0-preview.1", path = "../mtm-contracts" }
+mtm-runtime = { version = "=0.6.0-preview.1", path = "../mtm-runtime" }
+nix.workspace = true
 serde_json.workspace = true
+sha2.workspace = true
+tempfile.workspace = true
+
+[dev-dependencies]
+base64.workspace = true
+getrandom.workspace = true
+mtm-storage = { version = "=0.6.0-preview.1", path = "../mtm-storage" }
+nix.workspace = true
+rusqlite.workspace = true
+sha2.workspace = true
+tempfile.workspace = true
+url.workspace = true
 
 [lints]
 workspace = true

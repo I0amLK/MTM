@@ -1,4 +1,75 @@
-pub const STATE_SCHEMA_VERSION: i64 = 2;
+pub const STATE_SCHEMA_VERSION: i64 = mtm_contracts::STATE_SCHEMA_VERSION as i64;
+
+pub const V7_ATOMIC_ACTION_SQL: &str = r#"
+ALTER TABLE step_checkpoints ADD COLUMN atomic_action TEXT
+    CHECK(atomic_action IN ('assessment_complete','exploration_complete','proof_submitted','repair_submitted'));
+"#;
+
+pub const V6_CALLER_WRITE_JOURNAL_SQL: &str = r#"
+CREATE TABLE step_write_journals (
+    capability_sha256 TEXT PRIMARY KEY REFERENCES step_checkpoints(capability_sha256) ON DELETE RESTRICT,
+    marker_json TEXT NOT NULL CHECK(length(marker_json)<=4096)
+);
+"#;
+
+pub const V5_CREATION_INITIALIZATION_SQL: &str = r#"
+CREATE TABLE creation_initializations (
+    run_id TEXT PRIMARY KEY REFERENCES creation_receipts(run_id) ON DELETE RESTRICT,
+    material_sha256 TEXT CHECK(material_sha256 IS NULL OR length(material_sha256)=64),
+    database_sha256 TEXT CHECK(database_sha256 IS NULL OR length(database_sha256)=64),
+    CHECK((material_sha256 IS NULL)=(database_sha256 IS NULL))
+);
+"#;
+
+pub const V4_RECOVERY_SQL: &str = r#"
+CREATE TABLE creation_receipts (
+    owner_id TEXT NOT NULL,
+    key_sha256 TEXT NOT NULL CHECK(length(key_sha256)=64),
+    workspace_sha256 TEXT NOT NULL CHECK(length(workspace_sha256)=64),
+    request_sha256 TEXT NOT NULL CHECK(length(request_sha256)=64),
+    run_id TEXT NOT NULL UNIQUE,
+    execution_id TEXT NOT NULL UNIQUE,
+    status TEXT NOT NULL CHECK(status IN ('pending','completed')),
+    created_at TEXT NOT NULL,
+    completed_at TEXT,
+    PRIMARY KEY(owner_id,key_sha256),
+    CHECK((status='pending' AND completed_at IS NULL)
+       OR (status='completed' AND completed_at IS NOT NULL))
+);
+CREATE TABLE step_checkpoints (
+    capability_sha256 TEXT PRIMARY KEY REFERENCES step_receipts(capability_sha256) ON DELETE RESTRICT,
+    execution_id TEXT NOT NULL UNIQUE,
+    phase TEXT NOT NULL CHECK(phase IN ('prepared','running','commit_ready')),
+    expected_writes INTEGER CHECK(expected_writes BETWEEN 0 AND 65536),
+    accepted_writes INTEGER NOT NULL DEFAULT 0 CHECK(accepted_writes BETWEEN 0 AND 65536),
+    CHECK((phase='prepared' AND expected_writes IS NULL AND accepted_writes=0)
+       OR (phase='running' AND expected_writes IS NOT NULL AND accepted_writes<=expected_writes)
+       OR (phase='commit_ready' AND expected_writes IS NOT NULL AND accepted_writes=expected_writes))
+);
+"#;
+
+pub const V3_SUBMISSION_RECEIPTS_SQL: &str = r#"
+CREATE TABLE step_receipts (
+    capability_sha256 TEXT PRIMARY KEY CHECK(length(capability_sha256)=64),
+    owner_id TEXT NOT NULL,
+    workspace_sha256 TEXT NOT NULL CHECK(length(workspace_sha256)=64),
+    request_sha256 TEXT NOT NULL CHECK(length(request_sha256)=64),
+    run_id TEXT NOT NULL REFERENCES runs(run_id) ON DELETE RESTRICT,
+    domain_id TEXT NOT NULL REFERENCES domains(domain_id) ON DELETE RESTRICT,
+    role TEXT NOT NULL,
+    epoch INTEGER NOT NULL,
+    issued_state TEXT NOT NULL,
+    status TEXT NOT NULL CHECK(status IN ('pending','completed')),
+    result_json TEXT CHECK(result_json IS NULL OR length(result_json)<=2048),
+    created_at TEXT NOT NULL,
+    completed_at TEXT,
+    CHECK((status='pending' AND result_json IS NULL AND completed_at IS NULL)
+       OR (status='completed' AND result_json IS NOT NULL AND completed_at IS NOT NULL))
+);
+CREATE INDEX idx_step_receipts_run ON step_receipts(run_id);
+CREATE UNIQUE INDEX idx_step_receipts_pending_run
+    ON step_receipts(run_id) WHERE status='pending';
+"#;
 
 pub const SCHEMA_MIGRATIONS_TABLE_SQL: &str = r#"
 CREATE TABLE IF NOT EXISTS schema_migrations (

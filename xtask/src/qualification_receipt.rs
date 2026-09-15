@@ -1,0 +1,295 @@
+//! Revalidate sealed qualification data with the SAME summary validators.
+use super::*;
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Runner {
+    child_reaped: bool,
+    elapsed_ms: u64,
+    exit_code: i64,
+    output_limit_exceeded: bool,
+    pipes_closed: bool,
+    raw_output_recorded: bool,
+    signal: Value,
+    stderr_bytes_retained: u64,
+    stdout_bytes_retained: u64,
+    timed_out: bool,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Source {
+    before_sha256: String,
+    after_sha256: String,
+    commit: String,
+    unchanged: bool,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Receipt {
+    baseline_launched: Value,
+    baseline_sha256: Value,
+    candidate_launched: bool,
+    candidate_sha256: String,
+    delivery: String,
+    harness_source_identity: Source,
+    milestone: String,
+    original_and_snapshot_unchanged: bool,
+    passed: bool,
+    pending: Vec<String>,
+    production_selectors_changed: bool,
+    production_state_modified: bool,
+    profile: String,
+    python_invoked: bool,
+    raw_test_output_recorded: bool,
+    recorded_unix_seconds: u64,
+    release_qualified: bool,
+    runner: Runner,
+    schema_version: String,
+    scope: String,
+    selector_changed: bool,
+    selector_scope: Option<String>,
+    summaries: Value,
+    test_stderr_sha256: String,
+    test_stdout_sha256: String,
+    native_preflight: Option<Value>,
+    corpus_definition_sha256: Option<String>,
+}
+
+pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) -> Result<()> {
+    let report: Receipt = serde_json::from_value(value.clone())
+        .map_err(|_| "qualification receipt schema invalid")?;
+    let profile = Profile::parse(name)?;
+    let paired = matches!(profile, Profile::Upgrade | Profile::Resource);
+    let scope = match profile {
+        Profile::Protocol => "exact_candidate_protocol_not_release",
+        Profile::Target => "exact_candidate_target_not_release",
+        Profile::NativeCommands => "exact_candidate_capable_host_native_commands_not_release",
+        Profile::CompiledLatex => "exact_candidate_required_compiled_latex_not_release",
+        Profile::Resource => "exact_candidate_resource_not_release",
+        Profile::Upgrade => "exact_candidate_installed_upgrade_fixture_not_release",
+        Profile::Permissions => "exact_candidate_scripted_patch_permissions_not_release",
+        Profile::Corpus => "exact_candidate_partial_usability_corpus_not_release",
+        Profile::CorpusNative => "exact_candidate_native_corpus_u16_u20_not_release",
+        Profile::InstallSigkill => "exact_candidate_external_sigkill_install_recovery_not_release",
+        Profile::Retrieval => "exact_candidate_real_external_retrieval_not_release",
+    };
+    let runner = &report.runner;
+    let source = &report.harness_source_identity;
+    if !valid_hash(hash)
+        || !valid_hash(baseline)
+        || report.schema_version != "1.0.0"
+        || report.milestone != "MTM-016"
+        || report.profile != name
+        || report.scope != scope
+        || report.delivery != profile.delivery()
+        || report.candidate_sha256 != hash
+        || !report.candidate_launched
+        || !report.passed
+        || !report.original_and_snapshot_unchanged
+        || report.release_qualified
+        || report.production_selectors_changed
+        || report.production_state_modified
+        || report.python_invoked
+        || report.raw_test_output_recorded
+        || report.recorded_unix_seconds == 0
+        || report.pending.len() > 32
+        || report.pending.iter().any(|v| v.len() > 512)
+        || !runner.child_reaped
+        || !runner.pipes_closed
+        || runner.exit_code != 0
+        || runner.timed_out
+        || runner.output_limit_exceeded
+        || runner.raw_output_recorded
+        || !runner.signal.is_null()
+        || runner.elapsed_ms > 610_000
+        || runner.stdout_bytes_retained > 2 * 1024 * 1024
+        || runner.stderr_bytes_retained > 2 * 1024 * 1024
+        || !valid_hash(&report.test_stdout_sha256)
+        || !valid_hash(&report.test_stderr_sha256)
+        || !source.unchanged
+        || !valid_hash(&source.before_sha256)
+        || source.before_sha256 != source.after_sha256
+        || source.commit.len() != 40
+        || !source.commit.bytes().all(|b| b.is_ascii_hexdigit())
+        || (paired
+            && (report.baseline_sha256 != baseline
+                || report.baseline_launched != true
+                || hash == baseline))
+        || (!paired && (!report.baseline_sha256.is_null() || !report.baseline_launched.is_null()))
+        || report.selector_changed != (profile == Profile::Upgrade)
+        || report.selector_scope.as_deref()
+            != if profile == Profile::Upgrade {
+                Some("owned_disposable_fixture_only")
+            } else {
+                None
+            }
+        || (matches!(profile, Profile::Corpus | Profile::CorpusNative)
+            && !report
+                .corpus_definition_sha256
+                .as_deref()
+                .is_some_and(valid_hash))
+        || (!matches!(profile, Profile::Corpus | Profile::CorpusNative)
+            && report.corpus_definition_sha256.is_some())
+    {
+        return Err("qualification receipt identity, result or scope inconsistent".into());
+    }
+    if matches!(
+        profile,
+        Profile::Target
+            | Profile::NativeCommands
+            | Profile::CompiledLatex
+            | Profile::Resource
+            | Profile::CorpusNative
+    ) {
+        let native = report
+            .native_preflight
+            .as_ref()
+            .ok_or("Native preflight missing")?;
+        if native["passed"] != true || native["ready_for_native_tests"] != true {
+            return Err("Native preflight did not pass".into());
+        }
+    } else if report.native_preflight.is_some() {
+        return Err("unexpected Native preflight claim".into());
+    }
+    let summaries = &report.summaries;
+    let mut bytes = Vec::new();
+    let mut line = |key: &str, marker: &str| -> Result<()> {
+        let value = summaries.get(key).ok_or("qualification summary missing")?;
+        bytes.extend_from_slice(format!("{marker} {value}\n").as_bytes());
+        Ok(())
+    };
+    let checked = match profile {
+        Profile::CorpusNative => {
+            line("corpus_native", "MTM_NATIVE_CORPUS")?;
+            let checked = native_corpus::validate(&bytes, hash)?;
+            if checked["corpus_native"]["passed"] != true
+                || report.corpus_definition_sha256.as_deref()
+                    != checked["corpus_native"]["corpus_sha256"].as_str()
+            {
+                return Err("Native corpus receipt is not a complete fifteen-trial batch".into());
+            }
+            checked
+        }
+        Profile::Permissions => {
+            line("permissions", "MTM_PERMISSION_RUNTIME")?;
+            summary::validate_permissions(&bytes, hash)?
+        }
+        Profile::NativeCommands => {
+            line("native_commands", "MTM_NATIVE_COMMAND_RUNTIME")?;
+            summary::validate_native_commands(&bytes, hash)?
+        }
+        Profile::CompiledLatex => {
+            line("compiled_latex", "MTM_COMPILED_LATEX_RUNTIME")?;
+            summary::validate_compiled_latex(&bytes, hash)?
+        }
+        Profile::InstallSigkill => {
+            line("install_sigkill", "MTM_INSTALL_SIGKILL")?;
+            summary::validate_install_sigkill(&bytes, hash)?
+        }
+        Profile::Retrieval => {
+            line("retrieval", "MTM_RETRIEVAL_RUNTIME")?;
+            summary::validate_retrieval(&bytes, hash)?
+        }
+        Profile::Upgrade => {
+            line("upgrade", "MTM_UPGRADE_RUNTIME")?;
+            summary::validate_upgrade(&bytes, hash, baseline)?
+        }
+        Profile::Resource => {
+            line("resource", "MTM_RESOURCE_RUNTIME")?;
+            summary::validate_resource(&bytes, hash, baseline)?
+        }
+        Profile::Protocol | Profile::Target => {
+            line("capability", "MTM_CAPABILITY_GATE")?;
+            line("workspace", "MTM_WORKSPACE_SMOKE")?;
+            line("lifecycle", "MTM_CANDIDATE_LIFECYCLE")?;
+            if profile == Profile::Target {
+                line("target", "MTM_TARGET_RUNTIME")?;
+            }
+            summary::validate(&bytes, hash, profile)?
+        }
+        Profile::Corpus => {
+            line("corpus", "MTM_USABILITY_CORPUS")?;
+            let checked = summary::validate_corpus(&bytes, hash)?;
+            if checked["corpus"]["passed"] != true
+                || report.corpus_definition_sha256.as_deref()
+                    != checked["corpus"]["corpus_sha256"].as_str()
+            {
+                return Err(
+                    "corpus receipt is valid partial evidence, not a completed release gate".into(),
+                );
+            }
+            checked
+        }
+    };
+    if &checked != summaries {
+        return Err("qualification summary has extra or inconsistent fields".into());
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn native_corpus_receipt_rechecks_matrix_identity_preflight_and_runner() -> Result<()> {
+        let mut good: Value = serde_json::from_str(include_str!(
+            "../../records/evidence/MTM-016/candidate-native-commands-f6-a323ed8.json"
+        ))?;
+        let selected = good["candidate_sha256"]
+            .as_str()
+            .ok_or("fixture hash")?
+            .to_owned();
+        let matrix = native_corpus::fixture(&selected);
+        good["profile"] = json!("corpus_native");
+        good["scope"] = json!("exact_candidate_native_corpus_u16_u20_not_release");
+        good["corpus_definition_sha256"] = matrix["corpus_sha256"].clone();
+        good["summaries"] = json!({"corpus_native":matrix});
+        validate(&good, &selected, &"b".repeat(64), "corpus_native")?;
+        for (pointer, value) in [
+            ("/runner/exit_code", json!(101)),
+            ("/runner/child_reaped", json!(false)),
+            ("/native_preflight/ready_for_native_tests", json!(false)),
+            ("/corpus_definition_sha256", json!("b".repeat(64))),
+            ("/summaries/corpus_native/rows/0/repeat", json!(2)),
+            ("/summaries/corpus_native/passed_trials", json!(14)),
+            ("/summaries/corpus_native/passed", json!(false)),
+            ("/passed", json!(false)),
+        ] {
+            let mut bad = good.clone();
+            *bad.pointer_mut(pointer)
+                .ok_or("Native corpus fixture pointer")? = value;
+            assert!(validate(&bad, &selected, &"b".repeat(64), "corpus_native").is_err());
+        }
+        assert!(validate(&good, &selected, &"b".repeat(64), "native_commands").is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn sealed_protocol_rechecks_nested_counts_and_runner_not_just_passed() -> Result<()> {
+        let good: Value = serde_json::from_str(include_str!(
+            "../../records/evidence/MTM-016/candidate-protocol-f3-cc17b16.json"
+        ))?;
+        let hash = good["candidate_sha256"].as_str().ok_or("fixture hash")?;
+        validate(&good, hash, &"b".repeat(64), "protocol")?;
+        for (pointer, value) in [
+            ("/summaries/capability/normal_roundtrips", json!(499)),
+            ("/summaries/capability/normal_roundtrips", json!(500.0)),
+            ("/summaries/target", json!({"ok":true})),
+            ("/runner/exit_code", json!(101)),
+            ("/runner/child_reaped", json!(false)),
+            ("/harness_source_identity/unchanged", json!(false)),
+            ("/release_qualified", json!(true)),
+            ("/candidate_sha256", json!("b".repeat(64))),
+        ] {
+            let mut changed = good.clone();
+            *changed.pointer_mut(pointer).ok_or("fixture pointer")? = value;
+            assert!(validate(&changed, hash, &"b".repeat(64), "protocol").is_err());
+        }
+        assert!(validate(&good, hash, &"b".repeat(64), "target").is_err());
+        Ok(())
+    }
+}

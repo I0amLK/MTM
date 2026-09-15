@@ -1,8 +1,117 @@
 # MTM
 
+Stage E is complete for the current development contract. The E2 action-file
+checkpoint keeps schema 7 and uses `mtm-tools-v9`.
+All state-changing model actions now have a current-contract interruption policy:
+four database-only actions commit atomically, while plans/direct proving/branch/
+join/failure/replan/verification actions use explicit restartable enrollment plus
+stable private file-effect evidence. `recover_only` never runs an action; corrected
+resubmission reuses exact internal bytes or fails closed on drift. Historical or
+unmarked unknown work remains unknown rather than being inferred. See
+`docs/MTM-016-E2-ACTION-FILE-RECOVERY.md`. Development only; not release-qualified.
+
+The current E2 mechanical checkpoint keeps schema 7 and uses `mtm-tools-v8`.
+Branch preparation now uses stable identities plus one database transaction; LaTeX
+result metadata and its transition commit together; exact final proof publication is
+restartable and a Done reconnect may restore only the derived manual-validation
+manifest. Conflicting existing private/final bytes fail closed. See
+`docs/MTM-016-E2-MECHANICAL-RECOVERY.md`. Planning/direct-screening/join/verification
+file-effect recovery remains pending. Development only: no deployment.
+
+The preceding E2 action checkpoint uses schema 7 and `mtm-tools-v7`. Assessment,
+exploration, proof submission/escalation and repair commit their database effects,
+domain seal and transition receipt together. Explicitly enrolled interrupted actions
+can be reconciled without executing them; caller writes remain retained. Branch
+database sealing is also atomic, but preceding branch file effects stay unknown.
+See `docs/MTM-016-E2-ACTION-TRANSACTIONS.md`. Development only: no deployment.
+
+The preceding E2 checkpoint keeps schema 6 and uses `mtm-tools-v6`: caller
+`proof_manifest` and `reference_audit` writes commit with their accepted-write
+checkpoint in a single database transaction. Failed transactions preserve any
+earlier retained prefix; recovery never executes the action or rewrites evidence.
+Historical opaque journals and action-internal interruptions remain unresolved.
+See `docs/MTM-016-E2-DATABASE-WRITES.md`. Development only; no production cutover.
+
+The E2 caller-write checkpoint uses schema 6 and `mtm-tools-v5`. Explicit
+`recover_only` may reconcile a proven retained write prefix without replaying
+records or executing the action. File evidence and permanent private file locks
+distinguish publication from lost acknowledgement; opaque database writes,
+entered actions, conflicting bytes and legacy unknown work remain blocked.
+See `docs/MTM-016-E2-WRITE-RECOVERY.md`. This development branch is not installed
+or release-qualified; no previous candidate evidence qualifies schema 6.
+
+MTM-016 Native environment diagnostics are available with
+`cargo xtask native-preflight --record`. The ordinary source check includes the
+probe but still runs every test when the environment is blocked. See
+`docs/MTM-016-NATIVE-PREFLIGHT.md` for the real-host handoff and its limits.
+
+> Development branch: MTM-016 (`0.6.0-preview.1`, not qualified) is in progress. See
+> [the native modernization plan](docs/MTM-016-NATIVE-PLAN.md) and
+> `records/iterations/ITER-016.json`. This branch is not release-qualified and
+> must not overwrite the installed immutable 0.5.0-preview.2 binary. The release
+> section below describes the previously accepted MTM-015 baseline. The development
+> [MTM-owned tool contract](docs/MTM-016-TOOL-CONTRACT.md) removes hidden aliases and
+> exposes a Rust-built directory with `mtm tool-catalog`.
+
+The current E2 initialization-resume checkpoint uses schema 5 and `mtm-tools-v4`.
+New keyed initialization can finish missing input publication and its transactional
+database setup after process interruption, without replacing existing inputs,
+project snapshots or references. Legacy pending creations are not automatically
+enrolled. See `docs/MTM-016-E2-CREATION-RESUME.md`; arbitrary partial step/action
+replay, real-host qualification and production deployment remain outside this scope.
+
+The preceding E2 development checkpoint used schema 4 and `mtm-tools-v3`. Optional
+`creation_key` preserves one intended start across a lost response; explicit
+`recover_only` can resolve a still-unstarted step without executing it. Completed
+transition receipts survive failures constructing the next task. Partial writes,
+legacy unknown operations and unfinished initialization are never blindly retried.
+See `docs/MTM-016-E2-RECOVERY.md`. This is not complete crash reconciliation,
+release qualification or an instruction to open production state with this build.
+
+The E1 development checkpoint introduces state schema **3** and `mtm-tools-v2`:
+identical `rethlas_step` retries recover a durable non-authorizing submission
+receipt rather than applying writes twice. Pending outcomes remain blocked; this
+does not yet deduplicate run creation or reconcile interrupted submissions.
+Read `docs/MTM-016-SUBMISSION-RECEIPTS.md` before using this development binary.
+Do not point it at production data. Schema-2 binaries need an untouched pre-upgrade
+copy for rollback; deleting receipts or decrementing a schema version is not rollback.
+
+MTM-016 now has Rust commit-policy checks, authenticated HTTP tests and a
+current-binary capability regression and independent 135-case pure-policy tests;
+eleven reviewed Python files have been retired and 116 remain. See
+`docs/MTM-016-PYTHON-RETIREMENT.md` for coverage and remaining limitations.
+Record integrity is now consolidated in `cargo xtask records`, including archived
+operator host reports that are not overwritten by subsequent sandbox diagnostics.
+See `docs/MTM-016-RECORD-INTEGRITY.md` for the evidence and test boundaries.
+Exact-artifact protocol checks are available with `cargo xtask qualify --profile
+protocol --binary <artifact> --sha256 <digest> --record`. This selects the actual
+artifact for OAuth/capability, Workspace and complete scripted workflow fixtures;
+`--profile target` adds a fail-closed Native-host preflight, public Bubblewrap
+execution and required compiled LaTeX on that same SHA-bound artifact. The target
+profile is still not browser/resource/install/rollback or release qualification.
+`--profile resource` accepts an explicit baseline artifact and measures bounded
+startup/request/RSS/thread/FD/shutdown non-regression without reading or changing a
+selector. Target/resource profiles require a capable Native host. See
+`docs/MTM-016-CANDIDATE-GATE.md` before using the development qualification entry.
+The development branch also repairs atomic patch permission preservation and numeric
+schema bounds. See `docs/MTM-016-POLICY-REGRESSION.md` for the policy-test scope. These
+source changes are not installed by this checkout and are not release-qualified.
+
+The development branch also fixes lossless UTF-8 read continuations, explicit Git
+repository selection, and executable checks using the requested PATH. These have
+Rust regressions and a real-binary OAuth/MCP workspace smoke; see
+`docs/MTM-016-WORKSPACE-REPAIR.md`. Complex shell semantics and target qualification
+remain open. The installed preview.2 is not changed by this checkout.
+
 MTM is a Rust-native mathematical research runtime with capability-gated workflows,
 isolated Native tools, OAuth/MCP access, private workflow state, verifier/finalizer
 gates, and a single operational CLI/TUI.
+
+The development source gate includes a Rust-owned current-binary capability suite:
+`cargo xtask capability --record`. Its disposable OAuth/socket tests cover 500
+assessment first hops, negative capability cases and restart; see
+[the exact scope](docs/MTM-016-CAPABILITY-REGRESSION.md). This is not release or
+real-web-client qualification.
 
 MTM was migrated from the Re-CTM 0.3.0 compatibility baseline, but it is now a
 separate project with its own executable, configuration namespace, and runtime data.
@@ -37,7 +146,7 @@ and is not counted as a pass when the host installation rejects its license.
 ## Highlights
 
 - Single Rust executable: `mtm`.
-- 24 public MCP tools plus 11 hidden compatibility aliases.
+- 24 public MCP tools; this development branch removes the 11 historical hidden aliases.
 - OAuth DCR, PKCE, bearer-token validation, legacy/modern MCP, and HTTP gateway.
 - Capability-gated Rethlas workflow with private vault, verifier, repair, and
   mechanical finalizer.
@@ -312,11 +421,14 @@ authenticated loopback OAuth/MCP mixed workload under eight concurrent clients. 
 not a general claim about external research, CAS workloads, LaTeX, or mathematical
 proof-generation time.
 
-Run the complete local gate from a source checkout with:
+Run the current Rust source gate from a source checkout with:
 
 ```bash
-python3 scripts/run_checks.py
+cargo xtask check --record
 ```
+
+The pre-MTM-016 Python gate is retired. Its historical command/output remains in
+the immutable validation records; it is not a current executable prerequisite.
 
 See also:
 

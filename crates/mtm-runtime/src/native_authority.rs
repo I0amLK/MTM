@@ -663,6 +663,86 @@ mod tests {
         Ok(())
     }
 
+    #[derive(Debug, Eq, PartialEq)]
+    enum MagmaProbeOutcome {
+        Functional,
+        HostLicenseUnavailable,
+    }
+
+    fn magma_probe_outcome(result: &Value) -> Option<MagmaProbeOutcome> {
+        if result["status"] != "exited"
+            || result["timed_out"] != false
+            || !result.get("signal").is_some_and(Value::is_null)
+        {
+            return None;
+        }
+        let stdout = result["stdout"].as_str()?;
+        let stderr = result["stderr"].as_str()?;
+        let exit_code = result["exit_code"].as_i64()?;
+        if exit_code == 0 && stdout.lines().filter(|line| line.trim() == "42").count() == 1 {
+            Some(MagmaProbeOutcome::Functional)
+        } else {
+            let combined = format!("{stdout}\n{stderr}").to_ascii_lowercase();
+            (exit_code == 1
+                && combined.contains("magma")
+                && (combined.contains("not authorised") || combined.contains("not authorized")))
+            .then_some(MagmaProbeOutcome::HostLicenseUnavailable)
+        }
+    }
+
+    #[test]
+    fn magma_batch_probe_requires_computation_not_a_banner() {
+        let good = serde_json::json!({
+            "status":"exited","exit_code":0,"timed_out":false,"signal":null,
+            "stdout":"42\n","stderr":""
+        });
+        assert_eq!(
+            magma_probe_outcome(&good),
+            Some(MagmaProbeOutcome::Functional)
+        );
+        for (field, value) in [
+            ("stdout", Value::String(String::new())),
+            ("stdout", Value::String("Magma\n".to_owned())),
+            ("stdout", Value::String("142\n".to_owned())),
+            ("stdout", Value::String("42\n42\n".to_owned())),
+            ("stdout", Value::Null),
+            ("exit_code", Value::from(1)),
+            ("exit_code", Value::Null),
+            ("status", Value::String("running".to_owned())),
+            ("timed_out", Value::Bool(true)),
+            ("signal", Value::String("SIGTERM".to_owned())),
+        ] {
+            let mut changed = good.clone();
+            changed[field] = value;
+            assert_eq!(magma_probe_outcome(&changed), None);
+        }
+    }
+
+    #[test]
+    fn magma_license_denial_is_distinct_from_functional_execution() {
+        let denied = serde_json::json!({
+            "status":"exited","exit_code":1,"timed_out":false,"signal":null,
+            "stdout":"","stderr":"Magma is not authorised to run on this machine."
+        });
+        assert_eq!(
+            magma_probe_outcome(&denied),
+            Some(MagmaProbeOutcome::HostLicenseUnavailable)
+        );
+        for message in [
+            "Magma: startup failed",
+            "authorized",
+            "",
+            "Magma: license file missing",
+        ] {
+            let mut changed = denied.clone();
+            changed["stderr"] = Value::String(message.to_owned());
+            assert_eq!(magma_probe_outcome(&changed), None);
+        }
+        let mut changed = denied;
+        changed["exit_code"] = Value::from(0);
+        assert_eq!(magma_probe_outcome(&changed), None);
+    }
+
     #[cfg(target_os = "linux")]
     #[test]
     fn exec_candidate_preserves_git_latex_sage_and_exposes_magma() -> Result<(), ReCtmError> {
@@ -706,20 +786,27 @@ mod tests {
         if command_exists("magma") {
             let magma = Map::from_iter([
                 ("argv".to_owned(), serde_json::json!(["magma", "-b"])),
-                ("stdin".to_owned(), Value::String("quit;\n".to_owned())),
+                (
+                    "stdin".to_owned(),
+                    Value::String("print 6*7;\nquit;\n".to_owned()),
+                ),
+                ("timeout_ms".to_owned(), Value::from(30_000)),
+                ("yield_time_ms".to_owned(), Value::from(30_000)),
             ]);
             let result = fixture.executor.exec_command_candidate("owner-a", &magma)?;
-            assert_eq!(result["status"], "exited");
-            let combined = format!(
-                "{}\n{}",
-                result["stdout"].as_str().unwrap_or_default(),
-                result["stderr"].as_str().unwrap_or_default()
-            );
-            assert!(
-                combined.contains("Magma")
-                    || combined.to_ascii_lowercase().contains("authorised")
-                    || combined.to_ascii_lowercase().contains("authorized")
-            );
+            match magma_probe_outcome(&result) {
+                Some(MagmaProbeOutcome::Functional) => {}
+                Some(MagmaProbeOutcome::HostLicenseUnavailable) => {
+                    // Preserve this optional source smoke's historical license
+                    // classification. F6 still requires actual algebra success.
+                    eprintln!("MTM_SOURCE_MAGMA host_license_unavailable functional_passed=false");
+                }
+                None => {
+                    return Err(internal(
+                        "Magma probe returned neither arithmetic success nor a recognized host-license denial",
+                    ));
+                }
+            }
         }
         Ok(())
     }

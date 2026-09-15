@@ -1,5 +1,7 @@
 #![forbid(unsafe_code)]
 
+pub use mtm_gateway::TOOL_CONTRACT_VERSION;
+
 pub mod application;
 pub mod config;
 pub mod helper;

@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
-  "title": "MTM-reboot fourteen-milestone migration graph",
-  "updated_at": "2026-09-05T16:06:32+08:00",
+  "title": "MTM migration and native-product development graph",
+  "updated_at": "2026-09-07T14:54:38Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -545,6 +545,38 @@
       ],
       "rollback": "Revert the dedicated MTM-015 source commit and keep the already qualified 0.5.0-preview.1 selector and immutable stable 0.4.0 rollback artifact. Do not delete/regenerate live OAuth or capability keys, rewrite run state, or relabel historical receipts.",
       "dependencies": ["MTM-014"]
+    },
+    {
+      "id": "MTM-016",
+      "title": "Rust-native maintenance and usable tools",
+      "status": "in_progress",
+      "priority": "P1",
+      "production_authority_before": "rust",
+      "production_authority_after": "rust",
+      "functional_goal": "Remove current Re-CTM/Python maintenance dependencies and improve actual tool usability without weakening workflow, isolation or finalization authority.",
+      "scope": [
+        "Inventory and retire Re-CTM runtime/shadow dependencies after preserving independent coverage",
+        "Approve one maintenance-only xtask crate with no reverse product dependency",
+        "Correct Native command parsing and Workspace/Git tool semantics with adversarial regressions",
+        "Establish MTM-owned typed contracts and retire legacy aliases under a new release identity",
+        "Consolidate Rust evidence/release tools and add bounded task-domain recovery/idempotency"
+      ],
+      "non_goals": [
+        "No production selector change, secret rotation or data rewrite during partial implementation",
+        "No authority from run ids, revoked tokens or receipt queries",
+        "No new model API, background agent runtime or permissive shell fallback",
+        "No deletion or relabeling of historical evidence or legal notices",
+        "No ban on user Python/Sage programs and no replacement of Git/LaTeX/Bubblewrap"
+      ],
+      "acceptance_levels": ["A0", "A1", "A3", "A4", "A5"],
+      "validation_commands": [
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets --locked -- -D warnings",
+        "cargo test --workspace --locked",
+        "cargo xtask check"
+      ],
+      "rollback": "Revert the dedicated MTM-016 branch commits; leave installed preview.2 and existing MTM state untouched.",
+      "dependencies": ["MTM-015"]
     }
   ],
   "edges": [
@@ -568,9 +600,10 @@
     {"source": "MTM-013", "target": "MTM-011"},
     {"source": "MTM-013", "target": "MTM-012"},
     {"source": "MTM-014", "target": "MTM-013"},
-    {"source": "MTM-015", "target": "MTM-014"}
+    {"source": "MTM-015", "target": "MTM-014"},
+    {"source": "MTM-016", "target": "MTM-015"}
   ],
-  "todo": [],
+  "todo": ["MTM-016"],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -1043,6 +1076,22 @@
       "status_before": "in_progress",
       "status_after": "completed",
       "summary": "Completed MTM-015 with qualified 0.5.0-preview.2 selected at both ordinary mtm entries. Exact target qualification passed 15/15 checks, content-addressed candidate stage passed 9/9, clean real Quick Tunnel web-client acceptance recorded five paired compact assess submissions with zero CAPABILITY_INVALID diagnostics or submission rejections, and the final release drill passed preview.2 cutover, preview.1 rollback, preview.2 recutover plus a 60.148-second/506-iteration soak. Earlier rejected web-client and rollout-tooling attempts remain preserved; stable 0.4.0 and production state remain intact."
+    },
+    {
+      "event_id": "MEVT-060",
+      "milestone_id": "MTM-016",
+      "at": "2026-09-07T14:54:38Z",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "Operator explicitly approved the six-stage Rust-native maintenance and tool usability plan, including one maintenance-only xtask crate, current Re-CTM compatibility retirement and a separately qualified future contract-changing release."
+    },
+    {
+      "event_id": "MEVT-061",
+      "milestone_id": "MTM-016",
+      "at": "2026-09-07T14:54:38Z",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Started on an isolated branch cloned from verified b3ab147 main in the MTM workspace because CTM is unavailable; no production selector, binary, research data or historical evidence is modified."
     }
   ],
   "receipt_contract": {

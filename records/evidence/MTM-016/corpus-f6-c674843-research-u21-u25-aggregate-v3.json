@@ -1,0 +1,24 @@
+{
+  "schema": "mtm-usability-corpus-aggregate-v3",
+  "milestone": "MTM-016",
+  "candidate_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "candidate_source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+  "corpus_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861",
+  "base": {
+    "path": "records/evidence/MTM-016/corpus-f6-c674843-native-u16-u20-aggregate.json",
+    "sha256": "3dfb957302e3de11dde4b19b661ba4a2997e85dee30adc93d9305f4d9983b0b4"
+  },
+  "batches": [
+    {
+      "profile": "corpus_research",
+      "path": "records/evidence/MTM-016/research-corpus-batch-v2.json",
+      "sha256": "b845f80c69123c99e3c646660b458f9d0c240508d126faf0b0a222111ea95401"
+    }
+  ],
+  "passed_trials": 78,
+  "failed_trials": 0,
+  "blocked_trials": 12,
+  "complete": false,
+  "production_changed": false,
+  "release_qualified": false
+}

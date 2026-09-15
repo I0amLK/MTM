@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 use std::fs::{self, OpenOptions};
-use std::io::Write;
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
@@ -9,6 +9,16 @@ use regex::Regex;
 use serde::Serialize;
 use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
+
+#[path = "creation_vault.rs"]
+mod creation_vault;
+pub(crate) use creation_vault::PreparedInitialization;
+
+#[path = "file_effect.rs"]
+mod file_effect;
+
+#[path = "action_effect.rs"]
+mod action_effect;
 
 pub const GENERATION_CHANNELS: [&str; 10] = [
     "immediate_conclusions",
@@ -42,6 +52,7 @@ pub struct PrivateVault {
 impl PrivateVault {
     pub fn new(private_root: impl AsRef<Path>) -> Result<Self, ReCtmError> {
         let private_root = absolute_normalized(private_root.as_ref())?;
+        create_private_dir(&private_root)?;
         let runs_root = private_root.join("runs");
         create_private_dir(&runs_root)?;
         Ok(Self {
@@ -64,9 +75,11 @@ impl PrivateVault {
         metadata: &Value,
     ) -> Result<Value, ReCtmError> {
         let root = self.run_root(run_id)?;
+        create_private_dir(&root)?;
         for relative in [
             "input",
             "references",
+            "memory",
             "memory/generation",
             "memory/verifier",
             "branches",
@@ -75,6 +88,7 @@ impl PrivateVault {
             "draft",
             "verification",
             "final",
+            "debug",
             "debug/state",
         ] {
             create_private_dir(&root.join(relative))?;
@@ -266,6 +280,44 @@ impl PrivateVault {
         }))
     }
 
+    pub(crate) fn ensure_snapshot(
+        &self,
+        run_id: &str,
+        snapshot_id: &str,
+        payload: &Value,
+    ) -> Result<Value, ReCtmError> {
+        let snapshot = require_safe_id(snapshot_id, "snapshot_id")?;
+        let target = self
+            .run_root(run_id)?
+            .join("snapshots")
+            .join(format!("{snapshot}.json"));
+        let serialized = pretty_json(payload)?;
+        if target.exists() {
+            if self.read_text(&target)? != serialized {
+                return Err(ReCtmError::new(
+                    "SNAPSHOT_CONFLICT",
+                    "Existing snapshot bytes differ from the deterministic branch-preparation snapshot.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        } else {
+            self.atomic_text(&target, &serialized)?;
+            set_read_only(&target)?;
+            if self.read_text(&target)? != serialized {
+                return Err(ReCtmError::new(
+                    "SNAPSHOT_CONFLICT",
+                    "Snapshot publication did not preserve deterministic bytes.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        }
+        Ok(serde_json::json!({
+            "snapshot_id": snapshot_id,
+            "sha256": sha256_text(&serialized),
+            "path": target,
+        }))
+    }
+
     pub fn read_snapshot(&self, run_id: &str, snapshot_id: &str) -> Result<Value, ReCtmError> {
         let snapshot = require_safe_id(snapshot_id, "snapshot_id")?;
         let value = self.read_json(
@@ -291,8 +343,42 @@ impl PrivateVault {
     ) -> Result<PathBuf, ReCtmError> {
         let branch = require_safe_id(branch_id, "branch_id")?;
         let root = self.run_root(run_id)?.join("branches").join(branch);
+        create_private_dir(&root)?;
         create_private_dir(&root.join("memory"))?;
         self.atomic_json(&root.join("assignment.json"), payload)?;
+        Ok(root)
+    }
+
+    pub(crate) fn ensure_branch_assignment(
+        &self,
+        run_id: &str,
+        branch_id: &str,
+        payload: &Value,
+    ) -> Result<PathBuf, ReCtmError> {
+        let branch = require_safe_id(branch_id, "branch_id")?;
+        let root = self.run_root(run_id)?.join("branches").join(&branch);
+        create_private_dir(&root)?;
+        create_private_dir(&root.join("memory"))?;
+        let target = root.join("assignment.json");
+        let expected = pretty_json(payload)?;
+        if target.exists() {
+            if self.read_text(&target)? != expected {
+                return Err(ReCtmError::new(
+                    "BRANCH_ASSIGNMENT_CONFLICT",
+                    "Existing branch assignment differs from the deterministic preparation plan.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        } else {
+            self.atomic_text(&target, &expected)?;
+            if self.read_text(&target)? != expected {
+                return Err(ReCtmError::new(
+                    "BRANCH_ASSIGNMENT_CONFLICT",
+                    "Branch assignment publication did not preserve deterministic bytes.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        }
         Ok(root)
     }
 
@@ -427,8 +513,25 @@ impl PrivateVault {
             )
             .with_category(ErrorCategory::Conflict));
         }
-        self.atomic_text(&target, &proof)?;
-        set_read_only(&target)?;
+        if target.exists() {
+            if self.read_text(&target)? != proof {
+                return Err(ReCtmError::new(
+                    "FINAL_ARTIFACT_CONFLICT",
+                    "Existing final proof differs from the verifier-approved draft; it was not overwritten.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        } else {
+            self.atomic_text(&target, &proof)?;
+            set_read_only(&target)?;
+            if self.read_text(&target)? != proof {
+                return Err(ReCtmError::new(
+                    "FINAL_ARTIFACT_CONFLICT",
+                    "Final proof publication did not preserve verifier-approved bytes.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        }
         Ok(target)
     }
 
@@ -474,6 +577,64 @@ impl PrivateVault {
         let mut text = serde_json::to_string_pretty(&manifest).map_err(json_error)?;
         text.push('\n');
         self.atomic_text(&target, &text)?;
+        Ok(target)
+    }
+
+    pub(crate) fn ensure_manual_validation_manifest(
+        &self,
+        run_id: &str,
+        payload: &Value,
+    ) -> Result<PathBuf, ReCtmError> {
+        let target = self
+            .run_root(run_id)?
+            .join("debug/manual-validation-manifest.json");
+        let object = payload
+            .as_object()
+            .ok_or_else(|| validation("manual validation manifest must be an object"))?;
+        let manifest = ManualValidationManifest {
+            run_id: object
+                .get("run_id")
+                .and_then(Value::as_str)
+                .unwrap_or_default(),
+            state: object
+                .get("state")
+                .and_then(Value::as_str)
+                .unwrap_or_default(),
+            verdict: object.get("verdict").and_then(Value::as_str),
+            latex_passed: object
+                .get("latex_passed")
+                .and_then(Value::as_bool)
+                .unwrap_or(false),
+            transition_count: object
+                .get("transition_count")
+                .and_then(Value::as_i64)
+                .unwrap_or_default(),
+            manual_checks_still_required: object
+                .get("manual_checks_still_required")
+                .and_then(Value::as_array)
+                .map(|items| items.iter().filter_map(Value::as_str).collect::<Vec<_>>())
+                .unwrap_or_default(),
+        };
+        let mut text = serde_json::to_string_pretty(&manifest).map_err(json_error)?;
+        text.push('\n');
+        if target.exists() {
+            if self.read_text(&target)? != text {
+                return Err(ReCtmError::new(
+                    "MANUAL_VALIDATION_MANIFEST_CONFLICT",
+                    "Existing manual validation manifest differs from current terminal facts.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        } else {
+            self.atomic_text(&target, &text)?;
+            if self.read_text(&target)? != text {
+                return Err(ReCtmError::new(
+                    "MANUAL_VALIDATION_MANIFEST_CONFLICT",
+                    "Manual validation manifest publication did not preserve terminal facts.",
+                )
+                .with_category(ErrorCategory::Conflict));
+            }
+        }
         Ok(target)
     }
 
@@ -530,6 +691,11 @@ impl PrivateVault {
     }
 
     fn atomic_text(&self, path: &Path, content: &str) -> Result<(), ReCtmError> {
+        if let Some((run, relative)) = self.file_effect_location(path) {
+            let guard = self.lock_file_effect(&run, &relative)?;
+            let (evidence, bytes) = guard.prepare(content.as_bytes(), false)?;
+            return guard.publish(&evidence, &bytes);
+        }
         if let Some(parent) = path.parent() {
             create_private_dir(parent)?;
         }
@@ -568,6 +734,12 @@ impl PrivateVault {
     }
 
     fn append_jsonl(&self, path: &Path, payload: &Value) -> Result<(), ReCtmError> {
+        if let Some((run, relative)) = self.file_effect_location(path) {
+            let line = Self::file_effect_bytes(payload, true)?;
+            let guard = self.lock_file_effect(&run, &relative)?;
+            let (evidence, bytes) = guard.prepare(&line, true)?;
+            return guard.publish(&evidence, &bytes);
+        }
         if !payload.is_object() {
             return Err(validation("memory records must be JSON objects"));
         }
@@ -648,12 +820,47 @@ fn read_jsonl(path: &Path) -> Result<Vec<Value>, ReCtmError> {
     if !path.exists() {
         return Ok(Vec::new());
     }
-    let content = fs::read_to_string(path).map_err(io_error)?;
-    Ok(content
+    if fs::metadata(path).map_err(io_error)?.len() > 64 * 1024 * 1024 {
+        return Err(validation_code(
+            "MEMORY_TOO_LARGE",
+            "Memory exceeds the bounded read size.",
+        ));
+    }
+    let mut content = String::new();
+    fs::File::open(path)
+        .map_err(io_error)?
+        .take(64 * 1024 * 1024 + 1)
+        .read_to_string(&mut content)
+        .map_err(io_error)?;
+    if content.len() > 64 * 1024 * 1024 {
+        return Err(validation_code(
+            "MEMORY_TOO_LARGE",
+            "Memory exceeds the bounded read size.",
+        ));
+    }
+    parse_jsonl(&content)
+}
+
+fn parse_jsonl(content: &str) -> Result<Vec<Value>, ReCtmError> {
+    content
         .lines()
-        .filter_map(|line| serde_json::from_str::<Value>(line.trim()).ok())
-        .filter(Value::is_object)
-        .collect())
+        .filter(|line| !line.trim().is_empty())
+        .map(|line| {
+            let value: Value = serde_json::from_str(line).map_err(|_| {
+                validation_code(
+                    "MEMORY_CORRUPT",
+                    "Memory contains an invalid record; no records were discarded.",
+                )
+            })?;
+            if !value.is_object() {
+                return Err(validation_code(
+                    "MEMORY_CORRUPT",
+                    "Memory contains a non-object record; no records were discarded.",
+                ));
+            }
+            Ok(value)
+        })
+        .collect()
 }
 
 fn python_json(value: &Value) -> Result<String, ReCtmError> {
@@ -855,6 +1062,26 @@ mod tests {
                 .run_root("run-a")?
                 .join("final/proof_verified.tex")
                 .exists()
+        );
+        vault.write_proof("run-a", "proof version one")?;
+        let permit =
+            decision.finalization_permit("run-a", true, &sha256_text("proof version one"), None)?;
+        let first = vault.finalize_proof("run-a", &permit)?;
+        let first_bytes = fs::read(&first).map_err(io_error)?;
+        assert_eq!(vault.finalize_proof("run-a", &permit)?, first);
+        assert_eq!(fs::read(&first).map_err(io_error)?, first_bytes);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            fs::set_permissions(&first, fs::Permissions::from_mode(0o600)).map_err(io_error)?;
+        }
+        fs::write(&first, "conflicting final bytes").map_err(io_error)?;
+        assert_eq!(
+            vault
+                .finalize_proof("run-a", &permit)
+                .err()
+                .map(|error| error.code),
+            Some("FINAL_ARTIFACT_CONFLICT".to_owned())
         );
         Ok(())
     }

@@ -1,7 +1,5 @@
 use std::sync::Arc;
 
-use base64::Engine;
-use base64::engine::general_purpose::STANDARD;
 use mtm_contracts::{ErrorCategory, ReCtmError};
 use mtm_gateway::{
     GatewayHttpConfig, GatewayRuntime, GatewayState, MCPDispatcher, OAuthService, OAuthStore,
@@ -23,53 +21,22 @@ use crate::{
 
 #[derive(Clone, Debug)]
 pub struct RuntimeAssets {
-    tool_catalog: Value,
     methodology: Value,
 }
 
 impl RuntimeAssets {
-    pub fn new(tool_catalog: Value, methodology: Value) -> Result<Self, ReCtmError> {
-        ToolCatalog::from_source_snapshot(&tool_catalog)?;
+    pub fn new(methodology: Value) -> Result<Self, ReCtmError> {
         TaskCatalog::from_source_snapshot(methodology.clone())?;
-        Ok(Self {
-            tool_catalog,
-            methodology,
-        })
+        Ok(Self { methodology })
     }
 
-    pub fn from_json(tool_catalog: &str, methodology: &str) -> Result<Self, ReCtmError> {
-        let tool_catalog = serde_json::from_str(tool_catalog).map_err(asset_json_error)?;
+    pub fn from_json(methodology: &str) -> Result<Self, ReCtmError> {
         let methodology = serde_json::from_str(methodology).map_err(asset_json_error)?;
-        Self::new(tool_catalog, methodology)
+        Self::new(methodology)
     }
 
-    pub fn from_base64_catalog(
-        tool_catalog_base64: &str,
-        methodology: &str,
-    ) -> Result<Self, ReCtmError> {
-        let compact = tool_catalog_base64
-            .chars()
-            .filter(|character| !character.is_whitespace())
-            .collect::<String>();
-        let bytes = STANDARD.decode(compact).map_err(|_| {
-            ReCtmError::new(
-                "RUNTIME_ASSET_BASE64_INVALID",
-                "Embedded tool catalog is not valid base64.",
-            )
-            .with_category(ErrorCategory::Internal)
-        })?;
-        let tool_catalog = std::str::from_utf8(&bytes).map_err(|_| {
-            ReCtmError::new(
-                "RUNTIME_ASSET_UTF8_INVALID",
-                "Embedded tool catalog is not valid UTF-8.",
-            )
-            .with_category(ErrorCategory::Internal)
-        })?;
-        Self::from_json(tool_catalog, methodology)
-    }
-
-    pub fn tool_catalog(&self) -> &Value {
-        &self.tool_catalog
+    pub fn tool_catalog() -> Value {
+        ToolCatalog::new().snapshot()
     }
 
     pub fn methodology(&self) -> &Value {
@@ -137,7 +104,7 @@ impl RuntimeApplication {
             .with_category(ErrorCategory::Security));
         }
 
-        let catalog = Arc::new(ToolCatalog::from_source_snapshot(assets.tool_catalog())?);
+        let catalog = Arc::new(ToolCatalog::new());
         let methodology = Arc::new(TaskCatalog::from_source_snapshot(
             assets.methodology().clone(),
         )?);

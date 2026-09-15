@@ -1,0 +1,107 @@
+{
+  "schema": "mtm-research-corpus-batch-v2",
+  "milestone": "MTM-016",
+  "candidate_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "candidate_source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+  "corpus_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861",
+  "case_registry_sha256": "cd6d6a758e667fca21d2a04d2eba9a015c1d156350b34438660dd8bd16ae1bb9",
+  "trials": [
+    {
+      "task_id": "U21",
+      "repeat": 1,
+      "path": "records/evidence/MTM-016/research-u21-r1-916a977c7e32e425aa4ba1ee4f400696.json",
+      "sha256": "4d5019283ba49da5c3da2e92087477eeb63f7db73279f2bfefbab0a730c6bd2a"
+    },
+    {
+      "task_id": "U21",
+      "repeat": 2,
+      "path": "records/evidence/MTM-016/research-u21-r2-8d1b6f9d891714769c73d6f127c5c1b0.json",
+      "sha256": "884c00933f6ff2fc2629fad3be59cb1f7acee3d854dbbb142aeeefd86eb595fc"
+    },
+    {
+      "task_id": "U21",
+      "repeat": 3,
+      "path": "records/evidence/MTM-016/research-u21-r3-d709b459a4ddb8f2d180027b8c48559a.json",
+      "sha256": "ded1e2483a9525bb94c5fdbbcb0b196ae61cd66e848960bb3072e58279567758"
+    },
+    {
+      "task_id": "U22",
+      "repeat": 1,
+      "path": "records/evidence/MTM-016/research-u22-r1-35a340d2facdfa914b5ddb2ff9df0a13.json",
+      "sha256": "25d81100acdb4334796ace6e669fa3a26a2b195c113443618870a4bb0203d1c3"
+    },
+    {
+      "task_id": "U22",
+      "repeat": 2,
+      "path": "records/evidence/MTM-016/research-u22-r2-db88902481ea551b1c931556a9729dff.json",
+      "sha256": "0007cafb60bd12419d0fd3e521795b1d7d94e9f27f5a2ad6012b074d6010a13b"
+    },
+    {
+      "task_id": "U22",
+      "repeat": 3,
+      "path": "records/evidence/MTM-016/research-u22-r3-de0c19616ceb63f141e99e4e80f51f18.json",
+      "sha256": "a7628435972d8a8eab30b687c6f79aaacb7e7d0874feaaf896b09fb214f57df5"
+    },
+    {
+      "task_id": "U23",
+      "repeat": 1,
+      "path": "records/evidence/MTM-016/research-u23-r1-bcacdc8300d4d2b64f70b4ca18210c0c.json",
+      "sha256": "58132fb6ce812fee7af50be48ea2c6f331aec52b6d8351419cfc05bfbc028d2e"
+    },
+    {
+      "task_id": "U23",
+      "repeat": 2,
+      "path": "records/evidence/MTM-016/research-u23-r2-9f703a30b6eedfb12b56baf2584a0b9e.json",
+      "sha256": "61935ae091ff73ee15b290799e2b0e6445174a8c9d5ce2d78196ca4d53bec128"
+    },
+    {
+      "task_id": "U23",
+      "repeat": 3,
+      "path": "records/evidence/MTM-016/research-u23-r3-17fbbc76351fa5185defe6ea788724e7.json",
+      "sha256": "071fcc1d7a5909a83434b3cc224144901ec31b0bb495e1eab09a542b0c4681ba"
+    },
+    {
+      "task_id": "U24",
+      "repeat": 1,
+      "path": "records/evidence/MTM-016/research-u24-r1-4bd5fcec18d8a6bf88d193097ad3739f.json",
+      "sha256": "08a1df5d3c479691a31ab4ede196c8dc8c14009ba49018cad213bcb8f9af346f"
+    },
+    {
+      "task_id": "U24",
+      "repeat": 2,
+      "path": "records/evidence/MTM-016/research-u24-r2-d0083ee37b512ee00ad3711905bdb428.json",
+      "sha256": "1a5a20a32a996f8cdaa0482da194de5209a985f1c799cd056c4010bbbb2b55af"
+    },
+    {
+      "task_id": "U24",
+      "repeat": 3,
+      "path": "records/evidence/MTM-016/research-u24-r3-4e862e08b45665a99b1d936794933e3b.json",
+      "sha256": "948df3649ce925aa8aa1a73b5041eb4daadebe86b4664585c08a14da21a1d0b0"
+    },
+    {
+      "task_id": "U25",
+      "repeat": 1,
+      "path": "records/evidence/MTM-016/research-u25-r1-33e1ccd25dc93f57f33c109e1dbfb0c1.json",
+      "sha256": "1b2434f6f1a1816d8656becac49cb5adf90bde23d6f1258f7ca570aee4c12c58"
+    },
+    {
+      "task_id": "U25",
+      "repeat": 2,
+      "path": "records/evidence/MTM-016/research-u25-r2-efa92d3af7e2e24b52aa739b0fdada86.json",
+      "sha256": "b2303f2d88a5b8686d6a497141d4440d80c338313ebdaba97fe9c268ef13e6c4"
+    },
+    {
+      "task_id": "U25",
+      "repeat": 3,
+      "path": "records/evidence/MTM-016/research-u25-r3-84a3822af62d755e2fc4097f52fe5880.json",
+      "sha256": "480cecce9779865ad2cae92e73dc5ced67f577d15813de41675ad27f8d4ac2a9"
+    }
+  ],
+  "tasks": 5,
+  "repeats": 3,
+  "passed_trials": 15,
+  "failed_trials": 0,
+  "complete_for_research_scope": true,
+  "production_changed": false,
+  "release_qualified": false
+}

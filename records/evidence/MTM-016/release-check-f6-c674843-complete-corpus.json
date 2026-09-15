@@ -1,0 +1,110 @@
+{
+  "blocked_gates": 0,
+  "candidate_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "candidate_source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+  "compatibility_rust_reference_files": 83,
+  "evidence_reexecuted": false,
+  "gates": [
+    {
+      "gate": "source",
+      "reason": "sealed_scope_revalidated_not_reexecuted",
+      "status": "validated"
+    },
+    {
+      "gate": "protocol",
+      "reason": "sealed_scope_revalidated_not_reexecuted",
+      "status": "validated"
+    },
+    {
+      "gate": "permissions",
+      "reason": "sealed_scope_revalidated_not_reexecuted",
+      "status": "validated"
+    },
+    {
+      "gate": "upgrade",
+      "reason": "sealed_scope_revalidated_not_reexecuted",
+      "status": "validated"
+    },
+    {
+      "gate": "target",
+      "reason": "sealed_scope_revalidated_not_reexecuted",
+      "status": "validated"
+    },
+    {
+      "gate": "resource",
+      "reason": "sealed_scope_revalidated_not_reexecuted",
+      "status": "validated"
+    },
+    {
+      "gate": "clean_build",
+      "reason": "sealed_scope_revalidated_not_reexecuted",
+      "status": "validated"
+    },
+    {
+      "gate": "native_commands",
+      "reason": "sealed_scope_revalidated_not_reexecuted",
+      "status": "validated"
+    },
+    {
+      "gate": "compiled_latex",
+      "reason": "sealed_scope_revalidated_not_reexecuted",
+      "status": "validated"
+    },
+    {
+      "gate": "retrieval",
+      "reason": "sealed_scope_revalidated_not_reexecuted",
+      "status": "validated"
+    },
+    {
+      "gate": "browser_human",
+      "reason": "sealed_scope_revalidated_not_reexecuted",
+      "status": "validated"
+    },
+    {
+      "gate": "copied_operator_state",
+      "reason": "sealed_scope_revalidated_not_reexecuted",
+      "status": "validated"
+    },
+    {
+      "gate": "install_sigkill",
+      "reason": "sealed_scope_revalidated_not_reexecuted",
+      "status": "validated"
+    },
+    {
+      "gate": "corpus",
+      "reason": "sealed_scope_revalidated_not_reexecuted",
+      "status": "validated"
+    },
+    {
+      "gate": "record_integrity",
+      "reason": "current_static_checks_passed",
+      "status": "validated"
+    },
+    {
+      "gate": "retirement_provenance",
+      "reason": "current_static_checks_passed",
+      "status": "validated"
+    },
+    {
+      "gate": "rust_only",
+      "reason": "no_first_party_python_source_or_runtime_launcher",
+      "status": "validated"
+    }
+  ],
+  "inputs_unchanged": true,
+  "legacy_rust_reference_files": 0,
+  "legacy_shadow_binary_files": 4,
+  "milestone": "MTM-016",
+  "passed": true,
+  "production_changed": false,
+  "ready_for_release_review": true,
+  "release_authorization_implemented": false,
+  "release_qualified": false,
+  "remaining_python_files": 0,
+  "reviewed_inline_test_edits": [],
+  "round4_complete": false,
+  "round5_complete": false,
+  "schema": "mtm-release-check-v1",
+  "scope": "read_only_release_readiness_not_authorization",
+  "validated_gates": 17
+}

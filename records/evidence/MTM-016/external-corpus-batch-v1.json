@@ -1,0 +1,88 @@
+{
+  "schema": "mtm-external-corpus-batch-v1",
+  "milestone": "MTM-016",
+  "candidate_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "candidate_source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+  "corpus_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861",
+  "trials": [
+    {
+      "task_id": "U26",
+      "repeat": 1,
+      "path": "records/evidence/MTM-016/external-u26-r1-58c2a040ef4a6e891c1dbdcfe0ab50ad.json",
+      "sha256": "08a760bfa7572a3fdeae81e161a2f7b7563ddc5fa53def743ba693863cb1aa85"
+    },
+    {
+      "task_id": "U26",
+      "repeat": 2,
+      "path": "records/evidence/MTM-016/external-u26-r2-4e4706b8418d8c808979f91e18be67de.json",
+      "sha256": "1b1413ead728e1e236f6fdf9b32310860b3d0a4babe7bc0c65ab09bc237acd2f"
+    },
+    {
+      "task_id": "U26",
+      "repeat": 3,
+      "path": "records/evidence/MTM-016/external-u26-r3-968a711120bbef4de9dc08aafcee6b92.json",
+      "sha256": "0f96df4c110c01836c8ec3450788409e47aea8acf186839afcff5fdd37850e61"
+    },
+    {
+      "task_id": "U27",
+      "repeat": 1,
+      "path": "records/evidence/MTM-016/external-u27-r1-71254d976dfca1768b31f4c6f6498a41.json",
+      "sha256": "58b65f27ffcea265597b3d5cc6d2dafe42963a44c5d70e2afc0eecbad8594fae"
+    },
+    {
+      "task_id": "U27",
+      "repeat": 2,
+      "path": "records/evidence/MTM-016/external-u27-r2-ae6f999564b80c4f4daad718b831409b.json",
+      "sha256": "3446ba6ee5ca004a02ce5ba8081cd963b4241a5d576d7b7231c39a0d4733bb68"
+    },
+    {
+      "task_id": "U27",
+      "repeat": 3,
+      "path": "records/evidence/MTM-016/external-u27-r3-0b6057a3ec7e4548dce5a4f45297a941.json",
+      "sha256": "7b6d5c1476559ebf3fecb48b9d34f26d8d6f0089d77d4ded690cea697b4d73f4"
+    },
+    {
+      "task_id": "U28",
+      "repeat": 1,
+      "path": "records/evidence/MTM-016/external-u28-r1-e69795934fea42509f788fb6bcb346b2.json",
+      "sha256": "d1af333d84e3f30fef6eaf532008331ab03a6095259f586e3adbbb5e36442dee"
+    },
+    {
+      "task_id": "U28",
+      "repeat": 2,
+      "path": "records/evidence/MTM-016/external-u28-r2-3caf0a831473d1ea00040e2866073a25.json",
+      "sha256": "ab3858454eda8067e824631851cbd9dc9f817679d7f1cd078cbc6023b9e7d19a"
+    },
+    {
+      "task_id": "U28",
+      "repeat": 3,
+      "path": "records/evidence/MTM-016/external-u28-r3-5dba8b1258f6ab32ef7b79a35b6e0b35.json",
+      "sha256": "fa7ef456e9cfcbd797032b63621283c965eff94a4985d4a2f6e43c22489cdb09"
+    },
+    {
+      "task_id": "U29",
+      "repeat": 1,
+      "path": "records/evidence/MTM-016/external-u29-r1-897fda95e7c945c04cb1ef6c5d80b401.json",
+      "sha256": "6454459039eb2ceb0c29dffe68193917d222a7c0998cef1a0769036caf02eaf9"
+    },
+    {
+      "task_id": "U29",
+      "repeat": 2,
+      "path": "records/evidence/MTM-016/external-u29-r2-245a89ed2c06b26c355017ec8496e3c1.json",
+      "sha256": "fbd4175193a0bffd35bd344c9d44bb3287b6defa817b1a30971a158b6d592fb5"
+    },
+    {
+      "task_id": "U29",
+      "repeat": 3,
+      "path": "records/evidence/MTM-016/external-u29-r3-6e753606ba257b316b77e391f1d1b6c6.json",
+      "sha256": "567ef6ee5bb7bfa3e9c77d3ab7b45847930d4545d4e7fea55abea38221e78942"
+    }
+  ],
+  "tasks": 4,
+  "repeats": 3,
+  "passed_trials": 12,
+  "failed_trials": 0,
+  "complete_for_external_scope": true,
+  "production_changed": false,
+  "release_qualified": false
+}

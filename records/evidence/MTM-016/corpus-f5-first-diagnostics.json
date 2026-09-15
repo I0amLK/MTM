@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-016",
+  "scope": "direct_fixture_diagnostic_not_qualification",
+  "candidate_sha256": "589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8",
+  "passed_trials": 42,
+  "failed_trials": 3,
+  "blocked_trials": 45,
+  "failed_task": "U15",
+  "repeats": [1, 2, 3],
+  "diagnostic": "MCP protocol failure",
+  "finding": "The initial invalid handle failed the existing minimum-80-character two-component schema before reaching capability validation. Reuse the existing catalog's syntax-only negative fixture to test the intended signed-authority rejection, without changing the product schema or capability guard.",
+  "production_changed": false,
+  "release_qualified": false
+}

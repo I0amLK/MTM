@@ -2,4 +2,5 @@
 set -eu
 
 ROOT=$(git rev-parse --show-toplevel)
-exec python3 "$ROOT/scripts/validate_commit_message.py" "$1"
+# The shell only locates Cargo and this checkout. Policy is implemented in Rust.
+exec cargo run --quiet --locked --offline --manifest-path "$ROOT/xtask/Cargo.toml" -- commit-message "$1"

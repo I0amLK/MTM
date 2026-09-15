@@ -302,7 +302,7 @@ impl ExecInvocation {
                     return Err(invalid_argument("cmd contains a NUL byte"));
                 }
                 (
-                    vec!["/bin/sh".to_owned(), "-lc".to_owned(), command.to_owned()],
+                    vec!["/bin/sh".to_owned(), "-c".to_owned(), command.to_owned()],
                     command.to_owned(),
                     ExecInvocationForm::Cmd,
                 )
@@ -885,6 +885,14 @@ pub fn classify_exec_permissions(
         .with_category(mtm_contracts::ErrorCategory::Security)
         .with_details(serde_json::json!({
             "unresolved_count": facts.unresolved_executables().len(),
+            "unresolved_candidate_indexes":invocation.executable_candidates()?.iter().enumerate()
+                .filter_map(|(index,name)|facts.unresolved_executables().contains(name).then_some(index))
+                .collect::<Vec<_>>(),
+            "recovery":{
+                "action":"correct_command","automatic_retry":false,"side_effects":"none",
+                "next_tool":"check_exec_environment",
+                "guidance":"Check available tools; prefer argv for a literal program and explicit workdir/env.PATH. Candidate indexes are zero-based parse order, not argv indexes. Do not repeat unchanged parameters or relax isolation."
+            }
         })));
     }
 
@@ -1268,6 +1276,20 @@ fn shell_executable_candidates(command: &str, depth: usize) -> Result<Vec<String
         )
         .with_category(mtm_contracts::ErrorCategory::Security));
     }
+    if let Some(segments) = crate::shell_segments::literal_command_segments(command)? {
+        let mut candidates = Vec::new();
+        for segment in segments {
+            let words = shell_words::split(segment).map_err(|_| {
+                ReCtmError::new(
+                    "NATIVE_EXECUTABLE_PARSE_FAILED",
+                    "Invalid literal shell segment.",
+                )
+                .with_category(mtm_contracts::ErrorCategory::Security)
+            })?;
+            append_segment_candidates(&words, depth, &mut candidates)?;
+        }
+        return Ok(candidates);
+    }
     let tokens = shell_words::split(command).map_err(|_| {
         ReCtmError::new(
             "NATIVE_EXECUTABLE_PARSE_FAILED",
@@ -1598,7 +1620,7 @@ mod tests {
             "env":{"TOKEN":"do-not-print"},
         }))?;
         assert_eq!(command.form(), ExecInvocationForm::Cmd);
-        assert_eq!(command.argv(), &["/bin/sh", "-lc", "printf secret"]);
+        assert_eq!(command.argv(), &["/bin/sh", "-c", "printf secret"]);
         assert_eq!(command.workdir(), "src");
         assert_eq!(command.timeout_ms(), DEFAULT_EXEC_TIMEOUT_MS);
         assert_eq!(command.yield_time_ms(), DEFAULT_EXEC_YIELD_TIME_MS);
@@ -1744,6 +1766,34 @@ mod tests {
             invocation.executable_candidates()?,
             vec!["/opt/one", "/opt/two", "/opt/three"]
         );
+        Ok(())
+    }
+
+    #[test]
+    fn adjacent_control_operators_keep_all_executable_checks() -> Result<(), ReCtmError> {
+        for (command, expected) in [
+            ("pwd; pwd", vec!["pwd", "pwd"]),
+            (
+                "/opt/one|/opt/two&&/opt/three",
+                vec!["/opt/one", "/opt/two", "/opt/three"],
+            ),
+            (
+                "/opt/one||/opt/two&/opt/three",
+                vec!["/opt/one", "/opt/two", "/opt/three"],
+            ),
+            (
+                "'/opt/one;literal';/opt/two",
+                vec!["/opt/one;literal", "/opt/two"],
+            ),
+            (
+                "/opt/one\\;literal;/opt/two",
+                vec!["/opt/one;literal", "/opt/two"],
+            ),
+            ("printf '%s' ';' /opt/not-a-command", vec!["printf"]),
+        ] {
+            let invocation = exec(serde_json::json!({"cmd":command}))?;
+            assert_eq!(invocation.executable_candidates()?, expected, "{command}");
+        }
         Ok(())
     }
 

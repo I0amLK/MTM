@@ -1,0 +1,701 @@
+{
+  "baseline_launched": null,
+  "baseline_sha256": null,
+  "candidate_launched": true,
+  "candidate_sha256": "589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8",
+  "corpus_definition_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861",
+  "delivery": "F5",
+  "failed_stage": "corpus_coverage",
+  "failure": "Corpus contains blocked or failed trials; completed trials remain recorded",
+  "harness_source_identity": {
+    "after_sha256": "6f00e648b0a67102d0bc7bf30189e2010e38d9d45d277bed0a4bafb6a7ad4269",
+    "before_sha256": "6f00e648b0a67102d0bc7bf30189e2010e38d9d45d277bed0a4bafb6a7ad4269",
+    "commit": "3a13720b0576b21f428280f9a64e3caf2c16af8d",
+    "unchanged": true
+  },
+  "milestone": "MTM-016",
+  "original_and_snapshot_unchanged": true,
+  "passed": false,
+  "pending": [
+    "Native tasks U16-U20",
+    "independent research tasks U21-U25",
+    "external-client/operator tasks U26-U30",
+    "full release gates"
+  ],
+  "production_selectors_changed": false,
+  "production_state_modified": false,
+  "profile": "corpus",
+  "python_invoked": false,
+  "raw_test_output_recorded": false,
+  "recorded_unix_seconds": 1788972642,
+  "release_qualified": false,
+  "runner": {
+    "child_reaped": true,
+    "elapsed_ms": 62456,
+    "exit_code": 0,
+    "output_limit_exceeded": false,
+    "pipes_closed": true,
+    "raw_output_recorded": false,
+    "signal": null,
+    "stderr_bytes_retained": 251,
+    "stdout_bytes_retained": 9807,
+    "timed_out": false
+  },
+  "schema_version": "1.0.0",
+  "scope": "exact_candidate_partial_usability_corpus_not_release",
+  "selector_changed": false,
+  "summaries": {
+    "corpus": {
+      "binary_sha256": "589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8",
+      "blocked_trials": 45,
+      "corpus_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861",
+      "failed_trials": 0,
+      "human_consent_tested": false,
+      "independent_research_tested": false,
+      "latex_policy": "static_only",
+      "native_backend": "disabled",
+      "passed": false,
+      "passed_trials": 45,
+      "production_changed": false,
+      "release_qualified": false,
+      "repeats": 3,
+      "rows": [
+        {
+          "elapsed_ms": 1251,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "status": "passed",
+          "task_id": "U01"
+        },
+        {
+          "elapsed_ms": 1259,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "status": "passed",
+          "task_id": "U01"
+        },
+        {
+          "elapsed_ms": 1267,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "status": "passed",
+          "task_id": "U01"
+        },
+        {
+          "elapsed_ms": 1261,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "status": "passed",
+          "task_id": "U02"
+        },
+        {
+          "elapsed_ms": 1250,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "status": "passed",
+          "task_id": "U02"
+        },
+        {
+          "elapsed_ms": 1260,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "status": "passed",
+          "task_id": "U02"
+        },
+        {
+          "elapsed_ms": 1257,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "status": "passed",
+          "task_id": "U03"
+        },
+        {
+          "elapsed_ms": 1253,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "status": "passed",
+          "task_id": "U03"
+        },
+        {
+          "elapsed_ms": 1261,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "status": "passed",
+          "task_id": "U03"
+        },
+        {
+          "elapsed_ms": 1375,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "status": "passed",
+          "task_id": "U04"
+        },
+        {
+          "elapsed_ms": 1374,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "status": "passed",
+          "task_id": "U04"
+        },
+        {
+          "elapsed_ms": 1384,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "status": "passed",
+          "task_id": "U04"
+        },
+        {
+          "elapsed_ms": 1256,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "status": "passed",
+          "task_id": "U05"
+        },
+        {
+          "elapsed_ms": 1256,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "status": "passed",
+          "task_id": "U05"
+        },
+        {
+          "elapsed_ms": 1252,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "status": "passed",
+          "task_id": "U05"
+        },
+        {
+          "elapsed_ms": 1391,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "status": "passed",
+          "task_id": "U06"
+        },
+        {
+          "elapsed_ms": 1382,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "status": "passed",
+          "task_id": "U06"
+        },
+        {
+          "elapsed_ms": 1386,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "status": "passed",
+          "task_id": "U06"
+        },
+        {
+          "elapsed_ms": 1332,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "status": "passed",
+          "task_id": "U07"
+        },
+        {
+          "elapsed_ms": 1335,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "status": "passed",
+          "task_id": "U07"
+        },
+        {
+          "elapsed_ms": 1327,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "status": "passed",
+          "task_id": "U07"
+        },
+        {
+          "elapsed_ms": 1327,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "status": "passed",
+          "task_id": "U08"
+        },
+        {
+          "elapsed_ms": 1333,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "status": "passed",
+          "task_id": "U08"
+        },
+        {
+          "elapsed_ms": 1321,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "status": "passed",
+          "task_id": "U08"
+        },
+        {
+          "elapsed_ms": 1328,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "status": "passed",
+          "task_id": "U09"
+        },
+        {
+          "elapsed_ms": 1327,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "status": "passed",
+          "task_id": "U09"
+        },
+        {
+          "elapsed_ms": 1330,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "status": "passed",
+          "task_id": "U09"
+        },
+        {
+          "elapsed_ms": 1511,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "status": "passed",
+          "task_id": "U10"
+        },
+        {
+          "elapsed_ms": 1511,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "status": "passed",
+          "task_id": "U10"
+        },
+        {
+          "elapsed_ms": 1521,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "status": "passed",
+          "task_id": "U10"
+        },
+        {
+          "elapsed_ms": 1264,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "status": "passed",
+          "task_id": "U11"
+        },
+        {
+          "elapsed_ms": 1261,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "status": "passed",
+          "task_id": "U11"
+        },
+        {
+          "elapsed_ms": 1267,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "status": "passed",
+          "task_id": "U11"
+        },
+        {
+          "elapsed_ms": 1271,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "status": "passed",
+          "task_id": "U12"
+        },
+        {
+          "elapsed_ms": 1268,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "status": "passed",
+          "task_id": "U12"
+        },
+        {
+          "elapsed_ms": 1266,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "status": "passed",
+          "task_id": "U12"
+        },
+        {
+          "elapsed_ms": 1883,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "status": "passed",
+          "task_id": "U13"
+        },
+        {
+          "elapsed_ms": 1893,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "status": "passed",
+          "task_id": "U13"
+        },
+        {
+          "elapsed_ms": 1885,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "status": "passed",
+          "task_id": "U13"
+        },
+        {
+          "elapsed_ms": 1258,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "status": "passed",
+          "task_id": "U14"
+        },
+        {
+          "elapsed_ms": 1259,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "status": "passed",
+          "task_id": "U14"
+        },
+        {
+          "elapsed_ms": 1262,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "status": "passed",
+          "task_id": "U14"
+        },
+        {
+          "elapsed_ms": 1263,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "status": "passed",
+          "task_id": "U15"
+        },
+        {
+          "elapsed_ms": 1265,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "status": "passed",
+          "task_id": "U15"
+        },
+        {
+          "elapsed_ms": 1274,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "status": "passed",
+          "task_id": "U15"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "native_host_required",
+          "repeat": 1,
+          "status": "blocked",
+          "task_id": "U16"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "native_host_required",
+          "repeat": 2,
+          "status": "blocked",
+          "task_id": "U16"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "native_host_required",
+          "repeat": 3,
+          "status": "blocked",
+          "task_id": "U16"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "native_host_required",
+          "repeat": 1,
+          "status": "blocked",
+          "task_id": "U17"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "native_host_required",
+          "repeat": 2,
+          "status": "blocked",
+          "task_id": "U17"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "native_host_required",
+          "repeat": 3,
+          "status": "blocked",
+          "task_id": "U17"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "native_host_required",
+          "repeat": 1,
+          "status": "blocked",
+          "task_id": "U18"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "native_host_required",
+          "repeat": 2,
+          "status": "blocked",
+          "task_id": "U18"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "native_host_required",
+          "repeat": 3,
+          "status": "blocked",
+          "task_id": "U18"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "native_host_required",
+          "repeat": 1,
+          "status": "blocked",
+          "task_id": "U19"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "native_host_required",
+          "repeat": 2,
+          "status": "blocked",
+          "task_id": "U19"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "native_host_required",
+          "repeat": 3,
+          "status": "blocked",
+          "task_id": "U19"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "native_host_required",
+          "repeat": 1,
+          "status": "blocked",
+          "task_id": "U20"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "native_host_required",
+          "repeat": 2,
+          "status": "blocked",
+          "task_id": "U20"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "native_host_required",
+          "repeat": 3,
+          "status": "blocked",
+          "task_id": "U20"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_research_and_toolchain_required",
+          "repeat": 1,
+          "status": "blocked",
+          "task_id": "U21"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_research_and_toolchain_required",
+          "repeat": 2,
+          "status": "blocked",
+          "task_id": "U21"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_research_and_toolchain_required",
+          "repeat": 3,
+          "status": "blocked",
+          "task_id": "U21"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_research_and_toolchain_required",
+          "repeat": 1,
+          "status": "blocked",
+          "task_id": "U22"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_research_and_toolchain_required",
+          "repeat": 2,
+          "status": "blocked",
+          "task_id": "U22"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_research_and_toolchain_required",
+          "repeat": 3,
+          "status": "blocked",
+          "task_id": "U22"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_research_and_toolchain_required",
+          "repeat": 1,
+          "status": "blocked",
+          "task_id": "U23"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_research_and_toolchain_required",
+          "repeat": 2,
+          "status": "blocked",
+          "task_id": "U23"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_research_and_toolchain_required",
+          "repeat": 3,
+          "status": "blocked",
+          "task_id": "U23"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_research_and_toolchain_required",
+          "repeat": 1,
+          "status": "blocked",
+          "task_id": "U24"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_research_and_toolchain_required",
+          "repeat": 2,
+          "status": "blocked",
+          "task_id": "U24"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_research_and_toolchain_required",
+          "repeat": 3,
+          "status": "blocked",
+          "task_id": "U24"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_research_and_toolchain_required",
+          "repeat": 1,
+          "status": "blocked",
+          "task_id": "U25"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_research_and_toolchain_required",
+          "repeat": 2,
+          "status": "blocked",
+          "task_id": "U25"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_research_and_toolchain_required",
+          "repeat": 3,
+          "status": "blocked",
+          "task_id": "U25"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_client_or_operator_evidence_required",
+          "repeat": 1,
+          "status": "blocked",
+          "task_id": "U26"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_client_or_operator_evidence_required",
+          "repeat": 2,
+          "status": "blocked",
+          "task_id": "U26"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_client_or_operator_evidence_required",
+          "repeat": 3,
+          "status": "blocked",
+          "task_id": "U26"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_client_or_operator_evidence_required",
+          "repeat": 1,
+          "status": "blocked",
+          "task_id": "U27"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_client_or_operator_evidence_required",
+          "repeat": 2,
+          "status": "blocked",
+          "task_id": "U27"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_client_or_operator_evidence_required",
+          "repeat": 3,
+          "status": "blocked",
+          "task_id": "U27"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_client_or_operator_evidence_required",
+          "repeat": 1,
+          "status": "blocked",
+          "task_id": "U28"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_client_or_operator_evidence_required",
+          "repeat": 2,
+          "status": "blocked",
+          "task_id": "U28"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_client_or_operator_evidence_required",
+          "repeat": 3,
+          "status": "blocked",
+          "task_id": "U28"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_client_or_operator_evidence_required",
+          "repeat": 1,
+          "status": "blocked",
+          "task_id": "U29"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_client_or_operator_evidence_required",
+          "repeat": 2,
+          "status": "blocked",
+          "task_id": "U29"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_client_or_operator_evidence_required",
+          "repeat": 3,
+          "status": "blocked",
+          "task_id": "U29"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_client_or_operator_evidence_required",
+          "repeat": 1,
+          "status": "blocked",
+          "task_id": "U30"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_client_or_operator_evidence_required",
+          "repeat": 2,
+          "status": "blocked",
+          "task_id": "U30"
+        },
+        {
+          "elapsed_ms": 0,
+          "reason": "independent_client_or_operator_evidence_required",
+          "repeat": 3,
+          "status": "blocked",
+          "task_id": "U30"
+        }
+      ],
+      "schema": "mtm-usability-result-v1",
+      "tasks": 30,
+      "web_client_tested": false
+    }
+  },
+  "test_stderr_sha256": "7bf9b793eb153a2b3c02d27eaac3993fb8c9215773cf82cfc74ed75ffc31e87e",
+  "test_stdout_sha256": "2ff1d6d0f4aa8805dbacae7c339517b586871d19f50d39175abc0b64ecbb6c3d"
+}

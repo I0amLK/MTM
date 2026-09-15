@@ -4,8 +4,8 @@ use std::sync::Arc;
 
 use mtm_contracts::{ErrorCategory, ReCtmError, WorkflowRole, WorkflowState};
 use mtm_storage::{
-    CapabilityAuthority, CapabilityClaims, StateStore, TransitionRun, default_permissions,
-    role_for_state,
+    BranchPreparation, CapabilityAuthority, CapabilityClaims, CreationIdentity, CreationSlot,
+    PreparedBranch, StateStore, TransitionRun, default_permissions, role_for_state,
 };
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -75,7 +75,17 @@ pub struct WorkflowEvent {
 
 pub type WorkflowObserver = Arc<dyn Fn(WorkflowEvent) + Send + Sync + 'static>;
 
+#[path = "action_transactions.rs"]
+mod action_transactions;
+use action_transactions::TaskEffects;
+
+#[path = "submission_write.rs"]
+mod submission_write;
+
 const MAX_TASK_REFERENCE_LOCATORS: usize = 64;
+
+#[path = "creation_resume.rs"]
+mod creation_resume;
 
 pub struct WorkflowEngine {
     store: Arc<StateStore>,
@@ -130,6 +140,22 @@ impl WorkflowEngine {
     }
 
     pub fn start(&self, request: StartRequest<'_>) -> Result<Value, ReCtmError> {
+        self.start_inner(request, None)
+    }
+
+    pub fn start_idempotent(
+        &self,
+        request: StartRequest<'_>,
+        identity: CreationIdentity,
+    ) -> Result<Value, ReCtmError> {
+        self.start_inner(request, Some(identity))
+    }
+
+    fn start_inner(
+        &self,
+        request: StartRequest<'_>,
+        identity: Option<CreationIdentity>,
+    ) -> Result<Value, ReCtmError> {
         if request.owner_id.trim().is_empty() {
             return Err(invalid("owner_id is required"));
         }
@@ -154,6 +180,9 @@ impl WorkflowEngine {
                 }
             }
         }
+        if let Some(identity) = identity {
+            return self.start_resumable(request, identity);
+        }
         let problem_id = safe_component(request.problem_id.unwrap_or("problem"));
         let runtime = self.store.runtime();
         let run_id = format!("run-{problem_id}-{}", runtime.ids.token_hex(6)?);
@@ -167,6 +196,18 @@ impl WorkflowEngine {
             .filter(|path| !path.is_empty())
             .map(str::to_owned)
             .unwrap_or_else(|| format!("rethlas-output/{run_id}/proof_verified.tex"));
+        self.initialize_start(request, run_id, problem_id, trace, export_path)
+    }
+
+    fn initialize_start(
+        &self,
+        request: StartRequest<'_>,
+        run_id: String,
+        problem_id: String,
+        trace: String,
+        export_path: String,
+    ) -> Result<Value, ReCtmError> {
+        let runtime = self.store.runtime();
         let created_at = runtime.clock.now_iso()?;
         let vault_result = self.vault.initialize_run(
             &run_id,
@@ -297,6 +338,11 @@ impl WorkflowEngine {
             None => runtime.ids.token_urlsafe(16)?,
         };
         let mut run = self.require_owner(run_id, owner_id)?;
+        let pending = self.store.pending_submission_status(owner_id, run_id)?;
+        if !pending.is_null() {
+            return Err(ReCtmError::new("RESULT_UNKNOWN", "Pending submission prevents mechanical task advancement; inspect its checkpoint or recover the original request.")
+                .with_category(ErrorCategory::Conflict).with_retryable(false).with_details(pending));
+        }
         run = self.advance_mechanical(run, &trace)?;
         let state = workflow_state(text(&run, "state")?)?;
         if state.terminal() {
@@ -849,6 +895,7 @@ impl WorkflowEngine {
             "status":run["status"],
             "round_index":run["round_index"],
             "transition_seq":run["transition_seq"],
+            "pending_submission":self.store.pending_submission_status(owner_id, run_id)?,
             "latex_passed":run["latex_passed"],
             "verdict":run["verdict"],
             "sealed":run["sealed"],
@@ -1145,22 +1192,24 @@ impl WorkflowEngine {
         reason: &str,
         verdict: Option<&str>,
     ) -> Result<Value, ReCtmError> {
-        self.store.seal_domain(claims.domain_id())?;
         let empty = serde_json::json!({});
-        let updated = self.transition(TransitionInput {
-            run_id: claims.run_id(),
-            before: workflow_state(text(run, "state")?)?,
-            after,
-            trace_id,
-            actor: role_name(claims.role()),
-            reason,
-            evidence: &empty,
-            latex_passed: None,
-            verdict,
-            status: None,
-            sealed: None,
-            round_delta: 0,
-        })?;
+        let updated = self.transition_with_task(
+            TransitionInput {
+                run_id: claims.run_id(),
+                before: workflow_state(text(run, "state")?)?,
+                after,
+                trace_id,
+                actor: role_name(claims.role()),
+                reason,
+                evidence: &empty,
+                latex_passed: None,
+                verdict,
+                status: None,
+                sealed: None,
+                round_delta: 0,
+            },
+            Some(TaskEffects::new(claims)),
+        )?;
         Ok(serde_json::json!({
             "run_id":claims.run_id(),
             "state":updated["state"],
@@ -1176,6 +1225,10 @@ impl WorkflowEngine {
                 WorkflowState::Finalize => run = self.finalize(&run, trace_id)?,
                 WorkflowState::Done => {
                     run = self.retry_pending_registry_promotion(&run)?;
+                    self.vault.ensure_manual_validation_manifest(
+                        text(&run, "run_id")?,
+                        &self.manual_validation_manifest(&run),
+                    )?;
                     return Ok(run);
                 }
                 _ => return Ok(run),
@@ -1504,6 +1557,14 @@ impl WorkflowEngine {
     }
 
     fn transition(&self, input: TransitionInput<'_>) -> Result<Value, ReCtmError> {
+        self.transition_with_task(input, None)
+    }
+
+    fn transition_with_task(
+        &self,
+        input: TransitionInput<'_>,
+        task: Option<TaskEffects<'_>>,
+    ) -> Result<Value, ReCtmError> {
         let decision = TransitionDecision::validate(TransitionRequest {
             run_id: input.run_id.to_owned(),
             before: input.before,
@@ -1513,7 +1574,7 @@ impl WorkflowEngine {
             trace_id: input.trace_id.to_owned(),
         })?;
         let request = decision.request();
-        let result = self.store.transition_run(TransitionRun {
+        let persisted = TransitionRun {
             run_id: &request.run_id,
             expected_state: state_name(request.before),
             after_state: state_name(request.after),
@@ -1527,7 +1588,21 @@ impl WorkflowEngine {
             verdict: input.verdict,
             sealed: input.sealed,
             round_delta: input.round_delta,
-        })?;
+        };
+        let result = match task {
+            None => self.store.transition_run(persisted)?,
+            Some(task) => self.store.transition_task(
+                task.claims,
+                mtm_storage::TaskTransition {
+                    transition: persisted,
+                    expected_metadata: task.expected_metadata,
+                    metadata_updates: &task.metadata_updates,
+                    project_mode: task.project_mode,
+                    branch: task.branch,
+                    restartable_action: task.restartable_action,
+                },
+            )?,
+        };
         self.emit(WorkflowEvent {
             event_type: "workflow.transition".to_owned(),
             trace_id: input.trace_id.to_owned(),
@@ -1735,64 +1810,15 @@ impl WorkflowEngine {
         resource: &str,
         content: &Value,
     ) -> Result<Value, ReCtmError> {
-        if let Some(channel) = resource.strip_prefix("memory:generation:") {
-            if !GENERATION_CHANNELS.contains(&channel) || !content.is_object() {
-                return Err(invalid(
-                    "generation memory writes require a known channel and JSON object",
-                ));
-            }
-            let normalized = self.normalize_protocol3_generation_write(claims, channel, content)?;
-            let path =
-                self.vault
-                    .append_generation_memory(claims.run_id(), channel, &normalized)?;
-            return Ok(
-                serde_json::json!({"path_kind":"generation_memory","channel":channel,"file":file_name(&path)}),
-            );
-        }
-        if let Some(channel) = resource.strip_prefix("memory:verifier:") {
-            if !VERIFIER_CHANNELS.contains(&channel) || !content.is_object() {
-                return Err(invalid(
-                    "verifier memory writes require a known channel and JSON object",
-                ));
-            }
-            let path = self
+        if let Some(file) = self.prepare_file_resource(claims, resource, content)? {
+            let guard = self
                 .vault
-                .append_verifier_memory(claims.run_id(), channel, content)?;
-            return Ok(
-                serde_json::json!({"path_kind":"verifier_memory","channel":channel,"file":file_name(&path)}),
-            );
-        }
-        if let Some(channel) = resource.strip_prefix("memory:branch:") {
-            if !BRANCH_CHANNELS.contains(&channel) || !content.is_object() {
-                return Err(invalid(
-                    "branch memory writes require a known channel and JSON object",
-                ));
-            }
-            let branch_id = self.branch_id_for_domain(claims.domain_id())?;
-            let path =
-                self.vault
-                    .append_branch_memory(claims.run_id(), &branch_id, channel, content)?;
-            return Ok(
-                serde_json::json!({"path_kind":"branch_memory","branch_id":branch_id,"channel":channel,"file":file_name(&path)}),
-            );
+                .lock_file_effect(claims.run_id(), &file.relative)?;
+            let (evidence, bytes) = guard.prepare(&file.bytes, file.append)?;
+            guard.publish(&evidence, &bytes)?;
+            return Ok(file.result);
         }
         match resource {
-            "join_result" => {
-                if !content.is_object() {
-                    return Err(invalid("join_result must be a JSON object"));
-                }
-                let path = self.vault.write_join_result(claims.run_id(), content)?;
-                Ok(serde_json::json!({"path_kind":"join_result","file":file_name(&path)}))
-            }
-            "proof" => {
-                let proof = content
-                    .as_str()
-                    .ok_or_else(|| invalid("proof must be a LaTeX string"))?;
-                let path = self.vault.write_proof(claims.run_id(), proof)?;
-                Ok(
-                    serde_json::json!({"path_kind":"draft_tex","file":file_name(&path),"size":proof.len()}),
-                )
-            }
             "proof_manifest" => {
                 let manifest = self.normalize_proof_manifest(claims, content)?;
                 let stored = self
@@ -1800,15 +1826,7 @@ impl WorkflowEngine {
                     .write_proof_manifest(claims.run_id(), &manifest)?;
                 Ok(serde_json::json!({"path_kind":"proof_manifest","sha256":stored["sha256"]}))
             }
-            "verification_report" => {
-                let decision = VerificationDecision::from_submitted_report(content)?;
-                let normalized = decision.normalized_payload();
-                let path = self
-                    .vault
-                    .write_verification_report(claims.run_id(), &normalized)?;
-                Ok(serde_json::json!({"path_kind":"verification_report","file":file_name(&path)}))
-            }
-            "reference_audit" => self.write_reference_audit(claims, content),
+            "reference_audit" => self.write_reference_audit(claims, content, None),
             "branch:self" => Err(ReCtmError::new(
                 "BRANCH_RESULT_REQUIRES_COMMIT",
                 "Branch results are written and sealed atomically by branch_complete.",
@@ -1876,18 +1894,28 @@ impl WorkflowEngine {
             .map_err(protocol3_state_error)
     }
 
-    fn stamp_protocol3_claim_record(
+    fn stamp_protocol3_action_record(
         &self,
+        run: &Value,
         claims: &CapabilityClaims,
+        action: &str,
+        slot: &str,
         record_type: &str,
         content: &Value,
     ) -> Result<Value, ReCtmError> {
-        let run = self.store.get_run(claims.run_id())?;
-        if metadata_i64(&run, "workflow_protocol_version", 1) < 3 {
+        if metadata_i64(run, "workflow_protocol_version", 1) < 3 {
             return Ok(content.clone());
         }
-        let record_id = format!("research-{}", self.store.runtime().ids.token_hex(8)?);
-        let created_at = self.store.runtime().clock.now_iso()?;
+        let seed = format!(
+            "{}:{}:{}:{}:{}",
+            claims.run_id(),
+            claims.epoch(),
+            claims.issued_state().as_str(),
+            action,
+            slot
+        );
+        let digest = sha256_text(&seed);
+        let record_id = format!("research-{}", &digest[..16]);
         let round_index = u32::try_from(
             run.get("round_index")
                 .and_then(Value::as_i64)
@@ -1902,10 +1930,21 @@ impl WorkflowEngine {
                 actor_role: role_name(claims.role()),
                 actor_domain_id: claims.domain_id(),
                 round_index,
-                created_at: &created_at,
+                created_at: text(run, "updated_at")?,
             },
         )
         .map_err(protocol3_state_error)
+    }
+
+    fn action_effect_slot(&self, claims: &CapabilityClaims, action: &str, slot: &str) -> String {
+        format!(
+            "{}:{}:{}:{}:{}",
+            claims.run_id(),
+            claims.epoch(),
+            claims.issued_state().as_str(),
+            action,
+            slot
+        )
     }
 
     fn normalize_proof_manifest(
@@ -2024,6 +2063,7 @@ impl WorkflowEngine {
         &self,
         claims: &CapabilityClaims,
         content: &Value,
+        submission: Option<(&mtm_storage::SubmissionExecution, usize)>,
     ) -> Result<Value, ReCtmError> {
         if claims.role() != WorkflowRole::Verifier {
             return Err(invalid(
@@ -2148,22 +2188,42 @@ impl WorkflowEngine {
             .as_str()
             .unwrap_or_default()
             .to_owned();
-        let audit = self.store.write_reference_audit(
-            claims.run_id(),
-            &reference_id,
-            &disposition,
-            &evidence_basis,
-            &evidence_locator,
-            claims.domain_id(),
-            &proof_hash,
-            &manifest_hash,
-            material,
-            assumptions,
-            notation,
-            source,
-            rederived,
-            notes,
-        )?;
+        let audit = if let Some((execution, index)) = submission {
+            let audit = mtm_storage::ReferenceAuditWrite {
+                reference_id: reference_id.clone(),
+                disposition: disposition.clone(),
+                evidence_basis,
+                evidence_locator,
+                verifier_domain_id: claims.domain_id().into(),
+                proof_sha256: proof_hash,
+                proof_manifest_sha256: manifest_hash,
+                material,
+                assumptions_checked: assumptions,
+                notation_checked: notation,
+                source_checked: source,
+                independently_rederived: rederived,
+                notes: notes.into(),
+            };
+            self.store
+                .write_submission_reference_audit(execution, index, &audit)?
+        } else {
+            self.store.write_reference_audit(
+                claims.run_id(),
+                &reference_id,
+                &disposition,
+                &evidence_basis,
+                &evidence_locator,
+                claims.domain_id(),
+                &proof_hash,
+                &manifest_hash,
+                material,
+                assumptions,
+                notation,
+                source,
+                rederived,
+                notes,
+            )?
+        };
         Ok(
             serde_json::json!({"path_kind":"reference_audit","reference_id":reference_id,"disposition":audit["disposition"]}),
         )
@@ -2265,10 +2325,12 @@ impl WorkflowEngine {
                 .unwrap_or_default(),
             ));
         }
+        if let Some(kind) = mtm_storage::AtomicActionKind::parse(action) {
+            self.store.enroll_atomic_action(claims, trace_id, kind)?;
+        }
         match action {
             "assessment_complete" => {
-                let after = self.commit_assessment_complete(run, claims, payload)?;
-                self.seal_and_transition(run, claims, after, trace_id, action, None)
+                self.commit_assessment_complete(run, claims, payload, trace_id)
             }
             "exploration_complete" => {
                 self.require_generation_records(claims.run_id(), "events")?;
@@ -2281,16 +2343,10 @@ impl WorkflowEngine {
                     None,
                 )
             }
-            "plans_proposed" => {
-                let after = self.commit_plans_proposed(run, claims, payload)?;
-                self.seal_and_transition(run, claims, after, trace_id, action, None)
-            }
+            "plans_proposed" => self.commit_plans_proposed(run, claims, payload, trace_id),
             "direct_proving_complete" => self.commit_direct_proving(run, claims, payload, trace_id),
             "branch_complete" => self.commit_branch(run, claims, payload, trace_id),
-            "join_complete" => {
-                let after = self.commit_join(claims, payload)?;
-                self.seal_and_transition(run, claims, after, trace_id, action, None)
-            }
+            "join_complete" => self.commit_join(run, claims, payload, trace_id),
             "failures_identified" => {
                 let summary = payload
                     .get("summary")
@@ -2301,7 +2357,14 @@ impl WorkflowEngine {
                     let scope = self.protocol3_scope(claims.run_id())?;
                     let normalized = normalize_protocol3_failure_summary(summary, &scope)
                         .map_err(protocol3_input_error)?;
-                    self.stamp_protocol3_claim_record(claims, "key_failures_summary", &normalized)?
+                    self.stamp_protocol3_action_record(
+                        run,
+                        claims,
+                        action,
+                        "failure_summary",
+                        "key_failures_summary",
+                        &normalized,
+                    )?
                 } else {
                     let mut record = summary.as_object().cloned().unwrap_or_default();
                     record.insert(
@@ -2310,9 +2373,29 @@ impl WorkflowEngine {
                     );
                     Value::Object(record)
                 };
-                self.vault
-                    .append_generation_memory(claims.run_id(), "failed_paths", &record)?;
-                self.seal_and_transition(run, claims, WorkflowState::Replan, trace_id, action, None)
+                self.store.enroll_restartable_action(
+                    claims,
+                    trace_id,
+                    mtm_storage::RestartableActionKind::FailuresIdentified,
+                )?;
+                let slot = self.action_effect_slot(claims, action, "failure_summary");
+                self.vault.ensure_action_generation_record(
+                    claims.run_id(),
+                    &slot,
+                    "failed_paths",
+                    &record,
+                )?;
+                self.seal_restartable_transition(
+                    run,
+                    claims,
+                    WorkflowState::Replan,
+                    trace_id,
+                    action,
+                    serde_json::json!({}),
+                    None,
+                    None,
+                    mtm_storage::RestartableActionKind::FailuresIdentified,
+                )
             }
             "replan_complete" => {
                 let decision = payload
@@ -2324,31 +2407,52 @@ impl WorkflowEngine {
                     let scope = self.protocol3_scope(claims.run_id())?;
                     let normalized = normalize_protocol3_replan_decision(decision, &scope)
                         .map_err(protocol3_input_error)?;
-                    self.stamp_protocol3_claim_record(claims, "replan_decision", &normalized)?
+                    self.stamp_protocol3_action_record(
+                        run,
+                        claims,
+                        action,
+                        "replan_decision",
+                        "replan_decision",
+                        &normalized,
+                    )?
                 } else {
                     decision.clone()
                 };
-                self.vault
-                    .append_generation_memory(claims.run_id(), "big_decisions", &decision)?;
-                self.seal_and_transition(
+                self.store.enroll_restartable_action(
+                    claims,
+                    trace_id,
+                    mtm_storage::RestartableActionKind::ReplanComplete,
+                )?;
+                let slot = self.action_effect_slot(claims, action, "replan_decision");
+                self.vault.ensure_action_generation_record(
+                    claims.run_id(),
+                    &slot,
+                    "big_decisions",
+                    &decision,
+                )?;
+                self.seal_restartable_transition(
                     run,
                     claims,
                     WorkflowState::ProposePlans,
                     trace_id,
                     action,
+                    serde_json::json!({}),
                     None,
+                    None,
+                    mtm_storage::RestartableActionKind::ReplanComplete,
                 )
             }
             "proof_submitted" => self.commit_proof_submitted(run, claims, payload, trace_id),
             "verification_submitted" => self.commit_verification_submitted(run, claims, trace_id),
             "repair_submitted" => {
-                self.commit_repair_submitted(run, claims)?;
-                self.seal_and_transition(
+                let proof_sha256 = self.commit_repair_submitted(run, claims)?;
+                self.seal_atomic_transition(
                     run,
                     claims,
                     WorkflowState::LatexValidate,
                     trace_id,
                     action,
+                    serde_json::json!({"last_submitted_proof_sha256":proof_sha256}),
                     None,
                 )
             }
@@ -2364,10 +2468,19 @@ impl WorkflowEngine {
         run: &Value,
         claims: &CapabilityClaims,
         payload: &Value,
-    ) -> Result<WorkflowState, ReCtmError> {
+        trace_id: &str,
+    ) -> Result<Value, ReCtmError> {
         self.require_generation_records(claims.run_id(), "immediate_conclusions")?;
         if metadata_i64(run, "workflow_protocol_version", 1) < 2 {
-            return Ok(WorkflowState::Explore);
+            return self.seal_atomic_transition(
+                run,
+                claims,
+                WorkflowState::Explore,
+                trace_id,
+                "assessment_complete",
+                serde_json::json!({}),
+                None,
+            );
         }
         let requested = metadata_text(run, "requested_workflow_mode");
         let route = payload
@@ -2391,27 +2504,25 @@ impl WorkflowEngine {
             _ if route == "compact" && compact_allowed => "compact",
             _ => "full",
         };
-        self.update_metadata(
-            claims.run_id(),
-            serde_json::json!({
-                "effective_workflow_mode":effective_mode,
-                "workflow_route_reason":payload.get("route_reason").and_then(Value::as_str).unwrap_or_default(),
-                "compact_route_allowed":compact_allowed
-            }),
-        )?;
-        if self
-            .store
-            .get_project_run(claims.run_id(), Some(claims.owner_id()))?
-            .is_some()
-        {
-            self.store
-                .set_project_run_mode(claims.run_id(), effective_mode)?;
-        }
-        Ok(if effective_mode == "compact" {
+        let updates = serde_json::json!({
+            "effective_workflow_mode":effective_mode,
+            "workflow_route_reason":payload.get("route_reason").and_then(Value::as_str).unwrap_or_default(),
+            "compact_route_allowed":compact_allowed
+        });
+        let after = if effective_mode == "compact" {
             WorkflowState::Assemble
         } else {
             WorkflowState::Explore
-        })
+        };
+        self.seal_atomic_transition(
+            run,
+            claims,
+            after,
+            trace_id,
+            "assessment_complete",
+            updates,
+            Some(effective_mode),
+        )
     }
 
     fn commit_plans_proposed(
@@ -2419,7 +2530,8 @@ impl WorkflowEngine {
         run: &Value,
         claims: &CapabilityClaims,
         payload: &Value,
-    ) -> Result<WorkflowState, ReCtmError> {
+        trace_id: &str,
+    ) -> Result<Value, ReCtmError> {
         let protocol = metadata_i64(run, "workflow_protocol_version", 1);
         let plan_round = run
             .get("round_index")
@@ -2432,12 +2544,18 @@ impl WorkflowEngine {
         } else {
             validate_plans(payload.get("plans"), plan_round)?
         };
+        let mut records = Vec::with_capacity(plans.len());
         for plan in &plans {
             let mut record = plan.as_object().cloned().unwrap_or_default();
             record.insert("status".to_owned(), Value::String("proposed".to_owned()));
             let record = if protocol >= 3 {
-                self.stamp_protocol3_claim_record(
+                self.stamp_protocol3_action_record(
+                    run,
                     claims,
+                    "plans_proposed",
+                    plan.get("plan_id")
+                        .and_then(Value::as_str)
+                        .unwrap_or("plan"),
                     "decomposition_plan",
                     &Value::Object(record),
                 )?
@@ -2448,14 +2566,31 @@ impl WorkflowEngine {
                 );
                 Value::Object(record)
             };
-            self.vault
-                .append_generation_memory(claims.run_id(), "subgoals", &record)?;
+            records.push(record);
         }
-        self.update_metadata(
-            claims.run_id(),
-            serde_json::json!({"active_plans":plans,"direct_screening_progress":{}}),
+        self.store.enroll_restartable_action(
+            claims,
+            trace_id,
+            mtm_storage::RestartableActionKind::PlansProposed,
         )?;
-        Ok(WorkflowState::DirectProving)
+        let slot = self.action_effect_slot(claims, "plans_proposed", "subgoals");
+        self.vault.ensure_action_generation_records(
+            claims.run_id(),
+            &slot,
+            "subgoals",
+            &records,
+        )?;
+        self.seal_restartable_transition(
+            run,
+            claims,
+            WorkflowState::DirectProving,
+            trace_id,
+            "plans_proposed",
+            serde_json::json!({"active_plans":plans,"direct_screening_progress":{}}),
+            None,
+            None,
+            mtm_storage::RestartableActionKind::PlansProposed,
+        )
     }
 
     fn commit_direct_proving(
@@ -2465,7 +2600,15 @@ impl WorkflowEngine {
         payload: &Value,
         trace_id: &str,
     ) -> Result<Value, ReCtmError> {
-        self.require_generation_records(claims.run_id(), "proof_steps")?;
+        let protocol = metadata_i64(run, "workflow_protocol_version", 1);
+        // Protocol 3 derives and persists the canonical direct-screening record
+        // inside this action. Requiring a pre-existing proof_steps record here
+        // creates a circular contract for a fresh direct_proving task. Preserve
+        // the legacy precondition only for older protocol runs whose task
+        // contract still expects caller-authored proof_steps memory.
+        if protocol < 3 {
+            self.require_generation_records(claims.run_id(), "proof_steps")?;
+        }
         let active_plans = run
             .get("metadata")
             .and_then(Value::as_object)
@@ -2476,14 +2619,13 @@ impl WorkflowEngine {
             .get("metadata")
             .and_then(Value::as_object)
             .and_then(|metadata| metadata.get("direct_screening_progress"));
-        let protocol = metadata_i64(run, "workflow_protocol_version", 1);
         let (screening, progress, missing) =
             merge_direct_screening(payload.get("screening"), &active_plans, previous, protocol)?;
-        self.update_metadata(
-            claims.run_id(),
-            serde_json::json!({"direct_screening_progress":progress}),
-        )?;
         if !missing.is_empty() {
+            self.update_metadata(
+                claims.run_id(),
+                serde_json::json!({"direct_screening_progress":progress}),
+            )?;
             return Ok(serde_json::json!({
                 "run_id":claims.run_id(),"state":"direct_proving","complete":false,
                 "screening_complete":false,"missing_screening":missing,
@@ -2493,6 +2635,11 @@ impl WorkflowEngine {
         let mut persisted_screening = screening.clone();
         if protocol >= 3 {
             for plan in &mut persisted_screening {
+                let plan_id = plan
+                    .get("plan_id")
+                    .and_then(Value::as_str)
+                    .unwrap_or("plan")
+                    .to_owned();
                 let Some(results) = plan
                     .get_mut("subgoal_results")
                     .and_then(Value::as_array_mut)
@@ -2500,16 +2647,25 @@ impl WorkflowEngine {
                     return Err(internal("protocol-3 screening results are not an array"));
                 };
                 for result in results {
-                    result["attempt_id"] = Value::String(format!(
-                        "attempt-{}",
-                        self.store.runtime().ids.token_hex(8)?
+                    let subgoal_id = result
+                        .get("subgoal_id")
+                        .and_then(Value::as_str)
+                        .unwrap_or("subgoal");
+                    let digest = sha256_text(&format!(
+                        "{}:{}:direct_proving_complete:{plan_id}:{subgoal_id}",
+                        claims.run_id(),
+                        claims.epoch()
                     ));
+                    result["attempt_id"] = Value::String(format!("attempt-{}", &digest[..16]));
                 }
             }
         }
         let screening_record = if protocol >= 3 {
-            self.stamp_protocol3_claim_record(
+            self.stamp_protocol3_action_record(
+                run,
                 claims,
+                "direct_proving_complete",
+                "screening",
                 "direct_screening_round",
                 &serde_json::json!({"plans":persisted_screening}),
             )?
@@ -2517,11 +2673,9 @@ impl WorkflowEngine {
             serde_json::json!({
                 "record_type":"direct_screening_round",
                 "plans":persisted_screening,
-                "created_at":self.store.runtime().clock.now_iso()?
+                "created_at":text(run,"updated_at")?
             })
         };
-        self.vault
-            .append_generation_memory(claims.run_id(), "proof_steps", &screening_record)?;
         let solved = screening
             .iter()
             .filter_map(|item| {
@@ -2555,34 +2709,70 @@ impl WorkflowEngine {
                     serde_json::json!({"solved_plan_ids":solved}),
                 ));
             }
-            self.vault.write_join_result(
-                claims.run_id(),
-                &serde_json::json!({
-                    "source":"direct_proving","status":"solved","selected_plan_id":selected,
-                    "proof_route":proof_route,"screening":screening
-                }),
+            let join = serde_json::json!({
+                "source":"direct_proving","status":"solved","selected_plan_id":selected,
+                "proof_route":proof_route,"screening":screening
+            });
+            self.store.enroll_restartable_action(
+                claims,
+                trace_id,
+                mtm_storage::RestartableActionKind::DirectProvingComplete,
             )?;
-            return self.seal_and_transition(
+            let screening_slot =
+                self.action_effect_slot(claims, "direct_proving_complete", "screening");
+            self.vault.ensure_action_generation_record(
+                claims.run_id(),
+                &screening_slot,
+                "proof_steps",
+                &screening_record,
+            )?;
+            let join_slot = self.action_effect_slot(claims, "direct_proving_complete", "join");
+            self.vault.ensure_action_json(
+                claims.run_id(),
+                &join_slot,
+                "join/result.json",
+                &join,
+            )?;
+            return self.seal_restartable_transition(
                 run,
                 claims,
                 WorkflowState::Assemble,
                 trace_id,
                 "direct_proving_complete",
+                serde_json::json!({"direct_screening_progress":progress}),
                 None,
+                None,
+                mtm_storage::RestartableActionKind::DirectProvingComplete,
             );
         }
         let branch_plans = active_plans.as_array().cloned().unwrap_or_default();
-        self.update_metadata(
-            claims.run_id(),
-            serde_json::json!({"branch_requests":branch_plans,"last_direct_screening":screening}),
+        self.store.enroll_restartable_action(
+            claims,
+            trace_id,
+            mtm_storage::RestartableActionKind::DirectProvingComplete,
         )?;
-        self.seal_and_transition(
+        let screening_slot =
+            self.action_effect_slot(claims, "direct_proving_complete", "screening");
+        self.vault.ensure_action_generation_record(
+            claims.run_id(),
+            &screening_slot,
+            "proof_steps",
+            &screening_record,
+        )?;
+        self.seal_restartable_transition(
             run,
             claims,
             WorkflowState::BranchPrepare,
             trace_id,
             "direct_proving_complete",
+            serde_json::json!({
+                "direct_screening_progress":progress,
+                "branch_requests":branch_plans,
+                "last_direct_screening":screening
+            }),
             None,
+            None,
+            mtm_storage::RestartableActionKind::DirectProvingComplete,
         )
     }
 
@@ -2702,16 +2892,15 @@ impl WorkflowEngine {
         });
         if protocol >= 3 {
             result_payload["obstructions"] = Value::Array(obstructions);
-            result_payload =
-                self.stamp_protocol3_claim_record(claims, "branch_result", &result_payload)?;
+            result_payload = self.stamp_protocol3_action_record(
+                run,
+                claims,
+                "branch_complete",
+                "result",
+                "branch_result",
+                &result_payload,
+            )?;
         }
-        let path = self
-            .vault
-            .write_branch_result(claims.run_id(), &branch_id, &result_payload)?;
-        let path_text = path.to_string_lossy().into_owned();
-        self.store
-            .update_branch_status(&branch_id, "sealed", Some(&path_text))?;
-        self.store.seal_domain(claims.domain_id())?;
         let branch_state = serde_json::json!({
             "record_type":"branch_sealed","branch_id":branch_id,
             "plan_id":result_payload["plan_id"],"status":status
@@ -2722,17 +2911,23 @@ impl WorkflowEngine {
                 "plan_id":result_payload["plan_id"],
                 "status":status
             });
-            self.stamp_protocol3_claim_record(claims, "branch_sealed", &content)?
+            self.stamp_protocol3_action_record(
+                run,
+                claims,
+                "branch_complete",
+                "branch_state",
+                "branch_sealed",
+                &content,
+            )?
         } else {
             branch_state
         };
-        self.vault
-            .append_generation_memory(claims.run_id(), "branch_states", &branch_state)?;
         let branches = self.store.list_branches(claims.run_id())?;
         let barrier_complete = !branches.is_empty()
-            && branches
-                .iter()
-                .all(|branch| branch.get("status").and_then(Value::as_str) == Some("sealed"));
+            && branches.iter().all(|branch| {
+                branch["branch_id"] == branch_id
+                    || branch.get("status").and_then(Value::as_str) == Some("sealed")
+            });
         let after = if barrier_complete {
             WorkflowState::BranchJoin
         } else {
@@ -2741,24 +2936,53 @@ impl WorkflowEngine {
         let evidence = serde_json::json!({
             "branch_id":branch_id,"status":status,"barrier_complete":barrier_complete
         });
-        let result = self.transition(TransitionInput {
-            run_id: claims.run_id(),
-            before: WorkflowState::BranchRun,
-            after,
+        self.store.enroll_restartable_action(
+            claims,
             trace_id,
-            actor: role_name(claims.role()),
-            reason: if barrier_complete {
-                "branch_sealed_barrier_complete"
-            } else {
-                "branch_sealed_next_pending"
+            mtm_storage::RestartableActionKind::BranchComplete,
+        )?;
+        let result_slot = self.action_effect_slot(claims, "branch_complete", "result");
+        let path = self.vault.ensure_action_read_only_json(
+            claims.run_id(),
+            &result_slot,
+            &format!("branches/{branch_id}/result.json"),
+            &result_payload,
+        )?;
+        let path_text = path.to_string_lossy().into_owned();
+        let state_slot = self.action_effect_slot(claims, "branch_complete", "branch_state");
+        self.vault.ensure_action_generation_record(
+            claims.run_id(),
+            &state_slot,
+            "branch_states",
+            &branch_state,
+        )?;
+        let mut effects = TaskEffects::new(claims);
+        effects.branch = Some(mtm_storage::BranchSeal {
+            branch_id: &branch_id,
+            result_path: &path_text,
+        });
+        effects.restartable_action = Some(mtm_storage::RestartableActionKind::BranchComplete);
+        let result = self.transition_with_task(
+            TransitionInput {
+                run_id: claims.run_id(),
+                before: WorkflowState::BranchRun,
+                after,
+                trace_id,
+                actor: role_name(claims.role()),
+                reason: if barrier_complete {
+                    "branch_sealed_barrier_complete"
+                } else {
+                    "branch_sealed_next_pending"
+                },
+                evidence: &evidence,
+                latex_passed: None,
+                verdict: None,
+                status: None,
+                sealed: None,
+                round_delta: 0,
             },
-            evidence: &evidence,
-            latex_passed: None,
-            verdict: None,
-            status: None,
-            sealed: None,
-            round_delta: 0,
-        })?;
+            Some(effects),
+        )?;
         Ok(serde_json::json!({
             "run_id":claims.run_id(),"state":result["state"],"branch_id":branch_id,
             "branch_status":"sealed","barrier_complete":barrier_complete
@@ -2767,9 +2991,11 @@ impl WorkflowEngine {
 
     fn commit_join(
         &self,
+        run: &Value,
         claims: &CapabilityClaims,
         payload: &Value,
-    ) -> Result<WorkflowState, ReCtmError> {
+        trace_id: &str,
+    ) -> Result<Value, ReCtmError> {
         let object = payload
             .as_object()
             .ok_or_else(|| invalid("join payload must be a JSON object"))?;
@@ -2875,7 +3101,7 @@ impl WorkflowEngine {
         );
         normalized.insert(
             "joined_at".to_owned(),
-            Value::String(self.store.runtime().clock.now_iso()?),
+            Value::String(text(run, "updated_at")?.to_owned()),
         );
         if let Some(common_failures) = common_failures {
             normalized.insert(
@@ -2883,21 +3109,46 @@ impl WorkflowEngine {
                 serde_json::json!(common_failures),
             );
         }
-        self.vault
-            .write_join_result(claims.run_id(), &Value::Object(normalized))?;
-        self.vault.append_generation_memory(
-            claims.run_id(),
-            "branch_states",
-            &serde_json::json!({
-                "record_type":"branch_join","outcome":outcome,
-                "considered_branch_ids":sealed_ids.iter().collect::<Vec<_>>()
-            }),
+        let join_result = Value::Object(normalized);
+        let join_state = serde_json::json!({
+            "record_type":"branch_join","outcome":outcome,
+            "considered_branch_ids":sealed_ids.iter().collect::<Vec<_>>()
+        });
+        self.store.enroll_restartable_action(
+            claims,
+            trace_id,
+            mtm_storage::RestartableActionKind::JoinComplete,
         )?;
-        Ok(if outcome == "solved" {
+        let result_slot = self.action_effect_slot(claims, "join_complete", "result");
+        self.vault.ensure_action_json(
+            claims.run_id(),
+            &result_slot,
+            "join/result.json",
+            &join_result,
+        )?;
+        let state_slot = self.action_effect_slot(claims, "join_complete", "branch_state");
+        self.vault.ensure_action_generation_record(
+            claims.run_id(),
+            &state_slot,
+            "branch_states",
+            &join_state,
+        )?;
+        let after = if outcome == "solved" {
             WorkflowState::Assemble
         } else {
             WorkflowState::IdentifyFailures
-        })
+        };
+        self.seal_restartable_transition(
+            run,
+            claims,
+            after,
+            trace_id,
+            "join_complete",
+            serde_json::json!({}),
+            None,
+            None,
+            mtm_storage::RestartableActionKind::JoinComplete,
+        )
     }
 
     fn commit_proof_submitted(
@@ -2920,43 +3171,30 @@ impl WorkflowEngine {
                     "Only a compact assembly may escalate to full exploration",
                 ));
             }
-            self.update_metadata(
-                claims.run_id(),
-                serde_json::json!({
-                    "effective_workflow_mode":"full",
-                    "compact_escalation_reason":payload.get("escalation_reason").and_then(Value::as_str).unwrap_or("assembly requested full exploration")
-                }),
-            )?;
-            if self
-                .store
-                .get_project_run(claims.run_id(), Some(claims.owner_id()))?
-                .is_some()
-            {
-                self.store.set_project_run_mode(claims.run_id(), "full")?;
-            }
-            return self.seal_and_transition(
+            return self.seal_atomic_transition(
                 run,
                 claims,
                 WorkflowState::Explore,
                 trace_id,
                 "compact_assembly_escalated_to_full",
-                None,
+                serde_json::json!({
+                    "effective_workflow_mode":"full",
+                    "compact_escalation_reason":payload.get("escalation_reason").and_then(Value::as_str).unwrap_or("assembly requested full exploration")
+                }),
+                Some("full"),
             );
         }
         let proof = self.vault.read_proof(claims.run_id())?;
         if protocol >= 2 {
             self.store.read_proof_manifest(claims.run_id())?;
         }
-        self.update_metadata(
-            claims.run_id(),
-            serde_json::json!({"last_submitted_proof_sha256":sha256_text(&proof)}),
-        )?;
-        self.seal_and_transition(
+        self.seal_atomic_transition(
             run,
             claims,
             WorkflowState::LatexValidate,
             trace_id,
             "proof_submitted",
+            serde_json::json!({"last_submitted_proof_sha256":sha256_text(&proof)}),
             None,
         )
     }
@@ -3045,26 +3283,6 @@ impl WorkflowEngine {
             );
             normalized["repair_hints"] = Value::String(hint);
         }
-        self.vault
-            .write_verification_report(claims.run_id(), &normalized)?;
-        self.vault
-            .append_verifier_memory(claims.run_id(), "verification_reports", &normalized)?;
-        self.vault.append_generation_memory(
-            claims.run_id(),
-            "verification_reports",
-            &normalized,
-        )?;
-        self.update_metadata(
-            claims.run_id(),
-            serde_json::json!({
-                "last_verified_proof_sha256":sha256_text(&proof),
-                "last_verifier_audit":{
-                    "statement_checks":self.vault.read_verifier_memory(claims.run_id(),"statement_checks")?.len(),
-                    "legacy_reference_checks":self.vault.read_verifier_memory(claims.run_id(),"reference_checks")?.len(),
-                    "structured_reference_audits":self.store.list_reference_audits(claims.run_id())?.len()
-                }
-            }),
-        )?;
         let verdict = match decision.verdict() {
             VerificationVerdict::Correct => "correct",
             VerificationVerdict::Wrong => "wrong",
@@ -3076,38 +3294,73 @@ impl WorkflowEngine {
             )
             .with_category(ErrorCategory::Conflict));
         }
+        let statement_checks = self
+            .vault
+            .read_verifier_memory(claims.run_id(), "statement_checks")?
+            .len();
+        let legacy_reference_checks = self
+            .vault
+            .read_verifier_memory(claims.run_id(), "reference_checks")?
+            .len();
+        let structured_reference_audits = self.store.list_reference_audits(claims.run_id())?.len();
+        let mut updates = serde_json::json!({
+            "last_verified_proof_sha256":sha256_text(&proof),
+            "last_verifier_audit":{
+                "statement_checks":statement_checks,
+                "legacy_reference_checks":legacy_reference_checks,
+                "structured_reference_audits":structured_reference_audits
+            }
+        });
+        let mut project_mode = None;
         let after = if verdict == "correct" {
             WorkflowState::Finalize
         } else {
             let compact = metadata_text(run, "effective_workflow_mode") == "compact";
-            let failures = metadata_i64(run, "compact_verifier_failures", 0) + i64::from(compact);
+            let failures = metadata_i64(run, "compact_verifier_failures", 0)
+                .checked_add(i64::from(compact))
+                .ok_or_else(|| internal("compact verifier failure counter overflow"))?;
             if compact {
-                self.update_metadata(
-                    claims.run_id(),
-                    serde_json::json!({"compact_verifier_failures":failures}),
-                )?;
+                updates["compact_verifier_failures"] = Value::from(failures);
             }
             if compact && failures >= 2 {
-                self.update_metadata(
-                    claims.run_id(),
-                    serde_json::json!({
-                        "effective_workflow_mode":"full",
-                        "compact_escalated_after_verifier":true
-                    }),
-                )?;
-                if self
-                    .store
-                    .get_project_run(claims.run_id(), Some(claims.owner_id()))?
-                    .is_some()
-                {
-                    self.store.set_project_run_mode(claims.run_id(), "full")?;
-                }
+                updates["effective_workflow_mode"] = Value::String("full".to_owned());
+                updates["compact_escalated_after_verifier"] = Value::Bool(true);
+                project_mode = Some("full");
                 WorkflowState::Explore
             } else {
                 WorkflowState::Repair
             }
         };
-        self.seal_and_transition(
+        self.store.enroll_restartable_action(
+            claims,
+            trace_id,
+            mtm_storage::RestartableActionKind::VerificationSubmitted,
+        )?;
+        let report_slot =
+            self.action_effect_slot(claims, "verification_submitted", "normalized_report");
+        self.vault.ensure_action_json(
+            claims.run_id(),
+            &report_slot,
+            "verification/verification.json",
+            &normalized,
+        )?;
+        let verifier_slot =
+            self.action_effect_slot(claims, "verification_submitted", "verifier_memory");
+        self.vault.ensure_action_verifier_record(
+            claims.run_id(),
+            &verifier_slot,
+            "verification_reports",
+            &normalized,
+        )?;
+        let generation_slot =
+            self.action_effect_slot(claims, "verification_submitted", "generation_memory");
+        self.vault.ensure_action_generation_record(
+            claims.run_id(),
+            &generation_slot,
+            "verification_reports",
+            &normalized,
+        )?;
+        self.seal_restartable_transition(
             run,
             claims,
             after,
@@ -3119,7 +3372,10 @@ impl WorkflowEngine {
             } else {
                 "server_computed_verdict_wrong"
             },
+            updates,
+            project_mode,
             Some(verdict),
+            mtm_storage::RestartableActionKind::VerificationSubmitted,
         )
     }
 
@@ -3127,7 +3383,7 @@ impl WorkflowEngine {
         &self,
         run: &Value,
         claims: &CapabilityClaims,
-    ) -> Result<(), ReCtmError> {
+    ) -> Result<String, ReCtmError> {
         let proof = self.vault.read_proof(claims.run_id())?;
         if metadata_i64(run, "workflow_protocol_version", 1) >= 2 {
             self.store.read_proof_manifest(claims.run_id())?;
@@ -3141,11 +3397,7 @@ impl WorkflowEngine {
             )
             .with_category(ErrorCategory::Validation));
         }
-        self.update_metadata(
-            claims.run_id(),
-            serde_json::json!({"last_submitted_proof_sha256":proof_sha256}),
-        )?;
-        Ok(())
+        Ok(proof_sha256)
     }
 }
 
@@ -3170,66 +3422,45 @@ impl WorkflowEngine {
             .and_then(Value::as_i64)
             .unwrap_or_default()
             + 1;
-        let snapshot_id = format!(
-            "round-{next_round}-{}",
-            self.store.runtime().ids.token_hex(4)?
-        );
+        let run_id = text(run, "run_id")?;
+        let snapshot_suffix = sha256_text(&format!("{run_id}:{next_round}:branch_prepare"));
+        let snapshot_id = format!("round-{next_round}-{}", &snapshot_suffix[..8]);
         let mut generation_memory = Map::new();
         for channel in GENERATION_CHANNELS {
             if channel != "events" {
                 generation_memory.insert(
                     channel.to_owned(),
-                    Value::Array(
-                        self.vault
-                            .read_generation_memory(text(run, "run_id")?, channel)?,
-                    ),
+                    Value::Array(self.vault.read_generation_memory(run_id, channel)?),
                 );
             }
         }
         let snapshot_payload = serde_json::json!({
             "snapshot_id":snapshot_id,
-            "created_at":self.store.runtime().clock.now_iso()?,
-            "problem":self.vault.read_problem(text(run,"run_id")?)?,
-            "references_manifest":self.vault.read_references_manifest(text(run,"run_id")?)?,
+            "created_at":text(run,"updated_at")?,
+            "problem":self.vault.read_problem(run_id)?,
+            "references_manifest":self.vault.read_references_manifest(run_id)?,
             "generation_memory":generation_memory,
             "branch_requests":requests
         });
-        let snapshot =
-            self.vault
-                .create_snapshot(text(run, "run_id")?, &snapshot_id, &snapshot_payload)?;
+        let snapshot = self
+            .vault
+            .ensure_snapshot(run_id, &snapshot_id, &snapshot_payload)?;
+        let mut prepared = Vec::with_capacity(requests.len());
         for (index, plan) in requests.iter().enumerate() {
             let plan_id = plan
                 .get("plan_id")
                 .and_then(Value::as_str)
                 .filter(|value| !value.is_empty())
                 .ok_or_else(|| internal("branch request is missing plan_id"))?;
-            let branch_id = format!(
-                "branch-{next_round}-{}-{}",
-                index + 1,
-                self.store.runtime().ids.token_hex(3)?
-            );
+            let suffix = sha256_text(&format!("{run_id}:{next_round}:{}:{plan_id}", index + 1));
+            let branch_id = format!("branch-{next_round}-{}-{}", index + 1, &suffix[..6]);
             let domain_id = format!("branch-domain-{branch_id}");
-            self.store.create_domain(
-                &domain_id,
-                text(run, "run_id")?,
-                "branch",
-                Some(&snapshot_id),
-                Some(index as i64),
-                &serde_json::json!({
-                    "state":"branch_run","branch_id":branch_id,"snapshot_id":snapshot_id
-                }),
-            )?;
-            self.store.create_branch(
-                &branch_id,
-                text(run, "run_id")?,
-                plan_id,
-                &domain_id,
-                &snapshot_id,
-                index as i64,
-                &serde_json::json!({"plan":plan}),
-            )?;
-            self.vault.initialize_branch(
-                text(run, "run_id")?,
+            let domain_metadata = serde_json::json!({
+                "state":"branch_run","branch_id":branch_id,"snapshot_id":snapshot_id
+            });
+            let branch_metadata = serde_json::json!({"plan":plan});
+            self.vault.ensure_branch_assignment(
+                run_id,
                 &branch_id,
                 &serde_json::json!({
                     "branch_id":branch_id,
@@ -3238,27 +3469,38 @@ impl WorkflowEngine {
                     "snapshot_sha256":snapshot["sha256"]
                 }),
             )?;
+            prepared.push(PreparedBranch {
+                branch_id,
+                plan_id: plan_id.to_owned(),
+                domain_id,
+                snapshot_id: snapshot_id.clone(),
+                order_index: index as i64,
+                domain_metadata,
+                branch_metadata,
+            });
         }
-        self.update_metadata(
-            text(run, "run_id")?,
-            serde_json::json!({"active_snapshot_id":snapshot_id,"branch_requests":[]}),
-        )?;
         let evidence = serde_json::json!({
             "snapshot_id":snapshot_id,"branch_count":requests.len()
         });
-        self.transition(TransitionInput {
-            run_id: text(run, "run_id")?,
-            before: WorkflowState::BranchPrepare,
-            after: WorkflowState::BranchRun,
-            trace_id,
-            actor: "system",
-            reason: "frozen_snapshot_and_branch_domains_created",
-            evidence: &evidence,
-            latex_passed: None,
-            verdict: None,
-            status: None,
-            sealed: None,
-            round_delta: 1,
+        self.store.complete_branch_preparation(BranchPreparation {
+            transition: TransitionRun {
+                run_id,
+                expected_state: "branch_prepare",
+                after_state: "branch_run",
+                trace_id,
+                actor: "system",
+                reason: "frozen_snapshot_and_branch_domains_created",
+                evidence: &evidence,
+                increment_epoch: true,
+                status: None,
+                latex_passed: None,
+                verdict: None,
+                sealed: None,
+                round_delta: 1,
+            },
+            expected_branch_requests: &Value::Array(requests),
+            snapshot_id: &snapshot_id,
+            branches: &prepared,
         })
     }
 
@@ -3267,9 +3509,35 @@ impl WorkflowEngine {
         let proof = self.vault.read_proof(run_id)?;
         let workdir = self.vault.run_root(run_id)?.join("verification/latex");
         let result = self.latex_gate.validate(&proof, &workdir)?;
-        self.update_metadata(
-            run_id,
-            serde_json::json!({"latex_result":result.to_value()}),
+        let evidence = result.to_value();
+        let after = if result.gate_passed {
+            WorkflowState::Verify
+        } else {
+            WorkflowState::Repair
+        };
+        let reason = if result.gate_passed {
+            "latex_gate_passed"
+        } else {
+            "latex_gate_failed"
+        };
+        let updated = self.store.complete_latex_gate(
+            TransitionRun {
+                run_id,
+                expected_state: "latex_validate",
+                after_state: state_name(after),
+                trace_id,
+                actor: "latex_gate",
+                reason,
+                evidence: &evidence,
+                increment_epoch: true,
+                status: None,
+                latex_passed: Some(result.gate_passed),
+                verdict: None,
+                sealed: None,
+                round_delta: 0,
+            },
+            &run["metadata"],
+            &evidence,
         )?;
         self.emit(WorkflowEvent {
             event_type: "latex.gate_result".to_owned(),
@@ -3278,39 +3546,12 @@ impl WorkflowEngine {
             actor_role: None,
             domain_id: None,
             before_state: Some("latex_validate".to_owned()),
-            after_state: None,
+            after_state: Some(state_name(after).to_owned()),
             decision: if result.gate_passed { "allow" } else { "deny" }.to_owned(),
-            reason: if result.gate_passed {
-                "latex_gate_passed"
-            } else {
-                "latex_gate_failed"
-            }
-            .to_owned(),
-            details: result.to_value(),
+            reason: reason.to_owned(),
+            details: evidence,
         });
-        let evidence = result.to_value();
-        self.transition(TransitionInput {
-            run_id,
-            before: WorkflowState::LatexValidate,
-            after: if result.gate_passed {
-                WorkflowState::Verify
-            } else {
-                WorkflowState::Repair
-            },
-            trace_id,
-            actor: "latex_gate",
-            reason: if result.gate_passed {
-                "latex_gate_passed"
-            } else {
-                "latex_gate_failed"
-            },
-            evidence: &evidence,
-            latex_passed: Some(result.gate_passed),
-            verdict: None,
-            status: None,
-            sealed: None,
-            round_delta: 0,
-        })
+        Ok(updated)
     }
 
     fn finalize(&self, run: &Value, trace_id: &str) -> Result<Value, ReCtmError> {
@@ -3395,7 +3636,7 @@ impl WorkflowEngine {
         })?;
         let result = self.retry_pending_registry_promotion(&result)?;
         self.vault
-            .write_manual_validation_manifest(run_id, &self.manual_validation_manifest(&result))?;
+            .ensure_manual_validation_manifest(run_id, &self.manual_validation_manifest(&result))?;
         Ok(result)
     }
 

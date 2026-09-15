@@ -1,0 +1,66 @@
+{
+  "baseline_hashes_checked": 127,
+  "consolidated_with_pending_acceptance": 106,
+  "historical_comparisons_retired": 4,
+  "ok": true,
+  "pending_family_acceptance": [
+    {
+      "family": "historical_and_mtm015_target_qualification",
+      "pending": [
+        "F: exact current candidate on a capable Native host, safe/trusted/dangerous permission suites, TTY/timeout/descendant cleanup and available CAS tools",
+        "F: required compiled-LaTeX full/compact/repair flows and browser OAuth/independent human consent; completed external retrieval does not discharge these",
+        "F: operator-authorized copied production state and old-run resume/rollback; the existing synthetic v1 fixture is not equivalent"
+      ]
+    },
+    {
+      "family": "release_install_cutover_and_candidate_staging",
+      "pending": [
+        "F: equivalent baseline/candidate resource samples and capable-host Native command/grant behavior remain pending despite completed frozen Python-free clean-build evidence",
+        "F: independently observed real web-client roundtrips and human consent where required, never inferred from frozen historical evidence",
+        "F: operator-authorized copied production-state upgrade/old-run resume/rollback remains distinct from completed prepared-copy upgrade and external SIGKILL tests",
+        "F: physical power-loss/device-cache and shared-filesystem semantics remain outside the completed process-SIGKILL scope"
+      ]
+    },
+    {
+      "family": "release_deployment_python_tests",
+      "pending": [
+        "F: all forward evidence adapters now exist, but mandatory target/browser/resource/Native/LaTeX/corpus evidence must actually pass before any release verdict",
+        "F: old resource/soak/qualification-parser mutation fixtures are preserved at the baseline; Rust frozen-byte checks protect history but do not claim forward parser equivalence"
+      ]
+    },
+    {
+      "family": "legacy_shadow_conformance_and_runtime_measurements",
+      "pending": [
+        "F: capable-host Native/TTY/CAS and target/resource qualification remains independent; deleting Python shadows is not parity evidence",
+        "F: U16-U25 real-world corpus rows remain independently required and historical resource measurements are not reused as current measurements"
+      ]
+    },
+    {
+      "family": "historical_research_math_and_web_evaluation",
+      "pending": [
+        "F: U21-U25 require new independent research, compiled proof, repair, branch-join and CAS trials on the current candidate",
+        "F: historical MTM-009/011 blind scores, web treatments and resource bindings remain immutable history and are not forward acceptance evidence"
+      ]
+    },
+    {
+      "family": "historical_tui_and_web_client_helpers",
+      "pending": [
+        "F: current real browser DCR/PKCE reconnect and independent human-consent evidence remains required",
+        "F: current TUI/operator visibility may be exercised separately; historical MTM-009/012/015 scripts are not a forward client implementation"
+      ]
+    },
+    {
+      "family": "historical_mtm014_permission_target_helpers",
+      "pending": [
+        "F: capable-host Native command/TTY/CAS, target/resource and compiled-LaTeX gates remain required on the current candidate",
+        "F: real browser and independent human consent remain required; scripted Rust permission tests are not human evidence"
+      ]
+    }
+  ],
+  "release_qualified": false,
+  "replaced_by_rust": 17,
+  "retired_python_files": 127,
+  "retirement_families": 8,
+  "runtime_parity_proven": false,
+  "scope": "reviewed_python_deletion_provenance"
+}

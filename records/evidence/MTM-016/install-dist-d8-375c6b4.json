@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-016",
+  "round": "3_of_final_5",
+  "scope": "observed_exact_artifact_local_installation_mechanics_only",
+  "aggregation": "Reviewed summary of synchronous native command results, not a runtime qualification runner output",
+  "source_commit": "375c6b4ad3a7740cf8cdd223af0429758ddf4a0c",
+  "candidate_sha256": "955b097c8fdbb781a5ae5d7da9797c1b57d5a84bf755502c25a856016439025f",
+  "candidate_size_bytes": 13628560,
+  "version": "0.6.0-preview.1",
+  "fixture_root": "target/mtm016-d8-smoke",
+  "commands": [
+    {"operation": "Rust xtask dist with explicit artifact SHA version label and output directory", "exit_code": 0, "version_label_verified": false, "installed": false, "selector_changed": false},
+    {"operation": "staged candidate self-install with empty inherited environment and two explicit disposable selectors", "exit_code": 0, "state": "active", "selectors_correct": 2},
+    {"operation": "repeat same-artifact install with empty inherited environment", "exit_code": 0, "state": "active", "selectors_correct": 2},
+    {"operation": "status through the reviewed regular candidate with empty inherited environment", "exit_code": 0, "state": "active", "selectors_correct": 2},
+    {"operation": "rollback through the reviewed regular candidate with empty inherited environment", "exit_code": 0, "state": "previous_active", "selectors_correct": 2},
+    {"operation": "post-rollback status through the reviewed regular candidate with empty inherited environment", "exit_code": 0, "state": "previous_active", "selectors_correct": 2},
+    {"operation": "external sha256sum on installed immutable file and test absence of both prior-missing selectors including dangling links", "exit_code": 0, "installed_artifact_sha256": "955b097c8fdbb781a5ae5d7da9797c1b57d5a84bf755502c25a856016439025f"}
+  ],
+  "repeat_install_manifest_before_sha256": "69fdea36c84e0cc6a3ea4c78fe085468e66f6ab08dc710c064ce3a39496ff2ec",
+  "repeat_install_manifest_after_sha256": "69fdea36c84e0cc6a3ea4c78fe085468e66f6ab08dc710c064ce3a39496ff2ec",
+  "connector_observation": "A compound request including launch through the sandbox-absolute selector link was rejected before execution as NATIVE_EXECUTABLE_UNRESOLVED. The regular reviewed candidate performed the subsequent explicit status/rollback checks. No installed-server endpoint or selector-launch acceptance is claimed by this smoke.",
+  "prior_selector_kinds": ["missing", "missing"],
+  "regular_file_and_symlink_rollback_coverage": "Separate Rust CLI integration tests exercise original regular-file modes and symlink restoration; they are not relabelled as an old production runtime upgrade",
+  "passed": true,
+  "python_invoked_by_smoke": false,
+  "installed_server_endpoint_tested": false,
+  "production_selectors_changed": false,
+  "production_state_modified": false,
+  "old_production_state_upgrade_tested": false,
+  "release_qualified": false,
+  "performance_claim": false,
+  "limitations": [
+    "No production selector, runtime session, credential or research database was touched",
+    "No abrupt termination, power loss, hostile same-UID race, old-runtime health, or multi-selector atomic visibility claim",
+    "Distribution verifies bytes, not the caller version label; self-install separately binds compiled version and exact bytes",
+    "Full F acceptance including actual installed launch and compatible database rollback remains open"
+  ]
+}

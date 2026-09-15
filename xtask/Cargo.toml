@@ -1,0 +1,20 @@
+[package]
+name = "mtm-xtask"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tempfile.workspace = true
+
+[target.'cfg(target_os = "linux")'.dependencies]
+# Maintenance probes only: safe syscall and bounded nonblocking child capture.
+# Reuse the existing pinned dependency; no product-to-xtask dependency.
+nix = { workspace = true, features = ["sched"] }
+
+[lints]
+workspace = true

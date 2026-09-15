@@ -1,0 +1,48 @@
+{
+  "baseline_launched": null,
+  "baseline_sha256": null,
+  "candidate_launched": null,
+  "candidate_sha256": "1e056a583e03effdbd2366056bf2b8985f929f4e712cf7c4bfa7da720ee673e4",
+  "delivery": "D5",
+  "failed_stage": "summary_validation",
+  "failure": "Required candidate identity, runner or profile evidence did not pass; raw diagnostics withheld",
+  "harness_source_identity": {
+    "after_sha256": "5b146f349530316c82eb258d64fdcae709b140a3a248a0e822b876e2fb7fe4ef",
+    "before_sha256": "5b146f349530316c82eb258d64fdcae709b140a3a248a0e822b876e2fb7fe4ef",
+    "commit": "1633ab8221dd9f394a87482923f35d4361e74cd3",
+    "unchanged": true
+  },
+  "milestone": "MTM-016",
+  "passed": false,
+  "pending": [
+    "Native host",
+    "compiled LaTeX",
+    "browser",
+    "resources",
+    "upgrade and rollback",
+    "Python retirement"
+  ],
+  "production_state_modified": false,
+  "profile": "protocol",
+  "python_invoked": false,
+  "raw_test_output_recorded": false,
+  "recorded_unix_seconds": 1788937437,
+  "release_qualified": false,
+  "runner": {
+    "child_reaped": true,
+    "elapsed_ms": 35,
+    "exit_code": 101,
+    "output_limit_exceeded": false,
+    "pipes_closed": true,
+    "raw_output_recorded": false,
+    "signal": null,
+    "stderr_bytes_retained": 126,
+    "stdout_bytes_retained": 0,
+    "timed_out": false
+  },
+  "schema_version": "1.0.0",
+  "scope": "exact_candidate_protocol_not_release",
+  "selector_changed": false,
+  "test_stderr_sha256": "9a6e82c7be10f8aa511a34000404f0f1efd9429f5a3c47047a807694844e4994",
+  "test_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

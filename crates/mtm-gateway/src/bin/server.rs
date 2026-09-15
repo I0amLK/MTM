@@ -78,7 +78,7 @@ async fn run() -> Result<(), ReCtmError> {
         .collect::<BTreeSet<_>>();
     let catalog_value: Value =
         serde_json::from_slice(&fs::read(&catalog_path).map_err(io_error)?).map_err(json_error)?;
-    let catalog = Arc::new(ToolCatalog::from_source_snapshot(&catalog_value)?);
+    let catalog = Arc::new(ToolCatalog::from_snapshot(&catalog_value)?);
     let runtime = GatewayRuntime::default();
     let store = Arc::new(OAuthStore::open(&oauth_path, runtime.clone())?);
     let oauth = Arc::new(OAuthService::new(

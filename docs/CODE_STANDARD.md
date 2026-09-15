@@ -127,7 +127,7 @@ move downward only when they are stable contracts rather than implementation det
 - Code, ledgers, and documentation use canonical repository-relative paths. Do not
   create compatibility copies or symlinks at obsolete root paths merely to keep old
   path assumptions alive.
-- `scripts/validate_record_layout.py` is part of the required local gate and rejects
+- `cargo xtask records` is part of the required local gate and rejects
   root JSON records, malformed record namespaces, missing relocation targets, and
   hash drift of relocated accepted evidence.
 - A historical harness whose source SHA is itself part of an accepted receipt may

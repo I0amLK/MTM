@@ -300,6 +300,12 @@ fn overlay_protocol3_plans(task: &mut Map<String, Value>) {
 }
 
 fn overlay_protocol3_screening(task: &mut Map<String, Value>) {
+    // Protocol 3 persists the canonical direct_screening_round itself when the
+    // screening is complete. Do not ask the caller to pre-seed the same
+    // proof_steps channel: that makes the task contract circular and duplicates
+    // the server-owned screening record.
+    task.insert("write_contract".to_owned(), Value::Array(Vec::new()));
+    task.insert("required_records".to_owned(), Value::Array(Vec::new()));
     task.insert(
         "commit_payload_schema".to_owned(),
         serde_json::json!({
@@ -330,6 +336,7 @@ fn overlay_protocol3_screening(task: &mut Map<String, Value>) {
         .get_mut("minimal_submission_template")
         .and_then(Value::as_object_mut)
     {
+        template.insert("writes".to_owned(), Value::Array(Vec::new()));
         template.insert(
             "payload".to_owned(),
             serde_json::json!({
@@ -873,6 +880,12 @@ mod tests {
         let direct = catalog
             .task_for_run(WorkflowState::DirectProving, 3, "full", None)
             .expect("direct task");
+        assert_eq!(direct["required_records"], serde_json::json!([]));
+        assert_eq!(direct["write_contract"], serde_json::json!([]));
+        assert_eq!(
+            direct["minimal_submission_template"]["writes"],
+            serde_json::json!([])
+        );
         assert_eq!(
             direct["minimal_submission_template"]["payload"]["screening"]["<server plan_id>"]["<server subgoal_id>"]
                 ["method"],

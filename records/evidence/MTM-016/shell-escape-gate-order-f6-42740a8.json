@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-016",
+  "delivery": "F6",
+  "scope": "exact_candidate_static_rejection_diagnostic_not_compiled_qualification",
+  "passed": true,
+  "candidate_sha256": "46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+  "candidate_source_commit": "cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+  "harness_base_commit": "42740a817d9bb9565a5f0a4f50ccad6a18eed8ee",
+  "harness_worktree_modified": true,
+  "test": "compiled_latex_runtime::shell_escape_static_rejection_regression",
+  "test_uses_public_oauth_mcp": true,
+  "native_exec_backend": "disabled",
+  "latex_policy": "static_only",
+  "before": {
+    "runner_exit_code": 101,
+    "test_passed": false,
+    "incorrect_expectation": "unsafe assembly reaches verifier before LaTeX rejection",
+    "observed": {
+      "ok": true,
+      "repair": true,
+      "latex_gate_source": true,
+      "static_rejected": true,
+      "compile_not_attempted": true,
+      "shell_escape_error": true
+    }
+  },
+  "after": {
+    "runner_exit_code": 0,
+    "test_passed": true,
+    "tests_passed": 1,
+    "tests_failed": 0,
+    "corrected_expectation": "unsafe assembly reaches mechanical LaTeX rejection and immediate repair before compiler or verifier",
+    "specific_shell_escape_denial_checked": true,
+    "compiler_not_invoked_checked": true,
+    "no_final_artifact_checked": true,
+    "no_workspace_side_effect_checked": true,
+    "restart_preserves_repair_and_transition_sequence": true,
+    "restart_preserves_unsealed_and_latex_failed_state": true,
+    "candidate_unchanged_checked": true
+  },
+  "limitations": [
+    "These were precommit regression executions against exact candidate bytes, not a sealed qualify receipt.",
+    "Static-only rejection does not certify actual compilation; required-policy compact/full/repair and the fixed negative scenario must still pass on the capable host.",
+    "The separate real-host Native command receipt is unchanged and is not reexecuted by this diagnostic."
+  ],
+  "production_state_modified": false,
+  "production_selectors_changed": false,
+  "release_qualified": false
+}

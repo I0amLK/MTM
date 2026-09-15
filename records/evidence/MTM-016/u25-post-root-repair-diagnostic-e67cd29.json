@@ -1,0 +1,91 @@
+{
+  "schema": "mtm016-u25-post-root-repair-diagnostic-v1",
+  "milestone": "MTM-016",
+  "recorded_unix_seconds": 1789364700,
+  "head": "e67cd29cd275dd8394d98e1eb4a516b12db12271",
+  "candidate_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "candidate_source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+  "launcher_sha256": "9e5a143ec137246b4644b0df676419dc61b1592c9e4612463be35ae8b24eda79",
+  "launcher_blob_unchanged_from_8e74793": true,
+  "conformance": {
+    "exit_code": 0,
+    "negative_cases": 86,
+    "u25_explicit_tool_roots_bounded_and_deduplicated": true,
+    "runtime_server_started": false,
+    "research_trials_executed": 0
+  },
+  "prepare_only": [
+    {
+      "repeat": 1,
+      "case_id": "u25-r1-rank-nullity",
+      "trial_id": "490b832b3cab9569ea8109890688cdd2",
+      "native_mode": "safe",
+      "latex_policy": "required",
+      "runtime_executed": false
+    },
+    {
+      "repeat": 2,
+      "case_id": "u25-r2-finite-field-roots",
+      "trial_id": "fde5223f647ad7a3bd9ffa80e40b80a3",
+      "native_mode": "safe",
+      "latex_policy": "required",
+      "runtime_executed": false
+    },
+    {
+      "repeat": 3,
+      "case_id": "u25-r3-polynomial-gcd",
+      "trial_id": "412d2b99bf72c9db113760dd3323c495",
+      "native_mode": "safe",
+      "latex_policy": "required",
+      "runtime_executed": false
+    }
+  ],
+  "resolved_cas_roots": {
+    "sage_installation_root": "/home/lk/miniconda3",
+    "magma_installation_root": "/home/lk/magma",
+    "mount_mode_required": "read_only"
+  },
+  "exact_candidate_preflight": {
+    "repeat_probed": 1,
+    "passed": false,
+    "error_code": "NATIVE_HELPER_ATTESTATION_FAILED",
+    "bubblewrap_errno": "ENOSPC",
+    "stage": "sandbox_namespace_attestation_before_cas_or_permission_request",
+    "classified_as_product_failure": false,
+    "classified_as_trial_failure": false,
+    "repeat_2_or_3_probe_repeated": false
+  },
+  "diagnostic_cas_only": {
+    "acceptance_claimed": false,
+    "safe_mode_trial_execution_claimed": false,
+    "sage_version": "10.9",
+    "magma_version": "V2.29-8",
+    "all_six_outer_diagnostic_invocations_exit_zero": true,
+    "r1": {
+      "sage_input_sha256": "82bbb9ed70ef5af228a5f1c7314df00852136001fdad2340ac051f7b393f0425",
+      "sage_output_sha256": "352a2950bf1b39468e33229c431aebed5de87ff46c7574ea24c674ecf470a61c",
+      "magma_input_sha256": "2fac5b40e3a00f838d83f3d2f8ccfa1a92f5d2d5bf10228a8651791c2632ed78",
+      "magma_output_sha256": "352a2950bf1b39468e33229c431aebed5de87ff46c7574ea24c674ecf470a61c",
+      "semantic_result": "t=-1,0,1,2 each rank=2 nullity=1"
+    },
+    "r2": {
+      "sage_input_sha256": "b1c59eb55eb0e48f1719db1bd4b7bdaee43ecbffd4d1157e555ff6d45ce0c54c",
+      "sage_output_sha256": "5e6b4b1e766bc3fa80709e21bee4cb84a5c3f8ebfa6913d7c33a4d4a8e5cf8d2",
+      "magma_input_sha256": "6c22db67dd236340cc33d9591a5cc0a0e4b66361998c8f97f9d0de35f0d9caa8",
+      "magma_output_sha256": "1237051dbc0a986ca69e214c82d18bf266568f25ab7a47c1765505cbe09cab4c",
+      "semantic_result": "p=2,3,5 have all field elements as simple roots and gcd(f,f')=1"
+    },
+    "r3": {
+      "sage_input_sha256": "106feeda37a77207915b1d5cca86142c1bb1ceb925b743af453aa2e87fad3b62",
+      "sage_output_sha256": "33bdc3a500a043d46c9f66c4b2ef052ce94d53a511a42493dab6d067c3fd8ec0",
+      "magma_input_sha256": "79d29de84678147ab3d816f8987b63ab50e16aa8e1d40822949071ef8d7bf3f2",
+      "magma_output_sha256": "ccff67a266fbbae0b8ff5a34a32b09d343c5f72b2e620d8a5b4671ae691827ad",
+      "semantic_result": "gcd=x-1 and (x^4-1)-x(x^3-1)=x-1"
+    }
+  },
+  "accepted_trials_delta": 0,
+  "research_trials_completed_on_current_candidate": 12,
+  "research_trials_required": 15,
+  "production_changed": false,
+  "release_qualified": false
+}

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "graph_id": "mtm-reboot-target-architecture",
-  "updated_at": "2026-09-01T19:18:00-07:00",
+  "updated_at": "2026-09-07T14:54:38Z",
   "principles": [
     "Functional authority is preserved before structural optimization.",
     "The crate dependency graph is acyclic.",
@@ -23,7 +23,6 @@
     "edges": [
       {"source": "mtm-core", "target": "mtm-contracts"},
       {"source": "mtm-storage", "target": "mtm-contracts"},
-      {"source": "mtm-storage", "target": "mtm-core"},
       {"source": "mtm-native", "target": "mtm-contracts"},
       {"source": "mtm-native", "target": "mtm-core"},
       {"source": "mtm-gateway", "target": "mtm-contracts"},
@@ -41,6 +40,16 @@
       {"source": "mtm-cli", "target": "mtm-runtime"}
     ]
   },
+  "maintenance_crates": [
+    {
+      "id": "mtm-xtask",
+      "milestone": "MTM-016",
+      "runtime_dependency": false,
+      "product_may_depend_on_it": false,
+      "responsibility": "Rust inventory, static record integrity and source checks; not release or target authority."
+    }
+  ],
+  "mtm016_graph_reconciliation": "Cargo metadata and baseline b3ab147 both show 17 normal product edges. The old storage-to-core edge was stale documentation, not a dependency removed from code. Product dependencies are unchanged; maintenance tooling is separate.",
   "runtime_authority_graph": {
     "vertices": [
       {"id": "client", "kind": "external"},

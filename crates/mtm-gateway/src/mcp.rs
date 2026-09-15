@@ -469,8 +469,11 @@ pub fn server_identity() -> Value {
 }
 
 #[must_use]
-pub fn server_instructions() -> &'static str {
-    "Use native tools for ordinary workspace and computer operations under the configured native authority. For every concrete mathematical proof, derivation, proof repair, or rigorous verification task, start with rethlas_start and continue with rethlas_step until the run reaches done, unless the user explicitly requests a direct informal answer. Use rethlas_inspect for status/private logical reads, rethlas_retrieve for external mathematical retrieval, rethlas_control for steering/cancellation, and rethlas_artifact for artifact reads or explicit exports. Do not replace a required Rethlas branch, join, LaTeX, verifier, repair, or finalization stage with an unverified answer in chat. When rethlas_step reports done, report the workspace_export_path where proof_verified.tex was automatically written. The rethlas_* workflow is a separate capability-gated authority; native dangerous mode never grants workflow authority."
+pub fn server_instructions() -> String {
+    format!(
+        "Use MTM native tools for ordinary workspace operations under configured Native authority. Prefer literal argv for a single program and set workdir explicitly. search_text accepts files and directories. Only the tools returned by tools/list are supported; removed legacy aliases have no authority. For every concrete mathematical proof, derivation, repair or rigorous verification, start with rethlas_start and follow rethlas_step task contracts to done unless the user requests an informal answer. Do not bypass branch, join, verifier, LaTeX or finalizer gates. Report workspace_export_path only after mechanical completion. {}",
+        crate::catalog::CAPABILITY_LIFECYCLE
+    )
 }
 
 pub fn validate_rpc_envelope(request: &Map<String, Value>) -> Result<(), JSONRPCError> {

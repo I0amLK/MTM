@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-016",
+  "delivery": "F3",
+  "kind": "post_commit_qualification_runner_cache_miss",
+  "implementation_commit": "cc17b1688a2deda7db3dde4b2dbf63199bf48b13",
+  "candidate_sha256": "589db2a1e639a3a5ba7c10e39a04c0a6a68440b2e2319bc05d5e45f59aa3b2a8",
+  "profile": "protocol",
+  "passed": false,
+  "failed_stage": "summary_validation",
+  "runner_exit_code": 101,
+  "runner_stdout_bytes": 0,
+  "runner_stderr_bytes": 788,
+  "test_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "test_stderr_sha256": "34d286c58374f92e30fff629403b83c72b0d5efd826b8e5b626d8f7a14da3508",
+  "candidate_launched": null,
+  "interpretation": "The exact-artifact qualifier invokes its Rust test runner with Cargo offline. This fresh command sandbox did not yet contain the locked crate cache, so the runner exited before emitting a qualification summary. The observation contains no candidate verdict. A later command first populated the locked cache and reran the same exact candidate successfully; this record is not overwritten by that success.",
+  "production_state_modified": false,
+  "production_selectors_changed": false,
+  "release_qualified": false
+}

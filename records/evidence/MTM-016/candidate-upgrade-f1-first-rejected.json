@@ -1,0 +1,49 @@
+{
+  "baseline_launched": null,
+  "baseline_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+  "candidate_launched": null,
+  "candidate_sha256": "955b097c8fdbb781a5ae5d7da9797c1b57d5a84bf755502c25a856016439025f",
+  "delivery": "F1",
+  "failed_stage": "summary_validation",
+  "failure": "Required candidate identity, runner or profile evidence did not pass; raw diagnostics withheld",
+  "harness_source_identity": {
+    "after_sha256": "3a540f803024edd801fa2d4d4a67c4806a36803ec67d8dcb570e38a14b787c86",
+    "before_sha256": "3a540f803024edd801fa2d4d4a67c4806a36803ec67d8dcb570e38a14b787c86",
+    "commit": "188da23fbb33e47d0d329d8845b9eb26d1706aa3",
+    "unchanged": true
+  },
+  "milestone": "MTM-016",
+  "passed": false,
+  "pending": [
+    "real Native and compiled LaTeX",
+    "resources and permission-grant soak",
+    "browser and human consent",
+    "operator-authorized production-state copy",
+    "abrupt installation interruption",
+    "Python retirement and full release gate"
+  ],
+  "production_selectors_changed": false,
+  "production_state_modified": false,
+  "profile": "upgrade",
+  "python_invoked": false,
+  "raw_test_output_recorded": false,
+  "recorded_unix_seconds": 1788945840,
+  "release_qualified": false,
+  "runner": {
+    "child_reaped": true,
+    "elapsed_ms": 4984,
+    "exit_code": 101,
+    "output_limit_exceeded": false,
+    "pipes_closed": true,
+    "raw_output_recorded": false,
+    "signal": null,
+    "stderr_bytes_retained": 299,
+    "stdout_bytes_retained": 301,
+    "timed_out": false
+  },
+  "schema_version": "1.0.0",
+  "scope": "exact_candidate_installed_upgrade_fixture_not_release",
+  "selector_changed": null,
+  "test_stderr_sha256": "1b9833be20ace8da632732fa71599c04ab3fe8c7405dc42a0978d2533c63ecbb",
+  "test_stdout_sha256": "c8569de084987e9f06b5e753499ff18ca682742a7165b6b070a390961168683e"
+}

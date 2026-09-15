@@ -1,0 +1,59 @@
+{
+  "schema": "mtm-resource-contract-diagnostic-v1",
+  "milestone": "MTM-016",
+  "scope": "public_schema_compatibility_on_disposable_native_disabled_endpoints",
+  "base_commit": "af2b4e2041e303e622b22719834495e4f1ef62a7",
+  "baseline_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+  "candidate_sha256": "46c1441b824d6cc311a276ff34fda888c36223ebf5c98f8ca65ce26570df9724",
+  "archived_host_failure": {
+    "path": "records/evidence/MTM-016/candidate-resource-f6-af2b4e2-failed.json",
+    "sha256": "cca505d40d148509646896dda0c6a875389aa2793e10c9c452751036d0605f1f",
+    "passed": false,
+    "runner_exit_code": 101,
+    "runner_elapsed_ms": 2561,
+    "native_preflight_passed": true
+  },
+  "operator_focused_rerun": {
+    "error": "MCP protocol failure",
+    "passed": 0,
+    "failed": 1,
+    "elapsed_seconds": 2.48
+  },
+  "old_request_reproduction": {
+    "request_form": "argv_only",
+    "baseline_rpc_code": -32602,
+    "baseline_reason": "invalid_arguments",
+    "regression_tests_failed": 2,
+    "test_exit_code": 101
+  },
+  "shared_request": {"cmd":"/usr/bin/printf resource-ok","yield_time_ms":30000},
+  "public_catalog_observations": {
+    "baseline": {"requires_cmd":true,"advertises_argv":false},
+    "candidate": {"requires_cmd":false,"advertises_argv":true}
+  },
+  "corrected_request_observations": {
+    "baseline_public_schema_accepted": true,
+    "candidate_public_schema_accepted": true,
+    "both_returned_exact_native_denial": "NATIVE_ISOLATION_REQUIRED",
+    "same_request_on_both_artifacts": true,
+    "negative_schema_rejections_per_artifact": 4,
+    "negative_cases": ["missing_command","empty_command","conflicting_forms","unknown_property"],
+    "regression_tests_passed": 2,
+    "regression_tests_failed": 0,
+    "test_elapsed_seconds": 4.84
+  },
+  "regression_fixture_correction": "An intermediate regression assertion expected the unused test-only NATIVE_EXEC_DISABLED guard. Source review identified the production prepare_authority_exec guard as NATIVE_ISOLATION_REQUIRED; the final assertion requires that exact production denial.",
+  "resource_thresholds_changed": false,
+  "resource_samples_recorded": false,
+  "native_commands_executed_in_this_diagnostic": false,
+  "raw_protocol_or_credentials_recorded": false,
+  "candidate_or_baseline_replaced": false,
+  "production_changed": false,
+  "performance_claim": false,
+  "release_qualified": false,
+  "limitations": [
+    "Disabled Native endpoints prove public request compatibility, not successful Bubblewrap execution or resource acceptance.",
+    "The complete source gate needs a new committed capable-host run because test-source bytes changed.",
+    "The resource profile must be rerun on the capable host with both exact artifacts; the original failed receipt remains failed."
+  ]
+}

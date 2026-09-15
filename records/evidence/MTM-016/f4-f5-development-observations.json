@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-016",
+  "scope": "development_diagnostics_not_candidate_acceptance",
+  "starting_commit": "3a13720b0576b21f428280f9a64e3caf2c16af8d",
+  "observations": [
+    {"kind":"command_resolution","outcome":"first compound inspection was rejected with NATIVE_EXECUTABLE_UNRESOLVED; explicit ordinary executable paths succeeded without changing policy"},
+    {"kind":"build_failure","outcome":"initial maintenance build rejected private qualify::digest visibility; corrected the maintenance-only visibility"},
+    {"kind":"build_failure","outcome":"initial corpus compile referenced serde absent from mtm-cli direct dependencies; replaced that test-only decode with checked serde_json-to-named-type conversion, adding no package or manifest dependency"},
+    {"kind":"native_preflight","outcome":"fresh preflight returned ENOSPC / namespace_limit_or_depth before any candidate launch; host settings and isolation were not changed"}
+  ],
+  "production_changed": false,
+  "release_qualified": false
+}

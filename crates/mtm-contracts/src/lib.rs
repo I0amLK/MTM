@@ -20,8 +20,8 @@ pub const RETHLAS_TOOL_COUNT: u16 = 6;
 /// Number of hidden compatibility aliases in the source contract.
 pub const HIDDEN_ALIAS_COUNT: u16 = 11;
 
-/// Current persistent-state schema supported by the source baseline.
-pub const STATE_SCHEMA_VERSION: u16 = 2;
+/// Current MTM persistent-state schema, including durable step receipts.
+pub const STATE_SCHEMA_VERSION: u16 = 7;
 
 /// Historical workflow protocol captured by the immutable source baseline.
 pub const WORKFLOW_PROTOCOL_VERSION: u16 = 2;
@@ -80,6 +80,19 @@ pub struct ContractSnapshot {
 }
 
 impl ContractSnapshot {
+    /// MTM's current public contract, independent of historical migration inputs.
+    #[must_use]
+    pub const fn current() -> Self {
+        Self {
+            native_tools: NATIVE_TOOL_COUNT,
+            rethlas_tools: RETHLAS_TOOL_COUNT,
+            hidden_aliases: 0,
+            state_schema: STATE_SCHEMA_VERSION,
+            workflow_protocol: PRODUCTION_WORKFLOW_PROTOCOL_VERSION,
+            authority: RuntimeAuthority::Rust,
+        }
+    }
+
     /// Return the immutable bootstrap source contract.
     #[must_use]
     pub const fn source_baseline() -> Self {
@@ -87,7 +100,7 @@ impl ContractSnapshot {
             native_tools: NATIVE_TOOL_COUNT,
             rethlas_tools: RETHLAS_TOOL_COUNT,
             hidden_aliases: HIDDEN_ALIAS_COUNT,
-            state_schema: STATE_SCHEMA_VERSION,
+            state_schema: 2,
             workflow_protocol: WORKFLOW_PROTOCOL_VERSION,
             authority: RuntimeAuthority::Python,
         }

@@ -7,8 +7,8 @@ pub mod oauth;
 pub mod runtime;
 
 pub use catalog::{
-    ALL_TOOL_DEFINITIONS_SHA256, HIDDEN_TOOL_NAMES, PUBLIC_CATALOG_SHA256, PUBLIC_TOOL_NAMES,
-    ToolCatalog,
+    CAPABILITY_LIFECYCLE, NATIVE_TOOL_COUNT, PUBLIC_TOOL_NAMES, TOOL_CONTRACT_VERSION, ToolCatalog,
+    ToolId,
 };
 pub use http::{GatewayHttpConfig, GatewayState, build_router, serve};
 pub use mcp::{

@@ -123,6 +123,85 @@ fn start_compact_with_protocol(
         })
 }
 
+fn advance_compact_to_finalize(engine: &WorkflowEngine) -> Result<(String, String), ReCtmError> {
+    let run_id = start_compact(engine)?;
+    let assess = engine.next_task("owner", &run_id, None)?;
+    engine.write(
+        "owner",
+        capability(&assess)?,
+        "memory:generation:immediate_conclusions",
+        &serde_json::json!({"summary":"Reflexivity."}),
+        None,
+    )?;
+    engine.commit(
+        "owner",
+        capability(&assess)?,
+        "assessment_complete",
+        &serde_json::json!({"route":"compact","requires_external_retrieval":false,"requires_multiple_plans":false}),
+        None,
+    )?;
+    let assembler = engine.next_task("owner", &run_id, None)?;
+    let proof = "\\begin{proof}Reflexivity gives $1=1$.\\end{proof}".to_owned();
+    engine.write(
+        "owner",
+        capability(&assembler)?,
+        "proof",
+        &Value::String(proof.clone()),
+        None,
+    )?;
+    engine.write(
+        "owner",
+        capability(&assembler)?,
+        "proof_manifest",
+        &serde_json::json!({
+            "target_statement_tex":"Prove $1=1$.","dependency_revision_ids":[],
+            "reference_ids":[],"conditional_hypotheses":[],"computational_evidence":[]
+        }),
+        None,
+    )?;
+    engine.commit(
+        "owner",
+        capability(&assembler)?,
+        "proof_submitted",
+        &serde_json::json!({"outcome":"proof"}),
+        None,
+    )?;
+    let verifier = engine.next_task("owner", &run_id, None)?;
+    engine.write(
+        "owner",
+        capability(&verifier)?,
+        "memory:verifier:statement_checks",
+        &serde_json::json!({"location":"proof","status":"checked"}),
+        None,
+    )?;
+    engine.write(
+        "owner",
+        capability(&verifier)?,
+        "memory:verifier:events",
+        &serde_json::json!({"event_type":"verification_audit_complete"}),
+        None,
+    )?;
+    engine.write(
+        "owner",
+        capability(&verifier)?,
+        "verification_report",
+        &serde_json::json!({
+            "verification_report":{"summary":"Valid.","critical_errors":[],"gaps":[]},
+            "verdict":"correct","repair_hints":""
+        }),
+        None,
+    )?;
+    let finalized = engine.commit(
+        "owner",
+        capability(&verifier)?,
+        "verification_submitted",
+        &serde_json::json!({}),
+        None,
+    )?;
+    assert_eq!(finalized["state"], "finalize");
+    Ok((run_id, proof))
+}
+
 fn capability(task: &Value) -> Result<&str, ReCtmError> {
     task.get("capability")
         .and_then(Value::as_str)
@@ -175,6 +254,23 @@ fn tree_digest(root: &Path) -> Result<String, ReCtmError> {
         digest.update([0xff]);
     }
     Ok(format!("{:x}", digest.finalize()))
+}
+
+#[test]
+fn tree_digest_still_detects_database_and_file_writes_after_read_setup() -> Result<(), ReCtmError> {
+    let temp = tempfile::tempdir().map_err(|e| ReCtmError::new("TEST_IO", e.to_string()))?;
+    let store = StateStore::open(temp.path().join("state.sqlite3"))?;
+    store.create_run("run", "p", "owner", "assess", &serde_json::json!({}))?;
+    store.get_run("run")?;
+    let before = tree_digest(temp.path())?;
+    let updates = serde_json::Map::from_iter([("changed".into(), Value::Bool(true))]);
+    store.update_run_metadata("run", &updates)?;
+    let after_database = tree_digest(temp.path())?;
+    assert_ne!(before, after_database);
+    fs::write(temp.path().join("fixture.txt"), "changed bytes")
+        .map_err(|e| ReCtmError::new("TEST_IO", e.to_string()))?;
+    assert_ne!(after_database, tree_digest(temp.path())?);
+    Ok(())
 }
 
 #[test]
@@ -276,6 +372,45 @@ fn compact_correct_flow_reaches_mechanical_finalization() -> Result<(), ReCtmErr
     assert_eq!(done["terminal"], true);
     let artifact = engine.get_artifact("owner", &run_id, "final_tex")?;
     assert_eq!(artifact["content"], proof);
+    Ok(())
+}
+
+#[test]
+fn done_reconnect_repairs_only_the_missing_manual_manifest_without_republishing_proof()
+-> Result<(), ReCtmError> {
+    let temp = tempfile::tempdir().map_err(|error| {
+        ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+    })?;
+    let engine = engine(temp.path(), Arc::new(PassingLatex))?;
+    let (run_id, proof) = advance_compact_to_finalize(&engine)?;
+    let run_root = temp.path().join("private/runs").join(&run_id);
+    let manual = run_root.join("debug/manual-validation-manifest.json");
+    fs::create_dir(&manual).map_err(|error| {
+        ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+    })?;
+    assert!(
+        engine
+            .next_task("owner", &run_id, Some("finalize-post-transition-fault"))
+            .is_err()
+    );
+    assert_eq!(engine.status("owner", &run_id)?["state"], "done");
+    let final_path = run_root.join("final/proof_verified.tex");
+    let final_bytes = fs::read(&final_path).map_err(|error| {
+        ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+    })?;
+    assert_eq!(String::from_utf8_lossy(&final_bytes), proof);
+    fs::remove_dir(&manual).map_err(|error| {
+        ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+    })?;
+    let done = engine.next_task("owner", &run_id, Some("done-reconnect"))?;
+    assert_eq!(done["state"], "done");
+    assert!(manual.is_file());
+    assert_eq!(
+        fs::read(&final_path).map_err(|error| {
+            ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+        })?,
+        final_bytes
+    );
     Ok(())
 }
 
@@ -389,6 +524,164 @@ fn protocol_three_branch_context_does_not_receive_global_research_view() -> Resu
             .get("mathematical_research_state")
             .is_none()
     );
+    Ok(())
+}
+
+#[test]
+fn interrupted_branch_preparation_leaves_no_partial_database_rows_and_reuses_one_plan()
+-> Result<(), ReCtmError> {
+    let temp = tempfile::tempdir().map_err(|error| {
+        ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+    })?;
+    let engine = engine(temp.path(), Arc::new(PassingLatex))?;
+    let started = engine.start(StartRequest {
+        owner_id: "owner",
+        problem_tex: "Prove a two-route branch preparation recovery statement.",
+        problem_id: Some("branch-prepare-recovery"),
+        references: &[],
+        native_mode: "dangerous",
+        workspace_export_path: None,
+        project_id: None,
+        target_claim_id: None,
+        workflow_mode: "full",
+        register_result: true,
+        workflow_protocol_version: 3,
+        trace_id: None,
+    })?;
+    let run_id = started["run_id"].as_str().unwrap_or_default().to_owned();
+    let assess = engine.next_task("owner", &run_id, None)?;
+    engine.write(
+        "owner",
+        capability(&assess)?,
+        "memory:generation:immediate_conclusions",
+        &serde_json::json!({"summary":"two routes"}),
+        None,
+    )?;
+    engine.commit(
+        "owner",
+        capability(&assess)?,
+        "assessment_complete",
+        &serde_json::json!({"route":"full","requires_multiple_plans":true}),
+        None,
+    )?;
+    let explore = engine.next_task("owner", &run_id, None)?;
+    engine.write(
+        "owner",
+        capability(&explore)?,
+        "memory:generation:events",
+        &serde_json::json!({
+            "event_type":"notation_resolution","symbol":"x","resolution":"fixed",
+            "summary":"notation fixed","evidence_ids":[]
+        }),
+        None,
+    )?;
+    engine.commit(
+        "owner",
+        capability(&explore)?,
+        "exploration_complete",
+        &serde_json::json!({}),
+        None,
+    )?;
+    let planning = engine.next_task("owner", &run_id, None)?;
+    engine.commit(
+        "owner",
+        capability(&planning)?,
+        "plans_proposed",
+        &serde_json::json!({
+            "plans":[
+                {"summary":"Route A","subgoals":[{"key":"a","statement":"Prove A","depends_on":[],"critical":true}],"motivation":[],"dependencies":[],"risks":[]},
+                {"summary":"Route B","subgoals":[{"key":"b","statement":"Prove B","depends_on":[],"critical":true}],"motivation":[],"dependencies":[],"risks":[]}
+            ]
+        }),
+        None,
+    )?;
+    let direct = engine.next_task("owner", &run_id, None)?;
+    let plans = direct["context"]["active_plans"]
+        .as_array()
+        .ok_or_else(|| {
+            ReCtmError::new("TEST_FAILURE", "active plans missing")
+                .with_category(ErrorCategory::Internal)
+        })?;
+    let mut screening = serde_json::Map::new();
+    for plan in plans {
+        let plan_id = plan["plan_id"].as_str().unwrap_or_default().to_owned();
+        let subgoal_id = plan["subgoals"][0]["subgoal_id"]
+            .as_str()
+            .unwrap_or_default()
+            .to_owned();
+        screening.insert(
+            plan_id,
+            serde_json::json!({subgoal_id:{
+                "status":"stuck","summary":"branch needed","method":"direct",
+                "obstruction":"no_progress","evidence_ids":[]
+            }}),
+        );
+    }
+    engine.write(
+        "owner",
+        capability(&direct)?,
+        "memory:generation:proof_steps",
+        &serde_json::json!({"summary":"branch both plans"}),
+        None,
+    )?;
+    let prepared = engine.commit(
+        "owner",
+        capability(&direct)?,
+        "direct_proving_complete",
+        &serde_json::json!({"screening":Value::Object(screening)}),
+        None,
+    )?;
+    assert_eq!(prepared["state"], "branch_prepare");
+
+    let branches_root = temp
+        .path()
+        .join("private/runs")
+        .join(&run_id)
+        .join("branches");
+    fs::remove_dir(&branches_root).map_err(|error| {
+        ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+    })?;
+    fs::write(&branches_root, b"fault fixture").map_err(|error| {
+        ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+    })?;
+    assert!(
+        engine
+            .next_task("owner", &run_id, Some("branch-prepare-fault"))
+            .is_err()
+    );
+    let independent = StateStore::open(temp.path().join("state.sqlite3"))?;
+    assert!(independent.list_branches(&run_id)?.is_empty());
+    assert!(
+        independent
+            .list_domains(&run_id, Some("branch"), None)?
+            .is_empty()
+    );
+
+    fs::remove_file(&branches_root).map_err(|error| {
+        ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+    })?;
+    fs::create_dir(&branches_root).map_err(|error| {
+        ReCtmError::new("TEST_IO", error.to_string()).with_category(ErrorCategory::Runtime)
+    })?;
+    let branch = engine.next_task("owner", &run_id, Some("branch-prepare-retry"))?;
+    assert_eq!(branch["state"], "branch_run");
+    assert_eq!(independent.list_branches(&run_id)?.len(), 2);
+    assert_eq!(
+        independent
+            .list_domains(&run_id, Some("branch"), None)?
+            .len(),
+        2
+    );
+    let snapshots = fs::read_dir(
+        temp.path()
+            .join("private/runs")
+            .join(&run_id)
+            .join("snapshots"),
+    )
+    .map_err(|error| ReCtmError::new("TEST_IO", error.to_string()))?
+    .collect::<Result<Vec<_>, _>>()
+    .map_err(|error| ReCtmError::new("TEST_IO", error.to_string()))?;
+    assert_eq!(snapshots.len(), 1);
     Ok(())
 }
 
@@ -672,13 +965,6 @@ fn protocol_three_structured_research_contract_reaches_same_tex_finalizer() -> R
         first_subgoals[1]["depends_on"],
         Value::Array(vec![Value::String(base_node_id)])
     );
-    engine.write(
-        "owner",
-        capability(&direct)?,
-        "memory:generation:proof_steps",
-        &serde_json::json!({"summary":"Screened both structured routes."}),
-        Some("trace-p3-direct-write"),
-    )?;
     let mut first_results = serde_json::Map::new();
     first_results.insert(
         base_id,
@@ -712,6 +998,17 @@ fn protocol_three_structured_research_contract_reaches_same_tex_finalizer() -> R
     assert!(shadow["research_state"]["plan_routes"].is_object());
 
     let assembler = engine.next_task("owner", &run_id, Some("trace-p3-assemble"))?;
+    let proof_steps = engine.read(
+        "owner",
+        capability(&assembler)?,
+        "memory:generation:proof_steps",
+        None,
+    )?;
+    assert_eq!(
+        proof_steps["content"].as_array().map(Vec::len),
+        Some(1),
+        "protocol-3 direct screening must persist its canonical proof_steps record"
+    );
     let proof = r"\begin{proof}By reflexivity, $1=1$.\end{proof}";
     engine.write(
         "owner",
@@ -1083,6 +1380,11 @@ fn research_state_shadow_is_deterministic_owner_scoped_and_side_effect_free()
     )?;
     assert_eq!(branched["state"], "branch_prepare");
 
+    // The transition returns its row inside the write transaction. Establish the
+    // post-commit read view before freezing bytes: the first SELECT can update
+    // SQLite's transient WAL-index read mark. Do not exclude SHM, WAL, database
+    // or private files from the unchanged-byte assertions below.
+    assert_eq!(engine.status("owner", &run_id)?["state"], "branch_prepare");
     let before = tree_digest(temp.path())?;
     let first = engine.research_state_shadow("owner", &run_id)?;
     let second = engine.research_state_shadow("owner", &run_id)?;

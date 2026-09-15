@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 use std::fs::{self, OpenOptions};
 use std::io::{Read, Write};
-use std::os::unix::fs::MetadataExt;
+use std::os::unix::fs::{MetadataExt, OpenOptionsExt, PermissionsExt};
 use std::path::{Component, Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::time::UNIX_EPOCH;
@@ -34,6 +34,12 @@ const DEFAULT_EXCLUDED: [&str; 11] = [
 const PATCH_REVALIDATION_ATTEMPTS: usize = 3;
 const PATCH_TEMP_NAME_ATTEMPTS: usize = 8;
 const MAX_GIT_METADATA_BYTES: u64 = 64 * 1024 * 1024;
+
+#[path = "workspace_read.rs"]
+mod text_read;
+
+#[path = "workspace_git.rs"]
+mod git_scope;
 
 #[derive(Clone, Debug)]
 pub struct ResolvedPath {
@@ -70,6 +76,8 @@ struct PreparedPathChange {
     resolved: ResolvedPath,
     baseline: PatchBaseline,
     final_content: Option<Vec<u8>>,
+    // Preserve ordinary source permissions on update/move, never setuid/setgid.
+    final_mode: Option<u32>,
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
@@ -329,71 +337,7 @@ impl NativeWorkspace {
     }
 
     pub fn read_file(&self, arguments: &Map<String, Value>) -> Result<Value, ReCtmError> {
-        let encoding = optional_text(arguments, "encoding").unwrap_or("utf-8");
-        if encoding != "utf-8" {
-            return Err(validation_code(
-                "UNSUPPORTED_ENCODING",
-                "Only utf-8 is supported.",
-            ));
-        }
-        let start_line = integer_or(arguments, "start_line", 1)?;
-        if start_line < 1 {
-            return Err(validation("start_line must be >= 1"));
-        }
-        let end_line = optional_integer(arguments, "end_line")?;
-        let max_lines_arg = optional_integer(arguments, "max_lines")?;
-        if let (Some(end), Some(max_lines)) = (end_line, max_lines_arg)
-            && end != start_line + max_lines - 1
-        {
-            return Err(validation("end_line and max_lines select different ranges"));
-        }
-        let max_lines = if let Some(end) = end_line {
-            (end - start_line + 1).max(1)
-        } else {
-            max_lines_arg.unwrap_or(500)
-        };
-        let max_bytes = usize_from(arguments, "max_bytes", 131_072)?;
-        let resolved = self.resolve_existing(text_or(arguments, "path", ""))?;
-        if resolved.path.is_dir() {
-            return Err(validation_code("IS_DIRECTORY", "Path is a directory."));
-        }
-        let data = fs::read(&resolved.path).map_err(io_error)?;
-        let text = String::from_utf8(data.clone()).map_err(|_| {
-            validation_code("BINARY_FILE", "Native read_file supports UTF-8 text only.")
-        })?;
-        let lines = split_lines_keep_ends(&text);
-        let mut selected = String::new();
-        let mut bytes_used = 0_usize;
-        let mut index = usize::try_from(start_line - 1).unwrap_or(usize::MAX);
-        let max_lines = usize::try_from(max_lines).unwrap_or(usize::MAX);
-        let mut selected_count = 0_usize;
-        while index < lines.len() && selected_count < max_lines {
-            let encoded = lines[index].as_bytes();
-            if selected_count > 0 && bytes_used.saturating_add(encoded.len()) > max_bytes {
-                break;
-            }
-            if selected_count == 0 && encoded.len() > max_bytes {
-                let clipped = &encoded[..max_bytes.min(encoded.len())];
-                selected.push_str(&String::from_utf8_lossy(clipped));
-                index += 1;
-                selected_count += 1;
-                break;
-            }
-            selected.push_str(lines[index]);
-            bytes_used = bytes_used.saturating_add(encoded.len());
-            index += 1;
-            selected_count += 1;
-        }
-        let end = if selected_count == 0 {
-            start_line
-        } else {
-            start_line + i64::try_from(selected_count).unwrap_or(i64::MAX) - 1
-        };
-        Ok(serde_json::json!({
-            "path":resolved.display,"content":selected,"start_line":start_line,"end_line":end,
-            "total_lines":lines.len(),"total_bytes":data.len(),"truncated":index < lines.len(),
-            "next_start_line":if index < lines.len(){Some(index+1)}else{None}
-        }))
+        text_read::read(self, arguments)
     }
 
     pub fn list_dir(&self, arguments: &Map<String, Value>) -> Result<Value, ReCtmError> {
@@ -619,6 +563,19 @@ impl NativeWorkspace {
         let context_lines = usize_from(arguments, "context_lines", 0)?;
         let max_results = usize_from(arguments, "max_results", 1000)?;
         let max_preview = usize_from(arguments, "max_preview_bytes", 512)?;
+        if context_lines > 5
+            || !(1..=10_000).contains(&max_results)
+            || !(80..=4096).contains(&max_preview)
+        {
+            return Err(invalid_details(
+                "Search limits are outside the tool contract.",
+                serde_json::json!({
+                    "context_lines": {"minimum":0,"maximum":5},
+                    "max_results": {"minimum":1,"maximum":10000},
+                    "max_preview_bytes": {"minimum":80,"maximum":4096}
+                }),
+            ));
+        }
         let mut include = string_array(arguments.get("include_globs")).unwrap_or_default();
         if let Some(glob) = optional_text(arguments, "glob")
             && !glob.is_empty()
@@ -626,22 +583,49 @@ impl NativeWorkspace {
             include.push(glob.to_owned());
         }
         let exclude = string_array(arguments.get("exclude_globs")).unwrap_or_default();
-        let listed = self.list_files(&Map::from_iter([
-            (
-                "path".to_owned(),
-                Value::String(text_or(arguments, "path", ".").to_owned()),
-            ),
-            (
-                "patterns".to_owned(),
-                serde_json::json!(if include.is_empty() {
-                    vec!["**/*".to_owned()]
-                } else {
-                    include
-                }),
-            ),
-            ("exclude_patterns".to_owned(), serde_json::json!(exclude)),
-            ("max_results".to_owned(), Value::from(50_000)),
-        ]))?;
+        let target = self.resolve_existing(text_or(arguments, "path", "."))?;
+        let listed = if target.path.is_file() {
+            // An explicit file target must never widen to its parent directory.
+            // Both basename and workspace-relative globs are useful for a single file.
+            let basename = target
+                .path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or("");
+            let matches_glob = |pattern: &String| {
+                glob_match(basename, pattern) || glob_match(&target.display, pattern)
+            };
+            let selected = (include.is_empty() || include.iter().any(matches_glob))
+                && !exclude.iter().any(matches_glob);
+            let files = if selected {
+                vec![serde_json::json!({"path":target.display})]
+            } else {
+                Vec::new()
+            };
+            serde_json::json!({"files":files,"truncated":false})
+        } else if target.path.is_dir() {
+            self.list_files(&Map::from_iter([
+                (
+                    "path".to_owned(),
+                    Value::String(text_or(arguments, "path", ".").to_owned()),
+                ),
+                (
+                    "patterns".to_owned(),
+                    serde_json::json!(if include.is_empty() {
+                        vec!["**/*".to_owned()]
+                    } else {
+                        include
+                    }),
+                ),
+                ("exclude_patterns".to_owned(), serde_json::json!(exclude)),
+                ("max_results".to_owned(), Value::from(50_000)),
+            ]))?
+        } else {
+            return Err(validation_code(
+                "NOT_A_FILE_OR_DIRECTORY",
+                "Search requires a regular file or directory.",
+            ));
+        };
         let escaped_query = regex::escape(query);
         let pattern_text = if regex_mode { query } else { &escaped_query };
         let pattern = RegexBuilder::new(pattern_text)
@@ -758,6 +742,7 @@ impl NativeWorkspace {
                             resolved: target,
                             baseline: PatchBaseline::Missing,
                             final_content: Some(content.into_bytes()),
+                            final_mode: None,
                         },
                     )?;
                 }
@@ -780,12 +765,19 @@ impl NativeWorkspace {
                             resolved: source,
                             baseline,
                             final_content: None,
+                            final_mode: None,
                         },
                     )?;
                 }
                 "update" => {
                     let (source, baseline, old) =
                         self.capture_existing_patch_file(&operation.path, semantics)?;
+                    let final_mode = match &baseline {
+                        PatchBaseline::File { fingerprint } => {
+                            Some(fingerprint.identity.mode & 0o777)
+                        }
+                        PatchBaseline::Missing => None,
+                    };
                     let updated = apply_update_hunks(&old, &operation.hunks, &operation.path)?;
                     additions += updated.lines().count().saturating_sub(old.lines().count());
                     removals += old.lines().count().saturating_sub(updated.lines().count());
@@ -808,6 +800,7 @@ impl NativeWorkspace {
                                 resolved: target,
                                 baseline: target_baseline,
                                 final_content: Some(updated.into_bytes()),
+                                final_mode,
                             },
                         )?;
                         remove_prepared_virtual_path(
@@ -823,6 +816,7 @@ impl NativeWorkspace {
                                 resolved: source,
                                 baseline,
                                 final_content: None,
+                                final_mode: None,
                             },
                         )?;
                     } else {
@@ -840,6 +834,7 @@ impl NativeWorkspace {
                                 resolved: source,
                                 baseline,
                                 final_content: Some(updated.into_bytes()),
+                                final_mode,
                             },
                         )?;
                     }
@@ -1489,77 +1484,75 @@ impl NativeWorkspace {
     }
 
     pub fn git_status(&self, arguments: &Map<String, Value>) -> Result<Value, ReCtmError> {
-        let resolved = self.resolve_existing(text_or(arguments, "path", "."))?;
-        if !is_git_repo(&resolved.path) {
+        let Some(repo) = git_scope::select(self, arguments, text_or(arguments, "path", "."))?
+        else {
             return Ok(
                 serde_json::json!({"is_repo":false,"clean":true,"entries":[],"truncated":false,"warnings":[]}),
             );
-        }
+        };
         let max_entries = usize_from(arguments, "max_entries", 1000)?;
-        let mut argv = vec![
-            "git".to_owned(),
-            "-C".to_owned(),
-            resolved.path.display().to_string(),
-            "status".to_owned(),
-            "--porcelain=v1".to_owned(),
-            "-b".to_owned(),
-        ];
+        if !(1..=10_000).contains(&max_entries) {
+            return Err(validation("max_entries must be 1..10000"));
+        }
+        let mut argv = repo.command("status");
+        argv.extend(["--porcelain=v1".into(), "-b".into(), "-z".into()]);
         if !bool_or(arguments, "include_untracked", true) {
             argv.push("--untracked-files=no".to_owned());
         }
         let output = self.run_sync(argv, 15_000, 2_000_000)?;
         ensure_exit_ok(&output, "git status failed")?;
+        git_scope::complete_output(&output)?;
         let stdout = output["stdout"].as_str().unwrap_or_default();
         let mut branch = String::new();
         let mut upstream = String::new();
         let mut ahead = 0_i64;
         let mut behind = 0_i64;
         let mut entries = Vec::new();
-        for line in stdout.lines() {
+        let mut records = stdout.split('\0').filter(|s| !s.is_empty());
+        while let Some(line) = records.next() {
             if let Some(header) = line.strip_prefix("## ") {
                 (branch, upstream, ahead, behind) = parse_branch(header);
                 continue;
             }
-            if line.len() < 3 {
-                continue;
+            if line.len() < 3 || !line.as_bytes()[..2].is_ascii() || line.as_bytes()[2] != b' ' {
+                return Err(internal("Malformed Git status record"));
             }
-            let mut path_text = line[3..].to_owned();
+            let path_text = line[3..].to_owned();
             let mut original = Value::Null;
-            if let Some((before, after)) = path_text.split_once(" -> ") {
-                original = Value::String(before.to_owned());
-                path_text = after.to_owned();
+            if line[..2].contains(['R', 'C']) {
+                original = Value::String(
+                    records
+                        .next()
+                        .ok_or_else(|| internal("Missing Git rename source"))?
+                        .to_owned(),
+                );
             }
             entries.push(serde_json::json!({"path":path_text,"original_path":original,"index_status":&line[0..1],"worktree_status":&line[1..2]}));
-            if entries.len() >= max_entries {
+            if entries.len() > max_entries {
                 break;
             }
         }
-        let head = self.run_sync(
-            vec![
-                "git".into(),
-                "-C".into(),
-                resolved.path.display().to_string(),
-                "rev-parse".into(),
-                "HEAD".into(),
-            ],
-            5000,
-            4096,
-        )?;
+        let truncated = entries.len() > max_entries;
+        entries.truncate(max_entries);
+        let mut head_command = repo.command("rev-parse");
+        head_command.extend(["--verify".into(), "HEAD".into()]);
+        let head = self.run_sync(head_command, 5000, 4096)?;
         Ok(
-            serde_json::json!({"is_repo":true,"branch":branch,"head":head["stdout"].as_str().unwrap_or_default().trim(),"upstream":upstream,"ahead":ahead,"behind":behind,"clean":entries.is_empty(),"truncated":entries.len()>=max_entries,"entries":entries}),
+            serde_json::json!({"is_repo":true,"repo_path":repo.display,"branch":branch,"head":if head["exit_code"]==0{head["stdout"].as_str().unwrap_or_default().trim()}else{""},"upstream":upstream,"ahead":ahead,"behind":behind,"clean":entries.is_empty(),"truncated":truncated,"entries":entries}),
         )
     }
 
     pub fn git_diff(&self, arguments: &Map<String, Value>) -> Result<Value, ReCtmError> {
-        if !is_git_repo(&self.root) {
+        let Some(repo) = git_scope::select(self, arguments, ".")? else {
             return Ok(
                 serde_json::json!({"diff":"","files":[],"truncated":false,"warnings":["not a git repository"]}),
             );
-        }
+        };
         let context = integer_or(arguments, "context_lines", 3)?;
         let max_bytes = usize_from(arguments, "max_bytes", 262_144)?;
         let mut chunks = Vec::new();
-        let filters = path_filters(arguments)?;
+        let mut output_truncated = false;
+        let filters = repo.filters(self, arguments)?;
         for staged in [false, true] {
             if staged && !bool_or(arguments, "staged", false) {
                 continue;
@@ -1567,17 +1560,12 @@ impl NativeWorkspace {
             if !staged && !bool_or(arguments, "unstaged", true) {
                 continue;
             }
-            let mut argv = vec![
-                "git".into(),
-                "-C".into(),
-                self.root.display().to_string(),
-                "-c".into(),
-                "diff.external=".into(),
-                "diff".into(),
+            let mut argv = repo.command("diff");
+            argv.extend([
                 "--no-ext-diff".into(),
                 "--no-textconv".into(),
                 format!("--unified={context}"),
-            ];
+            ]);
             if staged {
                 argv.push("--cached".into());
             }
@@ -1586,6 +1574,7 @@ impl NativeWorkspace {
                 argv.extend(filters.clone());
             }
             let output = self.run_sync(argv, 15_000, max_bytes.saturating_mul(2).max(65536))?;
+            output_truncated |= git_scope::output_truncated(&output);
             let code = output["exit_code"].as_i64().unwrap_or(-1);
             if !matches!(code, 0 | 1) {
                 return Err(git_error(&output, "git diff failed"));
@@ -1607,37 +1596,40 @@ impl NativeWorkspace {
             text.push('\n');
         }
         let (text, truncated) = truncate_string_bytes(&text, max_bytes);
+        let truncated = truncated || output_truncated;
         Ok(
-            serde_json::json!({"diff":text,"files":parse_diff_files(&text),"truncated":truncated,"warnings":if truncated{vec!["diff truncated"]}else{Vec::<&str>::new()}}),
+            serde_json::json!({"repo_path":repo.display,"diff":text,"files":parse_diff_files(&text),"truncated":truncated,"warnings":if truncated{vec!["diff truncated"]}else{Vec::<&str>::new()}}),
         )
     }
 
     pub fn git_log(&self, arguments: &Map<String, Value>) -> Result<Value, ReCtmError> {
-        let requested = self.resolve_existing(text_or(arguments, "path", "."))?;
-        if !is_git_repo(&requested.path) {
+        let Some(repo) = git_scope::select(self, arguments, ".")? else {
             return Ok(
                 serde_json::json!({"is_repo":false,"commits":[],"truncated":false,"warnings":[]}),
             );
-        }
+        };
         let reference = validate_git_ref(text_or(arguments, "ref", "HEAD"))?;
         let count = usize_from(arguments, "max_count", 20)?;
         let skip = usize_from(arguments, "skip", 0)?;
-        let mut argv = vec![
-            "git".into(),
-            "-C".into(),
-            self.root.display().to_string(),
-            "log".into(),
+        if !(1..=100).contains(&count) || skip > 10_000 {
+            return Err(validation("Git log bounds exceeded"));
+        }
+        let mut argv = repo.command("log");
+        argv.extend([
             format!("--max-count={}", count + 1),
             format!("--skip={skip}"),
             "--date=iso-strict".into(),
             "--pretty=format:%H%x1f%h%x1f%an%x1f%ae%x1f%ad%x1f%s%x1e".into(),
             reference.clone(),
-        ];
-        if requested.display != "." {
-            argv.extend(["--".into(), requested.display.clone()]);
+        ]);
+        let filters = repo.filters(self, arguments)?;
+        if !filters.is_empty() {
+            argv.push("--".into());
+            argv.extend(filters);
         }
         let output = self.run_sync(argv, 15_000, 2_000_000)?;
         ensure_exit_ok(&output, "git log failed")?;
+        git_scope::complete_output(&output)?;
         let mut commits = Vec::new();
         for record in output["stdout"].as_str().unwrap_or_default().split('\x1e') {
             let fields = record.trim_matches('\n').split('\x1f').collect::<Vec<_>>();
@@ -1648,34 +1640,31 @@ impl NativeWorkspace {
         let truncated = commits.len() > count;
         commits.truncate(count);
         Ok(
-            serde_json::json!({"is_repo":true,"ref":reference,"path":requested.display,"max_count":count,"skip":skip,"commits":commits,"truncated":truncated,"warnings":if truncated{vec!["commit limit reached"]}else{Vec::<&str>::new()}}),
+            serde_json::json!({"is_repo":true,"repo_path":repo.display,"ref":reference,"path":text_or(arguments,"path","."),"max_count":count,"skip":skip,"commits":commits,"truncated":truncated,"warnings":if truncated{vec!["commit limit reached"]}else{Vec::<&str>::new()}}),
         )
     }
 
     pub fn git_show(&self, arguments: &Map<String, Value>) -> Result<Value, ReCtmError> {
-        if !is_git_repo(&self.root) {
+        let Some(repo) = git_scope::select(self, arguments, ".")? else {
             return Ok(
                 serde_json::json!({"is_repo":false,"content":"","files":[],"truncated":false,"warnings":[]}),
             );
-        }
+        };
         let reference = validate_git_ref(text_or(arguments, "rev", "HEAD"))?;
         let context = integer_or(arguments, "context_lines", 3)?;
         let max_bytes = usize_from(arguments, "max_bytes", 262_144)?;
-        let mut argv = vec![
-            "git".into(),
-            "-C".into(),
-            self.root.display().to_string(),
-            "show".into(),
+        let mut argv = repo.command("show");
+        argv.extend([
             "--no-ext-diff".into(),
             "--no-textconv".into(),
             "--format=fuller".into(),
             format!("--unified={context}"),
-        ];
+        ]);
         if !bool_or(arguments, "include_diff", true) {
             argv.push("--no-patch".into());
         }
         argv.push(reference.clone());
-        let filters = path_filters(arguments)?;
+        let filters = repo.filters(self, arguments)?;
         if !filters.is_empty() {
             argv.push("--".into());
             argv.extend(filters);
@@ -1684,53 +1673,103 @@ impl NativeWorkspace {
         ensure_exit_ok(&output, "git show failed")?;
         let (content, truncated) =
             truncate_string_bytes(output["stdout"].as_str().unwrap_or_default(), max_bytes);
+        let truncated = truncated || git_scope::output_truncated(&output);
         Ok(
-            serde_json::json!({"is_repo":true,"rev":reference,"files":parse_diff_files(&content),"content":content,"truncated":truncated,"warnings":if truncated{vec!["output truncated"]}else{Vec::<&str>::new()}}),
+            serde_json::json!({"is_repo":true,"repo_path":repo.display,"rev":reference,"files":parse_diff_files(&content),"content":content,"truncated":truncated,"warnings":if truncated{vec!["output truncated"]}else{Vec::<&str>::new()}}),
         )
     }
 
     pub fn git_blame(&self, arguments: &Map<String, Value>) -> Result<Value, ReCtmError> {
         let requested = text_or(arguments, "path", "");
-        let resolved = self.resolve_existing(requested)?;
-        if resolved.path.is_dir() {
-            return Err(validation_code("IS_DIRECTORY", "Path is a directory."));
+        if requested.is_empty() {
+            return Err(validation("path is required for git_blame"));
         }
-        if !is_git_repo(&self.root) {
+        let Some(repo) = git_scope::select(self, arguments, ".")? else {
             return Ok(
-                serde_json::json!({"is_repo":false,"path":resolved.display,"lines":[],"truncated":false,"warnings":[]}),
+                serde_json::json!({"is_repo":false,"path":requested,"lines":[],"truncated":false,"warnings":[]}),
             );
+        };
+        let filters = repo.filters(self, arguments)?;
+        let path = filters
+            .first()
+            .ok_or_else(|| validation("path is required for git_blame"))?;
+        let start = usize_from(arguments, "start_line", 1)?;
+        let max_lines = usize_from(arguments, "max_lines", 200)?;
+        if start == 0 || !(1..=1000).contains(&max_lines) {
+            return Err(validation(
+                "start_line must be positive and max_lines must be 1..1000",
+            ));
         }
-        let start = integer_or(arguments, "start_line", 1)?;
-        let max_lines = integer_or(arguments, "max_lines", 200)?;
-        let requested_end =
-            optional_integer(arguments, "end_line")?.unwrap_or(start + max_lines - 1);
-        if requested_end < start {
+        let end = optional_integer(arguments, "end_line")?
+            .map(|n| usize::try_from(n).map_err(|_| validation("end_line must be positive")))
+            .transpose()?;
+        if end.is_some_and(|end| end < start) {
             return Err(validation("end_line must be >= start_line"));
         }
-        let final_line = requested_end.min(start + max_lines - 1);
         let reference = optional_text(arguments, "rev")
             .map(validate_git_ref)
             .transpose()?;
-        let mut argv = vec![
-            "git".into(),
-            "-C".into(),
-            self.root.display().to_string(),
-            "blame".into(),
+        let total = if let Some(reference) = &reference {
+            let mut command = repo.command("show");
+            command.extend([
+                "--no-ext-diff".into(),
+                "--no-textconv".into(),
+                format!("{reference}:{path}"),
+            ]);
+            let output = self.run_sync(command, 15_000, 2_000_000)?;
+            ensure_exit_ok(&output, "git blame source lookup failed")?;
+            git_scope::complete_output(&output)?;
+            output["stdout"]
+                .as_str()
+                .unwrap_or_default()
+                .split_inclusive('\n')
+                .count()
+        } else {
+            let file = repo.root.join(path);
+            let source = self.read_file(
+                &serde_json::json!({
+                    "path":display_path(&file,&self.root),"max_lines":1,"max_bytes":4096
+                })
+                .as_object()
+                .cloned()
+                .ok_or_else(|| internal("blame read arguments"))?,
+            )?;
+            source["total_lines"]
+                .as_u64()
+                .and_then(|n| usize::try_from(n).ok())
+                .ok_or_else(|| internal("blame source line count"))?
+        };
+        let requested_end = end.unwrap_or(total).min(total);
+        if start > requested_end {
+            return Ok(
+                serde_json::json!({"is_repo":true,"repo_path":repo.display,"path":path,
+                "rev":reference,"start_line":start,"end_line":start,"lines":[],"truncated":false,"warnings":[]}),
+            );
+        }
+        let final_line = requested_end.min(start.saturating_add(max_lines - 1));
+        let mut argv = repo.command("blame");
+        argv.extend([
+            "--no-textconv".into(),
             "--line-porcelain".into(),
             "-L".into(),
             format!("{start},{final_line}"),
-        ];
+        ]);
         if let Some(value) = &reference {
             argv.push(value.clone());
         }
-        argv.extend(["--".into(), resolved.display.clone()]);
+        argv.extend(["--".into(), path.clone()]);
         let output = self.run_sync(argv, 15_000, 2_000_000)?;
         ensure_exit_ok(&output, "git blame failed")?;
+        git_scope::complete_output(&output)?;
         let lines = parse_blame(output["stdout"].as_str().unwrap_or_default());
         let truncated = requested_end > final_line;
-        let mut result = serde_json::json!({"is_repo":true,"path":resolved.display,"rev":reference,"start_line":start,"end_line":final_line,"max_lines":max_lines,"lines":lines,"truncated":truncated,"warnings":if truncated{vec!["line limit reached"]}else{Vec::<&str>::new()}});
+        let mut result = serde_json::json!({"is_repo":true,"repo_path":repo.display,"path":path,"rev":reference,"start_line":start,"end_line":final_line,"max_lines":max_lines,"lines":lines,"truncated":truncated,"warnings":if truncated{vec!["line limit reached"]}else{Vec::<&str>::new()}});
         if truncated {
-            result["next_action"] = serde_json::json!({"tool":"git_blame","arguments":{"path":requested,"start_line":final_line+1,"end_line":requested_end,"max_lines":max_lines}});
+            let mut next = arguments.clone();
+            next.insert("repo_path".into(), serde_json::json!(repo.display));
+            next.insert("start_line".into(), serde_json::json!(final_line + 1));
+            next.insert("end_line".into(), serde_json::json!(requested_end));
+            result["next_action"] = serde_json::json!({"tool":"git_blame","arguments":next});
         }
         Ok(result)
     }
@@ -1820,7 +1859,7 @@ impl NativeWorkspace {
             max_output_bytes,
             stdin: String::new(),
             tty: false,
-            verbosity: None,
+            verbosity: Some("full".to_owned()),
             preview_bytes: max_output_bytes.min(4096),
         })?;
         if result.get("status").and_then(Value::as_str) == Some("running") {
@@ -1834,7 +1873,7 @@ impl NativeWorkspace {
                 chars: String::new(),
                 yield_time_ms: 30_000,
                 max_output_bytes,
-                verbosity: None,
+                verbosity: Some("full".to_owned()),
                 preview_bytes: max_output_bytes.min(4096),
             });
         }
@@ -1935,6 +1974,7 @@ fn insert_prepared_change(
                 existing.resolution = PatchPathResolution::ForWrite;
             }
             existing.final_content = change.final_content;
+            existing.final_mode = change.final_mode;
             Ok(())
         }
     }
@@ -2227,7 +2267,7 @@ where
         let stage = change
             .final_content
             .as_deref()
-            .map(|content| create_patch_stage_file(parent, index, content))
+            .map(|content| create_patch_stage_file(parent, index, content, change.final_mode))
             .transpose()?;
         if let Some(path) = &stage {
             cleanup.track_temporary(path.clone());
@@ -2441,12 +2481,27 @@ fn create_patch_stage_file(
     parent: &Path,
     index: usize,
     content: &[u8],
+    final_mode: Option<u32>,
 ) -> Result<PathBuf, ReCtmError> {
+    let ordinary_mode = final_mode.map(|mode| mode & 0o777);
     for _ in 0..PATCH_TEMP_NAME_ATTEMPTS {
         let path = patch_temporary_path(parent, "stage", index)?;
-        match OpenOptions::new().write(true).create_new(true).open(&path) {
+        match OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .mode(ordinary_mode.unwrap_or(0o666))
+            .open(&path)
+        {
             Ok(mut file) => {
-                let result = file.write_all(content).and_then(|()| file.sync_all());
+                // Restrictive modes apply at creation, before content is written.
+                // Restore exact ordinary update/move permissions after umask;
+                // newly added files continue to respect the caller's umask.
+                let result = file.write_all(content).and_then(|()| {
+                    if let Some(mode) = ordinary_mode {
+                        file.set_permissions(fs::Permissions::from_mode(mode))?;
+                    }
+                    file.sync_all()
+                });
                 if let Err(error) = result {
                     let _ = fs::remove_file(&path);
                     return Err(io_error(error));
@@ -2610,20 +2665,6 @@ fn glob_match(path: &str, pattern: &str) -> bool {
     regex.push('$');
     Regex::new(&regex).is_ok_and(|compiled| compiled.is_match(path))
 }
-fn split_lines_keep_ends(text: &str) -> Vec<&str> {
-    let mut result = Vec::new();
-    let mut start = 0;
-    for (index, character) in text.char_indices() {
-        if character == '\n' {
-            result.push(&text[start..=index]);
-            start = index + 1;
-        }
-    }
-    if start < text.len() {
-        result.push(&text[start..]);
-    }
-    result
-}
 fn atomic_write(path: &Path, data: &[u8]) -> Result<(), ReCtmError> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).map_err(io_error)?;
@@ -2649,13 +2690,6 @@ fn absolute_normalized(path: &Path) -> Result<PathBuf, ReCtmError> {
     } else {
         Ok(std::env::current_dir().map_err(io_error)?.join(path))
     }
-}
-fn is_git_repo(path: &Path) -> bool {
-    path.join(".git").exists()
-        || std::process::Command::new("git")
-            .args(["-C", &path.display().to_string(), "rev-parse", "--git-dir"])
-            .output()
-            .is_ok_and(|output| output.status.success())
 }
 fn ensure_exit_ok(output: &Value, fallback: &str) -> Result<(), ReCtmError> {
     if output["exit_code"].as_i64() == Some(0) {
@@ -2696,28 +2730,6 @@ fn parse_branch(value: &str) -> (String, String, i64, i64) {
         }
     }
     (branch, upstream, ahead, behind)
-}
-fn path_filters(arguments: &Map<String, Value>) -> Result<Vec<String>, ReCtmError> {
-    let mut result = Vec::new();
-    if let Some(path) = optional_text(arguments, "path") {
-        if !path.is_empty() {
-            result.push(
-                validate_relative_path(path)?
-                    .to_string_lossy()
-                    .replace('\\', "/"),
-            );
-        }
-    }
-    if let Some(paths) = string_array(arguments.get("paths")) {
-        for path in paths {
-            result.push(
-                validate_relative_path(&path)?
-                    .to_string_lossy()
-                    .replace('\\', "/"),
-            );
-        }
-    }
-    Ok(result)
 }
 fn validate_git_ref(value: &str) -> Result<String, ReCtmError> {
     if value.is_empty()
@@ -2880,6 +2892,22 @@ fn internal(message: &str) -> ReCtmError {
 fn io_error(error: std::io::Error) -> ReCtmError {
     ReCtmError::new("RUNTIME_IO_ERROR", error.to_string()).with_category(ErrorCategory::Runtime)
 }
+
+#[cfg(test)]
+#[path = "workspace_search_tests.rs"]
+mod search_tests;
+
+#[cfg(test)]
+#[path = "workspace_mode_tests.rs"]
+mod mode_tests;
+
+#[cfg(test)]
+#[path = "workspace_read_tests.rs"]
+mod read_tests;
+
+#[cfg(test)]
+#[path = "workspace_git_tests.rs"]
+mod git_tests;
 
 #[cfg(test)]
 mod tests {
