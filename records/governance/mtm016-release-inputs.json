@@ -18,6 +18,6 @@
     "browser_human": {"path":"records/evidence/MTM-016/candidate-browser-human-f6-c674843-u28.json","sha256":"40e304d018989223f90e3833baba17f3535941063959364e51ad974680d8bb71"},
     "copied_operator_state": {"path":"records/evidence/MTM-016/candidate-copied-operator-state-f6-f263155.json","sha256":"76a48b8a20573010861ffc97e02784287dc3e70da3bd26cb1c8f3aa6d7cdf356"},
     "install_sigkill": {"path":"records/evidence/MTM-016/candidate-install-sigkill-f6-c674843.json","sha256":"e2d9ded282591f8d4da5d16ab6a27a5324b9b8fc4286f8ab82352549416c87b5"},
-    "corpus": {"path":"records/evidence/MTM-016/corpus-f6-c674843-native-u16-u20-aggregate.json","sha256":"3dfb957302e3de11dde4b19b661ba4a2997e85dee30adc93d9305f4d9983b0b4"}
+    "corpus": {"path":"records/evidence/MTM-016/corpus-f6-c674843-complete-u01-u30-aggregate-v4.json","sha256":"3063843848bec73a4f01d24586c46cb1b2971e9f54972cb5e9bb371392d01eb9"}
   }
 }

@@ -4625,14 +4625,118 @@
       "selector_changed": false,
       "git_push_performed": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-FINAL-CORPUS-AND-RELEASE-READINESS",
+      "status": "complete_90_of_90_corpus_release_check_17_of_17_ready_for_release_review_not_authorized",
+      "base_commit": "96fda7c7819397f33c512e016cf4b692e2bc1967",
+      "candidate": {
+        "source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+        "sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034"
+      },
+      "remaining_u25_receipts": [
+        {
+          "task_id": "U25",
+          "repeat": 2,
+          "trial_id": "efa92d3af7e2e24b52aa739b0fdada86",
+          "path": "records/evidence/MTM-016/research-u25-r2-efa92d3af7e2e24b52aa739b0fdada86.json",
+          "sha256": "b2303f2d88a5b8686d6a497141d4440d80c338313ebdaba97fe9c268ef13e6c4"
+        },
+        {
+          "task_id": "U25",
+          "repeat": 3,
+          "trial_id": "84a3822af62d755e2fc4097f52fe5880",
+          "path": "records/evidence/MTM-016/research-u25-r3-84a3822af62d755e2fc4097f52fe5880.json",
+          "sha256": "480cecce9779865ad2cae92e73dc5ced67f577d15813de41675ad27f8d4ac2a9"
+        }
+      ],
+      "research_batch": {
+        "schema": "mtm-research-corpus-batch-v2",
+        "path": "records/evidence/MTM-016/research-corpus-batch-v2.json",
+        "sha256": "b845f80c69123c99e3c646660b458f9d0c240508d126faf0b0a222111ea95401",
+        "passed_trials": 15,
+        "failed_trials": 0,
+        "distinct_cells": 15,
+        "distinct_trial_ids": 15,
+        "distinct_recording_timestamps": 15,
+        "complete_for_research_scope": true
+      },
+      "external_batch": {
+        "schema": "mtm-external-corpus-batch-v1",
+        "path": "records/evidence/MTM-016/external-corpus-batch-v1.json",
+        "sha256": "e74caeb898580398eeab4985bd8d320e686c34ead399a7df1efe6c83fa495e26",
+        "passed_trials": 12,
+        "failed_trials": 0,
+        "distinct_cells": 12,
+        "distinct_trial_ids": 12,
+        "distinct_recording_timestamps": 12,
+        "complete_for_external_scope": true
+      },
+      "research_aggregate": {
+        "schema": "mtm-usability-corpus-aggregate-v3",
+        "path": "records/evidence/MTM-016/corpus-f6-c674843-research-u21-u25-aggregate-v3.json",
+        "sha256": "bf9d03141d82721e9843b06d25b7e4121821e6e218d70985094bc667d49a400b",
+        "passed_trials": 78,
+        "failed_trials": 0,
+        "blocked_trials": 12,
+        "complete": false
+      },
+      "complete_corpus_aggregate": {
+        "schema": "mtm-usability-corpus-aggregate-v4",
+        "path": "records/evidence/MTM-016/corpus-f6-c674843-complete-u01-u30-aggregate-v4.json",
+        "sha256": "3063843848bec73a4f01d24586c46cb1b2971e9f54972cb5e9bb371392d01eb9",
+        "passed_trials": 90,
+        "failed_trials": 0,
+        "blocked_trials": 0,
+        "complete": true
+      },
+      "release_inputs": {
+        "path": "records/governance/mtm016-release-inputs.json",
+        "sha256": "5bc4a20ed74357ed48112ed245f4261b700c6c94159e13d317daf2a827773790",
+        "corpus_path": "records/evidence/MTM-016/corpus-f6-c674843-complete-u01-u30-aggregate-v4.json",
+        "corpus_sha256": "3063843848bec73a4f01d24586c46cb1b2971e9f54972cb5e9bb371392d01eb9"
+      },
+      "release_check": {
+        "schema": "mtm-release-check-v1",
+        "path": "records/evidence/MTM-016/release-check-f6-c674843-complete-corpus.json",
+        "sha256": "e6d3b32e413b7f03ca432e986267fda13f04f4999a0791679a1f8725983f092e",
+        "validated_gates": 17,
+        "blocked_gates": 0,
+        "passed": true,
+        "inputs_unchanged": true,
+        "evidence_reexecuted": false,
+        "production_changed": false,
+        "ready_for_release_review": true,
+        "release_authorization_implemented": false,
+        "release_qualified": false,
+        "round4_complete": false,
+        "round5_complete": false
+      },
+      "static_sealing_checks": {
+        "records_ok": true,
+        "historical_hashes_checked": 26,
+        "sealed_observation_hashes_checked": 128,
+        "retirement_ok": true,
+        "retired_python_files": 127,
+        "audit_completed": true,
+        "rust_only_ready": true,
+        "remaining_python_files": 0,
+        "git_diff_check_exit_code": 0
+      },
+      "acceptance_boundary": "The complete 90/0/0 corpus and all seventeen read-only release-readiness gates validate against the exact frozen f59/c674 candidate. This checkpoint records readiness for an explicit release review only. The release checker does not implement deployment authorization, release_qualified remains false, and no production state or selector is changed here.",
+      "product_source_changed": false,
+      "candidate_bytes_changed": false,
+      "accepted_historical_evidence_rewritten": false,
+      "production_changed": false,
+      "selector_changed": false,
+      "git_push_performed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
-    "Preserve the current E-stage evidenced-recovery/no-replay matrix through exact-candidate and final release qualification; never infer legacy opaque outcomes.",
-    "Preserve visibility of 82 compatibility-name references and defer four obsolete Rust shadow binaries to a separately rebuilt candidate; neither is first-party Python authority.",
-    "Complete typed MTM-owned contracts and real-client validation after the Rust registry and legacy alias retirement checkpoint.",
-    "Exercise exact candidate through Native isolation, full Rethlas, retrieval, LaTeX, reconnect and rollback.",
-    "Complete the representative 30-task, three-repeat usability corpus."
+    "Perform the explicit release review/authorization step outside the read-only release-check; never infer deployment authority from ready_for_release_review=true.",
+    "If release is approved, create the dedicated release/cutover receipt through the governed release path; do not rewrite the sealed readiness evidence.",
+    "Preserve visibility of 83 compatibility-name references and defer four informational Rust shadow binaries to a future candidate cleanup; neither is first-party Python runtime authority."
   ],
-  "decision": "implementation_in_progress_not_release_qualified"
+  "decision": "release_readiness_validated_not_authorized"
 }
