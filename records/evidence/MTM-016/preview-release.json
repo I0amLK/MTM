@@ -1,0 +1,56 @@
+{
+  "authorization": {
+    "explicit_cli_authorization": true,
+    "milestone": "MTM-016"
+  },
+  "candidate_binary_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "candidate_source_commit": "c67484319f12c458cd25c538e35bbb25023915a5",
+  "check_count": 10,
+  "checks": {
+    "deployment_manifest_consistent": true,
+    "exact_candidate_hash": true,
+    "final_selector_pair_consistent": true,
+    "immutable_release_installed": true,
+    "initial_selector_pair_consistent": true,
+    "preview1_cutover_smoke": true,
+    "preview1_recutover_smoke": true,
+    "preview2_rollback_smoke": true,
+    "readiness_revalidated": true,
+    "rollback_backup_preserved": true
+  },
+  "evidence_hygiene": {
+    "raw_capability_recorded": false,
+    "raw_logs_recorded": false,
+    "raw_oauth_token_recorded": false,
+    "raw_secret_recorded": false
+  },
+  "existing_sessions_restarted": false,
+  "milestone": "MTM-016",
+  "ok": true,
+  "performance_claim": false,
+  "phase": "preview_release",
+  "previous_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+  "previous_version": "0.5.0-preview.2",
+  "production_data_rewritten": false,
+  "production_selector_changed": true,
+  "readiness": {
+    "blocked_gates": 0,
+    "evidence_reexecuted": false,
+    "passed": true,
+    "validated_gates": 17
+  },
+  "recorded_unix_seconds": 1789455698,
+  "release_authorized": true,
+  "release_commit": "c3f0de8bf6ab2d1b0b4324e1c45d570745b11600",
+  "release_input_manifest_sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+  "release_path": "/home/lk/.local/share/mtm/releases/0.6.0-preview.1/mtm",
+  "release_qualified": true,
+  "rollback": {
+    "previous_path": "/home/lk/.local/share/mtm/releases/0.5.0-preview.2/mtm",
+    "previous_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+    "previous_version": "0.5.0-preview.2",
+    "real_rollback_and_recutover_passed": true
+  },
+  "schema_version": "1.0.0",
+  "version": "0.6.0-preview.1"
+}
