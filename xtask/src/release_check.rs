@@ -58,6 +58,14 @@ pub(crate) struct Options {
 }
 
 impl Options {
+    pub(crate) fn internal(binary: &str, manifest: &str) -> Self {
+        Self {
+            binary: binary.to_owned(),
+            manifest: manifest.to_owned(),
+            record: false,
+        }
+    }
+
     pub(crate) fn parse(args: &[String]) -> Result<Self> {
         let mut values = BTreeMap::new();
         let mut record = false;

@@ -4731,11 +4731,56 @@
       "selector_changed": false,
       "git_push_performed": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM016-F7-RUST-RELEASE-CUTOVER-DRIVER",
+      "status": "rust_release_cutover_driver_implemented_tests_pass_source_requalification_required_before_live_use",
+      "base_commit": "aacb9a1d86b946fc60fc2ef9207131b6d9e4eb71",
+      "scope": "Add one MTM-016-specific Rust release authority path after the complete read-only readiness checkpoint. The command cannot accept an arbitrary binary, manifest, version, state root, selector, skip-readiness option or force override. No live selector is changed by this implementation checkpoint.",
+      "command": "cargo xtask release-cutover --binary target/mtm016-f6-frozen/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm --manifest records/governance/mtm016-release-inputs.json --authorize MTM-016",
+      "authority_contract": {
+        "explicit_authorization_required": true,
+        "exact_candidate_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+        "exact_version": "0.6.0-preview.1",
+        "fresh_in_process_release_check_required": true,
+        "required_validated_gates": 17,
+        "required_blocked_gates": 0,
+        "clean_worktree_required": true,
+        "current_selector_pair_must_match_deployment_manifest": true,
+        "exclusive_rollout_lock": true,
+        "exact_pre_cutover_manifest_backup": true,
+        "atomic_two_selector_switch": true,
+        "real_rollback_and_recutover_required": true,
+        "failure_restores_previous_selectors_and_manifest": true,
+        "existing_sessions_restarted": false,
+        "production_data_rewritten": false
+      },
+      "validation": {
+        "targeted_release_cutover_unit_tests": {"passed": 3, "failed": 0},
+        "full_mtm_xtask_unit_tests": {"passed": 124, "failed": 0},
+        "release_cutover_cli_negative_test": {"passed": 1, "failed": 0},
+        "all_mtm_xtask_cli_tests_passed": true,
+        "format_exit_code": 0,
+        "clippy_before_final_cli_fixture_exit_code": 0,
+        "post_fixture_clippy_attempt": "platform_safety_blocked_before_execution",
+        "git_diff_check_exit_code": 0
+      },
+      "source_requalification_required": true,
+      "release_check_rerun_required_after_source_requalification": true,
+      "live_cutover_executed": false,
+      "release_receipt_created": false,
+      "product_source_changed": false,
+      "candidate_bytes_changed": false,
+      "accepted_historical_evidence_rewritten": false,
+      "production_changed": false,
+      "selector_changed": false,
+      "git_push_performed": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
-    "Perform the explicit release review/authorization step outside the read-only release-check; never infer deployment authority from ready_for_release_review=true.",
-    "If release is approved, create the dedicated release/cutover receipt through the governed release path; do not rewrite the sealed readiness evidence.",
+    "Commit and source-qualify the Rust release-cutover driver, then refresh the source release input and re-run all seventeen read-only readiness gates.",
+    "Only after that refreshed readiness pass, execute the explicit MTM-016 release-cutover command, require the real rollback/recutover drill, and seal the dedicated release receipt.",
     "Preserve visibility of 83 compatibility-name references and defer four informational Rust shadow binaries to a future candidate cleanup; neither is first-party Python runtime authority."
   ],
   "decision": "release_readiness_validated_not_authorized"

@@ -1,4 +1,4 @@
-//! Portable maintenance only. Never installs a release or changes live state.
+//! Portable maintenance plus the explicitly authorized MTM-016 release cutover.
 use std::env;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
@@ -22,6 +22,8 @@ mod qualify;
 mod records;
 #[cfg(target_os = "linux")]
 mod release_check;
+#[cfg(target_os = "linux")]
+mod release_cutover;
 #[cfg(target_os = "linux")]
 mod research_collect;
 #[cfg(target_os = "linux")]
@@ -103,6 +105,15 @@ fn run() -> Result<()> {
         if report["passed"] != true {
             return Err("release readiness blocked; no deployment authorized".into());
         }
+        return Ok(());
+    }
+    #[cfg(target_os = "linux")]
+    if name == "release-cutover" {
+        let options = release_cutover::Options::parse(options)?;
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&release_cutover::run(&root, &options)?)?
+        );
         return Ok(());
     }
     if options
@@ -255,6 +266,9 @@ fn run() -> Result<()> {
             );
             println!(
                 "cargo xtask release-check --binary <artifact> --manifest <repo-relative-json> [--record]"
+            );
+            println!(
+                "cargo xtask release-cutover --binary target/mtm016-f6-frozen/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm --manifest records/governance/mtm016-release-inputs.json --authorize MTM-016\n  Explicit MTM-016 production selector cutover with mandatory readiness revalidation and rollback/recutover drill."
             );
             println!(
                 "cargo xtask qualify --profile permissions --binary <artifact> --sha256 <sha256> [--record]"
