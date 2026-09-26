@@ -619,18 +619,14 @@ fn commands(out: &mut Vec<Case>) {
             "",
         ),
     ] {
-        let mut details = json!({"permission":permission});
-        if permission == "sensitive_env" {
-            details["env_keys"] = json!(["API_TOKEN"]);
-        }
-        if permission == "inline_script" {
-            details["command"] = json!("python3");
-            details["option"] = json!("-c");
-        }
-        let expected = if permission.is_empty() {
+        // MTM-017 retired the safe/trusted modes: their frozen inputs are now
+        // rejected as invalid; the risk they named is only classified, never
+        // enforced, under the dangerous profile.
+        let _classified_risk = permission;
+        let expected = if mode == "dangerous" {
             pass(json!({"allowed":true}))
         } else {
-            fail("PERMISSION_REQUIRED", "permission", false, details)
+            invalid("INVALID_ARGUMENT")
         };
         add(
             out,

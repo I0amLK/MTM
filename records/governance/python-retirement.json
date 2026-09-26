@@ -119,16 +119,16 @@
       "path": "tests/test_mtm014_capacity_evidence.py",
       "baseline_sha256": "491e4979e034eff1180f072ec2aa87225992e9a068aa3dff593a2f50e65e7405",
       "disposition": "replaced_by_rust",
-      "rationale": "This synthetic Python fixture tested the old MTM-014 capacity-report parser rather than live product behavior. Native permission capacity, exact grant consumption and bounded permission-soak summaries are now exercised and validated in Rust; synthetic reports cannot satisfy the current release gate.",
-      "replacements": ["crates/mtm-runtime/src/native_authority.rs", "crates/mtm-cli/tests/support/permission_runtime.rs", "xtask/src/permission_summary.rs", "xtask/src/release_check.rs"],
+      "rationale": "This synthetic Python fixture tested the old MTM-014 capacity-report parser rather than live product behavior. MTM-017 retired the unreachable consent/grant ledger; current dangerous-only Native authority is exercised in Rust, while frozen permission-soak receipts remain validated without satisfying a current release gate.",
+      "replacements": ["crates/mtm-runtime/src/native_authority.rs", "crates/mtm-cli/tests/support/native_command_runtime.rs", "xtask/src/permission_summary.rs", "xtask/src/release_check.rs"],
       "verification": ["cargo test -p mtm-runtime native_authority::tests --locked", "cargo test -p mtm-xtask --locked", "cargo xtask retirement"]
     },
     {
       "path": "tests/test_mtm014_elicitation_evidence.py",
       "baseline_sha256": "8ab3c415e25e90ae1a6078a06e8945c020932cc7be462bf274d8e1f4a56edbe6",
       "disposition": "replaced_by_rust",
-      "rationale": "This test revalidated one frozen MTM-014 human-elicitation receipt through the historical Python parser. Current Rust permission tests cover accept/decline/cancel and authority boundaries, record validation preserves the accepted historical receipt, and release-check still requires independently observed current browser/human evidence. Scripted consent is never promoted to human evidence.",
-      "replacements": ["crates/mtm-runtime/src/native_authority.rs", "crates/mtm-cli/tests/support/permission_runtime.rs", "xtask/src/permission_summary.rs", "xtask/src/record_layout.rs", "xtask/src/release_check.rs"],
+      "rationale": "This test revalidated one frozen MTM-014 human-elicitation receipt through the historical Python parser. MTM-017 retired current consent/grant execution; current Rust Native tests cover dangerous-only authority boundaries, record validation preserves the accepted historical receipt, and release-check still requires independently observed current browser/human evidence. Scripted consent is never promoted to human evidence.",
+      "replacements": ["crates/mtm-runtime/src/native_authority.rs", "crates/mtm-cli/tests/support/native_command_runtime.rs", "xtask/src/permission_summary.rs", "xtask/src/record_layout.rs", "xtask/src/release_check.rs"],
       "verification": ["cargo test -p mtm-xtask --locked", "cargo xtask records", "cargo xtask retirement", "Current browser/human-consent release gate remains blocked until real evidence exists"]
     }
   ],
@@ -137,7 +137,7 @@
       "name": "historical_and_mtm015_target_qualification",
       "disposition": "consolidated_with_pending_acceptance",
       "pending_acceptance": [
-        "F: exact current candidate on a capable Native host, safe/trusted/dangerous permission suites, TTY/timeout/descendant cleanup and available CAS tools",
+        "F: exact current candidate on a capable Native host, dangerous-only command and isolation suites, TTY/timeout/descendant cleanup and available CAS tools",
         "F: required compiled-LaTeX full/compact/repair flows and browser OAuth/independent human consent; completed external retrieval does not discharge these",
         "F: operator-authorized copied production state and old-run resume/rollback; the existing synthetic v1 fixture is not equivalent"
       ],
@@ -165,7 +165,7 @@
       "name": "release_install_cutover_and_candidate_staging",
       "disposition": "consolidated_with_pending_acceptance",
       "pending_acceptance": [
-        "F: equivalent baseline/candidate resource samples and capable-host Native command/grant behavior remain pending despite completed frozen Python-free clean-build evidence",
+        "F: equivalent baseline/candidate resource samples and capable-host dangerous-only Native command behavior remain pending despite completed frozen Python-free clean-build evidence",
         "F: independently observed real web-client roundtrips and human consent where required, never inferred from frozen historical evidence",
         "F: operator-authorized copied production-state upgrade/old-run resume/rollback remains distinct from completed prepared-copy upgrade and external SIGKILL tests",
         "F: physical power-loss/device-cache and shared-filesystem semantics remain outside the completed process-SIGKILL scope"
@@ -317,10 +317,10 @@
       "disposition": "consolidated_with_pending_acceptance",
       "pending_acceptance": [
         "F: capable-host Native command/TTY/CAS, target/resource and compiled-LaTeX gates remain required on the current candidate",
-        "F: real browser and independent human consent remain required; scripted Rust permission tests are not human evidence"
+        "F: real browser and independent human-consent evidence remain required by the release gate; dangerous-only scripted Native tests are not human evidence"
       ],
-      "rationale": "These MTM-014 scripts and validators drove the historical permission-capacity, MRTR, Native target and post-cutover public-authority qualification. Current permission classification, grant ledger, protected patch soak, target profile and release evidence schemas are Rust-owned and fail closed. Historical receipts remain immutable, while current capable-host and human evidence remains independently pending.",
-      "replacements": ["crates/mtm-core/src/native_permission.rs", "crates/mtm-runtime/src/native_authority.rs", "crates/mtm-cli/tests/support/permission_runtime.rs", "crates/mtm-cli/tests/support/target_runtime.rs", "xtask/src/permission_summary.rs", "xtask/src/qualification_receipt.rs", "xtask/src/release_check.rs"],
+      "rationale": "These MTM-014 scripts and validators drove historical permission-capacity, MRTR, Native target and public-authority qualification. MTM-017 retired the unreachable consent/grant ledger; current dangerous-only classification, Native target behavior and release evidence schemas remain Rust-owned and fail closed. Historical receipts remain immutable, while current capable-host and human evidence remains independently pending.",
+      "replacements": ["crates/mtm-core/src/native_permission.rs", "crates/mtm-runtime/src/native_authority.rs", "crates/mtm-cli/tests/support/native_command_runtime.rs", "crates/mtm-cli/tests/support/target_runtime.rs", "xtask/src/permission_summary.rs", "xtask/src/qualification_receipt.rs", "xtask/src/release_check.rs"],
       "verification": ["cargo test -p mtm-core -p mtm-runtime --locked --no-fail-fast", "cargo test -p mtm-xtask --locked", "cargo xtask records", "cargo xtask retirement", "Expected current-host Native failures are not converted into passes by retirement"],
       "members": [
         {"path":"scripts/run_mtm014_capacity_validation.py","baseline_sha256":"f321920034fa9290db017762833fd77f08dcdef3cdf469b24ac3190d3dfc7f97"},

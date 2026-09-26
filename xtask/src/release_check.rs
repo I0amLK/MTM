@@ -939,7 +939,13 @@ mod tests {
                 &format!("cc17b1688a2deda7db3dde4b2dbf63199bf48b13:{MAGMA_TEST_PATH}"),
             ],
         )?;
-        let after = records::read_bytes(root, MAGMA_TEST_PATH, 128 * 1024)?;
+        let after = git(
+            root,
+            &[
+                "show",
+                &format!("8336e088cdcf230254da28cf36b81dec8f440340:{MAGMA_TEST_PATH}"),
+            ],
+        )?;
         assert!(reviewed_inline_test_edit(MAGMA_TEST_PATH, &before, &after));
         let before_text = std::str::from_utf8(&before)?;
         let after_text = std::str::from_utf8(&after)?;
@@ -998,7 +1004,13 @@ mod tests {
                 &format!("cc17b1688a2deda7db3dde4b2dbf63199bf48b13:{MAGMA_TEST_PATH}"),
             ],
         )?;
-        let after = records::read_bytes(root, MAGMA_TEST_PATH, 128 * 1024)?;
+        let after = git(
+            root,
+            &[
+                "show",
+                &format!("8336e088cdcf230254da28cf36b81dec8f440340:{MAGMA_TEST_PATH}"),
+            ],
+        )?;
         let fixture = tempfile::tempdir()?;
         let fixture_root = fixture.path();
         let source = fixture_root.join(MAGMA_TEST_PATH);

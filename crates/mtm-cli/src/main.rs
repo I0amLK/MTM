@@ -159,18 +159,10 @@ fn settings_with_overrides(
                 })?;
             }
             "--native-mode" => {
-                settings.native_mode = match value.as_str() {
-                    "safe" => NativeMode::Safe,
-                    "trusted" => NativeMode::Trusted,
-                    "dangerous" => NativeMode::Dangerous,
-                    _ => {
-                        return Err(ReCtmError::new(
-                            "INVALID_ARGUMENT",
-                            "--native-mode must be safe, trusted, or dangerous",
-                        )
-                        .with_category(ErrorCategory::Validation));
-                    }
-                };
+                settings.native_mode = NativeMode::parse(value).map_err(|message| {
+                    ReCtmError::new("INVALID_ARGUMENT", format!("--native-mode: {message}"))
+                        .with_category(ErrorCategory::Validation)
+                })?;
             }
             "--latex-policy" => {
                 settings.latex_policy = match value.as_str() {

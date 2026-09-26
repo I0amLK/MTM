@@ -55,7 +55,7 @@ impl RuntimeSettings {
             env::var("MTM_NATIVE_MODE")
                 .ok()
                 .as_deref()
-                .unwrap_or("safe"),
+                .unwrap_or("dangerous"),
         )?;
         let configured_backend = env::var("MTM_NATIVE_EXEC_BACKEND")
             .unwrap_or_default()
@@ -394,14 +394,8 @@ fn absolute_path(raw: Option<&str>, default: &Path) -> Result<PathBuf, ReCtmErro
 }
 
 fn parse_native_mode(value: &str) -> Result<NativeMode, ReCtmError> {
-    match value {
-        "safe" => Ok(NativeMode::Safe),
-        "trusted" => Ok(NativeMode::Trusted),
-        "dangerous" => Ok(NativeMode::Dangerous),
-        _ => Err(validation(
-            "MTM_NATIVE_MODE must be safe, trusted, or dangerous.",
-        )),
-    }
+    NativeMode::parse(value)
+        .map_err(|message| validation(&format!("MTM_NATIVE_MODE is invalid: {message}")))
 }
 
 fn parse_latex_policy(value: &str) -> Result<LatexPolicy, ReCtmError> {
@@ -540,6 +534,22 @@ mod tests {
         assert_eq!(secret.len(), 32);
         assert_eq!(derive_capability_secret(&secret).len(), 32);
         Ok(())
+    }
+
+    #[test]
+    fn native_mode_config_rejects_retired_profiles() {
+        assert_eq!(
+            parse_native_mode("dangerous").ok(),
+            Some(NativeMode::Dangerous)
+        );
+        for retired in ["safe", "trusted"] {
+            let error = parse_native_mode(retired).err();
+            assert_eq!(
+                error.as_ref().map(|error| error.code.as_str()),
+                Some("INVALID_ARGUMENT")
+            );
+            assert!(error.is_some_and(|error| error.message.contains("MTM-017")));
+        }
     }
 
     #[test]

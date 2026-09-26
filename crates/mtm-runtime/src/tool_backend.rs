@@ -2,24 +2,17 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 
 use mtm_contracts::{ErrorCategory, PRODUCTION_WORKFLOW_PROTOCOL_VERSION, ReCtmError};
-use mtm_core::{
-    NativeInvocation, NativePermissionRequest, classify_exec_permissions,
-    classify_patch_permissions, native_mode_implicitly_grants,
-};
 use mtm_gateway::{
-    InputRequiredResult, OAuthPrincipal, PUBLIC_TOOL_NAMES, SUPPORTED_PROTOCOL_VERSIONS,
-    TOOL_CONTRACT_VERSION, ToolBackend, ToolBackendResult, ToolCallContext, ToolId,
+    OAuthPrincipal, PUBLIC_TOOL_NAMES, SUPPORTED_PROTOCOL_VERSIONS, TOOL_CONTRACT_VERSION,
+    ToolBackend, ToolBackendResult, ToolCallContext, ToolId,
 };
-use mtm_storage::{CapabilityAuthority, StateStore, StoreRuntime};
+use mtm_storage::{CapabilityAuthority, StateStore};
 use mtm_workflow::WorkflowEngine;
 use serde_json::{Map, Value};
 
 use crate::latex::static_latex_errors;
 use crate::native_authority::NativeAuthorityExecutor;
-use crate::{
-    NativePermissionConsentAuthority, NativePermissionConsentOutcome,
-    NativePermissionGrantAuthority, NativeToolRuntime, NativeWorkspace, RuntimeEventSink,
-};
+use crate::{NativeToolRuntime, NativeWorkspace, RuntimeEventSink};
 
 const INSPECT_OPERATIONS: [&str; 9] = [
     "status",
@@ -56,8 +49,6 @@ pub struct RuntimeToolBackend {
     workflow: Arc<WorkflowEngine>,
     store: Arc<StateStore>,
     capabilities: Arc<CapabilityAuthority>,
-    native_permissions: Arc<NativePermissionGrantAuthority>,
-    native_consents: Arc<NativePermissionConsentAuthority>,
     native_authority: NativeAuthorityExecutor,
     workflow_protocol_version: i64,
     complete_flow_locally_validated: bool,
@@ -117,47 +108,14 @@ impl RuntimeToolBackend {
         facts: RuntimeBackendFacts,
         observer: Option<RuntimeEventSink>,
     ) -> Self {
-        let permission_runtime = StoreRuntime::default();
-        Self::new_with_protocol_observer_and_native_permissions(
-            native,
-            workspace,
-            workflow,
-            store,
-            capabilities,
-            Arc::new(NativePermissionGrantAuthority::new(
-                permission_runtime.clone(),
-            )),
-            Arc::new(NativePermissionConsentAuthority::new(permission_runtime)),
-            facts,
-            observer,
-        )
-    }
-
-    #[allow(clippy::too_many_arguments)]
-    pub fn new_with_protocol_observer_and_native_permissions(
-        native: Arc<NativeToolRuntime>,
-        workspace: Arc<NativeWorkspace>,
-        workflow: Arc<WorkflowEngine>,
-        store: Arc<StateStore>,
-        capabilities: Arc<CapabilityAuthority>,
-        native_permissions: Arc<NativePermissionGrantAuthority>,
-        native_consents: Arc<NativePermissionConsentAuthority>,
-        facts: RuntimeBackendFacts,
-        observer: Option<RuntimeEventSink>,
-    ) -> Self {
-        let native_authority = NativeAuthorityExecutor::new(
-            Arc::clone(&native),
-            Arc::clone(&workspace),
-            Arc::clone(&native_permissions),
-        );
+        let native_authority =
+            NativeAuthorityExecutor::new(Arc::clone(&native), Arc::clone(&workspace));
         Self {
             native,
             workspace,
             workflow,
             store,
             capabilities,
-            native_permissions,
-            native_consents,
             native_authority,
             workflow_protocol_version: facts.workflow_protocol_version,
             complete_flow_locally_validated: facts.complete_flow_locally_validated,
@@ -187,14 +145,8 @@ impl RuntimeToolBackend {
             ToolId::ListDir => self.workspace.list_dir(arguments),
             ToolId::ListFiles => self.workspace.list_files(arguments),
             ToolId::SearchText => self.workspace.search_text(arguments),
-            ToolId::ApplyPatch => self
-                .native_authority
-                .apply_patch(&principal.client_id, arguments)
-                .map_err(public_native_authority_error),
-            ToolId::ExecCommand => self
-                .native_authority
-                .exec_command(&principal.client_id, arguments)
-                .map_err(public_native_authority_error),
+            ToolId::ApplyPatch => self.native_authority.apply_patch(arguments),
+            ToolId::ExecCommand => self.native_authority.exec_command(arguments),
             ToolId::WriteStdin => self.native.write_stdin(arguments),
             ToolId::KillCommand => self.native.kill_command(arguments),
             ToolId::ReadOutput => self.native.read_output(arguments),
@@ -1190,310 +1142,17 @@ impl RuntimeToolBackend {
         Ok(result)
     }
 
+    /// `request_permissions` under the dangerous profile (the only Native mode
+    /// since MTM-017): every permission is implicitly granted, so no consent form
+    /// is elicited and no grant is recorded.
     fn request_permissions_with_context(
         &self,
         arguments: &Map<String, Value>,
-        principal: &OAuthPrincipal,
-        context: &ToolCallContext,
     ) -> Result<ToolBackendResult, ReCtmError> {
-        if self.native.mode() == mtm_contracts::NativeMode::Dangerous {
-            return Ok(ToolBackendResult::Complete(
-                self.native.request_permissions(arguments),
-            ));
-        }
-        if !context.is_modern() || !context.supports_form_elicitation() {
-            return Ok(ToolBackendResult::Complete(
-                self.native.request_permissions(arguments),
-            ));
-        }
-
-        let request = NativePermissionRequest::parse(arguments)?;
-        let invocation_arguments = arguments
-            .get("arguments")
-            .and_then(Value::as_object)
-            .ok_or_else(|| validation("request_permissions arguments must be an object"))?;
-        let required = self.required_permissions_for_request(&request, invocation_arguments)?;
-        if !required.contains(&request.kind()) {
-            return Ok(ToolBackendResult::Complete(permission_not_required(
-                self.native.mode().as_str(),
-                self.workspace.root(),
-                &request,
-                "permission_not_intrinsic_to_invocation",
-            )));
-        }
-        if native_mode_implicitly_grants(self.native.mode(), request.kind()) {
-            return Ok(ToolBackendResult::Complete(permission_not_required(
-                self.native.mode().as_str(),
-                self.workspace.root(),
-                &request,
-                "native_mode_profile",
-            )));
-        }
-
-        let workspace = self.workspace.root().display().to_string();
-        let state = context.request_state();
-        let response = context.input_response("native_permission_consent");
-        match (state, response, context.input_response_count()) {
-            (None, None, 0) => {
-                if let Some(scope) = self.native_permissions.active_exact_grant_scope(
-                    &principal.client_id,
-                    &workspace,
-                    &request,
-                )? {
-                    return Ok(ToolBackendResult::Complete(permission_already_granted(
-                        self.native.mode().as_str(),
-                        self.workspace.root(),
-                        &request,
-                        scope,
-                    )));
-                }
-                let prompt =
-                    self.native_consents
-                        .begin(&principal.client_id, &workspace, request)?;
-                Ok(ToolBackendResult::InputRequired(
-                    InputRequiredResult::form_elicitation(
-                        "native_permission_consent",
-                        prompt.message(),
-                        prompt.requested_schema().clone(),
-                        prompt.request_state().to_owned(),
-                    )?,
-                ))
-            }
-            (Some(state), Some(response), 1) => {
-                let outcome = self.native_consents.complete(
-                    state,
-                    &principal.client_id,
-                    &workspace,
-                    &request,
-                    response,
-                )?;
-                match outcome {
-                    NativePermissionConsentOutcome::Accepted(consent) => {
-                        match self.native_permissions.issue_verified(consent) {
-                            Ok(receipt) => Ok(ToolBackendResult::Complete(permission_granted(
-                                self.native.mode().as_str(),
-                                self.workspace.root(),
-                                &request,
-                                &receipt,
-                            ))),
-                            Err(error)
-                                if error.code == "NATIVE_PERMISSION_GRANT_ALREADY_EXISTS" =>
-                            {
-                                let scope = self
-                                    .native_permissions
-                                    .active_exact_grant_scope(
-                                        &principal.client_id,
-                                        &workspace,
-                                        &request,
-                                    )?
-                                    .ok_or(error)?;
-                                Ok(ToolBackendResult::Complete(permission_already_granted(
-                                    self.native.mode().as_str(),
-                                    self.workspace.root(),
-                                    &request,
-                                    scope,
-                                )))
-                            }
-                            Err(error) => Err(error),
-                        }
-                    }
-                    NativePermissionConsentOutcome::Declined => Ok(ToolBackendResult::Complete(
-                        permission_denied("decline"),
-                    )),
-                    NativePermissionConsentOutcome::Cancelled => Ok(ToolBackendResult::Complete(
-                        permission_denied("cancel"),
-                    )),
-                }
-            }
-            _ => Err(ReCtmError::new(
-                "ELICITATION_RESPONSE_INVALID",
-                "Native permission MRTR retry requires exactly one consent response and requestState.",
-            )
-            .with_category(ErrorCategory::Permission)),
-        }
+        Ok(ToolBackendResult::Complete(
+            self.native.request_permissions(arguments),
+        ))
     }
-
-    fn required_permissions_for_request(
-        &self,
-        request: &NativePermissionRequest,
-        arguments: &Map<String, Value>,
-    ) -> Result<Vec<mtm_contracts::NativePermissionKind>, ReCtmError> {
-        let invocation = NativeInvocation::parse(request.tool(), arguments)?;
-        if invocation.arguments_sha256() != request.arguments_sha256() {
-            return Err(ReCtmError::new(
-                "NATIVE_PERMISSION_REQUEST_ARGUMENT_MISMATCH",
-                "Permission request does not match the exact nested tool arguments.",
-            )
-            .with_category(ErrorCategory::Security));
-        }
-        match invocation {
-            NativeInvocation::Exec(exec) => {
-                let facts = self.native.collect_shadow_exec_permission_facts(&exec)?;
-                classify_exec_permissions(&exec, &facts)
-            }
-            NativeInvocation::Patch(patch) => {
-                let facts = self.workspace.collect_patch_permission_facts(&patch)?;
-                classify_patch_permissions(&patch, &facts)
-            }
-        }
-    }
-}
-
-fn permission_not_required(
-    mode: &str,
-    workspace: &std::path::Path,
-    request: &NativePermissionRequest,
-    source: &str,
-) -> Value {
-    serde_json::json!({
-        "ok":true,
-        "status":"not_required",
-        "grant_id":Value::Null,
-        "expires_at":Value::Null,
-        "constraints":{
-            "mode":mode,
-            "workspace":workspace,
-            "tool_name":request.tool().as_str(),
-            "permission":request.kind().as_str(),
-            "scope":request.scope().as_str(),
-            "source":source,
-            "argument_fingerprint":request.arguments_sha256().chars().take(12).collect::<String>()
-        },
-        "warnings":[]
-    })
-}
-
-fn permission_granted(
-    mode: &str,
-    workspace: &std::path::Path,
-    request: &NativePermissionRequest,
-    receipt: &crate::NativePermissionGrantReceipt,
-) -> Value {
-    serde_json::json!({
-        "ok":true,
-        "status":"granted",
-        "grant_id":receipt.grant_id().as_str(),
-        "expires_at":receipt.expires_at(),
-        "constraints":{
-            "mode":mode,
-            "workspace":workspace,
-            "tool_name":request.tool().as_str(),
-            "permission":request.kind().as_str(),
-            "scope":request.scope().as_str(),
-            "source":"verified_mcp_mrtr_form_elicitation",
-            "argument_fingerprint":request.arguments_sha256().chars().take(12).collect::<String>(),
-            "workflow_authority_inherited":false
-        },
-        "warnings":[]
-    })
-}
-
-fn permission_already_granted(
-    mode: &str,
-    workspace: &std::path::Path,
-    request: &NativePermissionRequest,
-    existing_scope: mtm_contracts::NativePermissionScope,
-) -> Value {
-    serde_json::json!({
-        "ok":true,
-        "status":"already_granted",
-        "grant_id":Value::Null,
-        "expires_at":Value::Null,
-        "constraints":{
-            "mode":mode,
-            "workspace":workspace,
-            "tool_name":request.tool().as_str(),
-            "permission":request.kind().as_str(),
-            "requested_scope":request.scope().as_str(),
-            "existing_scope":existing_scope.as_str(),
-            "source":"process_local_exact_grant",
-            "argument_fingerprint":request.arguments_sha256().chars().take(12).collect::<String>(),
-            "workflow_authority_inherited":false
-        },
-        "warnings":[]
-    })
-}
-
-fn permission_denied(action: &str) -> Value {
-    serde_json::json!({
-        "ok":false,
-        "status":"denied",
-        "grant_id":Value::Null,
-        "expires_at":Value::Null,
-        "error":{
-            "code":"ELICITATION_DENIED",
-            "message":"Native permission request was not approved by the user.",
-            "category":"permission",
-            "retryable":false,
-            "details":{"action":action}
-        }
-    })
-}
-
-fn public_native_authority_error(error: ReCtmError) -> ReCtmError {
-    if error.code != "NATIVE_PERMISSION_GRANT_SET_INCOMPLETE" {
-        return error;
-    }
-    let expected_keys = ["permission", "permissions", "tool_name"];
-    if error.details.len() != expected_keys.len()
-        || expected_keys
-            .iter()
-            .any(|key| !error.details.contains_key(*key))
-    {
-        return native_authority_mapping_error();
-    }
-    let Some(permission) = error.details.get("permission").and_then(Value::as_str) else {
-        return native_authority_mapping_error();
-    };
-    let Some(tool_name) = error.details.get("tool_name").and_then(Value::as_str) else {
-        return native_authority_mapping_error();
-    };
-    let Some(permissions) = error.details.get("permissions").and_then(Value::as_array) else {
-        return native_authority_mapping_error();
-    };
-    let ordered = permissions
-        .iter()
-        .map(Value::as_str)
-        .collect::<Option<Vec<_>>>();
-    let Some(ordered) = ordered else {
-        return native_authority_mapping_error();
-    };
-    if permission.is_empty()
-        || tool_name.is_empty()
-        || ordered.is_empty()
-        || ordered.first().copied() != Some(permission)
-    {
-        return native_authority_mapping_error();
-    }
-    ReCtmError::new(
-        "PERMISSION_REQUIRED",
-        "Native permission is required before this operation can run.",
-    )
-    .with_category(ErrorCategory::Permission)
-    .with_details(Map::from_iter([
-        (
-            "permission".to_owned(),
-            Value::String(permission.to_owned()),
-        ),
-        (
-            "permissions".to_owned(),
-            Value::Array(
-                ordered
-                    .into_iter()
-                    .map(|value| Value::String(value.to_owned()))
-                    .collect(),
-            ),
-        ),
-        ("tool_name".to_owned(), Value::String(tool_name.to_owned())),
-    ]))
-}
-
-fn native_authority_mapping_error() -> ReCtmError {
-    ReCtmError::new(
-        "NATIVE_PERMISSION_INTERNAL_ERROR",
-        "Native permission denial metadata failed internal validation.",
-    )
-    .with_category(ErrorCategory::Internal)
 }
 
 impl ToolBackend for RuntimeToolBackend {
@@ -1503,7 +1162,7 @@ impl ToolBackend for RuntimeToolBackend {
         arguments: &Map<String, Value>,
         principal: &OAuthPrincipal,
         trace_id: &str,
-        context: &ToolCallContext,
+        _context: &ToolCallContext,
     ) -> Result<ToolBackendResult, ReCtmError> {
         self.emit(serde_json::json!({
             "event_type":"tool.call_started",
@@ -1513,7 +1172,7 @@ impl ToolBackend for RuntimeToolBackend {
             "details":{"tool":name,"argument_keys":arguments.keys().collect::<Vec<_>>()}
         }));
         let result = if name == "request_permissions" {
-            self.request_permissions_with_context(arguments, principal, context)
+            self.request_permissions_with_context(arguments)
         } else {
             self.dispatch(name, arguments, principal, trace_id)
                 .map(|value| ToolBackendResult::Complete(ensure_ok(value)))
@@ -1929,81 +1588,5 @@ mod tests {
         assert_eq!(result["isError"], false);
         assert!(result["content"].is_array());
         assert_eq!(result["structuredContent"]["tool_count"], 24);
-    }
-
-    #[test]
-    fn missing_exact_grants_map_to_redacted_public_permission_required() {
-        let internal = ReCtmError::new(
-            "NATIVE_PERMISSION_GRANT_SET_INCOMPLETE",
-            "internal ledger diagnostic",
-        )
-        .with_category(ErrorCategory::Permission)
-        .with_details(Map::from_iter([
-            (
-                "permission".to_owned(),
-                Value::String("inline_script".to_owned()),
-            ),
-            (
-                "permissions".to_owned(),
-                serde_json::json!(["inline_script", "long_timeout"]),
-            ),
-            (
-                "tool_name".to_owned(),
-                Value::String("exec_command".to_owned()),
-            ),
-        ]));
-        let public = public_native_authority_error(internal);
-        assert_eq!(public.code, "PERMISSION_REQUIRED");
-        assert_eq!(public.category, ErrorCategory::Permission);
-        assert_eq!(public.details.len(), 3);
-        assert_eq!(public.details["permission"], "inline_script");
-        assert_eq!(
-            public.details["permissions"],
-            serde_json::json!(["inline_script", "long_timeout"])
-        );
-        assert_eq!(public.details["tool_name"], "exec_command");
-        assert!(!public.details.contains_key("grant_id"));
-        assert!(!public.details.contains_key("arguments_sha256"));
-    }
-
-    #[test]
-    fn native_authority_mapper_preserves_security_errors() {
-        let error = ReCtmError::new("NATIVE_PERMISSION_GRANT_SET_AMBIGUOUS", "ambiguous")
-            .with_category(ErrorCategory::Permission);
-        let mapped = public_native_authority_error(error);
-        assert_eq!(mapped.code, "NATIVE_PERMISSION_GRANT_SET_AMBIGUOUS");
-    }
-
-    #[test]
-    fn malformed_missing_grant_metadata_fails_closed() {
-        for details in [
-            Map::new(),
-            Map::from_iter([(
-                "permission".to_owned(),
-                Value::String("inline_script".to_owned()),
-            )]),
-            Map::from_iter([
-                (
-                    "permission".to_owned(),
-                    Value::String("long_timeout".to_owned()),
-                ),
-                (
-                    "permissions".to_owned(),
-                    serde_json::json!(["inline_script", "long_timeout"]),
-                ),
-                (
-                    "tool_name".to_owned(),
-                    Value::String("exec_command".to_owned()),
-                ),
-            ]),
-        ] {
-            let error = ReCtmError::new("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE", "internal")
-                .with_category(ErrorCategory::Permission)
-                .with_details(details);
-            let mapped = public_native_authority_error(error);
-            assert_eq!(mapped.code, "NATIVE_PERMISSION_INTERNAL_ERROR");
-            assert_eq!(mapped.category, ErrorCategory::Internal);
-            assert!(mapped.details.is_empty());
-        }
     }
 }

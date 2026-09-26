@@ -1,20 +1,35 @@
 use serde::{Deserialize, Serialize};
 
+/// The Native execution profile.
+///
+/// MTM-017 retired the `safe` and `trusted` profiles; `dangerous` is the only
+/// supported mode. The single-variant enum keeps the `"dangerous"` wire value
+/// stable in reports and receipts.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum NativeMode {
-    Safe,
-    Trusted,
     Dangerous,
 }
 
 impl NativeMode {
+    /// Native mode names retired by MTM-017; parsers reject them explicitly.
+    pub const RETIRED: [&'static str; 2] = ["safe", "trusted"];
+
     #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
-            Self::Safe => "safe",
-            Self::Trusted => "trusted",
             Self::Dangerous => "dangerous",
+        }
+    }
+
+    /// Parse a configured Native mode, rejecting retired names explicitly.
+    pub fn parse(value: &str) -> Result<Self, String> {
+        match value {
+            "dangerous" => Ok(Self::Dangerous),
+            retired if Self::RETIRED.contains(&retired) => Err(format!(
+                "Native mode '{retired}' was removed in MTM-017; only 'dangerous' is supported."
+            )),
+            _ => Err("Native mode must be 'dangerous'.".to_owned()),
         }
     }
 }
@@ -241,6 +256,19 @@ mod tests {
         assert!(WorkflowState::Cancelled.terminal());
         assert!(WorkflowState::Failed.terminal());
         assert!(!WorkflowState::Verify.terminal());
+    }
+
+    #[test]
+    fn native_mode_accepts_only_dangerous() {
+        assert_eq!(NativeMode::parse("dangerous"), Ok(NativeMode::Dangerous));
+        for retired in NativeMode::RETIRED {
+            assert!(
+                NativeMode::parse(retired).is_err_and(|message| message.contains("MTM-017")),
+                "{retired} must be rejected as retired"
+            );
+        }
+        assert!(NativeMode::parse("Dangerous").is_err());
+        assert!(NativeMode::parse("").is_err());
     }
 
     #[test]

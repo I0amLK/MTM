@@ -118,27 +118,23 @@ pub fn build_toolchain_exposure_plan(
 ) -> Result<ToolchainExposurePlan, ReCtmError> {
     let policy = RootPolicy::new(workspace, forbidden_paths)?;
     let explicit = validate_explicit_toolchain_roots(explicit_roots, workspace, forbidden_paths)?;
-    let auto_discovery = matches!(mode, NativeMode::Trusted | NativeMode::Dangerous);
+    // The dangerous profile (the only mode since MTM-017) always discovers host
+    // toolchain roots from PATH; the roots remain read-only and policy-filtered.
+    let auto_discovery = match mode {
+        NativeMode::Dangerous => true,
+    };
     let inherited = host_path
         .map(ToOwned::to_owned)
         .or_else(|| env::var("PATH").ok())
         .unwrap_or_default();
-    let (discovered, path_entries) = if auto_discovery {
-        discover_path_view(&inherited, &policy)
-    } else {
-        (Vec::new(), Vec::new())
-    };
+    let (discovered, path_entries) = discover_path_view(&inherited, &policy);
     let mut combined = discovered.clone();
     combined.extend(explicit.iter().cloned());
     let read_only_roots = collapse_roots(&combined);
-    let base_path = if auto_discovery {
-        if path_entries.is_empty() {
-            DEFAULT_SANDBOX_PATH.to_owned()
-        } else {
-            join_paths(&path_entries)
-        }
-    } else {
+    let base_path = if path_entries.is_empty() {
         DEFAULT_SANDBOX_PATH.to_owned()
+    } else {
+        join_paths(&path_entries)
     };
     let sandbox_path = extend_path_for_explicit_roots(&base_path, &explicit);
     Ok(ToolchainExposurePlan {

@@ -156,6 +156,14 @@ impl Options {
                 .ok_or("explicit --profile is required")?
                 .as_str(),
         )?;
+        if profile == Profile::Permissions {
+            // The scripted consent/grant harness was retired with the grant ledger
+            // in MTM-017; sealed MTM-016 permission receipts still validate.
+            return Err(
+                "the permissions profile was retired by MTM-017; historical receipts remain valid"
+                    .into(),
+            );
+        }
         let sha256 = options.remove("--sha256").ok_or("--sha256 is required")?;
         if !valid_hash(&sha256) {
             return Err("SHA-256 must be 64 lowercase hexadecimal characters".into());
@@ -313,7 +321,6 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     let compiled_latex = options.profile == Profile::CompiledLatex;
     let resource = options.profile == Profile::Resource;
     let upgrade = options.profile == Profile::Upgrade;
-    let permissions = options.profile == Profile::Permissions;
     let corpus = options.profile == Profile::Corpus;
     let corpus_native = options.profile == Profile::CorpusNative;
     let install_sigkill = options.profile == Profile::InstallSigkill;
@@ -398,9 +405,6 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         stage = "protocol_test_runner";
         if upgrade {
             stage = "upgrade_test_runner";
-        }
-        if permissions {
-            stage = "permission_test_runner";
         }
         if install_sigkill {
             stage = "install_sigkill_test_runner";
@@ -504,15 +508,10 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
                 .arg("retrieval_runtime::exact_candidate_real_external_retrieval_and_redirect_policy")
                 .arg("--exact")
                 .env("MTM_TEST_RETRIEVAL_PROFILE", "1");
-        } else if permissions {
-            command
-                .arg("permission_runtime::exact_candidate_permission_patch_soak")
-                .arg("--exact")
-                .env("MTM_TEST_PERMISSION_PROFILE", "1");
         } else if native_commands {
             stage = "native_command_test_runner";
             command
-                .arg("native_command_runtime::exact_candidate_capable_host_native_commands_and_permission_soak")
+                .arg("native_command_runtime::exact_candidate_capable_host_native_commands_and_risk_soak")
                 .arg("--exact")
                 .env("MTM_TEST_NATIVE_COMMAND_PROFILE", "1");
         } else if compiled_latex {
@@ -575,8 +574,6 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             native_corpus::validate(&output.stdout, &snapshot.sha256)?
         } else if corpus {
             summary::validate_corpus(&output.stdout, &snapshot.sha256)?
-        } else if permissions {
-            summary::validate_permissions(&output.stdout, &snapshot.sha256)?
         } else if native_commands {
             summary::validate_native_commands(&output.stdout, &snapshot.sha256)?
         } else if compiled_latex {

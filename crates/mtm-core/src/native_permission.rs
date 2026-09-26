@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 use std::path::{Component, Path, PathBuf};
 
-use crate::command_policy::classify_current_command_permissions;
+use crate::command_policy::classify_command_permissions;
 use crate::patch::{PatchOperation, parse_patch};
 use crate::path_policy::validate_workspace_path;
 use mtm_contracts::{
@@ -159,15 +159,8 @@ impl NativePermissionRequest {
 /// This is profile data, not an explicit user grant, and it carries no workflow,
 /// project, verifier, or finalizer authority.
 #[must_use]
-pub fn native_mode_implicitly_grants(mode: NativeMode, kind: NativePermissionKind) -> bool {
+pub fn native_mode_implicitly_grants(mode: NativeMode, _kind: NativePermissionKind) -> bool {
     match mode {
-        NativeMode::Safe => false,
-        NativeMode::Trusted => matches!(
-            kind,
-            NativePermissionKind::Network
-                | NativePermissionKind::ShellExpansion
-                | NativePermissionKind::InlineScript
-        ),
         NativeMode::Dangerous => true,
     }
 }
@@ -900,11 +893,8 @@ pub fn classify_exec_permissions(
     // its regexes and ordering remain one source of truth.  argv is direct
     // execution, so shell expansion syntax in a literal argument is not a
     // shell risk.
-    let mut needs = classify_current_command_permissions(
-        NativeMode::Safe,
-        invocation.policy_text(),
-        invocation.environment(),
-    )?;
+    let mut needs =
+        classify_command_permissions(invocation.policy_text(), invocation.environment())?;
     if invocation.form() == ExecInvocationForm::Argv {
         needs.retain(|kind| *kind != NativePermissionKind::ShellExpansion);
     }
@@ -1555,29 +1545,7 @@ mod tests {
     #[test]
     fn mode_profiles_are_explicit_data_not_workflow_authority() {
         for kind in NativePermissionKind::ALL {
-            assert!(!native_mode_implicitly_grants(NativeMode::Safe, kind));
             assert!(native_mode_implicitly_grants(NativeMode::Dangerous, kind));
-        }
-        assert!(native_mode_implicitly_grants(
-            NativeMode::Trusted,
-            NativePermissionKind::Network
-        ));
-        assert!(native_mode_implicitly_grants(
-            NativeMode::Trusted,
-            NativePermissionKind::ShellExpansion
-        ));
-        assert!(native_mode_implicitly_grants(
-            NativeMode::Trusted,
-            NativePermissionKind::InlineScript
-        ));
-        for kind in [
-            NativePermissionKind::DestructiveCommand,
-            NativePermissionKind::LongTimeout,
-            NativePermissionKind::SensitiveEnv,
-            NativePermissionKind::PrivilegedExecutable,
-            NativePermissionKind::WriteGeneratedOrIgnored,
-        ] {
-            assert!(!native_mode_implicitly_grants(NativeMode::Trusted, kind));
         }
     }
 
@@ -1945,46 +1913,26 @@ mod tests {
             NativePermissionKind::Network,
             NativePermissionKind::WriteGeneratedOrIgnored,
         ]);
-        let safe =
-            EffectiveNativePolicy::evaluate(NativeMode::Safe, &invocation, &required, &explicit)?;
-        assert_eq!(safe.required(), &required);
-        assert_eq!(
-            safe.explicitly_granted(),
-            &BTreeSet::from([NativePermissionKind::Network])
-        );
-        assert_eq!(
-            safe.missing(),
-            &[
-                NativePermissionKind::SensitiveEnv,
-                NativePermissionKind::DestructiveCommand,
-                NativePermissionKind::ShellExpansion,
-                NativePermissionKind::InlineScript,
-                NativePermissionKind::LongTimeout,
-                NativePermissionKind::PrivilegedExecutable,
-            ]
-        );
-        assert!(!safe.is_authorized());
-        let trusted = EffectiveNativePolicy::derive(
-            NativeMode::Trusted,
-            &invocation,
-            &required,
-            &BTreeSet::new(),
-        )?;
-        assert_eq!(
-            trusted.implicitly_granted(),
-            &BTreeSet::from([
-                NativePermissionKind::Network,
-                NativePermissionKind::ShellExpansion,
-                NativePermissionKind::InlineScript,
-            ])
-        );
         let dangerous = EffectiveNativePolicy::evaluate(
             NativeMode::Dangerous,
             &invocation,
             &required,
-            &BTreeSet::new(),
+            &explicit,
         )?;
+        assert_eq!(dangerous.required(), &required);
+        assert_eq!(
+            dangerous.implicitly_granted(),
+            &required.iter().copied().collect::<BTreeSet<_>>()
+        );
+        assert!(dangerous.missing().is_empty());
         assert!(dangerous.authorized());
+        let repeated = EffectiveNativePolicy::evaluate(
+            NativeMode::Dangerous,
+            &invocation,
+            &required,
+            &explicit,
+        )?;
+        assert_eq!(repeated, dangerous);
         Ok(())
     }
 

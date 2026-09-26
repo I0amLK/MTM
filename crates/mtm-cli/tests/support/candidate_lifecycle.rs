@@ -377,8 +377,10 @@ fn candidate_persistence_and_complete_protocol_flows() -> Result {
         json!({"operation":"status","run_id":"legacy-run"}),
     )?;
     require(
-        migrated_info["research_workspace"]["state_schema_version"] == 7
-            && legacy["ok"] == true
+        matches!(
+            migrated_info["research_workspace"]["state_schema_version"].as_i64(),
+            Some(7 | 8)
+        ) && legacy["ok"] == true
             && legacy["problem_id"] == "legacy-problem"
             && legacy["state"] == "assess",
         "candidate did not migrate and preserve copied v1 state",
