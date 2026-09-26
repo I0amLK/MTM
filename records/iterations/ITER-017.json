@@ -829,18 +829,41 @@
       "evidence": "records/evidence/MTM-017/web-u23-final-repair.json",
       "evidence_sha256": "543a3f0e167fc9ed6839bd70e3e192ba88c48678abb4e6a028a2950ce5f8263c",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-WEB-U24-ROOT-BRANCH-PREPARE",
+      "recorded_at": "2026-09-26T16:41:02Z",
+      "scope": "real_web_u24_root_generator_to_first_branch_handoff",
+      "status": "two_branch_domains_prepared_first_branch_running",
+      "run_id": "run-u24-r1-geometric-series-6fe7b6e47b06",
+      "problem_id": "u24-r1-geometric-series",
+      "machine_state": "branch_run",
+      "snapshot_id": "round-1-2a297969",
+      "induction_plan_id": "plan-r1-1",
+      "algebraic_plan_id": "plan-r1-2",
+      "first_branch_id": "branch-1-1-825da2",
+      "first_branch_domain_id": "branch-domain-branch-1-1-825da2",
+      "second_branch_id": "branch-1-2-3c850f",
+      "second_branch_domain_id": "branch-domain-branch-1-2-3c850f",
+      "first_branch_status": "running",
+      "second_branch_status": "pending",
+      "branch_result_count": 0,
+      "join_result_present": false,
+      "evidence": "records/evidence/MTM-017/web-u24-root-branch-prepare.json",
+      "evidence_sha256": "61c07404bbbb88d17c5ed729af656f5608eb218ae5c2f0b2a89b38d72024366e",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Execute U24 real branch/join with at least two independent sealed branch domains and sibling-private denial, then continue U25 CAS and remaining corpus cases; U23-r1 repair is complete.",
+    "Complete U24 Branch A and Branch B in separate branch sessions, record sibling/join-only read denial for each, seal both before join, then continue U25 CAS and remaining corpus cases.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-26T16:29:30Z",
+  "updated_at": "2026-09-26T16:41:02Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -982,7 +1005,22 @@
       "final_artifact_sha256": "f9fbdc7fc215897af48e10cf6528b31c756099429efe375da3f74ab7ffacd928",
       "u23_r1_complete": true
     },
-    "next_test": "U24 real branch/join with sibling-private denial",
+    "u24_branch_join": {
+      "run_id": "run-u24-r1-geometric-series-6fe7b6e47b06",
+      "state": "branch_run",
+      "snapshot_id": "round-1-2a297969",
+      "branch_a_id": "branch-1-1-825da2",
+      "branch_a_domain_id": "branch-domain-branch-1-1-825da2",
+      "branch_a_plan_id": "plan-r1-1",
+      "branch_a_status": "running",
+      "branch_b_id": "branch-1-2-3c850f",
+      "branch_b_domain_id": "branch-domain-branch-1-2-3c850f",
+      "branch_b_plan_id": "plan-r1-2",
+      "branch_b_status": "pending",
+      "sealed_branch_count": 0,
+      "join_started": false
+    },
+    "next_test": "U24 Branch A independent induction route",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }

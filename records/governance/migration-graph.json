@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-26T16:29:30Z",
+  "updated_at": "2026-09-26T16:41:02Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1316,6 +1316,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "The second independent U23 verifier found no remaining gap. Server verdict became correct, finalization sealed proof hash f9fbdc7f..., and last submitted/verified/final artifact hashes all match the repaired bytes rather than the seeded draft. U23-r1 now satisfies the seeded-gap repair/recompile/reverify structure."
+    },
+    {
+      "event_id": "MEVT-086",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T16:41:02Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U24-r1 root generation prepared two distinct branch domains from induction and algebraic plans. Machine state is branch_run with induction running and algebraic pending on one frozen snapshot; no branch result or join result exists yet. The first branch is handed to a separate branch session next."
     }
   ],
   "receipt_contract": {
