@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "real_web_project_stage_c_independent_review_finalization_and_dependency_edge",
+  "observed_at": "2026-09-26T13:55:52Z",
+  "run_id": "run-web-memory-shifted-odd-sum-80f9bad30046",
+  "project_id": "web-memory-integer-identities",
+  "target_claim_id": "web-memory-shifted-odd-sum",
+  "operator_reported_review": {
+    "independent_review_complete": true,
+    "server_computed_verdict": "correct",
+    "repair_entered": false,
+    "dependency_revision_id": "web-memory-odd-sum-r2",
+    "critical_errors": 0,
+    "unresolved_gaps": 0
+  },
+  "machine_observed": {
+    "state": "done",
+    "status": "done",
+    "sealed": true,
+    "verdict": "correct",
+    "promotion_status": "promoted",
+    "promoted_revision_id": "web-memory-shifted-odd-sum-r2",
+    "promoted_fact_id": "02c10dd59da7e163",
+    "promoted_source_run_id": "run-web-memory-shifted-odd-sum-80f9bad30046",
+    "target_predecessors": ["c4ec50b45b618aa0"],
+    "base_fact_id": "c4ec50b45b618aa0",
+    "base_fact_predecessor_count": 0,
+    "active_project_fact_count": 2,
+    "project_fact_edge_count": 1,
+    "final_verified_artifact": "rethlas-output/run-web-memory-shifted-odd-sum-80f9bad30046/proof_verified.tex",
+    "final_verified_artifact_sha256": "cb5df8d04ce3c7a8a78d864683df67eea59f2b1d652efbb57cf7d9c93946e576",
+    "final_verified_artifact_mode": "0600",
+    "test_service_running": true
+  },
+  "interpretation": "The declared verified revision dependency became a predecessor of the final shifted target fact only. The existing base fact retained its original identity and remained predecessor-free.",
+  "credentials_recorded": false,
+  "capabilities_recorded": false,
+  "raw_private_logs_recorded": false,
+  "release_qualified": false
+}
