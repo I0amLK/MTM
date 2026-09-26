@@ -556,11 +556,34 @@
         "Only after verifier/finalizer completion may the final proof artifact and any promoted fact be counted as observed acceptance evidence.",
         "Full/repair/CAS, cross-run project memory, remaining corpus, operator-state-copy compatibility and release readiness remain separate."
       ]
+    },
+    {
+      "id": "MTM017-WEB-COMPACT-INDEPENDENT-REVIEW",
+      "recorded_at": "2026-09-26T12:45:44Z",
+      "scope": "real_web_compact_independent_verifier_and_finalizer",
+      "status": "compact_real_web_independent_review_passed",
+      "candidate_version": "0.6.0-preview.2",
+      "run_id": "run-compact-odd-sum-3d868d6cc457",
+      "operator_reported_independent_review": true,
+      "same_oauth_client_continuity_reported": true,
+      "server_computed_verdict": "correct",
+      "repair_entered": false,
+      "machine_state": "done",
+      "machine_sealed": true,
+      "final_artifact_sha256": "ceb83e22ddcab53ac89bd9e495a72868c0d2d7d1fc63c8e9516c71700900e866",
+      "project_linked": false,
+      "project_fact_promotion_expected": false,
+      "project_fact_promotion_observed": false,
+      "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
+      "evidence_sha256": "0dbf97daaf478774f0969b33d894487d75368e3dc66e0a932d7a25bd69f8a29b",
+      "credentials_recorded": false,
+      "capabilities_recorded": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Complete the independent verifier/finalizer phase for the first real-web compact run, then continue current-artifact real-client cross-run mathematical trials and all remaining corpus cases; Native coverage is 15/15, not a complete 90/90 corpus.",
+    "Execute the prepared project-linked real-web promotion/dependency-memory sequence, then continue full/repair/CAS and all remaining corpus cases; Native coverage is 15/15, not a complete 90/90 corpus.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
@@ -618,11 +641,16 @@
   "web_test_progress": {
     "session": "target/mtm017-web-sessions/web-q7gYA08c",
     "first_compact_run": "run-compact-odd-sum-3d868d6cc457",
-    "generator_state": "verify",
+    "generator_state": "done",
     "generator_latex_gate_passed": true,
-    "independent_verifier_pending": true,
-    "final_verified_artifact_present": false,
-    "evidence": "records/evidence/MTM-017/web-compact-generation-handoff.json",
+    "independent_verifier_pending": false,
+    "independent_verifier_passed": true,
+    "server_computed_verdict": "correct",
+    "final_verified_artifact_present": true,
+    "final_verified_artifact_sha256": "ceb83e22ddcab53ac89bd9e495a72868c0d2d7d1fc63c8e9516c71700900e866",
+    "project_fact_promotion_expected": false,
+    "next_test": "docs/MTM-017-PROJECT-MEMORY-WEB-TEST.md",
+    "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }
 }
