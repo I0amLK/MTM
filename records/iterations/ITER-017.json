@@ -644,18 +644,38 @@
       "typed_findings_visible": 0,
       "evidence": "records/evidence/MTM-017/web-project-stage-b-memory.json",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-WEB-PROJECT-STAGE-C-HANDOFF",
+      "recorded_at": "2026-09-26T13:42:26Z",
+      "scope": "real_web_project_stage_c_dependency_generation_to_verifier_handoff",
+      "status": "dependency_manifest_reached_verify_review_pending",
+      "run_id": "run-web-memory-shifted-odd-sum-80f9bad30046",
+      "project_id": "web-memory-integer-identities",
+      "target_claim_id": "web-memory-shifted-odd-sum",
+      "dependency_revision_id": "web-memory-odd-sum-r2",
+      "dependency_fact_id": "c4ec50b45b618aa0",
+      "machine_state": "verify",
+      "machine_latex_passed": true,
+      "promotion_status": "pending",
+      "shifted_promoted_fact_count": 0,
+      "base_fact_predecessor_count": 0,
+      "final_verified_artifact_present": false,
+      "evidence": "records/evidence/MTM-017/web-project-stage-c-verifier-handoff.json",
+      "evidence_sha256": "b5046f5a77f08f6f9c29457050b41ff417e28e57f737243edd895a5c4e0ddceb",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Execute project Stage C real dependency verification/promotion, then observe the resulting predecessor edge from a third run and continue full/CAS and all remaining corpus cases; Native coverage is 15/15, not a complete 90/90 corpus.",
+    "Complete Stage C independent verification/finalization and confirm the target-only predecessor edge, then observe the resulting dependency graph from a third run and continue full/CAS and all remaining corpus cases; Native coverage is 15/15, not a complete 90/90 corpus.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-26T13:27:10Z",
+  "updated_at": "2026-09-26T13:42:26Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -730,14 +750,24 @@
     "project_stage_b": {
       "run_id": "run-web-memory-shifted-odd-sum-80f9bad30046",
       "base_revision_id": "web-memory-shifted-odd-sum-r1",
-      "state": "assess",
-      "assessment_submitted": false,
+      "state": "verify",
+      "assessment_submitted": true,
       "project_memory_advisory_only": true,
       "fact_nodes": 1,
       "fact_edges": 0,
       "typed_findings_visible": 0
     },
-    "next_test": "project Stage C real dependency verification and promotion",
+    "project_stage_c": {
+      "run_id": "run-web-memory-shifted-odd-sum-80f9bad30046",
+      "state": "verify",
+      "latex_passed": true,
+      "dependency_revision_id": "web-memory-odd-sum-r2",
+      "dependency_fact_id": "c4ec50b45b618aa0",
+      "promotion_status": "pending",
+      "target_fact_count": 0,
+      "independent_verifier_pending": true
+    },
+    "next_test": "project Stage C independent verifier and finalizer",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }
