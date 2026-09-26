@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-26T16:15:13Z",
+  "updated_at": "2026-09-26T16:29:30Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1308,6 +1308,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "A separate U23 repair replaced the seeded draft with a different proof hash f9fbdc7f..., restored required LaTeX and returned the run to verify. The prior wrong verdict and original verified-proof hash remain recorded until the second independent verifier runs; no final artifact exists yet."
+    },
+    {
+      "event_id": "MEVT-085",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T16:29:30Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The second independent U23 verifier found no remaining gap. Server verdict became correct, finalization sealed proof hash f9fbdc7f..., and last submitted/verified/final artifact hashes all match the repaired bytes rather than the seeded draft. U23-r1 now satisfies the seeded-gap repair/recompile/reverify structure."
     }
   ],
   "receipt_contract": {
