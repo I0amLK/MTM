@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-26T12:45:44Z",
+  "updated_at": "2026-09-26T13:05:34Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1220,6 +1220,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "The separate real-web reviewer reported substantive checks with no critical error or gap; the server computed correct. Machine state confirms verify-to-finalize-to-done, sealed output SHA ceb83e22..., and no project fact as expected because the first run was not project-linked. A fixed project-linked promotion and cross-run dependency-memory test is prepared next."
+    },
+    {
+      "event_id": "MEVT-074",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T13:05:34Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Real-web project Stage A reached verify on run-web-memory-odd-sum-04d914f855b0 after a genuine LaTeX repair cycle. Machine state confirms the project/claim binding, pending promotion, unchanged open r1, zero verified revisions/facts before verifier finalization and no final artifact. Independent review is the next required step."
     }
   ],
   "receipt_contract": {

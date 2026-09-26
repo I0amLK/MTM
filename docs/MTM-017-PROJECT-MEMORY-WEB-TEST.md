@@ -6,6 +6,11 @@ completed non-project run to a project.
 
 ## Stage A: verifier-gated project promotion
 
+Current operator run: \`run-web-memory-odd-sum-04d914f855b0\`, with base
+revision \`web-memory-odd-sum-r1\`. Generation has reached \`verify\` after a real
+LaTeX repair cycle. Do not create a replacement run. The private workspace
+\`PROJECT-VERIFIER-HANDOFF.md\` is the next review locator.
+
 Create project \`web-memory-integer-identities\`. Create claim
 \`web-memory-odd-sum\` with statement:
 
