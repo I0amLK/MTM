@@ -7,7 +7,8 @@ use super::{
     ResearchStateError,
 };
 
-pub const MAX_RESEARCH_TASK_VIEW_BYTES: usize = 16_384;
+pub const MAX_RESEARCH_TASK_VIEW_BYTES: usize = 24_576;
+const MAX_RESEARCH_BASE_VIEW_BYTES: usize = 16_384;
 const MAX_VIEW_FRONTIER: usize = 5;
 const MAX_VIEW_ATTEMPTS: usize = 5;
 const MAX_VIEW_PARTIAL_RESULTS: usize = 5;
@@ -163,10 +164,10 @@ impl ResearchTaskView {
             truncated,
         };
         let bytes = serde_json::to_vec(&view).map_err(|_| ResearchStateError::Serialization)?;
-        if bytes.len() > MAX_RESEARCH_TASK_VIEW_BYTES {
+        if bytes.len() > MAX_RESEARCH_BASE_VIEW_BYTES {
             return Err(ResearchStateError::LimitExceeded {
                 kind: "research_task_view_bytes",
-                limit: MAX_RESEARCH_TASK_VIEW_BYTES,
+                limit: MAX_RESEARCH_BASE_VIEW_BYTES,
                 actual: bytes.len(),
             });
         }

@@ -539,7 +539,12 @@ fn overlay_proof_manifest(
                 "dependency_revision_ids":{"type":"array","items":{"type":"string","minLength":1}},
                 "reference_ids":{"type":"array","items":{"type":"string","minLength":1}},
                 "conditional_hypotheses":{"type":"array","items":{"type":"string","minLength":1}},
-                "computational_evidence":{"type":"array","items":{"type":"object","additionalProperties":true}}
+                "computational_evidence":{"type":"array","items":{"type":"object","additionalProperties":true}},
+                "facts":{"type":"array","minItems":1,"maxItems":32,"items":{"type":"object","required":["key","statement_tex","proof_tex","predecessors","glossary_introduces"],"additionalProperties":false,"properties":{
+                    "key":{"type":"string","minLength":1},"statement_tex":{"type":"string","minLength":1},"proof_tex":{"type":"string","minLength":1},
+                    "predecessors":{"type":"array","items":{"type":"string","minLength":1}},
+                    "glossary_introduces":{"type":"object"},"intuition":{"type":"string"}
+                }}}
             }
         },
         "example":{

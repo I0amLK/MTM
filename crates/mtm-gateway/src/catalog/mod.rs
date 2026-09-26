@@ -9,7 +9,7 @@ use sha2::{Digest, Sha256};
 mod schema;
 mod workflow_schema;
 
-pub const TOOL_CONTRACT_VERSION: &str = "mtm-tools-v9";
+pub const TOOL_CONTRACT_VERSION: &str = "mtm-tools-v10";
 pub const NATIVE_TOOL_COUNT: usize = 18;
 
 const DATABASE_WRITE_RECOVERY: &str = "New proof_manifest and reference_audit caller writes commit with their accepted-write checkpoint in one database transaction. A failed transaction retains neither the new record nor its count; committed writes can be included in the retained prefix. Historical opaque database journals remain unknown. Recovery never executes the action or grants verifier/finalizer authority. These database records are bounded to 1 MiB.";
