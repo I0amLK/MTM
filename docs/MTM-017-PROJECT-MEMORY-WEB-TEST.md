@@ -11,6 +11,17 @@ revision \`web-memory-odd-sum-r1\`. Generation has reached \`verify\` after a re
 LaTeX repair cycle. Do not create a replacement run. The private workspace
 \`PROJECT-VERIFIER-HANDOFF.md\` is the next review locator.
 
+Stage A is now complete. The independent verifier returned no gap, the server
+computed \`correct\`, and finalization promoted:
+
+- verified revision: \`web-memory-odd-sum-r2\`
+- fact locator: \`c4ec50b45b618aa0\`
+
+The original \`r1\` is now \`OPEN/SUPERSEDED\`; \`r2\` is
+\`VERIFIED/ACTIVE\` and points to the completed source run. The base fact has no
+predecessor. Continue with the private \`PROJECT-MEMORY-STAGE-B.md\` card before
+submitting any work in the next run.
+
 Create project \`web-memory-integer-identities\`. Create claim
 \`web-memory-odd-sum\` with statement:
 

@@ -602,18 +602,42 @@
       "credentials_recorded": false,
       "capabilities_recorded": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-WEB-PROJECT-STAGE-A-PROMOTION",
+      "recorded_at": "2026-09-26T13:20:06Z",
+      "scope": "real_web_project_stage_a_independent_review_finalization_and_promotion",
+      "status": "project_stage_a_verified_and_promoted",
+      "run_id": "run-web-memory-odd-sum-04d914f855b0",
+      "project_id": "web-memory-integer-identities",
+      "target_claim_id": "web-memory-odd-sum",
+      "server_computed_verdict": "correct",
+      "machine_state": "done",
+      "machine_sealed": true,
+      "promotion_status": "promoted",
+      "base_revision_id": "web-memory-odd-sum-r1",
+      "promoted_revision_id": "web-memory-odd-sum-r2",
+      "promoted_fact_id": "c4ec50b45b618aa0",
+      "promoted_fact_predecessor_count": 0,
+      "active_project_fact_count": 1,
+      "final_artifact_sha256": "7cd85844aa257598b4a2a4c7095df2a349efc7b756451658a287bf7ea4cc8a3c",
+      "evidence": "records/evidence/MTM-017/web-project-stage-a-independent-review.json",
+      "evidence_sha256": "5d788279e0d50a0f96eb282aaef8a36bd457c3e312c9e90ca0e0344380fa41de",
+      "credentials_recorded": false,
+      "capabilities_recorded": false,
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Complete independent review/finalization and verify promotion for project Stage A, then execute later-run project_memory/dependency stages and continue full/CAS and all remaining corpus cases; Native coverage is 15/15, not a complete 90/90 corpus.",
+    "Execute project Stage B later-run project_memory observation, then Stage C real dependency promotion and continue full/CAS and all remaining corpus cases; Native coverage is 15/15, not a complete 90/90 corpus.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-26T13:05:34Z",
+  "updated_at": "2026-09-26T13:20:06Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -675,14 +699,17 @@
     "project_stage_a": {
       "run_id": "run-web-memory-odd-sum-04d914f855b0",
       "base_revision_id": "web-memory-odd-sum-r1",
-      "state": "verify",
+      "promoted_revision_id": "web-memory-odd-sum-r2",
+      "promoted_fact_id": "c4ec50b45b618aa0",
+      "state": "done",
       "latex_passed": true,
       "repair_cycle_observed": true,
-      "promotion_status": "pending",
-      "project_fact_count": 0,
-      "independent_verifier_pending": true
+      "promotion_status": "promoted",
+      "project_fact_count": 1,
+      "independent_verifier_pending": false,
+      "independent_verifier_passed": true
     },
-    "next_test": "independent verifier for project Stage A",
+    "next_test": "project Stage B later-run initial project_memory observation",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }
