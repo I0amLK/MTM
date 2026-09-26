@@ -17,6 +17,13 @@ Development completion is not an installed upgrade, a release-qualified
 artifact, or completion of MTM-016's remaining release work. Historical
 MTM-016/MTM-015 receipts retain their original artifact and acceptance scopes.
 
+Update, 2026-09-26: the earlier MTM-016 remaining-work summary was stale. Its
+September 15 release is now lifecycle-reconciled, with the current missing older
+rollback artifact recorded separately in `docs/MTM-016-LIFECYCLE-RECONCILIATION.md`.
+Forward schema-8 machine qualification is recorded in
+`docs/MTM-017-ARTIFACT-QUALIFICATION.md`; neither reconciliation nor those partial
+profile passes authorize a new deployment.
+
 ## Forward acceptance remains explicit
 
 | Work | Required evidence before the corresponding release claim |

@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "qualification_only_optimized_snapshot_not_a_published_release",
+  "recorded_at": "2026-09-26T08:52:32Z",
+  "source_sha256": "61922484c1f969365660b052ab878250738542bf25bd870f40b3b6851ef1930d",
+  "build_source_commit": "4be97955eb99ff5a07d17e291188ff484afda723",
+  "qualification_harness_commit": "34c2b7df91a9d2a011cc84b10389aa6df830e49e",
+  "build_command": "cargo build --release --locked --offline -p mtm-cli",
+  "build_exit_code": 0,
+  "toolchain": "1.98.0",
+  "cargo_target_dir": "target/mtm-tool",
+  "candidate": {
+    "path": "target/mtm017-qualification/mtm-0.6.0-preview.1-20e5178bfb0b31633747b18343c92cc5f7f3e6e72680e586211416a9c25702b0/mtm",
+    "sha256": "20e5178bfb0b31633747b18343c92cc5f7f3e6e72680e586211416a9c25702b0",
+    "size_bytes": 13815576,
+    "release_info": {
+      "hidden_alias_count": 0,
+      "implementation": "rust",
+      "name": "mtm",
+      "production_authority": "rust",
+      "public_tool_count": 24,
+      "python_runtime_required": false,
+      "state_schema_version": 8,
+      "target_arch": "x86_64",
+      "target_os": "linux",
+      "tool_contract_version": "mtm-tools-v10",
+      "version": "0.6.0-preview.1",
+      "workflow_protocol_version": 3
+    }
+  },
+  "baseline": {
+    "path": "target/mtm017-baselines/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm",
+    "sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+    "size_bytes": 13602992,
+    "release_info": {
+      "hidden_alias_count": 0,
+      "implementation": "rust",
+      "name": "mtm",
+      "production_authority": "rust",
+      "public_tool_count": 24,
+      "python_runtime_required": false,
+      "state_schema_version": 7,
+      "target_arch": "x86_64",
+      "target_os": "linux",
+      "tool_contract_version": "mtm-tools-v9",
+      "version": "0.6.0-preview.1",
+      "workflow_protocol_version": 3
+    }
+  },
+  "staging_command": "cargo xtask dist with explicit binary, SHA-256 and separate workspace output roots",
+  "profiles_passed": [
+    "protocol",
+    "native_commands",
+    "compiled_latex",
+    "resource",
+    "corpus_native",
+    "install_sigkill",
+    "retrieval"
+  ],
+  "raw_report_seals": [
+    {
+      "path": "records/evidence/MTM-017/artifact-protocol-20e5178.json",
+      "sha256": "3b4928e41e4aaad776fe1009fd02ea17767e7cfd429444b150e03f9ec632045e"
+    },
+    {
+      "path": "records/evidence/MTM-017/artifact-native-commands-20e5178.json",
+      "sha256": "9e2741f0968cec991255abd85014a4374dfbe1111b30556ba365f5c8e4db7fa8"
+    },
+    {
+      "path": "records/evidence/MTM-017/artifact-compiled-latex-20e5178.json",
+      "sha256": "d77b166261029bc8df7a04fa7657bbb9aa1044759daa9121aaa5e1e97c136862"
+    },
+    {
+      "path": "records/evidence/MTM-017/artifact-resource-20e5178.json",
+      "sha256": "fc057fa8519061d7bbe110f5a8ddd84d767ccaa945eeccc5a39bd9c9b172cd8f"
+    },
+    {
+      "path": "records/evidence/MTM-017/artifact-corpus-native-20e5178.json",
+      "sha256": "675b554f5fd653b8436db2c5fa485bd104116134ce9722272a558ca8be97a57a"
+    },
+    {
+      "path": "records/evidence/MTM-017/artifact-install-sigkill-20e5178.json",
+      "sha256": "a43777709862cb8c16ce239c9f53b96addbd1e6e7d28c92ee1ac9325fa615d6d"
+    },
+    {
+      "path": "records/evidence/MTM-017/artifact-retrieval-20e5178.json",
+      "sha256": "edd04d94d99ebed82ec2db40bcf45a810604519f9103c654fbf85e063bd7aada"
+    }
+  ],
+  "native_corpus_trials": {
+    "passed": 15,
+    "failed": 0,
+    "scope": "U16-U20 only"
+  },
+  "protocol_assessments": {
+    "passed": 500,
+    "normal_invalid": 0,
+    "normal_rejections": 0
+  },
+  "distinct_publication_version_required": true,
+  "version_label_warning": "Schema 7 and schema 8 snapshots currently report the same package version. Digest equality, not version text, identifies tested bytes. A separately versioned artifact and revalidation are required before publication.",
+  "production_selectors_changed": false,
+  "production_state_modified": false,
+  "operator_state_copied": false,
+  "existing_sessions_restarted": false,
+  "performance_claim": false,
+  "release_qualified": false,
+  "limitations": [
+    "These seven profile passes are not the entire release checklist or full 90-trial corpus.",
+    "Scripted verifier and compiler fixtures do not establish independent mathematical review or real-client acceptance.",
+    "The existing paired upgrade harness fixes its baseline at schema 2; it was not falsely reused as schema-7 to schema-8 evidence.",
+    "The archived schema-7 baseline does not recover the missing older 0.5.0-preview.2 rollback binary."
+  ]
+}

@@ -264,18 +264,115 @@
       "production_state_modified": false,
       "release_qualified": false,
       "decision": "implementation_complete_release_not_qualified"
+    },
+    {
+      "id": "MTM017-ARTIFACT-QUALIFICATION-20E5178",
+      "recorded_at": "2026-09-26T08:52:32Z",
+      "scope": "seven_exact_artifact_machine_profiles_not_complete_release_qualification",
+      "status": "machine_profiles_passed_release_pending",
+      "source_sha256": "61922484c1f969365660b052ab878250738542bf25bd870f40b3b6851ef1930d",
+      "candidate_sha256": "20e5178bfb0b31633747b18343c92cc5f7f3e6e72680e586211416a9c25702b0",
+      "baseline_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+      "harness_commit": "34c2b7df91a9d2a011cc84b10389aa6df830e49e",
+      "snapshot": "records/evidence/MTM-017/artifact-snapshot-20e5178.json",
+      "commands": [
+        {
+          "command": "cargo xtask qualify --profile protocol --binary <explicit snapshot> --sha256 20e5178bfb0b31633747b18343c92cc5f7f3e6e72680e586211416a9c25702b0 --record",
+          "exit_code": 0,
+          "profile": "protocol"
+        },
+        {
+          "command": "cargo xtask qualify --profile native_commands --binary <explicit snapshot> --sha256 20e5178bfb0b31633747b18343c92cc5f7f3e6e72680e586211416a9c25702b0 --record",
+          "exit_code": 0,
+          "profile": "native_commands"
+        },
+        {
+          "command": "cargo xtask qualify --profile compiled_latex --binary <explicit snapshot> --sha256 20e5178bfb0b31633747b18343c92cc5f7f3e6e72680e586211416a9c25702b0 --record",
+          "exit_code": 0,
+          "profile": "compiled_latex"
+        },
+        {
+          "command": "cargo xtask qualify --profile resource --binary <explicit snapshot> --sha256 20e5178bfb0b31633747b18343c92cc5f7f3e6e72680e586211416a9c25702b0 --baseline <explicit schema-7 baseline> --baseline-sha256 f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034 --record",
+          "exit_code": 0,
+          "profile": "resource"
+        },
+        {
+          "command": "cargo xtask qualify --profile corpus_native --binary <explicit snapshot> --sha256 20e5178bfb0b31633747b18343c92cc5f7f3e6e72680e586211416a9c25702b0 --record",
+          "exit_code": 0,
+          "profile": "corpus_native"
+        },
+        {
+          "command": "cargo xtask qualify --profile install_sigkill --binary <explicit snapshot> --sha256 20e5178bfb0b31633747b18343c92cc5f7f3e6e72680e586211416a9c25702b0 --record",
+          "exit_code": 0,
+          "profile": "install_sigkill"
+        },
+        {
+          "command": "cargo xtask qualify --profile retrieval --binary <explicit snapshot> --sha256 20e5178bfb0b31633747b18343c92cc5f7f3e6e72680e586211416a9c25702b0 --record",
+          "exit_code": 0,
+          "profile": "retrieval"
+        }
+      ],
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/artifact-protocol-20e5178.json",
+          "sha256": "3b4928e41e4aaad776fe1009fd02ea17767e7cfd429444b150e03f9ec632045e"
+        },
+        {
+          "path": "records/evidence/MTM-017/artifact-native-commands-20e5178.json",
+          "sha256": "9e2741f0968cec991255abd85014a4374dfbe1111b30556ba365f5c8e4db7fa8"
+        },
+        {
+          "path": "records/evidence/MTM-017/artifact-compiled-latex-20e5178.json",
+          "sha256": "d77b166261029bc8df7a04fa7657bbb9aa1044759daa9121aaa5e1e97c136862"
+        },
+        {
+          "path": "records/evidence/MTM-017/artifact-resource-20e5178.json",
+          "sha256": "fc057fa8519061d7bbe110f5a8ddd84d767ccaa945eeccc5a39bd9c9b172cd8f"
+        },
+        {
+          "path": "records/evidence/MTM-017/artifact-corpus-native-20e5178.json",
+          "sha256": "675b554f5fd653b8436db2c5fa485bd104116134ce9722272a558ca8be97a57a"
+        },
+        {
+          "path": "records/evidence/MTM-017/artifact-install-sigkill-20e5178.json",
+          "sha256": "a43777709862cb8c16ce239c9f53b96addbd1e6e7d28c92ee1ac9325fa615d6d"
+        },
+        {
+          "path": "records/evidence/MTM-017/artifact-retrieval-20e5178.json",
+          "sha256": "edd04d94d99ebed82ec2db40bcf45a810604519f9103c654fbf85e063bd7aada"
+        },
+        {
+          "path": "records/evidence/MTM-017/artifact-snapshot-20e5178.json",
+          "sha256": "082888e4ada76b4853d7d664c71b12ab410b4cb31c87ba42a71f71ae52d20d36"
+        }
+      ],
+      "reports_archived_byte_for_byte": true,
+      "inherited_runner_label": "MTM-016 (unchanged in raw reports; candidate and source digests bind this schema-8 execution)",
+      "native_corpus_passed_trials": 15,
+      "capability_normal_roundtrips": 500,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false,
+      "remaining_acceptance": [
+        "Choose a distinct published schema-8 version, rebuild the candidate and revalidate the final versioned artifact; the current same-label snapshot is qualification-only.",
+        "Implement and review explicit schema-7 to schema-8 paired upgrade/resume/rollback fixtures, then separately authorize and qualify an operator-state copy.",
+        "Complete real-client and independent cross-run mathematical review, plus all remaining current-artifact corpus cases; the Native subset is 15/15, not 90/90.",
+        "Complete the current schema-8 release-input/readiness and deployment-authority path without repointing or weakening the frozen MTM-016 driver.",
+        "No production selector change or schema-8 production-data upgrade is authorized by these partial profile passes."
+      ]
     }
   ],
   "remaining_acceptance": [
-    "Fresh exact-artifact dangerous-only Native qualification and current release corpus.",
-    "Real web client, independent mathematical review and required compiled-LaTeX full/compact/repair flows.",
-    "Separately authorized copied-operator-state migration/resume/rollback and artifact-bound resource/install/rollback qualification.",
-    "No production selector change or schema-8 production-data upgrade is authorized by this development closeout."
+    "Choose a distinct published schema-8 version, rebuild the candidate and revalidate the final versioned artifact; the current same-label snapshot is qualification-only.",
+    "Implement and review explicit schema-7 to schema-8 paired upgrade/resume/rollback fixtures, then separately authorize and qualify an operator-state copy.",
+    "Complete real-client and independent cross-run mathematical review, plus all remaining current-artifact corpus cases; the Native subset is 15/15, not 90/90.",
+    "Complete the current schema-8 release-input/readiness and deployment-authority path without repointing or weakening the frozen MTM-016 driver.",
+    "No production selector change or schema-8 production-data upgrade is authorized by these partial profile passes."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-26T08:14:02Z",
+  "updated_at": "2026-09-26T08:52:32Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -292,5 +389,19 @@
       "path": "records/validation/mtm016-native-preflight.json",
       "sha256": "1b63674e333d1b8de9350e9a3ba9294cf59a93937ea587ad6333df9415da3de2"
     }
-  ]
+  ],
+  "artifact_qualification": {
+    "snapshot": "records/evidence/MTM-017/artifact-snapshot-20e5178.json",
+    "receipt_id": "MTM017-ARTIFACT-QUALIFICATION-20E5178",
+    "passed_profiles": [
+      "protocol",
+      "native_commands",
+      "compiled_latex",
+      "resource",
+      "corpus_native",
+      "install_sigkill",
+      "retrieval"
+    ],
+    "release_qualified": false
+  }
 }

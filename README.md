@@ -1,5 +1,11 @@
 # MTM
 
+The installed release baseline is the exact **schema-7 0.6.0-preview.1** artifact
+sealed by MTM-016 on September 15, 2026. Its lifecycle reconciliation and the
+currently missing older rollback binary are documented in
+`docs/MTM-016-LIFECYCLE-RECONCILIATION.md`. The schema-8 source below is a distinct
+development/qualification artifact even though its package label has not changed.
+
 ## Completed development checkpoint: MTM-017
 
 The current development contract uses **schema 8**, **`mtm-tools-v10`** and
@@ -22,6 +28,11 @@ zero failures and one inherited ignore; current-source capability validation
 passed 500 independent assessments with zero normal INVALID/rejections.
 The sealed receipt is `MREC-017`; remaining release work is explicit in
 `docs/MTM-017-RELEASE-HANDOFF.md`. The checkpoint is not release-qualified.
+
+Current digest-bound machine trials are tracked in
+`docs/MTM-017-ARTIFACT-QUALIFICATION.md`. A distinct versioned release, paired
+schema-7 upgrade tests, real-client/mathematical review and a separate release
+decision are still required before any schema-8 production upgrade.
 
 ## Earlier development checkpoints (historical contracts)
 
