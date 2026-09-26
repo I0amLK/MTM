@@ -370,7 +370,7 @@ fn v2_upgrade_preserves_rows_and_preupgrade_copy_and_is_idempotent() -> Result {
     std::fs::copy(&before, &copy)?;
     for _ in 0..2 {
         let store = StateStore::open(&copy)?;
-        assert_eq!(store.schema_version()?, 7);
+        assert_eq!(store.schema_version()?, 8);
         assert_eq!(store.get_run("old")?["problem_id"], "old-problem");
     }
     assert_eq!(std::fs::read(&before)?, bytes);

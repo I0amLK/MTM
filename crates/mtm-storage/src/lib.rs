@@ -11,8 +11,8 @@ pub use capability::{
 pub use store::{
     AtomicActionKind, BranchPreparation, BranchSeal, Clock, CreationIdentity,
     CreationInitialization, CreationReceipt, CreationReference, CreationReservation, CreationSlot,
-    FileEffectEvidence, FileImage, IdSource, PreparedBranch, ReferenceAuditWrite,
-    RestartableActionKind, StateStore, StoreRuntime, SubmissionDisposition, SubmissionExecution,
-    SubmissionReceipt, SubmissionRecovery, SubmissionReservation, SubmissionResult, SubmissionSlot,
-    SystemClock, SystemIdSource, TaskTransition, TransitionRun,
+    FactForPromotion, FileEffectEvidence, FileImage, FindingForStorage, IdSource, PreparedBranch,
+    ReferenceAuditWrite, RestartableActionKind, StateStore, StoreRuntime, SubmissionDisposition,
+    SubmissionExecution, SubmissionReceipt, SubmissionRecovery, SubmissionReservation,
+    SubmissionResult, SubmissionSlot, SystemClock, SystemIdSource, TaskTransition, TransitionRun,
 };

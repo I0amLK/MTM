@@ -339,7 +339,7 @@ fn schema6_preserves_legacy_journals_and_migration_rollback() -> Result {
         assert_eq!(opened.is_ok(), !collision);
         let db = Connection::open(&path)?;
         let version: i64 = db.query_row("PRAGMA user_version", [], |r| r.get(0))?;
-        assert_eq!(version, if collision { 5 } else { 7 });
+        assert_eq!(version, if collision { 5 } else { 8 });
         let count: i64 =
             db.query_row("SELECT COUNT(*) FROM step_write_journals", [], |r| r.get(0))?;
         assert_eq!(count, 0);

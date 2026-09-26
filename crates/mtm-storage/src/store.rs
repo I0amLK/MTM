@@ -8,7 +8,9 @@ use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use mtm_contracts::{ErrorCategory, ReCtmError};
 use rusqlite::types::ValueRef;
-use rusqlite::{Connection, OptionalExtension, Row, Transaction, TransactionBehavior, params};
+use rusqlite::{
+    Connection, OpenFlags, OptionalExtension, Row, Transaction, TransactionBehavior, params,
+};
 use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
 use time::OffsetDateTime;
@@ -18,12 +20,16 @@ use crate::schema::{
     SCHEMA_MIGRATIONS_TABLE_SQL, STATE_SCHEMA_VERSION, V1_WORKFLOW_SCHEMA_SQL,
     V2_RESEARCH_SCHEMA_SQL, V3_SUBMISSION_RECEIPTS_SQL, V4_RECOVERY_SQL,
     V5_CREATION_INITIALIZATION_SQL, V6_CALLER_WRITE_JOURNAL_SQL, V7_ATOMIC_ACTION_SQL,
+    V8_FACT_MEMORY_SQL,
 };
 
+#[path = "fact_memory.rs"]
+mod fact_memory;
 #[path = "mechanical_transitions.rs"]
 mod mechanical_transitions;
 #[path = "task_transitions.rs"]
 mod task_transitions;
+pub use fact_memory::{FactForPromotion, FindingForStorage};
 pub use mechanical_transitions::{BranchPreparation, PreparedBranch};
 pub use task_transitions::{BranchSeal, TaskTransition};
 
@@ -133,6 +139,30 @@ impl StateStore {
         Self::open_with_runtime(path, StoreRuntime::default())
     }
 
+    pub fn open_read_only(path: impl AsRef<Path>) -> Result<Self, ReCtmError> {
+        let path = path.as_ref().to_path_buf();
+        let connection = Connection::open_with_flags(&path, OpenFlags::SQLITE_OPEN_READ_ONLY)
+            .map_err(sql_error)?;
+        connection
+            .execute_batch("PRAGMA foreign_keys=ON; PRAGMA query_only=ON;")
+            .map_err(sql_error)?;
+        let version: i64 = connection
+            .query_row("PRAGMA user_version", [], |row| row.get(0))
+            .map_err(sql_error)?;
+        if version != STATE_SCHEMA_VERSION {
+            return Err(ReCtmError::new(
+                "STATE_SCHEMA_VERSION_MISMATCH",
+                "Read-only fact export requires a schema-8 database.",
+            )
+            .with_category(ErrorCategory::Conflict));
+        }
+        Ok(Self {
+            path,
+            connection: Mutex::new(connection),
+            runtime: StoreRuntime::default(),
+        })
+    }
+
     pub fn open_with_runtime(
         path: impl AsRef<Path>,
         runtime: StoreRuntime,
@@ -214,6 +244,10 @@ impl StateStore {
         if version == 6 {
             self.migrate_6_to_7()?;
             version = 7;
+        }
+        if version == 7 {
+            self.migrate_7_to_8()?;
+            version = 8;
         }
         if version != STATE_SCHEMA_VERSION {
             return Err(ReCtmError::new(
@@ -331,6 +365,16 @@ impl StateStore {
             tx.execute_batch(V7_ATOMIC_ACTION_SQL).map_err(sql_error)?;
             tx.execute("INSERT INTO schema_migrations(version,applied_at,description) VALUES(7,?,'Explicit atomic action enrollment; legacy work unchanged')", [now]).map_err(sql_error)?;
             tx.execute_batch("PRAGMA user_version=7").map_err(sql_error)?;
+            Ok(())
+        })
+    }
+
+    fn migrate_7_to_8(&self) -> Result<(), ReCtmError> {
+        let now = self.runtime.clock.now_iso()?;
+        self.immediate(|tx| {
+            tx.execute_batch(V8_FACT_MEMORY_SQL).map_err(sql_error)?;
+            tx.execute("INSERT INTO schema_migrations(version,applied_at,description) VALUES(8,?,'Verified fact graph and project findings')", [now]).map_err(sql_error)?;
+            tx.execute_batch("PRAGMA user_version=8").map_err(sql_error)?;
             Ok(())
         })
     }
@@ -1357,6 +1401,50 @@ impl StateStore {
         effective_conditions: &[String],
         manifest: &Value,
     ) -> Result<Value, ReCtmError> {
+        self.promote_run_inner(
+            run_id,
+            owner_id,
+            statement_tex,
+            proof_sha256,
+            effective_conditions,
+            manifest,
+            None,
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn promote_verified_run_with_facts(
+        &self,
+        run_id: &str,
+        owner_id: &str,
+        statement_tex: &str,
+        proof_sha256: &str,
+        effective_conditions: &[String],
+        manifest: &Value,
+        facts: &[FactForPromotion],
+    ) -> Result<Value, ReCtmError> {
+        self.promote_run_inner(
+            run_id,
+            owner_id,
+            statement_tex,
+            proof_sha256,
+            effective_conditions,
+            manifest,
+            Some(facts),
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn promote_run_inner(
+        &self,
+        run_id: &str,
+        owner_id: &str,
+        statement_tex: &str,
+        proof_sha256: &str,
+        effective_conditions: &[String],
+        manifest: &Value,
+        facts: Option<&[FactForPromotion]>,
+    ) -> Result<Value, ReCtmError> {
         let Some(project_run) = self.get_project_run(run_id, Some(owner_id))? else {
             return Ok(serde_json::json!({"status": "not_requested"}));
         };
@@ -1466,9 +1554,19 @@ impl StateStore {
                     [active_id],
                 ).map_err(sql_error)?;
             }
+            let fact_id = if let Some(facts) = facts {
+                let fact_id = fact_memory::insert_promoted_facts(transaction, project_id, run_id, facts, &now)?;
+                if normalize_sql(&facts.last().ok_or_else(internal_row_error)?.statement_tex) != normalize_sql(statement_tex) {
+                    return Err(ReCtmError::new("FACT_TARGET_MISMATCH", "Final fact does not match the promoted claim.").with_category(ErrorCategory::Validation));
+                }
+                fact_memory::verify_matching_findings(transaction, run_id, facts, &now)?;
+                Some(fact_id)
+            } else {
+                None
+            };
             transaction.execute(
-                "INSERT INTO claim_revisions(revision_id, claim_id, revision_number, statement_tex, evidence_status, lifecycle_status, source_run_id, proof_sha256, conditions_json, metadata_json, created_at) VALUES(?, ?, ?, ?, ?, 'ACTIVE', ?, ?, ?, ?, ?)",
-                params![revision_id, claim_id, revision_number, statement_tex, evidence_status, run_id, proof_sha256, python_string_array_json(&conditions)?, canonical_json(&serde_json::json!({"workflow_protocol_version": 2}))?, now],
+                "INSERT INTO claim_revisions(revision_id, claim_id, revision_number, statement_tex, evidence_status, lifecycle_status, source_run_id, proof_sha256, conditions_json, metadata_json, created_at, fact_id) VALUES(?, ?, ?, ?, ?, 'ACTIVE', ?, ?, ?, ?, ?, ?)",
+                params![revision_id, claim_id, revision_number, statement_tex, evidence_status, run_id, proof_sha256, python_string_array_json(&conditions)?, canonical_json(&serde_json::json!({"workflow_protocol_version": 2}))?, now, fact_id],
             ).map_err(sql_error)?;
             for dependency_id in &dependencies {
                 let exists: Option<String> = transaction.query_row(
@@ -1484,10 +1582,12 @@ impl StateStore {
                     .with_category(ErrorCategory::Validation)
                     .with_details(serde_json::json!({"revision_id": dependency_id})));
                 }
-                transaction.execute(
-                    "INSERT OR IGNORE INTO claim_edges(project_id, from_revision_id, to_revision_id, edge_type, created_at) VALUES(?, ?, ?, 'depends_on', ?)",
-                    params![project_id, revision_id, dependency_id, now],
-                ).map_err(sql_error)?;
+                if facts.is_none() {
+                    transaction.execute(
+                        "INSERT OR IGNORE INTO claim_edges(project_id, from_revision_id, to_revision_id, edge_type, created_at) VALUES(?, ?, ?, 'depends_on', ?)",
+                        params![project_id, revision_id, dependency_id, now],
+                    ).map_err(sql_error)?;
+                }
             }
             if let Some(active_id) = active_id {
                 transaction.execute(
@@ -1791,6 +1891,7 @@ fn normalize_row(mut value: Value, json_fields: &[&str]) -> Result<Value, ReCtmE
         "notation_checked",
         "source_checked",
         "independently_rederived",
+        "verifiable",
     ] {
         if let Some(raw) = object.get_mut(boolean) {
             if let Some(number) = raw.as_i64() {
