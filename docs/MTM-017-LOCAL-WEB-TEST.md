@@ -91,6 +91,22 @@ session path. Do not infer a latest directory or overwrite the previous trial.
 
 ## Evidence and remaining decisions
 
+### First real compact handoff
+
+The first operator-driven real-web compact run is
+`run-compact-odd-sum-3d868d6cc457`. Generation reached `verify` after the
+operator reported one `INVALID_PROOF_FACTS` manifest validation error and a
+manifest-only correction that did not replay the already retained proof write.
+Read-only machine inspection confirms the run is active in `verify`, the LaTeX
+gate passed, no verdict or seal exists, the final verified artifact is absent and
+no claim revision has a promoted fact link for this run.
+
+The private workspace contains `VERIFIER-HANDOFF.md`. It is deliberately
+non-authorizing and contains no capability or proof body. The next review must be
+performed in a separate conversation using the same already-registered OAuth
+client. That reviewer must inspect the actual verifier task and provide substantive
+findings; this handoff is not mathematical evidence and does not count as a pass.
+
 Only redacted preparation observations are committed. Operator logs, keys, OAuth
 storage, run data and actual proof files stay under the ignored private session.
 The setup verifies path isolation, pinned bytes, real Native prerequisites,

@@ -512,18 +512,62 @@
         "Operator real browser OAuth login, current-connection identity confirmation and actual workflow/mathematical trials.",
         "All previously recorded complete-corpus, independent-review, production-copy and release-readiness conditions remain separate."
       ]
+    },
+    {
+      "id": "MTM017-WEB-COMPACT-GENERATION-HANDOFF",
+      "recorded_at": "2026-09-26T12:45:44Z",
+      "scope": "real_web_compact_generation_to_independent_verifier_handoff",
+      "status": "generator_reached_verify_independent_review_pending",
+      "candidate_version": "0.6.0-preview.2",
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "run_id": "run-compact-odd-sum-3d868d6cc457",
+      "problem_id": "compact-odd-sum",
+      "route": "compact",
+      "operator_reported": {
+        "real_web_connection_used": true,
+        "dedicated_workspace_confirmed": true,
+        "manifest_error": "INVALID_PROOF_FACTS",
+        "manifest_only_correction_without_replaying_retained_proof_write": true,
+        "stopped_before_verifier_submission": true
+      },
+      "machine_observed": {
+        "state": "verify",
+        "status": "active",
+        "latex_passed": true,
+        "verdict": null,
+        "sealed": false,
+        "transition_sequence": 4,
+        "final_verified_artifact_present": false,
+        "verified_revision_fact_links": 0,
+        "test_service_running": true
+      },
+      "private_handoff": "target/mtm017-web-sessions/web-q7gYA08c/workspace/VERIFIER-HANDOFF.md",
+      "evidence": "records/evidence/MTM-017/web-compact-generation-handoff.json",
+      "evidence_sha256": "d76d7e71ea1c89e35f65777a0f3cffcae523b480cb0a2958379a96b5e35aa539",
+      "credentials_recorded": false,
+      "capabilities_recorded": false,
+      "proof_body_recorded": false,
+      "mathematical_verdict_recorded": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false,
+      "remaining_acceptance": [
+        "A separate reviewing conversation must reuse the same registered OAuth client, independently inspect the actual verifier task and submit substantive statement checks and findings.",
+        "Only after verifier/finalizer completion may the final proof artifact and any promoted fact be counted as observed acceptance evidence.",
+        "Full/repair/CAS, cross-run project memory, remaining corpus, operator-state-copy compatibility and release readiness remain separate."
+      ]
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Complete current-artifact real-client and independent cross-run mathematical trials and all remaining corpus cases; Native coverage is 15/15, not a complete 90/90 corpus.",
+    "Complete the independent verifier/finalizer phase for the first real-web compact run, then continue current-artifact real-client cross-run mathematical trials and all remaining corpus cases; Native coverage is 15/15, not a complete 90/90 corpus.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-26T10:22:59Z",
+  "updated_at": "2026-09-26T12:45:44Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -569,6 +613,16 @@
       "install_sigkill",
       "retrieval"
     ],
+    "release_qualified": false
+  },
+  "web_test_progress": {
+    "session": "target/mtm017-web-sessions/web-q7gYA08c",
+    "first_compact_run": "run-compact-odd-sum-3d868d6cc457",
+    "generator_state": "verify",
+    "generator_latex_gate_passed": true,
+    "independent_verifier_pending": true,
+    "final_verified_artifact_present": false,
+    "evidence": "records/evidence/MTM-017/web-compact-generation-handoff.json",
     "release_qualified": false
   }
 }
