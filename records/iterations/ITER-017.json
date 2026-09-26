@@ -753,18 +753,38 @@
       "evidence": "records/evidence/MTM-017/web-u22-independent-review.json",
       "evidence_sha256": "1f085fd35a58d030749246a1a1536f441a7ed9eda5797b86905e361ba5874b24",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-WEB-U23-SEEDED-DRAFT-HANDOFF",
+      "recorded_at": "2026-09-26T15:36:20Z",
+      "scope": "real_web_u23_compilable_seeded_draft_to_blind_independent_verifier",
+      "status": "seeded_compilable_draft_reached_verify_blind_review_pending",
+      "run_id": "run-u23-r1-uniform-continuity-gap-6bc910895a74",
+      "problem_id": "u23-r1-uniform-continuity-gap",
+      "machine_state": "verify",
+      "machine_latex_passed": true,
+      "server_verdict": null,
+      "machine_sealed": false,
+      "mechanical_latex_repair_cycles": 2,
+      "seeded_compilable_draft_sha256": "a770eed4b0f65095eb4defaf4c791bcd9c604b333969e503267872c31e95326f",
+      "proof_manifest_sha256": "fb9e260cd9ffb89e6420c92e56be476b9f46915ad5341f9f25e7dc916a283f6f",
+      "final_verified_artifact_present": false,
+      "blind_verifier_handoff": true,
+      "evidence": "records/evidence/MTM-017/web-u23-seeded-draft-handoff.json",
+      "evidence_sha256": "dfea4dafe4e3cec153898a325edd9a1b72a41c1a00acd18ff774efe1c50f7443",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Execute the U23 seeded repair challenge through independent gap detection, repair, recompilation and re-verification, then continue U24 branch/join, U25 CAS and remaining corpus cases; project-memory and one real U22 full/retrieval trial are complete.",
+    "Complete blind independent gap detection for the compilable U23 seeded draft, then perform a separate mathematical repair, recompilation and second independent verification; continue U24 branch/join, U25 CAS and remaining corpus cases afterward.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-26T15:27:09Z",
+  "updated_at": "2026-09-26T15:36:20Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -887,7 +907,18 @@
       "independent_verifier_passed": true,
       "final_artifact_sha256": "379ba13895c931c373af09bbdee6378b408aaaf89f22cf7435d3894cabe150e7"
     },
-    "next_test": "U23 seeded logical-gap repair challenge",
+    "u23_seeded_repair": {
+      "run_id": "run-u23-r1-uniform-continuity-gap-6bc910895a74",
+      "state": "verify",
+      "latex_passed": true,
+      "mechanical_latex_repair_cycles": 2,
+      "seeded_compilable_draft_sha256": "a770eed4b0f65095eb4defaf4c791bcd9c604b333969e503267872c31e95326f",
+      "proof_manifest_sha256": "fb9e260cd9ffb89e6420c92e56be476b9f46915ad5341f9f25e7dc916a283f6f",
+      "server_verdict": null,
+      "mathematical_repair_started": false,
+      "blind_independent_verifier_pending": true
+    },
+    "next_test": "U23 blind independent verifier gap detection",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }

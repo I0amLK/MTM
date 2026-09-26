@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "real_web_u23_compilable_seeded_draft_to_blind_independent_verifier",
+  "observed_at": "2026-09-26T15:36:20Z",
+  "run_id": "run-u23-r1-uniform-continuity-gap-6bc910895a74",
+  "problem_id": "u23-r1-uniform-continuity-gap",
+  "seeded_challenge": true,
+  "operator_reported": {
+    "intended_single_logical_gap_retained": true,
+    "verifier_findings_submitted": false,
+    "verdict_submitted": false,
+    "repair_hints_submitted": false
+  },
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "verdict": null,
+    "sealed": false,
+    "transition_sequence": 8,
+    "mechanical_latex_repair_cycles": 2,
+    "mechanical_latex_failure_class": "undefined_mathbb_before_amssymb",
+    "seeded_compilable_draft_sha256": "a770eed4b0f65095eb4defaf4c791bcd9c604b333969e503267872c31e95326f",
+    "proof_manifest_sha256": "fb9e260cd9ffb89e6420c92e56be476b9f46915ad5341f9f25e7dc916a283f6f",
+    "final_verified_artifact_present": false,
+    "test_service_running": true
+  },
+  "independence_boundary": {
+    "seed_description_removed_from_workspace_before_review": true,
+    "reviewer_handoff_reveals_exact_seeded_gap": false,
+    "reviewer_must_derive_findings_from_actual_proof": true
+  },
+  "credentials_recorded": false,
+  "capabilities_recorded": false,
+  "proof_body_recorded": false,
+  "raw_private_logs_recorded": false,
+  "release_qualified": false
+}

@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-26T15:27:09Z",
+  "updated_at": "2026-09-26T15:36:20Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1284,6 +1284,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "U22 independent real-web review completed with server verdict correct and a material SOURCE_VERIFIED audit of the sole bound reference. Audit proof and manifest hashes exactly match the finalized artifact and manifest; the run sealed without repair. U23 seeded logical-gap repair is prepared next."
+    },
+    {
+      "event_id": "MEVT-082",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T15:36:20Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U23 seeded compact draft reached verify with required LaTeX passing and no verifier verdict or final artifact. Two earlier repair cycles were mechanical LaTeX fixes for undefined mathbb and are explicitly excluded from the mathematical repair claim. The current compilable seeded draft hash is a770eed4..., and the exact seed description was removed from the workspace before blind independent review."
     }
   ],
   "receipt_contract": {
