@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-26T23:43:45Z",
+  "updated_at": "2026-09-26T23:50:59Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1332,6 +1332,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "U24 Branch A completed in its independent branch domain. The operator observed a ROLE_ACCESS_DENIED attempt against the join-only sealed-branch resource; machine state confirms Branch A sealed with result hash ec0bd951..., Branch B only running with assignment bytes, barrier still incomplete and no join result."
+    },
+    {
+      "event_id": "MEVT-088",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T23:50:59Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U24 Branch B completed in its independent branch domain with the same expected ROLE_ACCESS_DENIED join-only read. Machine state confirms both branches sealed, Branch B result hash ff1e4833..., transition reason branch_sealed_barrier_complete, state branch_join and no join result yet."
     }
   ],
   "receipt_contract": {

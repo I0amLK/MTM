@@ -872,18 +872,38 @@
       "evidence": "records/evidence/MTM-017/web-u24-branch-a-sealed.json",
       "evidence_sha256": "a6b163283b9e6eba6225531034bfdb98bd784d8cf4488e53474b7df16df6920c",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-WEB-U24-BRANCH-B-SEALED",
+      "recorded_at": "2026-09-26T23:50:59Z",
+      "scope": "real_web_u24_branch_b_isolation_and_barrier_complete",
+      "status": "both_branches_sealed_join_ready",
+      "run_id": "run-u24-r1-geometric-series-6fe7b6e47b06",
+      "branch_id": "branch-1-2-3c850f",
+      "domain_id": "branch-domain-branch-1-2-3c850f",
+      "plan_id": "plan-r1-2",
+      "sibling_private_read_denied": true,
+      "denial_code": "ROLE_ACCESS_DENIED",
+      "branch_result_sha256": "ff1e4833b5bf2a5754a67ae73c8307009d0ad4151bab0627cd77b58a7267b13e",
+      "machine_branch_status": "sealed",
+      "sealed_branch_count": 2,
+      "machine_state": "branch_join",
+      "join_result_present": false,
+      "evidence": "records/evidence/MTM-017/web-u24-branch-b-sealed.json",
+      "evidence_sha256": "ddde250fa19caf1174d48ddfbb647b7cffcda9cdab8dfa746a33580541fffe0b",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Complete U24 Branch B in a separate branch session with the same join-only read denial check, then verify both branches are sealed before join; continue U25 CAS and remaining corpus cases afterward.",
+    "Complete U24 join over exactly the two sealed branches, then assemble/compile and independently verify the final proof; continue U25 CAS and remaining corpus cases afterward.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-26T23:43:45Z",
+  "updated_at": "2026-09-26T23:50:59Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -1027,7 +1047,7 @@
     },
     "u24_branch_join": {
       "run_id": "run-u24-r1-geometric-series-6fe7b6e47b06",
-      "state": "branch_run",
+      "state": "branch_join",
       "snapshot_id": "round-1-2a297969",
       "branch_a_id": "branch-1-1-825da2",
       "branch_a_domain_id": "branch-domain-branch-1-1-825da2",
@@ -1038,11 +1058,14 @@
       "branch_b_id": "branch-1-2-3c850f",
       "branch_b_domain_id": "branch-domain-branch-1-2-3c850f",
       "branch_b_plan_id": "plan-r1-2",
-      "branch_b_status": "running",
-      "sealed_branch_count": 1,
-      "join_started": false
+      "branch_b_status": "sealed",
+      "branch_b_sibling_private_read_denied": true,
+      "branch_b_result_sha256": "ff1e4833b5bf2a5754a67ae73c8307009d0ad4151bab0627cd77b58a7267b13e",
+      "sealed_branch_count": 2,
+      "join_started": true,
+      "join_result_present": false
     },
-    "next_test": "U24 Branch B independent algebraic route",
+    "next_test": "U24 join over exactly two sealed branch results",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }
