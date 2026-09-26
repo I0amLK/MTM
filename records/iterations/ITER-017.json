@@ -478,6 +478,40 @@
         "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
         "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
       ]
+    },
+    {
+      "id": "MTM017-LOCAL-WEB-TEST-PREPARATION",
+      "recorded_at": "2026-09-26T10:22:59Z",
+      "scope": "isolated_local_deployment_preparation_not_operator_browser_acceptance",
+      "status": "local_test_service_ready_operator_browser_test_pending",
+      "candidate_version": "0.6.0-preview.2",
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "source_sha256": "0adec4b02a8b54fd20fb30c796c9959ccc346cc0f9336517fc47eafcb6951e02",
+      "product_and_harness_source_unchanged": true,
+      "launcher": "scripts/mtm017-web-session.sh",
+      "operator_guide": "docs/MTM-017-LOCAL-WEB-TEST.md",
+      "prepared_session": "target/mtm017-web-sessions/web-q7gYA08c",
+      "contract_tests_passed": true,
+      "native_preflight_passed": true,
+      "start_idempotency_stop_and_restart_checked": true,
+      "public_https_discovery_and_unauthenticated_rejection_passed": true,
+      "authenticated_public_smoke": "not_executed_platform_blocked_before_execution",
+      "operator_browser_test_performed": false,
+      "workflow_submissions_performed": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false,
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/local-web-test-preparation.json",
+          "sha256": "a579eef0e3446da08d2a4d34a644fb23fb05ac4631a3e99029225b9c76729eb6"
+        }
+      ],
+      "rollback": "Stop only the dedicated tmux test session and retain its data; production selectors and state never changed. Do not downgrade the schema-8 test database.",
+      "remaining_acceptance": [
+        "Operator real browser OAuth login, current-connection identity confirmation and actual workflow/mathematical trials.",
+        "All previously recorded complete-corpus, independent-review, production-copy and release-readiness conditions remain separate."
+      ]
     }
   ],
   "remaining_acceptance": [
@@ -489,7 +523,7 @@
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-26T09:36:34Z",
+  "updated_at": "2026-09-26T10:22:59Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",

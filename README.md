@@ -3,8 +3,16 @@
 The installed release baseline is the exact **schema-7 0.6.0-preview.1** artifact
 sealed by MTM-016 on September 15, 2026. Its lifecycle reconciliation and the
 currently missing older rollback binary are documented in
-`docs/MTM-016-LIFECYCLE-RECONCILIATION.md`. The schema-8 source below is a distinct
-development/qualification artifact even though its package label has not changed.
+`docs/MTM-016-LIFECYCLE-RECONCILIATION.md`. The schema-8 source below is the distinct
+preview.2 development/qualification candidate, not that installed release.
+
+## Local preview.2 web testing
+
+Use `scripts/mtm017-web-session.sh` for a separate, hash-pinned test instance,
+not the ordinary production `mtm` entry. Start/attach/stop instructions and the
+prepared session are in `docs/MTM-017-LOCAL-WEB-TEST.md`; the in-workspace test card
+is `docs/MTM-017-WEB-TEST-CARD.md`. This does not upgrade production data or claim
+real-browser or release acceptance.
 
 ## Completed development checkpoint: MTM-017
 

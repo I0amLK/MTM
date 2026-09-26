@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-26T09:36:34Z",
+  "updated_at": "2026-09-26T10:22:59Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1196,6 +1196,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "Versioned preview.2 source passed 633 tests with zero failures and one inherited ignore; all eight exact-artifact machine profiles passed at 13d7890, including 21 schema7-to-schema8 upgrade/restoration checks and 500/500 assessments. The earlier fixture failure remains sealed. Operator-state copy, independent client/mathematical trials, remaining corpus and complete release readiness remain pending; no production changes."
+    },
+    {
+      "event_id": "MEVT-071",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T10:22:59Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Prepared and started the exact preview.2 artifact in an independent owner-private web-test session. Launcher contracts, Native preflight, idempotent supervision, stop/restart, HTTPS metadata and unauthenticated MCP rejection passed. The test database starts empty. Actual operator browser login and mathematical trials remain pending; no product rebuild, production selector/state change or release claim."
     }
   ],
   "receipt_contract": {
