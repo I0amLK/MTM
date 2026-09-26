@@ -711,18 +711,37 @@
       "evidence": "records/evidence/MTM-017/web-project-final-memory-observation.json",
       "evidence_sha256": "362659ba95061eae0ff79ac457556b4bbdf8da2c59c5eb1c13bc078be10c0744",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-WEB-U22-GENERATION-HANDOFF",
+      "recorded_at": "2026-09-26T15:09:51Z",
+      "scope": "real_web_u22_full_retrieval_generation_to_independent_verifier_handoff",
+      "status": "full_retrieval_generation_reached_verify_review_pending",
+      "run_id": "run-u22-r1-chinese-remainder-5d8540bf8d79",
+      "problem_id": "u22-r1-chinese-remainder",
+      "workflow_mode": "full",
+      "machine_state": "verify",
+      "machine_latex_passed": true,
+      "manifest_reference_ids": ["ref-60ddb7444177a737"],
+      "reference_arxiv_id": "1001.1949",
+      "reference_theorem_id": "Lemma 2.20",
+      "reference_audit_count_before_verifier": 0,
+      "final_verified_artifact_present": false,
+      "evidence": "records/evidence/MTM-017/web-u22-generation-handoff.json",
+      "evidence_sha256": "0a247db758245f8798e6595f726f7d3f033f28f1cf94b4e93e51ac188715cad8",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Continue real-web full/retrieval/repair/CAS trials and all remaining corpus cases; the project-memory promotion/dependency/later-run path is now complete, while Native coverage remains 15/15 rather than a complete 90/90 corpus.",
+    "Complete U22 independent mathematical/reference review and finalization, then continue real-web repair/CAS and remaining corpus cases; the project-memory path is complete and U22 generation has reached verify with a real checked reference.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-26T14:05:43Z",
+  "updated_at": "2026-09-26T15:09:51Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -832,7 +851,17 @@
       "typed_findings_visible": 0,
       "project_memory_real_web_path_complete": true
     },
-    "next_test": "real-web full/retrieval/repair/CAS acceptance",
+    "u22_full_retrieval": {
+      "run_id": "run-u22-r1-chinese-remainder-5d8540bf8d79",
+      "state": "verify",
+      "latex_passed": true,
+      "reference_id": "ref-60ddb7444177a737",
+      "reference_arxiv_id": "1001.1949",
+      "reference_theorem_id": "Lemma 2.20",
+      "reference_audit_count": 0,
+      "independent_verifier_pending": true
+    },
+    "next_test": "U22 independent mathematical and reference verifier",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }
