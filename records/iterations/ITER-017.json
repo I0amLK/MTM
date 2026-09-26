@@ -730,18 +730,41 @@
       "evidence": "records/evidence/MTM-017/web-u22-generation-handoff.json",
       "evidence_sha256": "0a247db758245f8798e6595f726f7d3f033f28f1cf94b4e93e51ac188715cad8",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-WEB-U22-INDEPENDENT-REVIEW",
+      "recorded_at": "2026-09-26T15:27:09Z",
+      "scope": "real_web_u22_full_retrieval_independent_review_and_reference_audit",
+      "status": "u22_full_retrieval_reference_audit_passed",
+      "run_id": "run-u22-r1-chinese-remainder-5d8540bf8d79",
+      "problem_id": "u22-r1-chinese-remainder",
+      "server_computed_verdict": "correct",
+      "machine_state": "done",
+      "machine_sealed": true,
+      "reference_id": "ref-60ddb7444177a737",
+      "reference_disposition": "SOURCE_VERIFIED",
+      "reference_evidence_basis": "external_source_inspection",
+      "reference_assumptions_checked": true,
+      "reference_source_checked": true,
+      "reference_notation_checked": true,
+      "reference_independently_rederived": true,
+      "final_artifact_sha256": "379ba13895c931c373af09bbdee6378b408aaaf89f22cf7435d3894cabe150e7",
+      "proof_manifest_sha256": "0293b7675fa6604c2ca42f3a9818b5ac9fb303d495391774793e1ee735aa8196",
+      "evidence": "records/evidence/MTM-017/web-u22-independent-review.json",
+      "evidence_sha256": "1f085fd35a58d030749246a1a1536f441a7ed9eda5797b86905e361ba5874b24",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Complete U22 independent mathematical/reference review and finalization, then continue real-web repair/CAS and remaining corpus cases; the project-memory path is complete and U22 generation has reached verify with a real checked reference.",
+    "Execute the U23 seeded repair challenge through independent gap detection, repair, recompilation and re-verification, then continue U24 branch/join, U25 CAS and remaining corpus cases; project-memory and one real U22 full/retrieval trial are complete.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-26T15:09:51Z",
+  "updated_at": "2026-09-26T15:27:09Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -853,15 +876,18 @@
     },
     "u22_full_retrieval": {
       "run_id": "run-u22-r1-chinese-remainder-5d8540bf8d79",
-      "state": "verify",
+      "state": "done",
       "latex_passed": true,
       "reference_id": "ref-60ddb7444177a737",
       "reference_arxiv_id": "1001.1949",
       "reference_theorem_id": "Lemma 2.20",
-      "reference_audit_count": 0,
-      "independent_verifier_pending": true
+      "reference_audit_count": 1,
+      "reference_disposition": "SOURCE_VERIFIED",
+      "independent_verifier_pending": false,
+      "independent_verifier_passed": true,
+      "final_artifact_sha256": "379ba13895c931c373af09bbdee6378b408aaaf89f22cf7435d3894cabe150e7"
     },
-    "next_test": "U22 independent mathematical and reference verifier",
+    "next_test": "U23 seeded logical-gap repair challenge",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }

@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-26T15:09:51Z",
+  "updated_at": "2026-09-26T15:27:09Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1276,6 +1276,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "U22 real-web full workflow reached verify after actual theorem/paper retrieval. The manifest binds only checked reference ref-60ddb7444177a737 for arXiv:1001.1949 Lemma 2.20; database state confirms full-route progression, LaTeX pass, zero verifier audits so far, and no final artifact. Independent mathematical and reference audit is now required."
+    },
+    {
+      "event_id": "MEVT-081",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T15:27:09Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U22 independent real-web review completed with server verdict correct and a material SOURCE_VERIFIED audit of the sole bound reference. Audit proof and manifest hashes exactly match the finalized artifact and manifest; the run sealed without repair. U23 seeded logical-gap repair is prepared next."
     }
   ],
   "receipt_contract": {
