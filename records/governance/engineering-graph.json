@@ -37,6 +37,7 @@
       {"source": "mtm-runtime", "target": "mtm-gateway"},
       {"source": "mtm-runtime", "target": "mtm-workflow"},
       {"source": "mtm-cli", "target": "mtm-contracts"},
+      {"source": "mtm-cli", "target": "mtm-storage"},
       {"source": "mtm-cli", "target": "mtm-runtime"}
     ]
   },
