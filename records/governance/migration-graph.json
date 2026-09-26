@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-26T15:36:20Z",
+  "updated_at": "2026-09-26T16:15:13Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1292,6 +1292,22 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "U23 seeded compact draft reached verify with required LaTeX passing and no verifier verdict or final artifact. Two earlier repair cycles were mechanical LaTeX fixes for undefined mathbb and are explicitly excluded from the mathematical repair claim. The current compilable seeded draft hash is a770eed4..., and the exact seed description was removed from the workspace before blind independent review."
+    },
+    {
+      "event_id": "MEVT-083",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T15:59:27Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The blind U23 verifier independently located the seeded quantifier gap. Persisted verification records server verdict wrong with one located gap and concrete repair guidance; the normalized report was copied into generation-visible memory. The operator reported transition to repair with no verifier proof write."
+    },
+    {
+      "event_id": "MEVT-084",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T16:15:13Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "A separate U23 repair replaced the seeded draft with a different proof hash f9fbdc7f..., restored required LaTeX and returned the run to verify. The prior wrong verdict and original verified-proof hash remain recorded until the second independent verifier runs; no final artifact exists yet."
     }
   ],
   "receipt_contract": {
