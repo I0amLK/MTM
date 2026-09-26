@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0.0",
   "project": "MTM-reboot",
-  "version": "0.5.0-preview.2",
-  "status": "MTM-017-development-complete-release-pending",
-  "updated_at": "2026-09-26T08:14:02Z",
+  "version": "0.6.0-preview.1",
+  "status": "development-milestones-complete-schema8-release-pending",
+  "updated_at": "2026-09-26T08:39:36Z",
   "source_baseline": "records/governance/source-baseline.json",
   "current_production_authority": "rust",
   "rust_production_components": 7,
@@ -16,12 +16,12 @@
   "python_production_runtime_retired": true,
   "re_ctm_separate_project_installed": true,
   "milestone_count": 17,
-  "current_milestone": "MTM-016",
-  "completed_milestones": ["MTM-001", "MTM-002", "MTM-003", "MTM-004", "MTM-005", "MTM-006", "MTM-007", "MTM-008", "MTM-009", "MTM-010", "MTM-011", "MTM-012", "MTM-013", "MTM-014", "MTM-015", "MTM-017"],
+  "current_milestone": null,
+  "completed_milestones": ["MTM-001", "MTM-002", "MTM-003", "MTM-004", "MTM-005", "MTM-006", "MTM-007", "MTM-008", "MTM-009", "MTM-010", "MTM-011", "MTM-012", "MTM-013", "MTM-014", "MTM-015", "MTM-016", "MTM-017"],
   "next_milestone": null,
   "claims": [
-    "CURRENT DEVELOPMENT: MTM-017 is development-complete (A0/A1/A3), with five reviewable commits, final-source 628/0 workspace tests plus one inherited ignore, and current-source 500/500 capability assessments with zero normal INVALID/rejections. Source SHA-256 is 61922484c1f969365660b052ab878250738542bf25bd870f40b3b6851ef1930d. Sealed receipts and explicit forward acceptance are in ITER-017 and docs/MTM-017-RELEASE-HANDOFF.md. No installed selector, production database or historical failure was rewritten. MTM-016 remains separately in progress; this is not release qualification.",
-    "CURRENT DEVELOPMENT: MTM-016 is approved and in progress on work/mtm016-native-usability from b3ab147. The installed 0.5.0-preview.2 release is not changed. Rust-native maintenance, current Re-CTM compatibility retirement and tool usability fixes are pending their own source/security/target qualification; MTM-015 records below remain historical release facts.",
+    "CURRENT DEVELOPMENT: MTM-017 is development-complete at source 61922484c1f969365660b052ab878250738542bf25bd870f40b3b6851ef1930d; its 628-test source gate and 500/500 capability gate remain sealed. Schema-8 artifact release acceptance is separate and pending.",
+    "CURRENT RELEASE: MTM-016 0.6.0-preview.1 was qualified and switched on September 15, 2026, under preview-release.json and sealing commit 54a11f2. Both installed selectors currently match f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034. Lifecycle records were reconciled without rerunning cutover. The recorded previous 0.5.0-preview.2 rollback binary is missing now; current rollback readiness is false. Older claims below are historical stage records, not the current selector state.",
     "CURRENT: MTM-015 is completed and qualified 0.5.0-preview.2 is selected at both ordinary mtm command entries with exact SHA-256 2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a. Exact target qualification passed 15/15 checks, content-addressed installed-candidate stage passed 9/9, and the accepted real Quick Tunnel web-client receipt records five paired compact assess submissions with zero CAPABILITY_INVALID diagnostics and zero submission rejections. The final release receipt passed 11/11 checks, including real preview.2 cutover, preview.1 rollback, preview.2 recutover and a 60.148-second/506-iteration post-recutover permission soak. Stable 0.4.0 remains preserved at SHA-256 3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3; production state was not rewritten and existing sessions were not restarted. The earlier rejected web-client and first rollout-tooling attempts remain preserved rather than relabelled as passes.",
     "CURRENT: MTM-015 real web-client acceptance exposed an RFC 9728 interoperability blocker before any Rethlas capability was issued: the client derived protected-resource metadata for the configured /mcp resource, while MTM exposed only the historical origin-level metadata and required OAuth resource=origin. Gateway repair commit 46a587fa2bc5f58c3be03c23d95a302313e04013 now preserves the legacy origin metadata while adding /.well-known/oauth-protected-resource/mcp, binds the public MCP authorization-code/token resource to the exact /mcp URL, advertises the path-aware metadata URL in WWW-Authenticate, and keeps authorization-server issuer authority at the origin. Gateway unit tests and a full loopback DCR/PKCE resource=/mcp token-and-MCP-ping probe pass. The previously qualified preview.2 SHA-256 3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707 is superseded by this functional change and is no longer a release candidate; fresh exact target/stage/web-client qualification is required. Production remains on immutable 0.5.0-preview.1 SHA-256 2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036 with stable 0.4.0 rollback SHA-256 3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3.",
     "MTM-015 preview.2 candidate-stage evidence SHA-256 is 082d345b54434504b49dcebceec63e7bbb9cbc5164fe2acfc728c477f284b120. The exact binary is installed only at the content-addressed candidate path /home/lk/.local/share/mtm/candidates/MTM-015/3304bddde18a75240b68fe614ecf6752e04ba05dcaacc60999e5d0658956a707/mtm and passed target-evidence binding, exact rebuild identity, public server identity, OAuth/MCP capability roundtrip, persisted-secret owner-only checks, unchanged selectors, and preserved stable rollback artifact.",
@@ -107,6 +107,7 @@
     "records/governance/authority-inventory.json records every MTM production authority as Rust, with Bubblewrap retained only as the Linux kernel-isolation actuator; release evidence proves MTM uses mtm / MTM_* / ~/.mtm while Re-CTM uses re-ctm / RE_CTM_* / ~/.re-ctm."
   ],
   "manual_pending": [
+    "Recover and verify the recorded 0.5.0-preview.2 binary before claiming that historical rollback target is currently available.",
     "MTM-017 development is complete but exact-artifact Native/corpus, real client, independent mathematics, compiled LaTeX, copied operator state and resource/install/rollback release acceptance remain separate; see docs/MTM-017-RELEASE-HANDOFF.md.",
     "Already running MTM TUI/serve processes are not restarted by selector rollout. Restart the desired session manually to adopt 0.5.0-preview.2; both ordinary command entries already select it.",
     "Magma remains blocked by the host license and is not counted as functional validation. Other clients/platforms and long-duration soak remain separately qualified; explicit grants require a modern form-capable client.",

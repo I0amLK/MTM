@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-26T08:14:02Z",
+  "updated_at": "2026-09-26T08:39:36Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -549,7 +549,7 @@
     {
       "id": "MTM-016",
       "title": "Rust-native maintenance and usable tools",
-      "status": "in_progress",
+      "status": "completed",
       "priority": "P1",
       "production_authority_before": "rust",
       "production_authority_after": "rust",
@@ -635,7 +635,7 @@
     {"source": "MTM-016", "target": "MTM-015"},
     {"source": "MTM-017", "target": "MTM-016"}
   ],
-  "todo": ["MTM-016"],
+  "todo": [],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -1164,6 +1164,14 @@
       "status_before": "in_progress",
       "status_after": "completed",
       "summary": "Completed MTM-017 development A0/A1/A3 on final source 61922484c1f969365660b052ab878250738542bf25bd870f40b3b6851ef1930d: 628 workspace tests passed (one inherited ignore), current-source 500/500 capability regression passed, closing review fixes/regressions and four implementation commits plus records closeout retained. Exact-artifact release and MTM-016 completion remain separate; no production deployment."
+    },
+    {
+      "event_id": "MEVT-067",
+      "milestone_id": "MTM-016",
+      "at": "2026-09-26T08:39:36Z",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "summary": "Reconciled the already sealed September 15 preview release with unchanged receipt/hash/lineage and matching installed selectors. No deployment rerun. The previous 0.5.0-preview.2 rollback binary is now missing; this operational gap and schema-8 release work remain explicit."
     }
   ],
   "receipt_contract": {
@@ -3240,6 +3248,98 @@
       "production_state_modified": false,
       "release_qualified": false,
       "decision": "implementation_complete_release_not_qualified"
+    },
+    {
+      "receipt_id": "MREC-016",
+      "milestone_id": "MTM-016",
+      "started_at": "2026-09-07T14:54:38Z",
+      "completed_at": "2026-09-26T08:39:36Z",
+      "release_performed_at": "2026-09-15T07:01:38Z",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "docs(governance): reconcile the sealed MTM-016 release [MTM-016]",
+      "files_changed": [
+        "records/iterations/ITER-016.json",
+        "records/governance/migration-graph.json",
+        "records/governance/project-progress.json",
+        "records/evidence/MTM-016/lifecycle-reconciliation-20260926.json",
+        "docs/MTM-016-LIFECYCLE-RECONCILIATION.md"
+      ],
+      "commands": [
+        {
+          "command": "read-only verification of sealed release, Git source lineage, evidence hashes, installed selectors and --version",
+          "exit_code": 0,
+          "result": "The September 15 release and all 14 manifest evidence hashes match; both installed selectors match the exact released artifact. The previous rollback binary is missing and remains an explicit operational risk."
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "scope": "historical exact 0.6.0-preview.1 release only",
+          "evidence": [
+            "records/evidence/MTM-016/source-check-f7-host-339a5cb.json"
+          ]
+        },
+        "A1": {
+          "passed": true,
+          "scope": "historical exact 0.6.0-preview.1 release only",
+          "evidence": [
+            "records/evidence/MTM-016/preview-release.json"
+          ]
+        },
+        "A3": {
+          "passed": true,
+          "scope": "historical exact 0.6.0-preview.1 release only",
+          "evidence": [
+            "records/evidence/MTM-016/preview-release.json"
+          ]
+        },
+        "A4": {
+          "passed": true,
+          "scope": "historical exact 0.6.0-preview.1 release only",
+          "evidence": [
+            "records/evidence/MTM-016/preview-release.json"
+          ]
+        },
+        "A5": {
+          "passed": true,
+          "scope": "historical exact 0.6.0-preview.1 release only",
+          "evidence": [
+            "records/evidence/MTM-016/preview-release.json"
+          ]
+        }
+      },
+      "behavior_before": "The preview release had been sealed in commit 54a11f2, but lifecycle summaries still described the preceding unexecuted release driver.",
+      "behavior_after": "Lifecycle summaries acknowledge the already qualified schema-7 preview release and separate schema-8 development from future release qualification.",
+      "risk_review": "No historical receipt is altered or new cutover attempted. Current missing rollback bytes are not hidden by the historical successful rollback drill.",
+      "rollback": "For this records-only reconciliation append a correcting event/receipt rather than deleting sealed evidence. Do not attempt live release rollback until the exact recorded previous artifact has been recovered and verified.",
+      "manual_pending": [
+        "Recover and verify the recorded 0.5.0-preview.2 binary before claiming that historical rollback target is currently available.",
+        "Qualify schema-8 artifacts independently; this historical closure supplies no MTM-017 release permission."
+      ],
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-016/preview-release.json",
+          "sha256": "cc248a1f0e83c10992a0c23bd2de4fd86913b829d16b48803ed5353498b4a288"
+        },
+        {
+          "path": "records/evidence/MTM-016/source-check-f7-host-339a5cb.json",
+          "sha256": "9bf75b63f7c19c6d5982ce812c17ebda367cc81a75523f1cc7f8e4249d00e89b"
+        },
+        {
+          "path": "records/evidence/MTM-016/lifecycle-reconciliation-20260926.json",
+          "sha256": "9988d973770cbd5a95c15f4dc4a715d2ed772dcf4be77485c937de9d24401efd"
+        }
+      ],
+      "release_qualified": true,
+      "qualified_version": "0.6.0-preview.1",
+      "candidate_binary_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+      "current_rollback_ready": false,
+      "production_selector_changed_this_reconciliation": false,
+      "production_state_modified": false,
+      "decision": "completed_preview_release_governance_reconciled_with_rollback_gap"
     }
   ]
 }
