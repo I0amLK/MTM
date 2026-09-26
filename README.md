@@ -14,6 +14,11 @@ tests a real schema-7 baseline and preview.2 candidate on disposable state; see
 `docs/MTM-017-SCHEMA8-UPGRADE.md`. Earlier same-label snapshot results below retain
 their original artifact hashes and are not reused for the new candidate.
 
+The versioned candidate now passes the complete 633-test source gate (zero failed,
+one inherited ignore) and all eight explicit machine profiles, including 21 upgrade
+checks and 500/500 assessments. See `docs/MTM-017-PREVIEW2-QUALIFICATION.md` for the
+exact identities, retained failed attempt and remaining release conditions.
+
 The current development contract uses **schema 8**, **`mtm-tools-v10`** and
 dangerous-only Native execution. Bubblewrap and workflow/finalizer authority
 remain separate. Verified final proofs can promote immutable project facts;

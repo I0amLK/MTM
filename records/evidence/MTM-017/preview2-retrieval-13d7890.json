@@ -1,0 +1,76 @@
+{
+  "baseline_launched": null,
+  "baseline_sha256": null,
+  "candidate_launched": true,
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "delivery": "F4",
+  "harness_source_identity": {
+    "after_sha256": "0adec4b02a8b54fd20fb30c796c9959ccc346cc0f9336517fc47eafcb6951e02",
+    "before_sha256": "0adec4b02a8b54fd20fb30c796c9959ccc346cc0f9336517fc47eafcb6951e02",
+    "commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+    "unchanged": true
+  },
+  "milestone": "MTM-016",
+  "original_and_snapshot_unchanged": true,
+  "passed": true,
+  "pending": [
+    "compiled-LaTeX research workflow",
+    "independent mathematical verification",
+    "browser/human consent",
+    "Native target/resource gates",
+    "full corpus and release gates"
+  ],
+  "production_selectors_changed": false,
+  "production_state_modified": false,
+  "profile": "retrieval",
+  "python_invoked": false,
+  "raw_test_output_recorded": false,
+  "recorded_unix_seconds": 1790415124,
+  "release_qualified": false,
+  "runner": {
+    "child_reaped": true,
+    "elapsed_ms": 8846,
+    "exit_code": 0,
+    "output_limit_exceeded": false,
+    "pipes_closed": true,
+    "raw_output_recorded": false,
+    "signal": null,
+    "stderr_bytes_retained": 179,
+    "stdout_bytes_retained": 932,
+    "timed_out": false
+  },
+  "schema_version": "1.0.0",
+  "scope": "exact_candidate_real_external_retrieval_not_release",
+  "selector_changed": false,
+  "summaries": {
+    "retrieval": {
+      "actual_external_retrieval": true,
+      "binary_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "compiled_latex_tested": false,
+      "https_only": true,
+      "human_consent_tested": false,
+      "independent_source_count": 2,
+      "lookup_result_count": 1,
+      "native_execution_tested": false,
+      "ok": true,
+      "paper_result_count": 2,
+      "production_changed": false,
+      "raw_credentials_recorded": false,
+      "raw_retrieval_bodies_recorded": false,
+      "redirect_policy_checked": true,
+      "redirect_rejected_code": "RESEARCH_REDIRECT_DENIED",
+      "release_qualified": false,
+      "request_count": 4,
+      "schema": "mtm-retrieval-runtime-v1",
+      "sources": [
+        "leansearch.net",
+        "api.openalex.org"
+      ],
+      "successful_external_requests": 3,
+      "theorem_result_count": 2,
+      "web_client_tested": false
+    }
+  },
+  "test_stderr_sha256": "1eccdb1c3e41ddacc3e695addcdc6f91f09fe58fcae2cd059c3f86e4fc06d127",
+  "test_stdout_sha256": "17b193aa871522da078a231ec1b8ad3200693f5519876d3e015d1d1b5c8285b7"
+}

@@ -1,5 +1,14 @@
 # MTM-017 development-to-release handoff
 
+## Current versioned checkpoint
+
+`0.6.0-preview.2` now has its own artifact identity and has passed the dedicated
+schema-7 upgrade profile plus seven reexecuted machine profiles. See
+`docs/MTM-017-PREVIEW2-QUALIFICATION.md` and the appended ITER-017 receipt.
+The earlier development and same-label snapshot identities below are historical.
+Real operator-state-copy compatibility, independent client/mathematical trials,
+remaining corpus and complete schema-8 release readiness remain pending.
+
 ## Checkpoint boundary
 
 MTM-017 delivers dangerous-only Native execution and schema-8 project fact

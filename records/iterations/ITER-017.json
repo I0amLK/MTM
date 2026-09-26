@@ -396,19 +396,100 @@
       "production_selector_changed": false,
       "operator_state_copied": false,
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-PREVIEW2-QUALIFICATION-13D7890",
+      "recorded_at": "2026-09-26T09:36:34Z",
+      "status": "source_and_eight_machine_profiles_passed_release_pending",
+      "scope": "versioned_candidate_source_and_machine_qualification_not_release",
+      "implementation_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+      "source_sha256": "0adec4b02a8b54fd20fb30c796c9959ccc346cc0f9336517fc47eafcb6951e02",
+      "candidate_version": "0.6.0-preview.2",
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "baseline_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+      "snapshot": "records/evidence/MTM-017/preview2-qualification-snapshot.json",
+      "source_gate_passed": true,
+      "workspace_test_counts": {
+        "passed": 633,
+        "failed": 0,
+        "ignored": 1
+      },
+      "profiles_passed": [
+        "upgrade_schema8",
+        "protocol",
+        "native_commands",
+        "compiled_latex",
+        "resource",
+        "corpus_native",
+        "install_sigkill",
+        "retrieval"
+      ],
+      "upgrade_checks_passed": 21,
+      "capability_assessments": 500,
+      "native_corpus_trials": 15,
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/preview2-source-gate.json",
+          "sha256": "ed0552d6702e074a5daa16f82efb105845bc75883c294899dbc5af5907ac1207"
+        },
+        {
+          "path": "records/evidence/MTM-017/preview2-upgrade-schema8-13d7890.json",
+          "sha256": "c74120386df4f7f157dc0ab629678baaa1f6df67c14450cb912a846da87c99c7"
+        },
+        {
+          "path": "records/evidence/MTM-017/preview2-protocol-13d7890.json",
+          "sha256": "97c26171c2f8e5f3f525eb65082a49b81e416d041e0566c66d3ffe5ada18f748"
+        },
+        {
+          "path": "records/evidence/MTM-017/preview2-native-commands-13d7890.json",
+          "sha256": "7d47500caa29ad245809a3cafdae3910a6ea68fb71f1f5eefd2eaf274c1e6338"
+        },
+        {
+          "path": "records/evidence/MTM-017/preview2-compiled-latex-13d7890.json",
+          "sha256": "1eb252613871757ee1865f29baeeb9f388b6b4c01645565ead13cd9dd53dbf34"
+        },
+        {
+          "path": "records/evidence/MTM-017/preview2-resource-13d7890.json",
+          "sha256": "0013313c2d29fec4ab0b8064895be90569ee6adf1e307ab6d2300c7cd759e3a6"
+        },
+        {
+          "path": "records/evidence/MTM-017/preview2-corpus-native-13d7890.json",
+          "sha256": "e86e76d01504fbd2e7af78c884e35a433d8de97c81b370450f150b2b829ecfb7"
+        },
+        {
+          "path": "records/evidence/MTM-017/preview2-install-sigkill-13d7890.json",
+          "sha256": "e24a6e3995a1d5a2f27f47a66377246977c6ae532d6e59e12cb71d6dc08c9b3c"
+        },
+        {
+          "path": "records/evidence/MTM-017/preview2-retrieval-13d7890.json",
+          "sha256": "4b9c7229b57de2695f43dbc16e7aafd49708db2e2ac771c6414bfdf789a9f473"
+        },
+        {
+          "path": "records/evidence/MTM-017/preview2-qualification-snapshot.json",
+          "sha256": "5018c5b1050cefe6e0ef6c7db0bb0aeb15b03ed492ee8e75d6737097b535d55c"
+        }
+      ],
+      "production_state_modified": false,
+      "production_selector_changed": false,
+      "release_qualified": false,
+      "remaining_acceptance": [
+        "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
+        "Complete current-artifact real-client and independent cross-run mathematical trials and all remaining corpus cases; Native coverage is 15/15, not a complete 90/90 corpus.",
+        "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
+        "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
+      ]
     }
   ],
   "remaining_acceptance": [
-    "Choose a distinct published schema-8 version, rebuild the candidate and revalidate the final versioned artifact; the current same-label snapshot is qualification-only.",
-    "Implement and review explicit schema-7 to schema-8 paired upgrade/resume/rollback fixtures, then separately authorize and qualify an operator-state copy.",
-    "Complete real-client and independent cross-run mathematical review, plus all remaining current-artifact corpus cases; the Native subset is 15/15, not 90/90.",
-    "Complete the current schema-8 release-input/readiness and deployment-authority path without repointing or weakening the frozen MTM-016 driver.",
-    "No production selector change or schema-8 production-data upgrade is authorized by these partial profile passes."
+    "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
+    "Complete current-artifact real-client and independent cross-run mathematical trials and all remaining corpus cases; Native coverage is 15/15, not a complete 90/90 corpus.",
+    "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
+    "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-26T09:21:53Z",
+  "updated_at": "2026-09-26T09:36:34Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -430,6 +511,22 @@
     "snapshot": "records/evidence/MTM-017/artifact-snapshot-20e5178.json",
     "receipt_id": "MTM017-ARTIFACT-QUALIFICATION-20E5178",
     "passed_profiles": [
+      "protocol",
+      "native_commands",
+      "compiled_latex",
+      "resource",
+      "corpus_native",
+      "install_sigkill",
+      "retrieval"
+    ],
+    "release_qualified": false
+  },
+  "versioned_candidate_qualification": {
+    "version": "0.6.0-preview.2",
+    "receipt_id": "MTM017-PREVIEW2-QUALIFICATION-13D7890",
+    "snapshot": "records/evidence/MTM-017/preview2-qualification-snapshot.json",
+    "profiles_passed": [
+      "upgrade_schema8",
       "protocol",
       "native_commands",
       "compiled_latex",

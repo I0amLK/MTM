@@ -1,0 +1,446 @@
+{
+  "baseline_launched": null,
+  "baseline_sha256": null,
+  "candidate_launched": true,
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "corpus_definition_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861",
+  "delivery": "F6",
+  "harness_source_identity": {
+    "after_sha256": "0adec4b02a8b54fd20fb30c796c9959ccc346cc0f9336517fc47eafcb6951e02",
+    "before_sha256": "0adec4b02a8b54fd20fb30c796c9959ccc346cc0f9336517fc47eafcb6951e02",
+    "commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+    "unchanged": true
+  },
+  "milestone": "MTM-016",
+  "native_preflight": {
+    "bubblewrap_probe": {
+      "binary_sha256": "52231e1caf55bcbc667b269f49c63599a6f7db4767ae6a039580d0ff853db712",
+      "diagnostic_hint": "none",
+      "found": true,
+      "isolation_checks": {
+        "capabilities_dropped": true,
+        "environment_cleared": true,
+        "further_user_namespace_denied": true,
+        "new_ipc_namespace": true,
+        "new_mnt_namespace": true,
+        "new_net_namespace": true,
+        "new_pid_namespace": true,
+        "new_user_namespace": true,
+        "new_uts_namespace": true,
+        "no_new_privileges": true,
+        "protocol_valid": true,
+        "workspace_not_mounted": true
+      },
+      "process": {
+        "child_reaped": true,
+        "elapsed_ms": 5,
+        "exit_code": 0,
+        "output_limit_exceeded": false,
+        "pipes_closed": true,
+        "raw_output_recorded": false,
+        "signal": null,
+        "stderr_bytes_retained": 0,
+        "stdout_bytes_retained": 906,
+        "timed_out": false
+      }
+    },
+    "candidate_defect_attribution": "not_evaluated_by_preflight",
+    "classification": "ready_for_native_tests_not_qualified",
+    "context": {
+      "ancestor_limits_inspected": false,
+      "bounding_caps_zero": false,
+      "effective_caps_zero": true,
+      "gid_map_shape": "initial_like_not_host_proof",
+      "host_context_proven": false,
+      "namespace_occupancy_measured": false,
+      "no_new_privs": false,
+      "permitted_caps_zero": true,
+      "same_user_namespace_as_visible_pid1": null,
+      "seccomp_mode": 0,
+      "uid_map_shape": "initial_like_not_host_proof",
+      "visible_limits": {
+        "apparmor_restrict_unprivileged_userns": null,
+        "max_ipc_namespaces": 55803,
+        "max_mnt_namespaces": 55803,
+        "max_net_namespaces": 55803,
+        "max_pid_namespaces": 55803,
+        "max_user_namespaces": 55803,
+        "max_uts_namespaces": 55803,
+        "unprivileged_userns_clone": null
+      }
+    },
+    "host_settings_modified": false,
+    "limitations": [
+      "Positive visible namespace limits do not reveal ancestor quotas or current occupancy.",
+      "Restricted UID mappings and namespace equality to visible PID 1 do not identify the host or prove nesting depth.",
+      "ENOSPC/EUSERS alone cannot distinguish a configured nesting prohibition from depth/quota exhaustion.",
+      "Passing this probe is not full Native, TTY, external-tool, private-vault, workflow or release qualification."
+    ],
+    "maintenance_binary_sha256": "e83a3013e776b3041ca7adb12aa058d90bab7f25688e32ff1f600d7021fdbdf7",
+    "milestone": "MTM-016",
+    "native_product_runtime_tested": false,
+    "passed": true,
+    "probe_identities_unchanged": true,
+    "production_state_modified": false,
+    "python_invoked": false,
+    "raw_output_recorded": false,
+    "ready_for_native_tests": true,
+    "recorded_unix_seconds": 1790415042,
+    "recovery": {
+      "action": "run_product_tests_in_this_environment",
+      "automatic_retry": false,
+      "do_not_disable_isolation_or_raise_sysctls_automatically": true
+    },
+    "release_qualified": false,
+    "schema_version": "1.0.0",
+    "scope": "current_environment_native_prerequisites_only",
+    "source_tests_passed": null,
+    "supported": true,
+    "tests_skipped_by_preflight": false,
+    "user_namespace_probe": {
+      "classification": "available",
+      "measurement": {
+        "created": true,
+        "errno": null,
+        "errno_name": null,
+        "operation": "unshare_user",
+        "protocol": 1
+      },
+      "process": {
+        "child_reaped": true,
+        "elapsed_ms": 5,
+        "exit_code": 0,
+        "output_limit_exceeded": false,
+        "pipes_closed": true,
+        "raw_output_recorded": false,
+        "signal": null,
+        "stderr_bytes_retained": 0,
+        "stdout_bytes_retained": 88,
+        "timed_out": false
+      }
+    }
+  },
+  "original_and_snapshot_unchanged": true,
+  "passed": true,
+  "pending": [
+    "independent research tasks U21-U25",
+    "browser and human tasks U26-U28",
+    "copied-state repeated trials U29",
+    "complete corpus aggregation and release review"
+  ],
+  "production_selectors_changed": false,
+  "production_state_modified": false,
+  "profile": "corpus_native",
+  "python_invoked": false,
+  "raw_test_output_recorded": false,
+  "recorded_unix_seconds": 1790415089,
+  "release_qualified": false,
+  "runner": {
+    "child_reaped": true,
+    "elapsed_ms": 43212,
+    "exit_code": 0,
+    "output_limit_exceeded": false,
+    "pipes_closed": true,
+    "raw_output_recorded": false,
+    "signal": null,
+    "stderr_bytes_retained": 179,
+    "stdout_bytes_retained": 5425,
+    "timed_out": false
+  },
+  "schema_version": "1.0.0",
+  "scope": "exact_candidate_native_corpus_u16_u20_not_release",
+  "selector_changed": false,
+  "summaries": {
+    "corpus_native": {
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "corpus_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861",
+      "failed_trials": 0,
+      "human_consent_tested": false,
+      "independent_research_tested": false,
+      "latex_policy": "static_only",
+      "native_backend": "bubblewrap",
+      "passed": true,
+      "passed_trials": 15,
+      "production_changed": false,
+      "release_qualified": false,
+      "repeats": 3,
+      "rows": [
+        {
+          "checks": [
+            "hard_isolation",
+            "private_vault_hidden",
+            "children_reaped",
+            "clean_shutdown",
+            "literal_metacharacters",
+            "exact_stdout"
+          ],
+          "elapsed_ms": 1435,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "scenario": "native_direct_argv",
+          "status": "passed",
+          "task_id": "U16",
+          "trial_id": "f8aafbbd5d3638dfd7c4e93939be0fef"
+        },
+        {
+          "checks": [
+            "hard_isolation",
+            "private_vault_hidden",
+            "children_reaped",
+            "clean_shutdown",
+            "literal_metacharacters",
+            "exact_stdout"
+          ],
+          "elapsed_ms": 1397,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "scenario": "native_direct_argv",
+          "status": "passed",
+          "task_id": "U16",
+          "trial_id": "e410b5b0ea2a0b670188c34c61b514e9"
+        },
+        {
+          "checks": [
+            "hard_isolation",
+            "private_vault_hidden",
+            "children_reaped",
+            "clean_shutdown",
+            "literal_metacharacters",
+            "exact_stdout"
+          ],
+          "elapsed_ms": 1395,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "scenario": "native_direct_argv",
+          "status": "passed",
+          "task_id": "U16",
+          "trial_id": "b9b368789fadd3f793e5060462164b2d"
+        },
+        {
+          "checks": [
+            "hard_isolation",
+            "private_vault_hidden",
+            "children_reaped",
+            "clean_shutdown",
+            "compound_path",
+            "nested_cwd",
+            "missing_executable_denied"
+          ],
+          "elapsed_ms": 1472,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "scenario": "native_compound_path",
+          "status": "passed",
+          "task_id": "U17",
+          "trial_id": "11ce5771fad1884850c51840a3a3d5e8"
+        },
+        {
+          "checks": [
+            "hard_isolation",
+            "private_vault_hidden",
+            "children_reaped",
+            "clean_shutdown",
+            "compound_path",
+            "nested_cwd",
+            "missing_executable_denied"
+          ],
+          "elapsed_ms": 1475,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "scenario": "native_compound_path",
+          "status": "passed",
+          "task_id": "U17",
+          "trial_id": "f55d227f545e822d8db33316778ad6ba"
+        },
+        {
+          "checks": [
+            "hard_isolation",
+            "private_vault_hidden",
+            "children_reaped",
+            "clean_shutdown",
+            "compound_path",
+            "nested_cwd",
+            "missing_executable_denied"
+          ],
+          "elapsed_ms": 1465,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "scenario": "native_compound_path",
+          "status": "passed",
+          "task_id": "U17",
+          "trial_id": "f4ea1693bab0a38dd2057d3b29cc4700"
+        },
+        {
+          "checks": [
+            "hard_isolation",
+            "private_vault_hidden",
+            "children_reaped",
+            "clean_shutdown",
+            "tty_running",
+            "stdin_roundtrip",
+            "bounded_output",
+            "explicit_kill"
+          ],
+          "elapsed_ms": 2469,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "scenario": "native_tty_stdin",
+          "status": "passed",
+          "task_id": "U18",
+          "trial_id": "1c70a6c8fc4083e8da1afb71c4945885"
+        },
+        {
+          "checks": [
+            "hard_isolation",
+            "private_vault_hidden",
+            "children_reaped",
+            "clean_shutdown",
+            "tty_running",
+            "stdin_roundtrip",
+            "bounded_output",
+            "explicit_kill"
+          ],
+          "elapsed_ms": 2467,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "scenario": "native_tty_stdin",
+          "status": "passed",
+          "task_id": "U18",
+          "trial_id": "9eb3539cd52919bd730faddd8d3ab665"
+        },
+        {
+          "checks": [
+            "hard_isolation",
+            "private_vault_hidden",
+            "children_reaped",
+            "clean_shutdown",
+            "tty_running",
+            "stdin_roundtrip",
+            "bounded_output",
+            "explicit_kill"
+          ],
+          "elapsed_ms": 2451,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "scenario": "native_tty_stdin",
+          "status": "passed",
+          "task_id": "U18",
+          "trial_id": "df7e7c990d1b71471cc636775e0832be"
+        },
+        {
+          "checks": [
+            "hard_isolation",
+            "private_vault_hidden",
+            "children_reaped",
+            "clean_shutdown",
+            "timeout",
+            "explicit_kill",
+            "descendant_write_absent"
+          ],
+          "elapsed_ms": 7051,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "scenario": "native_timeout_descendants",
+          "status": "passed",
+          "task_id": "U19",
+          "trial_id": "a5279e42a046cff0ef391ab42a9889dd"
+        },
+        {
+          "checks": [
+            "hard_isolation",
+            "private_vault_hidden",
+            "children_reaped",
+            "clean_shutdown",
+            "timeout",
+            "explicit_kill",
+            "descendant_write_absent"
+          ],
+          "elapsed_ms": 7087,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "scenario": "native_timeout_descendants",
+          "status": "passed",
+          "task_id": "U19",
+          "trial_id": "1e5ebc4b99f6dbddb66f5dfcf843a4a3"
+        },
+        {
+          "checks": [
+            "hard_isolation",
+            "private_vault_hidden",
+            "children_reaped",
+            "clean_shutdown",
+            "timeout",
+            "explicit_kill",
+            "descendant_write_absent"
+          ],
+          "elapsed_ms": 7054,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "scenario": "native_timeout_descendants",
+          "status": "passed",
+          "task_id": "U19",
+          "trial_id": "ac4313770aa0fb69dd53c286467aba49"
+        },
+        {
+          "checks": [
+            "hard_isolation",
+            "private_vault_hidden",
+            "children_reaped",
+            "clean_shutdown",
+            "dangerous_network",
+            "repeated_without_grant",
+            "network_shared_vault_hidden"
+          ],
+          "elapsed_ms": 1553,
+          "reason": "checks_passed",
+          "repeat": 1,
+          "scenario": "native_network_permissions",
+          "status": "passed",
+          "task_id": "U20",
+          "trial_id": "f41902925c48d836a94232eb488545f5"
+        },
+        {
+          "checks": [
+            "hard_isolation",
+            "private_vault_hidden",
+            "children_reaped",
+            "clean_shutdown",
+            "dangerous_network",
+            "repeated_without_grant",
+            "network_shared_vault_hidden"
+          ],
+          "elapsed_ms": 1543,
+          "reason": "checks_passed",
+          "repeat": 2,
+          "scenario": "native_network_permissions",
+          "status": "passed",
+          "task_id": "U20",
+          "trial_id": "436e29f45551eaded8a3a0ecfe8d6730"
+        },
+        {
+          "checks": [
+            "hard_isolation",
+            "private_vault_hidden",
+            "children_reaped",
+            "clean_shutdown",
+            "dangerous_network",
+            "repeated_without_grant",
+            "network_shared_vault_hidden"
+          ],
+          "elapsed_ms": 1543,
+          "reason": "checks_passed",
+          "repeat": 3,
+          "scenario": "native_network_permissions",
+          "status": "passed",
+          "task_id": "U20",
+          "trial_id": "4b89318cc9c44f3a752501d967c8f5a5"
+        }
+      ],
+      "schema": "mtm-native-corpus-result-v1",
+      "scripted_consent_only": true,
+      "tasks": 5
+    }
+  },
+  "test_stderr_sha256": "1eccdb1c3e41ddacc3e695addcdc6f91f09fe58fcae2cd059c3f86e4fc06d127",
+  "test_stdout_sha256": "001dae3b994643c9c4fbbaa1432e2549d1dee1701bf25177e6bbf4d0620cf361"
+}

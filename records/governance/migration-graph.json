@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-26T09:21:53Z",
+  "updated_at": "2026-09-26T09:36:34Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1188,6 +1188,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "Implemented independently versioned preview.2 and the additive pinned-baseline schema7-to-schema8 upgrade profile. Direct paired runtime checks passed 21/21; stale deployment test version arguments were reproduced and corrected without changing installer policy. The failed source observation is retained; final-source and versioned-artifact qualification remain pending. No deployment or operator-data access."
+    },
+    {
+      "event_id": "MEVT-070",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T09:36:34Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Versioned preview.2 source passed 633 tests with zero failures and one inherited ignore; all eight exact-artifact machine profiles passed at 13d7890, including 21 schema7-to-schema8 upgrade/restoration checks and 500/500 assessments. The earlier fixture failure remains sealed. Operator-state copy, independent client/mathematical trials, remaining corpus and complete release readiness remain pending; no production changes."
     }
   ],
   "receipt_contract": {
