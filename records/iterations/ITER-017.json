@@ -1,0 +1,296 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "title": "Dangerous-only Native and Danus-style fact memory",
+  "status": "completed",
+  "started_at": "2026-09-25T10:18:16Z",
+  "base_commit": "8336e088cdcf230254da28cf36b81dec8f440340",
+  "branch": "work/mtm017-dangerous-fact-memory",
+  "plan": "docs/MTM-017-DANGEROUS-ONLY-AND-FACT-MEMORY.md",
+  "authority": {
+    "before": "rust",
+    "after": "rust",
+    "native_does_not_grant_workflow_authority": true,
+    "production_selector_changed": false,
+    "production_state_rewritten": false
+  },
+  "stages": [
+    {
+      "id": "A",
+      "status": "completed",
+      "goal": "Dangerous-only Native and consent/grant ledger retirement"
+    },
+    {
+      "id": "B",
+      "status": "completed",
+      "goal": "Schema-8 SQLite fact graph promoted from the final verified proof"
+    },
+    {
+      "id": "C",
+      "status": "completed",
+      "goal": "Project-scoped typed findings projected from research state"
+    },
+    {
+      "id": "D",
+      "status": "completed",
+      "goal": "Bounded project_memory JSON-graph view in the rethlas_step task context"
+    }
+  ],
+  "historical_observations": [
+    "The initial macOS host's 28 baseline failures were host-specific. The Linux development host now passes the complete workspace source gate and a positive Bubblewrap preflight; these are not exact-artifact release qualification.",
+    "U20 was revised with operator approval for dangerous-only checks while the frozen corpus JSON and sealed MTM-016 rows remain unchanged. A fresh current-artifact native_commands profile and broader release corpus remain pending.",
+    "The managed continuation sandbox denies loopback test-server startup and blocks the Bubblewrap probe. The final-source full gate is nonzero there; this does not change the earlier Linux host source pass or make it a pass for the final edited source.",
+    "The managed continuation sandbox mounts .git read-only. git add failed at .git/index.lock; no commit or partial staging was created. The proposed MTM-017 commit message passed the Rust validator."
+  ],
+  "open_observations": [
+    "The final source and current-binary capability gates passed; earlier failed or unrecorded attempts are not relabelled as passes.",
+    "Four separately build-checked implementation commits and this records-only closeout form the five-commit development delivery.",
+    "No push, release tag, installed-selector mutation, live-session restart or production state upgrade is part of this delivery."
+  ],
+  "review": {
+    "document": "docs/MTM-017-FACT-MEMORY-REVIEW.md",
+    "evidence": "records/evidence/MTM-017/closing-review.json",
+    "scope": "fact transactions, predecessor closure and content-addressed identity",
+    "independent_mathematical_review": false
+  },
+  "implementation_commits": [
+    "7858056ae66026f4ae9625279fb0d5fd3ced6b85",
+    "0462985d789f427ce26464ca5d05d810d75b21c0",
+    "8acae5d814e257b34bd627ac7afdca58f946e4b7",
+    "2cb49234014a4007ca7838837ebdab8f708ee2c9"
+  ],
+  "validation": {
+    "source_gate": {
+      "final_source_sha256": "61922484c1f969365660b052ab878250738542bf25bd870f40b3b6851ef1930d",
+      "final_source_command": "cargo xtask check --record",
+      "final_source_passed": true,
+      "source_unchanged": true,
+      "source_commit": "2cb49234014a4007ca7838837ebdab8f708ee2c9",
+      "report": "records/validation/mtm016-source-check.json",
+      "evidence": "records/evidence/MTM-017/closing-source-gate.json",
+      "workspace_test_counts": {
+        "passed": 628,
+        "failed": 0,
+        "ignored": 1
+      },
+      "earlier_failed_diagnostic": "records/evidence/MTM-017/managed-sandbox-source-gate-failed.json"
+    },
+    "focused_regressions": [
+      "schema-7 to schema-8 migration and rollback",
+      "Danus fact ID golden vectors and graph DAG",
+      "atomic fact promotion and cascading revocation",
+      "late promotion/status-write fault rollback and idempotent cascade revocation",
+      "snapshot-consistent export under concurrent writers",
+      "target-only revision dependencies, merged predecessor bounds and duplicate fact rejection",
+      "content IDs ignore local names and intuition but bind project, proof and dependencies",
+      "legacy verified revision without fact ID rejected before proof submission",
+      "typed finding projection, verified/superseded status, bounded chain/shared-predecessor graphs with exact closure, edges, digest and 80 findings",
+      "three-fact cross-run workflow and CLI export/revoke",
+      "safe/trusted rejected at CLI and configuration boundaries"
+    ],
+    "records": "cargo xtask records passed",
+    "retirement": "cargo xtask retirement passed",
+    "storage_workflow": "cargo test -p mtm-storage -p mtm-workflow --locked --offline passed 199 tests with zero failures or ignored tests on final source",
+    "clippy": "cargo clippy --workspace --all-targets --locked -- -D warnings passed on final source",
+    "capability": {
+      "command": "cargo xtask capability --record",
+      "passed": true,
+      "exit_code": 0,
+      "source_sha256": "61922484c1f969365660b052ab878250738542bf25bd870f40b3b6851ef1930d",
+      "binary_sha256": "fa880b56d1476960b9d8b34f95a5c16349c48ee22e340b271a3e271c82310c25",
+      "normal_roundtrips": 500,
+      "normal_invalid": 0,
+      "normal_rejections": 0,
+      "report": "records/validation/capability-current.json",
+      "evidence": "records/evidence/MTM-017/closing-capability.json",
+      "release_qualified": false
+    }
+  },
+  "receipts": [
+    {
+      "receipt_id": "MREC-017",
+      "milestone_id": "MTM-017",
+      "started_at": "2026-09-25T10:18:16Z",
+      "completed_at": "2026-09-26T08:14:02Z",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
+      "files_changed": [
+        "AGENTS.md",
+        "README.md",
+        "crates/mtm-cli/Cargo.toml",
+        "crates/mtm-cli/src/main.rs",
+        "crates/mtm-cli/tests/capability_runtime.rs",
+        "crates/mtm-cli/tests/fact_graph_cli.rs",
+        "crates/mtm-cli/tests/identity.rs",
+        "crates/mtm-cli/tests/support/candidate_lifecycle.rs",
+        "crates/mtm-cli/tests/support/loopback.rs",
+        "crates/mtm-cli/tests/support/native_command_runtime.rs",
+        "crates/mtm-cli/tests/support/native_corpus.rs",
+        "crates/mtm-cli/tests/support/permission_client.rs",
+        "crates/mtm-cli/tests/support/permission_runtime.rs",
+        "crates/mtm-cli/tests/support/policy_cases.rs",
+        "crates/mtm-contracts/src/enums.rs",
+        "crates/mtm-contracts/src/lib.rs",
+        "crates/mtm-core/src/command_policy.rs",
+        "crates/mtm-core/src/evaluator.rs",
+        "crates/mtm-core/src/lib.rs",
+        "crates/mtm-core/src/native_permission.rs",
+        "crates/mtm-gateway/src/catalog/mod.rs",
+        "crates/mtm-gateway/src/catalog/tests.rs",
+        "crates/mtm-native/src/bubblewrap.rs",
+        "crates/mtm-native/src/toolchain.rs",
+        "crates/mtm-runtime/src/application.rs",
+        "crates/mtm-runtime/src/config.rs",
+        "crates/mtm-runtime/src/lib.rs",
+        "crates/mtm-runtime/src/native_authority.rs",
+        "crates/mtm-runtime/src/native_permission.rs",
+        "crates/mtm-runtime/src/native_resolver_tests.rs",
+        "crates/mtm-runtime/src/native_tools.rs",
+        "crates/mtm-runtime/src/tool_backend.rs",
+        "crates/mtm-storage/src/fact_memory.rs",
+        "crates/mtm-storage/src/lib.rs",
+        "crates/mtm-storage/src/schema.rs",
+        "crates/mtm-storage/src/store.rs",
+        "crates/mtm-storage/tests/action_transactions.rs",
+        "crates/mtm-storage/tests/recovery.rs",
+        "crates/mtm-storage/tests/storage.rs",
+        "crates/mtm-storage/tests/submission_receipts.rs",
+        "crates/mtm-storage/tests/write_recovery.rs",
+        "crates/mtm-workflow/src/engine.rs",
+        "crates/mtm-workflow/src/lib.rs",
+        "crates/mtm-workflow/src/memory.rs",
+        "crates/mtm-workflow/src/memory/bm25.rs",
+        "crates/mtm-workflow/src/memory/graph.rs",
+        "crates/mtm-workflow/src/methodology.rs",
+        "crates/mtm-workflow/src/research_state/view.rs",
+        "crates/mtm-workflow/tests/workflow.rs",
+        "docs/ACCEPTANCE.md",
+        "docs/MTM-017-DANGEROUS-ONLY-AND-FACT-MEMORY.md",
+        "docs/MTM-017-FACT-MEMORY-REVIEW.md",
+        "docs/MTM-017-RELEASE-HANDOFF.md",
+        "records/evidence/MTM-017/closing-capability.json",
+        "records/evidence/MTM-017/closing-review.json",
+        "records/evidence/MTM-017/closing-source-gate.json",
+        "records/evidence/MTM-017/managed-sandbox-source-gate-failed.json",
+        "records/governance/engineering-graph.json",
+        "records/governance/migration-graph.json",
+        "records/governance/project-progress.json",
+        "records/governance/python-retirement.json",
+        "records/iterations/ITER-017.json",
+        "records/validation/capability-current.json",
+        "records/validation/mtm016-native-preflight.json",
+        "records/validation/mtm016-source-check.json",
+        "xtask/src/native_command_summary.rs",
+        "xtask/src/native_corpus_summary.rs",
+        "xtask/src/qualify.rs",
+        "xtask/src/release_check.rs"
+      ],
+      "commands": [
+        {
+          "command": "cargo xtask check --record",
+          "exit_code": 0,
+          "result": "Current source passed format, warnings-denied Clippy, workspace tests (628 passed, zero failed, one inherited ignored), records, architecture, retirement and diff checks with positive Native prerequisites."
+        },
+        {
+          "command": "cargo xtask capability --record",
+          "exit_code": 0,
+          "result": "Current-source serial suite passed; 500 independent assessments (250 compact, 250 full), zero normal INVALID/rejections, all eight adversarial checks and restart/shutdown checks passed."
+        },
+        {
+          "command": "cargo xtask records; cargo xtask retirement; git diff --check",
+          "exit_code": 0,
+          "result": "Validated the development record structure, deletion provenance and whitespace; final closing records are checked again before the records commit."
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "evidence": [
+            "records/evidence/MTM-017/closing-source-gate.json"
+          ]
+        },
+        "A1": {
+          "passed": true,
+          "evidence": [
+            "Golden fact IDs, schema migration and bounded deterministic graph/CLI regressions in closing-review.json; public tool count and protocol unchanged."
+          ]
+        },
+        "A3": {
+          "passed": true,
+          "evidence": [
+            "Late transaction rollback, cascade revocation, concurrent export and capability owner/run/restart regressions in the sealed review and capability reports."
+          ]
+        }
+      },
+      "behavior_before": "Schema-7 project revisions lacked immutable lemma-level fact memory; Native carried Safe/Trusted and a consent/grant ledger.",
+      "behavior_after": "The development source uses dangerous-only Native, schema-8 transactional verified facts/findings, bounded project memory and an operator-only graph CLI.",
+      "risk_review": "Source/capability acceptance is bound to the final source. Historical failures remain failed; no real-client, independent-mathematics or exact-artifact release claim is inferred. MTM-016 remains separately in progress.",
+      "rollback": "Revert the four implementation commits in reverse order for source rollback while preserving sealed records; append a superseding governance decision rather than deleting this receipt. Restore an untouched pre-upgrade copy and compatible binary for any schema-8 test database; do not rewrite existing facts or decrement the schema version.",
+      "manual_pending": [
+        "Fresh exact-artifact dangerous-only Native qualification and current release corpus.",
+        "Real web client, independent mathematical review and required compiled-LaTeX full/compact/repair flows.",
+        "Separately authorized copied-operator-state migration/resume/rollback and artifact-bound resource/install/rollback qualification.",
+        "No production selector change or schema-8 production-data upgrade is authorized by this development closeout."
+      ],
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/closing-source-gate.json",
+          "sha256": "b088130173f870dc50e30d9b0e5f17342d972639c7c6c36bdb6f31148dd71921"
+        },
+        {
+          "path": "records/evidence/MTM-017/closing-review.json",
+          "sha256": "1b6c062edbbf30854d835c23f65c68aab3f59430237ddb81cc9586a88a350300"
+        },
+        {
+          "path": "records/evidence/MTM-017/managed-sandbox-source-gate-failed.json",
+          "sha256": "cf19adb78fe9d6981b1e58dc11331050f37d7109c7e17a699bb55bca5c92985f"
+        },
+        {
+          "path": "records/evidence/MTM-017/closing-capability.json",
+          "sha256": "c33aea3a72f3749186d8382762c876e9ae1246f0421be9205ffb1a012173b326"
+        }
+      ],
+      "source_sha256": "61922484c1f969365660b052ab878250738542bf25bd870f40b3b6851ef1930d",
+      "implementation_commits": [
+        "7858056ae66026f4ae9625279fb0d5fd3ced6b85",
+        "0462985d789f427ce26464ca5d05d810d75b21c0",
+        "8acae5d814e257b34bd627ac7afdca58f946e4b7",
+        "2cb49234014a4007ca7838837ebdab8f708ee2c9"
+      ],
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false,
+      "decision": "implementation_complete_release_not_qualified"
+    }
+  ],
+  "remaining_acceptance": [
+    "Fresh exact-artifact dangerous-only Native qualification and current release corpus.",
+    "Real web client, independent mathematical review and required compiled-LaTeX full/compact/repair flows.",
+    "Separately authorized copied-operator-state migration/resume/rollback and artifact-bound resource/install/rollback qualification.",
+    "No production selector change or schema-8 production-data upgrade is authorized by this development closeout."
+  ],
+  "remaining_delivery": [],
+  "decision": "implementation_complete_release_not_qualified",
+  "completed_at": "2026-09-26T08:14:02Z",
+  "updated_at": "2026-09-26T08:14:02Z",
+  "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
+  "release_qualified": false,
+  "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
+  "accepted_validation_reports": [
+    {
+      "path": "records/validation/mtm016-source-check.json",
+      "sha256": "694beb2d3c80653bf126efbffeb92e16d86cd84c73cec4d5949953946609dcd5"
+    },
+    {
+      "path": "records/validation/capability-current.json",
+      "sha256": "eafd659bbd08876d3a5dbf5a2ec31d5a2f25c5e44e63de3e7b97ad5b8d0dca42"
+    },
+    {
+      "path": "records/validation/mtm016-native-preflight.json",
+      "sha256": "1b63674e333d1b8de9350e9a3ba9294cf59a93937ea587ad6333df9415da3de2"
+    }
+  ]
+}

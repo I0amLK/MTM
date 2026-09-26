@@ -279,3 +279,23 @@ immutable private/workspace proof files, never OAuth storage, operator keys/logs
 or production data, and publishes a private bundle only after the internal
 precheck succeeds without granting acceptance. Do not add a direct maintenance
 SQLite dependency if it changes the frozen Cargo.lock identity.
+
+## MTM-017 development boundary
+
+Read `docs/MTM-017-DANGEROUS-ONLY-AND-FACT-MEMORY.md` and
+`records/iterations/ITER-017.json`. Native accepts only `dangerous`; the public
+`request_permissions` tool retains its fixed response but no consent/grant ledger
+can authorize commands. Bubblewrap, executable revalidation and workflow/project
+authority boundaries remain separate. Schema 8 adds project findings and a fact
+graph; only the existing finalizer's verified final proof may feed fact promotion.
+The optional proof-manifest fact breakdown and bounded `rethlas_step` project
+memory advance the model-facing contract to `mtm-tools-v10` without adding a
+public tool or changing workflow protocol 3. Local `mtm fact-graph` export/revoke
+is operator-only and must never be routed through a model tool. Legacy schema-7
+revisions are not backfilled. Restore an untouched pre-upgrade copy for rollback;
+no installed selector or production state is changed by development checks.
+
+The MTM-017 closing review is `docs/MTM-017-FACT-MEMORY-REVIEW.md`. Its development
+receipt must bind the exact current Rust source to both the source gate and the
+500-assessment capability report. Keep prior failed diagnostics immutable, and
+never interpret development completion as exact-artifact release qualification.

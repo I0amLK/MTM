@@ -1,5 +1,30 @@
 # MTM
 
+## Completed development checkpoint: MTM-017
+
+The current development contract uses **schema 8**, **`mtm-tools-v10`** and
+dangerous-only Native execution. Bubblewrap and workflow/finalizer authority
+remain separate. Verified final proofs can promote immutable project facts;
+typed findings and a bounded predecessor-closed graph reach `rethlas_step`
+without adding a public tool. The operator-only `mtm fact-graph` CLI exports
+graphs and cascades explicit revocations.
+
+The implementation and its closing review are recorded in
+`docs/MTM-017-DANGEROUS-ONLY-AND-FACT-MEMORY.md`,
+`docs/MTM-017-FACT-MEMORY-REVIEW.md` and `records/iterations/ITER-017.json`.
+Development acceptance is separate from release qualification. Do not point
+this build at production data or replace an installed selector. Rollback from
+schema 8 requires an untouched pre-upgrade database copy; old facts and failed
+evidence are not rewritten.
+
+Development A0/A1/A3 is complete: the final-source gate passed 628 tests with
+zero failures and one inherited ignore; current-source capability validation
+passed 500 independent assessments with zero normal INVALID/rejections.
+The sealed receipt is `MREC-017`; remaining release work is explicit in
+`docs/MTM-017-RELEASE-HANDOFF.md`. The checkpoint is not release-qualified.
+
+## Earlier development checkpoints (historical contracts)
+
 Stage E is complete for the current development contract. The E2 action-file
 checkpoint keeps schema 7 and uses `mtm-tools-v9`.
 All state-changing model actions now have a current-contract interruption policy:
@@ -286,10 +311,10 @@ values and secrets are never printed:
 mtm tui --verbose --native-mode dangerous
 ```
 
-### Conservative local launch
+### Local launch
 
 ```bash
-mtm tui --native-mode safe
+mtm tui --native-mode dangerous
 ```
 
 ### Run the HTTP/MCP server directly
@@ -299,7 +324,7 @@ mtm serve \
   --host 127.0.0.1 \
   --port 8000 \
   --workspace "$PWD" \
-  --native-mode safe
+  --native-mode dangerous
 ```
 
 ### Inspect configuration and Native isolation
@@ -308,6 +333,19 @@ mtm serve \
 mtm check-config
 mtm attest-native --workspace "$PWD" --native-mode dangerous
 ```
+
+For a schema-8 project database, the local operator can inspect the verified
+fact graph or revoke a fact and its descendants:
+
+```bash
+mtm fact-graph export --project PROJECT_ID --out facts.json
+mtm fact-graph revoke FACT_ID --reason "incorrect premise"
+```
+
+These commands use `$MTM_PRIVATE_ROOT/state.sqlite3` by default. `--state-db`
+selects an explicit absolute database path, such as a disposable copy. Export
+reads without migrating the database; revocation is append-only. Project findings
+are advisory, while facts are promoted only after final proof verification.
 
 When no OAuth operator password is configured, an interactive launch generates one
 and prints it to the local terminal after the server has successfully bound. For
@@ -327,7 +365,7 @@ Important settings:
 | `MTM_DATA_ROOT` | Runtime state root | `~/.mtm` |
 | `MTM_PRIVATE_ROOT` | Private workflow/vault root | `$MTM_DATA_ROOT/private` |
 | `MTM_DEBUG_ROOT` | Debug/event root | `$MTM_DATA_ROOT/debug` |
-| `MTM_NATIVE_MODE` | `safe`, `trusted`, or `dangerous` | `safe` |
+| `MTM_NATIVE_MODE` | `dangerous` only (`safe` and `trusted` are rejected) | `dangerous` |
 | `MTM_NATIVE_EXEC_BACKEND` | `bubblewrap` or `disabled` | auto-detect on Linux |
 | `MTM_NATIVE_EXEC_ALLOW_ROOTS` | Extra read-only toolchain roots | empty |
 | `MTM_LATEX_POLICY` | `static_only`, `if_available`, or `required` | `required` |

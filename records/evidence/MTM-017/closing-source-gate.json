@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "development_source_gate_not_exact_artifact_release_qualification",
+  "command": "cargo xtask check --record",
+  "exit_code": 0,
+  "passed": true,
+  "recorded_unix_seconds": 1790405291,
+  "source_identity": {
+    "hash_scope": "mtm-rust-source-v1",
+    "before_sha256": "61922484c1f969365660b052ab878250738542bf25bd870f40b3b6851ef1930d",
+    "after_sha256": "61922484c1f969365660b052ab878250738542bf25bd870f40b3b6851ef1930d",
+    "commit_before": "2cb49234014a4007ca7838837ebdab8f708ee2c9",
+    "commit_after": "2cb49234014a4007ca7838837ebdab8f708ee2c9",
+    "unchanged": true
+  },
+  "source_report": {
+    "path": "records/validation/mtm016-source-check.json",
+    "sha256": "694beb2d3c80653bf126efbffeb92e16d86cd84c73cec4d5949953946609dcd5",
+    "runner_milestone_label": "MTM-016",
+    "interpretation": "The inherited runner name does not change this receipt's current-source identity or qualify its frozen MTM-016 candidate."
+  },
+  "checks": {
+    "format": true,
+    "clippy_all_targets_warnings_denied": true,
+    "workspace_tests": true,
+    "diff_check": true,
+    "record_integrity": true,
+    "architecture": true,
+    "retirement": true,
+    "commit_hook_executable": true
+  },
+  "test_counts_observation": {
+    "passed": 628,
+    "failed": 0,
+    "ignored": 1,
+    "summary_lines_counted": 50,
+    "method": "Sum the test-result summaries streamed by this exact cargo xtask check run; the inherited aggregate report does not itself store individual test counts.",
+    "existing_ignored_test": "native_authority::tests::exec_candidate_real_dns_https_target",
+    "new_test_skips": false
+  },
+  "native_preflight": {
+    "command": "cargo xtask native-preflight --record",
+    "exit_code": 0,
+    "passed": true,
+    "classification": "ready_for_native_tests_not_qualified",
+    "path": "records/validation/mtm016-native-preflight.json",
+    "sha256": "1b63674e333d1b8de9350e9a3ba9294cf59a93937ea587ad6333df9415da3de2",
+    "source_gate_embedded_preflight_passed": true
+  },
+  "build_cache": "target/mtm-tool",
+  "tests_skipped_by_preflight": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "limitations": [
+    "Ordinary test success does not execute every opt-in qualification profile.",
+    "The one inherited ignored real DNS/HTTPS target test is not counted as a pass.",
+    "This source gate does not replace exact-artifact Native, independent mathematics, real browser, compiled LaTeX, copied operator state or release qualification."
+  ]
+}

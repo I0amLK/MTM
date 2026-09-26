@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "focused_source_review_and_regressions_not_mathematical_or_release_qualification",
+  "source_sha256": "61922484c1f969365660b052ab878250738542bf25bd870f40b3b6851ef1930d",
+  "hash_scope": "mtm-rust-source-v1",
+  "source_commit": "2cb49234014a4007ca7838837ebdab8f708ee2c9",
+  "review": {
+    "path": "docs/MTM-017-FACT-MEMORY-REVIEW.md",
+    "sha256": "b159814ddc7b12c2c71a9e239ef430923b24290d700c0c5b0c223e7f43c2344e"
+  },
+  "corrections": [
+    "Only the final target inherits dependency_revision_ids; intermediate facts retain explicit predecessors and stable IDs.",
+    "Graph export reads nodes, revocations and edges in one deferred SQLite snapshot and releases the transaction before serialization.",
+    "Merged predecessor sets above 64 and duplicate content-addressed facts are rejected during preparation, before proof submission advances."
+  ],
+  "reviewed_invariants": [
+    "Late claim-revision insertion failure rolls back facts, edges, finding status and previous revision lifecycle together.",
+    "Finding-status failure during cascading revocation rolls back the entire revocation; repeated successful revocation is idempotent.",
+    "Concurrent graph export contains no dangling edges and matches a reopened read-only export after writers finish.",
+    "Long-chain and shared-predecessor task views contain every persisted predecessor, exact edges and topological order within the byte budget.",
+    "The emitted graph digest is recomputable and repeated unchanged-state views are deterministic.",
+    "Fact IDs ignore local manifest names and intuition while binding project, proof and resolved dependencies."
+  ],
+  "focused_validation": {
+    "command": "cargo test -p mtm-storage -p mtm-workflow --locked --offline",
+    "exit_code": 0,
+    "passed": 199,
+    "failed": 0,
+    "ignored": 0
+  },
+  "source_commits": [
+    {
+      "commit": "7858056ae66026f4ae9625279fb0d5fd3ced6b85",
+      "scope": "native",
+      "isolated_all_target_check_passed": true,
+      "additional_tests": "contracts/core/native/runtime library suites"
+    },
+    {
+      "commit": "0462985d789f427ce26464ca5d05d810d75b21c0",
+      "scope": "storage",
+      "isolated_all_target_check_passed": true,
+      "additional_tests": "complete storage suite"
+    },
+    {
+      "commit": "8acae5d814e257b34bd627ac7afdca58f946e4b7",
+      "scope": "workflow",
+      "isolated_all_target_check_passed": true,
+      "additional_tests": "complete workflow/gateway suites"
+    },
+    {
+      "commit": "2cb49234014a4007ca7838837ebdab8f708ee2c9",
+      "scope": "cli",
+      "isolated_all_target_check_passed": true,
+      "additional_tests": "fact-graph/identity CLI tests and warnings-denied all-target workspace Clippy"
+    }
+  ],
+  "isolation_method": "Each staged source tree was checked at the same checkout root with other stages temporarily stashed. Restored snapshots were byte-checked and only these temporary stashes were dropped.",
+  "build_cache": "target/mtm-tool",
+  "existing_facts_rewritten": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "limitations": [
+    "ASCII tokenization and the bounded recent candidate window do not establish multilingual retrieval quality or complete-history recall.",
+    "Scripted verifier fixtures and fact IDs do not replace independent mathematical review.",
+    "Native exact-artifact, real browser, compiled LaTeX, copied operator state, resource and install/rollback release evidence remain separate."
+  ]
+}
