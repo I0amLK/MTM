@@ -10,7 +10,8 @@ use mtm_storage::schema::V1_WORKFLOW_SCHEMA_SQL;
 use rusqlite::Connection;
 use serde_json::{Map, Value, json};
 
-const PROBLEM: &str = r"\begin{proposition}For the integer $1$, prove $1=1$.\end{proposition}";
+pub(super) const PROBLEM: &str =
+    r"\begin{proposition}For the integer $1$, prove $1=1$.\end{proposition}";
 const PROOF: &str = r"\documentclass{article}
 \usepackage{amsthm}
 \begin{document}

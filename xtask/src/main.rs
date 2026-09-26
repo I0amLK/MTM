@@ -204,6 +204,7 @@ fn run() -> Result<()> {
                     .env_remove("MTM_TEST_TARGET_PROFILE")
                     .env_remove("MTM_TEST_RESOURCE_PROFILE")
                     .env_remove("MTM_TEST_UPGRADE_PROFILE")
+                    .env_remove("MTM_TEST_SCHEMA8_UPGRADE_PROFILE")
                     .env_remove("MTM_TEST_PERMISSION_PROFILE")
                     .env_remove("MTM_TEST_BASELINE")
                     .env_remove("MTM_TEST_BASELINE_SHA256")
@@ -275,6 +276,9 @@ fn run() -> Result<()> {
             );
             println!(
                 "cargo xtask qualify --profile upgrade --binary <artifact> --sha256 <sha256> --baseline <artifact> --baseline-sha256 <sha256> [--record]"
+            );
+            println!(
+                "cargo xtask qualify --profile upgrade_schema8 --binary <preview.2-artifact> --sha256 <sha256> --baseline <released-schema7-artifact> --baseline-sha256 <sha256> [--record]\n  Disposable schema-7 to schema-8 upgrade/resume/rollback; not production-state or release acceptance."
             );
             println!(
                 "cargo xtask qualify --profile <protocol|target|native_commands|compiled_latex> --binary <artifact> --sha256 <sha256> [--record]\ncargo xtask qualify --profile resource --binary <artifact> --sha256 <sha256> --baseline <artifact> --baseline-sha256 <sha256> [--record]\ncargo xtask dist --binary <artifact> --sha256 <sha256> --version <version> --out <absolute-directory>"

@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-26T08:52:32Z",
+  "updated_at": "2026-09-26T09:21:53Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1180,6 +1180,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "Appended seven current optimized-snapshot machine qualification passes at 20e5178, including exact-binary 500/500 capability, Native 15/15 subset, real CAS/LaTeX/retrieval, resources and disposable SIGKILL recovery. Development stays complete; distinct release version, schema-7 upgrade, real-client/independent mathematics, remaining corpus and deployment review are still pending."
+    },
+    {
+      "event_id": "MEVT-069",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T09:21:53Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Implemented independently versioned preview.2 and the additive pinned-baseline schema7-to-schema8 upgrade profile. Direct paired runtime checks passed 21/21; stale deployment test version arguments were reproduced and corrected without changing installer policy. The failed source observation is retained; final-source and versioned-artifact qualification remain pending. No deployment or operator-data access."
     }
   ],
   "receipt_contract": {

@@ -299,3 +299,11 @@ The MTM-017 closing review is `docs/MTM-017-FACT-MEMORY-REVIEW.md`. Its developm
 receipt must bind the exact current Rust source to both the source gate and the
 500-assessment capability report. Keep prior failed diagnostics immutable, and
 never interpret development completion as exact-artifact release qualification.
+
+The versioned schema-8 candidate is `0.6.0-preview.2`. Read
+`docs/MTM-017-SCHEMA8-UPGRADE.md` for the explicit `upgrade_schema8` profile.
+Keep its pinned schema-7 baseline, separate report marker, exact 7/8/7 transition
+and all legacy-revision/receipt/snapshot checks. Ordinary source and capability
+gates clear `MTM_TEST_SCHEMA8_UPGRADE_PROFILE`; no profile opens operator state.
+The old `upgrade` receipt contract and frozen MTM-016 release driver are not
+relabelled as schema-8 acceptance.

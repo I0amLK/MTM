@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "precommit_source_failure_and_targeted_diagnostic_not_release_qualification",
+  "base_commit": "fec5aeb16343a9504566b59ba419ea04c2274676",
+  "candidate_version": "0.6.0-preview.2",
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "source_gate": {
+    "command": "cargo xtask check",
+    "exit_code": 1,
+    "passed": 628,
+    "failed": 5,
+    "ignored": 1,
+    "failed_test_target": "crates/mtm-cli/tests/deployment.rs",
+    "aggregate_json_retained": false,
+    "collector_error": "The diagnostic collector encountered multiple JSON objects in failing test output and did not retain the final aggregate; these counts came from the streamed test summaries."
+  },
+  "targeted_reproduction": {
+    "test": "install_status_and_rollback_preserve_both_previous_selectors",
+    "exit_code": 101,
+    "passed": 0,
+    "failed": 1,
+    "error_code": "DEPLOYMENT_REJECTED",
+    "message": "run install through the intended versioned MTM artifact"
+  },
+  "finding": "Current-artifact deployment and SIGKILL fixtures passed a hard-coded 0.6.0-preview.1 version to the 0.6.0-preview.2 runtime. The installer correctly refused it before installation.",
+  "correction": "Use the compiled candidate package version in current fixture arguments and recovery paths; retain and extend the negative version check. Do not relax product installation validation or change historical receipts.",
+  "production_state_modified": false,
+  "production_selectors_changed": false,
+  "release_qualified": false
+}

@@ -551,7 +551,7 @@ dependencies = [
 
 [[package]]
 name = "mtm-cli"
-version = "0.6.0-preview.1"
+version = "0.6.0-preview.2"
 dependencies = [
  "base64",
  "getrandom",
@@ -568,7 +568,7 @@ dependencies = [
 
 [[package]]
 name = "mtm-contracts"
-version = "0.6.0-preview.1"
+version = "0.6.0-preview.2"
 dependencies = [
  "serde",
  "serde_json",
@@ -576,7 +576,7 @@ dependencies = [
 
 [[package]]
 name = "mtm-core"
-version = "0.6.0-preview.1"
+version = "0.6.0-preview.2"
 dependencies = [
  "mtm-contracts",
  "regex",
@@ -589,7 +589,7 @@ dependencies = [
 
 [[package]]
 name = "mtm-gateway"
-version = "0.6.0-preview.1"
+version = "0.6.0-preview.2"
 dependencies = [
  "axum",
  "base64",
@@ -612,7 +612,7 @@ dependencies = [
 
 [[package]]
 name = "mtm-native"
-version = "0.6.0-preview.1"
+version = "0.6.0-preview.2"
 dependencies = [
  "base64",
  "mtm-contracts",
@@ -627,7 +627,7 @@ dependencies = [
 
 [[package]]
 name = "mtm-runtime"
-version = "0.6.0-preview.1"
+version = "0.6.0-preview.2"
 dependencies = [
  "axum",
  "base64",
@@ -649,7 +649,7 @@ dependencies = [
 
 [[package]]
 name = "mtm-storage"
-version = "0.6.0-preview.1"
+version = "0.6.0-preview.2"
 dependencies = [
  "base64",
  "getrandom",
@@ -665,7 +665,7 @@ dependencies = [
 
 [[package]]
 name = "mtm-workflow"
-version = "0.6.0-preview.1"
+version = "0.6.0-preview.2"
 dependencies = [
  "mtm-contracts",
  "mtm-core",

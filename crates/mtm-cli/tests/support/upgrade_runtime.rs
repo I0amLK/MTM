@@ -18,6 +18,15 @@ use crate::support::{Result, require, text};
 
 const ENABLE: &str = "MTM_TEST_UPGRADE_PROFILE";
 
+#[path = "schema8_upgrade.rs"]
+mod schema8;
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum UpgradePath {
+    Legacy,
+    Schema8,
+}
+
 struct OwnedChild(Child);
 
 impl Drop for OwnedChild {
@@ -99,11 +108,31 @@ fn schema(server: &Server) -> Result<u64> {
 
 #[test]
 fn exact_installed_upgrade_and_preupgrade_state_rollback() -> Result {
-    if env::var_os(ENABLE).is_none() {
+    run_upgrade(UpgradePath::Legacy)
+}
+
+#[test]
+fn exact_schema7_to_schema8_upgrade_and_rollback() -> Result {
+    run_upgrade(UpgradePath::Schema8)
+}
+
+fn run_upgrade(upgrade_path: UpgradePath) -> Result {
+    let schema8_path = upgrade_path == UpgradePath::Schema8;
+    let enable = if schema8_path {
+        "MTM_TEST_SCHEMA8_UPGRADE_PROFILE"
+    } else {
+        ENABLE
+    };
+    let (old_version, old_schema) = if schema8_path {
+        ("0.6.0-preview.1", 7)
+    } else {
+        ("0.5.0-preview.2", 2)
+    };
+    if env::var_os(enable).is_none() {
         return Ok(());
     }
     require(
-        env::var(ENABLE).ok().as_deref() == Some("1"),
+        env::var(enable).ok().as_deref() == Some("1"),
         "upgrade profile flag must be exactly one",
     )?;
     require(
@@ -112,6 +141,16 @@ fn exact_installed_upgrade_and_preupgrade_state_rollback() -> Result {
     )?;
     let candidate = candidate::select()?;
     let baseline = candidate::select_baseline()?;
+    if schema8_path {
+        require(
+            baseline.sha256 == schema8::BASELINE_SHA256,
+            "schema-8 upgrade requires the frozen schema-7 baseline",
+        )?;
+        require(
+            env!("CARGO_PKG_VERSION") == "0.6.0-preview.2",
+            "schema-8 upgrade candidate version changed",
+        )?;
+    }
     require(
         candidate.sha256 != baseline.sha256,
         "upgrade requires distinct reviewed artifacts",
@@ -121,10 +160,19 @@ fn exact_installed_upgrade_and_preupgrade_state_rollback() -> Result {
     let old_info = server.call(&owner, "server_info", json!({}))?;
     require(
         old_info["server"] == "mtm"
-            && old_info["version"] == "0.5.0-preview.2"
-            && schema(&server)? == 2,
-        "upgrade fixture requires preview.2 schema-2 baseline",
+            && old_info["version"] == old_version
+            && schema(&server)? == old_schema,
+        "upgrade fixture baseline version/schema mismatch",
     )?;
+    let schema8_fixture = if schema8_path {
+        require(
+            old_info["tool_contract_version"] == "mtm-tools-v9",
+            "schema-7 baseline contract mismatch",
+        )?;
+        Some(schema8::Fixture::seed(&server, &owner)?)
+    } else {
+        None
+    };
     let created = server.call(
         &owner,
         "rethlas_start",
@@ -205,6 +253,14 @@ fn exact_installed_upgrade_and_preupgrade_state_rollback() -> Result {
         info["version"] == env!("CARGO_PKG_VERSION") && schema(&server)? == current_schema,
         "installed candidate identity or schema mismatch",
     )?;
+    if let Some(fixture) = &schema8_fixture {
+        require(current_schema == 8, "schema-8 upgrade requires schema 8")?;
+        require(
+            info["tool_contract_version"] == "mtm-tools-v10",
+            "schema-8 candidate contract mismatch",
+        )?;
+        fixture.check_migration(&server, &owner)?;
+    }
     require(
         server.secret_fingerprint()? == secret_before,
         "upgrade rotated owned fixture secret",
@@ -247,6 +303,9 @@ fn exact_installed_upgrade_and_preupgrade_state_rollback() -> Result {
         reconnected["state"] == "assemble" && server.secret_fingerprint()? == secret_before,
         "installed restart lost old run or key",
     )?;
+    if let Some(fixture) = &schema8_fixture {
+        fixture.exercise_new_fact(&server, &owner)?;
+    }
     server.stop()?;
     require(schema(&server)? == current_schema, "candidate schema drift")?;
     snapshot.unchanged()?;
@@ -254,9 +313,12 @@ fn exact_installed_upgrade_and_preupgrade_state_rollback() -> Result {
     // Rollback needs both the old executable and the pre-upgrade data image.
     let restored_sha256 = server.restore_owned_state(&snapshot)?;
     require(
-        restored_sha256 == snapshot.sha256 && schema(&server)? == 2,
+        restored_sha256 == snapshot.sha256 && schema(&server)? == old_schema,
         "preupgrade snapshot restoration failed",
     )?;
+    if let Some(fixture) = &schema8_fixture {
+        fixture.check_restored(&server)?;
+    }
     let rolled = cli(
         &candidate.path,
         &["rollback".into(), "--state-root".into(), path(&state)?],
@@ -279,9 +341,9 @@ fn exact_installed_upgrade_and_preupgrade_state_rollback() -> Result {
     let restored_info = server.call(&owner, "server_info", json!({}))?;
     let restored_task = server.call(&owner, "rethlas_step", json!({"run_id":run_id}))?;
     require(
-        restored_info["version"] == "0.5.0-preview.2"
+        restored_info["version"] == old_version
             && restored_task["state"] == "assess"
-            && schema(&server)? == 2
+            && schema(&server)? == old_schema
             && server.secret_fingerprint()? == secret_before,
         "baseline runtime did not serve its restored state",
     )?;
@@ -303,29 +365,42 @@ fn exact_installed_upgrade_and_preupgrade_state_rollback() -> Result {
         "installed artifact drifted",
     )?;
 
-    println!(
-        "MTM_UPGRADE_RUNTIME {}",
-        json!({
-            "ok":true,"candidate_sha256":candidate.sha256,"baseline_sha256":baseline.sha256,
-            "candidate_version":env!("CARGO_PKG_VERSION"),"baseline_version":"0.5.0-preview.2",
-            "baseline_schema":2,"candidate_schema":current_schema,"restored_schema":2,
-            "snapshot_sha256":snapshot.sha256,"restored_snapshot_sha256":restored_sha256,
-            "snapshot_entries":snapshot.entries,"snapshot_bytes":snapshot.bytes,
-            "private_modes_prepared":true,"prepared_mode_entries":prepared_mode_entries,
-            "legacy_shared_write_entries":snapshot.legacy_shared_write_entries,
-            "checks":{"baseline_created_old_run":true,"snapshot_copy_verified":true,
-                "self_install_exact":true,"both_selectors_agree":true,"repeat_install_preserves_manifest":true,
-                "installed_endpoint_identity":true,"old_run_advances_after_upgrade":true,
-                "new_run_advances_after_upgrade":true,"same_key_restart":true,
-                "baseline_selectors_restored":true,"snapshot_restored_before_old_launch":true,
-                "old_runtime_advances_restored_run":true,"snapshot_immutable":true,
-                "artifacts_unchanged":true,"clean_shutdown":true},
-            "fixture_state_only":true,"installed_endpoint_tested":true,"selectors_tested":2,
-            "native_backend":"disabled","latex_policy":"static_only",
-            "native_execution_tested":false,"compiled_latex_tested":false,"web_client_tested":false,
-            "production_state_modified":false,"production_selectors_changed":false,
-            "release_qualified":false
-        })
-    );
+    let mut summary = json!({
+        "ok":true,"candidate_sha256":candidate.sha256,"baseline_sha256":baseline.sha256,
+        "candidate_version":env!("CARGO_PKG_VERSION"),"baseline_version":old_version,
+        "baseline_schema":old_schema,"candidate_schema":current_schema,"restored_schema":old_schema,
+        "snapshot_sha256":snapshot.sha256,"restored_snapshot_sha256":restored_sha256,
+        "snapshot_entries":snapshot.entries,"snapshot_bytes":snapshot.bytes,
+        "private_modes_prepared":true,"prepared_mode_entries":prepared_mode_entries,
+        "legacy_shared_write_entries":snapshot.legacy_shared_write_entries,
+        "checks":{"baseline_created_old_run":true,"snapshot_copy_verified":true,
+            "self_install_exact":true,"both_selectors_agree":true,"repeat_install_preserves_manifest":true,
+            "installed_endpoint_identity":true,"old_run_advances_after_upgrade":true,
+            "new_run_advances_after_upgrade":true,"same_key_restart":true,
+            "baseline_selectors_restored":true,"snapshot_restored_before_old_launch":true,
+            "old_runtime_advances_restored_run":true,"snapshot_immutable":true,
+            "artifacts_unchanged":true,"clean_shutdown":true},
+        "fixture_state_only":true,"installed_endpoint_tested":true,"selectors_tested":2,
+        "native_backend":"disabled","latex_policy":"static_only",
+        "native_execution_tested":false,"compiled_latex_tested":false,"web_client_tested":false,
+        "production_state_modified":false,"production_selectors_changed":false,
+        "release_qualified":false
+    });
+    let marker = if schema8_path {
+        for key in [
+            "legacy_verified_revision_preserved",
+            "no_fact_backfill",
+            "completed_receipt_replayed_without_writes",
+            "new_verified_fact_promoted",
+            "schema8_tables_removed_by_restore",
+            "legacy_proof_bytes_preserved",
+        ] {
+            summary["checks"][key] = json!(true);
+        }
+        "MTM_SCHEMA8_UPGRADE_RUNTIME"
+    } else {
+        "MTM_UPGRADE_RUNTIME"
+    };
+    println!("{marker} {summary}");
     Ok(())
 }

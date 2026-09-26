@@ -41,6 +41,7 @@ pub(super) enum Profile {
     CompiledLatex,
     Resource,
     Upgrade,
+    UpgradeSchema8,
     Permissions,
     Corpus,
     CorpusNative,
@@ -57,12 +58,13 @@ impl Profile {
             "compiled_latex" => Ok(Self::CompiledLatex),
             "resource" => Ok(Self::Resource),
             "upgrade" => Ok(Self::Upgrade),
+            "upgrade_schema8" => Ok(Self::UpgradeSchema8),
             "permissions" => Ok(Self::Permissions),
             "corpus" => Ok(Self::Corpus),
             "corpus_native" => Ok(Self::CorpusNative),
             "install_sigkill" => Ok(Self::InstallSigkill),
             "retrieval" => Ok(Self::Retrieval),
-            _ => Err("qualification profile must be protocol, target, native_commands, compiled_latex, resource, upgrade, permissions, corpus, corpus_native, install_sigkill or retrieval; release qualification is not implemented here".into()),
+            _ => Err("qualification profile must be protocol, target, native_commands, compiled_latex, resource, upgrade, upgrade_schema8, permissions, corpus, corpus_native, install_sigkill or retrieval; release qualification is not implemented here".into()),
         }
     }
 
@@ -74,6 +76,7 @@ impl Profile {
             Self::CompiledLatex => "compiled_latex",
             Self::Resource => "resource",
             Self::Upgrade => "upgrade",
+            Self::UpgradeSchema8 => "upgrade_schema8",
             Self::Permissions => "permissions",
             Self::Corpus => "corpus",
             Self::CorpusNative => "corpus_native",
@@ -89,6 +92,7 @@ impl Profile {
             Self::NativeCommands | Self::CompiledLatex | Self::CorpusNative => "F6",
             Self::Resource => "D7",
             Self::Upgrade => "F1",
+            Self::UpgradeSchema8 => "MTM017-schema8",
             Self::Permissions => "F2",
             Self::Corpus => "F5",
             Self::InstallSigkill => "F4",
@@ -104,6 +108,7 @@ impl Profile {
             Self::CompiledLatex => "candidate-compiled-latex.json",
             Self::Resource => "candidate-resource.json",
             Self::Upgrade => "candidate-upgrade.json",
+            Self::UpgradeSchema8 => "candidate-upgrade-schema8.json",
             Self::Permissions => "candidate-permissions.json",
             Self::Corpus => "candidate-corpus.json",
             Self::CorpusNative => "candidate-corpus-native.json",
@@ -171,7 +176,7 @@ impl Options {
         let baseline_binary = options.remove("--baseline");
         let baseline_sha256 = options.remove("--baseline-sha256");
         match profile {
-            Profile::Resource | Profile::Upgrade => {
+            Profile::Resource | Profile::Upgrade | Profile::UpgradeSchema8 => {
                 if baseline_binary.is_none() || baseline_sha256.is_none() {
                     return Err("paired profile requires --baseline and --baseline-sha256".into());
                 }
@@ -199,6 +204,12 @@ impl Options {
                     return Err("baseline options require a resource or upgrade profile".into());
                 }
             }
+        }
+        if profile == Profile::UpgradeSchema8
+            && baseline_sha256.as_deref()
+                != Some("f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034")
+        {
+            return Err("schema-8 upgrade requires the exact released schema-7 baseline".into());
         }
         Ok(Self {
             binary: options.remove("--binary").ok_or("--binary is required")?,
@@ -320,7 +331,8 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     let native_commands = options.profile == Profile::NativeCommands;
     let compiled_latex = options.profile == Profile::CompiledLatex;
     let resource = options.profile == Profile::Resource;
-    let upgrade = options.profile == Profile::Upgrade;
+    let schema8_upgrade = options.profile == Profile::UpgradeSchema8;
+    let upgrade = matches!(options.profile, Profile::Upgrade | Profile::UpgradeSchema8);
     let corpus = options.profile == Profile::Corpus;
     let corpus_native = options.profile == Profile::CorpusNative;
     let install_sigkill = options.profile == Profile::InstallSigkill;
@@ -334,6 +346,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         Profile::CompiledLatex => "exact_candidate_required_compiled_latex_not_release",
         Profile::Resource => "exact_candidate_resource_not_release",
         Profile::Upgrade => "exact_candidate_installed_upgrade_fixture_not_release",
+        Profile::UpgradeSchema8 => "exact_candidate_schema7_to_schema8_upgrade_not_release",
         Profile::Permissions => "exact_candidate_scripted_patch_permissions_not_release",
         Profile::Corpus => "exact_candidate_partial_usability_corpus_not_release",
         Profile::CorpusNative => "exact_candidate_native_corpus_u16_u20_not_release",
@@ -354,6 +367,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         Profile::CompiledLatex => json!(["capable-host Native command/CAS and permission soak","baseline resource comparison","browser and independent human consent","operator-authorized copied production state","remaining corpus and release gates"]),
         Profile::Resource => json!(["compiled-LaTeX target pass","permission-grant soak","browser","upgrade and rollback","Python retirement"]),
         Profile::Upgrade => json!(["real Native and compiled LaTeX","resources and permission-grant soak","browser and human consent","operator-authorized production-state copy","abrupt installation interruption","Python retirement and full release gate"]),
+        Profile::UpgradeSchema8 => json!(["operator-authorized schema-7 state copy","real client and independent mathematics","complete current-artifact corpus and release decision"]),
         Profile::Permissions => json!(["real Native command execution and command-grant soak","compiled LaTeX and external retrieval","browser and independent human consent","baseline resource comparison","production upgrade and abrupt installation interruption","Python retirement and full release gate"]),
         Profile::Corpus => json!(["Native tasks U16-U20","independent research tasks U21-U25","external-client/operator tasks U26-U30","full release gates"]),
         Profile::CorpusNative => json!(["independent research tasks U21-U25","browser and human tasks U26-U28","copied-state repeated trials U29","complete corpus aggregation and release review"]),
@@ -424,6 +438,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             .env_remove("MTM_TEST_DEPLOYMENT_CANDIDATE")
             .env_remove("MTM_TEST_DEPLOYMENT_CANDIDATE_SHA256")
             .env_remove("MTM_TEST_UPGRADE_PROFILE")
+            .env_remove("MTM_TEST_SCHEMA8_UPGRADE_PROFILE")
             .env_remove("MTM_TEST_TARGET_PROFILE")
             .env_remove("MTM_TEST_NATIVE_COMMAND_PROFILE")
             .env_remove("MTM_TEST_COMPILED_LATEX_PROFILE")
@@ -464,13 +479,17 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         }
         if paired {
             command
-                .arg(if upgrade {
+                .arg(if schema8_upgrade {
+                    "upgrade_runtime::exact_schema7_to_schema8_upgrade_and_rollback"
+                } else if upgrade {
                     "upgrade_runtime::exact_installed_upgrade_and_preupgrade_state_rollback"
                 } else {
                     "resource_runtime::explicit_baseline_and_candidate_resource_non_regression"
                 })
                 .env(
-                    if upgrade {
+                    if schema8_upgrade {
+                        "MTM_TEST_SCHEMA8_UPGRADE_PROFILE"
+                    } else if upgrade {
                         "MTM_TEST_UPGRADE_PROFILE"
                     } else {
                         "MTM_TEST_RESOURCE_PROFILE"
@@ -578,6 +597,15 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
             summary::validate_native_commands(&output.stdout, &snapshot.sha256)?
         } else if compiled_latex {
             summary::validate_compiled_latex(&output.stdout, &snapshot.sha256)?
+        } else if schema8_upgrade {
+            summary::validate_schema8_upgrade(
+                &output.stdout,
+                &snapshot.sha256,
+                baseline
+                    .as_ref()
+                    .map(|value| value.sha256.as_str())
+                    .ok_or("schema-8 upgrade baseline missing")?,
+            )?
         } else if upgrade {
             summary::validate_upgrade(
                 &output.stdout,

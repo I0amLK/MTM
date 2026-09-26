@@ -33,6 +33,14 @@ pub(super) fn validate_upgrade(stdout: &[u8], candidate: &str, baseline: &str) -
     upgrade::validate(stdout, candidate, baseline)
 }
 
+pub(super) fn validate_schema8_upgrade(
+    stdout: &[u8],
+    candidate: &str,
+    baseline: &str,
+) -> Result<Value> {
+    upgrade::validate_schema8(stdout, candidate, baseline)
+}
+
 fn extract<T: serde::de::DeserializeOwned>(stdout: &[u8], marker: &str) -> Result<T> {
     let text = std::str::from_utf8(stdout).map_err(|_| "qualification output is not UTF-8")?;
     let mut lines = text.lines().filter_map(|line| line.split_once(marker));
@@ -184,6 +192,7 @@ pub(super) fn validate_resource(
 ) -> Result<Value> {
     if [
         "MTM_UPGRADE_RUNTIME ",
+        "MTM_SCHEMA8_UPGRADE_RUNTIME ",
         "MTM_PERMISSION_RUNTIME ",
         "MTM_USABILITY_CORPUS ",
         "MTM_RETRIEVAL_RUNTIME ",
@@ -220,6 +229,7 @@ pub(super) fn validate_resource(
 pub(super) fn validate(stdout: &[u8], hash: &str, profile: Profile) -> Result<Value> {
     if [
         "MTM_UPGRADE_RUNTIME ",
+        "MTM_SCHEMA8_UPGRADE_RUNTIME ",
         "MTM_PERMISSION_RUNTIME ",
         "MTM_USABILITY_CORPUS ",
         "MTM_RETRIEVAL_RUNTIME ",

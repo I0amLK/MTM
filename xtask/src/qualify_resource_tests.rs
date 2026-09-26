@@ -81,6 +81,38 @@ fn resource_profile_requires_complete_baseline_selection() -> Result<()> {
 }
 
 #[test]
+fn schema8_upgrade_requires_its_own_profile_and_pinned_baseline() -> Result<()> {
+    let base = [
+        "--profile",
+        "upgrade_schema8",
+        "--binary",
+        "candidate",
+        "--sha256",
+        &"a".repeat(64),
+        "--baseline",
+        "baseline",
+        "--baseline-sha256",
+        "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+    ]
+    .map(str::to_owned);
+    let parsed = Options::parse(&base)?;
+    assert_eq!(parsed.profile, Profile::UpgradeSchema8);
+    assert_eq!(parsed.report_name(), "candidate-upgrade-schema8.json");
+    for missing in [base[..6].to_vec(), base[..8].to_vec()] {
+        assert!(Options::parse(&missing).is_err());
+    }
+    let mut wrong = base.to_vec();
+    wrong[9] = "b".repeat(64);
+    assert!(Options::parse(&wrong).is_err());
+    for option in ["--baseline-schema", "--state-root", "--selector", "--force"] {
+        let mut foreign = base.to_vec();
+        foreign.extend([option.to_owned(), "override".to_owned()]);
+        assert!(Options::parse(&foreign).is_err());
+    }
+    Ok(())
+}
+
+#[test]
 fn upgrade_profile_requires_distinct_complete_artifact_pairs() -> Result<()> {
     let base = [
         "--profile",

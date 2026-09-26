@@ -8,6 +8,12 @@ development/qualification artifact even though its package label has not changed
 
 ## Completed development checkpoint: MTM-017
 
+The next independently versioned candidate is **`0.6.0-preview.2` (schema 8)**.
+It is not installed or release-qualified. The additive `upgrade_schema8` profile
+tests a real schema-7 baseline and preview.2 candidate on disposable state; see
+`docs/MTM-017-SCHEMA8-UPGRADE.md`. Earlier same-label snapshot results below retain
+their original artifact hashes and are not reused for the new candidate.
+
 The current development contract uses **schema 8**, **`mtm-tools-v10`** and
 dangerous-only Native execution. Bubblewrap and workflow/finalizer authority
 remain separate. Verified final proofs can promote immutable project facts;
