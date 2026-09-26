@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "real_web_later_run_initial_project_memory_observation",
+  "observed_at": "2026-09-26T13:27:10Z",
+  "run_id": "run-web-memory-shifted-odd-sum-80f9bad30046",
+  "project_id": "web-memory-integer-identities",
+  "target_claim_id": "web-memory-shifted-odd-sum",
+  "project_memory_advisory_only": true,
+  "fact_nodes": 1,
+  "fact_edges": 0,
+  "typed_findings_visible": 0,
+  "assessment_submitted": false,
+  "machine_state": "assess",
+  "submission_receipts": 0,
+  "release_qualified": false
+}
