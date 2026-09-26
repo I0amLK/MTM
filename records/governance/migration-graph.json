@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-26T13:55:52Z",
+  "updated_at": "2026-09-26T14:05:43Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1260,6 +1260,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "Stage C independent review completed successfully. Finalization promoted the shifted project fact with exactly one predecessor pointing to the previously verified base fact, while that base fact retained zero predecessors. The resulting active project graph has two nodes and one edge."
+    },
+    {
+      "event_id": "MEVT-079",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T14:05:43Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "A third fresh project run observed the completed advisory project-memory graph as exactly two active facts and one shifted-to-base predecessor edge, with no revocation, non-project pollution, typed finding or verifier-private leakage. The observation run made no workflow submission and cancelled normally. The real-web project-memory path is complete."
     }
   ],
   "receipt_contract": {

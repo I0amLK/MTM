@@ -80,3 +80,22 @@ Report run IDs, independent-review results, promoted revision IDs, final artifac
 locators, project-memory node/edge counts, and observed errors/repairs. Never
 report OAuth passwords, bearer tokens, capabilities, tunnel URLs, or raw private
 logs. Operator fact revocation is outside this web-model test.
+
+## Completed real-web result
+
+The isolated preview.2 web sequence completed successfully:
+
+- Stage A promoted base fact `c4ec50b45b618aa0` only after independent
+  verification and finalization.
+- Stage B exposed that fact in a later generator's advisory project memory before
+  any submission.
+- Stage C promoted shifted fact `02c10dd59da7e163` with exactly one
+  predecessor, the base fact, while the base fact remained predecessor-free.
+- A third fresh run observed exactly two active nodes and one edge,
+  `02c10dd59da7e163 -> c4ec50b45b618aa0`, then cancelled with zero workflow
+  submissions.
+
+No revoked, non-project, typed-finding, or verifier-private material appeared in
+the final generator view. This closes the project-memory real-web path, but not
+the separate full/retrieval/repair/CAS, corpus, operator-state-copy, or release
+qualification work.
