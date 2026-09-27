@@ -1100,6 +1100,21 @@
       "evidence": "records/evidence/MTM-017/u25-preview2-research-infrastructure.json",
       "evidence_sha256": "ac97e041c9b3947aaf8ae995d20f02d0b6ba30e4090d5aef7fbed0a00301d4bf",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-U25-LAUNCHER-PREPARE-GATE-REPAIR",
+      "recorded_at": "2026-09-27T15:58:16Z",
+      "scope": "u25_preview2_launcher_prepare_gate_repair",
+      "status": "prepare_rejected_before_session_creation_then_launcher_repaired",
+      "initial_reason": "untracked_inputs",
+      "research_root_present_after_failure": false,
+      "workflow_started": false,
+      "production_changed": false,
+      "patch_marker_static_scan_passed": true,
+      "tracked_inputs_verified_individually": true,
+      "evidence": "records/evidence/MTM-017/u25-launcher-prepare-gate-repair.json",
+      "evidence_sha256": "b11c88671bad978f6e338aabf149bad61829654cb172d657aaf049e23b2ac430",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
@@ -1111,7 +1126,7 @@
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-27T15:45:00Z",
+  "updated_at": "2026-09-27T15:58:16Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",

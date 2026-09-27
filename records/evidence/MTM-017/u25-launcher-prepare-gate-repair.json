@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u25_preview2_launcher_prepare_gate_repair",
+  "observed_at": "2026-09-27T15:58:16Z",
+  "first_prepare_attempt": {
+    "result": "rejected_before_session_creation",
+    "reported_reason": "untracked_inputs",
+    "research_root_present_after_failure": false,
+    "candidate_started": false,
+    "workflow_started": false,
+    "production_changed": false
+  },
+  "root_cause": "Two launcher command lines retained literal patch-marker plus characters from an earlier multi-line patch, causing the tracked-input gate to fail before any private session was created.",
+  "repair": {
+    "tracked_input_check_uses_individual_git_queries": true,
+    "git_diff_check_has_no_line_continuation_patch_marker": true,
+    "tmux_start_command_has_no_line_continuation_patch_marker": true,
+    "bash_syntax_passed": true,
+    "tracked_inputs_verified_individually": true,
+    "patch_marker_static_scan_passed": true
+  },
+  "acceptance_impact": "none",
+  "release_qualified": false
+}

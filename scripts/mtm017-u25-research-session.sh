@@ -207,8 +207,11 @@ u25_prepare() {
   local -a names tools
   u25_repeat_case "$repeat" || { u25_fail repeat_must_be_1_to_3; return 1; }
   [[ $(/usr/bin/git -C "$u25_repo" rev-parse --show-toplevel) == "$u25_repo" ]] || { u25_fail repository_identity; return 1; }
-  /usr/bin/git -C "$u25_repo" ls-files --error-unmatch -- +    scripts/mtm017-u25-research-session.sh conformance/mtm016-research-cases.tsv +    conformance/mtm016-usability-corpus.json > /dev/null 2>&1 || { u25_fail untracked_inputs; return 1; }
-  /usr/bin/git -C "$u25_repo" diff --quiet HEAD -- +    scripts/mtm017-u25-research-session.sh conformance/mtm016-research-cases.tsv +    conformance/mtm016-usability-corpus.json || { u25_fail changed_session_inputs; return 1; }
+  for tracked in scripts/mtm017-u25-research-session.sh conformance/mtm016-research-cases.tsv conformance/mtm016-usability-corpus.json; do
+    /usr/bin/git -C "$u25_repo" ls-files --error-unmatch -- "$tracked" > /dev/null 2>&1 ||
+      { u25_fail untracked_inputs; return 1; }
+  done
+  /usr/bin/git -C "$u25_repo" diff --quiet HEAD -- scripts/mtm017-u25-research-session.sh conformance/mtm016-research-cases.tsv conformance/mtm016-usability-corpus.json || { u25_fail changed_session_inputs; return 1; }
   launcher_commit=$(/usr/bin/git -C "$u25_repo" rev-parse HEAD) || return 1
   [[ $launcher_commit =~ ^[0-9a-f]{40}$ ]] || return 1
   launcher_hash=$(u25_hash "$u25_script") || return 1
@@ -355,7 +358,7 @@ u25_main() {
           if /usr/bin/tmux -S "$socket" has-session -t mtm-u25 2>/dev/null; then
             printf 'Already running; retaining the current OAuth client and tunnel.\n'
           else
-            /usr/bin/tmux -S "$socket" new-session -d -s mtm-u25 -x 140 -y 45 +              /usr/bin/bash "$u25_script" start-internal "$2" || return 1
+            /usr/bin/tmux -S "$socket" new-session -d -s mtm-u25 -x 140 -y 45 /usr/bin/bash "$u25_script" start-internal "$2" || return 1
             printf 'Started fresh U25 research console. Attach to read its HTTPS MCP URL.\n'
           fi
           ;;

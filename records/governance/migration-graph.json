@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-27T15:45:00Z",
+  "updated_at": "2026-09-27T15:58:16Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1420,6 +1420,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "U25 preview.2 research infrastructure was versioned without relabeling MTM-016. The collector/precheck now select one of two closed candidate identities, MTM-017 is currently restricted to U25 dangerous-Native session-v2 evidence, and a fresh U25 launcher plus non-overwriting fixed-material seal path passed 132 xtask tests, clippy, records, retirement and Bash synthetic checks. Exploratory CAS probes in the operator web session remain non-acceptance evidence."
+    },
+    {
+      "event_id": "MEVT-099",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T15:58:16Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The first U25 session prepare attempt failed closed before creating the MTM-017 research root because two launcher command lines retained literal patch-marker plus characters. No candidate or workflow started. The launcher was repaired to use single-line commands and per-file tracked-input checks, and Bash syntax, tracked-input and patch-marker scans pass."
     }
   ],
   "receipt_contract": {
