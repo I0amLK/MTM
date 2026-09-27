@@ -1013,18 +1013,41 @@
       "evidence": "records/evidence/MTM-017/web-u24-replacement-owner-continuity-interruption.json",
       "evidence_sha256": "c3096f32cfc55146985875cbe80dd557ac82cc0fccd962c23b293552ffe68bcc",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-WEB-U24-THIRD-ROOT-BRANCH-PREPARE",
+      "recorded_at": "2026-09-27T14:13:28Z",
+      "scope": "real_web_u24_third_root_generator_to_first_branch_handoff",
+      "status": "third_trial_two_branch_domains_prepared_first_branch_running",
+      "run_id": "run-u24-r1-geometric-series-retry2-64fd86cb5f8d",
+      "problem_id": "u24-r1-geometric-series-retry2",
+      "machine_state": "branch_run",
+      "snapshot_id": "round-1-9fb9c68d",
+      "induction_plan_id": "plan-r1-1",
+      "algebraic_plan_id": "plan-r1-2",
+      "first_branch_id": "branch-1-1-aefe6a",
+      "first_branch_domain_id": "branch-domain-branch-1-1-aefe6a",
+      "second_branch_id": "branch-1-2-3dcd89",
+      "second_branch_domain_id": "branch-domain-branch-1-2-3dcd89",
+      "first_branch_status": "running",
+      "second_branch_status": "pending",
+      "branch_result_count": 0,
+      "join_result_present": false,
+      "evidence": "records/evidence/MTM-017/web-u24-third-root-branch-prepare.json",
+      "evidence_sha256": "1e75157da8b3872bd405b84e047bf5cc88c9f53ec818e129f9a24126b2bf88bd",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Run a third U24-r1 trial under the current OAuth owner because the second trial lost owner continuity at branch_join; preserve both interrupted trials unchanged and continue U25 only after a complete U24 replacement.",
+    "Complete the third U24 Branch A and Branch B in separate branch sessions with join-only read denial checks, then join/assemble/verify; preserve both interrupted trials unchanged and continue U25 only after complete U24 replacement.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-27T14:08:00Z",
+  "updated_at": "2026-09-27T14:13:28Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -1219,7 +1242,22 @@
       "owner_continuity_interrupted": true,
       "replacement_trial_required": true
     },
-    "next_test": "U24 third trial under current OAuth owner",
+    "u24_third_branch_join": {
+      "run_id": "run-u24-r1-geometric-series-retry2-64fd86cb5f8d",
+      "state": "branch_run",
+      "snapshot_id": "round-1-9fb9c68d",
+      "branch_a_id": "branch-1-1-aefe6a",
+      "branch_a_domain_id": "branch-domain-branch-1-1-aefe6a",
+      "branch_a_plan_id": "plan-r1-1",
+      "branch_a_status": "running",
+      "branch_b_id": "branch-1-2-3dcd89",
+      "branch_b_domain_id": "branch-domain-branch-1-2-3dcd89",
+      "branch_b_plan_id": "plan-r1-2",
+      "branch_b_status": "pending",
+      "sealed_branch_count": 0,
+      "join_started": false
+    },
+    "next_test": "U24 third trial Branch A independent induction route",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }
