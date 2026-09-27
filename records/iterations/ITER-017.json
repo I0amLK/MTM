@@ -892,18 +892,38 @@
       "evidence": "records/evidence/MTM-017/web-u24-branch-b-sealed.json",
       "evidence_sha256": "ddde250fa19caf1174d48ddfbb647b7cffcda9cdab8dfa746a33580541fffe0b",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-WEB-U24-JOIN-COMPLETE",
+      "recorded_at": "2026-09-27T00:54:16Z",
+      "scope": "real_web_u24_join_after_two_sealed_branches",
+      "status": "join_complete_assembler_pending",
+      "run_id": "run-u24-r1-geometric-series-6fe7b6e47b06",
+      "machine_state": "assemble",
+      "barrier_transition_sequence": 8,
+      "join_transition_sequence": 9,
+      "considered_branch_ids": [
+        "branch-1-1-825da2",
+        "branch-1-2-3c850f"
+      ],
+      "selected_branch_id": "branch-1-2-3c850f",
+      "join_result_sha256": "ec2cf189d77e2d2c1de276564151d66352aa132213d6883cf9411a6cf1affffc",
+      "join_outcome": "solved",
+      "evidence": "records/evidence/MTM-017/web-u24-join-complete.json",
+      "evidence_sha256": "dedb715c1402973f2083e469dc6cc7fbdcc0d80e1229e3ed078cd7b637e0c0bd",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Complete U24 join over exactly the two sealed branches, then assemble/compile and independently verify the final proof; continue U25 CAS and remaining corpus cases afterward.",
+    "Complete U24 assembly/required LaTeX and independent final verification from the already-sealed two-branch join; continue U25 CAS and remaining corpus cases afterward.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-26T23:50:59Z",
+  "updated_at": "2026-09-27T00:54:16Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -1047,7 +1067,7 @@
     },
     "u24_branch_join": {
       "run_id": "run-u24-r1-geometric-series-6fe7b6e47b06",
-      "state": "branch_join",
+      "state": "assemble",
       "snapshot_id": "round-1-2a297969",
       "branch_a_id": "branch-1-1-825da2",
       "branch_a_domain_id": "branch-domain-branch-1-1-825da2",
@@ -1063,9 +1083,15 @@
       "branch_b_result_sha256": "ff1e4833b5bf2a5754a67ae73c8307009d0ad4151bab0627cd77b58a7267b13e",
       "sealed_branch_count": 2,
       "join_started": true,
-      "join_result_present": false
+      "join_result_present": true,
+      "join_considered_branch_ids": [
+        "branch-1-1-825da2",
+        "branch-1-2-3c850f"
+      ],
+      "join_selected_branch_id": "branch-1-2-3c850f",
+      "join_result_sha256": "ec2cf189d77e2d2c1de276564151d66352aa132213d6883cf9411a6cf1affffc"
     },
-    "next_test": "U24 join over exactly two sealed branch results",
+    "next_test": "U24 assemble joined proof and stop at verify",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }

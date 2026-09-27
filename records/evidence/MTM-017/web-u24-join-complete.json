@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "real_web_u24_join_after_two_sealed_branches",
+  "observed_at": "2026-09-27T00:54:16Z",
+  "run_id": "run-u24-r1-geometric-series-6fe7b6e47b06",
+  "operator_reported": {
+    "join_role_observed": true,
+    "sealed_branch_ids": [
+      "branch-1-1-825da2",
+      "branch-1-2-3c850f"
+    ],
+    "sealed_resource_returned_exactly_two_results": true,
+    "selected_branch_id": "branch-1-2-3c850f",
+    "join_complete_succeeded": true,
+    "assembler_not_executed_in_join_session": true
+  },
+  "machine_observed": {
+    "state": "assemble",
+    "status": "active",
+    "transition_sequence": 9,
+    "branch_a_status": "sealed",
+    "branch_b_status": "sealed",
+    "barrier_transition_sequence": 8,
+    "join_transition_sequence": 9,
+    "join_considered_branch_ids": [
+      "branch-1-1-825da2",
+      "branch-1-2-3c850f"
+    ],
+    "join_selected_branch_id": "branch-1-2-3c850f",
+    "join_outcome": "solved",
+    "join_result_sha256": "ec2cf189d77e2d2c1de276564151d66352aa132213d6883cf9411a6cf1affffc",
+    "join_result_mode": "0600"
+  },
+  "credentials_recorded": false,
+  "capabilities_recorded": false,
+  "branch_private_memory_recorded": false,
+  "release_qualified": false
+}
