@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "real_web_u24_owner_continuity_interruption_before_final_verifier",
+  "observed_at": "2026-09-27T12:29:30Z",
+  "run_id": "run-u24-r1-geometric-series-6fe7b6e47b06",
+  "problem_id": "u24-r1-geometric-series",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "verdict": null,
+    "sealed": false,
+    "transition_sequence": 11,
+    "assembled_proof_sha256": "a681921312b6bd4e909e333facf5cdd0a6ef2413df0f25883d30912f31134198",
+    "old_owner_fingerprint_sha256": "d7dde00dc45ca5f5f254a16bbc81cb426c60751c8c9b40380cc38f6421409f3c",
+    "current_owner_fingerprint_sha256": "a5aacf7b8928843dfb27461046cbeb9abec5b08406ce14624273c43086cf6691",
+    "owner_identity_changed": true,
+    "old_oauth_registration_still_present": true
+  },
+  "operator_observed": {
+    "three_transport_unavailable_failures_before_reconnect": true,
+    "old_chatgpt_connection_unrecoverable": true,
+    "new_connection_registered_as_distinct_oauth_client": true,
+    "run_owner_mismatch_on_new_connection": true,
+    "new_run_authorized": true
+  },
+  "classification": "external_owner_continuity_interruption_not_mathematical_failure",
+  "old_run_preserved_unchanged": true,
+  "replacement_trial_required": true,
+  "credentials_recorded": false,
+  "raw_client_ids_recorded": false,
+  "capabilities_recorded": false,
+  "release_qualified": false
+}

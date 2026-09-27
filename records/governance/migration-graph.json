@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-27T00:54:16Z",
+  "updated_at": "2026-09-27T12:29:30Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1348,6 +1348,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "U24 join executed only after both branches were sealed. The join considered exactly the induction and algebraic branch ids, selected the algebraic route, persisted result hash ec2cf189..., and advanced to assemble. No assembler proof was submitted in the join session."
+    },
+    {
+      "event_id": "MEVT-090",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T12:29:30Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The first U24-r1 trial reached verify with required LaTeX and assembled proof hash a6819213..., but final review could not continue because the original OAuth owner connection was lost and the replacement ChatGPT connection registered as a distinct client. The old run is preserved unchanged and classified as an external owner-continuity interruption, not a mathematical failure; a replacement U24 trial is authorized under the current owner."
     }
   ],
   "receipt_contract": {

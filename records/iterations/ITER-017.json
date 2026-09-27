@@ -912,18 +912,36 @@
       "evidence": "records/evidence/MTM-017/web-u24-join-complete.json",
       "evidence_sha256": "dedb715c1402973f2083e469dc6cc7fbdcc0d80e1229e3ed078cd7b637e0c0bd",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-WEB-U24-OWNER-CONTINUITY-INTERRUPTION",
+      "recorded_at": "2026-09-27T12:29:30Z",
+      "scope": "real_web_u24_owner_continuity_interruption_before_final_verifier",
+      "status": "old_trial_preserved_replacement_trial_required",
+      "run_id": "run-u24-r1-geometric-series-6fe7b6e47b06",
+      "machine_state": "verify",
+      "machine_latex_passed": true,
+      "server_verdict": null,
+      "machine_sealed": false,
+      "assembled_proof_sha256": "a681921312b6bd4e909e333facf5cdd0a6ef2413df0f25883d30912f31134198",
+      "owner_identity_changed": true,
+      "classification": "external_owner_continuity_interruption_not_mathematical_failure",
+      "replacement_trial_required": true,
+      "evidence": "records/evidence/MTM-017/web-u24-owner-continuity-interruption.json",
+      "evidence_sha256": "8cabebaf1f076daaf022a7d606fab0987953ebc7f491b10cbb43e26eec89efdb",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Complete U24 assembly/required LaTeX and independent final verification from the already-sealed two-branch join; continue U25 CAS and remaining corpus cases afterward.",
+    "Run a replacement U24-r1 under the current OAuth owner because the prior trial lost owner continuity before final verification; preserve the old run unchanged and continue U25 only after the replacement completes.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-27T00:54:16Z",
+  "updated_at": "2026-09-27T12:29:30Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -1067,7 +1085,7 @@
     },
     "u24_branch_join": {
       "run_id": "run-u24-r1-geometric-series-6fe7b6e47b06",
-      "state": "assemble",
+      "state": "verify",
       "snapshot_id": "round-1-2a297969",
       "branch_a_id": "branch-1-1-825da2",
       "branch_a_domain_id": "branch-domain-branch-1-1-825da2",
@@ -1089,9 +1107,12 @@
         "branch-1-2-3c850f"
       ],
       "join_selected_branch_id": "branch-1-2-3c850f",
-      "join_result_sha256": "ec2cf189d77e2d2c1de276564151d66352aa132213d6883cf9411a6cf1affffc"
+      "join_result_sha256": "ec2cf189d77e2d2c1de276564151d66352aa132213d6883cf9411a6cf1affffc",
+      "assembled_proof_sha256": "a681921312b6bd4e909e333facf5cdd0a6ef2413df0f25883d30912f31134198",
+      "owner_continuity_interrupted": true,
+      "replacement_trial_required": true
     },
-    "next_test": "U24 assemble joined proof and stop at verify",
+    "next_test": "U24 replacement trial under current OAuth owner",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }
