@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u25_preview2_launcher_partial_preparation_repair",
+  "observed_at": "2026-09-27T16:01:11Z",
+  "second_prepare_attempt": {
+    "result": "rejected_during_directory_creation",
+    "stderr_class": "literal_patch_marker_argument",
+    "candidate_snapshot_present": false,
+    "session_manifest_present": false,
+    "oauth_key_present": false,
+    "task_card_present": false,
+    "workflow_database_present": false,
+    "workflow_started": false,
+    "files_created_in_rejected_session": 0,
+    "rejected_directory_retained": true,
+    "production_changed": false
+  },
+  "repair": {
+    "all_literal_space_plus_space_patch_markers_removed": true,
+    "launcher_self_scans_patch_markers_before_session_creation": true,
+    "bash_syntax_passed": true,
+    "post_repair_patch_marker_scan_passed": true
+  },
+  "acceptance_impact": "none",
+  "release_qualified": false
+}

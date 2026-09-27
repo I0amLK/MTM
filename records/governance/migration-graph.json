@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-27T15:58:16Z",
+  "updated_at": "2026-09-27T16:01:11Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1428,6 +1428,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "The first U25 session prepare attempt failed closed before creating the MTM-017 research root because two launcher command lines retained literal patch-marker plus characters. No candidate or workflow started. The launcher was repaired to use single-line commands and per-file tracked-input checks, and Bash syntax, tracked-input and patch-marker scans pass."
+    },
+    {
+      "event_id": "MEVT-100",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T16:01:11Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The second U25 prepare attempt exposed four remaining literal patch-marker arguments during directory creation. It left only a retained 0700 directory skeleton with zero files: no candidate, session manifest, OAuth key, database or workflow. All space-plus-space markers were removed and the launcher now self-scans for this corruption before creating a session."
     }
   ],
   "receipt_contract": {

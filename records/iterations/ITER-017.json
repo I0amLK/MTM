@@ -1115,6 +1115,24 @@
       "evidence": "records/evidence/MTM-017/u25-launcher-prepare-gate-repair.json",
       "evidence_sha256": "b11c88671bad978f6e338aabf149bad61829654cb172d657aaf049e23b2ac430",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-U25-LAUNCHER-PARTIAL-PREPARATION-REPAIR",
+      "recorded_at": "2026-09-27T16:01:11Z",
+      "scope": "u25_preview2_launcher_partial_preparation_repair",
+      "status": "partial_directory_only_preparation_rejected_and_preserved",
+      "candidate_snapshot_present": false,
+      "session_manifest_present": false,
+      "oauth_key_present": false,
+      "workflow_database_present": false,
+      "workflow_started": false,
+      "files_created_in_rejected_session": 0,
+      "rejected_directory_retained": true,
+      "all_patch_markers_removed": true,
+      "launcher_self_scan_added": true,
+      "evidence": "records/evidence/MTM-017/u25-launcher-partial-preparation-repair.json",
+      "evidence_sha256": "e832efae15566ac67ae13cdcae71139b9192317cd39505156892977dfe3a87ba",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
@@ -1126,7 +1144,7 @@
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-27T15:58:16Z",
+  "updated_at": "2026-09-27T16:01:11Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",

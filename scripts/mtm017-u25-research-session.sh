@@ -203,10 +203,12 @@ u25_check() {
 }
 
 u25_prepare() {
-  local repeat=$1 session trial password launcher_commit launcher_hash resolved name sage_root magma_root
+  local repeat=$1 session trial password launcher_commit launcher_hash resolved name sage_root magma_root marker
   local -a names tools
   u25_repeat_case "$repeat" || { u25_fail repeat_must_be_1_to_3; return 1; }
   [[ $(/usr/bin/git -C "$u25_repo" rev-parse --show-toplevel) == "$u25_repo" ]] || { u25_fail repository_identity; return 1; }
+  marker=$(printf ' %s ' '+')
+  ! /usr/bin/grep -qF "$marker" "$u25_script" || { u25_fail launcher_patch_marker; return 1; }
   for tracked in scripts/mtm017-u25-research-session.sh conformance/mtm016-research-cases.tsv conformance/mtm016-usability-corpus.json; do
     /usr/bin/git -C "$u25_repo" ls-files --error-unmatch -- "$tracked" > /dev/null 2>&1 ||
       { u25_fail untracked_inputs; return 1; }
@@ -236,7 +238,7 @@ u25_prepare() {
     u25_private_dir "$parent" || { u25_fail parent_not_private; return 1; }
   done
   session=$(/usr/bin/mktemp -d -- "$u25_base/U25-r$repeat.XXXXXXXX") || return 1
-  /usr/bin/mkdir -m 700 -- "$session/home" "$session/tmp" "$session/tool-bin" +    "$session/workspace" "$session/workspace/research-evidence" "$session/data" +    "$session/data/private" "$session/data/debug" "$session/control" "$session/logs" || return 1
+  /usr/bin/mkdir -m 700 -- "$session/home" "$session/tmp" "$session/tool-bin" "$session/workspace" "$session/workspace/research-evidence" "$session/data" "$session/data/private" "$session/data/debug" "$session/control" "$session/logs" || return 1
   for ((i=0; i<${#names[@]}; i++)); do
     /usr/bin/ln -s -- "${tools[$i]}" "$session/tool-bin/${names[$i]}" || return 1
   done
@@ -251,9 +253,9 @@ u25_prepare() {
   (set -o noclobber; printf '%s\n' "$password" > "$session/operator-key.txt"; printf 'session lock\n' > "$session/control/session.lock") || return 1
   password=
   (umask 077; set -o noclobber; /usr/bin/cat -- "$session/task.md" > "$session/workspace/task.md") || return 1
-  (set -o noclobber; /usr/bin/sha256sum -- "$u25_script" "$u25_registry" "$u25_corpus" +    "$session/candidate" "$session/session.json" "$session/task.md" "$session/workspace/task.md" +    > "$session/inputs.sha256") || return 1
+  (set -o noclobber; /usr/bin/sha256sum -- "$u25_script" "$u25_registry" "$u25_corpus" "$session/candidate" "$session/session.json" "$session/task.md" "$session/workspace/task.md" > "$session/inputs.sha256") || return 1
   u25_check "$session" || return 1
-  /usr/bin/timeout --signal=TERM --kill-after=3s 45s "${u25_env[@]}" "$session/candidate" +    attest-native --workspace "$session/workspace" --native-mode dangerous --latex-policy required +    > "$session/control/native-preflight.json" 2> "$session/control/native-preflight.stderr" || { u25_fail native_preflight_failed; return 1; }
+  /usr/bin/timeout --signal=TERM --kill-after=3s 45s "${u25_env[@]}" "$session/candidate" attest-native --workspace "$session/workspace" --native-mode dangerous --latex-policy required > "$session/control/native-preflight.json" 2> "$session/control/native-preflight.stderr" || { u25_fail native_preflight_failed; return 1; }
   /usr/bin/grep -q '"hard_isolation":true' "$session/control/native-preflight.json" || { u25_fail native_attestation_missing; return 1; }
   printf 'SESSION_ROOT=%s\n' "$session"
   printf 'Prepared MTM-017 U25-r%s preview.2 session. No research acceptance is claimed.\n' "$repeat"
@@ -326,7 +328,7 @@ u25_start() (
     IFS= read -r MTM_OAUTH_PASSWORD < "$1/operator-key.txt"
     export MTM_OAUTH_PASSWORD
     cd -- "$1"
-    exec "$1/candidate" tui --quick-tunnel --verbose --host 127.0.0.1 --port 0 +      --workspace "$1/workspace" --native-mode dangerous --latex-policy required
+    exec "$1/candidate" tui --quick-tunnel --verbose --host 127.0.0.1 --port 0 --workspace "$1/workspace" --native-mode dangerous --latex-policy required
   ' mtm-u25 "$session" 2>&1 | /usr/bin/tee -- "$log"
   rc=${PIPESTATUS[0]}
   printf 'U25 session stopped (exit=%s). Private state and evidence material retained.\n' "$rc"

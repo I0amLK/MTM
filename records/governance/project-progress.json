@@ -3,7 +3,7 @@
   "project": "MTM-reboot",
   "version": "0.6.0-preview.1",
   "status": "development-milestones-complete-schema8-release-pending",
-  "updated_at": "2026-09-27T15:58:16Z",
+  "updated_at": "2026-09-27T16:01:11Z",
   "source_baseline": "records/governance/source-baseline.json",
   "current_production_authority": "rust",
   "rust_production_components": 7,
