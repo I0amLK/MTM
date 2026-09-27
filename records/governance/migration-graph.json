@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-27T12:54:33Z",
+  "updated_at": "2026-09-27T14:08:00Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1372,6 +1372,22 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "Replacement U24 Branch A completed in its independent induction domain after the expected join-only read denial. Machine state confirms Branch A sealed with result hash ac0464d0..., Branch B mechanically activated as running, barrier still incomplete and no join result."
+    },
+    {
+      "event_id": "MEVT-093",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T12:59:57Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Replacement U24 Branch B completed in its independent algebraic domain after the expected join-only read denial. Machine state confirms both branches sealed, Branch B result hash 5a69901c..., transition reason branch_sealed_barrier_complete, state branch_join and no join result. One pre-write CAPABILITY_INVALID was operator-reported and the successful retry used fresh authority."
+    },
+    {
+      "event_id": "MEVT-094",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T14:08:00Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The second U24-r1 trial lost OAuth owner continuity after both branches sealed and the barrier advanced to branch_join. The new ChatGPT connection is a distinct OAuth client, the old run remains active with no join result, and the trial is preserved as an external owner-continuity interruption rather than a branch or mathematical failure. A third U24 trial is required."
     }
   ],
   "receipt_contract": {
