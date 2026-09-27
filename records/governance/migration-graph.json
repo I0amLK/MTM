@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-27T12:47:58Z",
+  "updated_at": "2026-09-27T12:54:33Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1364,6 +1364,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "The replacement U24-r1 run under the current OAuth owner reached branch_run. Machine state confirms two fresh branch domains on snapshot round-1-e92b3d79: induction running and algebraic pending, with no branch result and no join result. Branch A is handed to a separate branch session next."
+    },
+    {
+      "event_id": "MEVT-092",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T12:54:33Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Replacement U24 Branch A completed in its independent induction domain after the expected join-only read denial. Machine state confirms Branch A sealed with result hash ac0464d0..., Branch B mechanically activated as running, barrier still incomplete and no join result."
     }
   ],
   "receipt_contract": {
