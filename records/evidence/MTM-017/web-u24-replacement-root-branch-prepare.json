@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "real_web_u24_replacement_root_generator_to_first_branch_handoff",
+  "observed_at": "2026-09-27T12:47:58Z",
+  "run_id": "run-u24-r1-geometric-series-retry-d56e3a367e60",
+  "problem_id": "u24-r1-geometric-series-retry",
+  "workflow_mode": "full",
+  "operator_reported": {
+    "states": ["assess","explore","propose_plans","direct_proving","branch_prepare","branch_run"],
+    "induction_plan_id": "plan-r1-1",
+    "algebraic_plan_id": "plan-r1-2",
+    "information_barrier_observed": true,
+    "unexpected_errors": false
+  },
+  "machine_observed": {
+    "state": "branch_run",
+    "status": "active",
+    "transition_sequence": 6,
+    "snapshot_id": "round-1-e92b3d79",
+    "branches": [
+      {
+        "branch_id": "branch-1-1-366553",
+        "plan_id": "plan-r1-1",
+        "domain_id": "branch-domain-branch-1-1-366553",
+        "status": "running",
+        "order_index": 0
+      },
+      {
+        "branch_id": "branch-1-2-0cdbe2",
+        "plan_id": "plan-r1-2",
+        "domain_id": "branch-domain-branch-1-2-0cdbe2",
+        "status": "pending",
+        "order_index": 1
+      }
+    ],
+    "branch_result_count": 0,
+    "join_result_present": false
+  },
+  "replacement_for_run_id": "run-u24-r1-geometric-series-6fe7b6e47b06",
+  "credentials_recorded": false,
+  "capabilities_recorded": false,
+  "branch_private_memory_recorded": false,
+  "release_qualified": false
+}
