@@ -1081,18 +1081,37 @@
       "evidence": "records/evidence/MTM-017/web-u24-third-final.json",
       "evidence_sha256": "7261451d96beec46e962ad40f283e3e29bc4b59d47f7be2e46297510e311e892",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-U25-PREVIEW2-RESEARCH-INFRASTRUCTURE",
+      "recorded_at": "2026-09-27T15:45:00Z",
+      "scope": "versioned_preview2_u25_research_collection_and_fresh_session_infrastructure",
+      "status": "u25_preview2_fresh_session_path_ready",
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "candidate_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+      "mtm016_identity_preserved": true,
+      "mtm017_scope_currently_u25_only": true,
+      "stale_safe_mode_u21_u24_not_reenabled": true,
+      "mtm_xtask_tests_passed": 132,
+      "mtm_xtask_tests_failed": 0,
+      "clippy_passed": true,
+      "launcher_synthetic_check_passed": true,
+      "exploratory_cas_probe_formal_acceptance": false,
+      "evidence": "records/evidence/MTM-017/u25-preview2-research-infrastructure.json",
+      "evidence_sha256": "ac97e041c9b3947aaf8ae995d20f02d0b6ba30e4090d5aef7fbed0a00301d4bf",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Complete U25 CAS first case and remaining U21-U25 corpus repeats; preserve both interrupted U24 trials and the completed third U24-r1 trial as separate evidence.",
+    "Prepare and execute U25-r1 in the fresh MTM-017 mtm-research-session-v2 path, then complete the remaining U21-U25 corpus repeats; the exploratory U25 run in the operator web session is not acceptance evidence.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-27T15:23:46Z",
+  "updated_at": "2026-09-27T15:45:00Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -1321,7 +1340,16 @@
       "final_artifact_sha256": "0049b6b1bc3e3c36b8b7e58a576cd2e7eafcbb2aa28a4d3e4c60f373725b0e30",
       "u24_r1_complete": true
     },
-    "next_test": "U25-r1 CAS rank-nullity with Sage and Magma",
+    "u25_research_infrastructure": {
+      "session_schema": "mtm-research-session-v2",
+      "milestone": "MTM-017",
+      "native_mode": "dangerous",
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "collector_version_bound": true,
+      "fresh_session_required": true,
+      "exploratory_web_session_excluded": true
+    },
+    "next_test": "prepare fresh MTM-017 U25-r1 research session v2",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }

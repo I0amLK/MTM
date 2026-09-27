@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "versioned_preview2_u25_research_collection_and_fresh_session_infrastructure",
+  "candidate": {
+    "version": "0.6.0-preview.2",
+    "sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0"
+  },
+  "identity_policy": {
+    "legacy_mtm016_identity_preserved": true,
+    "mtm017_acceptance_root": "HOME/.mtm-acceptance/MTM-017/research",
+    "mtm017_session_schema": "mtm-research-session-v2",
+    "mtm017_scope_currently_u25_only": true,
+    "stale_safe_mode_u21_u24_not_reenabled": true,
+    "arbitrary_candidate_override_allowed": false
+  },
+  "launcher": {
+    "path": "scripts/mtm017-u25-research-session.sh",
+    "fresh_home_and_state": true,
+    "native_mode": "dangerous",
+    "latex_policy": "required",
+    "workflow_protocol": 3,
+    "fixed_material_allowlist": [
+      "sage_input.txt",
+      "sage_output.txt",
+      "magma_input.txt",
+      "magma_output.txt",
+      "cas_observation.json",
+      "review.json"
+    ],
+    "non_overwriting_material_seal": true,
+    "production_changed": false
+  },
+  "validation": {
+    "bash_syntax_passed": true,
+    "launcher_manifest_taskcard_synthetic_check_passed": true,
+    "mtm_xtask_tests_passed": 132,
+    "mtm_xtask_tests_failed": 0,
+    "clippy_warnings_denied_passed": true,
+    "records_passed": true,
+    "retirement_passed": true,
+    "diff_check_passed": true
+  },
+  "exploratory_native_probe": {
+    "formal_u25_acceptance_evidence": false,
+    "reason": "Probe ran in the existing mtm017-operator-web-session-v1 rather than a fresh mtm-research-session-v2.",
+    "sage_version": "10.9",
+    "magma_version": "V2.29-8",
+    "sage_exit_code": 0,
+    "magma_exit_code": 0,
+    "parameter_results": [
+      {"t": -1, "rank": 2, "nullity": 1},
+      {"t": 0, "rank": 2, "nullity": 1},
+      {"t": 1, "rank": 2, "nullity": 1},
+      {"t": 2, "rank": 2, "nullity": 1}
+    ],
+    "sage_magma_results_agree": true
+  },
+  "release_qualified": false
+}

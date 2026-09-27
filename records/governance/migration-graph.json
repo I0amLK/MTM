@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-27T15:23:46Z",
+  "updated_at": "2026-09-27T15:45:00Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1412,6 +1412,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "Third U24-r1 completed end to end. Assembly passed required LaTeX on the first submission, independent verification found no gaps or critical errors, the server computed verdict correct, finalize sealed the run at sequence 13, and proof_verified.tex exactly matches the verifier-approved assembled proof hash 0049b6b1...."
+    },
+    {
+      "event_id": "MEVT-098",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T15:45:00Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U25 preview.2 research infrastructure was versioned without relabeling MTM-016. The collector/precheck now select one of two closed candidate identities, MTM-017 is currently restricted to U25 dangerous-Native session-v2 evidence, and a fresh U25 launcher plus non-overwriting fixed-material seal path passed 132 xtask tests, clippy, records, retirement and Bash synthetic checks. Exploratory CAS probes in the operator web session remain non-acceptance evidence."
     }
   ],
   "receipt_contract": {
