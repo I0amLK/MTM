@@ -1060,18 +1060,39 @@
       "evidence": "records/evidence/MTM-017/web-u24-third-branches-and-join.json",
       "evidence_sha256": "00855a839ddbb7071ec81ae09220e1d22c37090626f8c8acd6fb4f78d9d900ce",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-WEB-U24-THIRD-FINAL",
+      "recorded_at": "2026-09-27T15:23:46Z",
+      "scope": "real_web_u24_third_complete_branch_join_assembly_verification",
+      "status": "u24_r1_complete",
+      "run_id": "run-u24-r1-geometric-series-retry2-64fd86cb5f8d",
+      "machine_state": "done",
+      "machine_status": "done",
+      "latex_passed": true,
+      "server_verdict": "correct",
+      "sealed": true,
+      "assembled_proof_sha256": "0049b6b1bc3e3c36b8b7e58a576cd2e7eafcbb2aa28a4d3e4c60f373725b0e30",
+      "proof_manifest_sha256": "aa4330b5e913c9506df8077f2ac4f720c3e425a14d41816d8f45f71f98e262dd",
+      "verification_report_sha256": "f58c252551b5656dccfd0ed8ec491f784a38fa728327dca57661a121bd851fa5",
+      "final_artifact_sha256": "0049b6b1bc3e3c36b8b7e58a576cd2e7eafcbb2aa28a4d3e4c60f373725b0e30",
+      "final_artifact_path": "rethlas-output/run-u24-r1-geometric-series-retry2-64fd86cb5f8d/proof_verified.tex",
+      "u24_r1_complete": true,
+      "evidence": "records/evidence/MTM-017/web-u24-third-final.json",
+      "evidence_sha256": "7261451d96beec46e962ad40f283e3e29bc4b59d47f7be2e46297510e311e892",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Complete third U24 assembly, required LaTeX and final independent verification after the successful two-branch join; preserve both interrupted trials unchanged and continue U25 only after complete U24 replacement.",
+    "Complete U25 CAS first case and remaining U21-U25 corpus repeats; preserve both interrupted U24 trials and the completed third U24-r1 trial as separate evidence.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-27T15:09:04Z",
+  "updated_at": "2026-09-27T15:23:46Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -1268,7 +1289,7 @@
     },
     "u24_third_branch_join": {
       "run_id": "run-u24-r1-geometric-series-retry2-64fd86cb5f8d",
-      "state": "assemble",
+      "state": "done",
       "snapshot_id": "round-1-9fb9c68d",
       "branch_a_id": "branch-1-1-aefe6a",
       "branch_a_domain_id": "branch-domain-branch-1-1-aefe6a",
@@ -1290,9 +1311,17 @@
         "branch-1-2-3dcd89"
       ],
       "join_selected_branch_id": "branch-1-2-3dcd89",
-      "join_result_sha256": "b335ec8e0bac216ea5338baf669ec8ac4e69344fe4a8eb728b6440f9bc01e0ed"
+      "join_result_sha256": "b335ec8e0bac216ea5338baf669ec8ac4e69344fe4a8eb728b6440f9bc01e0ed",
+      "assembled_proof_sha256": "0049b6b1bc3e3c36b8b7e58a576cd2e7eafcbb2aa28a4d3e4c60f373725b0e30",
+      "proof_manifest_sha256": "aa4330b5e913c9506df8077f2ac4f720c3e425a14d41816d8f45f71f98e262dd",
+      "verification_report_sha256": "f58c252551b5656dccfd0ed8ec491f784a38fa728327dca57661a121bd851fa5",
+      "server_verdict": "correct",
+      "latex_passed": true,
+      "sealed": true,
+      "final_artifact_sha256": "0049b6b1bc3e3c36b8b7e58a576cd2e7eafcbb2aa28a4d3e4c60f373725b0e30",
+      "u24_r1_complete": true
     },
-    "next_test": "U24 third trial assemble joined proof and stop at verify",
+    "next_test": "U25-r1 CAS rank-nullity with Sage and Magma",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }

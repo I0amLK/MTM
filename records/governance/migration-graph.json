@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-27T15:09:04Z",
+  "updated_at": "2026-09-27T15:23:46Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1404,6 +1404,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "Third U24 Branch A and Branch B independently sealed after expected join-only read denials. Machine state confirms the barrier completed at sequence 8, join considered exactly those two sealed branches at sequence 9, selected the algebraic branch, persisted join result hash b335ec8e..., and advanced to assemble."
+    },
+    {
+      "event_id": "MEVT-097",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T15:23:46Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Third U24-r1 completed end to end. Assembly passed required LaTeX on the first submission, independent verification found no gaps or critical errors, the server computed verdict correct, finalize sealed the run at sequence 13, and proof_verified.tex exactly matches the verifier-approved assembled proof hash 0049b6b1...."
     }
   ],
   "receipt_contract": {
