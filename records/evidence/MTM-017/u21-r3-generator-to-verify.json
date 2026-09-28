@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u21_r3_fresh_session_generator_to_verify",
+  "observed_at": "2026-09-28T15:56:23Z",
+  "session_marker": "U21-r3.GI5mBweH",
+  "trial_id": "edfd352d6262dc5c12c25e30623aaa61",
+  "run_id": "run-u21-r3-monotone-limit-b1e17dbd1b50",
+  "problem_id": "u21-r3-monotone-limit",
+  "workflow_mode": "compact",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": null,
+    "transition_sequence": 4,
+    "assembled_proof_sha256": "720be5afea9d6e153a61991b763839b074758974a1f588863bc6abd8d746d800",
+    "last_verified_proof_sha256_present": false,
+    "proof_manifest_sha256": "790a43f3e9551e8f9429332ebe8d538fc1a0bccc1251a612d2224b0632c48fe4",
+    "transitions": [
+      "1:created->assess:run_initialized",
+      "2:assess->assemble:assessment_complete",
+      "3:assemble->latex_validate:proof_submitted",
+      "4:latex_validate->verify:latex_gate_passed"
+    ]
+  },
+  "route": {
+    "compact": true,
+    "external_retrieval_used": false,
+    "branching_used": false,
+    "repair_used": false,
+    "cas_used": false,
+    "least_upper_bound_completeness_explicit": true,
+    "supremum_existence_distinguished_from_convergence_definition": true
+  },
+  "generation_boundary": {
+    "verifier_report_submitted": false,
+    "finalizer_executed": false,
+    "independent_review_required": true
+  },
+  "production_changed": false,
+  "release_qualified": false
+}
