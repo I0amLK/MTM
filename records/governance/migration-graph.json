@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-28T01:40:01Z",
+  "updated_at": "2026-09-28T08:30:00Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1468,6 +1468,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "U25-r1 collection completed after fail-closed infrastructure repairs. ResearchIdentity now binds MTM-016 to schema 7 and MTM-017 to schema 8; the collector fixed-input directory was populated with six exact hash-checked route files; the review observation was mechanically rebound to raw verification-report bytes and normalized to the closed review schema. research-collect and explicit research-precheck both passed with bundle hash 9da21c67..., 15 artifacts, zero workflow mutations and no corpus count increment. A standalone MTM-017 U25-r1 receipt was sealed."
+    },
+    {
+      "event_id": "MEVT-105",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T08:30:00Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U25-r2 stopped at assess after Sage completed the finite-field checks but Magma was unavailable for algebra execution in the current environment. The same Magma wrapper bytes had succeeded for U25-r1. No same-trial retry was attempted, so U25-r2 remains a preserved failed CAS trial pending a fresh replacement."
     }
   ],
   "receipt_contract": {

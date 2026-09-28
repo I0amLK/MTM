@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u25_r2_formal_cas_trial_blocked_by_magma_authorization",
+  "recorded_at": "2026-09-28T08:30:00Z",
+  "session_marker": "U25-r2.rWLPvSmo",
+  "trial_id": "55ae95e86f22a987e2860fa54922e5a9",
+  "run_id": "run-u25-r2-finite-field-roots-55f152ef7fb0",
+  "problem_id": "u25-r2-finite-field-roots",
+  "machine_state": "assess",
+  "machine_status": "active",
+  "transition_seq": 1,
+  "workflow_proof_submitted": false,
+  "same_trial_magma_reexecution_performed": false,
+  "formal_cas": {
+    "sage": {
+      "exit_code": 0,
+      "version": "SageMath 10.9",
+      "input_sha256": "0cb6d79b4fdae01024f52b7be6a211df8292738c11c507d23b8607220c58f74f",
+      "output_sha256": "e6bfd83b84a4c799121972f3f37bf4f3142de54e0c7b2842eebd78a95f4d3c09",
+      "results": [
+        {"p": 2, "roots": [0,1], "all_multiplicities_one": true},
+        {"p": 3, "roots": [0,1,2], "all_multiplicities_one": true},
+        {"p": 5, "roots": [0,1,2,3,4], "all_multiplicities_one": true}
+      ]
+    },
+    "magma": {
+      "exit_code": 1,
+      "input_sha256": "70b1358116f529dbde55949f4b7181a792fd4d0596f096bc823f548ce6c9e27a",
+      "output_sha256": "dc231263f67683504c970f331b44dfe4f4f8ca3a9846c234ac52058021db7e77",
+      "failure_class": "authorization_rejected_before_script_execution",
+      "failure_message_sanitized": "Magma reported that it is not authorised for use on this machine."
+    }
+  },
+  "toolchain_comparison": {
+    "u25_r1_magma_wrapper_path": "/home/lk/magma/magma",
+    "u25_r2_magma_wrapper_path": "/home/lk/magma/magma",
+    "wrapper_sha256": "4a3b6cfae16e7c4a0a6d26c094aa157adf57ded5f7faa7af645a06a5104f292e",
+    "same_wrapper_bytes": true,
+    "license_file_present": true,
+    "license_file_sha256": "1178ece08912c5690a1f512d9140fba32ab26e3e4d1b6d7d9961d108ef656fbd",
+    "license_contents_recorded": false,
+    "host_version_probe_exit_code": 0,
+    "host_algebra_execution_authorized": false
+  },
+  "classification": "external_magma_authorization_blocker_requires_fresh_replacement_after_license_restoration",
+  "production_changed": false,
+  "release_qualified": false
+}

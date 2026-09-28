@@ -1217,18 +1217,36 @@
       "evidence": "records/evidence/MTM-017/research-u25-r1-3a4634e6f686fdfce186f61e350821d2.json",
       "evidence_sha256": "206d03ac1d2bae70e82dd8d2a703cb256723823d47e7ce974972dd96b00bcf1e",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-U25-R2-MAGMA-AUTHORIZATION-BLOCKER",
+      "recorded_at": "2026-09-28T08:30:00Z",
+      "scope": "u25_r2_formal_cas_trial_blocked_by_magma_authorization",
+      "status": "formal_cas_trial_blocked_external_magma_authorization",
+      "session_marker": "U25-r2.rWLPvSmo",
+      "trial_id": "55ae95e86f22a987e2860fa54922e5a9",
+      "run_id": "run-u25-r2-finite-field-roots-55f152ef7fb0",
+      "machine_state": "assess",
+      "transition_sequence": 1,
+      "sage_exit_code": 0,
+      "magma_exit_code": 1,
+      "same_trial_magma_reexecution_performed": false,
+      "replacement_requires_license_restoration": true,
+      "evidence": "records/evidence/MTM-017/u25-r2-magma-authorization-blocker.json",
+      "evidence_sha256": "141dad00b4b6fcc40b3314872a9627eae42f680d43e8219de4ccf3338a24c530",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Complete U25-r2 and U25-r3 in fresh MTM-017 research-session-v2 lanes, then version the remaining U21-U24 repeats for dangerous-only preview.2 semantics and complete the exact research corpus matrix.",
+    "Restore Magma authorization before retrying U25-r2/r3 in fresh MTM-017 research-session-v2 lanes; in parallel version the remaining U21-U24 repeats for dangerous-only preview.2 semantics and continue the exact research corpus matrix.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-28T01:40:01Z",
+  "updated_at": "2026-09-28T08:30:00Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -1489,7 +1507,17 @@
       "standalone_receipt_prepared": true,
       "corpus_count_incremented": false
     },
-    "next_test": "U25-r2 finite-field roots in a fresh MTM-017 research session v2",
+    "u25_r2_blocker": {
+      "session_marker": "U25-r2.rWLPvSmo",
+      "run_id": "run-u25-r2-finite-field-roots-55f152ef7fb0",
+      "state": "assess",
+      "sage_exit_code": 0,
+      "magma_exit_code": 1,
+      "magma_authorization_blocked": true,
+      "same_trial_retry_performed": false,
+      "replacement_required_after_license_restoration": true
+    },
+    "next_test": "version U21-U24 preview2 research sessions while Magma authorization is blocked",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }

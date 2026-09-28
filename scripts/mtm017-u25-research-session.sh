@@ -125,7 +125,7 @@ u25_taskcard() {
     printf '## 生成与 CAS 会话\n\n'
     printf '只使用本次 fresh mtm-research-session-v2 连接，新建 full workflow。problem_id 必须使用 %s，register_result=false，creation_key 必须逐字使用 %s。\n\n' "$case_id" "$creation_key"
     printf '%s\n\n专项要求：%s\n\n' "$problem" "$requirement"
-    printf '%s\n\n' '一般 rank-nullity 证明必须独立于有限 CAS 检查。实际 Sage 与 Magma 各执行一次，输入先写入 workspace/research-evidence/sage_input.txt 与 magma_input.txt；把各自实际 stdout 原样保存为 sage_output.txt 与 magma_output.txt。记录实际版本、退出码和输入输出 SHA-256，并写 mtm-research-cas-observation-v2 的 cas_observation.json。不要把 exploratory web-session 计算或 MTM-016 历史结果复制为本轮证据。'
+    printf '%s\n\n' '一般数学证明必须独立于有限 CAS 检查。实际 Sage 与 Magma 各执行一次，输入先写入 workspace/research-evidence/sage_input.txt 与 magma_input.txt；把各自实际 stdout 原样保存为 sage_output.txt 与 magma_output.txt。记录实际版本、退出码和输入输出 SHA-256，并写 mtm-research-cas-observation-v2 的 cas_observation.json。不要把 exploratory web-session 计算或 MTM-016 历史结果复制为本轮证据。'
     printf '%s\n\n' 'proof_manifest 的 computational_evidence 至少保留两条，分别说明 Sage 与 Magma 的有限参数检查；它们不是一般定理的证明。所有 Native 命令使用当前 dangerous 模式；dangerous 不授予 workflow/verifier/finalizer authority。'
     printf '%s\n\n' 'rethlas_start 成功后，在 workspace 根写 run-handoff.json：schema=mtm-research-run-handoff-v1，并只包含 trial_id、task_id、repeat、case_id、workflow_mode、problem_id、run_id、non_authorizing=true；不得包含 creation_key、OAuth client id/key/token、capability 或 URL。'
     printf '## 独立复核\n\n'
