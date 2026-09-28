@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-28T10:54:18Z",
+  "updated_at": "2026-09-28T11:49:49Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1508,6 +1508,22 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "Fresh U25-r3 session ran SageMath 10.9 and Magma V2.29-8 exactly once each. Both returned monic gcd X-1, Bezout coefficients 1 and -X, and explicitly evaluated the combination to X-1. The generator passed required LaTeX on the first submission and stopped at verify with proof hash 58b2f2a7... and manifest hash 2b6085c6.... Independent review remains pending."
+    },
+    {
+      "event_id": "MEVT-110",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T11:40:00Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Independent U25-r3 review completed on the same OAuth owner with ten substantive checks covering the Euclidean combination, common-divisor implication, divisibility, monic normalization, Bezout coefficients, direct identity expansion, and both CAS outputs. The server computed verdict correct and sealed the run done with final proof hash 58b2f2a7...."
+    },
+    {
+      "event_id": "MEVT-111",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T11:49:49Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U25-r3 review was mechanically normalized to the raw verification-report digest and closed review schema without changing the ten substantive checks. Six route files were sealed to the collector input directory. research-collect and explicit research-precheck both passed with bundle hash 4a993f60..., 15 artifacts, zero workflow mutations and no corpus count increment. A standalone MTM-017 U25-r3 receipt was sealed, completing all three U25 standalone reviewed receipts."
     }
   ],
   "receipt_contract": {
