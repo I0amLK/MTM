@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u25_r2_independent_review_collection_and_precheck_closeout",
+  "recorded_at": "2026-09-28T09:08:52Z",
+  "session_marker": "U25-r2.iRKJJar9",
+  "trial_id": "6435a5fb64831a255f6cd4e4b519ad3e",
+  "run_id": "run-u25-r2-finite-field-roots-56b856b33e87",
+  "machine_final": {
+    "state": "done",
+    "status": "done",
+    "sealed": true,
+    "latex_passed": true,
+    "verdict": "correct",
+    "transition_sequence": 9,
+    "final_artifact_sha256": "13477046449149248a5ffef536213607833c985176f67a8565c4da7f5f7b9d56",
+    "verification_report_sha256": "ac040687921f738e93a23a711af86386535e20140f23bf412bc5b259679fcad3"
+  },
+  "independent_review": {
+    "statement_checks": 12,
+    "critical_errors": 0,
+    "gaps": 0,
+    "same_owner_continuity": true,
+    "review_observation_sha256": "76f3bc3403e700b30204520ce79c04c5b7614705cfe440e5e73775f4c45d0a4d",
+    "owner_fingerprint": "91eecfba5ff108163ec22a66f11c8d49789335097688c7bcdade10a0ce9b5d3c"
+  },
+  "cas": {
+    "sage_version": "SageMath 10.9",
+    "magma_version": "Magma V2.29-8",
+    "sage_exit_code": 0,
+    "magma_exit_code": 0,
+    "parameters": [2,3,5],
+    "results_agree": true,
+    "general_proof_independent": true,
+    "cas_observation_sha256": "33d103eb254022bdbb994c4017d453d69f533842336bdaae98c6e4ced0437cec"
+  },
+  "collection": {
+    "schema": "mtm-research-collection-v1",
+    "bundle_directory": "evidence-bundle.6435a5fb64831a255f6cd4e4b519ad3e",
+    "bundle_sha256": "2f333a61384f7b2bb49c88dec1ea1771ee0e23897447aa2a35743db03611c9b4",
+    "required_material_present": true,
+    "precheck_consistent": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "explicit_precheck": {
+    "schema": "mtm-research-precheck-v1",
+    "artifact_count": 15,
+    "bundle_sha256": "2f333a61384f7b2bb49c88dec1ea1771ee0e23897447aa2a35743db03611c9b4",
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "required_material_present": true,
+    "existing_material_consistent": true,
+    "missing_material": [],
+    "selected_candidate_bytes_checked": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}

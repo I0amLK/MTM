@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-28T08:48:34Z",
+  "updated_at": "2026-09-28T09:08:52Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1484,6 +1484,22 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "After Magma access was restored, a fresh U25-r2 replacement session ran SageMath 10.9 and Magma V2.29-8 exactly once each for p=2,3,5; both confirmed all field elements as simple roots, complete linear factorization and nonzero derivatives. The generator then passed required LaTeX on the first submission and stopped at verify with proof hash 13477046... and manifest hash 96ac2e24.... Independent review remains pending."
+    },
+    {
+      "event_id": "MEVT-107",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T09:00:00Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Independent U25-r2 review completed on the same OAuth owner with twelve substantive checks covering the finite-field proof, the p=2 derivative edge case, squarefreeness, factorization, and both CAS outputs. The server computed verdict correct and sealed the replacement run done with final proof hash 13477046...."
+    },
+    {
+      "event_id": "MEVT-108",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T09:08:52Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U25-r2 review binding was mechanically normalized to the raw verification-report digest and closed review schema without changing the twelve substantive checks. Six route files were sealed to the collector input directory. research-collect and explicit research-precheck both passed with bundle hash 2f333a61..., 15 artifacts, zero workflow mutations and no corpus count increment. A standalone MTM-017 U25-r2 receipt was sealed."
     }
   ],
   "receipt_contract": {
