@@ -85,7 +85,7 @@ u25_session() {
   repeat=${BASH_REMATCH[1]}
   u25_repeat_case "$repeat" || return 1
   u25_session_root=$canonical
-  for directory in home tmp tool-bin workspace workspace/research-evidence data data/private data/debug control logs; do
+  for directory in home tmp tool-bin workspace workspace/research-evidence workspace/research-evidence-input data data/private data/debug control logs; do
     u25_private_dir "$canonical/$directory" || return 1
   done
 }
@@ -131,7 +131,7 @@ u25_taskcard() {
     printf '## 独立复核\n\n'
     printf '%s\n\n' '生成阶段到 verify 后停止，但保持同一 TUI/Quick Tunnel 与同一已注册 OAuth connector。独立复核会话必须核对当前 owner continuity、实际 proof、manifest 和 CAS evidence 后再提交 verifier report；不得用生成会话预制 correct。'
     printf '## 私有证据文件\n\n'
-    printf '%s\n' '只在 workspace/research-evidence/ 下创建以下固定文件：sage_input.txt、sage_output.txt、magma_input.txt、magma_output.txt、cas_observation.json；独立复核完成后另写 review.json。宿主 launcher 的 seal-material 子命令只会原字节封存这些 allowlisted 文件。'
+    printf '%s\n' '只在 workspace/research-evidence/ 下创建以下固定文件：sage_input.txt、sage_output.txt、magma_input.txt、magma_output.txt、cas_observation.json；独立复核完成后另写 review.json。宿主 launcher 的 seal-material 子命令只会把这些 allowlisted 文件原字节复制到 workspace/research-evidence-input/，供 collector 读取。'
   )
 }
 
@@ -238,7 +238,7 @@ u25_prepare() {
     u25_private_dir "$parent" || { u25_fail parent_not_private; return 1; }
   done
   session=$(/usr/bin/mktemp -d -- "$u25_base/U25-r$repeat.XXXXXXXX") || return 1
-  /usr/bin/mkdir -m 700 -- "$session/home" "$session/tmp" "$session/tool-bin" "$session/workspace" "$session/workspace/research-evidence" "$session/data" "$session/data/private" "$session/data/debug" "$session/control" "$session/logs" || return 1
+  /usr/bin/mkdir -m 700 -- "$session/home" "$session/tmp" "$session/tool-bin" "$session/workspace" "$session/workspace/research-evidence" "$session/workspace/research-evidence-input" "$session/data" "$session/data/private" "$session/data/debug" "$session/control" "$session/logs" || return 1
   for ((i=0; i<${#names[@]}; i++)); do
     /usr/bin/ln -s -- "${tools[$i]}" "$session/tool-bin/${names[$i]}" || return 1
   done
@@ -282,11 +282,13 @@ PY
 }
 
 u25_seal_material() {
-  local session=$1 source item name destination source_hash count=0
+  local session=$1 source destination_root item name destination source_hash count=0
   local -a allowed=(sage_input.txt sage_output.txt magma_input.txt magma_output.txt cas_observation.json review.json)
   u25_check "$session" || return 1
   source=$session/workspace/research-evidence
+  destination_root=$session/workspace/research-evidence-input
   u25_private_dir "$source" || { u25_fail evidence_source_permissions; return 1; }
+  u25_private_dir "$destination_root" || { u25_fail evidence_input_permissions; return 1; }
   shopt -s nullglob dotglob
   for item in "$source"/*; do
     [[ -f $item && ! -L $item ]] || { u25_fail unknown_evidence_entry; return 1; }
@@ -296,7 +298,7 @@ u25_seal_material() {
       *) u25_fail unknown_evidence_file; return 1 ;;
     esac
     u25_material_file "$item" || { u25_fail invalid_evidence_file; return 1; }
-    destination=$session/$name
+    destination=$destination_root/$name
     source_hash=$(u25_hash "$item") || return 1
     if [[ -e $destination || -L $destination ]]; then
       u25_regular "$destination" 1048576 || { u25_fail existing_evidence_invalid; return 1; }
@@ -309,7 +311,7 @@ u25_seal_material() {
     ((count+=1))
   done
   ((count > 0)) || { u25_fail no_evidence_material; return 1; }
-  printf 'sealed_material_files=%s source=workspace/research-evidence\n' "$count"
+  printf 'sealed_material_files=%s source=workspace/research-evidence destination=workspace/research-evidence-input\n' "$count"
 }
 
 u25_start() (

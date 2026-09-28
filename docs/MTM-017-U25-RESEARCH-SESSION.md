@@ -78,7 +78,8 @@ general rank-nullity proof.
 
 The model-visible workspace never gains direct access to the session root,
 OAuth key or private workflow database. After CAS material is ready, the
-operator can copy only the fixed allowlist into the private session root:
+operator can copy only the fixed allowlist from workspace/research-evidence/
+into the collector's fixed workspace/research-evidence-input/ directory:
 
     bash scripts/mtm017-u25-research-session.sh seal-material "$SESSION"
 

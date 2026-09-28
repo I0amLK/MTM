@@ -18,6 +18,7 @@ fn frozen_research_identity_matches_selected_release_candidate() -> Result<()> {
     assert_eq!(manifest["candidate_sha256"], CANDIDATE_SHA);
     assert_eq!(manifest["candidate_source_commit"], CANDIDATE_SOURCE);
     assert_eq!(CANDIDATE_STAGE, "mtm016-f6-frozen");
+    assert_eq!(research_identity("MTM-016")?.state_schema_version, 7);
     Ok(())
 }
 
@@ -26,6 +27,7 @@ fn mtm017_research_identity_is_exact_and_closed() -> Result<()> {
     let identity = research_identity("MTM-017")?;
     assert_eq!(identity.milestone, "MTM-017");
     assert_eq!(identity.acceptance_root, "MTM-017");
+    assert_eq!(identity.state_schema_version, 8);
     assert_eq!(identity.candidate_sha256, MTM017_CANDIDATE_SHA);
     assert_eq!(identity.candidate_source_commit, MTM017_CANDIDATE_SOURCE);
     assert_eq!(

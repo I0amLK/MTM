@@ -415,6 +415,7 @@ fn collect_database(
     database: &Path,
     run_id: &str,
     include_references: bool,
+    expected_schema_version: u64,
 ) -> Result<RunEvidence> {
     require(safe_id(run_id, 256), "unsafe research run id")?;
     let version = exactly_one(
@@ -422,8 +423,8 @@ fn collect_database(
         "research schema version result is invalid",
     )?;
     require(
-        version["user_version"] == 7,
-        "research state schema is not the frozen schema 7",
+        version["user_version"] == expected_schema_version,
+        "research state schema does not match the versioned research identity",
     )?;
     let run_sql = format!(
         "PRAGMA query_only=ON; SELECT problem_id,owner_id,state,status,round_index,transition_seq,latex_passed,verdict,sealed,metadata_json FROM runs WHERE run_id='{run_id}';"
@@ -718,6 +719,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         &database_path,
         &options.run_id,
         manifest.task_id == "U22",
+        identity.state_schema_version,
     )?;
     require(
         before.status["problem_id"] == manifest.case_id
@@ -795,6 +797,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         &database_path,
         &options.run_id,
         manifest.task_id == "U22",
+        identity.state_schema_version,
     )?;
     require(
         evidence_fingerprint(&before)? == evidence_fingerprint(&after)?,
@@ -1095,7 +1098,7 @@ esac
         let tool = validate_sqlite(&sqlite)?;
         validate_database(&database, fs::metadata(root.path())?.uid())?;
         let before = fs::read(&database)?;
-        let evidence = collect_database(&tool, &database, "run-a", false)?;
+        let evidence = collect_database(&tool, &database, "run-a", false, 7)?;
         assert_eq!(evidence.status["state"], "done");
         assert_eq!(evidence.status["problem_id"], "u21-r1-subspace-dimension");
         assert_eq!(evidence.owner_id, "owner-a");
@@ -1105,8 +1108,20 @@ esac
             "Synthetic target"
         );
         assert_eq!(fs::read(&database)?, before);
-        assert!(collect_database(&tool, &database, "run-pending", false).is_err());
-        assert!(collect_database(&tool, &database, "missing", false).is_err());
+        assert!(collect_database(&tool, &database, "run-pending", false, 7).is_err());
+        assert!(collect_database(&tool, &database, "missing", false, 7).is_err());
+        assert!(collect_database(&tool, &database, "run-a", false, 8).is_err());
+
+        let sqlite8_dir = root.path().join("v8");
+        fs::create_dir(&sqlite8_dir)?;
+        let sqlite8 = sqlite8_dir.join("sqlite3");
+        let script8 = script.replace("[{\"user_version\":7}]", "[{\"user_version\":8}]");
+        fs::write(&sqlite8, script8.as_bytes())?;
+        fs::set_permissions(&sqlite8, fs::Permissions::from_mode(0o700))?;
+        let tool8 = validate_sqlite(&sqlite8)?;
+        let evidence8 = collect_database(&tool8, &database, "run-a", false, 8)?;
+        assert_eq!(evidence8.status["state"], "done");
+        assert!(collect_database(&tool8, &database, "run-a", false, 7).is_err());
         Ok(())
     }
 

@@ -44,6 +44,7 @@ pub(crate) struct ResearchIdentity {
     pub(crate) candidate_source_commit: &'static str,
     pub(crate) candidate_relative_path: &'static str,
     pub(crate) acceptance_root: &'static str,
+    pub(crate) state_schema_version: u64,
 }
 
 pub(crate) fn research_identity(milestone: &str) -> Result<ResearchIdentity> {
@@ -54,6 +55,7 @@ pub(crate) fn research_identity(milestone: &str) -> Result<ResearchIdentity> {
             candidate_source_commit: CANDIDATE_SOURCE,
             candidate_relative_path: "target/mtm016-f6-frozen/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm",
             acceptance_root: "MTM-016",
+            state_schema_version: 7,
         }),
         "MTM-017" => Ok(ResearchIdentity {
             milestone: "MTM-017",
@@ -61,6 +63,7 @@ pub(crate) fn research_identity(milestone: &str) -> Result<ResearchIdentity> {
             candidate_source_commit: MTM017_CANDIDATE_SOURCE,
             candidate_relative_path: MTM017_CANDIDATE_PATH,
             acceptance_root: "MTM-017",
+            state_schema_version: 8,
         }),
         _ => Err("unsupported research milestone identity".into()),
     }

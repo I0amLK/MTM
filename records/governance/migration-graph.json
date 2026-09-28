@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-28T00:56:27Z",
+  "updated_at": "2026-09-28T01:40:01Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1452,6 +1452,22 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "Replacement U25-r1 fresh session reached verify after first-pass required LaTeX. SageMath 10.9 and Magma V2.29-8 each executed exactly once with exit 0 on t=-1,0,1,2 and both reported rank 2, nullity 1. Five fixed CAS evidence files were sealed into the private session root. The assembler proof and manifest are hash-bound; independent reviewer submission remains pending."
+    },
+    {
+      "event_id": "MEVT-103",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T01:15:00Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Independent U25-r1 review completed on the same OAuth owner. Ten substantive statement checks covered rank-nullity, the matrix argument, parameter coverage and both CAS executions. The server computed verdict correct, sealed the run done, and the final artifact hash remained 229531ec...."
+    },
+    {
+      "event_id": "MEVT-104",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T01:40:01Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U25-r1 collection completed after fail-closed infrastructure repairs. ResearchIdentity now binds MTM-016 to schema 7 and MTM-017 to schema 8; the collector fixed-input directory was populated with six exact hash-checked route files; the review observation was mechanically rebound to raw verification-report bytes and normalized to the closed review schema. research-collect and explicit research-precheck both passed with bundle hash 9da21c67..., 15 artifacts, zero workflow mutations and no corpus count increment. A standalone MTM-017 U25-r1 receipt was sealed."
     }
   ],
   "receipt_contract": {

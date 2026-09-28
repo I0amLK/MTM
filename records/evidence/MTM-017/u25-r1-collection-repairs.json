@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u25_r1_collection_and_precheck_repair_chain",
+  "recorded_at": "2026-09-28T01:40:01Z",
+  "trial_id": "3a4634e6f686fdfce186f61e350821d2",
+  "run_id": "run-u25-r1-rank-nullity-0ea26c4c9d65",
+  "session_marker": "U25-r1.jFvUdqP4",
+  "failed_collection_attempts": [
+    {
+      "stage": "sqlite_tool_selection",
+      "error": "sqlite3 executable unavailable",
+      "cause": "The initial collector command selected /usr/bin/sqlite3, while the actual bounded host executable is /home/lk/miniconda3/bin/sqlite3.",
+      "bundle_created": false
+    },
+    {
+      "stage": "state_schema_binding",
+      "error": "research state schema is not the frozen schema 7",
+      "cause": "The collector still hard-coded schema 7 after the session/candidate identity path had been versioned.",
+      "repair": "ResearchIdentity now binds MTM-016 to schema 7 and MTM-017 to schema 8; synthetic schema7/schema8 cross-use fails closed.",
+      "bundle_created": false
+    },
+    {
+      "stage": "fixed_route_material",
+      "error": "research evidence input directory missing",
+      "cause": "The launcher sealed route files to the session root while the collector contract reads workspace/research-evidence-input.",
+      "repair": "For this reviewed trial, exactly six allowlisted files were copied byte-for-byte into workspace/research-evidence-input with non-overwrite and explicit SHA-256 verification. The launcher was corrected for future sessions.",
+      "bundle_created": false
+    },
+    {
+      "stage": "review_binding",
+      "error": "review observation is not bound to this owner/run/proof/report",
+      "cause": "The review observation used a logical verification-report digest instead of the raw private verification/verification.json byte digest.",
+      "repair": "Only verification_report_sha256 was changed to the raw report hash; mathematical statement checks were unchanged.",
+      "bundle_created": false
+    },
+    {
+      "stage": "review_closed_schema",
+      "error": "research evidence schema mismatch",
+      "cause": "The review used non-schema marker/status/count fields.",
+      "repair": "Session markers were normalized to distinct generator/reviewer chat markers, non-schema count/status fields were removed, and all ten substantive statement checks were preserved.",
+      "bundle_created": false
+    }
+  ],
+  "final_collection": {
+    "exit_code": 0,
+    "schema": "mtm-research-collection-v1",
+    "milestone": "MTM-017",
+    "bundle_directory": "evidence-bundle.3a4634e6f686fdfce186f61e350821d2",
+    "bundle_manifest_sha256": "9da21c677d66c4078cde64dfbc662da0234b439ca954d41e817026a59142342f",
+    "final_tex_sha256": "229531ec1b8e7327222af5aa9c92fa13616256e2aca2d03beb7e20a9024a9bc4",
+    "verification_report_sha256": "6f667029587cd3153537fef7d77fc42304d1fb36aa88a8b624d07357f7d67e5c",
+    "proof_manifest_sha256": "8e67059a592c55c338af4998f697500ecda5de7aca24f72ad0d72d4bbfcdf223",
+    "owner_fingerprint": "13a9dbc219c770ab8eacd84e21973fd6d30205ddaafa428e3827f11b4cf7d5d1",
+    "required_material_present": true,
+    "precheck_consistent": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false,
+    "release_qualified": false
+  },
+  "explicit_precheck": {
+    "exit_code": 0,
+    "schema": "mtm-research-precheck-v1",
+    "milestone": "MTM-017",
+    "artifact_count": 15,
+    "bundle_sha256": "9da21c677d66c4078cde64dfbc662da0234b439ca954d41e817026a59142342f",
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "required_material_present": true,
+    "existing_material_consistent": true,
+    "missing_material": [],
+    "selected_candidate_bytes_checked": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false,
+    "release_qualified": false
+  },
+  "mathematical_review_source": "independent_same_owner_reviewer_with_10_substantive_statement_checks",
+  "production_changed": false,
+  "release_qualified": false
+}
