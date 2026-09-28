@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-27T16:01:11Z",
+  "updated_at": "2026-09-28T00:56:27Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1436,6 +1436,22 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "The second U25 prepare attempt exposed four remaining literal patch-marker arguments during directory creation. It left only a retained 0700 directory skeleton with zero files: no candidate, session manifest, OAuth key, database or workflow. All space-plus-space markers were removed and the launcher now self-scans for this corruption before creating a session."
+    },
+    {
+      "event_id": "MEVT-101",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T00:25:00Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The first formal U25-r1 fresh research trial was preserved as a failed CAS attempt before workflow generation: Sage exited 1 because the input referenced an undefined SAGE_VERSION symbol, while Magma exited 0. The run remained at assess, no same-trial Sage re-execution was performed, and a fresh replacement session was required."
+    },
+    {
+      "event_id": "MEVT-102",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T00:56:27Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Replacement U25-r1 fresh session reached verify after first-pass required LaTeX. SageMath 10.9 and Magma V2.29-8 each executed exactly once with exit 0 on t=-1,0,1,2 and both reported rank 2, nullity 1. Five fixed CAS evidence files were sealed into the private session root. The assembler proof and manifest are hash-bound; independent reviewer submission remains pending."
     }
   ],
   "receipt_contract": {
