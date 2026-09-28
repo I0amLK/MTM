@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-28T08:30:00Z",
+  "updated_at": "2026-09-28T08:48:34Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1476,6 +1476,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "U25-r2 stopped at assess after Sage completed the finite-field checks but Magma was unavailable for algebra execution in the current environment. The same Magma wrapper bytes had succeeded for U25-r1. No same-trial retry was attempted, so U25-r2 remains a preserved failed CAS trial pending a fresh replacement."
+    },
+    {
+      "event_id": "MEVT-106",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T08:48:34Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "After Magma access was restored, a fresh U25-r2 replacement session ran SageMath 10.9 and Magma V2.29-8 exactly once each for p=2,3,5; both confirmed all field elements as simple roots, complete linear factorization and nonzero derivatives. The generator then passed required LaTeX on the first submission and stopped at verify with proof hash 13477046... and manifest hash 96ac2e24.... Independent review remains pending."
     }
   ],
   "receipt_contract": {

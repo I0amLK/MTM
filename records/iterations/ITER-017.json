@@ -1235,18 +1235,44 @@
       "evidence": "records/evidence/MTM-017/u25-r2-magma-authorization-blocker.json",
       "evidence_sha256": "141dad00b4b6fcc40b3314872a9627eae42f680d43e8219de4ccf3338a24c530",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-U25-R2-REPLACEMENT-GENERATOR-TO-VERIFY",
+      "recorded_at": "2026-09-28T08:48:34Z",
+      "scope": "u25_r2_replacement_fresh_session_generator_to_verify",
+      "status": "replacement_generator_complete_independent_review_pending",
+      "session_marker": "U25-r2.iRKJJar9",
+      "trial_id": "6435a5fb64831a255f6cd4e4b519ad3e",
+      "run_id": "run-u25-r2-finite-field-roots-56b856b33e87",
+      "machine_state": "verify",
+      "transition_sequence": 7,
+      "latex_passed": true,
+      "sealed": false,
+      "verdict": null,
+      "assembled_proof_sha256": "13477046449149248a5ffef536213607833c985176f67a8565c4da7f5f7b9d56",
+      "proof_manifest_sha256": "96ac2e2418acdc719d1bac8c7adfde8e9324b249dbbd856d52d719d0d1bd83d3",
+      "sage_exit_code": 0,
+      "magma_exit_code": 0,
+      "cas_results_agree": true,
+      "cas_observation_sha256": "33d103eb254022bdbb994c4017d453d69f533842336bdaae98c6e4ced0437cec",
+      "collector_input_material_sealed": true,
+      "verifier_report_submitted": false,
+      "independent_review_pending": true,
+      "evidence": "records/evidence/MTM-017/u25-r2-replacement-generator-to-verify.json",
+      "evidence_sha256": "f2155944376b7d7b67cb84061897c9c9f6f00840c5df17961ad93459ac870ffc",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Restore Magma authorization before retrying U25-r2/r3 in fresh MTM-017 research-session-v2 lanes; in parallel version the remaining U21-U24 repeats for dangerous-only preview.2 semantics and continue the exact research corpus matrix.",
+    "Complete an independent reviewer session for the U25-r2 replacement on the same live OAuth owner, then collect and precheck the private bundle; U25-r3 and remaining U21-U24 repeats follow.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-28T08:30:00Z",
+  "updated_at": "2026-09-28T08:48:34Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -1517,7 +1543,20 @@
       "same_trial_retry_performed": false,
       "replacement_required_after_license_restoration": true
     },
-    "next_test": "version U21-U24 preview2 research sessions while Magma authorization is blocked",
+    "u25_r2_replacement": {
+      "session_marker": "U25-r2.iRKJJar9",
+      "run_id": "run-u25-r2-finite-field-roots-56b856b33e87",
+      "state": "verify",
+      "latex_passed": true,
+      "assembled_proof_sha256": "13477046449149248a5ffef536213607833c985176f67a8565c4da7f5f7b9d56",
+      "proof_manifest_sha256": "96ac2e2418acdc719d1bac8c7adfde8e9324b249dbbd856d52d719d0d1bd83d3",
+      "formal_cas_sage_exit_code": 0,
+      "formal_cas_magma_exit_code": 0,
+      "formal_cas_results_agree": true,
+      "collector_input_material_sealed": true,
+      "independent_review_pending": true
+    },
+    "next_test": "independent review of U25-r2 replacement on same MTM2 OAuth owner",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }
