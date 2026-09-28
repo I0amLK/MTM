@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-28T12:48:15Z",
+  "updated_at": "2026-09-28T14:06:42Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1556,6 +1556,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "U21-r1 review was normalized to the raw verification-report digest and closed review schema without changing the ten substantive checks. The review file was sealed to the collector input directory. research-collect and explicit research-precheck both passed with bundle hash b115dac2..., 10 artifacts, zero workflow mutations and no corpus count increment. A standalone MTM-017 U21-r1 trial-v1 receipt was sealed."
+    },
+    {
+      "event_id": "MEVT-116",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T14:06:42Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Fresh U21-r2 preview.2 session used compact mode under session-v2/dangerous Native. The generator proved Cauchy-Schwarz by separating the zero-vector case, then applying the nonnegative squared norm of y-lambda x for x nonzero, with equality characterized exactly by linear dependence including zero vectors. Required LaTeX passed on the first submission and the run stopped at verify with proof hash 1e5b66db... and manifest hash b2aa734a.... Independent review remains pending."
     }
   ],
   "receipt_contract": {

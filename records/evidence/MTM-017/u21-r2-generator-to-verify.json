@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u21_r2_fresh_session_generator_to_verify",
+  "observed_at": "2026-09-28T14:06:42Z",
+  "session_marker": "U21-r2.FLYdNgYY",
+  "trial_id": "19a138d5c919c330a9f101347ec89f71",
+  "run_id": "run-u21-r2-cauchy-schwarz-fc9b5133f46c",
+  "problem_id": "u21-r2-cauchy-schwarz",
+  "workflow_mode": "compact",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": null,
+    "transition_sequence": 4,
+    "assembled_proof_sha256": "1e5b66db13ea034dd3beccee8729bd29a93db6ec66442685c9a00ae62a3a59d5",
+    "last_verified_proof_sha256_present": false,
+    "proof_manifest_sha256": "b2aa734aa14b5587bf1536ef6caac660c469c156af306cc68049e6513b098b0a"
+  },
+  "route": {
+    "compact": true,
+    "external_retrieval_used": false,
+    "branching_used": false,
+    "repair_used": false,
+    "cas_used": false,
+    "zero_vector_boundary_explicit": true,
+    "equality_condition": "linear_dependence"
+  },
+  "generation_boundary": {
+    "verifier_report_submitted": false,
+    "finalizer_executed": false,
+    "independent_review_required": true
+  },
+  "production_changed": false,
+  "release_qualified": false
+}

@@ -1466,18 +1466,39 @@
       "evidence": "records/evidence/MTM-017/research-u21-r1-344bafa5e61f13ce9c15a8a6ac7cb5b6.json",
       "evidence_sha256": "c3710a1701268e63c8b4197cfb4db6e17fcc80272203df5b2bde9445b5186b7d",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-U21-R2-GENERATOR-TO-VERIFY",
+      "recorded_at": "2026-09-28T14:06:42Z",
+      "scope": "u21_r2_fresh_session_generator_to_verify",
+      "status": "generator_complete_independent_review_pending",
+      "session_marker": "U21-r2.FLYdNgYY",
+      "trial_id": "19a138d5c919c330a9f101347ec89f71",
+      "run_id": "run-u21-r2-cauchy-schwarz-fc9b5133f46c",
+      "workflow_mode": "compact",
+      "machine_state": "verify",
+      "transition_sequence": 4,
+      "latex_passed": true,
+      "sealed": false,
+      "verdict": null,
+      "assembled_proof_sha256": "1e5b66db13ea034dd3beccee8729bd29a93db6ec66442685c9a00ae62a3a59d5",
+      "proof_manifest_sha256": "b2aa734aa14b5587bf1536ef6caac660c469c156af306cc68049e6513b098b0a",
+      "independent_review_pending": true,
+      "evidence": "records/evidence/MTM-017/u21-r2-generator-to-verify.json",
+      "evidence_sha256": "ef8dd40790c24c44bb11e5942958141d74c96898ac40a49baa7163eca8469cc5",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "U25-r1/r2/r3 and U21-r1 standalone reviewed receipts are complete. Continue U21-r2/r3 and the remaining U22-U24 preview.2 trials before any separately reviewed corpus import.",
+    "U25-r1/r2/r3 and U21-r1 standalone reviewed receipts are complete. U21-r2 now has a fresh compact generator checkpoint at verify; complete independent review and standalone receipt, then continue U21-r3 and the remaining U22-U24 preview.2 trials before any separately reviewed corpus import.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-28T12:48:15Z",
+  "updated_at": "2026-09-28T14:06:42Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -1824,7 +1845,18 @@
       "standalone_receipt_prepared": true,
       "corpus_count_incremented": false
     },
-    "next_test": "U21-r2 Cauchy-Schwarz in a fresh MTM-017 research session v2",
+    "u21_r2": {
+      "session_marker": "U21-r2.FLYdNgYY",
+      "run_id": "run-u21-r2-cauchy-schwarz-fc9b5133f46c",
+      "state": "verify",
+      "workflow_mode": "compact",
+      "latex_passed": true,
+      "assembled_proof_sha256": "1e5b66db13ea034dd3beccee8729bd29a93db6ec66442685c9a00ae62a3a59d5",
+      "proof_manifest_sha256": "b2aa734aa14b5587bf1536ef6caac660c469c156af306cc68049e6513b098b0a",
+      "independent_review_pending": true,
+      "corpus_count_incremented": false
+    },
+    "next_test": "independent review of U21-r2 on the same MTM OAuth owner",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }
