@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-28T14:06:42Z",
+  "updated_at": "2026-09-28T15:03:55Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1564,6 +1564,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "Fresh U21-r2 preview.2 session used compact mode under session-v2/dangerous Native. The generator proved Cauchy-Schwarz by separating the zero-vector case, then applying the nonnegative squared norm of y-lambda x for x nonzero, with equality characterized exactly by linear dependence including zero vectors. Required LaTeX passed on the first submission and the run stopped at verify with proof hash 1e5b66db... and manifest hash b2aa734a.... Independent review remains pending."
+    },
+    {
+      "event_id": "MEVT-117",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T15:03:55Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Independent U21-r2 review completed on the same OAuth owner with eleven substantive checks covering the zero-vector split, denominator positivity, projection coefficient, norm expansion, inequality, equality implications, zero-vector equality cases, linear-dependence characterization and manifest scope. The server computed verdict correct and sealed the compact run done with final proof hash 1e5b66db.... review.json was normalized to the raw verification-report digest f118d931... and closed schema. An existing immutable evidence bundle bound the normalized review, final proof and raw verification report; the current collector invocation refused to overwrite it, while explicit research-precheck passed on that bundle with hash 30dc421a..., 10 artifacts, zero workflow mutations and no corpus count increment."
     }
   ],
   "receipt_contract": {
