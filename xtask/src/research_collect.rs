@@ -226,7 +226,7 @@ fn validate_session_manifest(
     session_name: &str,
     root_milestone: &str,
 ) -> Result<()> {
-    let policy = research_precheck::research_policy(&value.task_id)?;
+    let policy = research_precheck::research_policy_for(&value.milestone, &value.task_id)?;
     let identity = research_precheck::research_identity(&value.milestone)?;
     let expected_mode = if matches!(value.task_id.as_str(), "U21" | "U23") {
         "compact"
@@ -238,7 +238,6 @@ fn validate_session_manifest(
         value.schema == policy.session_schema
             && root_milestone == identity.acceptance_root
             && value.milestone == identity.milestone
-            && (identity.milestone != "MTM-017" || value.task_id == "U25")
             && matches!(
                 value.task_id.as_str(),
                 "U21" | "U22" | "U23" | "U24" | "U25"
@@ -995,7 +994,7 @@ mod tests {
             let parsed: SessionManifest = serde_json::from_value(value_bad)?;
             assert!(validate_session_manifest(&parsed, "U21-r1.ABCdef12", "MTM-016").is_err());
         }
-        // Only newly prepared U25 v2 sessions may use dangerous Native.
+        // Historical MTM-016 U25 v2 uses dangerous Native.
         let mut u25 = serde_json::to_value(&base)?;
         u25["schema"] = json!("mtm-research-session-v2");
         u25["task_id"] = json!("U25");
@@ -1030,6 +1029,12 @@ mod tests {
         mtm017_u21["milestone"] = json!("MTM-017");
         mtm017_u21["candidate_sha256"] = json!(research_precheck::MTM017_CANDIDATE_SHA);
         mtm017_u21["candidate_source_commit"] = json!(research_precheck::MTM017_CANDIDATE_SOURCE);
+        mtm017_u21["schema"] = json!("mtm-research-session-v2");
+        mtm017_u21["native_mode"] = json!("dangerous");
+        let parsed: SessionManifest = serde_json::from_value(mtm017_u21.clone())?;
+        validate_session_manifest(&parsed, "U21-r1.ABCdef12", "MTM-017")?;
+        assert!(validate_session_manifest(&parsed, "U21-r1.ABCdef12", "MTM-016").is_err());
+        mtm017_u21["native_mode"] = json!("safe");
         let parsed: SessionManifest = serde_json::from_value(mtm017_u21)?;
         assert!(validate_session_manifest(&parsed, "U21-r1.ABCdef12", "MTM-017").is_err());
         bad["extra"] = json!(true);

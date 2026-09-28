@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-28T11:49:49Z",
+  "updated_at": "2026-09-28T12:05:51Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1524,6 +1524,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "U25-r3 review was mechanically normalized to the raw verification-report digest and closed review schema without changing the ten substantive checks. Six route files were sealed to the collector input directory. research-collect and explicit research-precheck both passed with bundle hash 4a993f60..., 15 artifacts, zero workflow mutations and no corpus count increment. A standalone MTM-017 U25-r3 receipt was sealed, completing all three U25 standalone reviewed receipts."
+    },
+    {
+      "event_id": "MEVT-112",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T12:05:51Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U21-U24 research policy was versioned without mutating MTM-016 history. MTM-016 U21-U24 remain session-v1/safe/trial-v1; MTM-017 U21-U24 now require session-v2/dangerous/trial-v1. Collector and precheck choose policy by milestone plus task, reject stale safe/v1 MTM-017 sessions, and preserve schema-8 database binding. A dedicated preview.2 U21-U24 launcher with route-specific fixed evidence allowlists passed synthetic route checks, 23 precheck tests, 6 collector tests and clippy. No new U21-U24 trial or corpus import was performed by this infrastructure step."
     }
   ],
   "receipt_contract": {

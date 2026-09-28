@@ -239,9 +239,15 @@ fn retarget_fixture_to_mtm017(fixture: &mut Fixture) -> Result<()> {
         .get(&Kind::Session)
         .ok_or("fixture session material missing")?;
     let mut session: Value = serde_json::from_slice(bytes)?;
+    let task = session["task_id"]
+        .as_str()
+        .ok_or("fixture session task missing")?;
+    let policy = research_policy_for("MTM-017", task)?;
     session["milestone"] = json!("MTM-017");
     session["candidate_sha256"] = json!(MTM017_CANDIDATE_SHA);
     session["candidate_source_commit"] = json!(MTM017_CANDIDATE_SOURCE);
+    session["schema"] = json!(policy.session_schema);
+    session["native_mode"] = json!(policy.native_mode);
     fixture
         .material
         .insert(Kind::Session, serde_json::to_vec(&session)?);
@@ -266,13 +272,15 @@ fn every_fixed_case_can_inventory_material_but_never_grants_acceptance() -> Resu
 }
 
 #[test]
-fn mtm017_u25_bundle_identity_is_version_bound() -> Result<()> {
-    let mut mtm017 = fixture("U25", 1)?;
-    retarget_fixture_to_mtm017(&mut mtm017)?;
-    let report = mtm017.inspect()?;
-    assert_eq!(report["milestone"], "MTM-017");
-    assert_eq!(report["required_material_present"], true);
-    assert_eq!(report["research_trial_passed"], false);
+fn mtm017_bundle_identity_and_native_policy_are_version_bound() -> Result<()> {
+    for task in ["U21", "U22", "U23", "U24", "U25"] {
+        let mut mtm017 = fixture(task, 1)?;
+        retarget_fixture_to_mtm017(&mut mtm017)?;
+        let report = mtm017.inspect()?;
+        assert_eq!(report["milestone"], "MTM-017");
+        assert_eq!(report["required_material_present"], true);
+        assert_eq!(report["research_trial_passed"], false);
+    }
 
     let mut wrong_sha = fixture("U25", 1)?;
     retarget_fixture_to_mtm017(&mut wrong_sha)?;
@@ -288,9 +296,17 @@ fn mtm017_u25_bundle_identity_is_version_bound() -> Result<()> {
     )?;
     assert!(wrong_source.inspect().is_err());
 
-    let mut stale_safe = fixture("U24", 1)?;
-    retarget_fixture_to_mtm017(&mut stale_safe)?;
-    assert!(stale_safe.inspect().is_err());
+    for task in ["U21", "U22", "U23", "U24"] {
+        let mut stale_safe = fixture(task, 1)?;
+        retarget_fixture_to_mtm017(&mut stale_safe)?;
+        stale_safe.change(Kind::Session, "native_mode", json!("safe"))?;
+        assert!(stale_safe.inspect().is_err());
+
+        let mut stale_schema = fixture(task, 1)?;
+        retarget_fixture_to_mtm017(&mut stale_schema)?;
+        stale_schema.change(Kind::Session, "schema", json!("mtm-research-session-v1"))?;
+        assert!(stale_schema.inspect().is_err());
+    }
     Ok(())
 }
 
@@ -638,8 +654,9 @@ fn cas_route_requires_dangerous_sage_and_magma_bound_to_exact_io() -> Result<()>
 }
 
 #[test]
-fn u25_session_epoch_is_explicit_and_does_not_change_other_tasks() -> Result<()> {
+fn research_policy_is_closed_by_milestone_and_task() -> Result<()> {
     assert!(research_policy("U26").is_err());
+    assert!(research_policy_for("MTM-018", "U21").is_err());
     for task in ["U21", "U22", "U23", "U24", "U25"] {
         for repeat in 1..=3 {
             let policy = research_policy(task)?;
@@ -654,6 +671,17 @@ fn u25_session_epoch_is_explicit_and_does_not_change_other_tasks() -> Result<()>
                 if task == "U25" { "dangerous" } else { "safe" }
             );
         }
+        let mtm017 = research_policy_for("MTM-017", task)?;
+        assert_eq!(mtm017.session_schema, "mtm-research-session-v2");
+        assert_eq!(mtm017.native_mode, "dangerous");
+        assert_eq!(
+            mtm017.trial_schema,
+            if task == "U25" {
+                "mtm-research-trial-evidence-v2"
+            } else {
+                "mtm-research-trial-evidence-v1"
+            }
+        );
     }
     for (key, value) in [
         ("schema", json!("mtm-research-session-v1")),

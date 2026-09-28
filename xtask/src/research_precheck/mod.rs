@@ -70,6 +70,28 @@ pub(crate) fn research_identity(milestone: &str) -> Result<ResearchIdentity> {
 }
 
 pub(crate) fn research_policy(task: &str) -> Result<ResearchPolicy> {
+    research_policy_for("MTM-016", task)
+}
+
+pub(crate) fn research_policy_for(milestone: &str, task: &str) -> Result<ResearchPolicy> {
+    if milestone == "MTM-017" {
+        return match task {
+            "U21" | "U22" | "U23" | "U24" => Ok(ResearchPolicy {
+                session_schema: "mtm-research-session-v2",
+                native_mode: "dangerous",
+                trial_schema: "mtm-research-trial-evidence-v1",
+            }),
+            "U25" => Ok(ResearchPolicy {
+                session_schema: "mtm-research-session-v2",
+                native_mode: "dangerous",
+                trial_schema: "mtm-research-trial-evidence-v2",
+            }),
+            _ => Err("unsupported research acceptance policy".into()),
+        };
+    }
+    if milestone != "MTM-016" {
+        return Err("unsupported research milestone policy".into());
+    }
     match task {
         "U21" | "U22" | "U23" | "U24" => Ok(ResearchPolicy {
             session_schema: "mtm-research-session-v1",

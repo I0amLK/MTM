@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "versioned_preview2_u21_u24_dangerous_research_infrastructure",
+  "candidate": {
+    "version": "0.6.0-preview.2",
+    "sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+    "state_schema_version": 8
+  },
+  "policy_matrix": {
+    "mtm016_u21_u24": {
+      "session_schema": "mtm-research-session-v1",
+      "native_mode": "safe",
+      "trial_schema": "mtm-research-trial-evidence-v1",
+      "preserved": true
+    },
+    "mtm017_u21_u24": {
+      "session_schema": "mtm-research-session-v2",
+      "native_mode": "dangerous",
+      "trial_schema": "mtm-research-trial-evidence-v1"
+    },
+    "mtm017_u25": {
+      "session_schema": "mtm-research-session-v2",
+      "native_mode": "dangerous",
+      "trial_schema": "mtm-research-trial-evidence-v2",
+      "separate_launcher_preserved": true
+    }
+  },
+  "collector_precheck": {
+    "milestone_and_task_policy_selection": true,
+    "mtm017_u21_u24_session_v1_rejected": true,
+    "mtm017_u21_u24_safe_native_rejected": true,
+    "mtm016_safe_v1_behavior_preserved": true,
+    "schema8_database_binding_preserved": true
+  },
+  "launcher": {
+    "path": "scripts/mtm017-research-session.sh",
+    "tasks": ["U21", "U22", "U23", "U24"],
+    "session_schema": "mtm-research-session-v2",
+    "native_mode": "dangerous",
+    "latex_policy": "required",
+    "workflow_protocol": 3,
+    "fresh_oauth_owner_per_session": true,
+    "route_specific_fixed_material_allowlists": true,
+    "collector_input_directory_created_at_prepare": true,
+    "non_overwriting_material_seal": true,
+    "production_changed": false
+  },
+  "synthetic_validation": {
+    "bash_syntax_passed": true,
+    "all_12_case_mode_mappings_passed": true,
+    "session_manifest_validation_passed": true,
+    "u22_route_card_schema_text_present": true,
+    "route_allowlist_checks_passed": true,
+    "precheck_tests_passed": 23,
+    "collector_tests_passed": 6,
+    "clippy_warnings_denied_passed": true
+  },
+  "corpus_import_performed": false,
+  "release_qualified": false
+}

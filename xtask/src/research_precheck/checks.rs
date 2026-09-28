@@ -6,7 +6,7 @@ use serde_json::Value;
 
 use super::{
     Bundle, CORPUS_SHA, Case, Kind, REGISTRY_SHA, ResearchIdentity, decode, hash, hex, require,
-    research_policy,
+    research_policy_for,
 };
 use crate::{Result, evidence_json};
 
@@ -41,7 +41,7 @@ fn matches_file(value: &Value, key: &str, material: &Material, kind: Kind) -> Re
 }
 
 fn session(value: &Value, bundle: &Bundle, case: &Case, identity: ResearchIdentity) -> Result<()> {
-    let policy = research_policy(&bundle.task_id)?;
+    let policy = research_policy_for(identity.milestone, &bundle.task_id)?;
     require(
         value.as_object().is_some_and(|fields| fields.len() == 20),
         "preparation schema mismatch",
@@ -49,7 +49,6 @@ fn session(value: &Value, bundle: &Bundle, case: &Case, identity: ResearchIdenti
     require(
         value["schema"] == policy.session_schema
             && value["milestone"] == identity.milestone
-            && (identity.milestone != "MTM-017" || bundle.task_id == "U25")
             && value["task_id"] == bundle.task_id
             && value["repeat"] == bundle.repeat
             && value["case_id"] == case.id

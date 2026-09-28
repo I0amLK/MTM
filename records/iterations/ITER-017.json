@@ -1379,18 +1379,38 @@
       "evidence": "records/evidence/MTM-017/research-u25-r3-4af23ea75819997a644483a5d2fd51e7.json",
       "evidence_sha256": "a09071f6431b4b0301da91c40ce9e075db0277ea36438bc955e57a1f28e69daa",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-U21-U24-PREVIEW2-RESEARCH-INFRASTRUCTURE",
+      "recorded_at": "2026-09-28T12:05:51Z",
+      "scope": "versioned_preview2_u21_u24_dangerous_research_infrastructure",
+      "status": "u21_u24_preview2_session_v2_dangerous_path_ready",
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "mtm016_u21_u24_safe_v1_preserved": true,
+      "mtm017_u21_u24_session_schema": "mtm-research-session-v2",
+      "mtm017_u21_u24_native_mode": "dangerous",
+      "mtm017_u21_u24_trial_schema": "mtm-research-trial-evidence-v1",
+      "launcher": "scripts/mtm017-research-session.sh",
+      "all_12_case_mode_mappings_synthetic_passed": true,
+      "precheck_tests_passed": 23,
+      "collector_tests_passed": 6,
+      "clippy_passed": true,
+      "corpus_import_performed": false,
+      "evidence": "records/evidence/MTM-017/u21-u24-preview2-research-infrastructure.json",
+      "evidence_sha256": "3103478ee060f6bf3f8d03ca0e85c3f49108490fef8035d639481d2d63265b14",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "U25-r1/r2/r3 standalone reviewed receipts are complete. Version the remaining U21-U24 research-session-v2 policies for dangerous-only preview.2 semantics, execute the remaining exact research repeats, and only then use a separately reviewed corpus importer.",
+    "U25-r1/r2/r3 standalone reviewed receipts are complete and the U21-U24 preview.2 session-v2/dangerous policy plus launcher are ready. Execute the remaining twelve U21-U24 standalone research trials and only then use a separately reviewed corpus importer.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-28T11:49:49Z",
+  "updated_at": "2026-09-28T12:05:51Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -1707,7 +1727,17 @@
       "standalone_receipt_prepared": true,
       "corpus_count_incremented": false
     },
-    "next_test": "version U21-U24 research-session-v2 for preview2 dangerous-only semantics",
+    "u21_u24_research_infrastructure": {
+      "session_schema": "mtm-research-session-v2",
+      "native_mode": "dangerous",
+      "trial_schema": "mtm-research-trial-evidence-v1",
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "mtm016_history_preserved": true,
+      "launcher_ready": true,
+      "collector_precheck_version_bound": true,
+      "corpus_import_performed": false
+    },
+    "next_test": "U21-r1 compact compiled proof in a fresh MTM-017 research session v2",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }
