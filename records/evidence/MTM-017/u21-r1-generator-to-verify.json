@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u21_r1_fresh_session_generator_to_verify",
+  "observed_at": "2026-09-28T12:30:36Z",
+  "session_marker": "U21-r1.shhEkEkx",
+  "trial_id": "344bafa5e61f13ce9c15a8a6ac7cb5b6",
+  "run_id": "run-u21-r1-subspace-dimension-8496de39bc11",
+  "problem_id": "u21-r1-subspace-dimension",
+  "workflow_mode": "compact",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": null,
+    "transition_sequence": 4,
+    "assembled_proof_sha256": "a200cbe9f49b5c87a1932c254eaaed9f4ad5a111fb1e1640e49bc16f34991652",
+    "last_verified_proof_sha256_present": false,
+    "proof_manifest_sha256": "e9149140e6557c4da406b47fd539a0c82fc0e612b0383dcdfdd20909264b3f3a",
+    "transitions": [
+      "1:created->assess:run_initialized",
+      "2:assess->assemble:assessment_complete",
+      "3:assemble->latex_validate:proof_submitted",
+      "4:latex_validate->verify:latex_gate_passed"
+    ]
+  },
+  "route": {
+    "compact": true,
+    "external_retrieval_used": false,
+    "branching_used": false,
+    "repair_used": false,
+    "cas_used": false,
+    "degenerate_subspace_cases_explicitly_addressed": true
+  },
+  "generation_boundary": {
+    "verifier_report_submitted": false,
+    "finalizer_executed": false,
+    "independent_review_required": true
+  },
+  "production_changed": false,
+  "release_qualified": false
+}

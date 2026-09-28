@@ -1399,18 +1399,39 @@
       "evidence": "records/evidence/MTM-017/u21-u24-preview2-research-infrastructure.json",
       "evidence_sha256": "3103478ee060f6bf3f8d03ca0e85c3f49108490fef8035d639481d2d63265b14",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-U21-R1-GENERATOR-TO-VERIFY",
+      "recorded_at": "2026-09-28T12:30:36Z",
+      "scope": "u21_r1_fresh_session_generator_to_verify",
+      "status": "generator_complete_independent_review_pending",
+      "session_marker": "U21-r1.shhEkEkx",
+      "trial_id": "344bafa5e61f13ce9c15a8a6ac7cb5b6",
+      "run_id": "run-u21-r1-subspace-dimension-8496de39bc11",
+      "workflow_mode": "compact",
+      "machine_state": "verify",
+      "transition_sequence": 4,
+      "latex_passed": true,
+      "sealed": false,
+      "verdict": null,
+      "assembled_proof_sha256": "a200cbe9f49b5c87a1932c254eaaed9f4ad5a111fb1e1640e49bc16f34991652",
+      "proof_manifest_sha256": "e9149140e6557c4da406b47fd539a0c82fc0e612b0383dcdfdd20909264b3f3a",
+      "independent_review_pending": true,
+      "evidence": "records/evidence/MTM-017/u21-r1-generator-to-verify.json",
+      "evidence_sha256": "704e0ff2b95736ff8b9fdb8f09107083e76a52b18c130f4e92ffbd99eb120bd4",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "U25-r1/r2/r3 standalone reviewed receipts are complete and the U21-U24 preview.2 session-v2/dangerous policy plus launcher are ready. Execute the remaining twelve U21-U24 standalone research trials and only then use a separately reviewed corpus importer.",
+    "U25-r1/r2/r3 standalone reviewed receipts are complete. U21-r1 now has a fresh preview.2 compact generator checkpoint at verify; complete its independent review and standalone receipt, then continue the remaining eleven U21-U24 trials before any separately reviewed corpus import.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-28T12:05:51Z",
+  "updated_at": "2026-09-28T12:30:36Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -1737,7 +1758,18 @@
       "collector_precheck_version_bound": true,
       "corpus_import_performed": false
     },
-    "next_test": "U21-r1 compact compiled proof in a fresh MTM-017 research session v2",
+    "u21_r1": {
+      "session_marker": "U21-r1.shhEkEkx",
+      "run_id": "run-u21-r1-subspace-dimension-8496de39bc11",
+      "state": "verify",
+      "workflow_mode": "compact",
+      "latex_passed": true,
+      "assembled_proof_sha256": "a200cbe9f49b5c87a1932c254eaaed9f4ad5a111fb1e1640e49bc16f34991652",
+      "proof_manifest_sha256": "e9149140e6557c4da406b47fd539a0c82fc0e612b0383dcdfdd20909264b3f3a",
+      "independent_review_pending": true,
+      "corpus_count_incremented": false
+    },
+    "next_test": "independent review of U21-r1 on the same MTM3 OAuth owner",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }
