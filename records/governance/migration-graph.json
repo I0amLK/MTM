@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-28T09:08:52Z",
+  "updated_at": "2026-09-28T10:54:18Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1500,6 +1500,14 @@
       "status_before": "completed",
       "status_after": "completed",
       "summary": "U25-r2 review binding was mechanically normalized to the raw verification-report digest and closed review schema without changing the twelve substantive checks. Six route files were sealed to the collector input directory. research-collect and explicit research-precheck both passed with bundle hash 2f333a61..., 15 artifacts, zero workflow mutations and no corpus count increment. A standalone MTM-017 U25-r2 receipt was sealed."
+    },
+    {
+      "event_id": "MEVT-109",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T10:54:18Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Fresh U25-r3 session ran SageMath 10.9 and Magma V2.29-8 exactly once each. Both returned monic gcd X-1, Bezout coefficients 1 and -X, and explicitly evaluated the combination to X-1. The generator passed required LaTeX on the first submission and stopped at verify with proof hash 58b2f2a7... and manifest hash 2b6085c6.... Independent review remains pending."
     }
   ],
   "receipt_contract": {

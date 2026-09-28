@@ -1307,18 +1307,44 @@
       "evidence": "records/evidence/MTM-017/research-u25-r2-6435a5fb64831a255f6cd4e4b519ad3e.json",
       "evidence_sha256": "979455efd4d9ff65e95b602ce82d7d995f8ee207e42d37a1aa02bdfb2825156b",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-U25-R3-GENERATOR-TO-VERIFY",
+      "recorded_at": "2026-09-28T10:54:18Z",
+      "scope": "u25_r3_fresh_session_generator_to_verify",
+      "status": "generator_complete_independent_review_pending",
+      "session_marker": "U25-r3.TDHJYNkf",
+      "trial_id": "4af23ea75819997a644483a5d2fd51e7",
+      "run_id": "run-u25-r3-polynomial-gcd-5fc10a9e4dd6",
+      "machine_state": "verify",
+      "transition_sequence": 7,
+      "latex_passed": true,
+      "sealed": false,
+      "verdict": null,
+      "assembled_proof_sha256": "58b2f2a73c939ec59e5c949194202714c90b1fec2314d32e8a0bf08ca3170a3d",
+      "proof_manifest_sha256": "2b6085c622d0628f65ff0e6be66e017372055d2fa5c2bdbe121432b26a2fc05e",
+      "sage_exit_code": 0,
+      "magma_exit_code": 0,
+      "cas_results_agree": true,
+      "cas_observation_sha256": "ad6ce5faf705b6b2c0840e3bd8570c9f5a673a9f334ea3095248fbf5ccfd56ab",
+      "collector_input_material_sealed": true,
+      "verifier_report_submitted": false,
+      "independent_review_pending": true,
+      "evidence": "records/evidence/MTM-017/u25-r3-generator-to-verify.json",
+      "evidence_sha256": "4957c4b3047e2f74ab820134b0bf7a3188ed27bdb4385bd41825089c08a4ac76",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "Complete U25-r3 in a fresh MTM-017 research-session-v2 lane, then version and execute the remaining U21-U24 preview.2 research repeats and complete the exact research corpus matrix.",
+    "Complete an independent reviewer session for U25-r3 on the same live OAuth owner, then collect and precheck the private bundle; remaining U21-U24 preview.2 research repeats follow.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-28T09:08:52Z",
+  "updated_at": "2026-09-28T10:54:18Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -1612,7 +1638,20 @@
       "standalone_receipt_prepared": true,
       "corpus_count_incremented": false
     },
-    "next_test": "U25-r3 polynomial gcd in a fresh MTM-017 research session v2",
+    "u25_r3": {
+      "session_marker": "U25-r3.TDHJYNkf",
+      "run_id": "run-u25-r3-polynomial-gcd-5fc10a9e4dd6",
+      "state": "verify",
+      "latex_passed": true,
+      "assembled_proof_sha256": "58b2f2a73c939ec59e5c949194202714c90b1fec2314d32e8a0bf08ca3170a3d",
+      "proof_manifest_sha256": "2b6085c622d0628f65ff0e6be66e017372055d2fa5c2bdbe121432b26a2fc05e",
+      "formal_cas_sage_exit_code": 0,
+      "formal_cas_magma_exit_code": 0,
+      "formal_cas_results_agree": true,
+      "collector_input_material_sealed": true,
+      "independent_review_pending": true
+    },
+    "next_test": "independent review of U25-r3 on the same MTM2 OAuth owner",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }
