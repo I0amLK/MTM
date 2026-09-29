@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u21_r3_collection_and_precheck_repair_chain",
+  "recorded_at": "2026-09-29T02:11:34Z",
+  "trial_id": "edfd352d6262dc5c12c25e30623aaa61",
+  "run_id": "run-u21-r3-monotone-limit-b1e17dbd1b50",
+  "session_marker": "U21-r3.GI5mBweH",
+  "failed_collection_attempts": [
+    {
+      "stage": "review_binding",
+      "error": "review observation is not bound to this owner/run/proof/report",
+      "cause": "The review observation used a logical verification-report digest instead of the raw private verification/verification.json byte digest.",
+      "repair": "Only verification_report_sha256 was changed to the raw report hash; all ten mathematical statement checks were unchanged.",
+      "bundle_created": false
+    },
+    {
+      "stage": "review_closed_schema",
+      "error": "research evidence schema mismatch",
+      "cause": "The review observation used generator_session_marker/reviewer_session_marker, statement_check_count and per-check status fields that are outside the closed review schema.",
+      "repair": "The session fields were renamed to generator_session/reviewer_session, non-schema count/status fields were removed, and all ten substantive statement checks were preserved.",
+      "bundle_created": false
+    },
+    {
+      "stage": "review_session_marker",
+      "error": "review observation identity, owner continuity or session separation mismatch",
+      "cause": "The generator session marker contained a period, which is outside the closed marker alphabet.",
+      "repair": "The actual generator marker U21-r3.GI5mBweH was mechanically normalized to U21-r3-GI5mBweH; reviewer identity, owner fingerprints and all ten statement checks were unchanged.",
+      "bundle_created": false
+    }
+  ],
+  "final_collection": {
+    "exit_code": 0,
+    "schema": "mtm-research-collection-v1",
+    "milestone": "MTM-017",
+    "bundle_directory": "evidence-bundle.edfd352d6262dc5c12c25e30623aaa61",
+    "bundle_manifest_sha256": "72c575804bbef8a3f9ad15de6f431c9418aed9e3091afee837f38dae2861d708",
+    "final_tex_sha256": "720be5afea9d6e153a61991b763839b074758974a1f588863bc6abd8d746d800",
+    "verification_report_sha256": "3de742578d90d85707e972d818f9f2aad5741bd2fbc9b2cd511fdb0229a68bb9",
+    "proof_manifest_sha256": "790a43f3e9551e8f9429332ebe8d538fc1a0bccc1251a612d2224b0632c48fe4",
+    "owner_fingerprint": "3bf2f4058182c58e0f69ea1100e7495682d016f29135ceac93c372d01733507b",
+    "required_material_present": true,
+    "precheck_consistent": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false,
+    "release_qualified": false
+  },
+  "explicit_precheck": {
+    "exit_code": 0,
+    "schema": "mtm-research-precheck-v1",
+    "milestone": "MTM-017",
+    "artifact_count": 10,
+    "bundle_sha256": "72c575804bbef8a3f9ad15de6f431c9418aed9e3091afee837f38dae2861d708",
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "required_material_present": true,
+    "existing_material_consistent": true,
+    "missing_material": [],
+    "selected_candidate_bytes_checked": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false,
+    "release_qualified": false
+  },
+  "mathematical_review_source": "independent_same_owner_reviewer_with_10_substantive_statement_checks",
+  "production_changed": false,
+  "release_qualified": false
+}
