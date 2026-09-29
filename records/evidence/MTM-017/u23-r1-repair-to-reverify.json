@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u23_r1_seeded_repair_second_verifier_pending",
+  "observed_at": "2026-09-29T10:53:56Z",
+  "session_marker": "U23-r1.GAjRDQCU",
+  "trial_id": "01bb5b7858e9b45f7ffbaecd180af003",
+  "run_id": "run-u23-r1-uniform-continuity-gap-d84ef823136f",
+  "problem_id": "u23-r1-uniform-continuity-gap",
+  "workflow_mode": "compact",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": "wrong",
+    "transition_sequence": 9,
+    "seeded_draft_sha256": "0fda3eaab1a263021edb4e3f35c79463776a9f361f796d37511fcd9b0f2a23f2",
+    "first_findings_sha256": "cffe5373e833a9e550e706e31718f734d01183bac667486a5e56673d328c7905",
+    "repaired_draft_sha256": "f36742fcce03bb3f741a5acea07060d03a50f99d7d73aaad12f031147a5030d4",
+    "proof_manifest_sha256": "2a99fe95800d06f060dad49da226304f3baa9280448e4eda8ac3e879eabca801"
+  },
+  "seeded_repair": {
+    "seeded_challenge": true,
+    "first_verifier_statement_checks": 8,
+    "first_verifier_gaps": 1,
+    "first_verifier_critical_errors": 0,
+    "first_verifier_identified_target_quantifier_gap": true,
+    "mathematical_repair_started": true,
+    "mathematical_repair_submitted": true,
+    "repaired_draft_differs_from_seeded_draft": true,
+    "repair_strategy": "For fixed epsilon, choose pointwise radii for epsilon/2, form half-radius neighborhoods, extract a finite subcover by compactness, take half the minimum selected radius, and compare close points through one selected center."
+  },
+  "generation_boundary": {
+    "second_independent_verifier_required": true,
+    "second_verifier_findings_pending": true,
+    "finalizer_executed": false,
+    "repair_history_present": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}
