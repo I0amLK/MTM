@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u23_r2_seeded_repair_second_verifier_pending",
+  "observed_at": "2026-09-29T12:46:32Z",
+  "session_marker": "U23-r2.mNsF4g5o",
+  "trial_id": "959c3b76a3c5f03bc49c38dbb0510dd7",
+  "run_id": "run-u23-r2-finite-domain-gap-a32fcbf72117",
+  "problem_id": "u23-r2-finite-domain-gap",
+  "workflow_mode": "compact",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": "wrong",
+    "transition_sequence": 7,
+    "seeded_draft_sha256": "5990bfc09b1bbafa561919a96c8159ad3f050dd289f2463581c4045cb9967a8c",
+    "first_findings_sha256": "a5111386bf8961be281017831c64046a011ff714421038483288ec57b0ed05ac",
+    "repaired_draft_sha256": "360d02ad3354577bb1772882a04a07b559c1e517e2e28e314d20555643321bc7",
+    "proof_manifest_sha256": "003b2251eb5d2bb6e4a258dcc915a88d0d68539b3395a98e59cc43175fe0f06f"
+  },
+  "seeded_repair": {
+    "seeded_challenge": true,
+    "first_verifier_statement_checks": 9,
+    "first_verifier_gaps": 0,
+    "first_verifier_critical_errors": 1,
+    "first_verifier_identified_missing_nonzero_hypothesis": true,
+    "mathematical_repair_started": true,
+    "mathematical_repair_submitted": true,
+    "repaired_draft_differs_from_seeded_draft": true,
+    "repair_strategy": "Fix an arbitrary nonzero a, prove multiplication by a is injective using no zero divisors, use finiteness for surjectivity, and conclude every nonzero element is invertible."
+  },
+  "generation_boundary": {
+    "second_independent_verifier_required": true,
+    "second_verifier_findings_pending": true,
+    "finalizer_executed": false,
+    "repair_history_present": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}
