@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u22_r1_independent_review_collection_and_precheck_closeout",
+  "recorded_at": "2026-09-29T03:51:04Z",
+  "session_marker": "U22-r1.6ZzLZrGN",
+  "trial_id": "650f2dfe8b33fa09813f22fc2056110a",
+  "run_id": "run-u22-r1-chinese-remainder-21c3b97f03f6",
+  "machine_final": {
+    "state": "done",
+    "status": "done",
+    "sealed": true,
+    "latex_passed": true,
+    "verdict": "correct",
+    "transition_sequence": 9,
+    "final_artifact_sha256": "650b047d0e7a859d9dd9b498c9723f38726539a5b3b7955c92e4c1ae1018555c",
+    "verification_report_sha256": "770b58df22f77af69c8272b52fcd9b038d0ab7a6cf69b7883da1a7cb650ce072"
+  },
+  "independent_review": {
+    "statement_checks": 11,
+    "critical_errors": 0,
+    "gaps": 0,
+    "same_owner_continuity": true,
+    "review_observation_sha256": "3f709b2825dc769ce51ddc1b866220b5d2405223b1b0f6a7519b731bc6274ffe",
+    "owner_fingerprint": "4f56e4b3342351ef91fa4390443643838895d87f04462bc9bf5f9f4712d32c21"
+  },
+  "reference_audit": {
+    "count": 1,
+    "reference_id": "ref-77a9edaca3a4dd1d",
+    "arxiv_id": "2401.05286",
+    "theorem_id": "Theorem 7.6",
+    "disposition": "SOURCE_VERIFIED",
+    "evidence_basis": "external_source_inspection",
+    "source_checked": true,
+    "assumptions_checked": true,
+    "notation_checked": true,
+    "audit_artifact_sha256": "68c22b3d4de0c54bd36baa6d74b0392dc69dd440020dfcd56b413c9735252aa0"
+  },
+  "route_material": {
+    "retrieval_observation_sha256": "b2cb0b9c03b6d067d06c06b6824b8a9cf5f17860374d83d8b3247e834eb647b3",
+    "source_observation_sha256": "760d5fe924618bca40fa059c86847ca841abff6167ee6d810f8da7867d3363f8",
+    "original_source_locator_sha256": "e5b40e090bae2e390426c85d18cab4075a79f1b5122a171e2b0611b48a4b4b37",
+    "original_source_content_sha256": "167f74f7d729911c776224961845307c825013b86e37a344c55922fc7fb6bf83"
+  },
+  "pre_collection_normalization": {
+    "reviewer_reported_logical_verification_sha256": "38e2eebeed7181654356cc6104cf24f192797bc3840af462a791e3a2d088fd8c",
+    "raw_private_verification_sha256_obtained_by_operator": "770b58df22f77af69c8272b52fcd9b038d0ab7a6cf69b7883da1a7cb650ce072",
+    "review_before_normalization_sha256": "a76b2088315c26c236e14ffa349ea9626bd138b8804c792b7a24f0dfc20c6f16",
+    "review_after_normalization_sha256": "3f709b2825dc769ce51ddc1b866220b5d2405223b1b0f6a7519b731bc6274ffe",
+    "statement_checks_unchanged": true,
+    "reference_audit_unchanged": true,
+    "source_locator_and_content_hashes_recomputed_from_inspected_arxiv_html_before_sealing": true
+  },
+  "collection": {
+    "schema": "mtm-research-collection-v1",
+    "bundle_directory": "evidence-bundle.650f2dfe8b33fa09813f22fc2056110a",
+    "bundle_sha256": "f4d97841958e002f228c8193fb141843d01c36859dfb3bb9cd89b4534b285282",
+    "required_material_present": true,
+    "precheck_consistent": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "explicit_precheck": {
+    "attempted": true,
+    "completed": true,
+    "exit_code": 0,
+    "artifact_count": 13,
+    "bundle_sha256": "f4d97841958e002f228c8193fb141843d01c36859dfb3bb9cd89b4534b285282",
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "required_material_present": true,
+    "existing_material_consistent": true,
+    "selected_candidate_bytes_checked": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}
