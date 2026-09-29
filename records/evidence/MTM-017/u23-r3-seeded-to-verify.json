@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u23_r3_seeded_draft_first_verifier_pending",
+  "observed_at": "2026-09-29T14:26:02Z",
+  "session_marker": "U23-r3.SPhLiS9y",
+  "trial_id": "b2d220a6228dc91a8374f2ce425c70cf",
+  "run_id": "run-u23-r3-matrix-inverse-gap-cbcd9ef528c4",
+  "problem_id": "u23-r3-matrix-inverse-gap",
+  "workflow_mode": "compact",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": null,
+    "transition_sequence": 4,
+    "seeded_draft_sha256": "c29b38382ca87dd5e274cfd62c579eacaa1defc19d756a463773f1dff16c7328",
+    "verifier_draft_sha256": "c29b38382ca87dd5e274cfd62c579eacaa1defc19d756a463773f1dff16c7328",
+    "seeded_draft_matches_verifier_bytes": true
+  },
+  "seeded_challenge": {
+    "intentional": true,
+    "target_gap": "The draft directly invokes A^{-1} from AB=I before proving that A is invertible, making the proof circular.",
+    "mathematical_gap_repaired_before_first_verifier": false,
+    "first_verifier_findings_pending": true,
+    "first_findings_present": false,
+    "repair_history_present": false
+  },
+  "generation_boundary": {
+    "independent_first_verifier_required": true,
+    "repair_not_started": true,
+    "finalizer_executed": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}
