@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u22_r2_independent_review_collection_and_precheck_closeout",
+  "recorded_at": "2026-09-29T07:51:13Z",
+  "session_marker": "U22-r2.FAmyEFLP",
+  "trial_id": "cba26cd45925117e6db72a096667d164",
+  "run_id": "run-u22-r2-finite-polynomial-roots-6c59fdefe1a1",
+  "machine_final": {
+    "state": "done",
+    "status": "done",
+    "sealed": true,
+    "latex_passed": true,
+    "verdict": "correct",
+    "transition_sequence": 9,
+    "final_artifact_sha256": "f9e036c963347a0064ec7891699fe53f9c500dbd15ed063a75e333850a78f193",
+    "verification_report_sha256": "041d20a0cd61c35d14bb6a9ed754a8757846cc19767fe817228885bc4810518b"
+  },
+  "independent_review": {
+    "statement_checks": 13,
+    "critical_errors": 0,
+    "gaps": 0,
+    "same_owner_continuity": true,
+    "review_observation_sha256": "ad58defcae07f95aff28fdea8ff744df6e0db4598ba7fcc32bce1414ed89d581",
+    "owner_fingerprint": "3664eef9bf944f490e7c5d189ab00cdb22d2bdd516f5580b810ba1713a31c968"
+  },
+  "reference_audit": {
+    "count": 1,
+    "reference_id": "ref-eabd6e9c74cf2764",
+    "arxiv_id": "1804.04657",
+    "theorem_id": "Theorem 2.1",
+    "disposition": "SOURCE_VERIFIED",
+    "evidence_basis": "external_source_inspection",
+    "source_checked": true,
+    "assumptions_checked": true,
+    "notation_checked": true,
+    "audit_artifact_sha256": "20005f2c9814f9a760922369bee5811e3c8a92f819844e50867c7c1d14c102c7"
+  },
+  "route_material": {
+    "retrieval_observation_sha256": "bbc39f9402705c538c437afcc380281863d939202aaf738f364d98dbcf6ff8e0",
+    "source_observation_sha256": "494985a73f59c3ce8b9983baf5519311e91ea0b1d2459f459b2e3cf3ed4ed27d"
+  },
+  "pre_collection_normalization": {
+    "review_before_normalization_sha256": "38db54c442cd1a650407e65097eb44f5d0d542df54c706b95fc25922987f998e",
+    "review_after_normalization_sha256": "ad58defcae07f95aff28fdea8ff744df6e0db4598ba7fcc32bce1414ed89d581",
+    "raw_private_verification_sha256_supplied_by_operator": "041d20a0cd61c35d14bb6a9ed754a8757846cc19767fe817228885bc4810518b",
+    "collector_confirmed_raw_verification_binding": true,
+    "statement_checks_unchanged": true,
+    "reference_audit_unchanged": true
+  },
+  "collection": {
+    "schema": "mtm-research-collection-v1",
+    "bundle_directory": "evidence-bundle.cba26cd45925117e6db72a096667d164",
+    "bundle_sha256": "31bf772920dee4f3f76a698303ff19dc691ad9d07c2d20a888f4778bd38f45bb",
+    "required_material_present": true,
+    "precheck_consistent": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "explicit_precheck": {
+    "attempted": true,
+    "completed": true,
+    "exit_code": 0,
+    "artifact_count": 13,
+    "bundle_sha256": "31bf772920dee4f3f76a698303ff19dc691ad9d07c2d20a888f4778bd38f45bb",
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "required_material_present": true,
+    "existing_material_consistent": true,
+    "selected_candidate_bytes_checked": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}
