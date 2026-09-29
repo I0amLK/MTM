@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u24_r2_branch_join_to_independent_verifier",
+  "observed_at": "2026-09-29T16:37:18Z",
+  "session_marker": "U24-r2.BMrVKGwb",
+  "trial_id": "84df5d8199912a2965aa2f08b1cac1ab",
+  "run_id": "run-u24-r2-idempotent-decomposition-08d911767b9d",
+  "problem_id": "u24-r2-idempotent-decomposition",
+  "workflow_mode": "full",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": null,
+    "transition_sequence": 11,
+    "draft_sha256": "345281af65838e9a6b7049eabfec61ae1c4880c215ed605a5ecc128332cb8926",
+    "proof_manifest_sha256": "bdd39a643b84aaa71f9553681fc1f504bffc506b02267593e2d62aa46c10d9ba",
+    "branches_observation_sha256": "d1df17210b36ac0db3af9818ad401b0d33b40cc6a5a0f8b6c317d20a7a1d3c9d"
+  },
+  "branch_route": {
+    "branch_count": 2,
+    "branches": [
+      {
+        "branch_id": "branch-1-1-c24edc",
+        "domain_id": "branch-domain-branch-1-1-c24edc",
+        "plan": "direct-decomposition",
+        "status": "sealed",
+        "result_sha256": "7415a20baa24e415913d3e5d8bd58b8713ae8ca0771351e864ff57bc7b74ac13"
+      },
+      {
+        "branch_id": "branch-1-2-cd4d6d",
+        "domain_id": "branch-domain-branch-1-2-cd4d6d",
+        "plan": "adapted-basis",
+        "status": "sealed",
+        "result_sha256": "64d7278b8dc3987c264d361ca77a5bfd0015582f7719cc46343b229b00052fde"
+      }
+    ],
+    "sibling_private_read_attempted": true,
+    "sibling_private_read_result": "ROLE_ACCESS_DENIED",
+    "all_required_sealed_before_join": true,
+    "join_considered_branch_ids": [
+      "branch-1-1-c24edc",
+      "branch-1-2-cd4d6d"
+    ],
+    "join_selected_branch_id": "branch-1-1-c24edc",
+    "join_result_sha256": "c37db931b682ab93b329a935330a65eaf6a09c72d23b3601586a5be82104e36c"
+  },
+  "generation_boundary": {
+    "independent_verifier_required": true,
+    "review_pending": true,
+    "finalizer_executed": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}
