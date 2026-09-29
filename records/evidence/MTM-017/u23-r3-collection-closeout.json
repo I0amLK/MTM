@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u23_r3_seeded_repair_collection_and_precheck_closeout",
+  "recorded_at": "2026-09-29T15:04:17Z",
+  "session_marker": "U23-r3.SPhLiS9y",
+  "trial_id": "b2d220a6228dc91a8374f2ce425c70cf",
+  "run_id": "run-u23-r3-matrix-inverse-gap-cbcd9ef528c4",
+  "machine_final": {
+    "state": "done",
+    "status": "done",
+    "sealed": true,
+    "latex_passed": true,
+    "verdict": "correct",
+    "transition_sequence": 9,
+    "final_artifact_sha256": "527a51387db2666f981af86d060a7b18039b3f5c002efd3120e77496f4f2e1e7",
+    "verification_report_sha256": "e570796be81a9ebcd58bd7a017b0c9cc730a83db2ef2bb044c5748c161fdce1e"
+  },
+  "seeded_repair": {
+    "seeded_challenge": true,
+    "seeded_draft_sha256": "c29b38382ca87dd5e274cfd62c579eacaa1defc19d756a463773f1dff16c7328",
+    "first_verifier_statement_checks": 10,
+    "first_verifier_gaps": 0,
+    "first_verifier_critical_errors": 1,
+    "first_findings_sha256": "dfc0eb0e77cf5b0775213a0ef223722d8bf86abf9c37bb8698e993981f970f57",
+    "repaired_draft_sha256": "527a51387db2666f981af86d060a7b18039b3f5c002efd3120e77496f4f2e1e7",
+    "repair_history_sha256": "9345567840d4cc9783d56ad79026933194a21c286009043275291b3a6fa2e85d",
+    "seeded_and_final_differ": true
+  },
+  "independent_review": {
+    "second_verifier_statement_checks": 12,
+    "critical_errors": 0,
+    "gaps": 0,
+    "same_owner_continuity": true,
+    "review_observation_sha256": "513f74d28dd2ecdb5073713180628e3b48eb603a5e1025080cd7cb3fa8f7a427",
+    "owner_fingerprint": "e6bd89820752219800726b9f97284514acf42d831e5ebc2426c63c9198c25d3c",
+    "reviewed_final_bytes_match": true
+  },
+  "collection": {
+    "schema": "mtm-research-collection-v1",
+    "bundle_directory": "evidence-bundle.b2d220a6228dc91a8374f2ce425c70cf",
+    "bundle_sha256": "d7e0f3a30927707d81c33b414758fa8a4431370d97f81d7017b900f65477587e",
+    "required_material_present": true,
+    "precheck_consistent": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "explicit_precheck": {
+    "attempted": true,
+    "completed": true,
+    "exit_code": 0,
+    "artifact_count": 13,
+    "bundle_sha256": "d7e0f3a30927707d81c33b414758fa8a4431370d97f81d7017b900f65477587e",
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "required_material_present": true,
+    "existing_material_consistent": true,
+    "selected_candidate_bytes_checked": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}
