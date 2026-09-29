@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u22_r3_fresh_session_generator_to_verify",
+  "observed_at": "2026-09-29T08:24:33Z",
+  "session_marker": "U22-r3.Nv3QW8kl",
+  "trial_id": "d70ba3cb8d38924bafb8ad655588a5fb",
+  "run_id": "run-u22-r3-orbit-stabilizer-f1e077b39d03",
+  "problem_id": "u22-r3-orbit-stabilizer",
+  "workflow_mode": "full",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": null,
+    "transition_sequence": 7,
+    "assembled_proof_sha256": "fddf0d73c4d9ba217e3bc7e70a67f654a9720430f93c2eedfb6d12129339dc21",
+    "proof_manifest_sha256": "c93d87572bb6aeb39abda05b077e06f29b5d5d6d56a97223f393a2e0d49e5650"
+  },
+  "retrieval_route": {
+    "actual_rethlas_retrieve_used": true,
+    "reference_id": "ref-4ab9f4a6a93068fb",
+    "reference_arxiv_id": "2103.00914",
+    "reference_theorem_id": "Theorem 2.3",
+    "source_kind": "original",
+    "original_source_inspected": true,
+    "retrieval_observation_sha256": "756648a6a4ac3bcd607884ff1b8697c905e03cb42bbcbef2a6bc8956b9a1ad21",
+    "source_observation_sha256": "434993ccf5d4e7ccfed620793b54a0f0782276553b185d3691221fc5de5e3969",
+    "proof_manifest_reference_nonempty": true,
+    "source_verified_reference_audit_pending": true
+  },
+  "generation_boundary": {
+    "verifier_report_submitted": false,
+    "reference_audit_submitted": false,
+    "finalizer_executed": false,
+    "independent_review_required": true
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}
