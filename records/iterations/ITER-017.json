@@ -2172,18 +2172,52 @@
       "evidence": "records/evidence/MTM-017/research-u23-r3-b2d220a6228dc91a8374f2ce425c70cf.json",
       "evidence_sha256": "aa348877c50585c6cacb535c17779d23921b0c5b7563007bb169da54b16eed29",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-U24-R1-BRANCH-TO-VERIFY",
+      "recorded_at": "2026-09-29T15:46:19Z",
+      "scope": "u24_r1_branch_join_to_independent_verifier",
+      "status": "two_real_branches_sealed_join_complete_verifier_pending",
+      "session_marker": "U24-r1.AfvycbfR",
+      "trial_id": "1bcc7ddfda220add09b372c2f9c92d17",
+      "run_id": "run-u24-r1-geometric-series-70660dfce96a",
+      "workflow_mode": "full",
+      "machine_state": "verify",
+      "transition_sequence": 11,
+      "latex_passed": true,
+      "sealed": false,
+      "verdict": null,
+      "branch_count": 2,
+      "branch_ids": [
+        "branch-1-1-57548c",
+        "branch-1-2-14f255"
+      ],
+      "branch_result_sha256": [
+        "12852b69bf3e7e405add0070c584093c9c01a684f2a230340c9edb56aed2513b",
+        "a7aad6eead955155db5bdf0efbfc4579a6ed0339614e828a3d2660b004078617"
+      ],
+      "sibling_private_read_result": "ROLE_ACCESS_DENIED",
+      "join_result_sha256": "2a0a0d5e5e7bdabc805ced3363f5c3dbfc11b51f248161cb8df3fb3c2e4564ef",
+      "join_selected_branch_id": "branch-1-2-14f255",
+      "draft_sha256": "43cc652d52e94e27269aae095a1a3231e70fa7ef7dc4cc537109a54668126abd",
+      "proof_manifest_sha256": "20ea5e2c467ad3f357ee6b6c711aed4f85938039f1dc043bc6b8cad79bdf465a",
+      "branches_observation_sha256": "adb954b701b31cf3638363220acaea7e937d0f3ff67ebebdc87f26d973592517",
+      "corpus_count_incremented": false,
+      "evidence": "records/evidence/MTM-017/u24-r1-branch-to-verify.json",
+      "evidence_sha256": "8acbd993affaea9de635723aa5aa06a3c8ab21850497e9b740ce1607a28cc94d",
+      "release_qualified": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "U25-r1/r2/r3, U21-r1/r2/r3, U22-r1/r2/r3 and U23-r1/r2/r3 standalone reviewed receipts are complete. Continue U24-r1/r2/r3 before any separately reviewed corpus import.",
+    "U25-r1/r2/r3, U21-r1/r2/r3, U22-r1/r2/r3 and U23-r1/r2/r3 standalone reviewed receipts are complete. U24-r1 has produced two real sealed branches, observed sibling-private access denial, completed a join over exactly both branches, passed required LaTeX and reached independent verification. Continue U24-r1/r2/r3 before any separately reviewed corpus import.",
     "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-29T15:04:17Z",
+  "updated_at": "2026-09-29T15:46:19Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -2757,7 +2791,29 @@
       "finalizer_executed": true,
       "corpus_count_incremented": false
     },
-    "next_test": "U24-r1 geometric-series two-branch join trial in a fresh MTM-017 research session v2",
+    "u24_r1_branch": {
+      "session_marker": "U24-r1.AfvycbfR",
+      "trial_id": "1bcc7ddfda220add09b372c2f9c92d17",
+      "run_id": "run-u24-r1-geometric-series-70660dfce96a",
+      "state": "verify",
+      "workflow_mode": "full",
+      "latex_passed": true,
+      "branch_count": 2,
+      "branch_ids": [
+        "branch-1-1-57548c",
+        "branch-1-2-14f255"
+      ],
+      "sibling_private_read_result": "ROLE_ACCESS_DENIED",
+      "join_considered_all_sealed_branches": true,
+      "join_selected_branch_id": "branch-1-2-14f255",
+      "join_result_sha256": "2a0a0d5e5e7bdabc805ced3363f5c3dbfc11b51f248161cb8df3fb3c2e4564ef",
+      "draft_sha256": "43cc652d52e94e27269aae095a1a3231e70fa7ef7dc4cc537109a54668126abd",
+      "branches_observation_sha256": "adb954b701b31cf3638363220acaea7e937d0f3ff67ebebdc87f26d973592517",
+      "independent_review_pending": true,
+      "finalizer_executed": false,
+      "corpus_count_incremented": false
+    },
+    "next_test": "U24-r1 independent verifier must review the joined geometric-series proof and branch-route evidence before finalization",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
   }
