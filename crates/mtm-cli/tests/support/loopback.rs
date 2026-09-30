@@ -167,6 +167,11 @@ impl Client {
     pub fn client_id(&self) -> &str {
         &self.client_id
     }
+
+    #[allow(dead_code)] // Used only by the explicit MTM-017 authority harness.
+    pub fn fixture_session_fingerprint(&self) -> String {
+        format!("{:x}", Sha256::digest(self.token.as_bytes()))
+    }
 }
 
 pub struct Server {
@@ -255,6 +260,15 @@ impl Server {
 
     pub fn private_state_path(&self) -> std::path::PathBuf {
         self.directory.path().join("data/private/state.sqlite3")
+    }
+
+    /// Only synthetic fixture identity; never exposes OAuth or capability material.
+    #[allow(dead_code)] // Used only by the explicit MTM-017 authority harness.
+    pub fn fixture_process_id(&self) -> Result<u32> {
+        self.child
+            .as_ref()
+            .map(Child::id)
+            .ok_or("fixture is stopped")
     }
 
     pub fn process_facts(&self) -> Result<Value> {

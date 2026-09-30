@@ -1,0 +1,66 @@
+{
+  "schema": "mtm017-portable-corpus-independent-review-record-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T08:50:15Z",
+  "scope": "independent_read_only_review_of_portable_observation_not_acceptance_or_aggregation",
+  "reviewer": {
+    "task": "/root/plan_remaining_candidate_corpus",
+    "role": "independent_read_only_reviewer",
+    "independent_from_executor_and_scribe": true,
+    "report_received_at": "2026-09-30T08:49:49Z",
+    "report_verbatim": "独立portable最终review通过，已报父agent：15 path/seal、raw90 unique45/0/45、partial outer1/runner0、accepted_delta0、source纯只读重算10066ff…248f0、fresh源码路径及records-final全部核实。没有运行维护/Cargo/candidate或写文件。你可保持所有封存不变"
+  },
+  "scribe": {
+    "task": "/root/qualify_remaining_portable_trials",
+    "role": "original_portable_executor_and_review_record_scribe",
+    "performed_independent_review": false,
+    "scope": "Faithfully record the separate reviewer's received conclusion without rerunning trials, Cargo or candidate."
+  },
+  "reviewed_artifacts": [
+    {
+      "kind": "unchanged_raw_qualification_report",
+      "path": "records/evidence/MTM-017/portable-corpus-20260930-13d7890-r1.json",
+      "sha256": "2eaf96aed03b24994c4cd9b7b4cd1363133de58ab50a06eb91a0028384b38096"
+    },
+    {
+      "kind": "unchanged_mtm017_observation_wrapper",
+      "path": "records/evidence/MTM-017/portable-corpus-observation-20260930-13d7890-r1.json",
+      "sha256": "dd78df9247ea44f5883368d7ad2fe7772e57dd04c0e63f54802317bebb49de59"
+    },
+    {
+      "kind": "final_static_record_integrity_result",
+      "path": "target/mtm017-portable-corpus-20260930-13d7890-r1/records-final.stdout.json",
+      "sha256": "82e2b19d395251fd6923ad82a47115d9849b673b25100d69a5a11f2a62f3227b",
+      "exit_code": 0
+    }
+  ],
+  "independently_reported_checks": {
+    "path_and_seal_pairs_checked": 15,
+    "raw_rows": 90,
+    "unique_task_repeat_rows": 90,
+    "passed_trials": 45,
+    "failed_trials": 0,
+    "blocked_trials": 45,
+    "qualifier_exit_code": 1,
+    "runner_exit_code": 0,
+    "expected_incomplete_partial_corpus": true,
+    "accepted_delta": 0,
+    "source_sha256_recomputed_read_only": "10066ff837e2cee485fabe19809f172b1527141195a7fe29488f9fa201b248f0",
+    "fresh_isolation_source_paths_verified": true,
+    "final_records_result_verified": true,
+    "reviewer_executed_maintenance_cargo_or_candidate": false,
+    "reviewer_wrote_files": false
+  },
+  "conclusion": {
+    "observation_review_passed": true,
+    "accepted_delta": 0,
+    "raw_passed_remains_false": true,
+    "wrapper_accepted_delta_remains_zero": true,
+    "raw_and_wrapper_must_remain_unchanged": true,
+    "future_aggregation_requires_separate_reviewed_import": true,
+    "full_90_trial_acceptance": false,
+    "release_ready": false,
+    "release_qualified": false,
+    "deployment_authorized": false
+  }
+}

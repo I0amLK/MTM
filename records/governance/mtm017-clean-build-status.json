@@ -1,0 +1,55 @@
+{
+  "schema": "mtm017-clean-build-gate-state-v1",
+  "milestone": "MTM-017",
+  "updated_at": "2026-09-30T06:58:39Z",
+  "scope": "clean_build_provenance_gate_only_not_complete_release_readiness",
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "gate": "clean_build_provenance",
+  "status": "waived_by_operator",
+  "reason": "explicit_human_risk_acceptance_of_unresolved_exact_candidate_clean_build_provenance",
+  "successful_clean_builds": 2,
+  "both_builds_equal": true,
+  "both_match_selected_candidate": false,
+  "active_observation": {
+    "path": "records/evidence/MTM-017/clean-build-provenance-20260930.json",
+    "sha256": "a39bd0f181b5ce356b485376776d42ef98e51247226ce01a2589297eb884a84e"
+  },
+  "event_id": "MEVT-120",
+  "research_accepted": true,
+  "research_acceptance_scope": "unchanged_current_candidate_U21-U25_fifteen_trial_subset_only",
+  "accepted_research_subset_trials": 15,
+  "research_state": {
+    "path": "records/governance/mtm017-research-corpus.json",
+    "sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24"
+  },
+  "next_input": "No original-build reconstruction is required to clear this waived single gate. Other engineering remains paused; genuine schema-7 operator-copy rehearsal, exact rollback and full schema-8 readiness remain pending under separate direction.",
+  "new_candidate_selected": false,
+  "full_release_input_created": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "technical_status": "not_reproduced",
+  "passed": false,
+  "exact_candidate_reproduced": false,
+  "human_authorized_override": true,
+  "gate_allowed_by_governance": true,
+  "governance_disposition": "accepted_with_operator_waiver",
+  "both_rebuilt_sha256": "b55dd460e8f2df80c149dcf659b8d29871d2fc9a0e505c51c915feaae8109147",
+  "active_decision": {
+    "decision_id": "MTM017-READINESS-DECISION-003",
+    "path": "records/evidence/MTM-017/clean-build-human-override-20260930.json",
+    "sha256": "c82f26ce562214f922a3e12eade3e329b2c37af2dbbaa4ec9784b683bc88d7c7"
+  },
+  "decision_ledger": "records/governance/mtm017-readiness-decisions.json",
+  "prior_gate": {
+    "path": "records/evidence/MTM-017/clean-build-gate-before-operator-override-20260930.json",
+    "sha256": "e98311c457905feee4d1a8f3f6c25a321f02d3144db693712265ab9df3f84b1e"
+  },
+  "readiness_consumption_contract": "Apply only to the exact candidate and clean_build_provenance gate above. Report governance waiver separately from technical passed=false and exact_candidate_reproduced=false; do not convert this record into a technical pass or complete release verdict.",
+  "new_test_execution_claimed": false,
+  "readiness_adapter_implemented_by_this_decision": false,
+  "other_engineering_tasks_remain_paused": true,
+  "operator_state_rehearsal_resumed": false,
+  "additional_build_authorized": false
+}

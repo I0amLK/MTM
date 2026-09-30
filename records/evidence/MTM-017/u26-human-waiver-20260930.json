@@ -1,0 +1,117 @@
+{
+  "schema": "mtm017-u26-human-waiver-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T12:15:34Z",
+  "decision_id": "MTM017-READINESS-DECISION-006",
+  "kind": "operator_scoped_U26_human_waiver",
+  "scope": "this_schema8_candidate_U26_three_cells_only",
+  "applicability": {
+    "candidate_version": "0.6.0-preview.2",
+    "candidate_state_schema": 8,
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "candidate_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+    "task_id": "U26",
+    "repeats": [
+      1,
+      2,
+      3
+    ]
+  },
+  "authorization": {
+    "source": "direct_operator_message",
+    "user_message_id": "Sentinel_beb3f96c23948191bb5c3d688b490c58",
+    "sent_at": "2026-09-30T12:11:00Z",
+    "timestamp_precision": "minute",
+    "verbatim": "我授权通过 U26"
+  },
+  "decision": "waived_by_operator",
+  "disposition": "accepted_with_operator_waiver",
+  "human_authorized_override": true,
+  "gate_allowed_by_governance": true,
+  "passed": false,
+  "technical_status": "incomplete_real_client_trials",
+  "technical_accepted_trials": 87,
+  "technical_pending_trials": 3,
+  "total_corpus_cells": 90,
+  "human_waived_cells": 3,
+  "technical_accepted_delta": 0,
+  "accepted_delta": 0,
+  "corpus_count_incremented": false,
+  "full_technical_corpus": false,
+  "cells": [
+    {
+      "task_id": "U26",
+      "repeat": 1,
+      "technical_status": "pending",
+      "passed": false,
+      "governance_disposition": "waived_by_operator",
+      "new_technical_trial_claimed": false
+    },
+    {
+      "task_id": "U26",
+      "repeat": 2,
+      "technical_status": "pending",
+      "passed": false,
+      "governance_disposition": "waived_by_operator",
+      "new_technical_trial_claimed": false
+    },
+    {
+      "task_id": "U26",
+      "repeat": 3,
+      "technical_status": "pending",
+      "passed": false,
+      "governance_disposition": "waived_by_operator",
+      "new_technical_trial_claimed": false
+    }
+  ],
+  "original_partial_observation": {
+    "path": "records/evidence/MTM-017/u26-browser-r1-partial-observation-20260930.json",
+    "sha256": "8918f3b2ba3fd7941ee082e5a9aa7fc915d0e4b613ae09a395703f37174af4ac"
+  },
+  "original_87_acceptance": {
+    "path": "records/evidence/MTM-017/corpus-union-accepted-20260930.json",
+    "sha256": "1afff81a1ce804eb4fa88ef23012c37f2289f0f54d02fe73b0092e5cceba7523"
+  },
+  "original_87_pointer": {
+    "path": "records/governance/mtm017-corpus-union.json",
+    "sha256": "9e2d9de518a3ab1225134164828f1f83ddcb83d0f72c55399301ea53452c1393"
+  },
+  "frozen_mtm016_driver": {
+    "path": "records/governance/mtm016-release-inputs.json",
+    "sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04"
+  },
+  "preserved_observations": {
+    "operator_reported_real_browser_connection": true,
+    "same_owner_reconnect_read_continuity_observed": true,
+    "valid_normal_assessment_submission_completed": false,
+    "connector_oneOf_validation_rejected_before_server_dispatch": true,
+    "candidate_assessment_rejection_claimed": false,
+    "protected_resource_path_directly_observed": false,
+    "repeat_2_completed": false,
+    "repeat_3_completed": false,
+    "raw_oauth_or_capability_recorded": false
+  },
+  "risk_acceptance": {
+    "basis": "Explicit operator authorization waives the remaining U26 requirement for this candidate; no new technical evidence is produced.",
+    "normal_submission_path_unverified": true,
+    "connector_oneOf_root_cause": "undetermined",
+    "zero_server_rejections_not_a_submission_pass": true,
+    "partial_browser_evidence_not_three_completed_trials": true,
+    "existing_failure_and_partial_evidence_preserved": true
+  },
+  "readiness_consumption_contract": "Read this separate exact-candidate U26 waiver alongside the immutable 87-cell acceptance. Report 87 technically accepted cells plus 3 human-waived cells; retain technical pending=3, technical full corpus=false and passed=false for U26. This decision removes only the U26 governance requirement and grants no complete release or deployment verdict. The existing readiness draft is not modified or claimed to consume this record.",
+  "readiness_adapter_implemented_by_this_decision": false,
+  "new_test_execution_claimed": false,
+  "original_87_pointer_changed": false,
+  "runtime_or_dangerous_mode_changed": false,
+  "other_gates_waived_by_this_decision": false,
+  "implementation_complete": "unknown",
+  "research_accepted": true,
+  "research_acceptance_scope": "unchanged_original_fifteen_only",
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "recorded_by": "ctm-corpus-audit-session",
+  "reversal": "Append a superseding operator decision; preserve this waiver, original technical evidence and all prior corpus pointers."
+}

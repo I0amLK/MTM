@@ -2408,18 +2408,316 @@
       "evidence": "records/evidence/MTM-017/research-u24-r3-1979479333b1fe2611ef16326366ed3e.json",
       "evidence_sha256": "d0c663303ddc1ccf59fb386adff4f3c0c6d68a754dbabb3dab6d7d2715b264eb",
       "release_qualified": false
+    },
+    {
+      "id": "MTM017-RESEARCH-CORPUS-IMPORT-20260930",
+      "recorded_at": "2026-09-30T04:12:24Z",
+      "scope": "current_preview2_u21_u25_fifteen_trial_research_subset",
+      "status": "research_subset_accepted_after_separate_input_and_result_reviews",
+      "evidence": "records/evidence/MTM-017/research-corpus-subset-accepted-20260930.json",
+      "evidence_sha256": "49fc407487fa7c9104c4a6b7aae92e2cde2b9fe4287bd5c73b0e0352abbaae6e",
+      "input_review": {
+        "path": "records/evidence/MTM-017/corpus-import-input-review-20260930-r3.json",
+        "sha256": "e963cabe924ebf0be44d77ee53bf0c9562fa4a38f4872169cf65ac2bfa30fcfa"
+      },
+      "result_review": {
+        "path": "records/evidence/MTM-017/corpus-import-result-review-20260930-r3.json",
+        "sha256": "a6208dd66b9d59af24c28225af6735cf509fc83fa2dc3eda1b56903d12f8ee48"
+      },
+      "proposal": {
+        "path": "records/evidence/MTM-017/corpus-import-proposal-20260930-r3.json",
+        "sha256": "03ac34879a68c1a371a5b83b66cbe45103a5bd82ce029564f2b5ec5d1a326d2a"
+      },
+      "accepted_trials_delta": 15,
+      "accepted_research_subset_trials": 15,
+      "corpus_count_incremented": true,
+      "historical_counts_inherited": false,
+      "implementation_complete": "unknown",
+      "research_accepted": true,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_selector_changed": false,
+      "production_state_modified": false
+    },
+    {
+      "id": "MTM017-CLEAN-BUILD-PROVENANCE-20260930",
+      "recorded_at": "2026-09-30T04:26:54Z",
+      "scope": "two_clean_builds_exact_candidate_comparison_not_release",
+      "status": "builds_succeeded_exact_candidate_provenance_blocked",
+      "source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+      "source_sha256": "0adec4b02a8b54fd20fb30c796c9959ccc346cc0f9336517fc47eafcb6951e02",
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "both_rebuilt_sha256": "b55dd460e8f2df80c149dcf659b8d29871d2fc9a0e505c51c915feaae8109147",
+      "successful_clean_builds": 2,
+      "runner_exit_code": 1,
+      "failure": "exact_candidate_not_reproduced",
+      "gate": "records/governance/mtm017-clean-build-status.json",
+      "event_id": "MEVT-119",
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/clean-build-run-1-20260930.json",
+          "sha256": "225625663585e13e6a689f59371f2bb6efcdb1db7b0529079cfbeb64a963df11"
+        },
+        {
+          "path": "records/evidence/MTM-017/clean-build-run-2-20260930.json",
+          "sha256": "18ac9d0baa5246a58a104f291a72b41e3823bd095e5b2ead809bc178dc445f02"
+        },
+        {
+          "path": "records/evidence/MTM-017/clean-build-comparison-20260930.json",
+          "sha256": "81aa8d286317d5f6ec0378a442628458f31518f67c61c3c21f330ebab741fc16"
+        },
+        {
+          "path": "records/evidence/MTM-017/clean-build-provenance-20260930.json",
+          "sha256": "a39bd0f181b5ce356b485376776d42ef98e51247226ce01a2589297eb884a84e"
+        }
+      ],
+      "research_accepted": true,
+      "research_acceptance_scope": "unchanged_current_candidate_U21-U25_fifteen_trial_subset_only",
+      "accepted_research_subset_trials": 15,
+      "new_candidate_selected": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false,
+      "deployment_authorized": false
+    },
+    {
+      "id": "MTM017-CLEAN-BUILD-HUMAN-OVERRIDE-20260930",
+      "recorded_at": "2026-09-30T06:58:39Z",
+      "scope": "single_candidate_clean_build_gate_governance_override_only",
+      "status": "waived_by_operator",
+      "decision_id": "MTM017-READINESS-DECISION-003",
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+      "both_rebuilt_sha256": "b55dd460e8f2df80c149dcf659b8d29871d2fc9a0e505c51c915feaae8109147",
+      "technical_status": "not_reproduced",
+      "passed": false,
+      "exact_candidate_reproduced": false,
+      "human_authorized_override": true,
+      "gate_allowed_by_governance": true,
+      "gate": "records/governance/mtm017-clean-build-status.json",
+      "event_id": "MEVT-120",
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/clean-build-human-override-20260930.json",
+          "sha256": "c82f26ce562214f922a3e12eade3e329b2c37af2dbbaa4ec9784b683bc88d7c7"
+        },
+        {
+          "path": "records/evidence/MTM-017/clean-build-gate-before-operator-override-20260930.json",
+          "sha256": "e98311c457905feee4d1a8f3f6c25a321f02d3144db693712265ab9df3f84b1e"
+        }
+      ],
+      "original_failure_receipt_id": "MTM017-CLEAN-BUILD-PROVENANCE-20260930",
+      "original_failure_summary": {
+        "path": "records/evidence/MTM-017/clean-build-provenance-20260930.json",
+        "sha256": "a39bd0f181b5ce356b485376776d42ef98e51247226ce01a2589297eb884a84e"
+      },
+      "authorization_message_id": "Sentinel_c630877fa6388191b74664aee4f5bfdf",
+      "research_accepted": true,
+      "accepted_research_subset_trials": 15,
+      "new_test_execution_claimed": false,
+      "other_engineering_tasks_remain_paused": true,
+      "operator_state_rehearsal_resumed": false,
+      "additional_build_executed": false,
+      "new_candidate_selected": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false,
+      "deployment_authorized": false
+    },
+    {
+      "id": "MTM017-PARTIAL-CORPUS-ACCEPTANCE-20260930",
+      "recorded_at": "2026-09-30T09:31:34Z",
+      "scope": "current_candidate_partial_corpus_78_of_90",
+      "status": "partial_corpus_accepted_twelve_external_cells_pending",
+      "evidence": "records/evidence/MTM-017/partial-corpus-accepted-20260930.json",
+      "evidence_sha256": "a08866847b55fb1e896e98a2cd746c4d61e550515f3167122015e282051adaf9",
+      "input_review": {
+        "path": "records/evidence/MTM-017/partial-corpus-input-review-20260930.json",
+        "sha256": "f70734c5f588015d3907ba3d4831feccdb43eb254fea6ba56823410db03663ef"
+      },
+      "result_review": {
+        "path": "records/evidence/MTM-017/partial-corpus-result-review-20260930.json",
+        "sha256": "eec355bdeffaf9dcea65494b49a5d01684bff025c303f076dcf95eb697498456"
+      },
+      "proposal": {
+        "path": "records/evidence/MTM-017/partial-corpus-proposal-20260930.json",
+        "sha256": "8eb3af91c3c583f5da1ec7781893a4a55ae659d79cf4d3f93cc45f1ee453f049"
+      },
+      "whole_source_gate": {
+        "path": "records/evidence/MTM-017/partial-corpus-whole-source-gate-20260930.json",
+        "sha256": "ab6ce87f6919e44f9523432d0de09b3def01449179cd6a0f68d6570d3b05caf6"
+      },
+      "accepted_delta": 63,
+      "accepted_trials": 78,
+      "pending_trials": 12,
+      "newly_accepted_research_trials": 0,
+      "original_research_pointer": {
+        "path": "records/governance/mtm017-research-corpus.json",
+        "sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24"
+      },
+      "historical_counts_inherited": false,
+      "implementation_complete": "unknown",
+      "research_accepted": true,
+      "full_corpus_accepted": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_selector_changed": false,
+      "production_state_modified": false
+    },
+    {
+      "id": "MTM017-READINESS-DECISION-004-AUTHORIZATION",
+      "recorded_at": "2026-09-30T10:15:06Z",
+      "scope": "MTM017_U27_U28_current_candidate_compatibility_and_authority_boundaries_only",
+      "status": "contract_approved_execution_and_acceptance_pending",
+      "decision_id": "MTM017-READINESS-DECISION-004",
+      "event_id": "MEVT-122",
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/u27-u28-operator-mapping-authorization-20260930.json",
+          "sha256": "3fded16a067a77f6935aca556593e2c955563562c1ec8bf02a76d138ba24fcbc"
+        }
+      ],
+      "accepted_delta": 0,
+      "corpus_count_incremented": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false,
+      "deployment_authorized": false
+    },
+    {
+      "id": "MTM017-READINESS-DECISION-005-AUTHORIZATION",
+      "recorded_at": "2026-09-30T10:15:06Z",
+      "scope": "MTM017_genuine_operator_copy_exact_restore_then_prepared_baseline_continuation_only",
+      "status": "contract_approved_execution_and_acceptance_pending",
+      "decision_id": "MTM017-READINESS-DECISION-005",
+      "event_id": "MEVT-123",
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/operator-copy-prepared-continuation-authorization-20260930.json",
+          "sha256": "953be5aa5bfa3632408f66264e129b184219ce09c8ecd5de91ee93e608ee0933"
+        }
+      ],
+      "accepted_delta": 0,
+      "corpus_count_incremented": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false,
+      "deployment_authorized": false
+    },
+    {
+      "id": "MTM017-READINESS-DECISION-005-CLARIFICATION-001",
+      "recorded_at": "2026-09-30T10:21:44Z",
+      "scope": "ordering_clarification_without_additional_authority",
+      "status": "ordering_clarified",
+      "decision_id": "MTM017-READINESS-DECISION-005-CLARIFICATION-001",
+      "event_id": "MEVT-124",
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/operator-copy-prepared-continuation-order-clarification-20260930.json",
+          "sha256": "ec2638268b0b419d6f4ca0cd03985336965a8e7b4cb47bcc31f43c6fcfee03c1"
+        }
+      ],
+      "accepted_delta": 0,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_selector_changed": false,
+      "production_state_modified": false
+    },
+    {
+      "id": "MTM017-CORPUS-UNION-ACCEPTANCE-20260930",
+      "recorded_at": "2026-09-30T11:57:13Z",
+      "scope": "current_candidate_unique_cell_union_87_of_90",
+      "status": "partial_corpus_accepted_U26_three_cells_pending",
+      "event_id": "MEVT-125",
+      "evidence": {
+        "path": "records/evidence/MTM-017/corpus-union-accepted-20260930.json",
+        "sha256": "1afff81a1ce804eb4fa88ef23012c37f2289f0f54d02fe73b0092e5cceba7523"
+      },
+      "governance_pointer": {
+        "path": "records/governance/mtm017-corpus-union.json",
+        "sha256": "9e2d9de518a3ab1225134164828f1f83ddcb83d0f72c55399301ea53452c1393"
+      },
+      "input_review": {
+        "path": "records/evidence/MTM-017/corpus-union-input-review-20260930.json",
+        "sha256": "847d8c20c06aeb1169694ced9f5f06168981ffd4cc90cec59498dc2f93267f9f"
+      },
+      "result_review": {
+        "path": "records/evidence/MTM-017/corpus-union-result-review-20260930.json",
+        "sha256": "c3af37b47ec37b84158b499b102ae37c0e024b3eb2ea37b7c2716f290d5807d2"
+      },
+      "proposal": {
+        "path": "records/evidence/MTM-017/corpus-union-proposal-20260930.json",
+        "sha256": "a8f9e23e6e3e62b471e822cb91945db3d727b59f02eb92ab206fb9807ad2cd80"
+      },
+      "whole_source_gate": {
+        "path": "records/evidence/MTM-017/authority-corpus-whole-source-final-20260930.json",
+        "sha256": "ded9f3362936b08589df6d58f909c0f8046e069592d609f7d31ef033e69428bc"
+      },
+      "accepted_delta": 9,
+      "accepted_trials": 87,
+      "previously_accepted_trials": 78,
+      "pending_trials": 3,
+      "new_authority_trials": 6,
+      "new_operator_copy_trials": 3,
+      "new_research_trials": 0,
+      "integration_route": "actual_hash_sealed_Bash_SQLite_governance_code",
+      "known_source_failure_root_cause": "indeterminate",
+      "operator_copy_scope": "exact_restore_then_prepared_continuation",
+      "original_78_pointer_unchanged": true,
+      "original_research_pointer_unchanged": true,
+      "frozen_MTM016_driver_unchanged": true,
+      "implementation_complete": "unknown",
+      "research_accepted": true,
+      "research_acceptance_scope": "unchanged_original_fifteen_only",
+      "full_corpus_accepted": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_selector_changed": false,
+      "production_state_modified": false
+    },
+    {
+      "id": "MTM017-U26-HUMAN-WAIVER-20260930",
+      "recorded_at": "2026-09-30T12:18:33Z",
+      "scope": "exact_schema8_candidate_U26_three_cells_only",
+      "status": "waived_by_operator_not_technical_pass",
+      "event_id": "MEVT-126",
+      "decision_id": "MTM017-READINESS-DECISION-006",
+      "evidence": {
+        "path": "records/evidence/MTM-017/u26-human-waiver-20260930.json",
+        "sha256": "011fdee5b398b768088cc1dfab42c9f6a41a743be60dddc51234bd770f1f1a23"
+      },
+      "governance_pointer": {
+        "path": "records/governance/mtm017-u26-waiver.json",
+        "sha256": "4bcf208c6e68d490b835fd895b6879a4dd694f5cbb698a6fc3fcf6248ee5219c"
+      },
+      "source_archive": {
+        "path": "records/evidence/MTM-017/corpus-union-source-archive-20260930.json",
+        "sha256": "910d9004850c3a859112340665d0131d0bb1b536b4fcd583636aad97a5665fba"
+      },
+      "technical_accepted_trials": 87,
+      "technical_pending_trials": 3,
+      "human_waived_cells": 3,
+      "technical_accepted_delta": 0,
+      "corpus_count_incremented": false,
+      "full_technical_corpus": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "remaining_risk": "Valid normal browser assessment submission never reached the candidate due to connector oneOf validation; direct protected-resource observation and R2/R3 completed trials are absent. Prior r3 source failure remains indeterminate and is not waived.",
+      "readiness_adapter_implemented": false
     }
   ],
   "remaining_acceptance": [
     "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
-    "All fifteen standalone reviewed research trials are complete: U21-r1/r2/r3, U22-r1/r2/r3, U23-r1/r2/r3, U24-r1/r2/r3 and U25-r1/r2/r3. A separately reviewed corpus import remains required before any corpus count increment.",
-    "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
+    "The fifteen MTM-017 U21-U25 research rows are now accepted after separate input and result reviews; see records/governance/mtm017-research-corpus.json. This research subset does not qualify the full corpus or release.",
+    "The exact candidate clean-build provenance gate is waived by explicit human risk acceptance under MTM017-READINESS-DECISION-003; technical reproduction remains false. Schema-8 release-input/readiness and any deployment decision remain separate and paused; do not repoint the frozen MTM-016 driver.",
     "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
   ],
   "remaining_delivery": [],
   "decision": "implementation_complete_release_not_qualified",
   "completed_at": "2026-09-26T08:14:02Z",
-  "updated_at": "2026-09-30T02:52:46Z",
+  "updated_at": "2026-09-30T12:18:33Z",
   "records_commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
   "release_qualified": false,
   "release_handoff": "docs/MTM-017-RELEASE-HANDOFF.md",
@@ -3080,8 +3378,172 @@
       "finalizer_executed": true,
       "corpus_count_incremented": false
     },
-    "next_test": "Separately reviewed corpus import of all fifteen standalone receipts; do not increment corpus count before that independent import review.",
+    "next_test": "Current candidate corpus is formally accepted at87/90: prior78 plus six U27/U28 and three genuine U29 prepared-continuation trials. U26 remains three pending browser cells; no connector bypass may count as browser evidence. Final schema8 release-readiness and explicit deployment authorization remain separate. Preserve the indeterminate r3 source failure and original strict rollback failure.",
     "evidence": "records/evidence/MTM-017/web-compact-independent-review.json",
     "release_qualified": false
+  },
+  "research_corpus_import": {
+    "schema": "mtm017-research-corpus-state-v1",
+    "milestone": "MTM-017",
+    "updated_at": "2026-09-30T04:12:24Z",
+    "scope": "U21-U25_fifteen_trial_research_subset_only",
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "candidate_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+    "state_schema_version": 8,
+    "active_acceptance": {
+      "path": "records/evidence/MTM-017/research-corpus-subset-accepted-20260930.json",
+      "sha256": "49fc407487fa7c9104c4a6b7aae92e2cde2b9fe4287bd5c73b0e0352abbaae6e"
+    },
+    "inputs": {
+      "path": "records/evidence/MTM-017/corpus-import-inputs-20260930.json",
+      "sha256": "74592e4a94da281c15f05ee0710b7722326491743652be2b671d4b8664ed0750"
+    },
+    "input_review": {
+      "path": "records/evidence/MTM-017/corpus-import-input-review-20260930-r3.json",
+      "sha256": "e963cabe924ebf0be44d77ee53bf0c9562fa4a38f4872169cf65ac2bfa30fcfa"
+    },
+    "proposal": {
+      "path": "records/evidence/MTM-017/corpus-import-proposal-20260930-r3.json",
+      "sha256": "03ac34879a68c1a371a5b83b66cbe45103a5bd82ce029564f2b5ec5d1a326d2a"
+    },
+    "result_review": {
+      "path": "records/evidence/MTM-017/corpus-import-result-review-20260930-r3.json",
+      "sha256": "a6208dd66b9d59af24c28225af6735cf509fc83fa2dc3eda1b56903d12f8ee48"
+    },
+    "accepted_research_subset_trials": 15,
+    "expected_research_subset_trials": 15,
+    "complete_for_research_scope": true,
+    "complete_for_full_corpus": false,
+    "historical_counts_inherited": false,
+    "implementation_complete": "unknown",
+    "research_accepted": true,
+    "research_acceptance_scope": "only_current_mtm017_u21_u25_subset",
+    "release_qualified": false,
+    "deployment_authorized": false,
+    "production_selector_changed": false,
+    "production_state_modified": false,
+    "frozen_mtm016_driver_sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04"
+  },
+  "partial_corpus": {
+    "schema": "mtm017-partial-corpus-state-v1",
+    "milestone": "MTM-017",
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "candidate_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+    "state_schema_version": 8,
+    "corpus_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861",
+    "accepted_trials": 78,
+    "pending_trials": 12,
+    "failed_trials": 0,
+    "total_trials": 90,
+    "newly_accepted_nonresearch_trials": 63,
+    "previously_accepted_research_trials": 15,
+    "newly_accepted_research_trials": 0,
+    "full_corpus_accepted": false,
+    "complete": false,
+    "historical_counts_inherited": false,
+    "implementation_complete": "unknown",
+    "research_accepted": true,
+    "research_acceptance_scope": "unchanged_prior_U21_U25_fifteen_trials",
+    "release_qualified": false,
+    "deployment_authorized": false,
+    "production_selector_changed": false,
+    "production_state_modified": false,
+    "pending_task_ids": [
+      "U26",
+      "U27",
+      "U28",
+      "U29"
+    ],
+    "u27_u28_mapping_approved": false,
+    "original_research_pointer": {
+      "path": "records/governance/mtm017-research-corpus.json",
+      "sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24"
+    },
+    "frozen_mtm016_driver": {
+      "path": "records/governance/mtm016-release-inputs.json",
+      "sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04"
+    },
+    "updated_at": "2026-09-30T09:31:34Z",
+    "active_acceptance": {
+      "path": "records/evidence/MTM-017/partial-corpus-accepted-20260930.json",
+      "sha256": "a08866847b55fb1e896e98a2cd746c4d61e550515f3167122015e282051adaf9"
+    },
+    "inputs": {
+      "path": "records/evidence/MTM-017/partial-corpus-inputs-20260930.json",
+      "sha256": "09101a673cec4a67ba681b0ddc8bd0899bef195f1d6353bf896ce51a6713f7be"
+    },
+    "input_review": {
+      "path": "records/evidence/MTM-017/partial-corpus-input-review-20260930.json",
+      "sha256": "f70734c5f588015d3907ba3d4831feccdb43eb254fea6ba56823410db03663ef"
+    },
+    "proposal": {
+      "path": "records/evidence/MTM-017/partial-corpus-proposal-20260930.json",
+      "sha256": "8eb3af91c3c583f5da1ec7781893a4a55ae659d79cf4d3f93cc45f1ee453f049"
+    },
+    "result_review": {
+      "path": "records/evidence/MTM-017/partial-corpus-result-review-20260930.json",
+      "sha256": "eec355bdeffaf9dcea65494b49a5d01684bff025c303f076dcf95eb697498456"
+    },
+    "whole_source_gate": {
+      "path": "records/evidence/MTM-017/partial-corpus-whole-source-gate-20260930.json",
+      "sha256": "ab6ce87f6919e44f9523432d0de09b3def01449179cd6a0f68d6570d3b05caf6"
+    },
+    "partial_corpus_accepted": true,
+    "count_semantics": "fixed_unique_cell_union_78_of_90_not_repeated_increment"
+  },
+  "corpus_union": {
+    "schema": "mtm017-current-corpus-union-state-v1",
+    "milestone": "MTM-017",
+    "updated_at": "2026-09-30T11:57:13Z",
+    "status": "partial_corpus_accepted_U26_pending",
+    "activation_id": "MTM017-CORPUS-UNION-20260930",
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "candidate_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+    "state_schema_version": 8,
+    "accepted_trials": 87,
+    "pending_trials": 3,
+    "total_trials": 90,
+    "accepted_delta": 9,
+    "previously_accepted_trials": 78,
+    "new_authority_trials": 6,
+    "new_operator_copy_trials": 3,
+    "new_research_trials": 0,
+    "pending_task_ids": [
+      "U26"
+    ],
+    "full_corpus_accepted": false,
+    "acceptance": {
+      "path": "records/evidence/MTM-017/corpus-union-accepted-20260930.json",
+      "sha256": "1afff81a1ce804eb4fa88ef23012c37f2289f0f54d02fe73b0092e5cceba7523"
+    },
+    "input_review": {
+      "path": "records/evidence/MTM-017/corpus-union-input-review-20260930.json",
+      "sha256": "847d8c20c06aeb1169694ced9f5f06168981ffd4cc90cec59498dc2f93267f9f"
+    },
+    "result_review": {
+      "path": "records/evidence/MTM-017/corpus-union-result-review-20260930.json",
+      "sha256": "c3af37b47ec37b84158b499b102ae37c0e024b3eb2ea37b7c2716f290d5807d2"
+    },
+    "original_78_pointer": {
+      "path": "records/governance/mtm017-partial-corpus.json",
+      "sha256": "0f2562453258f469a99a8f8b084cb4fb718ed089470dd185222da613ceb403c2"
+    },
+    "original_research_pointer": {
+      "path": "records/governance/mtm017-research-corpus.json",
+      "sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24"
+    },
+    "implementation_complete": "unknown",
+    "research_accepted": true,
+    "research_acceptance_scope": "unchanged_original_fifteen_only",
+    "release_qualified": false,
+    "deployment_authorized": false,
+    "production_selector_changed": false,
+    "production_state_modified": false,
+    "integration_route": "actual_hash_sealed_Bash_SQLite_governance_integration",
+    "known_source_failure_root_cause": "indeterminate",
+    "transactional_capture_snapshot_claimed": false,
+    "complete_capture_process_visibility_claimed": false,
+    "operator_copy_rollback_scope": "exact_restore_then_prepared_continuation",
+    "original_modes_baseline_continuation": false
   }
 }

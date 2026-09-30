@@ -307,3 +307,22 @@ and all legacy-revision/receipt/snapshot checks. Ordinary source and capability
 gates clear `MTM_TEST_SCHEMA8_UPGRADE_PROFILE`; no profile opens operator state.
 The old `upgrade` receipt contract and frozen MTM-016 release driver are not
 relabelled as schema-8 acceptance.
+
+## MTM-017 two-clean-build qualification
+
+The operator explicitly approved the narrow cache exception recorded as
+`MTM017-READINESS-DECISION-002` in
+`records/governance/mtm017-readiness-decisions.json`. For the requested two clean
+checkout/build observations of the exact schema-8 preview.2 candidate, only
+`scripts/mtm017-clean-build-provenance.sh` may use a new owner-private, marker-bound
+session under `target/mtm017-clean-build-provenance/`. Its two rounds reuse one
+dedicated disposable checkout/build-cache path serially. Cargo dependency inputs
+must be bounded private copies, never writable links into existing caches.
+Cleanup is restricted to the script-created, marker/device/inode-verified scratch
+children after preserving each round's artifact and receipt. Do not use or clean
+`target/debug`, `target/release`, `target/mtm-tool`, frozen candidates or operator
+caches. This exception applies only to this explicitly requested MTM-017
+qualification; all ordinary Cargo ownership rules remain unchanged. Read
+`docs/MTM-017-CLEAN-BUILD-PROVENANCE.md`. Complete the corpus phase and independent
+pre-execution review before the explicit build entry. Neither preparation nor
+clean-build evidence grants release or deployment authority.

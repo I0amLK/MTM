@@ -1,0 +1,93 @@
+{
+  "schema": "mtm017-research-import-implementation-validation-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T03:45:33.511395+00:00",
+  "scope": "maintenance_import_proposal_implementation_only",
+  "implementation_source_sha256": "563362c935f43aa4a585fb6b86cb489206840bda649287db2e87f8aae9a5f376",
+  "maintenance_binary_sha256": "a69d5a3ba2b9fab04b54251c42282944ead234ce2f6d0e998f2b1ebc22a0b357",
+  "source_files": [
+    {
+      "path": "xtask/src/main.rs",
+      "sha256": "43b755b3f935aec9217d1c13f4c8ab2fea66224964ecd547ee27ca622e2e4036"
+    },
+    {
+      "path": "xtask/src/research_import_check/mod.rs",
+      "sha256": "26897b0bca5a9fc3789cb9640edf617156e3ed42b1fb982de190a8802ae42980"
+    },
+    {
+      "path": "xtask/src/research_import_check/files.rs",
+      "sha256": "2753a9ae26ce3d768c332d3f2ec2106d1cbe1ced24e2d5b139b18ccfe3d5c0d6"
+    },
+    {
+      "path": "xtask/src/research_import_check/tests.rs",
+      "sha256": "40ab9727df6f394a4388458e2026254ee1f6716309688b684d8844d66905b9f5"
+    },
+    {
+      "path": "xtask/tests/research_import_check_cli.rs",
+      "sha256": "3a3463a83563defc67bbf8dd33693456c99dbcccc92b6f1bc65dbcc51f202d6f"
+    }
+  ],
+  "documentation": {
+    "path": "docs/MTM-017-RESEARCH-CORPUS-IMPORT.md",
+    "sha256": "8f082862793f7f6958b0d90bff314a1683917b7ea2c5a5cdeac19e98ffd6c78a"
+  },
+  "tests": {
+    "cargo_test_mtm_xtask": {
+      "exit_code": 0,
+      "unit_passed": 141,
+      "integration_passed": 21,
+      "new_import_unit_tests": 9,
+      "new_import_cli_tests": 2,
+      "stdout_sha256": "fe0e0a6b56ad43cc2fa33854be800d74276bbc23426bb2a615dc85a6c0e7a672",
+      "stderr_sha256": "0fb594a607b991cf7b4f4ac89c6cc676010a7d13b39d3208506cdc6470cb69d8"
+    },
+    "cargo_clippy_mtm_xtask_all_targets": {
+      "exit_code": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "5c01d9fbdac77b3311882411dbd288104a0adbe8f6bdce299a878ca20104f815"
+    },
+    "cargo_fmt_check": {
+      "exit_code": 0
+    },
+    "git_diff_check": {
+      "exit_code": 0
+    },
+    "cargo_xtask_records": {
+      "exit_code": 0,
+      "ok": true,
+      "report_sha256": "36e2a3fe5e79bf4451f92b8165579f968d7f08badeeb6f48e538f7e03d9ac8b8"
+    }
+  },
+  "prior_diagnostics": [
+    {
+      "stage": "first_focused_import_unit_run",
+      "passed": 6,
+      "failed": 1,
+      "failed_test": "safe_files_reject_escape_links_hardlinks_writable_and_oversize",
+      "cause": "Synthetic good-file setup inherited group-writable default mode and correctly failed the strict input reader.",
+      "repair": "Set only the synthetic good fixture to mode 0600 before asserting successful read; production file checks unchanged.",
+      "superseded_by_successful_focused_run": true
+    }
+  ],
+  "fresh_whole_source_gate_performed": false,
+  "input_review_pending": true,
+  "proposal_created": false,
+  "result_review_pending": true,
+  "accepted_trials_delta": 0,
+  "corpus_count_incremented": false,
+  "frozen_mtm016_driver_sha256_before": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+  "frozen_mtm016_driver_sha256_after": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "production_boundary_basis": "Only new maintenance source/docs/evidence and the dedicated tool build cache were written; no product state or installation command was invoked.",
+  "previous_validation": {
+    "path": "records/evidence/MTM-017/corpus-import-implementation-validation-20260930.json",
+    "sha256": "b2efceea748728124276fb66285c91edd11112d3d63cd5e0728bd1979a7bb3cd",
+    "reason_superseded": "Proposal now explicitly distinguishes all four requested machine states; old input-review identities must not be reused."
+  },
+  "implementation_complete": "unknown",
+  "implementation_scope": "whole_project_requires_separate_evidence",
+  "research_accepted": false,
+  "deployment_authorized": false
+}

@@ -1,0 +1,299 @@
+{
+  "accepted_trials_delta": 0,
+  "audit": {
+    "path": "records/evidence/MTM-017/corpus-import-input-audit-20260930.json",
+    "sha256": "f1b319d88125924bf663fb0e1bbb4074339c4c107d2578f6b317636ae090faa0"
+  },
+  "bundle_catalog_sha256": "15e4ba61d9677a1bac0cca6b642ee9762df21c972c38e121909ba1c98905d92c",
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "candidate_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+  "case_registry_sha256": "cd6d6a758e667fca21d2a04d2eba9a015c1d156350b34438660dd8bd16ae1bb9",
+  "corpus_count_incremented": false,
+  "corpus_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861",
+  "deployment_authorized": false,
+  "eligible_trials": 15,
+  "frozen_driver_sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+  "historical_counts_inherited": false,
+  "implementation_complete": "unknown",
+  "implementation_scope": "whole_project_requires_separate_evidence",
+  "implementation_source_sha256": "7a986e059516efb8b90ef7abca84b6940667b4a3ce6b8e935b48eac489a6e4d0",
+  "input_review_cryptographically_authenticated": false,
+  "input_review_sha256": "e963cabe924ebf0be44d77ee53bf0c9562fa4a38f4872169cf65ac2bfa30fcfa",
+  "inputs_sha256": "74592e4a94da281c15f05ee0710b7722326491743652be2b671d4b8664ed0750",
+  "limitations": [
+    "Procedural review records and hashes do not authenticate a reviewer or re-prove mathematics.",
+    "This command writes no file and grants no corpus count or deployment authority.",
+    "A separate result review and explicit governance acceptance are still required."
+  ],
+  "maintenance_binary_sha256": "55d5616e96f2b951dc70498c15229cb71812710c691db9df2b701f0e3c4ae187",
+  "milestone": "MTM-017",
+  "prechecks": {
+    "path": "records/evidence/MTM-017/corpus-import-prechecks-20260930.json",
+    "sha256": "6eaa52167ad9064d9f6ca38e628b3e96f3aeab9c7fb9d6425d373bfabf370a4b"
+  },
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "research_accepted": false,
+  "result_review_required": true,
+  "schema": "mtm017-research-import-proposal-v1",
+  "scope": "U21-U25_fifteen_trial_research_subset_only",
+  "state_schema_version": 8,
+  "trials": [
+    {
+      "artifact_count": 10,
+      "bundle_sha256": "b115dac27dc511f080d56f6926f3a09c87d8297e808c00b82bb4166b977fac15",
+      "case_id": "u21-r1-subspace-dimension",
+      "eligible_for_result_review": true,
+      "final_tex_sha256": "a200cbe9f49b5c87a1932c254eaaed9f4ad5a111fb1e1640e49bc16f34991652",
+      "receipt": {
+        "path": "records/evidence/MTM-017/research-u21-r1-344bafa5e61f13ce9c15a8a6ac7cb5b6.json",
+        "sha256": "c3710a1701268e63c8b4197cfb4db6e17fcc80272203df5b2bde9445b5186b7d"
+      },
+      "repeat": 1,
+      "review_observation_sha256": "4cc80f9317040a7d9bbab009b82d6cd9ae123ce917e5a38c2bb02d60cfcf62f3",
+      "reviewer_statement_checks": 10,
+      "task_id": "U21",
+      "trial_id": "344bafa5e61f13ce9c15a8a6ac7cb5b6",
+      "verification_report_sha256": "b1d3d2fabcb1d3c06da4c2857ea5e7c2a91ef30dcdee576a5e982844dba4f4ef"
+    },
+    {
+      "artifact_count": 10,
+      "bundle_sha256": "30dc421a1ab71432a1aca978ec3715af9d577437074cd6c38877c7fde9a4bfcc",
+      "case_id": "u21-r2-cauchy-schwarz",
+      "eligible_for_result_review": true,
+      "final_tex_sha256": "1e5b66db13ea034dd3beccee8729bd29a93db6ec66442685c9a00ae62a3a59d5",
+      "receipt": {
+        "path": "records/evidence/MTM-017/research-u21-r2-19a138d5c919c330a9f101347ec89f71.json",
+        "sha256": "3ae0a9439e43766fdf41e3aad0fc2c907ad4fc37017a6115f662c2d702ec402a"
+      },
+      "repeat": 2,
+      "review_observation_sha256": "fd70020346b2ee5ff5fa594288edbce2680a4a9b6880d874108dfc7fe207c926",
+      "reviewer_statement_checks": 11,
+      "task_id": "U21",
+      "trial_id": "19a138d5c919c330a9f101347ec89f71",
+      "verification_report_sha256": "f118d9318ce7333c22742ab2d9cd7826a86a2b9173d47e70775b9e73d8a2d0c2"
+    },
+    {
+      "artifact_count": 10,
+      "bundle_sha256": "72c575804bbef8a3f9ad15de6f431c9418aed9e3091afee837f38dae2861d708",
+      "case_id": "u21-r3-monotone-limit",
+      "eligible_for_result_review": true,
+      "final_tex_sha256": "720be5afea9d6e153a61991b763839b074758974a1f588863bc6abd8d746d800",
+      "receipt": {
+        "path": "records/evidence/MTM-017/research-u21-r3-edfd352d6262dc5c12c25e30623aaa61.json",
+        "sha256": "3414776844d1abefc37ec05f2eba1f623ae058af0dd5fc75e924fccc21786b35"
+      },
+      "repeat": 3,
+      "review_observation_sha256": "61b50eda2813086b519a25b19ada513396008321c2acb04d31e9ccee5c86458b",
+      "reviewer_statement_checks": 10,
+      "task_id": "U21",
+      "trial_id": "edfd352d6262dc5c12c25e30623aaa61",
+      "verification_report_sha256": "3de742578d90d85707e972d818f9f2aad5741bd2fbc9b2cd511fdb0229a68bb9"
+    },
+    {
+      "artifact_count": 13,
+      "bundle_sha256": "f4d97841958e002f228c8193fb141843d01c36859dfb3bb9cd89b4534b285282",
+      "case_id": "u22-r1-chinese-remainder",
+      "eligible_for_result_review": true,
+      "final_tex_sha256": "650b047d0e7a859d9dd9b498c9723f38726539a5b3b7955c92e4c1ae1018555c",
+      "receipt": {
+        "path": "records/evidence/MTM-017/research-u22-r1-650f2dfe8b33fa09813f22fc2056110a.json",
+        "sha256": "9019e6e99777ea3b3b56993a1974a4302b43d8d2b2d334733bccd3d1109c7ea0"
+      },
+      "repeat": 1,
+      "review_observation_sha256": "3f709b2825dc769ce51ddc1b866220b5d2405223b1b0f6a7519b731bc6274ffe",
+      "reviewer_statement_checks": 11,
+      "task_id": "U22",
+      "trial_id": "650f2dfe8b33fa09813f22fc2056110a",
+      "verification_report_sha256": "770b58df22f77af69c8272b52fcd9b038d0ab7a6cf69b7883da1a7cb650ce072"
+    },
+    {
+      "artifact_count": 13,
+      "bundle_sha256": "31bf772920dee4f3f76a698303ff19dc691ad9d07c2d20a888f4778bd38f45bb",
+      "case_id": "u22-r2-finite-polynomial-roots",
+      "eligible_for_result_review": true,
+      "final_tex_sha256": "f9e036c963347a0064ec7891699fe53f9c500dbd15ed063a75e333850a78f193",
+      "receipt": {
+        "path": "records/evidence/MTM-017/research-u22-r2-cba26cd45925117e6db72a096667d164.json",
+        "sha256": "55bdf02755b5fb7532dacf590f50aaeab21bc7ff0482f3d95397e9e7a79baa64"
+      },
+      "repeat": 2,
+      "review_observation_sha256": "ad58defcae07f95aff28fdea8ff744df6e0db4598ba7fcc32bce1414ed89d581",
+      "reviewer_statement_checks": 13,
+      "task_id": "U22",
+      "trial_id": "cba26cd45925117e6db72a096667d164",
+      "verification_report_sha256": "041d20a0cd61c35d14bb6a9ed754a8757846cc19767fe817228885bc4810518b"
+    },
+    {
+      "artifact_count": 13,
+      "bundle_sha256": "04d2270ed415d11ac6251519da03354662c580eab6fd0518030175434ba6e6b1",
+      "case_id": "u22-r3-orbit-stabilizer",
+      "eligible_for_result_review": true,
+      "final_tex_sha256": "fddf0d73c4d9ba217e3bc7e70a67f654a9720430f93c2eedfb6d12129339dc21",
+      "receipt": {
+        "path": "records/evidence/MTM-017/research-u22-r3-d70ba3cb8d38924bafb8ad655588a5fb.json",
+        "sha256": "1f2ed513994444cd03d0ede3ed5d98bc3ab6ce13a42bf185d2ec45b820787f0a"
+      },
+      "repeat": 3,
+      "review_observation_sha256": "9db840e6013a46d2a7be68adf98d6ecd3084001c33ee23785894239c17264586",
+      "reviewer_statement_checks": 12,
+      "task_id": "U22",
+      "trial_id": "d70ba3cb8d38924bafb8ad655588a5fb",
+      "verification_report_sha256": "fc6b5f3840bff9583b163926dfc45ee7c3909547f33fcf1f8999c5e11825797f"
+    },
+    {
+      "artifact_count": 13,
+      "bundle_sha256": "b21ee875e2017904a85313a1933a4a3c7ceb35b6abe4f9c985a801dfcf102278",
+      "case_id": "u23-r1-uniform-continuity-gap",
+      "eligible_for_result_review": true,
+      "final_tex_sha256": "f36742fcce03bb3f741a5acea07060d03a50f99d7d73aaad12f031147a5030d4",
+      "receipt": {
+        "path": "records/evidence/MTM-017/research-u23-r1-01bb5b7858e9b45f7ffbaecd180af003.json",
+        "sha256": "8fba037ceca034acc9d1ed10e73072b72dbcdc7bfb8f8b284fb770ee9e2b658c"
+      },
+      "repeat": 1,
+      "review_observation_sha256": "8041dc3b3d544b2b05449bc12f5614570c71f26bc27b02e1e7bb2bb73c0166d4",
+      "reviewer_statement_checks": 12,
+      "task_id": "U23",
+      "trial_id": "01bb5b7858e9b45f7ffbaecd180af003",
+      "verification_report_sha256": "40f6f9bc81e23b367ab2f3d988f6d6cdebb24d6d8ac8d0a2f79e7e2754bda676"
+    },
+    {
+      "artifact_count": 13,
+      "bundle_sha256": "d3b318cc8827c17951f8f232fefad791a4a1c3aaf38f94df590b01e2fa4fd8fa",
+      "case_id": "u23-r2-finite-domain-gap",
+      "eligible_for_result_review": true,
+      "final_tex_sha256": "360d02ad3354577bb1772882a04a07b559c1e517e2e28e314d20555643321bc7",
+      "receipt": {
+        "path": "records/evidence/MTM-017/research-u23-r2-959c3b76a3c5f03bc49c38dbb0510dd7.json",
+        "sha256": "719f56789bf427aa0157f7967051db732c0a6196e3d175e598b777019c5fa2c3"
+      },
+      "repeat": 2,
+      "review_observation_sha256": "d608f5173611c999020fe91ddf753a09b4372a987673bd040f9fd7d2a0ec658b",
+      "reviewer_statement_checks": 12,
+      "task_id": "U23",
+      "trial_id": "959c3b76a3c5f03bc49c38dbb0510dd7",
+      "verification_report_sha256": "f335ec9496e4efe074cb209827462eb834cd3e37d5b350e7b7e8e0e75a2239db"
+    },
+    {
+      "artifact_count": 13,
+      "bundle_sha256": "d7e0f3a30927707d81c33b414758fa8a4431370d97f81d7017b900f65477587e",
+      "case_id": "u23-r3-matrix-inverse-gap",
+      "eligible_for_result_review": true,
+      "final_tex_sha256": "527a51387db2666f981af86d060a7b18039b3f5c002efd3120e77496f4f2e1e7",
+      "receipt": {
+        "path": "records/evidence/MTM-017/research-u23-r3-b2d220a6228dc91a8374f2ce425c70cf.json",
+        "sha256": "aa348877c50585c6cacb535c17779d23921b0c5b7563007bb169da54b16eed29"
+      },
+      "repeat": 3,
+      "review_observation_sha256": "513f74d28dd2ecdb5073713180628e3b48eb603a5e1025080cd7cb3fa8f7a427",
+      "reviewer_statement_checks": 12,
+      "task_id": "U23",
+      "trial_id": "b2d220a6228dc91a8374f2ce425c70cf",
+      "verification_report_sha256": "e570796be81a9ebcd58bd7a017b0c9cc730a83db2ef2bb044c5748c161fdce1e"
+    },
+    {
+      "artifact_count": 11,
+      "bundle_sha256": "7efb77ee9917d4999d189aa0660a6cd4f18a7340c53287b037bf45bed91c2e3f",
+      "case_id": "u24-r1-geometric-series",
+      "eligible_for_result_review": true,
+      "final_tex_sha256": "43cc652d52e94e27269aae095a1a3231e70fa7ef7dc4cc537109a54668126abd",
+      "receipt": {
+        "path": "records/evidence/MTM-017/research-u24-r1-1bcc7ddfda220add09b372c2f9c92d17.json",
+        "sha256": "2f0d38c322c04718a25bd2c95278bb1358cb83e894e17cc2e3f1b480cbbd62dc"
+      },
+      "repeat": 1,
+      "review_observation_sha256": "62faeb5809ebe7b0a3672048a2ea4dc467bd2443d9d5e380d927bd06728e2222",
+      "reviewer_statement_checks": 21,
+      "task_id": "U24",
+      "trial_id": "1bcc7ddfda220add09b372c2f9c92d17",
+      "verification_report_sha256": "74cc223ff8856d30253704f113c2047be7ebc736d8c67672d54ab19b8a5d1917"
+    },
+    {
+      "artifact_count": 11,
+      "bundle_sha256": "23b8965e523cb33add36a57469769d84352eb78f3a86f87509219e1a674a658c",
+      "case_id": "u24-r2-idempotent-decomposition",
+      "eligible_for_result_review": true,
+      "final_tex_sha256": "345281af65838e9a6b7049eabfec61ae1c4880c215ed605a5ecc128332cb8926",
+      "receipt": {
+        "path": "records/evidence/MTM-017/research-u24-r2-84df5d8199912a2965aa2f08b1cac1ab.json",
+        "sha256": "fea72b9a74b56bc6d9fde70bf2968570c3d9822019eccd4307b414e3d3810a88"
+      },
+      "repeat": 2,
+      "review_observation_sha256": "52fbd5682fbd2e96bef0ea6ccb8d6000016d360485fc909db18a3eef51f77457",
+      "reviewer_statement_checks": 23,
+      "task_id": "U24",
+      "trial_id": "84df5d8199912a2965aa2f08b1cac1ab",
+      "verification_report_sha256": "20d2959644e38800d38486f9d1da5e07dfff0bd706450fcc13f6f094b1691e36"
+    },
+    {
+      "artifact_count": 11,
+      "bundle_sha256": "2886718ae525fca069a6b416ec1772e90c6dd0428174105fa391fa252338c8e3",
+      "case_id": "u24-r3-sum-of-squares",
+      "eligible_for_result_review": true,
+      "final_tex_sha256": "bf5b577a88ff681eb034f173e8a83df7bb26e0a4f0ce31c901fce7e82c7f4796",
+      "receipt": {
+        "path": "records/evidence/MTM-017/research-u24-r3-1979479333b1fe2611ef16326366ed3e.json",
+        "sha256": "d0c663303ddc1ccf59fb386adff4f3c0c6d68a754dbabb3dab6d7d2715b264eb"
+      },
+      "repeat": 3,
+      "review_observation_sha256": "46c6b4b8f2fc55a1708cadc00973ba3925cbf8f3a7f77fd73190dd615c2faa3c",
+      "reviewer_statement_checks": 24,
+      "task_id": "U24",
+      "trial_id": "1979479333b1fe2611ef16326366ed3e",
+      "verification_report_sha256": "50fac620740533c6b4ded3804d14f5587cc68492f418d961d66522fce209c370"
+    },
+    {
+      "artifact_count": 15,
+      "bundle_sha256": "9da21c677d66c4078cde64dfbc662da0234b439ca954d41e817026a59142342f",
+      "case_id": "u25-r1-rank-nullity",
+      "eligible_for_result_review": true,
+      "final_tex_sha256": "229531ec1b8e7327222af5aa9c92fa13616256e2aca2d03beb7e20a9024a9bc4",
+      "receipt": {
+        "path": "records/evidence/MTM-017/research-u25-r1-3a4634e6f686fdfce186f61e350821d2.json",
+        "sha256": "206d03ac1d2bae70e82dd8d2a703cb256723823d47e7ce974972dd96b00bcf1e"
+      },
+      "repeat": 1,
+      "review_observation_sha256": "87202540a68817be0a98bbe875c3dfbce16690385e64f4e510b5e144636b811d",
+      "reviewer_statement_checks": 10,
+      "task_id": "U25",
+      "trial_id": "3a4634e6f686fdfce186f61e350821d2",
+      "verification_report_sha256": "6f667029587cd3153537fef7d77fc42304d1fb36aa88a8b624d07357f7d67e5c"
+    },
+    {
+      "artifact_count": 15,
+      "bundle_sha256": "2f333a61384f7b2bb49c88dec1ea1771ee0e23897447aa2a35743db03611c9b4",
+      "case_id": "u25-r2-finite-field-roots",
+      "eligible_for_result_review": true,
+      "final_tex_sha256": "13477046449149248a5ffef536213607833c985176f67a8565c4da7f5f7b9d56",
+      "receipt": {
+        "path": "records/evidence/MTM-017/research-u25-r2-6435a5fb64831a255f6cd4e4b519ad3e.json",
+        "sha256": "979455efd4d9ff65e95b602ce82d7d995f8ee207e42d37a1aa02bdfb2825156b"
+      },
+      "repeat": 2,
+      "review_observation_sha256": "76f3bc3403e700b30204520ce79c04c5b7614705cfe440e5e73775f4c45d0a4d",
+      "reviewer_statement_checks": 12,
+      "task_id": "U25",
+      "trial_id": "6435a5fb64831a255f6cd4e4b519ad3e",
+      "verification_report_sha256": "ac040687921f738e93a23a711af86386535e20140f23bf412bc5b259679fcad3"
+    },
+    {
+      "artifact_count": 15,
+      "bundle_sha256": "4a993f60dc12d4ee333ee2d237fe9d2309cd735b7757058f328399efebc09d69",
+      "case_id": "u25-r3-polynomial-gcd",
+      "eligible_for_result_review": true,
+      "final_tex_sha256": "58b2f2a73c939ec59e5c949194202714c90b1fec2314d32e8a0bf08ca3170a3d",
+      "receipt": {
+        "path": "records/evidence/MTM-017/research-u25-r3-4af23ea75819997a644483a5d2fd51e7.json",
+        "sha256": "a09071f6431b4b0301da91c40ce9e075db0277ea36438bc955e57a1f28e69daa"
+      },
+      "repeat": 3,
+      "review_observation_sha256": "da4f4e66b99b1ebd4ea6f7a85f27e01c93cd4e02f9a76869fc915f191189c45d",
+      "reviewer_statement_checks": 10,
+      "task_id": "U25",
+      "trial_id": "4af23ea75819997a644483a5d2fd51e7",
+      "verification_report_sha256": "3ff6341237feb8f34e260694d0cc0db86e8413d830fda8ef9f946dcfc8579e23"
+    }
+  ]
+}

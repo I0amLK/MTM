@@ -1,0 +1,21 @@
+{
+  "schema": "mtm017-research-import-failed-proposal-v1",
+  "milestone": "MTM-017",
+  "attempt": "r2",
+  "input_review": {
+    "path": "records/evidence/MTM-017/corpus-import-input-review-20260930-r2.json",
+    "sha256": "343eaddd14d90d032c774a1caefe10dd9b76120628749ed47a6f52fd46155464"
+  },
+  "exit_code": 1,
+  "error": "xtask: candidate must be a bounded regular executable without special permission bits",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "76a8266ef5a8ef1f029ad5d2c3bea80dab735ee81ec1e11c5b5ef0eecd02072b",
+  "cause": "The initial checker passed frozen driver JSON to qualify::digest, which correctly accepts only executable candidates. The JSON read path was a maintenance importer defect.",
+  "repair_scope": "New bounded descriptor-relative driver-only raw-byte digest; permits the fixed public driver existing 0664 mode without changing any other evidence reader or file mode.",
+  "accepted_trials_delta": 0,
+  "corpus_count_incremented": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "deployment_authorized": false
+}

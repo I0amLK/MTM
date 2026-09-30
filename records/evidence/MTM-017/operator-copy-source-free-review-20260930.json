@@ -1,0 +1,61 @@
+{
+  "schema": "mtm017-operator-copy-source-free-review-v1",
+  "milestone": "MTM-017",
+  "observed_at": "2026-09-30T08:42:08Z",
+  "reviewed_validation": {
+    "path": "records/evidence/MTM-017/operator-copy-source-free-validation-20260930.json",
+    "sha256": "6f8d9c7ac69f54a908bdf6e0c2f8aac120a14adfcd9ba41e39afb3e06a3150de"
+  },
+  "independent_review": {
+    "passed": true,
+    "scope": "implementation and source-free synthetic validation only",
+    "command_output_and_terminal_status_independently_checked": true,
+    "file_hashes_rechecked": true,
+    "file_hash_check_command_id": "DzcRd-8gm5dMJCT-0G8kwKZF",
+    "bash_syntax_and_diff_check_command_id": "WaLfSpQDN7Ls3V8Pzg4rPtrQ",
+    "syntax_and_diff_exit_code": 0,
+    "legacy_mtm016_scripts_and_tests_diff_empty": true,
+    "raw_wire_or_production_state_read": false
+  },
+  "producer_selfcheck": {
+    "command_id": "HigxEpQWCIz7_lFsNsYiQ2OB",
+    "exit_code": 0,
+    "all_recorded_file_hashes_match": true,
+    "synthetic_receipt_exact_33_fields": true,
+    "secret_identifier_fields_absent": true
+  },
+  "source_free_only": true,
+  "synthetic_gate_passed": true,
+  "real_copied_state_gate_passed": false,
+  "release_qualified": false,
+  "later_readonly_startup_metadata_survey": {
+    "authorized_scope": "Identify the actual startup entry and non-sensitive configured path metadata before requesting a specific quiesce/capture window",
+    "process_metadata_lookup_command_ids": [
+      "QRv5s7dg0hcZrygmT-8uSaB1",
+      "2MvYR5OjqAZv9NKDqUMPv_YH"
+    ],
+    "system_and_user_service_lookup_command_ids": [
+      "oSQUsAGtps1py7P9MKa4BZ6d",
+      "OyXbcKDU1yOya8aj7Blyog5C",
+      "2WQTyF_2bc8A87iEemsC8gCP"
+    ],
+    "pid1": "systemd",
+    "matching_runtime_instance_identified": false,
+    "maintenance_xtask_excluded": true,
+    "system_service_query_available": true,
+    "user_service_query_available": true,
+    "matching_service_identified": false,
+    "workspace_launch_file_identified": false,
+    "actual_production_data_root_confirmed": false,
+    "full_process_arguments_read": false,
+    "process_environment_read": false,
+    "production_databases_or_credentials_read": false,
+    "service_state_changed": false
+  },
+  "blocker": "Need the actual production startup script path, service name or other verified startup entry. No root can be inferred from connector HOME or account HOME, and no exact stop/resume command is proposed without identifying that entry.",
+  "production_capture_executed": false,
+  "production_modified": false,
+  "selectors_modified": false,
+  "commit_created": false,
+  "pushed": false
+}

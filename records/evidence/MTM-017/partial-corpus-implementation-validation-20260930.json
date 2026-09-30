@@ -1,0 +1,115 @@
+{
+  "schema": "mtm017-partial-corpus-implementation-validation-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T09:23:43.229817+00:00",
+  "scope": "fixed_current_candidate_partial_corpus_adapter_not_acceptance",
+  "implementation_source_sha256": "144bf61b2595d95d89d1d1bbb5ede61660de5824be53ceb933cfe3cec09efbdb",
+  "maintenance_binary_sha256": "8cb2d0bbde1da80ac7cd721c95b3f4c84cd4120bc33b98cf7b48b04234321d77",
+  "source_files": [
+    {
+      "path": "xtask/src/main.rs",
+      "sha256": "4b09bfd2fddcb7ad366ad4c8ff7e21527be0a7a071f39a07437d57cc6a6ebf8d"
+    },
+    {
+      "path": "xtask/src/release_readiness_schema8/mod.rs",
+      "sha256": "ea8c4c10f737ad98c76f5078d64678b843361cf6b824eff18eb676f213bdf385"
+    },
+    {
+      "path": "xtask/src/corpus_aggregate_schema8/mod.rs",
+      "sha256": "b84fa7d9bd5e2e4f8b30ea98add8ba66be764292bab95e376c1e0ad453d47525"
+    },
+    {
+      "path": "xtask/src/corpus_aggregate_schema8/batches.rs",
+      "sha256": "dce2bccce4e6e30a1b28b6ce3d495777198b6125c6416f66afcb3b171d645425"
+    },
+    {
+      "path": "xtask/src/corpus_aggregate_schema8/files.rs",
+      "sha256": "d6556ac43f253acfc3f124a153b235eb233bddddf2edef4f224f657c0e4ffbf6"
+    },
+    {
+      "path": "xtask/src/corpus_aggregate_schema8/tests.rs",
+      "sha256": "7ecce17f77814ca6988c9fc29fa925901710111e3e1cf099362db8be269ddb51"
+    },
+    {
+      "path": "xtask/tests/corpus_aggregate_schema8_cli.rs",
+      "sha256": "a1d0baaaaf393ecb3dcb11b4788eeb425181106fa098ace4092d1c31e5180adc"
+    }
+  ],
+  "documentation": {
+    "path": "docs/MTM-017-PARTIAL-CORPUS-AGGREGATE.md",
+    "sha256": "3c85ffd40b38a28c7e1cef134bf0db4afd2977f6109a22e7390f7a5d73e688d0"
+  },
+  "inputs": {
+    "path": "records/evidence/MTM-017/partial-corpus-inputs-20260930.json",
+    "sha256": "09101a673cec4a67ba681b0ddc8bd0899bef195f1d6353bf896ce51a6713f7be"
+  },
+  "tests": {
+    "maintenance_unit_passed": 162,
+    "maintenance_integration_passed": 25,
+    "new_partial_unit_tests": 9,
+    "new_partial_cli_tests": 2,
+    "maintenance_exit_code": 0,
+    "maintenance_stdout": {
+      "path": "target/mtm017-corpus-aggregate-20260930/maintenance-r2.stdout",
+      "sha256": "4f78457b135c02775654c62a73dbdf4e2a9599ba0a65ff562455c11774f8b213"
+    },
+    "maintenance_stderr": {
+      "path": "target/mtm017-corpus-aggregate-20260930/maintenance-r2.stderr",
+      "sha256": "52a2258c1cb9403f48d33b4a288b571131a00fb2bbc19fd17571ee26fd7579ba"
+    },
+    "clippy_exit_code": 0,
+    "clippy_stdout": {
+      "path": "target/mtm017-corpus-aggregate-20260930/clippy-r2.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "clippy_stderr": {
+      "path": "target/mtm017-corpus-aggregate-20260930/clippy-r2.stderr",
+      "sha256": "2f299f6b8e715bc83fa44f0ef575d79e61e0dc60a9816467effd7fb1eb4ddc1c"
+    },
+    "whole_source_exit_code": 0,
+    "whole_source_report": {
+      "path": "records/evidence/MTM-017/partial-corpus-whole-source-gate-20260930.json",
+      "sha256": "ab6ce87f6919e44f9523432d0de09b3def01449179cd6a0f68d6570d3b05caf6"
+    },
+    "whole_source_stdout": {
+      "path": "target/mtm017-corpus-aggregate-20260930/whole-source-r1.stdout",
+      "sha256": "bc526a7ce62bdb07ed8000d3204f0bfd7775e886f22617f890b9ef93f4a969de"
+    },
+    "whole_source_stderr": {
+      "path": "target/mtm017-corpus-aggregate-20260930/whole-source-r1.stderr",
+      "sha256": "2826c98870d0927cf52c3c0416f8274c8429696c756806770f0b4cdb36729bad"
+    },
+    "whole_source_counts": {
+      "passed": 671,
+      "failed": 0,
+      "ignored": 1
+    },
+    "tests_skipped": false
+  },
+  "initial_focused_tests": {
+    "exit_code": 0,
+    "stdout": {
+      "path": "target/mtm017-corpus-aggregate-20260930/focused-r1.stdout",
+      "sha256": "e5be4b5b2b6c1939dd8058f90c96c39f9e326305088243ce1b9bbd0e687870aa"
+    },
+    "stderr": {
+      "path": "target/mtm017-corpus-aggregate-20260930/focused-r1.stderr",
+      "sha256": "af301220fd40e44a8dcb0a78c0f39fae2ec0b5d8f9ddaa7f8381e6ed9a87096b"
+    }
+  },
+  "prior_source_gate_reused_as_current": false,
+  "original_research_pointer_sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24",
+  "frozen_mtm016_driver_sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+  "input_review_pending": true,
+  "result_review_pending": true,
+  "accepted_delta": 0,
+  "newly_accepted_research_trials": 0,
+  "implementation_complete": "unknown",
+  "research_accepted": true,
+  "research_acceptance_scope": "previously_accepted_U21_U25_fifteen_only",
+  "full_corpus_accepted": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "production_selector_changed": false,
+  "production_state_modified": false
+}

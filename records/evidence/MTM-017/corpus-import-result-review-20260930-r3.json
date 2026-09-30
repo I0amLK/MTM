@@ -1,0 +1,46 @@
+{
+  "schema": "mtm017-research-import-result-review-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T04:12:24Z",
+  "reviewer_session": "review-schema8-importer",
+  "recorded_by": "ctm-corpus-audit-session",
+  "recording_role": "scribe_only",
+  "decision": "approved_for_research_subset_acceptance",
+  "inputs": {
+    "path": "records/evidence/MTM-017/corpus-import-inputs-20260930.json",
+    "sha256": "74592e4a94da281c15f05ee0710b7722326491743652be2b671d4b8664ed0750"
+  },
+  "input_review": {
+    "path": "records/evidence/MTM-017/corpus-import-input-review-20260930-r3.json",
+    "sha256": "e963cabe924ebf0be44d77ee53bf0c9562fa4a38f4872169cf65ac2bfa30fcfa"
+  },
+  "proposal": {
+    "path": "records/evidence/MTM-017/corpus-import-proposal-20260930-r3.json",
+    "sha256": "03ac34879a68c1a371a5b83b66cbe45103a5bd82ce029564f2b5ec5d1a326d2a"
+  },
+  "implementation_validation": {
+    "path": "records/evidence/MTM-017/corpus-import-implementation-validation-20260930-r3.json",
+    "sha256": "48e9deec677f07fb45603a611ae456473a147e76198f802269ac0d8b8ffe577c"
+  },
+  "implementation_source_sha256": "7a986e059516efb8b90ef7abca84b6940667b4a3ce6b8e935b48eac489a6e4d0",
+  "maintenance_binary_sha256": "55d5616e96f2b951dc70498c15229cb71812710c691db9df2b701f0e3c4ae187",
+  "checks": {
+    "independently_reconstructed_all_fifteen_output_rows": true,
+    "independently_rehashed_all_186_bundle_artifacts": true,
+    "independent_importer_rerun_exit_code": 0,
+    "independent_rerun_stdout_byte_identical_to_proposal": true,
+    "input_review_faithfully_transcribed": true,
+    "scope_limited_to_mtm017_u21_u25_research_subset": true,
+    "frozen_driver_and_original_receipts_unchanged": true
+  },
+  "eligible_trials": 15,
+  "accepted_trials_delta": 0,
+  "corpus_count_incremented": false,
+  "implementation_complete": "unknown",
+  "research_accepted": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "limitation": "Independent review of the proposed import permits a later explicit governance acceptance; this review record itself changes no count."
+}

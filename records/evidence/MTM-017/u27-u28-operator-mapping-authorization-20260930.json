@@ -1,0 +1,60 @@
+{
+  "schema": "mtm017-scoped-operator-decision-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T10:15:06Z",
+  "kind": "operator_scoped_acceptance_contract_adjustment",
+  "decision": "approved_contract_pending_observations",
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "candidate_version": "0.6.0-preview.2",
+  "candidate_state_schema": 8,
+  "authorization": {
+    "source": "direct_operator_confirmation",
+    "user_message_id": "Sentinel_8f37e42fafd481919aa483b94b99ee50",
+    "question_verbatim": "另外请明确确认两项验收调整是否都同意：① U27/U28 改测兼容回复无副作用、dangerous 不越权；② baseline 副本先完成原始 bytes/modes 精确恢复校验，再做权限准备并验证同一旧 run 延续。这两项获准后可以继续推进",
+    "answer_verbatim": "确认"
+  },
+  "new_test_execution_claimed": false,
+  "accepted_delta": 0,
+  "corpus_count_incremented": false,
+  "existing_partial_corpus": {
+    "path": "records/governance/mtm017-partial-corpus.json",
+    "sha256": "0f2562453258f469a99a8f8b084cb4fb718ed089470dd185222da613ceb403c2"
+  },
+  "original_research_pointer": {
+    "path": "records/governance/mtm017-research-corpus.json",
+    "sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24"
+  },
+  "frozen_mtm016_driver": {
+    "path": "records/governance/mtm016-release-inputs.json",
+    "sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04"
+  },
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "reversal": "Append a superseding scoped decision; retain this authorization, original contracts and all failed observations.",
+  "decision_id": "MTM017-READINESS-DECISION-004",
+  "scope": "MTM017_U27_U28_current_candidate_compatibility_and_authority_boundaries_only",
+  "mapping": {
+    "U27": "request_permissions compatibility response without command, file, workflow, elicitation or grant-ledger effects",
+    "U28": "dangerous Native does not grant workflow/project authority, disabled-backend execution, path escape or private-vault access; same boundaries after reconnect and restart"
+  },
+  "required_observations": [
+    "Each task has three fresh exact-candidate runtime trials with distinct identities, times and sealed reports.",
+    "U27 covers exec and patch requests, once and session scopes, the fixed dangerous marker and null expiry.",
+    "U28 uses only isolated synthetic canaries and disposable runtime state.",
+    "Independent implementation/collector review before execution; separately reviewed import before adding any corpus cells."
+  ],
+  "human_consent_tested": false,
+  "public_tool_contract_changed": false,
+  "runtime_changed": false,
+  "state_schema_changed": false,
+  "workflow_protocol_changed": false,
+  "old_MTM016_mapping_changed": false,
+  "pending_cells_not_accepted": [
+    "U26",
+    "U27",
+    "U28",
+    "U29"
+  ]
+}

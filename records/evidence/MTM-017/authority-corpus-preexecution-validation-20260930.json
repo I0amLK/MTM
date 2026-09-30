@@ -1,0 +1,148 @@
+{
+  "schema": "mtm017-authority-preexecution-validation-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T11:04:12.543765+00:00",
+  "implementation_source_sha256": "e23c984936c6d2945b82db5a0fc26f3ab1ebf4629d7d1bbe14078cca0953620f",
+  "maintenance_binary": {
+    "path": "target/mtm-tool/debug/mtm-xtask",
+    "sha256": "06e379af877588460fe9aad8436dc3ee9f4a25b8615de1e8ce5a1561f4370de5"
+  },
+  "harness_test_executable": {
+    "path": "target/mtm-tool/debug/deps/schema8_authority_corpus-750565244e4ba4fc",
+    "sha256": "2ea20240837769c80b532c4f015cb578aa7d68dfc3bfbc0a008e46912bd87060"
+  },
+  "maintenance_binary_mode": "0o775",
+  "harness_test_executable_mode": "0o775",
+  "source_files": [
+    {
+      "path": "crates/mtm-cli/tests/schema8_authority_corpus.rs",
+      "sha256": "1206a108181d7c0c4b1ad049e1cc48bf755fa08610e638df099ffe35c142509d"
+    },
+    {
+      "path": "crates/mtm-cli/tests/support/loopback.rs",
+      "sha256": "27a878be8f4d19ac68359136b47d365d0cc9ffb4c0ea60dbafebea1c4dbfbbff"
+    },
+    {
+      "path": "xtask/src/main.rs",
+      "sha256": "a2da8df7edca413c5659e79d01dd69c05c4d012cdd743b1c9b9604bcf84be3d1"
+    },
+    {
+      "path": "xtask/src/authority_corpus_schema8/mod.rs",
+      "sha256": "dff618942ad237f3b09607ca59167f79aadad1d8b78e2f991114a37836ca238a"
+    },
+    {
+      "path": "xtask/src/authority_corpus_schema8/files.rs",
+      "sha256": "d6556ac43f253acfc3f124a153b235eb233bddddf2edef4f224f657c0e4ffbf6"
+    },
+    {
+      "path": "xtask/src/authority_corpus_schema8/tests.rs",
+      "sha256": "f61ed360dcc8d6929350efe71d374fb7fc7b9fd4f3dbf5c6559075aac7541dbf"
+    },
+    {
+      "path": "xtask/src/release_readiness_schema8/tests.rs",
+      "sha256": "c5305b4e0590459f30f32e07cf6d47ca2b6a5e0cf6775afdd2db67fda3d51c53"
+    },
+    {
+      "path": "docs/MTM-017-AUTHORITY-CORPUS.md",
+      "sha256": "133ae486d3d447d46ab98be21cc0a81ce5e048e691bc469ab9852cb6a0b04040"
+    }
+  ],
+  "raw_logs": [
+    {
+      "path": "target/mtm017-authority-corpus-20260930/clippy-preexecution3.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "target/mtm017-authority-corpus-20260930/clippy-preexecution3.stderr",
+      "sha256": "e87399b22340ac644904f375bcf9ab33cd60afd240e2b20e7b6e8f6d71a5ad1a"
+    },
+    {
+      "path": "target/mtm017-authority-corpus-20260930/harness-preexecution3.stdout",
+      "sha256": "39226e1e9d10d8c8e8d93f36bdb9b8d5ae466bea289c52db6946690581182510"
+    },
+    {
+      "path": "target/mtm017-authority-corpus-20260930/harness-preexecution3.stderr",
+      "sha256": "be35f5b9c1d7c95a2bcdd8d59679f28b62f959b669b6de65788e7365cb82c8d0"
+    },
+    {
+      "path": "target/mtm017-authority-corpus-20260930/collector-preexecution.stdout",
+      "sha256": "8cfa4e176af08e3ea0826eba94ef11b4a813e6b34af993b138b032611f0dcdd7"
+    },
+    {
+      "path": "target/mtm017-authority-corpus-20260930/collector-preexecution.stderr",
+      "sha256": "62e8bf55833bf3c0d03cc5d5a891771372b3d139a996becc2adf603782a4d209"
+    },
+    {
+      "path": "target/mtm017-authority-corpus-20260930/preexecution3.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "target/mtm017-authority-corpus-20260930/whole-source-r4.stdout",
+      "sha256": "19f6bf217ceda09f54a3750bc00a78ccfba8838a8c80d30210867597f6d23328"
+    },
+    {
+      "path": "target/mtm017-authority-corpus-20260930/whole-source-r4.stderr",
+      "sha256": "7f56881dc19756a5b73c35dd44b3d56851f32a7d639e4267c4c2c35320a8e5f3"
+    },
+    {
+      "path": "target/mtm017-authority-corpus-20260930/whole-source-r4.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "target/mtm017-authority-corpus-20260930/whole-source-r3.stdout",
+      "sha256": "ea27f0ecef97ee16a48db1854ba9ddbc1492339acbff71d96d7a5e00abeb96f1"
+    },
+    {
+      "path": "target/mtm017-authority-corpus-20260930/whole-source-r3.stderr",
+      "sha256": "56c59e4b28e9e2ba4e652f48ff86a81f38645185e2b27044336ccb4ba37653d4"
+    },
+    {
+      "path": "target/mtm017-authority-corpus-20260930/whole-source-r3.exit",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    }
+  ],
+  "focused_harness_tests_passed": 22,
+  "focused_collector_test_groups_passed": 4,
+  "workspace_clippy_passed": true,
+  "prior_source_whole_gate": {
+    "path": "records/evidence/MTM-017/authority-corpus-whole-source-r4-20260930.json",
+    "sha256": "0d19e76c52fe8f2f42b0d3987eea098ba7a792560ff58ba6909546fdde3651d3"
+  },
+  "prior_source_sha256": "75d97e9f49ff758bc35d4e00bc250054e3e24a0095147e62ef93a5e231d76c2b",
+  "current_source_whole_gate_passed": false,
+  "current_source_whole_gate_status": "pending_after_six_disposable_trials_under_root_execution_order",
+  "prior_gate_not_relabelled_as_current": true,
+  "known_source_regression": {
+    "path": "records/evidence/MTM-017/authority-corpus-source-regression-followup-20260930.json",
+    "sha256": "e5d4d5a4374f75abb113b0dd995f9a8a2e9118788d9ccba5a922232f5611fa45"
+  },
+  "known_regression_root_cause": "indeterminate",
+  "product_runtime_modified": false,
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "operator_mapping_authorization": {
+    "path": "records/evidence/MTM-017/u27-u28-operator-mapping-authorization-20260930.json",
+    "sha256": "3fded16a067a77f6935aca556593e2c955563562c1ec8bf02a76d138ba24fcbc"
+  },
+  "frozen_prior_pointers": [
+    {
+      "path": "records/governance/mtm016-release-inputs.json",
+      "sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04"
+    },
+    {
+      "path": "records/governance/mtm017-partial-corpus.json",
+      "sha256": "0f2562453258f469a99a8f8b084cb4fb718ed089470dd185222da613ceb403c2"
+    },
+    {
+      "path": "records/governance/mtm017-research-corpus.json",
+      "sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24"
+    }
+  ],
+  "real_trials_executed": 0,
+  "accepted_delta": 0,
+  "implementation_complete": "unknown",
+  "research_accepted": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "production_selector_changed": false,
+  "production_state_modified": false
+}

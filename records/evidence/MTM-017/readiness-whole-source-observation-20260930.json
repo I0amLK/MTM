@@ -1,0 +1,79 @@
+{
+  "schema": "mtm017-readiness-whole-source-observation-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T08:42:26Z",
+  "scope": "fresh_current_rust_source_gate_after_additive_maintenance_checker_not_exact_candidate_release",
+  "source": {
+    "hash_scope": "mtm-rust-source-v1",
+    "before_sha256": "10066ff837e2cee485fabe19809f172b1527141195a7fe29488f9fa201b248f0",
+    "after_sha256": "10066ff837e2cee485fabe19809f172b1527141195a7fe29488f9fa201b248f0",
+    "commit_before": "b8ca577521f5494c712cd52fb35a611588a32651",
+    "commit_after": "b8ca577521f5494c712cd52fb35a611588a32651",
+    "unchanged": true
+  },
+  "command": "CARGO_TARGET_DIR=\"$PWD/target/mtm-tool\" cargo xtask check",
+  "cargo_cache": "existing_host_checkout_target/mtm-tool",
+  "qualification_environment_flags_cleared": true,
+  "ctm_command_id": "o0Gx3pWaWVbOBHu4y4oJZdBx",
+  "exit_code": 0,
+  "passed": true,
+  "source_report": {
+    "path": "records/evidence/MTM-017/readiness-whole-source-gate-20260930.json",
+    "sha256": "f42928f56aefc2d25b528606955fe2bf1b4ed64a522c12810f529373bdb3e9da"
+  },
+  "source_report_bytes": "Exact final JSON substring including newline preserved from command stdout; no source identity fields relabelled.",
+  "stdout_sha256": "9bb72e5878cf2e766764e9cf6c83c58acf52b5ce7bdc05efa1ef2dc53470a566",
+  "stderr_sha256": "7006ec0ce201ed70976f73bddc8b6f7dbefbe900df21ba3d45acc4f1294aae89",
+  "counts_observed_from_all_streamed_test_result_summaries": {
+    "passed": 660,
+    "failed": 0,
+    "ignored": 1
+  },
+  "existing_ignored_test": "native_authority::tests::exec_candidate_real_dns_https_target (MTM-014 A4 target-only real DNS/HTTPS check)",
+  "checks": [
+    "workspace_format",
+    "workspace_all_targets_clippy",
+    "workspace_tests",
+    "records",
+    "architecture",
+    "retirement",
+    "git_diff",
+    "positive_native_prerequisite_probe"
+  ],
+  "tests_skipped_by_preflight": false,
+  "prior_incomplete_attempt": {
+    "ctm_command_id": "lOj9QNO4pLeWfftXIxueCDRq",
+    "timeout_ms": 120000,
+    "terminal_status": "timeout",
+    "signal": "SIGTERM",
+    "exit_code": -15,
+    "complete_source_verdict_produced": false,
+    "counted_as_pass": false,
+    "stdout_sha256": "dbdee722c92bc603817fde02766d82949ba90fe138249a9ef65ddc2d1af4a4f8",
+    "stderr_sha256": "666a35c67c09e0ac40ab1d1d95bb52e30d1289ddc2cd1cb77c5be900141cbe6d",
+    "retry_reason": "The bounded outer execution window expired during long integration tests; terminal status was confirmed before rerunning with the supported 600000ms window.",
+    "tests_disabled_or_changed": false
+  },
+  "readiness_draft": {
+    "path": "records/evidence/MTM-017/readiness-draft-20260930.json",
+    "sha256": "2a24cf4d5ddf5a66704bd2030b63b7fc8a5d4255d1b1807cf5fe32e2b10c2756",
+    "changed": false,
+    "note": "The earlier draft truthfully records its then-current lack of a fresh whole-source gate. This later observation is separate and does not retroactively edit it."
+  },
+  "frozen_mtm016_driver_sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+  "original_research_state_sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24",
+  "product_candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "exact_candidate_profiles_reexecuted": false,
+  "private_mathematical_review_reexecuted": false,
+  "operator_state_copy_exercised": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "full_release_input_created": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "cache_process_observation_after_exit": {
+    "matching_workspace_cargo_compiler_or_tool_cache_mtm_processes": 0,
+    "cache_released_for_subsequent_authorized_qualification": true
+  },
+  "scope_limit": "Any later Rust/source change needs impact-appropriate revalidation; this is not an immutable full-tree release verdict, a schema-8 browser/corpus adapter, or operator-state evidence."
+}

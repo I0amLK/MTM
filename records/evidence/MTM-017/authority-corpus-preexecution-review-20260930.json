@@ -1,0 +1,42 @@
+{
+  "schema": "mtm017-authority-preexecution-independent-review-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T11:06:32.561359+00:00",
+  "decision": "APPROVED_FOR_SIX_ISOLATED_OBSERVATIONS",
+  "reviewer_session": "review-schema8-importer",
+  "recorded_by": "ctm-corpus-audit-session",
+  "recording_role": "scribe_of_actual_independent_review",
+  "source_sha256": "e23c984936c6d2945b82db5a0fc26f3ab1ebf4629d7d1bbe14078cca0953620f",
+  "maintenance_binary_sha256": "06e379af877588460fe9aad8436dc3ee9f4a25b8615de1e8ce5a1561f4370de5",
+  "harness_test_executable": {
+    "path": "target/mtm-tool/debug/deps/schema8_authority_corpus-750565244e4ba4fc",
+    "sha256": "2ea20240837769c80b532c4f015cb578aa7d68dfc3bfbc0a008e46912bd87060"
+  },
+  "validation": {
+    "path": "records/evidence/MTM-017/authority-corpus-preexecution-validation-20260930.json",
+    "sha256": "054c663c680e9cdc721a4addd070ed9bcdbc61462b8210999717eb535ada28f1"
+  },
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "independent_refs_rehashed": 29,
+  "harness_tests_verified": 22,
+  "collector_negative_test_groups_verified": 4,
+  "workspace_clippy_exit_code": 0,
+  "diff_exit_code": 0,
+  "scope": "U27 and U28 three fresh isolated observations each followed by zero-delta collector only",
+  "checks": [
+    "exact_production_denial_paths_checked",
+    "synthetic_only_environment_isolation_checked",
+    "fresh_per_trial_identities_and_same_state_reconnect_restart_checked",
+    "snapshot_chains_and_collection_mutation_tests_checked",
+    "hashes_and_raw_test_logs_independently_recomputed",
+    "no_corpus_acceptance_or_release_authority"
+  ],
+  "current_final_whole_source_gate": "required_after_trials_before_acceptance",
+  "known_limitation": "r3 failed after496 normal roundtrips with next task missing; root cause indeterminate. Focused500 and r4 prior-source697/0/1 pass do not erase the failure or prove it fixed.",
+  "accepted_delta": 0,
+  "corpus_count_incremented": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "production_selector_changed": false,
+  "production_state_modified": false
+}

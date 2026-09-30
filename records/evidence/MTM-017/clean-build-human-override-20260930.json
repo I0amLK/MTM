@@ -1,0 +1,102 @@
+{
+  "schema": "mtm017-clean-build-human-override-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T06:58:39Z",
+  "scope": "immutable_operator_decision_record_for_one_gate_not_new_test_evidence",
+  "decision": {
+    "decision_id": "MTM017-READINESS-DECISION-003",
+    "recorded_at": "2026-09-30T06:58:39Z",
+    "kind": "operator_scoped_clean_build_gate_override",
+    "gate": "clean_build_provenance",
+    "applicability": {
+      "milestone": "MTM-017",
+      "candidate_version": "0.6.0-preview.2",
+      "candidate_state_schema": 8,
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "candidate_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+      "scope": "this_candidate_clean_build_provenance_gate_only"
+    },
+    "decision": "waived_by_operator",
+    "disposition": "accepted_with_operator_waiver",
+    "human_authorized_override": true,
+    "gate_allowed_by_governance": true,
+    "passed": false,
+    "technical_status": "not_reproduced",
+    "exact_candidate_reproduced": false,
+    "authorization": {
+      "source": "direct_operator_message",
+      "user_message_id": "Sentinel_c630877fa6388191b74664aee4f5bfdf",
+      "sent_at": "2026-09-30T06:55:41.860419+00:00",
+      "verbatim": "尽管无法重建当时环境，但是后续测试，完全可以说明问题，所以我们可以记录后通过gate 记录为人类授权"
+    },
+    "risk_acceptance": {
+      "judgment": "The operator accepts the unresolved original-build-environment and exact-candidate-reproduction gap for this single gate in light of existing test evidence.",
+      "operator_judgment_not_new_test_evidence": true,
+      "new_test_execution_claimed": false,
+      "technical_provenance_restored": false,
+      "reason_for_gate_release": "Explicit human risk acceptance; no claim that existing tests prove exact clean-build provenance."
+    },
+    "original_failure": {
+      "summary": {
+        "path": "records/evidence/MTM-017/clean-build-provenance-20260930.json",
+        "sha256": "a39bd0f181b5ce356b485376776d42ef98e51247226ce01a2589297eb884a84e"
+      },
+      "prior_gate": {
+        "path": "records/evidence/MTM-017/clean-build-gate-before-operator-override-20260930.json",
+        "sha256": "e98311c457905feee4d1a8f3f6c25a321f02d3144db693712265ab9df3f84b1e"
+      },
+      "comparison": {
+        "path": "records/evidence/MTM-017/clean-build-comparison-20260930.json",
+        "sha256": "81aa8d286317d5f6ec0378a442628458f31518f67c61c3c21f330ebab741fc16"
+      },
+      "runner_exit_code": 1,
+      "successful_clean_builds": 2,
+      "both_builds_equal": true,
+      "both_rebuilt_sha256": "b55dd460e8f2df80c149dcf659b8d29871d2fc9a0e505c51c915feaae8109147",
+      "both_match_selected_candidate": false,
+      "original_evidence_unchanged": true
+    },
+    "existing_test_context": [
+      {
+        "path": "records/evidence/MTM-017/preview2-qualification-snapshot.json",
+        "sha256": "5018c5b1050cefe6e0ef6c7db0bb0aeb15b03ed492ee8e75d6737097b535d55c",
+        "scope": "Existing exact-candidate machine qualifications only; schema-7/8/7 upgrade used generated state, not a genuine operator copy.",
+        "recorded_profiles_passed": [
+          "upgrade_schema8",
+          "protocol",
+          "native_commands",
+          "compiled_latex",
+          "resource",
+          "corpus_native",
+          "install_sigkill",
+          "retrieval"
+        ]
+      },
+      {
+        "path": "records/evidence/MTM-017/research-corpus-subset-accepted-20260930.json",
+        "sha256": "49fc407487fa7c9104c4a6b7aae92e2cde2b9fe4287bd5c73b0e0352abbaae6e",
+        "scope": "Existing accepted current-candidate U21-U25 fifteen-trial research subset only; not the complete corpus.",
+        "accepted_trials": 15
+      }
+    ],
+    "still_required": [
+      "A genuine stopped or consistently backed-up schema-7 operator-state copy, private-mode preparation on a disposable working copy, old-run continuation and exact bytes/modes/database rollback with the schema-7 baseline.",
+      "All other exact-artifact corpus and schema-8 release-input/readiness requirements, with technical success distinguishable from an explicit governance waiver.",
+      "Separate explicit deployment authorization before any production selector or state change."
+    ],
+    "readiness_consumption_contract": "Apply only to the exact candidate and clean_build_provenance gate above. Report governance waiver separately from technical passed=false and exact_candidate_reproduced=false; do not convert this record into a technical pass or complete release verdict.",
+    "other_engineering_tasks_remain_paused": true,
+    "operator_state_rehearsal_resumed": false,
+    "additional_build_authorized": false,
+    "new_candidate_selected": false,
+    "readiness_adapter_implemented_by_this_decision": false,
+    "full_release_input_created": false,
+    "frozen_mtm016_driver_changed": false,
+    "historical_evidence_deleted_or_relabelled": false,
+    "production_selector_changed": false,
+    "production_state_modified": false,
+    "release_qualified": false,
+    "deployment_authorized": false,
+    "reversal": "Append a superseding human decision and update the current single-gate pointer; retain this override and all original failure evidence."
+  }
+}

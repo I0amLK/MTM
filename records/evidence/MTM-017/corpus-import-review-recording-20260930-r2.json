@@ -1,0 +1,21 @@
+{
+  "schema": "mtm017-research-review-recording-provenance-v1",
+  "milestone": "MTM-017",
+  "input_review": {
+    "path": "records/evidence/MTM-017/corpus-import-input-review-20260930-r2.json",
+    "sha256": "343eaddd14d90d032c774a1caefe10dd9b76120628749ed47a6f52fd46155464"
+  },
+  "review_performed_by": "review-schema8-importer",
+  "recorded_by": "ctm-corpus-audit-session",
+  "recording_role": "scribe_only",
+  "independent_review_decision": "approved_for_read_only_proposal",
+  "decision_transcribed_without_change": true,
+  "separate_reviewer_explicitly_supplied_closed_fields_and_recording_authorization": true,
+  "coordinator_authorized_transcription_and_read_only_proposal": true,
+  "accepted_trials_delta": 0,
+  "corpus_count_incremented": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "deployment_authorized": false
+}

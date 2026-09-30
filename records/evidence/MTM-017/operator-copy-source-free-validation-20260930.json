@@ -1,0 +1,132 @@
+{
+  "schema": "mtm017-operator-copy-source-free-validation-v1",
+  "milestone": "MTM-017",
+  "observed_at": "2026-09-30T08:37:24Z",
+  "evidence_kind": "synthetic_fixture",
+  "synthetic_only": true,
+  "scope": "CTM connector only; source-free transport, inspection, safety regressions and exact-artifact 7/8/7 rehearsal",
+  "execution_workspace": "/home/lk/桌面/MTM2/MTM",
+  "execution_workdir": ".",
+  "implementation_sha256": {
+    "scripts/mtm017-capture-operator-state.sh": "4834390b5880a0baaaa448b4830d4794914a6d28f50f41b8e2503422211311b8",
+    "scripts/mtm017-inspect-operator-copy.sh": "dcbfcadd104c1642a12a07afd6fd9efc109c0b06bc1aac52e03d982a88934121",
+    "scripts/mtm017-rehearse-operator-copy.sh": "4cb565884045e3eed1330f4bb5b5688d4a11feaf52f5aee808853b064a107edb",
+    "scripts/mtm017-run-copy-rehearsal.sh": "0856db3629028edc3ee177298d2f6a9f79fe7bfbafd36d3580802ae5cb9a6fcb",
+    "conformance/mtm017-operator-capture-tests.sh": "c6219a2587065550155d7fe5bed15c5238f8cf3f5fa252592f3008e87f3b97f1",
+    "conformance/mtm017-operator-copy-inspection-tests.sh": "19d74b7a50caeefc07ed27d21f20ca35b1f6e65642844d22c4ffa878c7888ad5",
+    "conformance/mtm017-copy-rehearsal-tests.sh": "399e379826da3bca581263bf2850542869098e20591adfe66d0709d4334cbc2e",
+    "docs/MTM-017-OPERATOR-COPY-REHEARSAL.md": "8f9ef119167d004ccbeaf10ee0795e500d43f6bb15b573d9c4f602f831254ff9"
+  },
+  "commands": [
+    {
+      "command": "bash conformance/mtm017-operator-capture-tests.sh --host-isolation",
+      "command_id": "JEJ19dhjtprfZQYfVscr5zPd",
+      "exit_code": 0,
+      "stdout": "TRANSPORT_TEST readonly_vfs_option_parser=passed\nTRANSPORT_TEST cleanup_inode_marker_and_mode_mismatch_retained=passed\nTRANSPORT_TEST overlapping_and_identical_roots_rejected=passed\nTRANSPORT_TEST deterministic_stream_and_content_drift=passed\nTRANSPORT_TEST private_keys_wal_shm_names_and_modes_preserved=passed\nTRANSPORT_TEST seven_unsafe_or_oversized_trees_rejected=passed\nTRANSPORT_TEST entry_limit_exact_boundary=passed\nTRANSPORT_TEST source_scan_error_category=passed\nTRANSPORT_TEST classifier_missing_failed_and_canonical=passed\nTRANSPORT_TEST malformed_missing_source_and_missing_ro_mount_rejected=passed\nTRANSPORT_TEST namespace_bind_alias_roots_rejected=passed\nMTM017_COPY_TOOLCHAIN awk_functional=true legacy_awk_visible=false\nTRANSPORT_TEST isolated_capture_and_exact_archive=passed\nTRANSPORT_TEST isolated_unsafe_tree_denial_before_archive=passed\nTRANSPORT_TEST production_source_accessed=false full_host_capture_tested=true synthetic_only=true\n",
+      "stderr": "",
+      "supersedes_source_free_test_run": "FzmmWKa37MfYBxCbOC-WRZJC",
+      "earlier_result": "passed before cleanup and bind-alias regressions were added"
+    },
+    {
+      "command": "bash conformance/mtm017-operator-copy-inspection-tests.sh --host-isolation --sqlite /home/lk/miniconda3/bin/sqlite3",
+      "command_id": "IHRmID_eYVximWgl6ol_mThQ",
+      "exit_code": 0,
+      "checks": [
+        "integrity and aggregate counts without private identifiers",
+        "missing copy cannot fall back to caller directory",
+        "corrupt database, foreign key and schema mismatch rejection",
+        "committed WAL retained and read only on extracted copy",
+        "strict 20-field capture receipt types, duplicate keys and quoted paths",
+        "input hash, links, size and private directory guards",
+        "real namespace extraction, identity and unsafe-link rejection before database open",
+        "receipt and counts rejected before database open"
+      ]
+    },
+    {
+      "command": "bash conformance/mtm017-copy-rehearsal-tests.sh --sqlite /home/lk/miniconda3/bin/sqlite3",
+      "command_id": "cBNFy4_NWB2L41sfj3bD4MOz",
+      "exit_code": 0,
+      "negative_cases": 95,
+      "checks": [
+        "exact root nanosecond metadata and Unicode/newline-name roundtrip",
+        "preexisting/linked destination, owned active child and wrong identity rejected",
+        "content/mode/time/missing WAL/extra entry drift rejected",
+        "duplicate/link/sparse apparent size/traversal archives rejected before destination creation",
+        "nested and duplicate JSON rejected",
+        "HTTP framing and lengths verified",
+        "MCP request ID/outcome strict types",
+        "PKCE callback and state binding; redirect never visited",
+        "preserved public-client owner eligibility and exact transition sequence",
+        "strict 33-field final receipt; fixture cannot be presented as captured",
+        "non-loopback and invalid ports refused",
+        "captured mode rejects registration, new run and Native tools",
+        "owned-child graceful stop and failure cleanup"
+      ]
+    },
+    {
+      "command": "bash scripts/mtm017-run-copy-rehearsal.sh --synthetic --sqlite /home/lk/miniconda3/bin/sqlite3",
+      "command_id": "zbyjfJz5qkhK1FoBGuzDim6L",
+      "exit_code": 0,
+      "sanitized_receipt": {
+        "schema": "mtm017-schema8-copy-rehearsal-v1",
+        "milestone": "MTM-017",
+        "rehearsal_complete": true,
+        "synthetic_only": true,
+        "archive_sha256": "6022e4f65c206204297f49ff2844ca575a404d1ca27787382ca27d565e946ad0",
+        "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+        "baseline_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+        "schema_before": 7,
+        "schema_candidate": 8,
+        "schema_restored": 7,
+        "original_archive_unchanged": true,
+        "restored_archive_bytes_and_modes_match": true,
+        "old_owner_authenticated": true,
+        "owner_and_client_sets_unchanged_on_candidate": true,
+        "owner_and_client_sets_unchanged_on_baseline": true,
+        "old_run_advanced_on_candidate": true,
+        "candidate_restart_resumed": true,
+        "restored_old_runtime_advanced": true,
+        "exactly_one_transition_per_leg": true,
+        "persisted_signing_key_preserved": true,
+        "no_final_artifact_published": true,
+        "native_backend": "disabled",
+        "latex_policy": "static_only",
+        "mathematical_verification_claimed": false,
+        "production_source_mounted": false,
+        "production_modified": false,
+        "selectors_modified": false,
+        "clean_shutdown": true,
+        "raw_private_state_published": false,
+        "release_qualified": false,
+        "copied_operator_state_gate_passed": false,
+        "evidence_kind": "synthetic_fixture",
+        "run_id": "run-copied-state-synthetic-fb67b3bed4da"
+      }
+    },
+    {
+      "command": "bash -n [the seven listed MTM017 shell files] && git diff --check",
+      "command_id": "2OeyRqeFVvujDqSbe6OM36Od",
+      "exit_code": 0
+    }
+  ],
+  "final_helper_bytes_bound": true,
+  "mtm016_scripts_and_tests_unchanged": true,
+  "production_source_accessed": false,
+  "production_configuration_accessed": false,
+  "production_clients_accessed": false,
+  "production_service_stopped": false,
+  "production_modified": false,
+  "selectors_modified": false,
+  "real_capture_executed": false,
+  "real_copied_state_gate_passed": false,
+  "release_qualified": false,
+  "raw_private_state_published": false,
+  "commit_created": false,
+  "pushed": false,
+  "remaining": [
+    "Separately authorize startup-configuration metadata inspection and a specific production quiesce/capture window.",
+    "Identify the actual data and private roots from the approved startup configuration; do not guess HOME.",
+    "Retain archive owner-read-only outside the repository; perform actual copied-state rehearsal only on new extractions after separate authorization.",
+    "Do not promote this synthetic receipt into copied-operator-state or release acceptance."
+  ]
+}

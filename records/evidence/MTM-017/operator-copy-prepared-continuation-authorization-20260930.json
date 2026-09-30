@@ -1,0 +1,61 @@
+{
+  "schema": "mtm017-scoped-operator-decision-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T10:15:06Z",
+  "kind": "operator_scoped_acceptance_contract_adjustment",
+  "decision": "approved_contract_pending_observations",
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "candidate_version": "0.6.0-preview.2",
+  "candidate_state_schema": 8,
+  "authorization": {
+    "source": "direct_operator_confirmation",
+    "user_message_id": "Sentinel_8f37e42fafd481919aa483b94b99ee50",
+    "question_verbatim": "另外请明确确认两项验收调整是否都同意：① U27/U28 改测兼容回复无副作用、dangerous 不越权；② baseline 副本先完成原始 bytes/modes 精确恢复校验，再做权限准备并验证同一旧 run 延续。这两项获准后可以继续推进",
+    "answer_verbatim": "确认"
+  },
+  "new_test_execution_claimed": false,
+  "accepted_delta": 0,
+  "corpus_count_incremented": false,
+  "existing_partial_corpus": {
+    "path": "records/governance/mtm017-partial-corpus.json",
+    "sha256": "0f2562453258f469a99a8f8b084cb4fb718ed089470dd185222da613ceb403c2"
+  },
+  "original_research_pointer": {
+    "path": "records/governance/mtm017-research-corpus.json",
+    "sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24"
+  },
+  "frozen_mtm016_driver": {
+    "path": "records/governance/mtm016-release-inputs.json",
+    "sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04"
+  },
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "reversal": "Append a superseding scoped decision; retain this authorization, original contracts and all failed observations.",
+  "decision_id": "MTM017-READINESS-DECISION-005",
+  "scope": "MTM017_genuine_operator_copy_exact_restore_then_prepared_baseline_continuation_only",
+  "rollback_semantics": "exact_restore_then_prepared_continuation",
+  "compatible_schema7_baseline_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "exact_original_bytes_modes_database_restore_required": true,
+  "baseline_private_mode_preparation_after_exact_restore_only": true,
+  "same_existing_run_continuation_required": true,
+  "original_modes_baseline_continuation": false,
+  "new_operator_source_read_authorized": false,
+  "working_scope": "existing_authorized_archive_and_new_disposable_copies_only",
+  "required_observations": [
+    "Three fresh repeat observations from the existing captured archive with before/after seals.",
+    "Verify original bytes, modes and database restoration before any baseline permissions preparation.",
+    "Perform permission preparation only on the restored disposable working copy, then verify the same old run continues under the pinned schema-7 baseline.",
+    "Preserve strict original-modes failure and all diagnostics; independent review before acceptance."
+  ],
+  "original_strict_failure": {
+    "path": "records/evidence/MTM-017/operator-copy-real-rehearsal-attempt-1-failed-20260930.json",
+    "sha256": "2fbc819765e920a8ce89ad4f94317a26275b3701c785fe2fa9e2ffee4fbd67d0"
+  },
+  "original_failure_diagnostic": {
+    "path": "records/evidence/MTM-017/operator-copy-baseline-failure-diagnostic-20260930.json",
+    "sha256": "1f658753069848e9ba0954f173caa4bec41fb157b1c81ea7a5a6f5df6f89d960"
+  },
+  "new_U29_acceptance": false
+}

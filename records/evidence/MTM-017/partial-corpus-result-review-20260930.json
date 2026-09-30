@@ -1,0 +1,53 @@
+{
+  "schema": "mtm017-partial-corpus-result-review-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T09:31:34Z",
+  "reviewer_session": "review-schema8-importer",
+  "recorded_by": "ctm-corpus-aggregate-preparation",
+  "recording_role": "scribe_only",
+  "decision": "approved_for_partial_corpus_activation",
+  "inputs": {
+    "path": "records/evidence/MTM-017/partial-corpus-inputs-20260930.json",
+    "sha256": "09101a673cec4a67ba681b0ddc8bd0899bef195f1d6353bf896ce51a6713f7be"
+  },
+  "input_review": {
+    "path": "records/evidence/MTM-017/partial-corpus-input-review-20260930.json",
+    "sha256": "f70734c5f588015d3907ba3d4831feccdb43eb254fea6ba56823410db03663ef"
+  },
+  "proposal": {
+    "path": "records/evidence/MTM-017/partial-corpus-proposal-20260930.json",
+    "sha256": "8eb3af91c3c583f5da1ec7781893a4a55ae659d79cf4d3f93cc45f1ee453f049"
+  },
+  "implementation_validation": {
+    "path": "records/evidence/MTM-017/partial-corpus-implementation-validation-20260930.json",
+    "sha256": "8e75adb7f4358bf5493cc20b5ba036065ba5184789406d68c506a4a6affafe65"
+  },
+  "whole_source_gate": {
+    "path": "records/evidence/MTM-017/partial-corpus-whole-source-gate-20260930.json",
+    "sha256": "ab6ce87f6919e44f9523432d0de09b3def01449179cd6a0f68d6570d3b05caf6"
+  },
+  "implementation_source_sha256": "144bf61b2595d95d89d1d1bbb5ede61660de5824be53ceb933cfe3cec09efbdb",
+  "maintenance_binary_sha256": "8cb2d0bbde1da80ac7cd721c95b3f4c84cd4120bc33b98cf7b48b04234321d77",
+  "checks": {
+    "independently_reconstructed_all_ninety_rows_from_four_batches": true,
+    "independently_rehashed_all_ninety_three_seals": true,
+    "independent_read_only_aggregate_rerun_exit_code": 0,
+    "independent_rerun_stdout_byte_identical_to_proposal": true,
+    "input_review_faithfully_transcribed": true,
+    "new_observed_cells": 63,
+    "previously_accepted_research_cells": 15,
+    "pending_external_cells": 12,
+    "new_research_acceptance": 0,
+    "research_pointer_and_frozen_driver_unchanged": true
+  },
+  "accepted_delta": 0,
+  "implementation_complete": "unknown",
+  "research_accepted": true,
+  "research_acceptance_scope": "previously_accepted_U21_U25_fifteen_only",
+  "full_corpus_accepted": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "limitation": "This independent result review authorizes no count by itself; explicit coordinator activation is a separate step."
+}

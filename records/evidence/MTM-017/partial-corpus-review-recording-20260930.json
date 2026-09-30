@@ -1,0 +1,22 @@
+{
+  "schema": "mtm017-partial-corpus-review-recording-v1",
+  "milestone": "MTM-017",
+  "input_review": {
+    "path": "records/evidence/MTM-017/partial-corpus-input-review-20260930.json",
+    "sha256": "f70734c5f588015d3907ba3d4831feccdb43eb254fea6ba56823410db03663ef"
+  },
+  "review_performed_by": "review-schema8-importer",
+  "recorded_by": "ctm-corpus-aggregate-preparation",
+  "recording_role": "scribe_only",
+  "independent_review_decision": "approved_for_read_only_proposal",
+  "coordinator_relayed_explicit_independent_approval_and_authorized_transcription": true,
+  "validation": {
+    "path": "records/evidence/MTM-017/partial-corpus-implementation-validation-20260930.json",
+    "sha256": "8e75adb7f4358bf5493cc20b5ba036065ba5184789406d68c506a4a6affafe65"
+  },
+  "accepted_delta": 0,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "deployment_authorized": false
+}

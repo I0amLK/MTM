@@ -1,0 +1,24 @@
+{
+  "schema": "mtm017-partial-corpus-input-review-v1",
+  "milestone": "MTM-017",
+  "inputs_sha256": "09101a673cec4a67ba681b0ddc8bd0899bef195f1d6353bf896ce51a6713f7be",
+  "implementation_source_sha256": "144bf61b2595d95d89d1d1bbb5ede61660de5824be53ceb933cfe3cec09efbdb",
+  "maintenance_binary_sha256": "8cb2d0bbde1da80ac7cd721c95b3f4c84cd4120bc33b98cf7b48b04234321d77",
+  "prepared_by": "ctm-corpus-aggregate-preparation",
+  "reviewer_session": "review-schema8-importer",
+  "decision": "approved_for_read_only_proposal",
+  "checks": [
+    "implementation_and_negative_tests_reviewed",
+    "portable_partial_outer_and_forty_five_rows_reviewed",
+    "native_fifteen_rows_and_dangerous_u20_reviewed",
+    "existing_research_chain_referenced_without_reacceptance",
+    "three_distinct_u30_observations_and_seals_reviewed",
+    "only_seventy_eight_eligible_twelve_pending_zero_delta"
+  ],
+  "recorded_unix_seconds": 1790760379,
+  "accepted_delta": 0,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "deployment_authorized": false
+}

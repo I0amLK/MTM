@@ -1,0 +1,17 @@
+{
+  "schema":"mtm017-clean-build-comparison-v1",
+  "milestone":"MTM-017",
+  "source_commit":"7b4afe2359e688263557f62154e4bc1e640c12c0",
+  "selected_candidate_sha256":"13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "first_sha256":"b55dd460e8f2df80c149dcf659b8d29871d2fc9a0e505c51c915feaae8109147",
+  "second_sha256":"b55dd460e8f2df80c149dcf659b8d29871d2fc9a0e505c51c915feaae8109147",
+  "both_builds_equal":true,
+  "both_match_selected_candidate":false,
+  "run_1_receipt_sha256":"225625663585e13e6a689f59371f2bb6efcdb1db7b0529079cfbeb64a963df11",
+  "run_2_receipt_sha256":"18ac9d0baa5246a58a104f291a72b41e3823bd095e5b2ead809bc178dc445f02",
+  "readiness_adapter_acceptance_claimed":false,
+  "production_selector_changed":false,
+  "production_state_modified":false,
+  "release_qualified":false,
+  "deployment_authorized":false
+}

@@ -1,0 +1,69 @@
+{
+  "baseline_launched": null,
+  "baseline_sha256": null,
+  "candidate_launched": true,
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "delivery": "F4",
+  "harness_source_identity": {
+    "after_sha256": "10066ff837e2cee485fabe19809f172b1527141195a7fe29488f9fa201b248f0",
+    "before_sha256": "10066ff837e2cee485fabe19809f172b1527141195a7fe29488f9fa201b248f0",
+    "commit": "b8ca577521f5494c712cd52fb35a611588a32651",
+    "unchanged": true
+  },
+  "milestone": "MTM-016",
+  "original_and_snapshot_unchanged": true,
+  "passed": true,
+  "pending": [
+    "physical power-loss/device-cache durability",
+    "production selector drill",
+    "shared-filesystem semantics",
+    "full release gates"
+  ],
+  "production_selectors_changed": false,
+  "production_state_modified": false,
+  "profile": "install_sigkill",
+  "python_invoked": false,
+  "raw_test_output_recorded": false,
+  "recorded_unix_seconds": 1790758204,
+  "release_qualified": false,
+  "runner": {
+    "child_reaped": true,
+    "elapsed_ms": 19009,
+    "exit_code": 0,
+    "output_limit_exceeded": false,
+    "pipes_closed": true,
+    "raw_output_recorded": false,
+    "signal": null,
+    "stderr_bytes_retained": 163,
+    "stdout_bytes_retained": 844,
+    "timed_out": false
+  },
+  "schema_version": "1.0.0",
+  "scope": "exact_candidate_external_sigkill_install_recovery_not_release",
+  "selector_changed": false,
+  "summaries": {
+    "install_sigkill": {
+      "all_candidate_selectors_recovered": true,
+      "binary_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "elapsed_ms": 10103,
+      "external_process_sigkill": true,
+      "final_state": "previous_active",
+      "kill_signal": 9,
+      "ok": true,
+      "partial_restored_selectors": 1,
+      "pending_journal_cleared": true,
+      "pending_journal_observed_before_kill": true,
+      "physical_power_loss_tested": false,
+      "previous_selector_bytes_and_modes_restored": true,
+      "production_selectors_changed": false,
+      "production_state_modified": false,
+      "recovered_state": "active",
+      "release_qualified": false,
+      "schema": "mtm-install-sigkill-v1",
+      "selector_count": 8,
+      "shared_filesystem_tested": false
+    }
+  },
+  "test_stderr_sha256": "f17f3e7ae7823788da7753737f0a373550986b802e6d255fae3703598631dccf",
+  "test_stdout_sha256": "e79758171f4dc756d63d55146b37975410c17dac774adafe9f7f627a146637f1"
+}

@@ -1,0 +1,27 @@
+{
+  "schema": "mtm017-authority-executable-preservation-v1",
+  "milestone": "MTM-017",
+  "scope": "byte_identical_reviewed_maintenance_artifacts_preserved_before_final_cargo_gate",
+  "artifacts": [
+    {
+      "original_path": "target/mtm-tool/debug/mtm-xtask",
+      "preserved_path": "target/mtm017-authority-corpus-20260930/frozen/mtm-xtask-06e379af877588460fe9aad8436dc3ee9f4a25b8615de1e8ce5a1561f4370de5",
+      "sha256": "06e379af877588460fe9aad8436dc3ee9f4a25b8615de1e8ce5a1561f4370de5",
+      "preserved_mode": "0700",
+      "original_mode_unchanged": true
+    },
+    {
+      "original_path": "target/mtm-tool/debug/deps/schema8_authority_corpus-750565244e4ba4fc",
+      "preserved_path": "target/mtm017-authority-corpus-20260930/frozen/authority-harness-2ea20240837769c80b532c4f015cb578aa7d68dfc3bfbc0a008e46912bd87060",
+      "sha256": "2ea20240837769c80b532c4f015cb578aa7d68dfc3bfbc0a008e46912bd87060",
+      "preserved_mode": "0700",
+      "original_mode_unchanged": true
+    }
+  ],
+  "new_full_build_cache_created": false,
+  "source_changed": false,
+  "candidate_changed": false,
+  "accepted_delta": 0,
+  "release_qualified": false,
+  "deployment_authorized": false
+}

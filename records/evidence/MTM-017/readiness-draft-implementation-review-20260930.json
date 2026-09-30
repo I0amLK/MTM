@@ -1,0 +1,97 @@
+{
+  "schema": "mtm017-readiness-draft-implementation-review-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T08:29:32Z",
+  "scope": "fixed_inventory_read_only_draft_implementation_and_pre_execution_review_only",
+  "reviewer_session": "assess-remaining-release-gates",
+  "recording_role": "scribe_of_separate_review",
+  "decision": "approved_for_read_only_blocked_draft_after_successful_final_maintenance_checks",
+  "review_limits": [
+    "Not release acceptance, operator-copy authorization or deployment approval",
+    "Historical importer source locators remain sealed history; current maintenance source is separate",
+    "Eight original scoped profile observations do not become complete schema8 gates"
+  ],
+  "source_files": [
+    {
+      "path": "xtask/src/main.rs",
+      "sha256": "2b3f0c3d5a767567221617f7df96e90d8ccfdd97d6261792f4852d9f2f6a63b3"
+    },
+    {
+      "path": "xtask/src/release_readiness_schema8/mod.rs",
+      "sha256": "ba2279cfda2a9c8f91534f4e157f9fc49ea44950dedf7189028607d67ea6c96b"
+    },
+    {
+      "path": "xtask/src/release_readiness_schema8/files.rs",
+      "sha256": "9f5286cfa2294e032fd324a45e6543c5c6ceab930c3d160038e7761b8bad93e8"
+    },
+    {
+      "path": "xtask/src/release_readiness_schema8/validation.rs",
+      "sha256": "0146e1ad21a6b9138f1557b78ad7ec35f270838d3a8a143c73ce0dcf4acbe63c"
+    },
+    {
+      "path": "xtask/src/release_readiness_schema8/tests.rs",
+      "sha256": "964abb72e00921dfe6b3b6115eca455a20101b320d2870d60fd3dc8bc5315550"
+    },
+    {
+      "path": "xtask/tests/release_readiness_schema8_cli.rs",
+      "sha256": "01f4a4e5bdb478aca888a36a82368aabd0a25b7eb1f2d43eeef9179387f5c45a"
+    },
+    {
+      "path": "docs/MTM-017-READINESS-DRAFT.md",
+      "sha256": "d65b65e9ed8ed1d1a3db0e3073bb61af58f53a759dafa237601250f0dd851cfc"
+    }
+  ],
+  "maintenance_binary_sha256": "d959e2db851a2a6a36395df7ff74badf9fb8ae90bf948159c03873a3735267cb",
+  "validation": {
+    "maintenance_tests": {
+      "exit_code": 0,
+      "unit_passed": 153,
+      "integration_passed": 23,
+      "new_readiness_unit_tests": 10,
+      "new_readiness_cli_tests": 2,
+      "log_sha256": "5fe4dfdaec036b66377871a80db387864ff34745eca3bb8e1cc0eebaf2dbfa42"
+    },
+    "maintenance_clippy": {
+      "exit_code": 0,
+      "log_sha256": "77ee1e4568b38285100364a9743b7809ebd652d3d197f2b885e05bfd13221d93"
+    },
+    "format_all_check": {
+      "exit_code": 0
+    },
+    "git_diff_check": {
+      "exit_code": 0
+    },
+    "records": {
+      "exit_code": 0,
+      "report_sha256": "82e2b19d395251fd6923ad82a47115d9849b673b25100d69a5a11f2a62f3227b"
+    },
+    "retirement": {
+      "exit_code": 0,
+      "report_sha256": "7a3136951525962f74dd19d3b1a45b80ce82866c45f8e6b22994156cc26daec2"
+    },
+    "rust_only_audit_strict": {
+      "exit_code": 0,
+      "report_sha256": "084a0315602dbf342b4e249aae57c0ede95e1c734f7f43e9ba1b34195ff4dc22"
+    },
+    "fresh_whole_workspace_source_gate_performed": false,
+    "exact_candidate_profiles_reexecuted": false
+  },
+  "prior_diagnostic": {
+    "ctm_command_id": "A6kFzRU_uHvpjlSfJKbCEQKb",
+    "exit_code": 101,
+    "focused_passed": 5,
+    "focused_failed": 4,
+    "error": "readiness reference outside reviewed evidence namespace",
+    "cause": "Generic public reference traversal correctly rejected old importer source_files/documentation references; these describe historical mutable source rather than current evidence inputs.",
+    "repair": "Keep the complete old validation report sealed and exclude only its named historical-source locator fields; all other out-of-namespace references remain rejected. Added regression covers this distinction.",
+    "subsequent_focused_passed": 9,
+    "subsequent_final_new_unit_tests_passed": 10
+  },
+  "frozen_mtm016_driver_sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "full_release_input_created": false
+}
