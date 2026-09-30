@@ -1,0 +1,71 @@
+{
+  "schema": "mtm017-candidate-copy-mode-preparation-validation-v1",
+  "milestone": "MTM-017",
+  "observed_at": "2026-09-30T09:07:28Z",
+  "candidate_copy_only": true,
+  "restored_baseline_mode_preparation_allowed": false,
+  "source_and_archive_modes_changed": false,
+  "implementation_sha256": {
+    "scripts/mtm017-rehearse-operator-copy.sh": "43caa68d7ff17f2fe974b0990a243527fe5b0d807f0481880b5a369cb1beba2b",
+    "conformance/mtm017-copy-mode-preparation-tests.sh": "be9d2ef084226591e44036110bb7e700936e4099c4d07486f8e9a333e637c0e1",
+    "docs/MTM-017-OPERATOR-COPY-REHEARSAL.md": "6d4ae57411582619597800e15eb0654730e3eca988c4b94c9ca3b512b61f9850"
+  },
+  "independent_preexecution_review": true,
+  "commands": [
+    {
+      "command": "bash conformance/mtm017-copy-mode-preparation-tests.sh && bash conformance/mtm017-copy-rehearsal-tests.sh --sqlite /home/lk/miniconda3/bin/sqlite3",
+      "command_id": "VDCgNgPvF8lkUoykXvPJ28qG",
+      "exit_code": 0,
+      "mode_preparation_negative_cases": 6,
+      "rehearsal_negative_cases": 95
+    },
+    {
+      "command": "bash scripts/mtm017-run-copy-rehearsal.sh --synthetic --sqlite /home/lk/miniconda3/bin/sqlite3",
+      "command_id": "3C8E3ogiymvt9VkEAF3qX9Kp",
+      "exit_code": 0,
+      "sanitized_receipt": {
+        "schema": "mtm017-schema8-copy-rehearsal-v1",
+        "milestone": "MTM-017",
+        "rehearsal_complete": true,
+        "synthetic_only": true,
+        "archive_sha256": "8a2139c6ca68b71ae3e5f887d3de76bf7d905bee38089a0257e71d5f01f33c8a",
+        "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+        "baseline_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+        "schema_before": 7,
+        "schema_candidate": 8,
+        "schema_restored": 7,
+        "original_archive_unchanged": true,
+        "restored_archive_bytes_and_modes_match": true,
+        "old_owner_authenticated": true,
+        "owner_and_client_sets_unchanged_on_candidate": true,
+        "owner_and_client_sets_unchanged_on_baseline": true,
+        "old_run_advanced_on_candidate": true,
+        "candidate_restart_resumed": true,
+        "restored_old_runtime_advanced": true,
+        "exactly_one_transition_per_leg": true,
+        "persisted_signing_key_preserved": true,
+        "no_final_artifact_published": true,
+        "native_backend": "disabled",
+        "latex_policy": "static_only",
+        "mathematical_verification_claimed": false,
+        "production_source_mounted": false,
+        "production_modified": false,
+        "selectors_modified": false,
+        "clean_shutdown": true,
+        "raw_private_state_published": false,
+        "release_qualified": false,
+        "copied_operator_state_gate_passed": false,
+        "evidence_kind": "synthetic_fixture",
+        "run_id": "run-copied-state-synthetic-4ba4d7e5dc36"
+      }
+    },
+    {
+      "command": "sha256sum [listed files]; bash -n [changed shell files]; git diff --check",
+      "command_id": "TL5I7wwTyxzx5k15m3uWx8IV",
+      "exit_code": 0
+    }
+  ],
+  "synthetic_only": true,
+  "real_copied_state_gate_passed": false,
+  "release_qualified": false
+}

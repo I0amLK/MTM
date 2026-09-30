@@ -22,9 +22,6 @@ use super::{Result, require, text};
 #[path = "upgrade_state.rs"]
 mod upgrade_state;
 
-#[path = "permission_client.rs"]
-mod permission_client;
-
 const MAX_RESPONSE: usize = 2 * 1024 * 1024;
 const IO_TIMEOUT: Duration = Duration::from_secs(5);
 // Magma's installed launcher resolves its symlink, sibling executable and
@@ -170,6 +167,11 @@ impl Client {
     pub fn client_id(&self) -> &str {
         &self.client_id
     }
+
+    #[allow(dead_code)] // Used only by the explicit MTM-017 authority harness.
+    pub fn fixture_session_fingerprint(&self) -> String {
+        format!("{:x}", Sha256::digest(self.token.as_bytes()))
+    }
 }
 
 pub struct Server {
@@ -189,11 +191,11 @@ pub struct Server {
 
 impl Server {
     pub fn start(binary: &str) -> Result<Self> {
-        Self::start_profile(binary, false, false, false, "safe")
+        Self::start_profile(binary, false, false, false, "dangerous")
     }
 
     pub fn start_workspace(binary: &str) -> Result<Self> {
-        Self::start_profile(binary, true, false, false, "safe")
+        Self::start_profile(binary, true, false, false, "dangerous")
     }
 
     pub fn start_target(binary: &str) -> Result<Self> {
@@ -241,17 +243,13 @@ impl Server {
         Self::start_profile(binary, false, true, false, "dangerous")
     }
 
-    pub fn start_permissions(binary: &str, mode: mtm_contracts::NativeMode) -> Result<Self> {
-        Self::start_profile(binary, true, false, false, mode.as_str())
-    }
-
     pub fn start_retrieval_redirect(binary: &str, theorem_search_url: &str) -> Result<Self> {
         Self::start_profile_with_theorem(
             binary,
             false,
             false,
             false,
-            "safe",
+            "dangerous",
             Some(theorem_search_url),
         )
     }
@@ -262,6 +260,15 @@ impl Server {
 
     pub fn private_state_path(&self) -> std::path::PathBuf {
         self.directory.path().join("data/private/state.sqlite3")
+    }
+
+    /// Only synthetic fixture identity; never exposes OAuth or capability material.
+    #[allow(dead_code)] // Used only by the explicit MTM-017 authority harness.
+    pub fn fixture_process_id(&self) -> Result<u32> {
+        self.child
+            .as_ref()
+            .map(Child::id)
+            .ok_or("fixture is stopped")
     }
 
     pub fn process_facts(&self) -> Result<Value> {

@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u25_r2_replacement_fresh_session_generator_to_verify",
+  "observed_at": "2026-09-28T08:48:34Z",
+  "session_marker": "U25-r2.iRKJJar9",
+  "trial_id": "6435a5fb64831a255f6cd4e4b519ad3e",
+  "run_id": "run-u25-r2-finite-field-roots-56b856b33e87",
+  "problem_id": "u25-r2-finite-field-roots",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": null,
+    "transition_sequence": 7,
+    "assembled_proof_sha256": "13477046449149248a5ffef536213607833c985176f67a8565c4da7f5f7b9d56",
+    "last_verified_proof_sha256_present": false,
+    "proof_manifest_sha256": "96ac2e2418acdc719d1bac8c7adfde8e9324b249dbbd856d52d719d0d1bd83d3"
+  },
+  "cas": {
+    "native_mode": "dangerous",
+    "general_proof_independent": true,
+    "sage": {
+      "version": "SageMath 10.9",
+      "input_sha256": "0cb6d79b4fdae01024f52b7be6a211df8292738c11c507d23b8607220c58f74f",
+      "output_sha256": "e6bfd83b84a4c799121972f3f37bf4f3142de54e0c7b2842eebd78a95f4d3c09",
+      "exit_code": 0
+    },
+    "magma": {
+      "version": "Magma V2.29-8",
+      "input_sha256": "70b1358116f529dbde55949f4b7181a792fd4d0596f096bc823f548ce6c9e27a",
+      "output_sha256": "b03add9b1ffc9c76e7508e05675a7fd12958bd9b6ecb37dc99ef04966dc4f8a4",
+      "exit_code": 0
+    },
+    "cas_observation_sha256": "33d103eb254022bdbb994c4017d453d69f533842336bdaae98c6e4ced0437cec",
+    "verified_parameters": [2,3,5],
+    "finite_results_agree": true,
+    "collector_input_material_sealed": true
+  },
+  "generation_boundary": {
+    "verifier_report_submitted": false,
+    "finalizer_executed": false,
+    "independent_review_required": true
+  },
+  "production_changed": false,
+  "release_qualified": false
+}

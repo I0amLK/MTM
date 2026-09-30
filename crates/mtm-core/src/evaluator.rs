@@ -70,9 +70,7 @@ pub fn evaluate_request(request: &Value) -> Result<Value, ReCtmError> {
 }
 
 fn evaluate_command_policy(object: &Map<String, Value>) -> Result<Value, ReCtmError> {
-    let mode: NativeMode =
-        serde_json::from_value(Value::String(required_string(object, "mode")?.to_owned()))
-            .map_err(|_| invalid_argument("mode must be safe, trusted, or dangerous"))?;
+    let mode = NativeMode::parse(required_string(object, "mode")?).map_err(invalid_argument)?;
     let command = required_string(object, "command")?;
     let empty_environment = Value::Object(Map::new());
     let environment_value = object.get("env").unwrap_or(&empty_environment);

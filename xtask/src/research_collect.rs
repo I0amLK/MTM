@@ -109,6 +109,27 @@ fn require(condition: bool, message: &'static str) -> Result<()> {
     }
 }
 
+fn session_root_milestone(path: &Path) -> Result<&'static str> {
+    let parts = path
+        .components()
+        .filter_map(|part| match part {
+            Component::Normal(value) => value.to_str(),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    let mtm016 = parts
+        .windows(3)
+        .any(|window| window == [".mtm-acceptance", "MTM-016", "research"]);
+    let mtm017 = parts
+        .windows(3)
+        .any(|window| window == [".mtm-acceptance", "MTM-017", "research"]);
+    match (mtm016, mtm017) {
+        (true, false) => Ok("MTM-016"),
+        (false, true) => Ok("MTM-017"),
+        _ => Err("session is outside one exact versioned research root".into()),
+    }
+}
+
 fn validate_session_path(path: &Path) -> Result<PathBuf> {
     require(
         path.is_absolute()
@@ -126,17 +147,7 @@ fn validate_session_path(path: &Path) -> Result<PathBuf> {
         canonical == path,
         "research session path contains indirection",
     )?;
-    let parts = path
-        .components()
-        .filter_map(|part| match part {
-            Component::Normal(value) => value.to_str(),
-            _ => None,
-        })
-        .collect::<Vec<_>>();
-    let acceptance = parts
-        .windows(3)
-        .any(|window| window == [".mtm-acceptance", "MTM-016", "research"]);
-    require(acceptance, "session is outside the MTM-016 research root")?;
+    session_root_milestone(path)?;
     let name = path
         .file_name()
         .and_then(|value| value.to_str())
@@ -210,8 +221,13 @@ fn strict_json<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T> {
         .map_err(|_| "research collection JSON schema mismatch".into())
 }
 
-fn validate_session_manifest(value: &SessionManifest, session_name: &str) -> Result<()> {
-    let policy = research_precheck::research_policy(&value.task_id)?;
+fn validate_session_manifest(
+    value: &SessionManifest,
+    session_name: &str,
+    root_milestone: &str,
+) -> Result<()> {
+    let policy = research_precheck::research_policy_for(&value.milestone, &value.task_id)?;
+    let identity = research_precheck::research_identity(&value.milestone)?;
     let expected_mode = if matches!(value.task_id.as_str(), "U21" | "U23") {
         "compact"
     } else {
@@ -220,7 +236,8 @@ fn validate_session_manifest(value: &SessionManifest, session_name: &str) -> Res
     let expected_prefix = format!("{}-r{}.", value.task_id, value.repeat);
     require(
         value.schema == policy.session_schema
-            && value.milestone == "MTM-016"
+            && root_milestone == identity.acceptance_root
+            && value.milestone == identity.milestone
             && matches!(
                 value.task_id.as_str(),
                 "U21" | "U22" | "U23" | "U24" | "U25"
@@ -233,8 +250,8 @@ fn validate_session_manifest(value: &SessionManifest, session_name: &str) -> Res
             ))
             && value.workflow_mode == expected_mode
             && hex(&value.trial_id, 32)
-            && value.candidate_sha256 == research_precheck::CANDIDATE_SHA
-            && value.candidate_source_commit == research_precheck::CANDIDATE_SOURCE
+            && value.candidate_sha256 == identity.candidate_sha256
+            && value.candidate_source_commit == identity.candidate_source_commit
             && hex(&value.launcher_source_commit, 40)
             && hex(&value.launcher_sha256, 64)
             && value.case_registry_sha256 == research_precheck::REGISTRY_SHA
@@ -397,6 +414,7 @@ fn collect_database(
     database: &Path,
     run_id: &str,
     include_references: bool,
+    expected_schema_version: u64,
 ) -> Result<RunEvidence> {
     require(safe_id(run_id, 256), "unsafe research run id")?;
     let version = exactly_one(
@@ -404,8 +422,8 @@ fn collect_database(
         "research schema version result is invalid",
     )?;
     require(
-        version["user_version"] == 7,
-        "research state schema is not the frozen schema 7",
+        version["user_version"] == expected_schema_version,
+        "research state schema does not match the versioned research identity",
     )?;
     let run_sql = format!(
         "PRAGMA query_only=ON; SELECT problem_id,owner_id,state,status,round_index,transition_seq,latex_passed,verdict,sealed,metadata_json FROM runs WHERE run_id='{run_id}';"
@@ -670,18 +688,20 @@ fn safe_workspace_export(
 
 pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     let session = validate_session_path(&options.session)?;
+    let root_milestone = session_root_milestone(&session)?;
     let owner = fs::metadata(&session)?.uid();
     let session_bytes = read_file(&session.join("session.json"), JSON_LIMIT, owner)?;
     let manifest: SessionManifest = strict_json(&session_bytes)?;
+    let identity = research_precheck::research_identity(&manifest.milestone)?;
     let session_name = session
         .file_name()
         .and_then(|value| value.to_str())
         .ok_or("research session name unavailable")?;
-    validate_session_manifest(&manifest, session_name)?;
+    validate_session_manifest(&manifest, session_name, root_milestone)?;
 
     let candidate = read_file(&session.join("candidate"), 268_435_456, owner)?;
     require(
-        hash(&candidate) == research_precheck::CANDIDATE_SHA,
+        hash(&candidate) == identity.candidate_sha256,
         "research session candidate differs from the frozen candidate",
     )?;
     let candidate_mode = fs::metadata(session.join("candidate"))?.mode() & 0o7777;
@@ -698,6 +718,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         &database_path,
         &options.run_id,
         manifest.task_id == "U22",
+        identity.state_schema_version,
     )?;
     require(
         before.status["problem_id"] == manifest.case_id
@@ -775,6 +796,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
         &database_path,
         &options.run_id,
         manifest.task_id == "U22",
+        identity.state_schema_version,
     )?;
     require(
         evidence_fingerprint(&before)? == evidence_fingerprint(&after)?,
@@ -853,7 +875,7 @@ pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     File::open(&session)?.sync_all()?;
 
     Ok(json!({
-        "schema":"mtm-research-collection-v1","milestone":"MTM-016",
+        "schema":"mtm-research-collection-v1","milestone":manifest.milestone,
         "task_id":manifest.task_id,"repeat":manifest.repeat,"case_id":manifest.case_id,
         "trial_id":manifest.trial_id,"bundle_directory":final_dir.file_name().and_then(|v|v.to_str()),
         "bundle_manifest_sha256":hash(&bundle),"final_tex_sha256":hash(&final_tex),
@@ -956,7 +978,7 @@ mod tests {
             research_trial_passed: false,
             release_qualified: false,
         };
-        validate_session_manifest(&base, "U21-r1.ABCdef12")?;
+        validate_session_manifest(&base, "U21-r1.ABCdef12", "MTM-016")?;
         let mut bad = serde_json::to_value(&base)?;
         for (pointer, value) in [
             ("/schema", json!("mtm-research-session-v2")),
@@ -970,9 +992,9 @@ mod tests {
             let mut value_bad = bad.clone();
             *value_bad.pointer_mut(pointer).ok_or("fixture pointer")? = value;
             let parsed: SessionManifest = serde_json::from_value(value_bad)?;
-            assert!(validate_session_manifest(&parsed, "U21-r1.ABCdef12").is_err());
+            assert!(validate_session_manifest(&parsed, "U21-r1.ABCdef12", "MTM-016").is_err());
         }
-        // Only newly prepared U25 v2 sessions may use dangerous Native.
+        // Historical MTM-016 U25 v2 uses dangerous Native.
         let mut u25 = serde_json::to_value(&base)?;
         u25["schema"] = json!("mtm-research-session-v2");
         u25["task_id"] = json!("U25");
@@ -980,7 +1002,7 @@ mod tests {
         u25["workflow_mode"] = json!("full");
         u25["native_mode"] = json!("dangerous");
         let parsed: SessionManifest = serde_json::from_value(u25.clone())?;
-        validate_session_manifest(&parsed, "U25-r1.ABCdef12")?;
+        validate_session_manifest(&parsed, "U25-r1.ABCdef12", "MTM-016")?;
         for (key, replacement) in [
             ("schema", json!("mtm-research-session-v1")),
             ("native_mode", json!("safe")),
@@ -991,8 +1013,30 @@ mod tests {
             let mut changed = u25.clone();
             changed[key] = replacement;
             let parsed: SessionManifest = serde_json::from_value(changed)?;
-            assert!(validate_session_manifest(&parsed, "U25-r1.ABCdef12").is_err());
+            assert!(validate_session_manifest(&parsed, "U25-r1.ABCdef12", "MTM-016").is_err());
         }
+        let mut mtm017 = u25.clone();
+        mtm017["milestone"] = json!("MTM-017");
+        mtm017["candidate_sha256"] = json!(research_precheck::MTM017_CANDIDATE_SHA);
+        mtm017["candidate_source_commit"] = json!(research_precheck::MTM017_CANDIDATE_SOURCE);
+        let parsed: SessionManifest = serde_json::from_value(mtm017.clone())?;
+        validate_session_manifest(&parsed, "U25-r1.ABCdef12", "MTM-017")?;
+        assert!(validate_session_manifest(&parsed, "U25-r1.ABCdef12", "MTM-016").is_err());
+        mtm017["candidate_sha256"] = json!(research_precheck::CANDIDATE_SHA);
+        let parsed: SessionManifest = serde_json::from_value(mtm017)?;
+        assert!(validate_session_manifest(&parsed, "U25-r1.ABCdef12", "MTM-017").is_err());
+        let mut mtm017_u21 = serde_json::to_value(&base)?;
+        mtm017_u21["milestone"] = json!("MTM-017");
+        mtm017_u21["candidate_sha256"] = json!(research_precheck::MTM017_CANDIDATE_SHA);
+        mtm017_u21["candidate_source_commit"] = json!(research_precheck::MTM017_CANDIDATE_SOURCE);
+        mtm017_u21["schema"] = json!("mtm-research-session-v2");
+        mtm017_u21["native_mode"] = json!("dangerous");
+        let parsed: SessionManifest = serde_json::from_value(mtm017_u21.clone())?;
+        validate_session_manifest(&parsed, "U21-r1.ABCdef12", "MTM-017")?;
+        assert!(validate_session_manifest(&parsed, "U21-r1.ABCdef12", "MTM-016").is_err());
+        mtm017_u21["native_mode"] = json!("safe");
+        let parsed: SessionManifest = serde_json::from_value(mtm017_u21)?;
+        assert!(validate_session_manifest(&parsed, "U21-r1.ABCdef12", "MTM-017").is_err());
         bad["extra"] = json!(true);
         assert!(serde_json::from_value::<SessionManifest>(bad).is_err());
         Ok(())
@@ -1059,7 +1103,7 @@ esac
         let tool = validate_sqlite(&sqlite)?;
         validate_database(&database, fs::metadata(root.path())?.uid())?;
         let before = fs::read(&database)?;
-        let evidence = collect_database(&tool, &database, "run-a", false)?;
+        let evidence = collect_database(&tool, &database, "run-a", false, 7)?;
         assert_eq!(evidence.status["state"], "done");
         assert_eq!(evidence.status["problem_id"], "u21-r1-subspace-dimension");
         assert_eq!(evidence.owner_id, "owner-a");
@@ -1069,8 +1113,20 @@ esac
             "Synthetic target"
         );
         assert_eq!(fs::read(&database)?, before);
-        assert!(collect_database(&tool, &database, "run-pending", false).is_err());
-        assert!(collect_database(&tool, &database, "missing", false).is_err());
+        assert!(collect_database(&tool, &database, "run-pending", false, 7).is_err());
+        assert!(collect_database(&tool, &database, "missing", false, 7).is_err());
+        assert!(collect_database(&tool, &database, "run-a", false, 8).is_err());
+
+        let sqlite8_dir = root.path().join("v8");
+        fs::create_dir(&sqlite8_dir)?;
+        let sqlite8 = sqlite8_dir.join("sqlite3");
+        let script8 = script.replace("[{\"user_version\":7}]", "[{\"user_version\":8}]");
+        fs::write(&sqlite8, script8.as_bytes())?;
+        fs::set_permissions(&sqlite8, fs::Permissions::from_mode(0o700))?;
+        let tool8 = validate_sqlite(&sqlite8)?;
+        let evidence8 = collect_database(&tool8, &database, "run-a", false, 8)?;
+        assert_eq!(evidence8.status["state"], "done");
+        assert!(collect_database(&tool8, &database, "run-a", false, 7).is_err());
         Ok(())
     }
 
@@ -1116,14 +1172,22 @@ esac
     }
 
     #[test]
-    fn session_path_is_scoped_to_private_mtm016_research_layout() -> Result<()> {
+    fn session_path_is_scoped_to_versioned_private_research_layouts() -> Result<()> {
         let root = tempdir()?;
-        let research = root
+        let mtm016 = root
             .path()
             .join(".mtm-acceptance/MTM-016/research/U21-r1.ABCdef12");
-        fs::create_dir_all(&research)?;
-        fs::set_permissions(&research, fs::Permissions::from_mode(0o700))?;
-        assert_eq!(validate_session_path(&research)?, research);
+        fs::create_dir_all(&mtm016)?;
+        fs::set_permissions(&mtm016, fs::Permissions::from_mode(0o700))?;
+        assert_eq!(validate_session_path(&mtm016)?, mtm016);
+        assert_eq!(session_root_milestone(&mtm016)?, "MTM-016");
+        let mtm017 = root
+            .path()
+            .join(".mtm-acceptance/MTM-017/research/U25-r1.ZYXwvu98");
+        fs::create_dir_all(&mtm017)?;
+        fs::set_permissions(&mtm017, fs::Permissions::from_mode(0o700))?;
+        assert_eq!(validate_session_path(&mtm017)?, mtm017);
+        assert_eq!(session_root_milestone(&mtm017)?, "MTM-017");
         let outside = root.path().join("U21-r1.ABCdef12");
         fs::create_dir(&outside)?;
         fs::set_permissions(&outside, fs::Permissions::from_mode(0o700))?;

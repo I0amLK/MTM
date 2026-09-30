@@ -48,6 +48,38 @@ fn upgrade_cli_rejects_missing_baseline_and_production_path_options() -> Result<
 }
 
 #[test]
+fn schema8_upgrade_cli_rejects_missing_pairs_and_state_override() -> Result<(), Box<dyn Error>> {
+    let directory = tempfile::tempdir()?;
+    for extra in [
+        vec![],
+        vec!["--baseline", "old"],
+        vec!["--baseline", "old", "--baseline-sha256", "wrong"],
+        vec!["--state-root", "/operator/state"],
+        vec!["--baseline-schema", "2"],
+    ] {
+        let output = Command::new(env!("CARGO_BIN_EXE_mtm-xtask"))
+            .args([
+                "qualify",
+                "--profile",
+                "upgrade_schema8",
+                "--binary",
+                "candidate",
+                "--sha256",
+                &"a".repeat(64),
+            ])
+            .args(extra)
+            .env_clear()
+            .current_dir(directory.path())
+            .stdin(Stdio::null())
+            .output()?;
+        assert_eq!(output.status.code(), Some(1));
+        assert!(output.stdout.is_empty());
+        assert_eq!(std::fs::read_dir(directory.path())?.count(), 0);
+    }
+    Ok(())
+}
+
+#[test]
 fn resource_profile_requires_a_complete_distinct_baseline() -> Result<(), Box<dyn Error>> {
     let candidate = "a".repeat(64);
     let baseline = "b".repeat(64);

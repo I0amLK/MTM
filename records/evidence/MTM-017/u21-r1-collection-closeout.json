@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u21_r1_independent_review_collection_and_precheck_closeout",
+  "recorded_at": "2026-09-28T12:48:15Z",
+  "session_marker": "U21-r1.shhEkEkx",
+  "trial_id": "344bafa5e61f13ce9c15a8a6ac7cb5b6",
+  "run_id": "run-u21-r1-subspace-dimension-8496de39bc11",
+  "machine_final": {
+    "state": "done",
+    "status": "done",
+    "sealed": true,
+    "latex_passed": true,
+    "verdict": "correct",
+    "transition_sequence": 6,
+    "final_artifact_sha256": "a200cbe9f49b5c87a1932c254eaaed9f4ad5a111fb1e1640e49bc16f34991652",
+    "verification_report_sha256": "b1d3d2fabcb1d3c06da4c2857ea5e7c2a91ef30dcdee576a5e982844dba4f4ef"
+  },
+  "independent_review": {
+    "statement_checks": 10,
+    "critical_errors": 0,
+    "gaps": 0,
+    "same_owner_continuity": true,
+    "review_observation_sha256": "4cc80f9317040a7d9bbab009b82d6cd9ae123ce917e5a38c2bb02d60cfcf62f3",
+    "owner_fingerprint": "7d4753c4dcd3df53b8b8eb0cb8cebd0f6b88fd29727092f55d83c3155717d454"
+  },
+  "collection": {
+    "schema": "mtm-research-collection-v1",
+    "bundle_directory": "evidence-bundle.344bafa5e61f13ce9c15a8a6ac7cb5b6",
+    "bundle_sha256": "b115dac27dc511f080d56f6926f3a09c87d8297e808c00b82bb4166b977fac15",
+    "required_material_present": true,
+    "precheck_consistent": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "explicit_precheck": {
+    "schema": "mtm-research-precheck-v1",
+    "artifact_count": 10,
+    "bundle_sha256": "b115dac27dc511f080d56f6926f3a09c87d8297e808c00b82bb4166b977fac15",
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "required_material_present": true,
+    "existing_material_consistent": true,
+    "missing_material": [],
+    "selected_candidate_bytes_checked": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}

@@ -2,27 +2,24 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use mtm_contracts::{
-    ErrorCategory, NativeMode, NativePermissionKind, NativePermissionTool, ReCtmError,
-};
+use mtm_contracts::{ErrorCategory, NativeMode, ReCtmError};
 #[cfg(test)]
 use mtm_core::check_command_policy;
 use mtm_core::{
     EffectiveNativePolicy, ExecInvocation, ExecPermissionFacts, NativeInvocation,
     classify_exec_permissions,
 };
-#[cfg(test)]
-use mtm_native::network_namespace_for_mode;
 use mtm_native::{
     CommandManager, CommandManagerConfig, CommandRequest, DEFAULT_SANDBOX_PATH, KillRequest,
     NATIVE_HELPER_PROTOCOL, NativeHelperRequest, NativeHelperResponse, NetworkNamespacePlan,
     PollRequest, SandboxPlan, SandboxPlanInput, ToolchainExposurePlan, build_bubblewrap_command,
-    build_toolchain_exposure_plan, plan_sandbox, validate_helper_response,
+    build_toolchain_exposure_plan, network_namespace_for_mode, plan_sandbox,
+    validate_helper_response,
 };
 use serde_json::{Map, Value};
 
 use crate::helper::invoke_runtime_helper;
-use crate::{NativeInvocationPermissionPermit, revalidate_exec_permission_facts};
+use crate::revalidate_exec_permission_facts;
 
 pub(crate) struct PreparedAuthorityExec {
     invocation: ExecInvocation,
@@ -55,6 +52,7 @@ impl PreparedAuthorityExec {
     }
 
     #[must_use]
+    #[cfg(test)]
     pub(crate) fn policy(&self) -> &EffectiveNativePolicy {
         &self.policy
     }
@@ -68,12 +66,6 @@ impl PreparedAuthorityExec {
 
 pub(crate) struct RevalidatedAuthorityExec(PreparedAuthorityExec);
 
-impl RevalidatedAuthorityExec {
-    #[must_use]
-    pub(crate) fn policy(&self) -> &EffectiveNativePolicy {
-        self.0.policy()
-    }
-}
 use crate::native_permission::collect_exec_permission_facts;
 use crate::workspace::NativeWorkspace;
 
@@ -117,7 +109,7 @@ impl NativeToolRuntime {
                     .iter()
                     .map(|path| path.display().to_string())
                     .collect(),
-                mode,
+                network: network_namespace_for_mode(mode),
                 argv: Vec::new(),
                 workdir: ".".to_owned(),
                 timeout_ms: 15_000,
@@ -132,7 +124,7 @@ impl NativeToolRuntime {
             Some(validate_helper_response(
                 &response,
                 &request,
-                mode == NativeMode::Safe,
+                request.network == NetworkNamespacePlan::Isolated,
                 plan.read_only_roots.len(),
             )?)
         } else {
@@ -202,21 +194,16 @@ impl NativeToolRuntime {
     }
 
     pub fn check_exec_environment(&self) -> Value {
-        let global_tmp = match self.mode {
-            NativeMode::Safe => "blocked",
-            NativeMode::Trusted => "tmp-prefix",
-            NativeMode::Dangerous => "allowed",
+        let (global_tmp, network_allowed) = match self.mode {
+            NativeMode::Dangerous => ("allowed", true),
         };
-        let mut warnings = Vec::new();
-        if self.mode == NativeMode::Dangerous {
-            warnings.push("permission_mode=dangerous disables MCP safety gates");
-        }
+        let mut warnings = vec!["permission_mode=dangerous disables MCP safety gates"];
         if self.backend != "bubblewrap" {
             warnings.push("Full interactive command lifecycle requires the built-in bubblewrap backend; disabled/external helpers may execute synchronously only.");
         }
         serde_json::json!({
             "ok":true,"native_mode":self.mode.as_str(),"permission_mode":self.mode.as_str(),
-            "workspace":self.workspace.root(),"network_allowed":self.mode!=NativeMode::Safe,
+            "workspace":self.workspace.root(),"network_allowed":network_allowed,
             "runtime_dir":"/tmp","home":"/home/re-ctm","tmpdir":"/tmp","cache_dir":"/tmp/cache",
             "native_exec_backend":if self.backend=="bubblewrap"{"BubblewrapExecBackend"}else{"DisabledExecBackend"},
             "hard_isolation_attested":self.attestation.is_some(),"command_lifecycle_supported":self.backend=="bubblewrap",
@@ -229,17 +216,13 @@ impl NativeToolRuntime {
     }
 
     pub fn request_permissions(&self, arguments: &Map<String, Value>) -> Value {
-        if self.mode == NativeMode::Dangerous {
-            return serde_json::json!({
+        match self.mode {
+            NativeMode::Dangerous => serde_json::json!({
                 "ok":true,"status":"granted","grant_id":"dangerously-skip-all-permissions","expires_at":Value::Null,
                 "constraints":{"mode":"dangerously_skip_all_permissions","workspace":self.workspace.root(),"requested":arguments},
                 "warnings":["dangerously-skip-all-permissions is enabled; permission-gated operations are auto-granted"]
-            });
+            }),
         }
-        serde_json::json!({
-            "ok":false,"status":"unsupported","grant_id":Value::Null,"expires_at":Value::Null,
-            "error":{"code":"ELICITATION_UNSUPPORTED","message":"Permission elicitation is not available for this client.","category":"permission","retryable":false,"details":{"requested":arguments}}
-        })
     }
 
     #[cfg(test)]
@@ -420,13 +403,7 @@ impl NativeToolRuntime {
                 "workdir is not a directory.",
             ));
         }
-        let network = if self.mode == NativeMode::Safe
-            && !required.contains(&NativePermissionKind::Network)
-        {
-            NetworkNamespacePlan::Isolated
-        } else {
-            NetworkNamespacePlan::Shared
-        };
+        let network = network_namespace_for_mode(self.mode);
         let sandbox_plan = plan_sandbox(&SandboxPlanInput {
             workspace: self.workspace.root(),
             workdir: &resolved.display,
@@ -475,29 +452,14 @@ impl NativeToolRuntime {
     pub(crate) fn start_authority_exec(
         &self,
         prepared: RevalidatedAuthorityExec,
-        permit: NativeInvocationPermissionPermit,
     ) -> Result<Value, ReCtmError> {
         let prepared = prepared.0;
-        if permit.tool() != NativePermissionTool::ExecCommand
-            || permit.arguments_sha256() != prepared.invocation.arguments_sha256()
-        {
+        // The dangerous profile implicitly grants every kind; anything still
+        // missing means the profile changed, so fail closed rather than run.
+        if !prepared.policy.missing().is_empty() {
             return Err(ReCtmError::new(
-                "NATIVE_PERMISSION_PERMIT_MISMATCH",
-                "Native invocation permit does not match the prepared command.",
-            )
-            .with_category(ErrorCategory::Security));
-        }
-        let expected = prepared
-            .policy
-            .required()
-            .iter()
-            .copied()
-            .filter(|kind| !prepared.policy.implicitly_granted().contains(kind))
-            .collect::<Vec<_>>();
-        if permit.permissions() != expected.as_slice() {
-            return Err(ReCtmError::new(
-                "NATIVE_PERMISSION_PERMIT_MISMATCH",
-                "Native invocation permit does not cover the prepared command exactly.",
+                "NATIVE_PERMISSION_PROFILE_INCOMPLETE",
+                "The Native mode profile does not cover every permission this command requires.",
             )
             .with_category(ErrorCategory::Security));
         }
@@ -591,7 +553,8 @@ impl NativeToolRuntime {
                 .iter()
                 .map(|path| path.display().to_string())
                 .collect(),
-            mode: NativeMode::Safe,
+            // Fixed adapters never need the network; keep them isolated.
+            network: NetworkNamespacePlan::Isolated,
             argv: argv.to_vec(),
             workdir: ".".to_owned(),
             timeout_ms,
@@ -688,14 +651,7 @@ fn internal(message: &str) -> ReCtmError {
 mod tests {
     use std::fs;
 
-    use mtm_contracts::{NativePermissionScope, NativePermissionTool};
-    use mtm_core::NativePermissionRequest;
-    use mtm_storage::StoreRuntime;
-
-    use crate::{
-        NativePermissionConsentAuthority, NativePermissionConsentOutcome,
-        NativePermissionGrantAuthority,
-    };
+    use mtm_contracts::NativePermissionKind;
 
     use super::*;
 
@@ -727,41 +683,6 @@ mod tests {
         Ok((root, Arc::new(runtime)))
     }
 
-    fn issue_exec_grant(
-        grants: &NativePermissionGrantAuthority,
-        consents: &NativePermissionConsentAuthority,
-        owner: &str,
-        workspace: &str,
-        kind: NativePermissionKind,
-        arguments: &Map<String, Value>,
-    ) -> Result<(), ReCtmError> {
-        let request = NativePermissionRequest::parse(
-            serde_json::json!({
-                "tool_name":"exec_command",
-                "permission":kind.as_str(),
-                "reason":"authority candidate exec test",
-                "arguments":arguments,
-                "scope":NativePermissionScope::Once.as_str(),
-                "ttl_seconds":300
-            })
-            .as_object()
-            .ok_or_else(|| internal("test permission request must be an object"))?,
-        )?;
-        let prompt = consents.begin(owner, workspace, request.clone())?;
-        let outcome = consents.complete(
-            prompt.request_state(),
-            owner,
-            workspace,
-            &request,
-            &serde_json::json!({"action":"accept","content":{"approved":true}}),
-        )?;
-        let NativePermissionConsentOutcome::Accepted(consent) = outcome else {
-            return Err(internal("test consent was not accepted"));
-        };
-        grants.issue_verified(consent)?;
-        Ok(())
-    }
-
     #[test]
     fn validated_execution_response_preserves_execution_fields() -> Result<(), ReCtmError> {
         let request = NativeHelperRequest {
@@ -770,7 +691,7 @@ mod tests {
             request_id: "test-request".to_owned(),
             workspace: "/tmp/mtm-runtime-test".to_owned(),
             forbidden_paths: Vec::new(),
-            mode: NativeMode::Safe,
+            network: NetworkNamespacePlan::Isolated,
             argv: vec!["/usr/bin/printf".to_owned(), "ok".to_owned()],
             workdir: ".".to_owned(),
             timeout_ms: 1000,
@@ -820,9 +741,9 @@ mod tests {
     }
 
     #[test]
-    fn authority_exec_plan_changes_only_network_dimension_for_safe_network_risk()
+    fn authority_exec_plan_shares_network_and_still_classifies_network_risk()
     -> Result<(), ReCtmError> {
-        let (_root, runtime) = authority_test_runtime(NativeMode::Safe)?;
+        let (_root, runtime) = authority_test_runtime(NativeMode::Dangerous)?;
         let local = Map::from_iter([("argv".to_owned(), serde_json::json!(["printf", "local"]))]);
         let network = Map::from_iter([(
             "argv".to_owned(),
@@ -830,7 +751,7 @@ mod tests {
         )]);
         let local_prepared = runtime.prepare_authority_exec(&local)?;
         let network_prepared = runtime.prepare_authority_exec(&network)?;
-        assert_eq!(local_prepared.network(), NetworkNamespacePlan::Isolated);
+        assert_eq!(local_prepared.network(), NetworkNamespacePlan::Shared);
         assert_eq!(network_prepared.network(), NetworkNamespacePlan::Shared);
         assert!(
             !local_prepared
@@ -850,8 +771,7 @@ mod tests {
     }
 
     #[test]
-    fn authority_exec_exact_once_grant_runs_once_when_bubblewrap_is_available()
-    -> Result<(), ReCtmError> {
+    fn authority_exec_runs_without_grants_when_bubblewrap_is_available() -> Result<(), ReCtmError> {
         if std::process::Command::new("sh")
             .args(["-c", "command -v bwrap >/dev/null 2>&1"])
             .status()
@@ -859,7 +779,7 @@ mod tests {
         {
             return Ok(());
         }
-        let (_root, runtime) = authority_test_runtime(NativeMode::Safe)?;
+        let (_root, runtime) = authority_test_runtime(NativeMode::Dangerous)?;
         let arguments = Map::from_iter([
             (
                 "argv".to_owned(),
@@ -867,46 +787,21 @@ mod tests {
             ),
             ("yield_time_ms".to_owned(), Value::from(30_000)),
         ]);
-        let owner = "owner-a";
-        let workspace = runtime.workspace().root().display().to_string();
-        let store_runtime = StoreRuntime::default();
-        let grants = NativePermissionGrantAuthority::new(store_runtime.clone());
-        let consents = NativePermissionConsentAuthority::new(store_runtime);
-
-        let first = runtime.prepare_authority_exec(&arguments)?;
-        let first = runtime.revalidate_authority_exec(first)?;
-        assert_eq!(
-            grants
-                .authorize_invocation(owner, &workspace, first.policy())
-                .map_err(|error| error.code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
-        );
-
-        issue_exec_grant(
-            &grants,
-            &consents,
-            owner,
-            &workspace,
-            NativePermissionKind::InlineScript,
-            &arguments,
-        )?;
-        let prepared = runtime.prepare_authority_exec(&arguments)?;
-        let revalidated = runtime.revalidate_authority_exec(prepared)?;
-        let permit = grants.authorize_invocation(owner, &workspace, revalidated.policy())?;
-        assert_eq!(permit.tool(), NativePermissionTool::ExecCommand);
-        let result = runtime.start_authority_exec(revalidated, permit)?;
-        assert_eq!(result["status"], "exited");
-        assert_eq!(result["exit_code"], 0);
-        assert_eq!(result["stdout"], "candidate");
-
-        let second = runtime.prepare_authority_exec(&arguments)?;
-        let second = runtime.revalidate_authority_exec(second)?;
-        assert_eq!(
-            grants
-                .authorize_invocation(owner, &workspace, second.policy())
-                .map_err(|error| error.code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
-        );
+        for _ in 0..2 {
+            let prepared = runtime.prepare_authority_exec(&arguments)?;
+            assert!(
+                prepared
+                    .policy()
+                    .required()
+                    .contains(&NativePermissionKind::InlineScript)
+            );
+            assert!(prepared.policy().missing().is_empty());
+            let revalidated = runtime.revalidate_authority_exec(prepared)?;
+            let result = runtime.start_authority_exec(revalidated)?;
+            assert_eq!(result["status"], "exited");
+            assert_eq!(result["exit_code"], 0);
+            assert_eq!(result["stdout"], "candidate");
+        }
         runtime.close()?;
         Ok(())
     }

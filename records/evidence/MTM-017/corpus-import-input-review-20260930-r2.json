@@ -1,0 +1,24 @@
+{
+  "schema": "mtm017-research-import-input-review-v1",
+  "milestone": "MTM-017",
+  "inputs_sha256": "74592e4a94da281c15f05ee0710b7722326491743652be2b671d4b8664ed0750",
+  "bundle_catalog_sha256": "15e4ba61d9677a1bac0cca6b642ee9762df21c972c38e121909ba1c98905d92c",
+  "implementation_source_sha256": "563362c935f43aa4a585fb6b86cb489206840bda649287db2e87f8aae9a5f376",
+  "maintenance_binary_sha256": "a69d5a3ba2b9fab04b54251c42282944ead234ce2f6d0e998f2b1ebc22a0b357",
+  "prepared_by": "ctm-corpus-audit-session",
+  "reviewer_session": "review-schema8-importer",
+  "decision": "approved_for_read_only_proposal",
+  "checks": [
+    "implementation_and_negative_tests_reviewed",
+    "all_fifteen_original_bundles_inspected",
+    "receipt_and_exact_artifact_bindings_checked",
+    "route_observations_and_review_provenance_inspected",
+    "no_historical_base_or_release_authority_inherited",
+    "proposal_only_zero_accepted_delta"
+  ],
+  "recorded_unix_seconds": 1790740076,
+  "corpus_count_incremented": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false
+}

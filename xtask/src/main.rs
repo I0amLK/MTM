@@ -9,9 +9,13 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use serde_json::{Value, json};
 
 mod architecture;
+#[cfg(target_os = "linux")]
+mod authority_corpus_schema8;
 mod capability;
 mod check_report;
 mod commit_message;
+#[cfg(target_os = "linux")]
+mod corpus_aggregate_schema8;
 mod dist;
 mod evidence_json;
 mod inventory;
@@ -23,9 +27,15 @@ mod records;
 #[cfg(target_os = "linux")]
 mod release_check;
 #[cfg(target_os = "linux")]
+mod release_check_schema8;
+#[cfg(target_os = "linux")]
 mod release_cutover;
 #[cfg(target_os = "linux")]
+mod release_readiness_schema8;
+#[cfg(target_os = "linux")]
 mod research_collect;
+#[cfg(target_os = "linux")]
+mod research_import_check;
 #[cfg(target_os = "linux")]
 mod research_precheck;
 mod retirement;
@@ -80,6 +90,54 @@ fn run() -> Result<()> {
         if report["required_material_present"] != true {
             return Err("research evidence is incomplete; no corpus row accepted".into());
         }
+        return Ok(());
+    }
+    #[cfg(target_os = "linux")]
+    if name == "research-import-check" {
+        let options = research_import_check::Options::parse(options)?;
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&research_import_check::run(&root, &options)?)?
+        );
+        return Ok(());
+    }
+    #[cfg(target_os = "linux")]
+    if name == "release-check-schema8" {
+        let options = release_check_schema8::Options::parse(options)?;
+        let report = release_check_schema8::run(&root, &options)?;
+        println!("{}", serde_json::to_string_pretty(&report)?);
+        if report["readiness_evaluation_passed"] != true {
+            return Err(
+                "schema-8 readiness evaluation unresolved; no release or deployment acceptance"
+                    .into(),
+            );
+        }
+        return Ok(());
+    }
+    #[cfg(target_os = "linux")]
+    if name == "release-readiness-schema8" {
+        release_readiness_schema8::reject_options(options)?;
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&release_readiness_schema8::run(&root)?)?
+        );
+        return Err("schema-8 readiness draft blocked; criteria/evidence incomplete and no deployment authorized".into());
+    }
+    #[cfg(target_os = "linux")]
+    if name == "corpus-aggregate-check" {
+        let options = corpus_aggregate_schema8::Options::parse(options)?;
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&corpus_aggregate_schema8::run(&root, &options)?)?
+        );
+        return Ok(());
+    }
+    #[cfg(target_os = "linux")]
+    if name == "schema8-authority-observation-check" {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&authority_corpus_schema8::run(&root, options)?)?
+        );
         return Ok(());
     }
     if name == "dist" {
@@ -193,6 +251,11 @@ fn run() -> Result<()> {
             ] {
                 eprintln!("[source-check] {label}");
                 let status = Command::new(&cargo)
+                    .env_remove("MTM017_AUTHORITY_CORPUS")
+                    .env_remove("MTM017_AUTHORITY_TASK")
+                    .env_remove("MTM017_AUTHORITY_REPEAT")
+                    .env_remove("MTM017_AUTHORITY_TRIAL")
+                    .env_remove("MTM017_AUTHORITY_SOURCE_SHA256")
                     .env_remove("MTM_TEST_CORPUS_PROFILE")
                     .env_remove("MTM_TEST_NATIVE_CORPUS_PROFILE")
                     .env_remove("MTM_TEST_INSTALL_SIGKILL_PROFILE")
@@ -204,6 +267,7 @@ fn run() -> Result<()> {
                     .env_remove("MTM_TEST_TARGET_PROFILE")
                     .env_remove("MTM_TEST_RESOURCE_PROFILE")
                     .env_remove("MTM_TEST_UPGRADE_PROFILE")
+                    .env_remove("MTM_TEST_SCHEMA8_UPGRADE_PROFILE")
                     .env_remove("MTM_TEST_PERMISSION_PROFILE")
                     .env_remove("MTM_TEST_BASELINE")
                     .env_remove("MTM_TEST_BASELINE_SHA256")
@@ -250,10 +314,16 @@ fn run() -> Result<()> {
         }
         "help" | "--help" | "-h" => {
             println!(
+                "cargo xtask release-check-schema8 --inputs <flat-MTM017-JSON> --input-review <flat-MTM017-JSON>\n  Read-only formal evaluation; independent result review and separate acceptance remain required, never deployment."
+            );
+            println!(
+                "cargo xtask release-readiness-schema8\n  Fixed reviewed-inventory, read-only schema-8 draft; always blocked, not final release inputs or deployment authority.\ncargo xtask corpus-aggregate-check --inputs <repo-relative-json> --input-review <repo-relative-json>\n  Read-only MTM-017 partial-corpus proposal; zero accepted delta, no release or deployment authority."
+            );
+            println!(
                 "cargo xtask research-collect --session <absolute-private-session> --run-id <run-id> --sqlite <absolute-sqlite3>\n  Create and precheck a private evidence bundle from one sealed disposable research run using explicit read-only sqlite3; NOT corpus acceptance."
             );
             println!(
-                "cargo xtask research-precheck --bundle <absolute-private-directory>\n  Read-only evidence integrity/checklist, NOT mathematical acceptance or corpus import."
+                "cargo xtask research-precheck --bundle <absolute-private-directory>\n  Read-only evidence integrity/checklist, NOT mathematical acceptance or corpus import.\ncargo xtask research-import-check --inputs <repo-relative-json> --bundle-catalog <absolute-private-json> --input-review <repo-relative-json>\n  MTM-017-only read-only fifteen-trial proposal; accepted delta stays zero and a separate result review is required."
             );
             println!(
                 "cargo xtask qualify --profile retrieval --binary <artifact> --sha256 <sha256> [--record]"
@@ -275,6 +345,9 @@ fn run() -> Result<()> {
             );
             println!(
                 "cargo xtask qualify --profile upgrade --binary <artifact> --sha256 <sha256> --baseline <artifact> --baseline-sha256 <sha256> [--record]"
+            );
+            println!(
+                "cargo xtask qualify --profile upgrade_schema8 --binary <preview.2-artifact> --sha256 <sha256> --baseline <released-schema7-artifact> --baseline-sha256 <sha256> [--record]\n  Disposable schema-7 to schema-8 upgrade/resume/rollback; not production-state or release acceptance."
             );
             println!(
                 "cargo xtask qualify --profile <protocol|target|native_commands|compiled_latex> --binary <artifact> --sha256 <sha256> [--record]\ncargo xtask qualify --profile resource --binary <artifact> --sha256 <sha256> --baseline <artifact> --baseline-sha256 <sha256> [--record]\ncargo xtask dist --binary <artifact> --sha256 <sha256> --version <version> --out <absolute-directory>"

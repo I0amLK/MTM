@@ -37,7 +37,7 @@ fn schema5_preserves_legacy_creation_and_does_not_enroll_unknown_work() -> Resul
         _ => return Err("old identity was replaced".into()),
     };
     assert!(store.resume_creation(old).is_err());
-    assert_eq!(store.schema_version()?, 7);
+    assert_eq!(store.schema_version()?, 8);
     let db = Connection::open(&path)?;
     let enrolled: i64 = db.query_row("SELECT COUNT(*) FROM creation_initializations", [], |r| {
         r.get(0)
@@ -638,7 +638,7 @@ fn schema4_migration_preserves_schema3_and_rolls_back_on_failure() -> Result {
         let db = Connection::open(&path)?;
         assert_eq!(
             db.query_row("PRAGMA user_version", [], |r| r.get::<_, i64>(0))?,
-            if broken { 3 } else { 7 }
+            if broken { 3 } else { 8 }
         );
         assert_eq!(
             db.query_row(

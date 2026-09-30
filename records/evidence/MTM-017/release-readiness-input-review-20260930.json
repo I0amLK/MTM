@@ -1,0 +1,21 @@
+{
+  "schema": "mtm017-release-input-review-v1",
+  "milestone": "MTM-017",
+  "inputs_sha256": "c24e2e741f99451936b051e98d1c180ca612ad5fa20ec48318ee05e486c43c78",
+  "implementation_source_sha256": "39f42266b1dafc323b525130ba00cb11aac6f06f6a4448a132cdad6ac2add8f0",
+  "maintenance_binary_sha256": "223459136ac5184572b9b5c338c77dd01347252c12f16191c616a69b04b14ff7",
+  "prepared_by": "formal-readiness-implementation-session",
+  "reviewer_session": "review-schema8-importer",
+  "decision": "approved_for_read_only_readiness_evaluation",
+  "checks": [
+    "eighteen_mapping_scopes_reviewed",
+    "public_chain_refs_and_scoped_waivers_reviewed",
+    "known_failure_disposition_scope_reviewed",
+    "current_source_and_binary_bound",
+    "negative_tests_and_no_action_boundary_reviewed",
+    "separate_result_review_required"
+  ],
+  "recorded_unix_seconds": 1790778370,
+  "release_qualified": false,
+  "deployment_authorized": false
+}

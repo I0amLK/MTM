@@ -62,7 +62,8 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
     let report: Receipt = serde_json::from_value(value.clone())
         .map_err(|_| "qualification receipt schema invalid")?;
     let profile = Profile::parse(name)?;
-    let paired = matches!(profile, Profile::Upgrade | Profile::Resource);
+    let upgrade = matches!(profile, Profile::Upgrade | Profile::UpgradeSchema8);
+    let paired = upgrade || profile == Profile::Resource;
     let scope = match profile {
         Profile::Protocol => "exact_candidate_protocol_not_release",
         Profile::Target => "exact_candidate_target_not_release",
@@ -70,6 +71,7 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
         Profile::CompiledLatex => "exact_candidate_required_compiled_latex_not_release",
         Profile::Resource => "exact_candidate_resource_not_release",
         Profile::Upgrade => "exact_candidate_installed_upgrade_fixture_not_release",
+        Profile::UpgradeSchema8 => "exact_candidate_schema7_to_schema8_upgrade_not_release",
         Profile::Permissions => "exact_candidate_scripted_patch_permissions_not_release",
         Profile::Corpus => "exact_candidate_partial_usability_corpus_not_release",
         Profile::CorpusNative => "exact_candidate_native_corpus_u16_u20_not_release",
@@ -119,9 +121,9 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
                 || report.baseline_launched != true
                 || hash == baseline))
         || (!paired && (!report.baseline_sha256.is_null() || !report.baseline_launched.is_null()))
-        || report.selector_changed != (profile == Profile::Upgrade)
+        || report.selector_changed != upgrade
         || report.selector_scope.as_deref()
-            != if profile == Profile::Upgrade {
+            != if upgrade {
                 Some("owned_disposable_fixture_only")
             } else {
                 None
@@ -197,6 +199,10 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
             line("upgrade", "MTM_UPGRADE_RUNTIME")?;
             summary::validate_upgrade(&bytes, hash, baseline)?
         }
+        Profile::UpgradeSchema8 => {
+            line("upgrade_schema8", "MTM_SCHEMA8_UPGRADE_RUNTIME")?;
+            summary::validate_schema8_upgrade(&bytes, hash, baseline)?
+        }
         Profile::Resource => {
             line("resource", "MTM_RESOURCE_RUNTIME")?;
             summary::validate_resource(&bytes, hash, baseline)?
@@ -233,6 +239,59 @@ pub(crate) fn validate(value: &Value, hash: &str, baseline: &str, name: &str) ->
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn schema8_receipt_cannot_substitute_for_the_historical_upgrade() -> Result<()> {
+        let mut good: Value = serde_json::from_str(include_str!(
+            "../../records/evidence/MTM-016/candidate-upgrade-f6-c674843.json"
+        ))?;
+        // Synthetic parser fixture: the sealed old candidate is now the baseline.
+        let hash = "a".repeat(64);
+        good["candidate_sha256"] = json!(hash);
+        let baseline = "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034";
+        let mut summary = good["summaries"]["upgrade"].clone();
+        summary["candidate_sha256"] = json!(hash);
+        summary["baseline_sha256"] = json!(baseline);
+        summary["baseline_version"] = json!("0.6.0-preview.1");
+        summary["candidate_version"] = json!("0.6.0-preview.2");
+        summary["baseline_schema"] = json!(7);
+        summary["candidate_schema"] = json!(8);
+        summary["restored_schema"] = json!(7);
+        for key in [
+            "legacy_verified_revision_preserved",
+            "no_fact_backfill",
+            "completed_receipt_replayed_without_writes",
+            "new_verified_fact_promoted",
+            "schema8_tables_removed_by_restore",
+            "legacy_proof_bytes_preserved",
+        ] {
+            summary["checks"][key] = json!(true);
+        }
+        good["summaries"] = json!({"upgrade_schema8":summary});
+        good["baseline_sha256"] = json!(baseline);
+        good["profile"] = json!("upgrade_schema8");
+        good["delivery"] = json!("MTM017-schema8");
+        good["scope"] = json!("exact_candidate_schema7_to_schema8_upgrade_not_release");
+        validate(&good, &hash, baseline, "upgrade_schema8")?;
+        assert!(validate(&good, &hash, baseline, "upgrade").is_err());
+        for (pointer, value) in [
+            (
+                "/summaries/upgrade_schema8/checks/no_fact_backfill",
+                json!(false),
+            ),
+            ("/summaries/upgrade_schema8/baseline_schema", json!(2)),
+            ("/summaries/upgrade_schema8/restored_schema", json!(8)),
+            ("/runner/exit_code", json!(101)),
+            ("/harness_source_identity/unchanged", json!(false)),
+            ("/selector_scope", json!("production")),
+            ("/production_state_modified", json!(true)),
+        ] {
+            let mut bad = good.clone();
+            *bad.pointer_mut(pointer).ok_or("schema8 fixture pointer")? = value;
+            assert!(validate(&bad, &hash, baseline, "upgrade_schema8").is_err());
+        }
+        Ok(())
+    }
 
     #[test]
     fn native_corpus_receipt_rechecks_matrix_identity_preflight_and_runner() -> Result<()> {

@@ -1,0 +1,358 @@
+{
+  "architecture": {
+    "maintenance_crates": 1,
+    "ok": true,
+    "product_crates": 8,
+    "product_edges": 18,
+    "reverse_maintenance_dependency": false
+  },
+  "checks": [
+    {
+      "exit_code": 0,
+      "name": "format",
+      "passed": true
+    },
+    {
+      "exit_code": 0,
+      "name": "clippy",
+      "passed": true
+    },
+    {
+      "exit_code": 0,
+      "name": "rust_tests",
+      "passed": true
+    },
+    {
+      "exit_code": 0,
+      "name": "diff",
+      "passed": true
+    }
+  ],
+  "commit_hook_executable_checked": true,
+  "milestone": "MTM-016",
+  "native_environment": {
+    "bubblewrap_probe": {
+      "binary_sha256": "e318903862396f96de3df57264e0158682b952fd3fb53ac23d876413e7b30f71",
+      "diagnostic_hint": "none",
+      "found": true,
+      "isolation_checks": {
+        "capabilities_dropped": true,
+        "environment_cleared": true,
+        "further_user_namespace_denied": true,
+        "new_ipc_namespace": true,
+        "new_mnt_namespace": true,
+        "new_net_namespace": true,
+        "new_pid_namespace": true,
+        "new_user_namespace": true,
+        "new_uts_namespace": true,
+        "no_new_privileges": true,
+        "protocol_valid": true,
+        "workspace_not_mounted": true
+      },
+      "process": {
+        "child_reaped": true,
+        "elapsed_ms": 5,
+        "exit_code": 0,
+        "output_limit_exceeded": false,
+        "pipes_closed": true,
+        "raw_output_recorded": false,
+        "signal": null,
+        "stderr_bytes_retained": 0,
+        "stdout_bytes_retained": 906,
+        "timed_out": false
+      }
+    },
+    "candidate_defect_attribution": "not_evaluated_by_preflight",
+    "classification": "ready_for_native_tests_not_qualified",
+    "context": {
+      "ancestor_limits_inspected": false,
+      "bounding_caps_zero": false,
+      "effective_caps_zero": true,
+      "gid_map_shape": "initial_like_not_host_proof",
+      "host_context_proven": false,
+      "namespace_occupancy_measured": false,
+      "no_new_privs": false,
+      "permitted_caps_zero": true,
+      "same_user_namespace_as_visible_pid1": null,
+      "seccomp_mode": 0,
+      "uid_map_shape": "initial_like_not_host_proof",
+      "visible_limits": {
+        "apparmor_restrict_unprivileged_userns": null,
+        "max_ipc_namespaces": 55803,
+        "max_mnt_namespaces": 55803,
+        "max_net_namespaces": 55803,
+        "max_pid_namespaces": 55803,
+        "max_user_namespaces": 55803,
+        "max_uts_namespaces": 55803,
+        "unprivileged_userns_clone": null
+      }
+    },
+    "host_settings_modified": false,
+    "limitations": [
+      "Positive visible namespace limits do not reveal ancestor quotas or current occupancy.",
+      "Restricted UID mappings and namespace equality to visible PID 1 do not identify the host or prove nesting depth.",
+      "ENOSPC/EUSERS alone cannot distinguish a configured nesting prohibition from depth/quota exhaustion.",
+      "Passing this probe is not full Native, TTY, external-tool, private-vault, workflow or release qualification."
+    ],
+    "maintenance_binary_sha256": "fbac0c5e9606fa5418e3d6a3c1c80422e5b987623b359ffa80113d093903399a",
+    "milestone": "MTM-016",
+    "native_product_runtime_tested": false,
+    "passed": true,
+    "probe_identities_unchanged": true,
+    "production_state_modified": false,
+    "python_invoked": false,
+    "raw_output_recorded": false,
+    "ready_for_native_tests": true,
+    "recorded_unix_seconds": 1790777651,
+    "recovery": {
+      "action": "run_product_tests_in_this_environment",
+      "automatic_retry": false,
+      "do_not_disable_isolation_or_raise_sysctls_automatically": true
+    },
+    "release_qualified": false,
+    "schema_version": "1.0.0",
+    "scope": "current_environment_native_prerequisites_only",
+    "source_tests_passed": null,
+    "supported": true,
+    "tests_skipped_by_preflight": false,
+    "user_namespace_probe": {
+      "classification": "available",
+      "measurement": {
+        "created": true,
+        "errno": null,
+        "errno_name": null,
+        "operation": "unshare_user",
+        "protocol": 1
+      },
+      "process": {
+        "child_reaped": true,
+        "elapsed_ms": 5,
+        "exit_code": 0,
+        "output_limit_exceeded": false,
+        "pipes_closed": true,
+        "raw_output_recorded": false,
+        "signal": null,
+        "stderr_bytes_retained": 0,
+        "stdout_bytes_retained": 88,
+        "timed_out": false
+      }
+    }
+  },
+  "passed": true,
+  "pending": [
+    "Python/shadow coverage retirement",
+    "independent full API and capability suites",
+    "real Native/browser/LaTeX/upgrade qualification"
+  ],
+  "product_test_evaluation": {
+    "exact_candidate_release_qualified": false,
+    "individual_test_counts_recorded": false,
+    "interpretation": "workspace_command_passed_with_native_prerequisites",
+    "native_environment_ready": true,
+    "passed": true,
+    "previous_failure_attribution": "not_inferred_without_comparing_sealed_runs",
+    "required_checks_passed": true,
+    "scope": "current_run_not_historical_failure_attribution",
+    "source_unchanged": true,
+    "workspace_test_command_passed": true
+  },
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "record_integrity": {
+    "baseline_history_and_notices_unchanged": true,
+    "historical_hashes_checked": 26,
+    "historical_releases": {
+      "current_release_qualified": false,
+      "historical_milestones": 12,
+      "historical_release_milestones": 6,
+      "historical_target_milestones": 6,
+      "live_selectors_checked": false,
+      "mtm015_lifecycle_evidence": {
+        "candidate_stage": {
+          "candidate_binary_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+          "path": "records/evidence/MTM-015/candidate-stage.json",
+          "phase": "candidate_stage",
+          "sha256": "5787fd9d54cb8eb918833ecc8fc8cba417adde9de0baa612577042abb506aed4"
+        },
+        "target_qualification": {
+          "candidate_binary_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+          "path": "records/evidence/MTM-015/target-qualification.json",
+          "phase": "target_qualification",
+          "sha256": "6155b14f9e5c365b0049dd2436b5f6888f403ab4d2685eb45e5e5e8079e05da5"
+        },
+        "web_client": {
+          "candidate_binary_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+          "path": "records/evidence/MTM-015/web-client.json",
+          "phase": "web_client",
+          "sha256": "345d9bdb3bd7da994b7406038ca739a18140c9e581c0ba6761f4e9328ee0040f"
+        }
+      },
+      "release_evidence": {
+        "MTM-009": {
+          "binary_sha256": "e76c2124cddb73370d902394df3c143124870abf8f05240f1a72ca835a8e2477",
+          "path": "records/evidence/MTM-009/preview-release.json",
+          "sha256": "665427fe68ff7fec6661825ffcdfb3c4898bc036600629eab1e2e1d2b72a157f",
+          "version": "0.4.0-preview.1"
+        },
+        "MTM-011": {
+          "binary_sha256": "5ed668d5bf765be2efd1b50933e941cf60dbbd414e3b6daab77745624d5cfa81",
+          "path": "records/evidence/MTM-011/preview-release.json",
+          "sha256": "4978afc094fba9f6ca5e7aaad93483d338241ad16e1bc9b4dfbd37565fb8dc3d",
+          "version": "0.4.0-preview.2"
+        },
+        "MTM-012": {
+          "binary_sha256": "545ab9ef8cc01edf804581cb52c2b1a4158d03bd8a25ea00c7785039167f3659",
+          "path": "records/evidence/MTM-012/preview-release.json",
+          "sha256": "c269822e3d35536f0c4f402edd1ea570e97ac49fe4b421216b375bbe825b342f",
+          "version": "0.4.0-preview.3"
+        },
+        "MTM-013": {
+          "binary_sha256": "3312ca75a1de8707e740963cc0add4b09430dccc9dc63a3145e4456ff2b0cdf3",
+          "path": "records/evidence/MTM-013/stable-release.json",
+          "sha256": "9244cf7179d8665127fc630d8986e6a205416d1fc0bb910b1e7f58c78d8902c8",
+          "version": "0.4.0"
+        },
+        "MTM-014": {
+          "binary_sha256": "2b2cd48bea965fd21c5c54d3be3ead6917eaf40870e9aa801c48bb9484209036",
+          "path": "records/evidence/MTM-014/preview-release.json",
+          "sha256": "97ecae64d4154479fe0e6125caf67e663f18bfd621b13ba73752e09badca4ab5",
+          "version": "0.5.0-preview.1"
+        },
+        "MTM-015": {
+          "binary_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+          "path": "records/evidence/MTM-015/preview-release.json",
+          "sha256": "7c3e635619e1a9c9e987366a3cf03a7c12185ec402fa8642d9b3b1e3cd9f29a3",
+          "version": "0.5.0-preview.2"
+        }
+      },
+      "scope": "immutable_historical_receipts_only",
+      "target_evidence": {
+        "MTM-003": {
+          "check_count": 14,
+          "path": "records/evidence/MTM-003/target-validation.json",
+          "sha256": "87d8f99465580565ebca843e7d79b44f3466d775290980fb6762bde3a99880db"
+        },
+        "MTM-004": {
+          "check_count": 10,
+          "path": "records/evidence/MTM-004/target-validation.json",
+          "sha256": "ab52686ea2a8da88e212ef60ce5df780db76ff00d44335cb5194cd03d88e3f56"
+        },
+        "MTM-005": {
+          "check_count": 15,
+          "path": "records/evidence/MTM-005/target-validation.json",
+          "sha256": "43b26b5d5b17356a6f4815a2d62a8140cad3707b177fa629322ce761ba22e6c9"
+        },
+        "MTM-006": {
+          "check_count": 8,
+          "path": "records/evidence/MTM-006/target-validation.json",
+          "sha256": "4b7096f5e51ab07243c3ab1b1e413dbd2460eceb1185e4bfa66776c108f8b7c4"
+        },
+        "MTM-007": {
+          "check_count": 12,
+          "path": "records/evidence/MTM-007/target-validation.json",
+          "sha256": "254090e5110e0ac6ea658d3ed3cfc3538fc0440f236300f5058a876826619e09"
+        },
+        "MTM-008": {
+          "check_count": 10,
+          "path": "records/evidence/MTM-008/candidate-validation.json",
+          "sha256": "7578b74e8d42d6050cbd98d17100f281f7e48b51b341977c41f92f73e960eebf"
+        }
+      }
+    },
+    "layout": {
+      "evidence_hashes_checked": 26,
+      "evidence_milestone_count": 15,
+      "governance_record_count": 14,
+      "iteration_record_count": 17,
+      "observations_reexecuted": false,
+      "relocation_count": 32,
+      "root_json_count": 0,
+      "sealed_observation_hashes_checked": 166
+    },
+    "live_deployment_checked": false,
+    "milestones": 17,
+    "ok": true,
+    "release_qualified": false,
+    "scope": "static_record_integrity_only"
+  },
+  "recorded_unix_seconds": 1790778043,
+  "release_qualified": false,
+  "retirement": {
+    "baseline_hashes_checked": 127,
+    "consolidated_with_pending_acceptance": 106,
+    "historical_comparisons_retired": 4,
+    "ok": true,
+    "pending_family_acceptance": [
+      {
+        "family": "historical_and_mtm015_target_qualification",
+        "pending": [
+          "F: exact current candidate on a capable Native host, dangerous-only command and isolation suites, TTY/timeout/descendant cleanup and available CAS tools",
+          "F: required compiled-LaTeX full/compact/repair flows and browser OAuth/independent human consent; completed external retrieval does not discharge these",
+          "F: operator-authorized copied production state and old-run resume/rollback; the existing synthetic v1 fixture is not equivalent"
+        ]
+      },
+      {
+        "family": "release_install_cutover_and_candidate_staging",
+        "pending": [
+          "F: equivalent baseline/candidate resource samples and capable-host dangerous-only Native command behavior remain pending despite completed frozen Python-free clean-build evidence",
+          "F: independently observed real web-client roundtrips and human consent where required, never inferred from frozen historical evidence",
+          "F: operator-authorized copied production-state upgrade/old-run resume/rollback remains distinct from completed prepared-copy upgrade and external SIGKILL tests",
+          "F: physical power-loss/device-cache and shared-filesystem semantics remain outside the completed process-SIGKILL scope"
+        ]
+      },
+      {
+        "family": "release_deployment_python_tests",
+        "pending": [
+          "F: all forward evidence adapters now exist, but mandatory target/browser/resource/Native/LaTeX/corpus evidence must actually pass before any release verdict",
+          "F: old resource/soak/qualification-parser mutation fixtures are preserved at the baseline; Rust frozen-byte checks protect history but do not claim forward parser equivalence"
+        ]
+      },
+      {
+        "family": "legacy_shadow_conformance_and_runtime_measurements",
+        "pending": [
+          "F: capable-host Native/TTY/CAS and target/resource qualification remains independent; deleting Python shadows is not parity evidence",
+          "F: U16-U25 real-world corpus rows remain independently required and historical resource measurements are not reused as current measurements"
+        ]
+      },
+      {
+        "family": "historical_research_math_and_web_evaluation",
+        "pending": [
+          "F: U21-U25 require new independent research, compiled proof, repair, branch-join and CAS trials on the current candidate",
+          "F: historical MTM-009/011 blind scores, web treatments and resource bindings remain immutable history and are not forward acceptance evidence"
+        ]
+      },
+      {
+        "family": "historical_tui_and_web_client_helpers",
+        "pending": [
+          "F: current real browser DCR/PKCE reconnect and independent human-consent evidence remains required",
+          "F: current TUI/operator visibility may be exercised separately; historical MTM-009/012/015 scripts are not a forward client implementation"
+        ]
+      },
+      {
+        "family": "historical_mtm014_permission_target_helpers",
+        "pending": [
+          "F: capable-host Native command/TTY/CAS, target/resource and compiled-LaTeX gates remain required on the current candidate",
+          "F: real browser and independent human-consent evidence remain required by the release gate; dangerous-only scripted Native tests are not human evidence"
+        ]
+      }
+    ],
+    "release_qualified": false,
+    "replaced_by_rust": 17,
+    "retired_python_files": 127,
+    "retirement_families": 8,
+    "runtime_parity_proven": false,
+    "scope": "reviewed_python_deletion_provenance"
+  },
+  "schema_version": "1.0.0",
+  "scope": "rust_source_with_inherited_host_tests",
+  "source_identity": {
+    "after_sha256": "39f42266b1dafc323b525130ba00cb11aac6f06f6a4448a132cdad6ac2add8f0",
+    "before_sha256": "39f42266b1dafc323b525130ba00cb11aac6f06f6a4448a132cdad6ac2add8f0",
+    "commit_after": "9f8b9eb28b4aed1f4e81a4483a3433a9a30a8ac2",
+    "commit_before": "9f8b9eb28b4aed1f4e81a4483a3433a9a30a8ac2",
+    "hash_scope": "mtm-rust-source-v1",
+    "unchanged": true
+  },
+  "test_failure_attribution": "Historical comparisons belong in reviewed evidence, not the prerequisite probe.",
+  "tests_skipped_by_preflight": false
+}

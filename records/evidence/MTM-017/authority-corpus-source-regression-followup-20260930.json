@@ -1,0 +1,32 @@
+{
+  "schema": "mtm017-source-failure-followup-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T10:51:53.243367+00:00",
+  "source_sha256": "75d97e9f49ff758bc35d4e00bc250054e3e24a0095147e62ef93a5e231d76c2b",
+  "original_failed_gate": {
+    "path": "records/evidence/MTM-017/authority-corpus-whole-source-r3-failed-20260930.json",
+    "sha256": "5214ea3ec16b5277e950ca110a94af554d335c94c9c2a8328cc97bab0e615fb7"
+  },
+  "failed_gate_remains_failed": true,
+  "original_failure": "task has no minimal submission after 496 normal roundtrips; one normal rejection, no normal capability-invalid result",
+  "root_cause": "indeterminate",
+  "source_review_hypothesis": "A post-commit next-task failure can return a successful persisted submission summary without a new task. A 24-bit global domain identifier collision is a code-level candidate, not an established explanation of this failure.",
+  "hypothesis_proven": false,
+  "product_runtime_modified": false,
+  "focused_command_id": "KpiXhgjzPhaPfz1uW4KdbafX",
+  "focused_result": {
+    "path": "records/evidence/MTM-017/authority-corpus-capability-focused-20260930.json",
+    "sha256": "b5ce7d1884f8d14580820c6054f914294c319f029bc89665b5339c8b879dbf36"
+  },
+  "focused_source_binary_sha256": "8cdc4747159795cbfe0dfd822fabb45acb24861a799f56550fe36b9acad254dc",
+  "focused_exit_code": 0,
+  "focused_normal_roundtrips": 500,
+  "focused_normal_rejections": 0,
+  "focused_success_does_not_resolve_original_failure": true,
+  "full_gate_rerun_still_required": true,
+  "accepted_delta": 0,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "production_selector_changed": false,
+  "production_state_modified": false
+}

@@ -1,0 +1,39 @@
+{
+  "schema": "mtm017-u26-waiver-state-v1",
+  "milestone": "MTM-017",
+  "updated_at": "2026-09-30T12:15:34Z",
+  "status": "U26_governance_waived_technical_evidence_incomplete",
+  "decision_id": "MTM017-READINESS-DECISION-006",
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "task_id": "U26",
+  "repeats": [
+    1,
+    2,
+    3
+  ],
+  "waiver": {
+    "path": "records/evidence/MTM-017/u26-human-waiver-20260930.json",
+    "sha256": "011fdee5b398b768088cc1dfab42c9f6a41a743be60dddc51234bd770f1f1a23"
+  },
+  "original_87_pointer": {
+    "path": "records/governance/mtm017-corpus-union.json",
+    "sha256": "9e2d9de518a3ab1225134164828f1f83ddcb83d0f72c55399301ea53452c1393"
+  },
+  "technical_accepted_trials": 87,
+  "technical_pending_trials": 3,
+  "human_waived_cells": 3,
+  "total_corpus_cells": 90,
+  "technical_accepted_delta": 0,
+  "corpus_count_incremented": false,
+  "U26_technical_passed": false,
+  "U26_governance_disposition": "waived_by_operator",
+  "full_technical_corpus": false,
+  "readiness_adapter_implemented": false,
+  "implementation_complete": "unknown",
+  "research_accepted": true,
+  "research_acceptance_scope": "unchanged_original_fifteen_only",
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "production_selector_changed": false,
+  "production_state_modified": false
+}

@@ -1,0 +1,133 @@
+{
+  "schema": "mtm017-clean-build-provenance-observation-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T04:26:54Z",
+  "scope": "two_clean_builds_and_read_only_difference_diagnosis_not_release_qualification",
+  "candidate": {
+    "version": "0.6.0-preview.2",
+    "sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "size_bytes": 13817960,
+    "unchanged": true
+  },
+  "source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+  "source_sha256": "0adec4b02a8b54fd20fb30c796c9959ccc346cc0f9336517fc47eafcb6951e02",
+  "runner": {
+    "path": "scripts/mtm017-clean-build-provenance.sh",
+    "sha256": "24177bbe96970d926e76bea64d720f3790d3d70e8eea624f5075df7b7be9971a",
+    "command": "bash scripts/mtm017-clean-build-provenance.sh --run --authorize MTM-017-CLEAN-BUILD --dependency-cache /home/lk/.cargo",
+    "ctm_command_id": "Vwgv235dHLMIBo2t5QVRZGuk",
+    "exit_code": 1,
+    "failure": "exact_candidate_not_reproduced",
+    "timed_out": false
+  },
+  "retained_session": "target/mtm017-clean-build-provenance/session.Cqmkh2dI",
+  "build_results": {
+    "successful_clean_builds": 2,
+    "build_exit_codes": [
+      0,
+      0
+    ],
+    "both_builds_equal": true,
+    "rebuilt_sha256": "b55dd460e8f2df80c149dcf659b8d29871d2fc9a0e505c51c915feaae8109147",
+    "rebuilt_size_bytes": 13832488,
+    "both_match_selected_candidate": false,
+    "source_before_after_equal": true,
+    "compiler_inputs_unchanged": true,
+    "original_dependency_input_content_hashes_unchanged": true,
+    "existing_compiled_caches_selected_or_cleaned": false,
+    "all_cache_zero_write_syscalls_proven": false,
+    "build_logs_and_artifacts_retained": true,
+    "private_dependency_copy_retained": true,
+    "successful_round_scratch_removed_after_artifact_and_receipt_preservation": true
+  },
+  "sealed_reports": [
+    {
+      "path": "records/evidence/MTM-017/clean-build-run-1-20260930.json",
+      "sha256": "225625663585e13e6a689f59371f2bb6efcdb1db7b0529079cfbeb64a963df11"
+    },
+    {
+      "path": "records/evidence/MTM-017/clean-build-run-2-20260930.json",
+      "sha256": "18ac9d0baa5246a58a104f291a72b41e3823bd095e5b2ead809bc178dc445f02"
+    },
+    {
+      "path": "records/evidence/MTM-017/clean-build-comparison-20260930.json",
+      "sha256": "81aa8d286317d5f6ec0378a442628458f31518f67c61c3c21f330ebab741fc16"
+    }
+  ],
+  "read_only_diagnosis": {
+    "registry_path_occurrences": {
+      "candidate_marker": "/home/lk/.cargo/registry",
+      "candidate_count": 229,
+      "rebuilt_marker": "session.Cqmkh2dI/cargo-home/registry",
+      "rebuilt_count": 229
+    },
+    "candidate_compiler_comments": [
+      "LLD 22.1.8",
+      "GCC conda-forge 15.2.0-7",
+      "GCC Ubuntu 13.3.0-6ubuntu2~24.04.1",
+      "GCC Red Hat 14.3.1-2",
+      "rustc 1.98.0 (88d9e12ae)"
+    ],
+    "rebuilt_compiler_comments": [
+      "LLD 22.1.8",
+      "GCC Ubuntu 13.3.0-6ubuntu2~24.04.1",
+      "rustc 1.98.0 (88d9e12ae)"
+    ],
+    "candidate_gnu_build_id_present": false,
+    "rebuilt_gnu_build_id": "05723ba2378d4cc9ca1b15f74e7a7115a05ca7c4",
+    "candidate_text_section_size_hex": "7c2cfa",
+    "rebuilt_text_section_size_hex": "7c2d2a",
+    "text_section_size_difference_bytes": 48,
+    "retained_native_archive": {
+      "path": "target/mtm-tool/release/build/libsqlite3-sys-d341ad8e9b2d4f2b/out/libsqlite3.a",
+      "sha256": "f00910c8f4af6d3cd7fd7888a7f215241ae6010fa7bcd66951399fdf074f3ad7",
+      "compiler_comment": "GCC Ubuntu 13.3.0",
+      "recorded_cc": "None",
+      "recorded_cflags": "None",
+      "binding_limit": "Existing mutable build-cache observation; not a sealed original final-link command."
+    },
+    "currently_available_conda_startup_objects": {
+      "compiler": "/home/lk/miniconda3/bin/x86_64-conda-linux-gnu-gcc",
+      "compiler_version": "conda-forge gcc 15.2.0-7",
+      "crtbeginS_sha256": "e009581607738eac6ba6ae19ad39155d0b25e480f019f05c9f3658c115aba170",
+      "crtbeginS_comment": "GCC conda-forge 15.2.0-7",
+      "Scrt1_sha256": "776b373619f5714f35e6111e49d9ce4803b073588233257e5141b0f480562d63",
+      "Scrt1_comment": "GCC Red Hat 14.3.1-2",
+      "inference": "The available Conda startup-object markers are consistent with extra markers in the candidate. Their original use and exact historical hashes are not established by these markers."
+    },
+    "retained_cargo_fingerprints_rustflags": [],
+    "source_free_namespace_probe": {
+      "tool": "bubblewrap 0.9.0",
+      "successful_command_id": "bfXluLz6c9n6ZE4gT8hRs9wf",
+      "exit_code": 0,
+      "exact_checkout_path_visible": true,
+      "exact_cargo_home_path_visible": true,
+      "actual_host_home_state_and_caches_not_mounted": true,
+      "build_executed": false,
+      "earlier_attempt": {
+        "command_id": "QtXiy7u39ga7xN8h9U8MIbYe",
+        "exit_code": 2,
+        "reason": "Unterminated quoted string in the probe shell; no build or host state modification."
+      },
+      "scope": "Empty-namespace capability only; no reconstruction of historical compiler/linker inputs."
+    },
+    "path_is_proven_sole_cause": false,
+    "original_final_link_argv_and_effective_build_environment_recovered": false,
+    "additional_rebuild_performed": false,
+    "minimum_next_input": "The original build command/verbose build log and non-secret compiler/linker selection record for candidate 13d7890. Do not infer unknown CC/linker/flags or try parameter combinations until a hash matches."
+  },
+  "research_acceptance_preserved": {
+    "path": "records/governance/mtm017-research-corpus.json",
+    "sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24",
+    "research_accepted": true,
+    "scope": "current_13d7890_candidate_U21-U25_fifteen_trial_subset_only",
+    "accepted_trials": 15
+  },
+  "installed_selectors_observed_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "frozen_mtm016_driver_changed": false,
+  "full_release_input_created": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "deployment_authorized": false
+}

@@ -24,10 +24,11 @@ fn current_identity_does_not_publish_the_migration_baseline() -> Result<(), Box<
     let contract = read("contract")?;
     let status = read("status")?;
     assert_eq!(info["version"], env!("CARGO_PKG_VERSION"));
+    assert_eq!(info["version"], "0.6.0-preview.2");
     assert_eq!(info["public_tool_count"], 24);
     assert_eq!(info["hidden_alias_count"], 0);
     assert_eq!(info["workflow_protocol_version"], 3);
-    assert_eq!(info["state_schema_version"], 7);
+    assert_eq!(info["state_schema_version"], 8);
     assert_eq!(info["python_runtime_required"], false);
     assert_eq!(contract["authority"], "rust");
     assert_eq!(contract["hidden_aliases"], 0);

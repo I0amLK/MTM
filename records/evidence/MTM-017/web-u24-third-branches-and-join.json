@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "real_web_u24_third_two_branch_isolation_barrier_and_join",
+  "observed_at": "2026-09-27T15:09:04Z",
+  "run_id": "run-u24-r1-geometric-series-retry2-64fd86cb5f8d",
+  "snapshot_id": "round-1-9fb9c68d",
+  "operator_reported": {
+    "branch_a_join_only_read_denied": true,
+    "branch_a_denial_code": "ROLE_ACCESS_DENIED",
+    "branch_a_tool_category": "INVALID_ARGUMENT",
+    "branch_b_join_only_read_denied": true,
+    "branch_b_denial_code": "ROLE_ACCESS_DENIED",
+    "branch_b_tool_category": "INVALID_ARGUMENT",
+    "join_read_returned_exactly_two_solved_results": true,
+    "join_complete_succeeded": true,
+    "assembler_not_executed_in_join_session": true
+  },
+  "machine_observed": {
+    "state": "assemble",
+    "status": "active",
+    "transition_sequence": 9,
+    "barrier_transition_sequence": 8,
+    "join_transition_sequence": 9,
+    "branch_a": {
+      "branch_id": "branch-1-1-aefe6a",
+      "domain_id": "branch-domain-branch-1-1-aefe6a",
+      "plan_id": "plan-r1-1",
+      "status": "sealed",
+      "result_sha256": "0017a263035f8369f4d2320dc961b735e71905b6041852286c35c532e6f87dbf"
+    },
+    "branch_b": {
+      "branch_id": "branch-1-2-3dcd89",
+      "domain_id": "branch-domain-branch-1-2-3dcd89",
+      "plan_id": "plan-r1-2",
+      "status": "sealed",
+      "result_sha256": "4a5559e349fec966dbb9c8fedb638ec7d5020ec22008c64f1bc7a2b00abda7f8"
+    },
+    "join_considered_branch_ids": [
+      "branch-1-1-aefe6a",
+      "branch-1-2-3dcd89"
+    ],
+    "join_selected_branch_id": "branch-1-2-3dcd89",
+    "join_outcome": "solved",
+    "join_result_sha256": "b335ec8e0bac216ea5338baf669ec8ac4e69344fe4a8eb728b6440f9bc01e0ed"
+  },
+  "credentials_recorded": false,
+  "capabilities_recorded": false,
+  "branch_private_memory_recorded": false,
+  "release_qualified": false
+}

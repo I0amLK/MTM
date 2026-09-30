@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-07T14:54:38Z",
+  "updated_at": "2026-09-30T14:43:53Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -549,7 +549,7 @@
     {
       "id": "MTM-016",
       "title": "Rust-native maintenance and usable tools",
-      "status": "in_progress",
+      "status": "completed",
       "priority": "P1",
       "production_authority_before": "rust",
       "production_authority_after": "rust",
@@ -577,6 +577,37 @@
       ],
       "rollback": "Revert the dedicated MTM-016 branch commits; leave installed preview.2 and existing MTM state untouched.",
       "dependencies": ["MTM-015"]
+    },
+    {
+      "id": "MTM-017",
+      "title": "Dangerous-only Native and Danus-style fact memory",
+      "status": "completed",
+      "priority": "P1",
+      "production_authority_before": "rust",
+      "production_authority_after": "rust",
+      "functional_goal": "Make dangerous the only Native mode (retiring safe/trusted and the consent/grant ledger) and give rethlas_step long-term project memory: a verifier-gated, content-addressed fact-graph DAG plus typed shared findings, surfaced as a bounded JSON graph view.",
+      "scope": [
+        "Retire NativeMode safe/trusted with explicit rejection; keep Bubblewrap isolation, risk classification and executable revalidation",
+        "Retire the consent/grant ledger and the F2 scripted-consent qualification profile while preserving validation of sealed MTM-016 receipts",
+        "Add a schema-8 SQLite fact graph promoted only from the final verified proof, with cascade revocation and deterministic JSON-graph export",
+        "Project typed findings (dead ends, obstacles, counterexamples, plans) into project-scoped memory and surface a bounded view through rethlas_step"
+      ],
+      "non_goals": [
+        "No production selector change, installed-binary change or production data rewrite",
+        "No new public tool; the tool count stays 24 and the tool name stays rethlas_step",
+        "No per-lemma verifier gate; facts come only from the final verified proof",
+        "No edit or relabeling of sealed historical evidence",
+        "No change to workflow transition or finalizer authority"
+      ],
+      "acceptance_levels": ["A0", "A1", "A3"],
+      "validation_commands": [
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets --locked -- -D warnings",
+        "cargo test --workspace --locked",
+        "cargo xtask records"
+      ],
+      "rollback": "Revert the dedicated MTM-017 branch commits; a schema-8 state database requires restoring an untouched pre-upgrade copy.",
+      "dependencies": ["MTM-016"]
     }
   ],
   "edges": [
@@ -601,9 +632,10 @@
     {"source": "MTM-013", "target": "MTM-012"},
     {"source": "MTM-014", "target": "MTM-013"},
     {"source": "MTM-015", "target": "MTM-014"},
-    {"source": "MTM-016", "target": "MTM-015"}
+    {"source": "MTM-016", "target": "MTM-015"},
+    {"source": "MTM-017", "target": "MTM-016"}
   ],
-  "todo": ["MTM-016"],
+  "todo": [],
   "events": [
     {
       "event_id": "MEVT-001",
@@ -1092,6 +1124,648 @@
       "status_before": "approved",
       "status_after": "in_progress",
       "summary": "Started on an isolated branch cloned from verified b3ab147 main in the MTM workspace because CTM is unavailable; no production selector, binary, research data or historical evidence is modified."
+    },
+    {
+      "event_id": "MEVT-062",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-25T10:18:16Z",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "Operator approved MTM-017 in the project conversation: dangerous-only Native, retirement of the unreachable consent/grant ledger, and Danus-style fact-graph memory in SQLite surfaced through rethlas_step with facts promoted only from the final verified proof."
+    },
+    {
+      "event_id": "MEVT-063",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-25T10:18:16Z",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Started on branch work/mtm017-dangerous-fact-memory from 8336e08; no production selector, installed binary, research data or historical evidence is modified."
+    },
+    {
+      "event_id": "MEVT-064",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T02:00:30Z",
+      "status_before": "in_progress",
+      "status_after": "in_progress",
+      "summary": "Stages A-D are implemented with focused schema, fact, finding, workflow and CLI regressions. A prior Linux source gate and 500-assessment capability run passed before the final edits; the final-source gate remains pending because the managed continuation sandbox denies local test-server binding. No tests are waived and no release qualification is inferred."
+    },
+    {
+      "event_id": "MEVT-065",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T02:08:23Z",
+      "status_before": "in_progress",
+      "status_after": "in_progress",
+      "summary": "The stable final source passed format, all-target Clippy, storage/workflow tests, records, retirement and diff checks. The complete source gate remained nonzero in the managed sandbox: 28 CLI tests could not start local endpoints and two Native host tests failed; positive Native preflight and final-source capability qualification remain pending on a capable host. The failed diagnostic is retained under records/evidence/MTM-017."
+    },
+    {
+      "event_id": "MEVT-066",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T08:14:02Z",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "summary": "Completed MTM-017 development A0/A1/A3 on final source 61922484c1f969365660b052ab878250738542bf25bd870f40b3b6851ef1930d: 628 workspace tests passed (one inherited ignore), current-source 500/500 capability regression passed, closing review fixes/regressions and four implementation commits plus records closeout retained. Exact-artifact release and MTM-016 completion remain separate; no production deployment."
+    },
+    {
+      "event_id": "MEVT-067",
+      "milestone_id": "MTM-016",
+      "at": "2026-09-26T08:39:36Z",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "summary": "Reconciled the already sealed September 15 preview release with unchanged receipt/hash/lineage and matching installed selectors. No deployment rerun. The previous 0.5.0-preview.2 rollback binary is now missing; this operational gap and schema-8 release work remain explicit."
+    },
+    {
+      "event_id": "MEVT-068",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T08:52:32Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Appended seven current optimized-snapshot machine qualification passes at 20e5178, including exact-binary 500/500 capability, Native 15/15 subset, real CAS/LaTeX/retrieval, resources and disposable SIGKILL recovery. Development stays complete; distinct release version, schema-7 upgrade, real-client/independent mathematics, remaining corpus and deployment review are still pending."
+    },
+    {
+      "event_id": "MEVT-069",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T09:21:53Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Implemented independently versioned preview.2 and the additive pinned-baseline schema7-to-schema8 upgrade profile. Direct paired runtime checks passed 21/21; stale deployment test version arguments were reproduced and corrected without changing installer policy. The failed source observation is retained; final-source and versioned-artifact qualification remain pending. No deployment or operator-data access."
+    },
+    {
+      "event_id": "MEVT-070",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T09:36:34Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Versioned preview.2 source passed 633 tests with zero failures and one inherited ignore; all eight exact-artifact machine profiles passed at 13d7890, including 21 schema7-to-schema8 upgrade/restoration checks and 500/500 assessments. The earlier fixture failure remains sealed. Operator-state copy, independent client/mathematical trials, remaining corpus and complete release readiness remain pending; no production changes."
+    },
+    {
+      "event_id": "MEVT-071",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T10:22:59Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Prepared and started the exact preview.2 artifact in an independent owner-private web-test session. Launcher contracts, Native preflight, idempotent supervision, stop/restart, HTTPS metadata and unauthenticated MCP rejection passed. The test database starts empty. Actual operator browser login and mathematical trials remain pending; no product rebuild, production selector/state change or release claim."
+    },
+    {
+      "event_id": "MEVT-072",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T12:45:44Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Operator-reported real-web compact generation reached the independent verifier boundary on run-compact-odd-sum-3d868d6cc457. Machine state confirms verify/active with LaTeX passed, no verdict, no seal, no final verified artifact and no fact link. An INVALID_PROOF_FACTS manifest correction was reported without replaying the retained proof write. Independent review/finalizer and all broader release conditions remain pending."
+    },
+    {
+      "event_id": "MEVT-073",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T12:45:44Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The separate real-web reviewer reported substantive checks with no critical error or gap; the server computed correct. Machine state confirms verify-to-finalize-to-done, sealed output SHA ceb83e22..., and no project fact as expected because the first run was not project-linked. A fixed project-linked promotion and cross-run dependency-memory test is prepared next."
+    },
+    {
+      "event_id": "MEVT-074",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T13:05:34Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Real-web project Stage A reached verify on run-web-memory-odd-sum-04d914f855b0 after a genuine LaTeX repair cycle. Machine state confirms the project/claim binding, pending promotion, unchanged open r1, zero verified revisions/facts before verifier finalization and no final artifact. Independent review is the next required step."
+    },
+    {
+      "event_id": "MEVT-075",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T13:20:06Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Independent Stage-A review returned no gap and the server computed correct. Machine state confirms finalizer completion, r1 OPEN/SUPERSEDED, new r2 VERIFIED/ACTIVE with source run and fact c4ec50b45b618aa0, one active project fact, no predecessor, and sealed final artifact SHA 7cd85844.... Stage B later-run project_memory observation is prepared."
+    },
+    {
+      "event_id": "MEVT-076",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T13:27:10Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Stage B later-run observation passed before any generator submission. The generator saw advisory project memory with one verified base fact, zero edges and no typed findings. Machine state confirmed assess/active, zero submission receipts, one active project fact and no fact edge."
+    },
+    {
+      "event_id": "MEVT-077",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T13:42:26Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Stage C generation reached verify with the exact dependency revision web-memory-odd-sum-r2 in the manifest. Machine state confirms promotion still pending, no shifted target fact or final artifact, and the base fact remains predecessor-free. Independent review/finalization is required before checking the new dependency edge."
+    },
+    {
+      "event_id": "MEVT-078",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T13:55:52Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Stage C independent review completed successfully. Finalization promoted the shifted project fact with exactly one predecessor pointing to the previously verified base fact, while that base fact retained zero predecessors. The resulting active project graph has two nodes and one edge."
+    },
+    {
+      "event_id": "MEVT-079",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T14:05:43Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "A third fresh project run observed the completed advisory project-memory graph as exactly two active facts and one shifted-to-base predecessor edge, with no revocation, non-project pollution, typed finding or verifier-private leakage. The observation run made no workflow submission and cancelled normally. The real-web project-memory path is complete."
+    },
+    {
+      "event_id": "MEVT-080",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T15:09:51Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U22 real-web full workflow reached verify after actual theorem/paper retrieval. The manifest binds only checked reference ref-60ddb7444177a737 for arXiv:1001.1949 Lemma 2.20; database state confirms full-route progression, LaTeX pass, zero verifier audits so far, and no final artifact. Independent mathematical and reference audit is now required."
+    },
+    {
+      "event_id": "MEVT-081",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T15:27:09Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U22 independent real-web review completed with server verdict correct and a material SOURCE_VERIFIED audit of the sole bound reference. Audit proof and manifest hashes exactly match the finalized artifact and manifest; the run sealed without repair. U23 seeded logical-gap repair is prepared next."
+    },
+    {
+      "event_id": "MEVT-082",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T15:36:20Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U23 seeded compact draft reached verify with required LaTeX passing and no verifier verdict or final artifact. Two earlier repair cycles were mechanical LaTeX fixes for undefined mathbb and are explicitly excluded from the mathematical repair claim. The current compilable seeded draft hash is a770eed4..., and the exact seed description was removed from the workspace before blind independent review."
+    },
+    {
+      "event_id": "MEVT-083",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T15:59:27Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The blind U23 verifier independently located the seeded quantifier gap. Persisted verification records server verdict wrong with one located gap and concrete repair guidance; the normalized report was copied into generation-visible memory. The operator reported transition to repair with no verifier proof write."
+    },
+    {
+      "event_id": "MEVT-084",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T16:15:13Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "A separate U23 repair replaced the seeded draft with a different proof hash f9fbdc7f..., restored required LaTeX and returned the run to verify. The prior wrong verdict and original verified-proof hash remain recorded until the second independent verifier runs; no final artifact exists yet."
+    },
+    {
+      "event_id": "MEVT-085",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T16:29:30Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The second independent U23 verifier found no remaining gap. Server verdict became correct, finalization sealed proof hash f9fbdc7f..., and last submitted/verified/final artifact hashes all match the repaired bytes rather than the seeded draft. U23-r1 now satisfies the seeded-gap repair/recompile/reverify structure."
+    },
+    {
+      "event_id": "MEVT-086",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T16:41:02Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U24-r1 root generation prepared two distinct branch domains from induction and algebraic plans. Machine state is branch_run with induction running and algebraic pending on one frozen snapshot; no branch result or join result exists yet. The first branch is handed to a separate branch session next."
+    },
+    {
+      "event_id": "MEVT-087",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T23:43:45Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U24 Branch A completed in its independent branch domain. The operator observed a ROLE_ACCESS_DENIED attempt against the join-only sealed-branch resource; machine state confirms Branch A sealed with result hash ec0bd951..., Branch B only running with assignment bytes, barrier still incomplete and no join result."
+    },
+    {
+      "event_id": "MEVT-088",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-26T23:50:59Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U24 Branch B completed in its independent branch domain with the same expected ROLE_ACCESS_DENIED join-only read. Machine state confirms both branches sealed, Branch B result hash ff1e4833..., transition reason branch_sealed_barrier_complete, state branch_join and no join result yet."
+    },
+    {
+      "event_id": "MEVT-089",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T00:54:16Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U24 join executed only after both branches were sealed. The join considered exactly the induction and algebraic branch ids, selected the algebraic route, persisted result hash ec2cf189..., and advanced to assemble. No assembler proof was submitted in the join session."
+    },
+    {
+      "event_id": "MEVT-090",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T12:29:30Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The first U24-r1 trial reached verify with required LaTeX and assembled proof hash a6819213..., but final review could not continue because the original OAuth owner connection was lost and the replacement ChatGPT connection registered as a distinct client. The old run is preserved unchanged and classified as an external owner-continuity interruption, not a mathematical failure; a replacement U24 trial is authorized under the current owner."
+    },
+    {
+      "event_id": "MEVT-091",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T12:47:58Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The replacement U24-r1 run under the current OAuth owner reached branch_run. Machine state confirms two fresh branch domains on snapshot round-1-e92b3d79: induction running and algebraic pending, with no branch result and no join result. Branch A is handed to a separate branch session next."
+    },
+    {
+      "event_id": "MEVT-092",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T12:54:33Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Replacement U24 Branch A completed in its independent induction domain after the expected join-only read denial. Machine state confirms Branch A sealed with result hash ac0464d0..., Branch B mechanically activated as running, barrier still incomplete and no join result."
+    },
+    {
+      "event_id": "MEVT-093",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T12:59:57Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Replacement U24 Branch B completed in its independent algebraic domain after the expected join-only read denial. Machine state confirms both branches sealed, Branch B result hash 5a69901c..., transition reason branch_sealed_barrier_complete, state branch_join and no join result. One pre-write CAPABILITY_INVALID was operator-reported and the successful retry used fresh authority."
+    },
+    {
+      "event_id": "MEVT-094",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T14:08:00Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The second U24-r1 trial lost OAuth owner continuity after both branches sealed and the barrier advanced to branch_join. The new ChatGPT connection is a distinct OAuth client, the old run remains active with no join result, and the trial is preserved as an external owner-continuity interruption rather than a branch or mathematical failure. A third U24 trial is required."
+    },
+    {
+      "event_id": "MEVT-095",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T14:13:28Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The third U24-r1 trial under the current OAuth owner reached branch_run. Machine state confirms two fresh branch domains on snapshot round-1-9fb9c68d: induction running and algebraic pending, with no branch result and no join result. Branch A is next."
+    },
+    {
+      "event_id": "MEVT-096",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T15:09:04Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Third U24 Branch A and Branch B independently sealed after expected join-only read denials. Machine state confirms the barrier completed at sequence 8, join considered exactly those two sealed branches at sequence 9, selected the algebraic branch, persisted join result hash b335ec8e..., and advanced to assemble."
+    },
+    {
+      "event_id": "MEVT-097",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T15:23:46Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Third U24-r1 completed end to end. Assembly passed required LaTeX on the first submission, independent verification found no gaps or critical errors, the server computed verdict correct, finalize sealed the run at sequence 13, and proof_verified.tex exactly matches the verifier-approved assembled proof hash 0049b6b1...."
+    },
+    {
+      "event_id": "MEVT-098",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T15:45:00Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U25 preview.2 research infrastructure was versioned without relabeling MTM-016. The collector/precheck now select one of two closed candidate identities, MTM-017 is currently restricted to U25 dangerous-Native session-v2 evidence, and a fresh U25 launcher plus non-overwriting fixed-material seal path passed 132 xtask tests, clippy, records, retirement and Bash synthetic checks. Exploratory CAS probes in the operator web session remain non-acceptance evidence."
+    },
+    {
+      "event_id": "MEVT-099",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T15:58:16Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The first U25 session prepare attempt failed closed before creating the MTM-017 research root because two launcher command lines retained literal patch-marker plus characters. No candidate or workflow started. The launcher was repaired to use single-line commands and per-file tracked-input checks, and Bash syntax, tracked-input and patch-marker scans pass."
+    },
+    {
+      "event_id": "MEVT-100",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-27T16:01:11Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The second U25 prepare attempt exposed four remaining literal patch-marker arguments during directory creation. It left only a retained 0700 directory skeleton with zero files: no candidate, session manifest, OAuth key, database or workflow. All space-plus-space markers were removed and the launcher now self-scans for this corruption before creating a session."
+    },
+    {
+      "event_id": "MEVT-101",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T00:25:00Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "The first formal U25-r1 fresh research trial was preserved as a failed CAS attempt before workflow generation: Sage exited 1 because the input referenced an undefined SAGE_VERSION symbol, while Magma exited 0. The run remained at assess, no same-trial Sage re-execution was performed, and a fresh replacement session was required."
+    },
+    {
+      "event_id": "MEVT-102",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T00:56:27Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Replacement U25-r1 fresh session reached verify after first-pass required LaTeX. SageMath 10.9 and Magma V2.29-8 each executed exactly once with exit 0 on t=-1,0,1,2 and both reported rank 2, nullity 1. Five fixed CAS evidence files were sealed into the private session root. The assembler proof and manifest are hash-bound; independent reviewer submission remains pending."
+    },
+    {
+      "event_id": "MEVT-103",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T01:15:00Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Independent U25-r1 review completed on the same OAuth owner. Ten substantive statement checks covered rank-nullity, the matrix argument, parameter coverage and both CAS executions. The server computed verdict correct, sealed the run done, and the final artifact hash remained 229531ec...."
+    },
+    {
+      "event_id": "MEVT-104",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T01:40:01Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U25-r1 collection completed after fail-closed infrastructure repairs. ResearchIdentity now binds MTM-016 to schema 7 and MTM-017 to schema 8; the collector fixed-input directory was populated with six exact hash-checked route files; the review observation was mechanically rebound to raw verification-report bytes and normalized to the closed review schema. research-collect and explicit research-precheck both passed with bundle hash 9da21c67..., 15 artifacts, zero workflow mutations and no corpus count increment. A standalone MTM-017 U25-r1 receipt was sealed."
+    },
+    {
+      "event_id": "MEVT-105",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T08:30:00Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U25-r2 stopped at assess after Sage completed the finite-field checks but Magma was unavailable for algebra execution in the current environment. The same Magma wrapper bytes had succeeded for U25-r1. No same-trial retry was attempted, so U25-r2 remains a preserved failed CAS trial pending a fresh replacement."
+    },
+    {
+      "event_id": "MEVT-106",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T08:48:34Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "After Magma access was restored, a fresh U25-r2 replacement session ran SageMath 10.9 and Magma V2.29-8 exactly once each for p=2,3,5; both confirmed all field elements as simple roots, complete linear factorization and nonzero derivatives. The generator then passed required LaTeX on the first submission and stopped at verify with proof hash 13477046... and manifest hash 96ac2e24.... Independent review remains pending."
+    },
+    {
+      "event_id": "MEVT-107",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T09:00:00Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Independent U25-r2 review completed on the same OAuth owner with twelve substantive checks covering the finite-field proof, the p=2 derivative edge case, squarefreeness, factorization, and both CAS outputs. The server computed verdict correct and sealed the replacement run done with final proof hash 13477046...."
+    },
+    {
+      "event_id": "MEVT-108",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T09:08:52Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U25-r2 review binding was mechanically normalized to the raw verification-report digest and closed review schema without changing the twelve substantive checks. Six route files were sealed to the collector input directory. research-collect and explicit research-precheck both passed with bundle hash 2f333a61..., 15 artifacts, zero workflow mutations and no corpus count increment. A standalone MTM-017 U25-r2 receipt was sealed."
+    },
+    {
+      "event_id": "MEVT-109",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T10:54:18Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Fresh U25-r3 session ran SageMath 10.9 and Magma V2.29-8 exactly once each. Both returned monic gcd X-1, Bezout coefficients 1 and -X, and explicitly evaluated the combination to X-1. The generator passed required LaTeX on the first submission and stopped at verify with proof hash 58b2f2a7... and manifest hash 2b6085c6.... Independent review remains pending."
+    },
+    {
+      "event_id": "MEVT-110",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T11:40:00Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Independent U25-r3 review completed on the same OAuth owner with ten substantive checks covering the Euclidean combination, common-divisor implication, divisibility, monic normalization, Bezout coefficients, direct identity expansion, and both CAS outputs. The server computed verdict correct and sealed the run done with final proof hash 58b2f2a7...."
+    },
+    {
+      "event_id": "MEVT-111",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T11:49:49Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U25-r3 review was mechanically normalized to the raw verification-report digest and closed review schema without changing the ten substantive checks. Six route files were sealed to the collector input directory. research-collect and explicit research-precheck both passed with bundle hash 4a993f60..., 15 artifacts, zero workflow mutations and no corpus count increment. A standalone MTM-017 U25-r3 receipt was sealed, completing all three U25 standalone reviewed receipts."
+    },
+    {
+      "event_id": "MEVT-112",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T12:05:51Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U21-U24 research policy was versioned without mutating MTM-016 history. MTM-016 U21-U24 remain session-v1/safe/trial-v1; MTM-017 U21-U24 now require session-v2/dangerous/trial-v1. Collector and precheck choose policy by milestone plus task, reject stale safe/v1 MTM-017 sessions, and preserve schema-8 database binding. A dedicated preview.2 U21-U24 launcher with route-specific fixed evidence allowlists passed synthetic route checks, 23 precheck tests, 6 collector tests and clippy. No new U21-U24 trial or corpus import was performed by this infrastructure step."
+    },
+    {
+      "event_id": "MEVT-113",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T12:30:36Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Fresh U21-r1 preview.2 session used compact mode under session-v2/dangerous Native. The generator proved the subspace dimension formula by extending a basis of U intersect W to bases of U and W, explicitly covering degenerate zero-length basis lists. Required LaTeX passed on the first submission and the run stopped at verify with proof hash a200cbe9... and manifest hash e9149140.... Independent review remains pending."
+    },
+    {
+      "event_id": "MEVT-114",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T12:42:00Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Independent U21-r1 review completed on the same OAuth owner with ten substantive checks covering the intersection basis, extensions to U and W, spanning, linear independence, coordinate uniqueness, dimension counting, degenerate cases and manifest scope. The server computed verdict correct and sealed the compact run done with final proof hash a200cbe9...."
+    },
+    {
+      "event_id": "MEVT-115",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T12:48:15Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "U21-r1 review was normalized to the raw verification-report digest and closed review schema without changing the ten substantive checks. The review file was sealed to the collector input directory. research-collect and explicit research-precheck both passed with bundle hash b115dac2..., 10 artifacts, zero workflow mutations and no corpus count increment. A standalone MTM-017 U21-r1 trial-v1 receipt was sealed."
+    },
+    {
+      "event_id": "MEVT-116",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T14:06:42Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Fresh U21-r2 preview.2 session used compact mode under session-v2/dangerous Native. The generator proved Cauchy-Schwarz by separating the zero-vector case, then applying the nonnegative squared norm of y-lambda x for x nonzero, with equality characterized exactly by linear dependence including zero vectors. Required LaTeX passed on the first submission and the run stopped at verify with proof hash 1e5b66db... and manifest hash b2aa734a.... Independent review remains pending."
+    },
+    {
+      "event_id": "MEVT-117",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-28T15:03:55Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Independent U21-r2 review completed on the same OAuth owner with eleven substantive checks covering the zero-vector split, denominator positivity, projection coefficient, norm expansion, inequality, equality implications, zero-vector equality cases, linear-dependence characterization and manifest scope. The server computed verdict correct and sealed the compact run done with final proof hash 1e5b66db.... review.json was normalized to the raw verification-report digest f118d931... and closed schema. An existing immutable evidence bundle bound the normalized review, final proof and raw verification report; the current collector invocation refused to overwrite it, while explicit research-precheck passed on that bundle with hash 30dc421a..., 10 artifacts, zero workflow mutations and no corpus count increment."
+    },
+    {
+      "event_id": "MEVT-118",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-30T04:12:24Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Accepted only the current preview.2 U21-U25 fifteen-row research subset after independent input review, actual zero-delta import proposal, and independent byte-identical result re-execution. All 186 original bundle artifacts and fifteen distinct receipts were checked. The earlier r2 JSON-digest failure remains retained. No MTM-016 base/count/driver is inherited or changed; release and deployment remain unauthorized.",
+      "evidence": {
+        "path": "records/evidence/MTM-017/research-corpus-subset-accepted-20260930.json",
+        "sha256": "49fc407487fa7c9104c4a6b7aae92e2cde2b9fe4287bd5c73b0e0352abbaae6e"
+      }
+    },
+    {
+      "event_id": "MEVT-119",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-30T04:26:54Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Both authorized clean builds succeeded and produced identical b55dd460 bytes, but neither reproduced the frozen 13d7890 candidate. The clean-build provenance gate remains blocked; all artifacts and failed-comparison evidence are retained. Read-only diagnosis found dependency path, startup-object/compiler marker and ELF layout differences, without establishing the original final-link environment. The accepted fifteen-row research subset remains unchanged. No guessed parameter trials, new candidate selection, complete release input or deployment followed.",
+      "evidence": {
+        "path": "records/evidence/MTM-017/clean-build-provenance-20260930.json",
+        "sha256": "a39bd0f181b5ce356b485376776d42ef98e51247226ce01a2589297eb884a84e"
+      }
+    },
+    {
+      "event_id": "MEVT-120",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-30T06:58:39Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "gate": "clean_build_provenance",
+      "gate_status_before": "blocked",
+      "gate_status_after": "waived_by_operator",
+      "human_authorized_override": true,
+      "technical_passed": false,
+      "exact_candidate_reproduced": false,
+      "summary": "The operator explicitly accepted the unresolved original-build environment and waived only candidate 13d7890's clean-build provenance gate. Two clean builds still match each other as b55dd460 but do not reproduce the selected candidate; the original exit-1 failure, receipts and prior blocked gate remain immutable. Existing tests inform the operator's risk judgment, not a new verification result. The fifteen accepted research rows and completed development state remain unchanged; other engineering remains paused, including genuine schema-7 operator-copy rehearsal and full schema-8 readiness. Release and deployment remain unauthorized.",
+      "evidence": {
+        "path": "records/evidence/MTM-017/clean-build-human-override-20260930.json",
+        "sha256": "c82f26ce562214f922a3e12eade3e329b2c37af2dbbaa4ec9784b683bc88d7c7"
+      }
+    },
+    {
+      "event_id": "MEVT-121",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-30T09:31:34Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Activated only the independently reviewed current-candidate unique-cell partial aggregate: 45 portable + 15 Native + 15 previously accepted research + 3 new U30 process-SIGKILL observations = 78/90. Only 63 nonresearch rows are newly accepted; the original research pointer and its acceptance chain remain byte-identical. U26-U29 remain twelve pending cells; no waiver or future state rehearsal creates a pass. New source gate 144bf61b passed 671 tests with one inherited ignored test. Frozen MTM-016 driver/counts and all original observations remain unchanged; release/deployment remain unauthorized.",
+      "evidence": {
+        "path": "records/evidence/MTM-017/partial-corpus-accepted-20260930.json",
+        "sha256": "a08866847b55fb1e896e98a2cd746c4d61e550515f3167122015e282051adaf9"
+      },
+      "governance_pointer": {
+        "path": "records/governance/mtm017-partial-corpus.json",
+        "sha256": "0f2562453258f469a99a8f8b084cb4fb718ed089470dd185222da613ceb403c2"
+      }
+    },
+    {
+      "event_id": "MEVT-122",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-30T10:15:06Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "decision_id": "MTM017-READINESS-DECISION-004",
+      "summary": "MTM017_U27_U28_current_candidate_compatibility_and_authority_boundaries_only approved explicitly by the operator; implementation and fresh observations remain independently review-gated. No corpus cells or release/deployment authority are granted by this decision. Existing accepted78 and all historical observations remain unchanged.",
+      "evidence": {
+        "path": "records/evidence/MTM-017/u27-u28-operator-mapping-authorization-20260930.json",
+        "sha256": "3fded16a067a77f6935aca556593e2c955563562c1ec8bf02a76d138ba24fcbc"
+      },
+      "accepted_delta": 0
+    },
+    {
+      "event_id": "MEVT-123",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-30T10:15:06Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "decision_id": "MTM017-READINESS-DECISION-005",
+      "summary": "MTM017_genuine_operator_copy_exact_restore_then_prepared_baseline_continuation_only approved explicitly by the operator; implementation and fresh observations remain independently review-gated. No corpus cells or release/deployment authority are granted by this decision. Existing accepted78 and all historical observations remain unchanged.",
+      "evidence": {
+        "path": "records/evidence/MTM-017/operator-copy-prepared-continuation-authorization-20260930.json",
+        "sha256": "953be5aa5bfa3632408f66264e129b184219ce09c8ecd5de91ee93e608ee0933"
+      },
+      "accepted_delta": 0
+    },
+    {
+      "event_id": "MEVT-124",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-30T10:21:44Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Clarify decision005 exact-restore order: seal and recheck original bytes/modes before mode-only preparation; opening SQLite and same-run checks follow preparation. No new authority or corpus acceptance. Original005 and strict failure remain immutable.",
+      "evidence": {
+        "path": "records/evidence/MTM-017/operator-copy-prepared-continuation-order-clarification-20260930.json",
+        "sha256": "ec2638268b0b419d6f4ca0cd03985336965a8e7b4cb47bcc31f43c6fcfee03c1"
+      },
+      "accepted_delta": 0
+    },
+    {
+      "event_id": "MEVT-125",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-30T11:57:13Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Activated only nine newly independently reviewed current-candidate cells: six U27/U28 compatibility and dangerous-authority observations plus three genuine U29 exact-restore-then-prepared-continuation observations. The immutable prior78 and original research15 are referenced without reacceptance, yielding87/90 with U26 three cells pending. Integration used separately sealed and tested Bash/SQLite governance code, not a new Rust CLI. Final maintenance source e23 passed698/0/1. The earlier r3 source failure remains indeterminate; capture nontransactional/visibility limits and original strict baseline failure remain preserved. No full-corpus, release, deployment or production authority follows.",
+      "evidence": {
+        "path": "records/evidence/MTM-017/corpus-union-accepted-20260930.json",
+        "sha256": "1afff81a1ce804eb4fa88ef23012c37f2289f0f54d02fe73b0092e5cceba7523"
+      },
+      "governance_pointer": {
+        "path": "records/governance/mtm017-corpus-union.json",
+        "sha256": "9e2d9de518a3ab1225134164828f1f83ddcb83d0f72c55399301ea53452c1393"
+      },
+      "accepted_delta": 9,
+      "accepted_trials": 87,
+      "pending_trials": 3,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_selector_changed": false,
+      "production_state_modified": false
+    },
+    {
+      "event_id": "MEVT-126",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-30T12:18:33Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Recorded the operator's explicit U26-only human waiver for this exact schema8 candidate. Technical corpus remains87 accepted and3 pending; the separate governance disposition waives only those3 U26 cells without new trials or a technical pass. Original partial browser/oneOf evidence and87/78/research15 pointers remain immutable. Separately archived the already-reviewed Bash/SQLite union implementation byte-for-byte for version control; original execution paths remain sealed. No release or deployment judgment follows.",
+      "evidence": {
+        "path": "records/evidence/MTM-017/u26-human-waiver-20260930.json",
+        "sha256": "011fdee5b398b768088cc1dfab42c9f6a41a743be60dddc51234bd770f1f1a23"
+      },
+      "governance_pointer": {
+        "path": "records/governance/mtm017-u26-waiver.json",
+        "sha256": "4bcf208c6e68d490b835fd895b6879a4dd694f5cbb698a6fc3fcf6248ee5219c"
+      },
+      "source_archive": {
+        "path": "records/evidence/MTM-017/corpus-union-source-archive-20260930.json",
+        "sha256": "910d9004850c3a859112340665d0131d0bb1b536b4fcd583636aad97a5665fba"
+      },
+      "technical_accepted_trials": 87,
+      "technical_pending_trials": 3,
+      "human_waived_cells": 3,
+      "technical_accepted_delta": 0,
+      "corpus_count_incremented": false,
+      "full_technical_corpus": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_selector_changed": false,
+      "production_state_modified": false
+    },
+    {
+      "event_id": "MEVT-127",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-30T14:01:18Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Recorded explicit operator acceptance of the separate prior r3 source next-task failure risk as DECISION-007. The original failure remains failed and root-cause indeterminate; the new synthetic collision test confirms a recoverable mechanism, not original attribution or a runtime fix. Existing 87 technical corpus cells and three U26 waivers are unchanged. Formal readiness and deployment remain separate.",
+      "evidence": {
+        "path": "records/evidence/MTM-017/source-risk-human-disposition-20260930.json",
+        "sha256": "a6132158e02e45dee166a214e0b8eadd7c72d55715e17b680aff9d7838496014"
+      },
+      "known_finding_id": "MTM017-SOURCE-R3-NORMAL-ASSESSMENT",
+      "technical_passed": false,
+      "root_cause_status": "indeterminate",
+      "release_disposition": "accepted_by_operator",
+      "runtime_fix_claimed": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_state_modified": false,
+      "production_selector_changed": false
+    },
+    {
+      "event_id": "MEVT-128",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-30T14:43:53Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Accepted exact schema8 candidate release readiness after the reviewed readonly adapter, final current-source gate (712/0/1), separate input review, successful evaluation and independent byte-identical result review. Corpus remains 87 technical and three U26 operator-waived cells; scoped historical-binary and clean-build waivers plus separate indeterminate-source-risk acceptance remain explicit. No deployment or production change.",
+      "evidence": {
+        "path": "records/evidence/MTM-017/release-readiness-accepted-20260930.json",
+        "sha256": "87535ae751060e6a43043c0b6225fbfa951b57ec2b8b0f9f3d1c9ac3fecd4240"
+      },
+      "governance_pointer": {
+        "path": "records/governance/mtm017-release-inputs.json",
+        "sha256": "690a34b02013cf2edf9622a17642cb104f21b1118b3bd531e5daed85cfdea312"
+      },
+      "release_qualified": true,
+      "technical_qualification_complete": false,
+      "deployment_authorized": false,
+      "production_state_modified": false,
+      "production_selector_changed": false
     }
   ],
   "receipt_contract": {
@@ -3010,6 +3684,850 @@
         "Push the local main branch to GitHub as the operator. Magma functional validation remains dependent on a valid host license; other operating systems and long-duration operation remain outside this bounded preview evidence."
       ],
       "decision": "accepted_0_5_0_preview_2"
+    },
+    {
+      "receipt_id": "MREC-017",
+      "milestone_id": "MTM-017",
+      "started_at": "2026-09-25T10:18:16Z",
+      "completed_at": "2026-09-26T08:14:02Z",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "docs(records): close MTM-017 development checkpoint [MTM-017]",
+      "files_changed": [
+        "AGENTS.md",
+        "README.md",
+        "crates/mtm-cli/Cargo.toml",
+        "crates/mtm-cli/src/main.rs",
+        "crates/mtm-cli/tests/capability_runtime.rs",
+        "crates/mtm-cli/tests/fact_graph_cli.rs",
+        "crates/mtm-cli/tests/identity.rs",
+        "crates/mtm-cli/tests/support/candidate_lifecycle.rs",
+        "crates/mtm-cli/tests/support/loopback.rs",
+        "crates/mtm-cli/tests/support/native_command_runtime.rs",
+        "crates/mtm-cli/tests/support/native_corpus.rs",
+        "crates/mtm-cli/tests/support/permission_client.rs",
+        "crates/mtm-cli/tests/support/permission_runtime.rs",
+        "crates/mtm-cli/tests/support/policy_cases.rs",
+        "crates/mtm-contracts/src/enums.rs",
+        "crates/mtm-contracts/src/lib.rs",
+        "crates/mtm-core/src/command_policy.rs",
+        "crates/mtm-core/src/evaluator.rs",
+        "crates/mtm-core/src/lib.rs",
+        "crates/mtm-core/src/native_permission.rs",
+        "crates/mtm-gateway/src/catalog/mod.rs",
+        "crates/mtm-gateway/src/catalog/tests.rs",
+        "crates/mtm-native/src/bubblewrap.rs",
+        "crates/mtm-native/src/toolchain.rs",
+        "crates/mtm-runtime/src/application.rs",
+        "crates/mtm-runtime/src/config.rs",
+        "crates/mtm-runtime/src/lib.rs",
+        "crates/mtm-runtime/src/native_authority.rs",
+        "crates/mtm-runtime/src/native_permission.rs",
+        "crates/mtm-runtime/src/native_resolver_tests.rs",
+        "crates/mtm-runtime/src/native_tools.rs",
+        "crates/mtm-runtime/src/tool_backend.rs",
+        "crates/mtm-storage/src/fact_memory.rs",
+        "crates/mtm-storage/src/lib.rs",
+        "crates/mtm-storage/src/schema.rs",
+        "crates/mtm-storage/src/store.rs",
+        "crates/mtm-storage/tests/action_transactions.rs",
+        "crates/mtm-storage/tests/recovery.rs",
+        "crates/mtm-storage/tests/storage.rs",
+        "crates/mtm-storage/tests/submission_receipts.rs",
+        "crates/mtm-storage/tests/write_recovery.rs",
+        "crates/mtm-workflow/src/engine.rs",
+        "crates/mtm-workflow/src/lib.rs",
+        "crates/mtm-workflow/src/memory.rs",
+        "crates/mtm-workflow/src/memory/bm25.rs",
+        "crates/mtm-workflow/src/memory/graph.rs",
+        "crates/mtm-workflow/src/methodology.rs",
+        "crates/mtm-workflow/src/research_state/view.rs",
+        "crates/mtm-workflow/tests/workflow.rs",
+        "docs/ACCEPTANCE.md",
+        "docs/MTM-017-DANGEROUS-ONLY-AND-FACT-MEMORY.md",
+        "docs/MTM-017-FACT-MEMORY-REVIEW.md",
+        "docs/MTM-017-RELEASE-HANDOFF.md",
+        "records/evidence/MTM-017/closing-capability.json",
+        "records/evidence/MTM-017/closing-review.json",
+        "records/evidence/MTM-017/closing-source-gate.json",
+        "records/evidence/MTM-017/managed-sandbox-source-gate-failed.json",
+        "records/governance/engineering-graph.json",
+        "records/governance/migration-graph.json",
+        "records/governance/project-progress.json",
+        "records/governance/python-retirement.json",
+        "records/iterations/ITER-017.json",
+        "records/validation/capability-current.json",
+        "records/validation/mtm016-native-preflight.json",
+        "records/validation/mtm016-source-check.json",
+        "xtask/src/native_command_summary.rs",
+        "xtask/src/native_corpus_summary.rs",
+        "xtask/src/qualify.rs",
+        "xtask/src/release_check.rs"
+      ],
+      "commands": [
+        {
+          "command": "cargo xtask check --record",
+          "exit_code": 0,
+          "result": "Current source passed format, warnings-denied Clippy, workspace tests (628 passed, zero failed, one inherited ignored), records, architecture, retirement and diff checks with positive Native prerequisites."
+        },
+        {
+          "command": "cargo xtask capability --record",
+          "exit_code": 0,
+          "result": "Current-source serial suite passed; 500 independent assessments (250 compact, 250 full), zero normal INVALID/rejections, all eight adversarial checks and restart/shutdown checks passed."
+        },
+        {
+          "command": "cargo xtask records; cargo xtask retirement; git diff --check",
+          "exit_code": 0,
+          "result": "Validated the development record structure, deletion provenance and whitespace; final closing records are checked again before the records commit."
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "evidence": [
+            "records/evidence/MTM-017/closing-source-gate.json"
+          ]
+        },
+        "A1": {
+          "passed": true,
+          "evidence": [
+            "Golden fact IDs, schema migration and bounded deterministic graph/CLI regressions in closing-review.json; public tool count and protocol unchanged."
+          ]
+        },
+        "A3": {
+          "passed": true,
+          "evidence": [
+            "Late transaction rollback, cascade revocation, concurrent export and capability owner/run/restart regressions in the sealed review and capability reports."
+          ]
+        }
+      },
+      "behavior_before": "Schema-7 project revisions lacked immutable lemma-level fact memory; Native carried Safe/Trusted and a consent/grant ledger.",
+      "behavior_after": "The development source uses dangerous-only Native, schema-8 transactional verified facts/findings, bounded project memory and an operator-only graph CLI.",
+      "risk_review": "Source/capability acceptance is bound to the final source. Historical failures remain failed; no real-client, independent-mathematics or exact-artifact release claim is inferred. MTM-016 remains separately in progress.",
+      "rollback": "Revert the four implementation commits in reverse order for source rollback while preserving sealed records; append a superseding governance decision rather than deleting this receipt. Restore an untouched pre-upgrade copy and compatible binary for any schema-8 test database; do not rewrite existing facts or decrement the schema version.",
+      "manual_pending": [
+        "Fresh exact-artifact dangerous-only Native qualification and current release corpus.",
+        "Real web client, independent mathematical review and required compiled-LaTeX full/compact/repair flows.",
+        "Separately authorized copied-operator-state migration/resume/rollback and artifact-bound resource/install/rollback qualification.",
+        "No production selector change or schema-8 production-data upgrade is authorized by this development closeout."
+      ],
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/closing-source-gate.json",
+          "sha256": "b088130173f870dc50e30d9b0e5f17342d972639c7c6c36bdb6f31148dd71921"
+        },
+        {
+          "path": "records/evidence/MTM-017/closing-review.json",
+          "sha256": "1b6c062edbbf30854d835c23f65c68aab3f59430237ddb81cc9586a88a350300"
+        },
+        {
+          "path": "records/evidence/MTM-017/managed-sandbox-source-gate-failed.json",
+          "sha256": "cf19adb78fe9d6981b1e58dc11331050f37d7109c7e17a699bb55bca5c92985f"
+        },
+        {
+          "path": "records/evidence/MTM-017/closing-capability.json",
+          "sha256": "c33aea3a72f3749186d8382762c876e9ae1246f0421be9205ffb1a012173b326"
+        }
+      ],
+      "source_sha256": "61922484c1f969365660b052ab878250738542bf25bd870f40b3b6851ef1930d",
+      "implementation_commits": [
+        "7858056ae66026f4ae9625279fb0d5fd3ced6b85",
+        "0462985d789f427ce26464ca5d05d810d75b21c0",
+        "8acae5d814e257b34bd627ac7afdca58f946e4b7",
+        "2cb49234014a4007ca7838837ebdab8f708ee2c9"
+      ],
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false,
+      "decision": "implementation_complete_release_not_qualified"
+    },
+    {
+      "receipt_id": "MREC-016",
+      "milestone_id": "MTM-016",
+      "started_at": "2026-09-07T14:54:38Z",
+      "completed_at": "2026-09-26T08:39:36Z",
+      "release_performed_at": "2026-09-15T07:01:38Z",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "docs(governance): reconcile the sealed MTM-016 release [MTM-016]",
+      "files_changed": [
+        "records/iterations/ITER-016.json",
+        "records/governance/migration-graph.json",
+        "records/governance/project-progress.json",
+        "records/evidence/MTM-016/lifecycle-reconciliation-20260926.json",
+        "docs/MTM-016-LIFECYCLE-RECONCILIATION.md"
+      ],
+      "commands": [
+        {
+          "command": "read-only verification of sealed release, Git source lineage, evidence hashes, installed selectors and --version",
+          "exit_code": 0,
+          "result": "The September 15 release and all 14 manifest evidence hashes match; both installed selectors match the exact released artifact. The previous rollback binary is missing and remains an explicit operational risk."
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "scope": "historical exact 0.6.0-preview.1 release only",
+          "evidence": [
+            "records/evidence/MTM-016/source-check-f7-host-339a5cb.json"
+          ]
+        },
+        "A1": {
+          "passed": true,
+          "scope": "historical exact 0.6.0-preview.1 release only",
+          "evidence": [
+            "records/evidence/MTM-016/preview-release.json"
+          ]
+        },
+        "A3": {
+          "passed": true,
+          "scope": "historical exact 0.6.0-preview.1 release only",
+          "evidence": [
+            "records/evidence/MTM-016/preview-release.json"
+          ]
+        },
+        "A4": {
+          "passed": true,
+          "scope": "historical exact 0.6.0-preview.1 release only",
+          "evidence": [
+            "records/evidence/MTM-016/preview-release.json"
+          ]
+        },
+        "A5": {
+          "passed": true,
+          "scope": "historical exact 0.6.0-preview.1 release only",
+          "evidence": [
+            "records/evidence/MTM-016/preview-release.json"
+          ]
+        }
+      },
+      "behavior_before": "The preview release had been sealed in commit 54a11f2, but lifecycle summaries still described the preceding unexecuted release driver.",
+      "behavior_after": "Lifecycle summaries acknowledge the already qualified schema-7 preview release and separate schema-8 development from future release qualification.",
+      "risk_review": "No historical receipt is altered or new cutover attempted. Current missing rollback bytes are not hidden by the historical successful rollback drill.",
+      "rollback": "For this records-only reconciliation append a correcting event/receipt rather than deleting sealed evidence. Do not attempt live release rollback until the exact recorded previous artifact has been recovered and verified.",
+      "manual_pending": [
+        "Recover and verify the recorded 0.5.0-preview.2 binary before claiming that historical rollback target is currently available.",
+        "Qualify schema-8 artifacts independently; this historical closure supplies no MTM-017 release permission."
+      ],
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-016/preview-release.json",
+          "sha256": "cc248a1f0e83c10992a0c23bd2de4fd86913b829d16b48803ed5353498b4a288"
+        },
+        {
+          "path": "records/evidence/MTM-016/source-check-f7-host-339a5cb.json",
+          "sha256": "9bf75b63f7c19c6d5982ce812c17ebda367cc81a75523f1cc7f8e4249d00e89b"
+        },
+        {
+          "path": "records/evidence/MTM-016/lifecycle-reconciliation-20260926.json",
+          "sha256": "9988d973770cbd5a95c15f4dc4a715d2ed772dcf4be77485c937de9d24401efd"
+        }
+      ],
+      "release_qualified": true,
+      "qualified_version": "0.6.0-preview.1",
+      "candidate_binary_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+      "current_rollback_ready": false,
+      "production_selector_changed_this_reconciliation": false,
+      "production_state_modified": false,
+      "decision": "completed_preview_release_governance_reconciled_with_rollback_gap"
+    },
+    {
+      "receipt_id": "MREC-017-RESEARCH-IMPORT-20260930",
+      "milestone_id": "MTM-017",
+      "started_at": "2026-09-30T03:15:46Z",
+      "completed_at": "2026-09-30T04:12:24Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "feat(maintenance): add reviewed research subset import [MTM-017]",
+      "commit_performed": false,
+      "files_changed": [
+        "xtask/src/main.rs",
+        "xtask/src/research_import_check/mod.rs",
+        "xtask/src/research_import_check/files.rs",
+        "xtask/src/research_import_check/tests.rs",
+        "xtask/tests/research_import_check_cli.rs",
+        "docs/MTM-017-RESEARCH-CORPUS-IMPORT.md",
+        "records/evidence/MTM-017/corpus-import-inputs-20260930.json",
+        "records/evidence/MTM-017/corpus-import-input-review-20260930-r3.json",
+        "records/evidence/MTM-017/corpus-import-proposal-20260930-r3.json",
+        "records/evidence/MTM-017/corpus-import-result-review-20260930-r3.json",
+        "records/evidence/MTM-017/research-corpus-subset-accepted-20260930.json",
+        "records/governance/mtm017-research-corpus.json",
+        "records/iterations/ITER-017.json",
+        "records/governance/migration-graph.json"
+      ],
+      "commands": [
+        {
+          "command": "cargo test --locked --offline -p mtm-xtask",
+          "exit_code": 0,
+          "result": "143 unit and 21 integration tests passed; synthetic tests count as no research trials."
+        },
+        {
+          "command": "cargo clippy --locked --offline -p mtm-xtask --all-targets -- -D warnings; cargo fmt --all -- --check; git diff --check; cargo xtask records",
+          "exit_code": 0,
+          "result": "Maintenance scoped checks passed before governance activation."
+        },
+        {
+          "command": "research-import-check with separately reviewed r3 inputs",
+          "exit_code": 0,
+          "result": "15 eligible rows, 186 artifacts, accepted delta zero; independent reviewer rerun matched exact output bytes."
+        }
+      ],
+      "acceptance": {
+        "maintenance_scoped_validation": {
+          "passed": true,
+          "evidence": [
+            "records/evidence/MTM-017/corpus-import-implementation-validation-20260930-r3.json"
+          ]
+        },
+        "research_subset": {
+          "passed": true,
+          "scope": "MTM-017 U21-U25 only",
+          "accepted_trials": 15,
+          "evidence": [
+            "records/evidence/MTM-017/research-corpus-subset-accepted-20260930.json"
+          ]
+        },
+        "release": {
+          "passed": false,
+          "scope": "No release or deployment authority in this receipt"
+        }
+      },
+      "behavior_before": "Fifteen reviewed standalone research receipts existed without a separately reviewed import.",
+      "behavior_after": "Only those fifteen current-candidate research rows are activated as a separately reviewed subset; old standalone records remain unchanged.",
+      "risk_review": "The importer is read-only, has no accept/deploy option, rejects stale reviews, and binds independent input/result reviews to exact bytes. A fixed driver-only data reader repairs the prior executable-digest error without weakening private file checks.",
+      "rollback": "Append a superseding evidence/governance decision for this subset; preserve all original receipts, prior failed attempts and historical MTM-016 state. No production rollback is performed.",
+      "manual_pending": [
+        "Fresh whole-source gate after maintenance source changes.",
+        "Genuine copied-operator-state migration/resume/exact rollback and clean-build provenance remain separate.",
+        "Schema-8 readiness and explicit deployment authorization remain separate."
+      ],
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/corpus-import-inputs-20260930.json",
+          "sha256": "74592e4a94da281c15f05ee0710b7722326491743652be2b671d4b8664ed0750"
+        },
+        {
+          "path": "records/evidence/MTM-017/corpus-import-input-review-20260930-r3.json",
+          "sha256": "e963cabe924ebf0be44d77ee53bf0c9562fa4a38f4872169cf65ac2bfa30fcfa"
+        },
+        {
+          "path": "records/evidence/MTM-017/corpus-import-proposal-20260930-r3.json",
+          "sha256": "03ac34879a68c1a371a5b83b66cbe45103a5bd82ce029564f2b5ec5d1a326d2a"
+        },
+        {
+          "path": "records/evidence/MTM-017/corpus-import-result-review-20260930-r3.json",
+          "sha256": "a6208dd66b9d59af24c28225af6735cf509fc83fa2dc3eda1b56903d12f8ee48"
+        },
+        {
+          "path": "records/evidence/MTM-017/research-corpus-subset-accepted-20260930.json",
+          "sha256": "49fc407487fa7c9104c4a6b7aae92e2cde2b9fe4287bd5c73b0e0352abbaae6e"
+        },
+        {
+          "path": "records/evidence/MTM-017/corpus-import-implementation-validation-20260930-r3.json",
+          "sha256": "48e9deec677f07fb45603a611ae456473a147e76198f802269ac0d8b8ffe577c"
+        }
+      ],
+      "accepted_research_subset_trials": 15,
+      "corpus_count_incremented": true,
+      "historical_counts_inherited": false,
+      "implementation_complete": "unknown",
+      "research_accepted": true,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "decision": "research_subset_accepted_release_not_qualified_deployment_not_authorized"
+    },
+    {
+      "receipt_id": "MREC-017-PARTIAL-CORPUS-20260930",
+      "milestone_id": "MTM-017",
+      "started_at": "2026-09-30T08:51:49Z",
+      "completed_at": "2026-09-30T09:31:34Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "feat(maintenance): validate current partial corpus [MTM-017]",
+      "commit_performed": false,
+      "files_changed": [
+        "xtask/src/main.rs",
+        "xtask/src/release_readiness_schema8/mod.rs",
+        "xtask/src/corpus_aggregate_schema8/mod.rs",
+        "xtask/src/corpus_aggregate_schema8/batches.rs",
+        "xtask/src/corpus_aggregate_schema8/files.rs",
+        "xtask/src/corpus_aggregate_schema8/tests.rs",
+        "xtask/tests/corpus_aggregate_schema8_cli.rs",
+        "docs/MTM-017-PARTIAL-CORPUS-AGGREGATE.md",
+        "records/evidence/MTM-017/partial-corpus-inputs-20260930.json",
+        "records/evidence/MTM-017/partial-corpus-input-review-20260930.json",
+        "records/evidence/MTM-017/partial-corpus-proposal-20260930.json",
+        "records/evidence/MTM-017/partial-corpus-result-review-20260930.json",
+        "records/evidence/MTM-017/partial-corpus-accepted-20260930.json",
+        "records/governance/mtm017-partial-corpus.json",
+        "records/iterations/ITER-017.json",
+        "records/governance/migration-graph.json"
+      ],
+      "commands": [
+        {
+          "command": "cargo test --locked --offline -p mtm-xtask; cargo clippy --locked --offline -p mtm-xtask --all-targets -- -D warnings",
+          "exit_code": 0,
+          "result": "162 unit and 25 integration tests passed; Clippy passed."
+        },
+        {
+          "command": "cargo xtask check without --record",
+          "exit_code": 0,
+          "result": "Fresh whole-source gate: 671 passed, zero failed, one inherited ignored; no tests skipped. Source before/after 144bf61b2595d95d89d1d1bbb5ede61660de5824be53ceb933cfe3cec09efbdb."
+        },
+        {
+          "command": "corpus-aggregate-check with separately reviewed fixed four-batch input",
+          "exit_code": 0,
+          "result": "90 rows, 78 covered, 12 pending, 93 seals, accepted_delta0; independent rerun was byte-identical."
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "scope": "fresh_current_maintenance_and_workspace_source",
+          "evidence": [
+            "records/evidence/MTM-017/partial-corpus-whole-source-gate-20260930.json",
+            "records/evidence/MTM-017/partial-corpus-implementation-validation-20260930.json"
+          ]
+        },
+        "partial_corpus": {
+          "passed": true,
+          "accepted_trials": 78,
+          "pending_trials": 12,
+          "scope": "current_candidate_unique_cells_only",
+          "evidence": [
+            "records/evidence/MTM-017/partial-corpus-accepted-20260930.json"
+          ]
+        },
+        "full_corpus": {
+          "passed": false,
+          "remaining_task_ids": [
+            "U26",
+            "U27",
+            "U28",
+            "U29"
+          ]
+        }
+      },
+      "behavior_before": "Research15 was separately accepted; current portable45, Native15 and three U30 observations were not yet combined by an independently reviewed adapter.",
+      "behavior_after": "A new immutable 78/90 partial aggregate and independent governance pointer select only the reviewed current-candidate cells; twelve external cells remain pending.",
+      "risk_review": "Closed inputs and fixed byte anchors, original closed validators and narrower current scope, metadata/hash rechecks and independent input/result reviews prevent caller-supplied counts. Historical wrapper labels and non-passing portable outer report remain unchanged.",
+      "rollback": "Append a superseding aggregate/governance decision; never alter original observations, prior research acceptance or frozen MTM-016 counts. No production rollback is involved.",
+      "manual_pending": [
+        "Real-browser U26, separately approved current U27/U28 mapping and genuine operator-state U29 remain twelve pending cells.",
+        "Full corpus and final schema-8 release criteria/readiness remain separate.",
+        "Deployment remains unauthorized."
+      ],
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/partial-corpus-inputs-20260930.json",
+          "sha256": "09101a673cec4a67ba681b0ddc8bd0899bef195f1d6353bf896ce51a6713f7be"
+        },
+        {
+          "path": "records/evidence/MTM-017/partial-corpus-input-review-20260930.json",
+          "sha256": "f70734c5f588015d3907ba3d4831feccdb43eb254fea6ba56823410db03663ef"
+        },
+        {
+          "path": "records/evidence/MTM-017/partial-corpus-proposal-20260930.json",
+          "sha256": "8eb3af91c3c583f5da1ec7781893a4a55ae659d79cf4d3f93cc45f1ee453f049"
+        },
+        {
+          "path": "records/evidence/MTM-017/partial-corpus-result-review-20260930.json",
+          "sha256": "eec355bdeffaf9dcea65494b49a5d01684bff025c303f076dcf95eb697498456"
+        },
+        {
+          "path": "records/evidence/MTM-017/partial-corpus-accepted-20260930.json",
+          "sha256": "a08866847b55fb1e896e98a2cd746c4d61e550515f3167122015e282051adaf9"
+        },
+        {
+          "path": "records/evidence/MTM-017/partial-corpus-implementation-validation-20260930.json",
+          "sha256": "8e75adb7f4358bf5493cc20b5ba036065ba5184789406d68c506a4a6affafe65"
+        },
+        {
+          "path": "records/evidence/MTM-017/partial-corpus-whole-source-gate-20260930.json",
+          "sha256": "ab6ce87f6919e44f9523432d0de09b3def01449179cd6a0f68d6570d3b05caf6"
+        }
+      ],
+      "accepted_delta": 63,
+      "accepted_trials": 78,
+      "pending_trials": 12,
+      "newly_accepted_research_trials": 0,
+      "original_research_pointer": {
+        "path": "records/governance/mtm017-research-corpus.json",
+        "sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24"
+      },
+      "historical_counts_inherited": false,
+      "implementation_complete": "unknown",
+      "research_accepted": true,
+      "full_corpus_accepted": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "decision": "partial_corpus_accepted_full_corpus_and_release_pending"
+    },
+    {
+      "receipt_id": "MREC-017-CORPUS-UNION-20260930",
+      "milestone_id": "MTM-017",
+      "started_at": "2026-09-30T10:12:35Z",
+      "completed_at": "2026-09-30T11:57:13Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "feat(maintenance): integrate reviewed schema8 corpus union [MTM-017]",
+      "commit_performed": false,
+      "files_changed": [
+        "crates/mtm-cli/tests/schema8_authority_corpus.rs",
+        "crates/mtm-cli/tests/support/loopback.rs",
+        "xtask/src/authority_corpus_schema8/mod.rs",
+        "xtask/src/authority_corpus_schema8/files.rs",
+        "xtask/src/authority_corpus_schema8/tests.rs",
+        "xtask/src/release_readiness_schema8/tests.rs",
+        "xtask/src/main.rs",
+        "docs/MTM-017-AUTHORITY-CORPUS.md",
+        "records/evidence/MTM-017/corpus-union-inputs-20260930.json",
+        "records/evidence/MTM-017/corpus-union-input-review-20260930.json",
+        "records/evidence/MTM-017/corpus-union-proposal-20260930.json",
+        "records/evidence/MTM-017/corpus-union-result-review-20260930.json",
+        "records/evidence/MTM-017/corpus-union-accepted-20260930.json",
+        "records/governance/mtm017-corpus-union.json",
+        "records/iterations/ITER-017.json",
+        "records/governance/migration-graph.json"
+      ],
+      "commands": [
+        {
+          "command": "six separate exact-candidate U27/U28 test-harness observations",
+          "exit_code": 0,
+          "result": "six fresh isolated runtime trials,18 phases,144 compatibility requests; real Native positive and isolation negative controls; human consent not tested"
+        },
+        {
+          "command": "cargo xtask check without --record on final source e23",
+          "exit_code": 0,
+          "result": "698 passed,zero failed,one inherited ignored; source before/after identical; original r3 failure retained"
+        },
+        {
+          "command": "bash union-validator.sh --self-test",
+          "exit_code": 0,
+          "result": "65 semantic and10 reader negative cases plus valid87 union fixture passed; separate from Cargo coverage"
+        },
+        {
+          "command": "bash union-validator.sh --propose",
+          "exit_code": 0,
+          "result": "87eligible,9new,78prior,3pending,accepted_delta0; independent result reconstruction and byte-identical replay passed"
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "source_sha256": "e23c984936c6d2945b82db5a0fc26f3ab1ebf4629d7d1bbe14078cca0953620f"
+        },
+        "scoped_corpus_union": {
+          "passed": true,
+          "accepted_trials": 87,
+          "pending_trials": 3
+        },
+        "full_corpus": {
+          "passed": false,
+          "remaining_task_ids": [
+            "U26"
+          ]
+        }
+      },
+      "behavior_before": "Current candidate had an independently accepted78-cell partial corpus; U27/U28 mapping and U29 prepared rollback scope awaited separate observations and reviewed import.",
+      "behavior_after": "Exactly nine reviewed cells are newly activated in an independent87-cell union. Original78 and research15 acceptance bytes are unchanged; U26 remains pending.",
+      "risk_review": "Closed key/type/duplicate-key validation, immutable source anchors, unique cell/trial checks and snapshot hashes precede independent input/result reviews. Original r3 next-task failure remains indeterminate. Capture was user-quiesced but not claimed transactional or completely visible. Original unprepared baseline failure remains failed.",
+      "rollback": "Append a superseding MTM-017 corpus/governance decision while retaining original evidence and pointers; no production rollback is performed.",
+      "manual_pending": [
+        "U26 genuine browser three-cell evidence remains pending; connector schema rejection cannot be bypassed or counted as server acceptance.",
+        "Final schema8 release-readiness judgment and deployment authorization remain separate.",
+        "The preserved intermittent r3 source failure still has no proven root cause."
+      ],
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/corpus-union-validation-20260930.json",
+          "sha256": "7df1db2ec71ad9e968e27c07ec220e3fc05c62baa3a17dac52f3b849120ecf82"
+        },
+        {
+          "path": "records/evidence/MTM-017/corpus-union-input-review-20260930.json",
+          "sha256": "847d8c20c06aeb1169694ced9f5f06168981ffd4cc90cec59498dc2f93267f9f"
+        },
+        {
+          "path": "records/evidence/MTM-017/corpus-union-proposal-20260930.json",
+          "sha256": "a8f9e23e6e3e62b471e822cb91945db3d727b59f02eb92ab206fb9807ad2cd80"
+        },
+        {
+          "path": "records/evidence/MTM-017/corpus-union-result-review-20260930.json",
+          "sha256": "c3af37b47ec37b84158b499b102ae37c0e024b3eb2ea37b7c2716f290d5807d2"
+        },
+        {
+          "path": "records/evidence/MTM-017/corpus-union-accepted-20260930.json",
+          "sha256": "1afff81a1ce804eb4fa88ef23012c37f2289f0f54d02fe73b0092e5cceba7523"
+        }
+      ],
+      "accepted_delta": 9,
+      "accepted_trials": 87,
+      "previously_accepted_trials": 78,
+      "pending_trials": 3,
+      "new_research_trials": 0,
+      "integration_route": "Bash_SQLite_governance_not_Rust_CLI",
+      "implementation_complete": "unknown",
+      "research_accepted": true,
+      "full_corpus_accepted": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "decision": "scoped_partial_corpus_union_accepted_release_and_deployment_not_authorized"
+    },
+    {
+      "receipt_id": "MREC-017-U26-HUMAN-WAIVER-20260930",
+      "milestone_id": "MTM-017",
+      "started_at": "2026-09-30T12:15:34Z",
+      "completed_at": "2026-09-30T12:18:33Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "chore(governance): record scoped U26 waiver and corpus evidence [MTM-017]",
+      "commit_performed": false,
+      "files_changed": [
+        "records/evidence/MTM-017/u26-human-waiver-20260930.json",
+        "records/governance/mtm017-u26-waiver.json",
+        "records/evidence/MTM-017/corpus-union-source-archive-20260930.json",
+        "records/governance/mtm017-readiness-decisions.json",
+        "records/governance/migration-graph.json",
+        "records/iterations/ITER-017.json",
+        "scripts/mtm017-corpus-union/README.md",
+        "scripts/mtm017-corpus-union/union-validator.sh",
+        "scripts/mtm017-corpus-union/union-validator.sql",
+        "scripts/mtm017-corpus-union/union-shapes.sql",
+        "scripts/mtm017-corpus-union/union-negative-mutations.sql"
+      ],
+      "commands": [
+        {
+          "command": "cmp original and version-control archive for all four union implementation files",
+          "exit_code": 0,
+          "result": "Exact bytes and all independently reviewed SHA values unchanged; no replay or technical pass inferred."
+        }
+      ],
+      "acceptance": {
+        "U26": {
+          "passed": false,
+          "disposition": "waived_by_operator",
+          "human_waived_cells": 3
+        },
+        "full_technical_corpus": {
+          "passed": false,
+          "technical_accepted_trials": 87,
+          "technical_pending_trials": 3
+        }
+      },
+      "behavior_before": "The current candidate has87 technically accepted corpus cells and3 pending U26 cells.",
+      "behavior_after": "The87 technical count and3 pending technical cells remain unchanged; a separate exact-candidate U26 operator waiver covers the three missing cells for governance only.",
+      "risk_review": "Valid normal browser assessment submission never reached the candidate due to connector oneOf validation; direct protected-resource observation and R2/R3 completed trials are absent. Prior r3 source failure remains indeterminate and is not waived.",
+      "rollback": "Append a superseding decision and retain this waiver and all existing evidence; no production rollback is performed.",
+      "manual_pending": [
+        "Formal current schema8 readiness evaluation with each waiver separate from technical evidence.",
+        "The intermittent prior r3 source failure remains root-cause indeterminate; U26 waiver does not cover it.",
+        "Deployment requires separate explicit authorization."
+      ],
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/u26-human-waiver-20260930.json",
+          "sha256": "011fdee5b398b768088cc1dfab42c9f6a41a743be60dddc51234bd770f1f1a23"
+        },
+        {
+          "path": "records/evidence/MTM-017/corpus-union-source-archive-20260930.json",
+          "sha256": "910d9004850c3a859112340665d0131d0bb1b536b4fcd583636aad97a5665fba"
+        }
+      ],
+      "technical_accepted_trials": 87,
+      "technical_pending_trials": 3,
+      "human_waived_cells": 3,
+      "technical_accepted_delta": 0,
+      "corpus_count_incremented": false,
+      "full_technical_corpus": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "implementation_complete": "unknown",
+      "research_accepted": true,
+      "research_acceptance_scope": "unchanged_original_fifteen_only",
+      "decision": "U26_waived_by_operator_technical_evidence_incomplete"
+    },
+    {
+      "receipt_id": "MREC-017-SOURCE-RISK-DISPOSITION-20260930",
+      "milestone_id": "MTM-017",
+      "started_at": "2026-09-30T13:47:58Z",
+      "completed_at": "2026-09-30T14:01:18Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "chore(governance): retain independently accepted source risk [MTM-017]",
+      "commit_performed": false,
+      "files_changed": [
+        "records/evidence/MTM-017/source-risk-human-disposition-20260930.json",
+        "records/governance/mtm017-readiness-decisions.json",
+        "records/governance/migration-graph.json",
+        "records/iterations/ITER-017.json"
+      ],
+      "commands": [
+        {
+          "command": "sha256sum records/evidence/MTM-017/source-risk-human-disposition-20260930.json",
+          "exit_code": 0,
+          "result": "a6132158e02e45dee166a214e0b8eadd7c72d55715e17b680aff9d7838496014"
+        }
+      ],
+      "acceptance": {
+        "known_r3_source_failure": {
+          "passed": false,
+          "root_cause_status": "indeterminate",
+          "release_disposition": "accepted_by_operator",
+          "runtime_fix_claimed": false
+        }
+      },
+      "behavior_before": "The prior source-run next-task failure remained an unresolved readiness finding despite later successful tests.",
+      "behavior_after": "A separate explicit operator decision accepts this exact known risk for candidate 13d7890; no technical pass, runtime repair, full release or deployment decision is inferred.",
+      "risk_review": "The deterministic collision diagnosis proves one recoverable mechanism but does not establish the cause of the original r3 failure. That failure remains failed and its root cause remains indeterminate. Formal adapter consumption still requires independent disposition/input/result review.",
+      "rollback": "Append a superseding risk decision; retain this decision and all failed observations. No runtime or production rollback is performed.",
+      "manual_pending": [
+        "Complete and review the new formal readonly readiness adapter on final source.",
+        "Independent result review and separate accepted-readiness governance.",
+        "Deployment requires separate explicit authorization."
+      ],
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/source-risk-human-disposition-20260930.json",
+          "sha256": "a6132158e02e45dee166a214e0b8eadd7c72d55715e17b680aff9d7838496014"
+        },
+        {
+          "path": "records/evidence/MTM-017/authority-corpus-domain-collision-diagnostic-20260930.json",
+          "sha256": "8995c3db3585b43b984b9c234dbb7f6613ef135e16991540184a3a7db8a395fc"
+        }
+      ],
+      "accepted_delta": 0,
+      "corpus_count_incremented": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_selector_changed": false,
+      "production_state_modified": false
+    },
+    {
+      "receipt_id": "MREC-017-FORMAL-READINESS-20260930",
+      "milestone_id": "MTM-017",
+      "started_at": "2026-09-30T13:33:50Z",
+      "completed_at": "2026-09-30T14:43:53Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "feat(readiness): accept scoped schema8 release readiness [MTM-017]",
+      "commit_performed": false,
+      "files_changed": [
+        "xtask/src/release_check_schema8/",
+        "xtask/tests/release_check_schema8_cli.rs",
+        "xtask/src/main.rs",
+        "xtask/src/corpus_aggregate_schema8/mod.rs",
+        "xtask/src/authority_corpus_schema8/mod.rs",
+        "docs/MTM-017-FORMAL-READINESS.md",
+        "records/evidence/MTM-017/release-readiness-accepted-20260930.json",
+        "records/governance/mtm017-release-inputs.json",
+        "records/governance/migration-graph.json",
+        "records/iterations/ITER-017.json"
+      ],
+      "commands": [
+        {
+          "command": "cargo xtask check (final frozen source; retained CTM CQZkNON1WzcNAAvUvcte3TWR)",
+          "exit_code": 0,
+          "result": "712 passed, 0 failed, 1 existing ignored; fmt/clippy/tests/diff all zero; current source 39f42266b1dafc323b525130ba00cb11aac6f06f6a4448a132cdad6ac2add8f0"
+        },
+        {
+          "command": "reviewed maintenance binary release-check-schema8 --inputs records/evidence/MTM-017/release-readiness-inputs-20260930.json --input-review records/evidence/MTM-017/release-readiness-input-review-20260930.json",
+          "exit_code": 0,
+          "ctm_command_id": "XHb70Z-bXgb7Fo87CySLr1Od",
+          "result": "Readiness evaluation passed; no direct release or deployment activation."
+        },
+        {
+          "command": "independent readonly repeat of exact reviewed evaluation command",
+          "exit_code": 0,
+          "ctm_command_id": "uK-Gq5uICJY4tRvL0Reaj9rv",
+          "result": "Byte-identical evaluation; separate result review approved scoped readiness acceptance."
+        }
+      ],
+      "acceptance": {
+        "implementation_complete": "unknown",
+        "adapter_implementation_scope_validated": true,
+        "research_previously_accepted_subset": 15,
+        "technical_accepted_trials": 87,
+        "technical_pending_trials": 3,
+        "human_waived_cells": 3,
+        "source_tests_passed": 712,
+        "source_tests_failed": 0,
+        "source_tests_ignored": 1,
+        "technical_qualification_complete": false,
+        "qualification_basis": "technical_evidence_plus_scoped_operator_waivers",
+        "known_failure_root_cause": "indeterminate",
+        "known_failure_release_disposition": "accepted_by_operator",
+        "runtime_fix_claimed": false
+      },
+      "behavior_before": "All technical observations and individual human dispositions existed, but formal schema8 readonly evaluation and separate accepted-readiness governance had not closed.",
+      "behavior_after": "The versioned independent adapter validates the exact public evidence chain and current source; separate input and result reviews now support explicit scoped readiness acceptance.",
+      "risk_review": "DECISION-001 only covers the historical missing binary; 003 only exact-candidate clean-build provenance; 006 only U26 x3; separate 007 accepts the prior indeterminate source finding. None is converted to technical pass, and all original failures remain unchanged.",
+      "rollback": "Append a superseding readiness governance event and point active_acceptance to the resulting disposition; retain all accepted and failed evidence. No production rollback is performed.",
+      "manual_pending": [
+        "Deployment requires separate explicit authorization and an operation-specific plan.",
+        "Waived technical gaps and the indeterminate historical source failure remain documented accepted risks; this acceptance is not a claim they were technically solved."
+      ],
+      "decision": "release_readiness_accepted_with_scoped_operator_waivers",
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/release-readiness-accepted-20260930.json",
+          "sha256": "87535ae751060e6a43043c0b6225fbfa951b57ec2b8b0f9f3d1c9ac3fecd4240"
+        },
+        {
+          "path": "records/evidence/MTM-017/release-readiness-inputs-20260930.json",
+          "sha256": "c24e2e741f99451936b051e98d1c180ca612ad5fa20ec48318ee05e486c43c78"
+        },
+        {
+          "path": "records/evidence/MTM-017/release-readiness-input-review-20260930.json",
+          "sha256": "e15276af01026c44d6cc4858c4facaf6a6ff7d1d9b11f1bb8df39fd087c8b51d"
+        },
+        {
+          "path": "records/evidence/MTM-017/release-readiness-evaluation-20260930.json",
+          "sha256": "2ba3ecc8a54987f0a63640f64cf418f4e8001b1e52e550f7f3d27d7480e1919e"
+        },
+        {
+          "path": "records/evidence/MTM-017/release-readiness-result-review-20260930.json",
+          "sha256": "e55f71e772901585a0608b1df297f34b8cc929b1ba547d55c3e816de32f0185d"
+        },
+        {
+          "path": "records/evidence/MTM-017/formal-readiness-implementation-validation-20260930.json",
+          "sha256": "0eda81b2204c0dd63dae1eda5812765da926aa74916c0148ff87ab2137fef7f6"
+        },
+        {
+          "path": "records/evidence/MTM-017/formal-readiness-whole-source-20260930.json",
+          "sha256": "d1eaed722274b3af7057d1cf8ca426eda1bcf20a959955f28f5cce47a023676a"
+        }
+      ],
+      "accepted_delta": 0,
+      "corpus_count_incremented": false,
+      "release_qualified": true,
+      "deployment_authorized": false,
+      "production_state_modified": false,
+      "production_selector_changed": false
     }
   ]
 }

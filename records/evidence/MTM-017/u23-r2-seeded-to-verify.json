@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u23_r2_seeded_draft_first_verifier_pending",
+  "observed_at": "2026-09-29T12:10:04Z",
+  "session_marker": "U23-r2.mNsF4g5o",
+  "trial_id": "959c3b76a3c5f03bc49c38dbb0510dd7",
+  "run_id": "run-u23-r2-finite-domain-gap-a32fcbf72117",
+  "problem_id": "u23-r2-finite-domain-gap",
+  "workflow_mode": "compact",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": null,
+    "transition_sequence": 4,
+    "seeded_draft_sha256": "5990bfc09b1bbafa561919a96c8159ad3f050dd289f2463581c4045cb9967a8c",
+    "verifier_draft_sha256": "5990bfc09b1bbafa561919a96c8159ad3f050dd289f2463581c4045cb9967a8c",
+    "seeded_draft_matches_verifier_bytes": true
+  },
+  "seeded_challenge": {
+    "intentional": true,
+    "target_gap": "The draft claims multiplication by arbitrary a is cancellable/injective in an integral domain, omitting the required hypothesis a != 0; the claim fails for a = 0.",
+    "mathematical_gap_repaired_before_first_verifier": false,
+    "first_verifier_findings_pending": true,
+    "first_findings_present": false,
+    "repair_history_present": false
+  },
+  "generation_boundary": {
+    "independent_first_verifier_required": true,
+    "repair_not_started": true,
+    "finalizer_executed": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}

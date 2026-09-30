@@ -1,0 +1,65 @@
+{
+  "schema": "mtm017-readiness-evaluation-execution-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T14:32:26Z",
+  "ctm_command_id": "XHb70Z-bXgb7Fo87CySLr1Od",
+  "exit_code": 0,
+  "command": "preserved mtm-xtask-223459136ac5184572b9b5c338c77dd01347252c12f16191c616a69b04b14ff7 release-check-schema8 --inputs records/evidence/MTM-017/release-readiness-inputs-20260930.json --input-review records/evidence/MTM-017/release-readiness-input-review-20260930.json",
+  "inputs": {
+    "path": "records/evidence/MTM-017/release-readiness-inputs-20260930.json",
+    "sha256": "c24e2e741f99451936b051e98d1c180ca612ad5fa20ec48318ee05e486c43c78"
+  },
+  "input_review": {
+    "path": "records/evidence/MTM-017/release-readiness-input-review-20260930.json",
+    "sha256": "e15276af01026c44d6cc4858c4facaf6a6ff7d1d9b11f1bb8df39fd087c8b51d"
+  },
+  "implementation_validation": {
+    "path": "records/evidence/MTM-017/formal-readiness-implementation-validation-20260930.json",
+    "sha256": "0eda81b2204c0dd63dae1eda5812765da926aa74916c0148ff87ab2137fef7f6"
+  },
+  "source_report": {
+    "path": "records/evidence/MTM-017/formal-readiness-whole-source-20260930.json",
+    "sha256": "d1eaed722274b3af7057d1cf8ca426eda1bcf20a959955f28f5cce47a023676a"
+  },
+  "evaluation": {
+    "path": "records/evidence/MTM-017/release-readiness-evaluation-20260930.json",
+    "sha256": "2ba3ecc8a54987f0a63640f64cf418f4e8001b1e52e550f7f3d27d7480e1919e"
+  },
+  "original_stdout": {
+    "path": "target/mtm017-formal-readiness-20260930/evaluation-r1.stdout",
+    "sha256": "2ba3ecc8a54987f0a63640f64cf418f4e8001b1e52e550f7f3d27d7480e1919e"
+  },
+  "original_stderr": {
+    "path": "target/mtm017-formal-readiness-20260930/evaluation-r1.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "original_exit": {
+    "path": "target/mtm017-formal-readiness-20260930/evaluation-r1.exit",
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "stdout_archive_and_published_evaluation_byte_identical": true,
+  "stderr_empty": true,
+  "source_sha256": "39f42266b1dafc323b525130ba00cb11aac6f06f6a4448a132cdad6ac2add8f0",
+  "maintenance_binary_sha256": "223459136ac5184572b9b5c338c77dd01347252c12f16191c616a69b04b14ff7",
+  "cargo_invoked_for_evaluation": false,
+  "reviewed_binary_rebuilt_or_replaced": false,
+  "verified_inventory_count": 131,
+  "readiness_evaluation_passed": true,
+  "technical_qualification_complete": false,
+  "technical_accepted_trials": 87,
+  "technical_pending_trials": 3,
+  "human_waived_cells": 3,
+  "known_finding_release_disposition": "accepted_by_operator",
+  "known_finding_root_cause": "indeterminate",
+  "known_finding_runtime_fix_claimed": false,
+  "result_review_pending": true,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "candidate_executed": false,
+  "private_state_opened": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "corpus_count_incremented": false,
+  "commit_created": false,
+  "pushed": false
+}

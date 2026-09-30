@@ -22,14 +22,7 @@ pub use helper::{native_helper_main, native_sandbox_probe_main};
 pub use latex::RuntimeLatexGate;
 pub use mtm_core::evaluate_request;
 pub use mtm_native::{QuickTunnel, TunnelEvent, TunnelState};
-pub use native_permission::{
-    NATIVE_PERMISSION_CONSENT_CHALLENGE_TTL_SECONDS, NativeInvocationPermissionPermit,
-    NativeInvocationPermit, NativePermissionConsentAuthority, NativePermissionConsentChallengeId,
-    NativePermissionConsentOutcome, NativePermissionConsentPrompt, NativePermissionGrantAuthority,
-    NativePermissionGrantId, NativePermissionGrantReceipt, NativePermissionPermit,
-    VerifiedNativePermissionConsent, collect_exec_permission_facts,
-    revalidate_exec_permission_facts,
-};
+pub use native_permission::{collect_exec_permission_facts, revalidate_exec_permission_facts};
 pub use native_tools::NativeToolRuntime;
 pub use operator::{OperatorSession, RuntimeEventSink};
 pub use research::CurlResearchProvider;

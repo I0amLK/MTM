@@ -1,0 +1,51 @@
+{
+  "schema": "mtm017-real-copy-attempt-review-v1",
+  "milestone": "MTM-017",
+  "reviewed_at": "2026-09-30T09:14:50Z",
+  "review_type": "independent_code_and_record_review_not_human_witness",
+  "capture_attempt_count": 1,
+  "capture_verified": true,
+  "copied_schema7_inspection_verified": true,
+  "candidate_mode_preparation_validation_verified": true,
+  "real_attempt_terminal_status": "failed",
+  "real_attempt_command_id": "W0AYEZdsC6am0_n5UuuG22_8",
+  "real_attempt_exit_code": 1,
+  "successful_real_repetitions": 0,
+  "counts_as_u29_pass": false,
+  "real_copied_state_gate_passed": false,
+  "release_qualified": false,
+  "reviewed_records": [
+    {
+      "path": "records/evidence/MTM-017/operator-state-capture-20260930.json",
+      "sha256": "404e0205ed7fee18bfe3a15c5999d3be2082fb8dad69bc9b5cb8efc6e0917771"
+    },
+    {
+      "path": "records/evidence/MTM-017/operator-state-copy-inspection-20260930.json",
+      "sha256": "8600e441e57ba1d577af4e3124e4fb4a5c48dbf6c61b74296934bcbd05e92444"
+    },
+    {
+      "path": "records/evidence/MTM-017/operator-copy-candidate-mode-preparation-validation-20260930.json",
+      "sha256": "8689c320660f790f8b9cd796f298e52604816deb3abaee03441a92dc75a7e5e9"
+    },
+    {
+      "path": "records/evidence/MTM-017/operator-copy-real-rehearsal-attempt-1-failed-20260930.json",
+      "sha256": "2fbc819765e920a8ce89ad4f94317a26275b3701c785fe2fa9e2ffee4fbd67d0"
+    },
+    {
+      "path": "records/evidence/MTM-017/operator-copy-baseline-failure-diagnostic-20260930.json",
+      "sha256": "1f658753069848e9ba0954f173caa4bec41fb157b1c81ea7a5a6f5df6f89d960"
+    }
+  ],
+  "finding": "Candidate migration/continuation/restart and exact restoration reached their assertions. Restored baseline authenticated but its write was rejected with FILE_EFFECT_CONFLICT because the copied run memory parent retained group-writable mode 0775. Zero writes were accepted on that failed baseline submission.",
+  "scope_preserved": {
+    "production_modified": false,
+    "selectors_modified": false,
+    "original_archive_modified": false,
+    "baseline_copy_modes_prepared": false,
+    "diagnostic_runtime_reexecution": false,
+    "raw_private_state_published": false,
+    "commit_created": false,
+    "pushed": false
+  },
+  "next_action": "Pause further real rehearsals pending the operator's explicit decision on a two-stage claim: exact original byte/mode restoration, then separately prepared-baseline-copy continuation. Preserve the original strict failure."
+}

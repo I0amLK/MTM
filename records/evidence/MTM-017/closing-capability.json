@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "current_source_loopback_capability_not_release_qualification",
+  "observed_at": "2026-09-26T08:14:02Z",
+  "command": "cargo xtask capability --record",
+  "exit_code": 0,
+  "passed": true,
+  "source_sha256": "61922484c1f969365660b052ab878250738542bf25bd870f40b3b6851ef1930d",
+  "source_commit": "2cb49234014a4007ca7838837ebdab8f708ee2c9",
+  "source_unchanged": true,
+  "report": {
+    "path": "records/validation/capability-current.json",
+    "sha256": "eafd659bbd08876d3a5dbf5a2ec31d5a2f25c5e44e63de3e7b97ad5b8d0dca42",
+    "runner_milestone_label": "MTM-016"
+  },
+  "summary": {
+    "adversarial_checks": {
+      "cross_owner_refresh_denied": true,
+      "cross_run_denied": true,
+      "fresh_submission_advances": true,
+      "invalid_inspect_and_retrieve_denied": true,
+      "invalid_submission_zero_memory_changes": true,
+      "mutated_and_truncated_signature": true,
+      "revoked_inspect_and_retrieve_denied": true,
+      "used_capability_revoked": true
+    },
+    "binary_sha256": "fa880b56d1476960b9d8b34f95a5c16349c48ee22e340b271a3e271c82310c25",
+    "binary_unchanged": true,
+    "bounded_clean_shutdown": true,
+    "child_path_policy": "curl_only_no_python",
+    "external_retrieval_tested": false,
+    "independent_normal_runs": 500,
+    "kind": "rust_current_binary_loopback_capability_regression",
+    "latex_policy": "static_only",
+    "lost_outcome_no_automatic_replay": true,
+    "native_backend": "disabled",
+    "normal_invalid": 0,
+    "normal_modes": {
+      "compact": 250,
+      "full": 250
+    },
+    "normal_rejections": 0,
+    "normal_roundtrips": 500,
+    "ok": true,
+    "production_state_modified": false,
+    "raw_capability_recorded": false,
+    "raw_oauth_token_recorded": false,
+    "release_qualified": false,
+    "same_identity_and_capability_survive_restart": true,
+    "samples_requested": 500,
+    "schema_version": "1.0.0",
+    "version": "0.6.0-preview.1",
+    "web_client_tested": false
+  },
+  "test_stdout_sha256": "99706b2cbddb08dc5ce7d2a765954dadd8d4937a75c21ff1c5ccddf4a3394b6f",
+  "test_stderr_sha256": "5bb24361bc330a8ee776ddd8e9a2d39260dbebe2904bf300bfc024d2b9abde05",
+  "raw_test_output_recorded": false,
+  "runner_bound_seconds": 1800,
+  "build_cache": "target/mtm-tool",
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "limitations": [
+    "The runner executes the existing capability_runtime suite serially without suppressing tests.",
+    "An earlier invocation left no retained current-source report or retrievable terminal status and is not counted as a pass; only this completed rerun supplies acceptance.",
+    "Native execution is disabled and LaTeX is static-only in the 500-assessment workload; it is not real-browser, mathematical, compiled-LaTeX or exact-artifact release evidence."
+  ]
+}

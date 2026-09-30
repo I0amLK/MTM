@@ -5,18 +5,15 @@ use mtm_gateway::{
     GatewayHttpConfig, GatewayRuntime, GatewayState, MCPDispatcher, OAuthService, OAuthStore,
     ToolBackend, ToolCatalog,
 };
-use mtm_storage::{
-    CapabilityAuthority, CapabilityEvent, CapabilityObserver, StateStore, StoreRuntime,
-};
+use mtm_storage::{CapabilityAuthority, CapabilityEvent, CapabilityObserver, StateStore};
 use mtm_workflow::{
     PrivateVault, ResearchProvider, TaskCatalog, WorkflowEngine, WorkflowEvent, WorkflowObserver,
 };
 use serde_json::Value;
 
 use crate::{
-    CurlResearchProvider, NativePermissionConsentAuthority, NativePermissionGrantAuthority,
-    NativeToolRuntime, NativeWorkspace, RuntimeBackendFacts, RuntimeEventSink, RuntimeLatexGate,
-    RuntimeSettings, RuntimeToolBackend,
+    CurlResearchProvider, NativeToolRuntime, NativeWorkspace, RuntimeBackendFacts,
+    RuntimeEventSink, RuntimeLatexGate, RuntimeSettings, RuntimeToolBackend,
 };
 
 #[derive(Clone, Debug)]
@@ -50,8 +47,6 @@ pub struct RuntimeApplication {
     pub oauth_store: Arc<OAuthStore>,
     pub vault: Arc<PrivateVault>,
     pub capabilities: Arc<CapabilityAuthority>,
-    pub native_permissions: Arc<NativePermissionGrantAuthority>,
-    pub native_consents: Arc<NativePermissionConsentAuthority>,
     pub native: Arc<NativeToolRuntime>,
     pub workflow: Arc<WorkflowEngine>,
     pub backend: Arc<RuntimeToolBackend>,
@@ -133,11 +128,6 @@ impl RuntimeApplication {
             &settings.workspace,
             &settings.private_root,
         )?);
-        let permission_runtime = StoreRuntime::default();
-        let native_permissions = Arc::new(NativePermissionGrantAuthority::new(
-            permission_runtime.clone(),
-        ));
-        let native_consents = Arc::new(NativePermissionConsentAuthority::new(permission_runtime));
         let native = Arc::new(NativeToolRuntime::new(
             Arc::clone(&workspace),
             settings.native_mode,
@@ -170,22 +160,18 @@ impl RuntimeApplication {
             research,
             workflow_observer,
         ));
-        let backend = Arc::new(
-            RuntimeToolBackend::new_with_protocol_observer_and_native_permissions(
-                Arc::clone(&native),
-                workspace,
-                Arc::clone(&workflow),
-                Arc::clone(&state_store),
-                Arc::clone(&capabilities),
-                Arc::clone(&native_permissions),
-                Arc::clone(&native_consents),
-                RuntimeBackendFacts {
-                    workflow_protocol_version: settings.workflow_protocol_version,
-                    complete_flow_locally_validated,
-                },
-                observer.clone(),
-            ),
-        );
+        let backend = Arc::new(RuntimeToolBackend::new_with_protocol_and_observer(
+            Arc::clone(&native),
+            workspace,
+            Arc::clone(&workflow),
+            Arc::clone(&state_store),
+            Arc::clone(&capabilities),
+            RuntimeBackendFacts {
+                workflow_protocol_version: settings.workflow_protocol_version,
+                complete_flow_locally_validated,
+            },
+            observer.clone(),
+        ));
 
         let mut gateway_runtime = GatewayRuntime::default();
         if let Some(sink) = observer {
@@ -229,8 +215,6 @@ impl RuntimeApplication {
             oauth_store,
             vault,
             capabilities,
-            native_permissions,
-            native_consents,
             native,
             workflow,
             backend,

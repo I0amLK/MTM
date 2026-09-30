@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "managed_continuation_sandbox_diagnostic_only",
+  "observed_at": "2026-09-26T02:08:23Z",
+  "command": "cargo xtask check",
+  "cargo_target_dir": "target/mtm-tool",
+  "exit_code": 1,
+  "source_sha256": "98c253a710713f7773259c9c11187e57cfd5639ae9a0f39717253e3656ce6d8f",
+  "source_unchanged_during_check": true,
+  "format_passed": true,
+  "clippy_passed": true,
+  "diff_check_passed": true,
+  "workspace_tests_passed": false,
+  "cli_capability_runtime": {
+    "passed": 29,
+    "failed": 28,
+    "dominant_failure": "test server startup failed or timed out; raw logs withheld",
+    "native_corpus_fixture_failure": "Native corpus endpoint bind failed"
+  },
+  "runtime_native_failures": [
+    "exec_candidate_runs_all_seven_permission_kinds_without_grants: Operation not permitted (os error 1)",
+    "exec_candidate_preserves_git_latex_sage_and_exposes_magma: Magma probe returned neither arithmetic success nor a recognized host-license denial"
+  ],
+  "native_preflight": {
+    "passed": false,
+    "classification": "bubblewrap_probe_failed_or_inconclusive",
+    "diagnostic_hint": "permission_or_policy_denied",
+    "candidate_defect_attribution": "not_evaluated_by_preflight"
+  },
+  "tests_skipped": false,
+  "release_qualified": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "next_action": "Run cargo xtask check --record and cargo xtask capability --record on the final source in a loopback-capable Linux environment with positive Native preflight."
+}

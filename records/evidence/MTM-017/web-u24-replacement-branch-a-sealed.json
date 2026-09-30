@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "real_web_u24_replacement_branch_a_isolation_and_seal",
+  "observed_at": "2026-09-27T12:54:33Z",
+  "run_id": "run-u24-r1-geometric-series-retry-d56e3a367e60",
+  "branch_id": "branch-1-1-366553",
+  "domain_id": "branch-domain-branch-1-1-366553",
+  "plan_id": "plan-r1-1",
+  "route": "induction",
+  "operator_reported": {
+    "join_only_read_attempted_once": true,
+    "join_only_read_denied": true,
+    "denial_code": "ROLE_ACCESS_DENIED",
+    "tool_category": "INVALID_ARGUMENT",
+    "branch_status": "solved",
+    "branch_b_private_content_read": false,
+    "join_executed": false
+  },
+  "machine_observed": {
+    "run_state": "branch_run",
+    "run_status": "active",
+    "transition_sequence": 7,
+    "branch_a_status": "sealed",
+    "branch_a_result_sha256": "ac0464d0b94aadb58f9d237e1ef4d4e0f3104b6183646745fe2060256eb24c8a",
+    "branch_a_result_mode": "0400",
+    "branch_b_status": "running",
+    "sealed_branch_count": 1,
+    "join_result_present": false,
+    "last_transition_reason": "branch_sealed_next_pending"
+  },
+  "replacement_for_run_id": "run-u24-r1-geometric-series-6fe7b6e47b06",
+  "credentials_recorded": false,
+  "capabilities_recorded": false,
+  "branch_private_memory_recorded": false,
+  "release_qualified": false
+}

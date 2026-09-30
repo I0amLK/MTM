@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u25_r1_first_fresh_session_cas_attempt_failed_before_workflow_generation",
+  "recorded_at": "2026-09-28T00:25:00Z",
+  "session_marker": "U25-r1.DQbxOjq1",
+  "run_id": "run-u25-r1-rank-nullity-dc403ebf25ae",
+  "problem_id": "u25-r1-rank-nullity",
+  "machine_state": "assess",
+  "machine_status": "active",
+  "transition_seq": 1,
+  "workflow_proof_submitted": false,
+  "cas_attempts": {
+    "sage": {
+      "exit_code": 1,
+      "failure_class": "input_script_name_error",
+      "failure_detail": "SAGE_VERSION was not defined in the formal input script",
+      "input_sha256": "57c2eb73672d9596d016d0c44df34c1438909556a1cc30200551c62c0f9487fb",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output_bytes": 0
+    },
+    "magma": {
+      "exit_code": 0,
+      "input_sha256": "b07e751ebc588ead760c8eeb4f57e2b1cc123e95f1027191f048c0cffbe6ec76",
+      "output_sha256": "1d4008429df7d563aa1161f8a12ab0b20c36182ca6dcd30ad2cbaa4894acebb2",
+      "parameter_results": [
+        {"t": -1, "rank": 2, "nullity": 1},
+        {"t": 0, "rank": 2, "nullity": 1},
+        {"t": 1, "rank": 2, "nullity": 1},
+        {"t": 2, "rank": 2, "nullity": 1}
+      ],
+      "version_output_incomplete": true
+    }
+  },
+  "same_trial_reexecution_performed": false,
+  "classification": "failed_cas_trial_requires_fresh_replacement_session",
+  "production_changed": false,
+  "release_qualified": false
+}

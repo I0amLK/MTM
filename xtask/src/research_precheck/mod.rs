@@ -16,7 +16,12 @@ mod tests;
 pub(crate) const CANDIDATE_SHA: &str =
     "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034";
 pub(crate) const CANDIDATE_SOURCE: &str = "c67484319f12c458cd25c538e35bbb25023915a5";
+#[cfg(test)]
 const CANDIDATE_STAGE: &str = "mtm016-f6-frozen";
+pub(crate) const MTM017_CANDIDATE_SHA: &str =
+    "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4";
+pub(crate) const MTM017_CANDIDATE_SOURCE: &str = "7b4afe2359e688263557f62154e4bc1e640c12c0";
+const MTM017_CANDIDATE_PATH: &str = "target/mtm017-preview2/mtm-0.6.0-preview.2-13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4/mtm";
 pub(crate) const CORPUS_SHA: &str =
     "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861";
 pub(crate) const REGISTRY_SHA: &str =
@@ -32,7 +37,61 @@ pub(crate) struct ResearchPolicy {
     pub(crate) trial_schema: &'static str,
 }
 
+#[derive(Clone, Copy)]
+pub(crate) struct ResearchIdentity {
+    pub(crate) milestone: &'static str,
+    pub(crate) candidate_sha256: &'static str,
+    pub(crate) candidate_source_commit: &'static str,
+    pub(crate) candidate_relative_path: &'static str,
+    pub(crate) acceptance_root: &'static str,
+    pub(crate) state_schema_version: u64,
+}
+
+pub(crate) fn research_identity(milestone: &str) -> Result<ResearchIdentity> {
+    match milestone {
+        "MTM-016" => Ok(ResearchIdentity {
+            milestone: "MTM-016",
+            candidate_sha256: CANDIDATE_SHA,
+            candidate_source_commit: CANDIDATE_SOURCE,
+            candidate_relative_path: "target/mtm016-f6-frozen/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm",
+            acceptance_root: "MTM-016",
+            state_schema_version: 7,
+        }),
+        "MTM-017" => Ok(ResearchIdentity {
+            milestone: "MTM-017",
+            candidate_sha256: MTM017_CANDIDATE_SHA,
+            candidate_source_commit: MTM017_CANDIDATE_SOURCE,
+            candidate_relative_path: MTM017_CANDIDATE_PATH,
+            acceptance_root: "MTM-017",
+            state_schema_version: 8,
+        }),
+        _ => Err("unsupported research milestone identity".into()),
+    }
+}
+
 pub(crate) fn research_policy(task: &str) -> Result<ResearchPolicy> {
+    research_policy_for("MTM-016", task)
+}
+
+pub(crate) fn research_policy_for(milestone: &str, task: &str) -> Result<ResearchPolicy> {
+    if milestone == "MTM-017" {
+        return match task {
+            "U21" | "U22" | "U23" | "U24" => Ok(ResearchPolicy {
+                session_schema: "mtm-research-session-v2",
+                native_mode: "dangerous",
+                trial_schema: "mtm-research-trial-evidence-v1",
+            }),
+            "U25" => Ok(ResearchPolicy {
+                session_schema: "mtm-research-session-v2",
+                native_mode: "dangerous",
+                trial_schema: "mtm-research-trial-evidence-v2",
+            }),
+            _ => Err("unsupported research acceptance policy".into()),
+        };
+    }
+    if milestone != "MTM-016" {
+        return Err("unsupported research milestone policy".into());
+    }
     match task {
         "U21" | "U22" | "U23" | "U24" => Ok(ResearchPolicy {
             session_schema: "mtm-research-session-v1",
@@ -222,7 +281,11 @@ fn case(registry: &[u8], bundle: &Bundle) -> Result<Case> {
     Err("research case absent from frozen registry".into())
 }
 
-fn inspect(directory: &files::Directory, registry: &[u8]) -> Result<Value> {
+fn inspect(
+    directory: &files::Directory,
+    registry: &[u8],
+    identity: ResearchIdentity,
+) -> Result<Value> {
     let bytes = directory
         .read("bundle.json", JSON_LIMIT)?
         .ok_or("bundle manifest missing")?;
@@ -301,14 +364,14 @@ fn inspect(directory: &files::Directory, registry: &[u8]) -> Result<Value> {
         observed.push(json!({"artifact":filename,"bytes":content.len(),"sha256":binding.sha256}));
         material.insert(binding.kind, content);
     }
-    checks::validate(&bundle, &case, &material)?;
+    checks::validate(&bundle, &case, &material, identity)?;
     let missing: Vec<_> = required
         .iter()
         .filter(|kind| !material.contains_key(kind))
         .map(|kind| kind.filename())
         .collect();
     Ok(json!({
-        "schema":"mtm-research-precheck-v1","milestone":"MTM-016",
+        "schema":"mtm-research-precheck-v1","milestone":identity.milestone,
         "scope":"read_only_bundle_integrity_and_common_fact_consistency",
         "task_id":bundle.task_id,"repeat":bundle.repeat,"case_id":case.id,
         "bundle_sha256":hash(&bytes),"artifact_count":material.len(),
@@ -336,16 +399,23 @@ pub(crate) fn validate_bundle(root: &Path, bundle: &Path) -> Result<Value> {
     let corpus = records::read_bytes(root, "conformance/mtm016-usability-corpus.json", 65536)
         .map_err(|_| "frozen research corpus unavailable")?;
     require(hash(&corpus) == CORPUS_SHA, "research corpus hash mismatch")?;
-    let candidate = root.join(format!(
-        "target/{CANDIDATE_STAGE}/mtm-0.6.0-preview.1-{CANDIDATE_SHA}/mtm"
-    ));
+    let directory = files::Directory::open(bundle)?;
+    let session_bytes = directory
+        .read("session.json", JSON_LIMIT)?
+        .ok_or("research session observation missing")?;
+    let session = evidence_json::decode(&session_bytes)?;
+    let milestone = session["milestone"]
+        .as_str()
+        .ok_or("research session milestone missing")?;
+    let identity = research_identity(milestone)?;
+    let candidate = root.join(identity.candidate_relative_path);
     require(
-        qualify::digest(&candidate)? == CANDIDATE_SHA,
+        qualify::digest(&candidate)? == identity.candidate_sha256,
         "selected candidate digest mismatch",
     )?;
-    let mut report = inspect(&files::Directory::open(bundle)?, &registry)?;
+    let mut report = inspect(&directory, &registry, identity)?;
     report["selected_candidate_bytes_checked"] = json!(true);
-    report["candidate_sha256"] = json!(CANDIDATE_SHA);
+    report["candidate_sha256"] = json!(identity.candidate_sha256);
     // This is not an attestation that a running process used those bytes.
     report["running_candidate_attested_by_precheck"] = json!(false);
     Ok(report)

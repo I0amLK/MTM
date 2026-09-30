@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "real_web_project_stage_a_independent_review_finalization_and_promotion",
+  "observed_at": "2026-09-26T13:20:06Z",
+  "candidate_version": "0.6.0-preview.2",
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "run_id": "run-web-memory-odd-sum-04d914f855b0",
+  "project_id": "web-memory-integer-identities",
+  "target_claim_id": "web-memory-odd-sum",
+  "operator_reported_review": {
+    "separate_reviewing_conversation": true,
+    "same_oauth_client_continuity_confirmed": true,
+    "project_or_claim_modified_by_reviewer": false,
+    "revision_or_fact_created_by_reviewer": false,
+    "critical_errors": 0,
+    "unresolved_gaps": 0,
+    "substantive_statement_checks_submitted": true,
+    "audit_complete_submitted": true,
+    "substantive_verification_report_submitted": true,
+    "server_computed_verdict": "correct",
+    "repair_entered_after_verifier": false
+  },
+  "machine_observed": {
+    "run_state": "done",
+    "run_status": "done",
+    "latex_passed": true,
+    "verdict": "correct",
+    "sealed": true,
+    "transition_sequence": 8,
+    "promotion_status": "promoted",
+    "base_revision": {
+      "revision_id": "web-memory-odd-sum-r1",
+      "revision_number": 1,
+      "evidence_status": "OPEN",
+      "lifecycle_status": "SUPERSEDED",
+      "source_run_id": null,
+      "fact_id": null
+    },
+    "promoted_revision": {
+      "revision_id": "web-memory-odd-sum-r2",
+      "revision_number": 2,
+      "evidence_status": "VERIFIED",
+      "lifecycle_status": "ACTIVE",
+      "source_run_id": "run-web-memory-odd-sum-04d914f855b0",
+      "fact_id": "c4ec50b45b618aa0"
+    },
+    "supersedes_edge": {
+      "from_revision_id": "web-memory-odd-sum-r2",
+      "to_revision_id": "web-memory-odd-sum-r1",
+      "edge_type": "supersedes"
+    },
+    "promoted_fact": {
+      "fact_id": "c4ec50b45b618aa0",
+      "source_run_id": "run-web-memory-odd-sum-04d914f855b0",
+      "predecessor_count": 0
+    },
+    "active_project_fact_count": 1,
+    "final_verified_artifact": "rethlas-output/run-web-memory-odd-sum-04d914f855b0/proof_verified.tex",
+    "final_verified_artifact_sha256": "7cd85844aa257598b4a2a4c7095df2a349efc7b756451658a287bf7ea4cc8a3c",
+    "final_verified_artifact_mode": "0600",
+    "test_service_running": true
+  },
+  "boundary_comparison": {
+    "before_independent_review_project_fact_count": 0,
+    "after_finalizer_project_fact_count": 1,
+    "before_independent_review_promotion_status": "pending",
+    "after_finalizer_promotion_status": "promoted"
+  },
+  "credentials_recorded": false,
+  "capabilities_recorded": false,
+  "proof_body_recorded": false,
+  "raw_private_logs_recorded": false,
+  "release_qualified": false
+}

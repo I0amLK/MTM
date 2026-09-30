@@ -1,0 +1,113 @@
+{
+  "submission_metadata": {
+    "schema": "mtm017-real-copy-baseline-failure-diagnostic-v1",
+    "run_id": "run-clean_liuxing_style_main_theorem-7fc8f2e30d1b",
+    "read_only_copy_diagnostic": true,
+    "production_source_accessed": false,
+    "runtime_launched": false,
+    "baseline_modes_changed": false,
+    "candidate": {
+      "schema": 8,
+      "run_state": {
+        "state": "explore",
+        "status": "active",
+        "sealed": false,
+        "transition_seq": 2
+      },
+      "recent_submission_metadata": [
+        {
+          "status": "completed",
+          "issued_state": "assess",
+          "checkpoint_phase": "commit_ready",
+          "expected_writes": 1,
+          "accepted_writes": 1,
+          "sanitized_error_codes": []
+        }
+      ],
+      "copied_run_permission_counts": {
+        "directories_not_0700": 0,
+        "files_not_0600": 0,
+        "write_lock_files_not_0600": 0
+      }
+    },
+    "restored_baseline": {
+      "schema": 7,
+      "run_state": {
+        "state": "assess",
+        "status": "active",
+        "sealed": false,
+        "transition_seq": 1
+      },
+      "recent_submission_metadata": [
+        {
+          "status": "completed",
+          "issued_state": "assess",
+          "checkpoint_phase": "running",
+          "expected_writes": 1,
+          "accepted_writes": 0,
+          "sanitized_error_codes": []
+        }
+      ],
+      "copied_run_permission_counts": {
+        "directories_not_0700": 2,
+        "files_not_0600": 5,
+        "write_lock_files_not_0600": 0
+      }
+    }
+  },
+  "failure_code": {
+    "schema": "mtm017-baseline-submission-failure-code-v1",
+    "run_id": "run-clean_liuxing_style_main_theorem-7fc8f2e30d1b",
+    "error_code": "FILE_EFFECT_CONFLICT",
+    "disposition": "correction_required",
+    "state": "assess",
+    "read_only_copy_diagnostic": true,
+    "runtime_launched": false,
+    "baseline_modes_changed": false,
+    "production_source_accessed": false,
+    "selected_copied_run_permission_counts": {
+      "directory_700": 11,
+      "file_664": 5,
+      "directory_775": 2
+    }
+  },
+  "write_boundary": {
+    "schema": "mtm017-baseline-write-boundary-diagnostic-v1",
+    "run_id": "run-clean_liuxing_style_main_theorem-7fc8f2e30d1b",
+    "error_code": "FILE_EFFECT_CONFLICT",
+    "read_only_copy_diagnostic": true,
+    "runtime_launched": false,
+    "production_source_accessed": false,
+    "baseline_modes_changed": false,
+    "memory_parent": {
+      "mode": "775",
+      "group_or_other_writable": true,
+      "regular_file": false,
+      "directory": true,
+      "single_link_if_file": null
+    },
+    "generation_memory_directory": {
+      "mode": "700",
+      "group_or_other_writable": false,
+      "regular_file": false,
+      "directory": true,
+      "single_link_if_file": null
+    },
+    "immediate_conclusions_resource": {
+      "exists": false
+    }
+  },
+  "schema": "mtm017-real-copy-baseline-failure-diagnostics-v1",
+  "milestone": "MTM-017",
+  "command_ids": [
+    "aPPrhBWnO5Kmcpn-mLIIUH0w",
+    "GTfIgIh83X_A2MwUWljoSjRM",
+    "jSF6cQIJg7W_gjwItNU7RBY3"
+  ],
+  "finding": "The restored baseline authenticated but rejected the requested write with FILE_EFFECT_CONFLICT. The selected copied run's memory parent mode is 0775, violating the file-effect directory rule forbidding group/other write bits. No write was accepted.",
+  "source_reference": "crates/mtm-workflow/src/file_effect.rs:228-237",
+  "production_modified": false,
+  "baseline_working_copy_permissions_changed": false,
+  "runtime_reexecution_performed": false,
+  "release_qualified": false
+}

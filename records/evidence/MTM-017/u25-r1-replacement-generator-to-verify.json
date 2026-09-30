@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u25_r1_replacement_fresh_session_generator_to_verify",
+  "observed_at": "2026-09-28T00:56:27Z",
+  "session_marker": "U25-r1.jFvUdqP4",
+  "run_id": "run-u25-r1-rank-nullity-0ea26c4c9d65",
+  "problem_id": "u25-r1-rank-nullity",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": null,
+    "transition_sequence": 7,
+    "assembled_proof_sha256": "229531ec1b8e7327222af5aa9c92fa13616256e2aca2d03beb7e20a9024a9bc4",
+    "last_verified_proof_sha256_present": false,
+    "proof_manifest_sha256": "8e67059a592c55c338af4998f697500ecda5de7aca24f72ad0d72d4bbfcdf223",
+    "transitions": [
+      "1:created->assess:run_initialized",
+      "2:assess->explore:assessment_complete",
+      "3:explore->propose_plans:exploration_complete",
+      "4:propose_plans->direct_proving:plans_proposed",
+      "5:direct_proving->assemble:direct_proving_complete",
+      "6:assemble->latex_validate:proof_submitted",
+      "7:latex_validate->verify:latex_gate_passed"
+    ]
+  },
+  "cas": {
+    "native_mode": "dangerous",
+    "general_proof_independent": true,
+    "sage": {
+      "version": "SageMath 10.9",
+      "input_sha256": "5ecb9462646cab3a4be0ba8f8d2619e36e62a1d9c72a38181c62f86fa103d0f6",
+      "output_sha256": "871d71dbd2acf76909a7046850ba75f433644d94d02198200a4c80672741c944",
+      "exit_code": 0
+    },
+    "magma": {
+      "version": "Magma V2.29-8",
+      "input_sha256": "6fbe7dba4b7e0a2ab847dd00bb44a1fe48e949cbcb68f7f85c28b70931ffcb19",
+      "output_sha256": "7d34fda52b05e306f251f7a3e1eec969e3eb5b0b89f7f3447a4039a3a0763d2e",
+      "exit_code": 0
+    },
+    "cas_observation_sha256": "8563d4b58d5799065498242d3fed04f3327ca750777a57932dbe1c4196d5f2ec",
+    "parameter_results": [
+      {"t": -1, "rank": 2, "nullity": 1},
+      {"t": 0, "rank": 2, "nullity": 1},
+      {"t": 1, "rank": 2, "nullity": 1},
+      {"t": 2, "rank": 2, "nullity": 1}
+    ],
+    "private_material_sealed": true,
+    "sealed_material_file_count": 5
+  },
+  "generation_boundary": {
+    "verifier_report_submitted": false,
+    "finalizer_executed": false,
+    "independent_review_required": true
+  },
+  "production_changed": false,
+  "release_qualified": false
+}

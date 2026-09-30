@@ -1,0 +1,84 @@
+{
+  "schema": "mtm017-research-import-implementation-validation-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T03:42:20.396475+00:00",
+  "scope": "maintenance_import_proposal_implementation_only",
+  "implementation_source_sha256": "3200cea91c529cfe0a1573e57855ad3ba942d0ee8efa836ddf8422692dddfcad",
+  "maintenance_binary_sha256": "4bda371c768e9abfb493b41368cf0569073d3e33e0ed2b15228b1835395568de",
+  "source_files": [
+    {
+      "path": "xtask/src/main.rs",
+      "sha256": "43b755b3f935aec9217d1c13f4c8ab2fea66224964ecd547ee27ca622e2e4036"
+    },
+    {
+      "path": "xtask/src/research_import_check/mod.rs",
+      "sha256": "888cdea9534106392d5f7fd9b9be468b77481edf9970578fcd0d5ffa712b95d0"
+    },
+    {
+      "path": "xtask/src/research_import_check/files.rs",
+      "sha256": "2753a9ae26ce3d768c332d3f2ec2106d1cbe1ced24e2d5b139b18ccfe3d5c0d6"
+    },
+    {
+      "path": "xtask/src/research_import_check/tests.rs",
+      "sha256": "40ab9727df6f394a4388458e2026254ee1f6716309688b684d8844d66905b9f5"
+    },
+    {
+      "path": "xtask/tests/research_import_check_cli.rs",
+      "sha256": "3a3463a83563defc67bbf8dd33693456c99dbcccc92b6f1bc65dbcc51f202d6f"
+    }
+  ],
+  "documentation": {
+    "path": "docs/MTM-017-RESEARCH-CORPUS-IMPORT.md",
+    "sha256": "7759fca0b2421280bfa7b2ad4cfb8426cb0f6243c61354b8b1b71121c5f009c8"
+  },
+  "tests": {
+    "cargo_test_mtm_xtask": {
+      "exit_code": 0,
+      "unit_passed": 141,
+      "integration_passed": 21,
+      "new_import_unit_tests": 9,
+      "new_import_cli_tests": 2,
+      "stdout_sha256": "30a7913236f023660846ab390a5d98d6910c469b18dba299d85d6fb3b2135271",
+      "stderr_sha256": "65b5f4287aefdc6072a8614a2b50b8a91f9d6914472abed6ebe0603e07e070e6"
+    },
+    "cargo_clippy_mtm_xtask_all_targets": {
+      "exit_code": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "57a582d42b35635adff51bb6114c4ed42e0733d3714060493e33b376f3dbedd2"
+    },
+    "cargo_fmt_check": {
+      "exit_code": 0
+    },
+    "git_diff_check": {
+      "exit_code": 0
+    },
+    "cargo_xtask_records": {
+      "exit_code": 0,
+      "ok": true,
+      "report_sha256": "36e2a3fe5e79bf4451f92b8165579f968d7f08badeeb6f48e538f7e03d9ac8b8"
+    }
+  },
+  "prior_diagnostics": [
+    {
+      "stage": "first_focused_import_unit_run",
+      "passed": 6,
+      "failed": 1,
+      "failed_test": "safe_files_reject_escape_links_hardlinks_writable_and_oversize",
+      "cause": "Synthetic good-file setup inherited group-writable default mode and correctly failed the strict input reader.",
+      "repair": "Set only the synthetic good fixture to mode 0600 before asserting successful read; production file checks unchanged.",
+      "superseded_by_successful_focused_run": true
+    }
+  ],
+  "fresh_whole_source_gate_performed": false,
+  "input_review_pending": true,
+  "proposal_created": false,
+  "result_review_pending": true,
+  "accepted_trials_delta": 0,
+  "corpus_count_incremented": false,
+  "frozen_mtm016_driver_sha256_before": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+  "frozen_mtm016_driver_sha256_after": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "production_boundary_basis": "Only new maintenance source/docs/evidence and the dedicated tool build cache were written; no product state or installation command was invoked."
+}

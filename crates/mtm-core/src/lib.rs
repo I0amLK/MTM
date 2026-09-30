@@ -11,8 +11,8 @@ mod shell_segments;
 mod url_policy;
 
 pub use command_policy::{
-    InlineScript, check_command_policy, classify_current_command_permissions,
-    inline_script_command, is_filtered_env_var,
+    InlineScript, check_command_policy, classify_command_permissions, inline_script_command,
+    is_filtered_env_var,
 };
 pub use evaluator::evaluate_request;
 pub use native_permission::{

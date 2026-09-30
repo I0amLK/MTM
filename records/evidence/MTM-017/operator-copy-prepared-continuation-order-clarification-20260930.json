@@ -1,0 +1,36 @@
+{
+  "schema": "mtm017-scoped-operator-decision-clarification-v1",
+  "milestone": "MTM-017",
+  "decision_id": "MTM017-READINESS-DECISION-005-CLARIFICATION-001",
+  "recorded_at": "2026-09-30T10:21:44Z",
+  "clarifies": {
+    "path": "records/evidence/MTM-017/operator-copy-prepared-continuation-authorization-20260930.json",
+    "sha256": "953be5aa5bfa3632408f66264e129b184219ce09c8ecd5de91ee93e608ee0933"
+  },
+  "authorization": {
+    "source": "direct_operator_confirmation",
+    "user_message_id": "Sentinel_8f37e42fafd481919aa483b94b99ee50",
+    "question_verbatim": "另外请明确确认两项验收调整是否都同意：① U27/U28 改测兼容回复无副作用、dangerous 不越权；② baseline 副本先完成原始 bytes/modes 精确恢复校验，再做权限准备并验证同一旧 run 延续。这两项获准后可以继续推进",
+    "answer_verbatim": "确认"
+  },
+  "scope": "ordering_clarification_without_additional_authority",
+  "meaning": "Database restoration before preparation means exact restored database file bytes/modes, not opening SQLite before preparation. SQLite consistency/schema/same-run/owner/key checks occur after mode-only preparation, so WAL recovery cannot mutate the exact-restore proof before it is sealed.",
+  "required_order": [
+    "extract existing authorized archive into a fresh disposable copy",
+    "persist durable exact original bytes and modes verification",
+    "recheck the same exact restored hashes immediately before preparation",
+    "prepare only copied baseline filesystem modes without changing file content",
+    "open SQLite and verify schema7, original same run, owner and key binding",
+    "start the exact schema7 baseline and verify prepared continuation of that same old run"
+  ],
+  "exact_original_restore_required": true,
+  "permission_preparation_changes_content": false,
+  "original_modes_baseline_continuation": false,
+  "new_operator_source_read_authorized": false,
+  "accepted_delta": 0,
+  "corpus_count_incremented": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "deployment_authorized": false
+}

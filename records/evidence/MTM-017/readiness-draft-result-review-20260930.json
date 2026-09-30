@@ -1,0 +1,48 @@
+{
+  "schema": "mtm017-readiness-draft-result-review-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T08:33:27Z",
+  "reviewer_session": "assess-remaining-release-gates",
+  "recording_role": "scribe_of_separate_review",
+  "decision": "approved_as_read_only_blocked_draft_only",
+  "draft": {
+    "path": "records/evidence/MTM-017/readiness-draft-20260930.json",
+    "sha256": "2a24cf4d5ddf5a66704bd2030b63b7fc8a5d4255d1b1807cf5fe32e2b10c2756"
+  },
+  "actual_checker_exit_code": 1,
+  "exit_classification": "expected_blocked_draft",
+  "observed_maintenance_tests": {
+    "unit_passed": 153,
+    "integration_passed": 23,
+    "failed": 0,
+    "ignored": 0,
+    "log_sha256": "5fe4dfdaec036b66377871a80db387864ff34745eca3bb8e1cc0eebaf2dbfa42"
+  },
+  "checks": {
+    "complete_draft_read_and_independent_sha256": true,
+    "actual_checker_exit_status_verified": true,
+    "maintenance_test_log_and_counts_verified": true,
+    "main_binary_module_test_document_seals_match_pre_execution_review": true,
+    "frozen_mtm016_driver_unchanged": true,
+    "research_acceptance_state_unchanged": true,
+    "exactly_eighteen_scoped_rows": true,
+    "waivers_keep_technical_false": true,
+    "research_previous15_new0": true,
+    "whole_source_not_claimed_by_draft": true
+  },
+  "gate_dispositions": {
+    "technical_pass_with_limited_scope": 3,
+    "waived_by_operator": 2,
+    "missing_evidence": 3,
+    "criteria_not_implemented": 10
+  },
+  "frozen_mtm016_driver_sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+  "research_state_sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24",
+  "candidate_profiles_reexecuted": false,
+  "private_mathematical_review_reexecuted": false,
+  "operator_copy_authorized": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "full_release_input_created": false,
+  "follow_on": "A later whole-source observation is separately sealed and does not edit this draft."
+}

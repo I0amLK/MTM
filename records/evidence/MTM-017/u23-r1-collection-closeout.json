@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u23_r1_seeded_repair_collection_and_precheck_closeout",
+  "recorded_at": "2026-09-29T11:44:03Z",
+  "session_marker": "U23-r1.GAjRDQCU",
+  "trial_id": "01bb5b7858e9b45f7ffbaecd180af003",
+  "run_id": "run-u23-r1-uniform-continuity-gap-d84ef823136f",
+  "machine_final": {
+    "state": "done",
+    "status": "done",
+    "sealed": true,
+    "latex_passed": true,
+    "verdict": "correct",
+    "transition_sequence": 11,
+    "final_artifact_sha256": "f36742fcce03bb3f741a5acea07060d03a50f99d7d73aaad12f031147a5030d4",
+    "verification_report_sha256": "40f6f9bc81e23b367ab2f3d988f6d6cdebb24d6d8ac8d0a2f79e7e2754bda676"
+  },
+  "seeded_repair": {
+    "seeded_challenge": true,
+    "seeded_draft_sha256": "0fda3eaab1a263021edb4e3f35c79463776a9f361f796d37511fcd9b0f2a23f2",
+    "first_verifier_statement_checks": 8,
+    "first_verifier_gaps": 1,
+    "first_verifier_critical_errors": 0,
+    "first_findings_sha256": "cffe5373e833a9e550e706e31718f734d01183bac667486a5e56673d328c7905",
+    "repaired_draft_sha256": "f36742fcce03bb3f741a5acea07060d03a50f99d7d73aaad12f031147a5030d4",
+    "repair_history_sha256": "f9e5c6c60d67f4f95396885b8997a4b9cb1d4e53b9eecbdd65dc04b655d05da0",
+    "seeded_and_final_differ": true
+  },
+  "independent_review": {
+    "second_verifier_statement_checks": 12,
+    "critical_errors": 0,
+    "gaps": 0,
+    "same_owner_continuity": true,
+    "review_observation_sha256": "8041dc3b3d544b2b05449bc12f5614570c71f26bc27b02e1e7bb2bb73c0166d4",
+    "owner_fingerprint": "98389a93080e6595614e08df18e4cc0b0c8c8f9b298c3867ffdea85fa93cad39",
+    "reviewed_final_bytes_match": true
+  },
+  "collection": {
+    "schema": "mtm-research-collection-v1",
+    "bundle_directory": "evidence-bundle.01bb5b7858e9b45f7ffbaecd180af003",
+    "bundle_sha256": "b21ee875e2017904a85313a1933a4a3c7ceb35b6abe4f9c985a801dfcf102278",
+    "required_material_present": true,
+    "precheck_consistent": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "explicit_precheck": {
+    "attempted": true,
+    "completed": true,
+    "exit_code": 0,
+    "artifact_count": 13,
+    "bundle_sha256": "b21ee875e2017904a85313a1933a4a3c7ceb35b6abe4f9c985a801dfcf102278",
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "required_material_present": true,
+    "existing_material_consistent": true,
+    "selected_candidate_bytes_checked": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}

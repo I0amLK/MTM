@@ -14,7 +14,7 @@ use mtm_contracts::NativeMode;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
-use crate::native_command_runtime::{check_environment, grant_once, permission_required};
+use crate::native_command_runtime::check_environment;
 use crate::support::candidate;
 use crate::support::loopback::{Client, Server};
 use crate::support::{Result, require, text};
@@ -51,13 +51,9 @@ const TASKS: [(&str, &str, &[&str]); 5] = [
         "U20",
         "native_network_permissions",
         &[
-            "safe_denial",
-            "exact_grant_binding",
-            "once_consumed",
-            "safe_network_isolated",
-            "safe_granted_network",
-            "trusted_network",
             "dangerous_network",
+            "repeated_without_grant",
+            "network_shared_vault_hidden",
         ],
     ),
 ];
@@ -112,7 +108,7 @@ fn isolated_case(
 }
 
 fn direct_argv(binary: &str, nonce: &str) -> Result {
-    isolated_case(binary, NativeMode::Safe, |server, owner| {
+    isolated_case(binary, NativeMode::Dangerous, |server, owner| {
         let literal = format!("{nonce}; $HOME | * ' \" $(not-a-command) \\");
         let reply = server.call(
             owner,
@@ -390,54 +386,27 @@ impl Drop for Endpoint {
     }
 }
 
+/// U20 (MTM-017 dangerous-only revision): the shared network namespace reaches
+/// an owned endpoint repeatedly with no grant, and the private vault stays
+/// hidden while networking is shared. Safe/trusted/grant checks were retired.
 fn network_permissions(binary: &str, nonce: &str) -> Result {
     let endpoint = Endpoint::start(nonce)?;
     let arguments = json!({"argv":["curl","-q","--silent","--show-error","--noproxy","*","--max-time","1","--http1.1",endpoint.address],"yield_time_ms":30000});
-    isolated_case(binary, NativeMode::Safe, |server, owner| {
-        let parent_network = fs::read_link("/proc/self/ns/net")
-            .map_err(|_| "Native corpus parent network identity unavailable")?;
-        let local = server.call(
-            owner,
-            "exec_command",
-            json!({"argv":["readlink","/proc/self/ns/net"],"yield_time_ms":30000}),
-        )?;
-        ordinary_exit(&local)?;
-        let local_network = text(&local, "stdout")?.trim();
-        require(
-            local_network.starts_with("net:[")
-                && local_network.ends_with(']')
-                && local_network != parent_network.to_string_lossy(),
-            "Native corpus ordinary safe command did not isolate networking",
-        )?;
-        permission_required(server, owner, &arguments)?;
-        grant_once(server, owner, "network", &arguments)?;
-        let other = server.login()?;
-        permission_required(server, &other, &arguments)?;
-        let mut changed = arguments.clone();
-        changed["argv"][7] = json!("2");
-        permission_required(server, owner, &changed)?;
-        require(
-            endpoint.hits.load(Ordering::SeqCst) == 0,
-            "Native corpus denied request reached the network",
-        )?;
-        let authorized = server.call(owner, "exec_command", arguments.clone())?;
-        ordinary_exit(&authorized)?;
-        require(
-            authorized["stdout"] == nonce && endpoint.hits.load(Ordering::SeqCst) == 1,
-            "Native corpus exact network grant did not enable its authorized request",
-        )?;
-        permission_required(server, owner, &arguments)
-    })?;
-    for mode in [NativeMode::Trusted, NativeMode::Dangerous] {
-        isolated_case(binary, mode, |server, owner| {
+    isolated_case(binary, NativeMode::Dangerous, |server, owner| {
+        for expected_hits in 1..=3 {
             let reply = server.call(owner, "exec_command", arguments.clone())?;
             ordinary_exit(&reply)?;
             require(
-                reply["stdout"] == nonce,
-                "Native corpus shared network response mismatch",
-            )
-        })?;
-    }
+                reply["stdout"] == nonce && endpoint.hits.load(Ordering::SeqCst) == expected_hits,
+                "Native corpus dangerous network request mismatch",
+            )?;
+        }
+        let environment = server.call(owner, "check_exec_environment", json!({}))?;
+        require(
+            environment["network_allowed"] == true && environment["private_vault_visible"] == false,
+            "Native corpus dangerous profile did not share network with a hidden vault",
+        )
+    })?;
     endpoint.finish()
 }
 

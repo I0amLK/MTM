@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-016",
+  "scope": "historical_release_lifecycle_reconciliation_and_read_only_installed_identity",
+  "observed_at": "2026-09-26T08:39:36Z",
+  "release_performed_at": "2026-09-15T07:01:38Z",
+  "release_receipt": {
+    "path": "records/evidence/MTM-016/preview-release.json",
+    "sha256": "cc248a1f0e83c10992a0c23bd2de4fd86913b829d16b48803ed5353498b4a288"
+  },
+  "source_receipt": {
+    "path": "records/evidence/MTM-016/source-check-f7-host-339a5cb.json",
+    "sha256": "9bf75b63f7c19c6d5982ce812c17ebda367cc81a75523f1cc7f8e4249d00e89b"
+  },
+  "historical_source_sha256": "6836edaea16b1c6a043ab553ea6fe62f06edce32c46d21549d84b5ccdd1b4db6",
+  "historical_source_recomputed_from_git": true,
+  "release_lineage_verified": true,
+  "release_inputs": {
+    "path": "records/governance/mtm016-release-inputs.json",
+    "sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+    "evidence": {
+      "source": {
+        "path": "records/evidence/MTM-016/source-check-f7-host-339a5cb.json",
+        "sha256": "9bf75b63f7c19c6d5982ce812c17ebda367cc81a75523f1cc7f8e4249d00e89b",
+        "hash_verified": true
+      },
+      "protocol": {
+        "path": "records/evidence/MTM-016/candidate-protocol-f6-c674843.json",
+        "sha256": "b5dc197a286da7db5e8639a1ecf30edb39255e573930d92e948de299e666c87c",
+        "hash_verified": true
+      },
+      "permissions": {
+        "path": "records/evidence/MTM-016/candidate-permissions-f6-c674843.json",
+        "sha256": "39c502a5e613085b24bcdcc5fc43623ba84142ef687475b09845f355f0635706",
+        "hash_verified": true
+      },
+      "upgrade": {
+        "path": "records/evidence/MTM-016/candidate-upgrade-f6-c674843.json",
+        "sha256": "cc6cc4fd33b24bbcaedfe532a10fe684fa4aa8bfd4ce391ce664e55c2d460011",
+        "hash_verified": true
+      },
+      "target": {
+        "path": "records/evidence/MTM-016/candidate-target-f6-df4feca.json",
+        "sha256": "1e6097aca1cf9c49002053773dc2abba35678159a3ebc688d840e17eb80c4dc3",
+        "hash_verified": true
+      },
+      "resource": {
+        "path": "records/evidence/MTM-016/candidate-resource-f6-df4feca.json",
+        "sha256": "0b01038b3ae563ddf1302c6106f2f877ec31e8700fab0279953dda27b24ec8ae",
+        "hash_verified": true
+      },
+      "clean_build": {
+        "path": "records/evidence/MTM-016/clean-build-f6-c674843.json",
+        "sha256": "1077112e1962458c89fcfd239f725a0a3beedce0f5404dc2841585b4b450b8a7",
+        "hash_verified": true
+      },
+      "native_commands": {
+        "path": "records/evidence/MTM-016/candidate-native-commands-f6-df4feca.json",
+        "sha256": "3e4d7673ff838e53f775d2696023659ebcd7975bef4d82b4ed20651f8c7a69f0",
+        "hash_verified": true
+      },
+      "compiled_latex": {
+        "path": "records/evidence/MTM-016/candidate-compiled-latex-f6-df4feca.json",
+        "sha256": "4ab3db3fb5adf3c18fbfcfec176491ccffbe5d203ee775829382d8f76571b187",
+        "hash_verified": true
+      },
+      "retrieval": {
+        "path": "records/evidence/MTM-016/candidate-retrieval-f6-c674843.json",
+        "sha256": "dc2771579b7805250157a66f68ad41005743f8c9b08c3db7c8c1d6299ca7f248",
+        "hash_verified": true
+      },
+      "browser_human": {
+        "path": "records/evidence/MTM-016/candidate-browser-human-f6-c674843-u28.json",
+        "sha256": "40e304d018989223f90e3833baba17f3535941063959364e51ad974680d8bb71",
+        "hash_verified": true
+      },
+      "copied_operator_state": {
+        "path": "records/evidence/MTM-016/candidate-copied-operator-state-f6-f263155.json",
+        "sha256": "76a48b8a20573010861ffc97e02784287dc3e70da3bd26cb1c8f3aa6d7cdf356",
+        "hash_verified": true
+      },
+      "install_sigkill": {
+        "path": "records/evidence/MTM-016/candidate-install-sigkill-f6-c674843.json",
+        "sha256": "e2d9ded282591f8d4da5d16ab6a27a5324b9b8fc4286f8ab82352549416c87b5",
+        "hash_verified": true
+      },
+      "corpus": {
+        "path": "records/evidence/MTM-016/corpus-f6-c674843-complete-u01-u30-aggregate-v4.json",
+        "sha256": "3063843848bec73a4f01d24586c46cb1b2971e9f54972cb5e9bb371392d01eb9",
+        "hash_verified": true
+      }
+    }
+  },
+  "historical_release_checks": {
+    "deployment_manifest_consistent": true,
+    "exact_candidate_hash": true,
+    "final_selector_pair_consistent": true,
+    "immutable_release_installed": true,
+    "initial_selector_pair_consistent": true,
+    "preview1_cutover_smoke": true,
+    "preview1_recutover_smoke": true,
+    "preview2_rollback_smoke": true,
+    "readiness_revalidated": true,
+    "rollback_backup_preserved": true
+  },
+  "historical_readiness": {
+    "blocked_gates": 0,
+    "evidence_reexecuted": false,
+    "passed": true,
+    "validated_gates": 17
+  },
+  "installed_release": {
+    "path": "/home/lk/.local/share/mtm/releases/0.6.0-preview.1/mtm",
+    "sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+    "size_bytes": 13602992,
+    "version": "0.6.0-preview.1"
+  },
+  "selectors": [
+    {
+      "path": "/home/lk/.local/bin/mtm",
+      "resolved_target": "/home/lk/.local/share/mtm/releases/0.6.0-preview.1/mtm",
+      "sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+      "version_verified": true
+    },
+    {
+      "path": "/home/lk/.cargo/bin/mtm",
+      "resolved_target": "/home/lk/.local/share/mtm/releases/0.6.0-preview.1/mtm",
+      "sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+      "version_verified": true
+    }
+  ],
+  "deployment_manifest_sha256": "d8d3c959fc22ec48780f0a741bb38e640056b3b05436a6999950d275a56079a2",
+  "rollback_manifest_sha256": "46ce9d2a4c2c83eb3fc5e4cf98f275a50fc189bd7873246bb52aa739bb08dd1c",
+  "historical_rollback_recutover_passed": true,
+  "current_previous_release": {
+    "path": "/home/lk/.local/share/mtm/releases/0.5.0-preview.2/mtm",
+    "expected_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+    "exists": false,
+    "exact_artifact_available": false
+  },
+  "current_rollback_ready": false,
+  "open_operational_risk": "The recorded 0.5.0-preview.2 rollback binary is missing now. The historical drill remains valid; current rollback cannot be claimed ready. Deletion time and cause are unknown.",
+  "cutover_reexecuted": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "existing_sessions_restarted": false,
+  "historical_release_qualified": true,
+  "current_schema8_release_qualified": false,
+  "limitations": [
+    "Hash and lineage verification do not reexecute historical browser, mathematical or qualification trials.",
+    "The current schema-8 source must not be fed to the frozen schema-7 release-cutover driver.",
+    "No live database was opened or copied; this reconciliation reads installation metadata and binary identities only."
+  ]
+}

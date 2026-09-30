@@ -1,5 +1,55 @@
 pub const STATE_SCHEMA_VERSION: i64 = mtm_contracts::STATE_SCHEMA_VERSION as i64;
 
+pub const V8_FACT_MEMORY_SQL: &str = r#"
+CREATE TABLE facts (
+    fact_id TEXT PRIMARY KEY CHECK(length(fact_id)=16),
+    project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    source_run_id TEXT NOT NULL REFERENCES runs(run_id) ON DELETE RESTRICT,
+    statement_tex TEXT NOT NULL,
+    proof_tex TEXT NOT NULL,
+    intuition TEXT NOT NULL DEFAULT '',
+    glossary_json TEXT NOT NULL DEFAULT '[]',
+    external_refs_json TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL
+);
+CREATE INDEX idx_facts_project ON facts(project_id, created_at, fact_id);
+ALTER TABLE claim_revisions ADD COLUMN fact_id TEXT REFERENCES facts(fact_id) ON DELETE RESTRICT;
+CREATE TABLE fact_edges (
+    fact_id TEXT NOT NULL REFERENCES facts(fact_id) ON DELETE RESTRICT,
+    predecessor_id TEXT NOT NULL REFERENCES facts(fact_id) ON DELETE RESTRICT,
+    PRIMARY KEY(fact_id, predecessor_id),
+    CHECK(fact_id != predecessor_id)
+);
+CREATE TABLE fact_revocations (
+    fact_id TEXT NOT NULL REFERENCES facts(fact_id) ON DELETE RESTRICT,
+    reason TEXT NOT NULL CHECK(length(reason)>0),
+    actor TEXT NOT NULL CHECK(length(actor)>0),
+    created_at TEXT NOT NULL
+);
+CREATE INDEX idx_fact_revocations_fact ON fact_revocations(fact_id);
+CREATE TABLE memory_findings (
+    finding_id TEXT PRIMARY KEY CHECK(length(finding_id)=64),
+    project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    run_id TEXT NOT NULL REFERENCES runs(run_id) ON DELETE CASCADE,
+    kind TEXT NOT NULL CHECK(kind IN ('conclusion','example','counterexample','proof_attempt','plan','dead_end','direction','obstacle')),
+    claim TEXT NOT NULL,
+    evidence TEXT NOT NULL,
+    verifiable INTEGER NOT NULL CHECK(verifiable IN (0,1)),
+    links_json TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL
+);
+CREATE INDEX idx_memory_findings_project ON memory_findings(project_id, kind, created_at);
+CREATE TABLE memory_finding_status (
+    finding_id TEXT NOT NULL REFERENCES memory_findings(finding_id) ON DELETE CASCADE,
+    seq INTEGER NOT NULL CHECK(seq>0),
+    status TEXT NOT NULL CHECK(status IN ('active','verified','superseded')),
+    fact_id TEXT REFERENCES facts(fact_id) ON DELETE RESTRICT,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY(finding_id, seq),
+    CHECK((status='verified')=(fact_id IS NOT NULL))
+);
+"#;
+
 pub const V7_ATOMIC_ACTION_SQL: &str = r#"
 ALTER TABLE step_checkpoints ADD COLUMN atomic_action TEXT
     CHECK(atomic_action IN ('assessment_complete','exploration_complete','proof_submitted','repair_submitted'));

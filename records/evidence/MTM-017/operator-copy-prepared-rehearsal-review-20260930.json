@@ -1,0 +1,46 @@
+{
+  "schema": "mtm017-prepared-copy-rehearsal-independent-review-v2",
+  "milestone": "MTM-017",
+  "reviewed_at": "2026-09-30T10:30:32Z",
+  "review_type": "independent_code_and_execution_evidence_review_not_human_witness",
+  "passed": true,
+  "aggregate": {
+    "path": "records/evidence/MTM-017/operator-copy-prepared-rehearsal-aggregate-20260930.json",
+    "sha256": "95190cfb08f3a5efc71d913a272ba8db2dd2779465e5c2b4c77ece09ae30731f"
+  },
+  "source_free_validation": {
+    "path": "records/evidence/MTM-017/operator-copy-two-stage-validation-20260930.json",
+    "sha256": "fcafc906528ca40656715fd16b88bbab262a2fbe009d2ca7720b7a676a040f64"
+  },
+  "independent_final_hash_verification_command_id": "hKFq9M1grciBZV6TIZIG68rp",
+  "independent_preexecution_final_hash_check_command_id": "LZeCAyMWZQtqPvaSIetBwx_O",
+  "verified_real_command_ids": [
+    "W6_rW1TUfrHeMBI-6N1vUcgq",
+    "cAxKsLu8BfiB0rCsdQYT6-7i",
+    "bjujf49AOdS-FzcNYvfz_QK0"
+  ],
+  "all_verified_real_exit_codes_zero": true,
+  "verified_distinct_real_repetitions": 3,
+  "all_same_original_old_run": true,
+  "distinct_commands_sessions_working_inodes_and_exact_proofs": true,
+  "original_archive_unchanged": true,
+  "original_archive_owner_readonly": true,
+  "original_capture_attempts": 1,
+  "source_capture_repeated": false,
+  "rollback_validation_mode": "exact_restore_then_prepared_continuation",
+  "unprepared_baseline_continuation_claimed": false,
+  "preserved_strict_failure_sha256": "2fbc819765e920a8ce89ad4f94317a26275b3701c785fe2fa9e2ffee4fbd67d0",
+  "strict_failure_still_failed": true,
+  "operator_decision_sha256": "953be5aa5bfa3632408f66264e129b184219ce09c8ecd5de91ee93e608ee0933",
+  "order_clarification_sha256": "ec2638268b0b419d6f4ca0cd03985336965a8e7b4cb47bcc31f43c6fcfee03c1",
+  "u29_import_input_review_passed": true,
+  "corpus_import_executed": false,
+  "readiness_gate_evaluation_performed": false,
+  "release_qualified": false,
+  "deployment_authorized_by_this_review": false,
+  "production_modified": false,
+  "selectors_modified": false,
+  "raw_private_state_published": false,
+  "commit_created": false,
+  "pushed": false
+}

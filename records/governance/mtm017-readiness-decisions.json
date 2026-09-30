@@ -1,0 +1,486 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "append_only_operator_decisions_for_schema8_release_readiness_not_deployment_authority",
+  "decisions": [
+    {
+      "decision_id": "MTM017-READINESS-DECISION-001",
+      "recorded_at": "2026-09-30T03:23:22Z",
+      "kind": "operator_scoped_gate_waiver",
+      "gate": "historical_0_5_0_preview_2_rollback_artifact",
+      "applicability": {
+        "milestone": "MTM-017",
+        "candidate_version": "0.6.0-preview.2",
+        "candidate_state_schema": 8,
+        "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+        "scope": "new_schema8_release_readiness_only"
+      },
+      "decision": "not_required",
+      "disposition": "waived_by_operator",
+      "passed": false,
+      "reason": "The operator explicitly excluded this longstanding historical artifact gap from this schema-8 readiness scope. This is a waiver, not recovered bytes or a successful rollback observation.",
+      "authorization": {
+        "source": "direct_operator_message_received_2026-09-30",
+        "verbatim": "历史 0.5.0-preview.2 rollback binary 在已记录的安装路径和 baseline 路径都缺失 这个是长期的历史遗留了，可以删除这个  gate"
+      },
+      "historical_fact_preserved": {
+        "version": "0.5.0-preview.2",
+        "expected_sha256": "2164c84701b191b06a66a5d28ba595697d355f9a3bdc78ca31ea455d49793d6a",
+        "recorded_install_path": "/home/lk/.local/share/mtm/releases/0.5.0-preview.2/mtm",
+        "recorded_baseline_path": "target/mtm016-f3/baseline/mtm",
+        "observed_available": false,
+        "evidence": "records/evidence/MTM-016/lifecycle-reconciliation-20260926.json",
+        "evidence_changed": false,
+        "historical_rollback_readiness_claimed": false
+      },
+      "still_required": [
+        "A genuine stopped or consistently backed-up schema-7 operator-state copy with its source and consistency provenance.",
+        "Private-mode preparation only on a disposable working copy, schema-7 to schema-8 migration and an eligible existing-run continuation.",
+        "Exact pre-upgrade bytes, modes and database restoration with the matching schema-7 0.6.0-preview.1 binary, followed by old-runtime existing-run continuation.",
+        "All other current-artifact research, corpus, clean-build provenance and schema-8 release-readiness requirements.",
+        "A separate explicit deployment authorization before any production selector or production state change."
+      ],
+      "compatible_schema7_baseline_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+      "frozen_mtm016_driver_changed": false,
+      "frozen_mtm016_release_inputs_changed": false,
+      "historical_evidence_deleted_or_relabelled": false,
+      "readiness_adapter_implemented_by_this_decision": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "reversal": "Append a superseding MTM-017 operator decision; retain this decision and all historical missing-artifact evidence."
+    },
+    {
+      "decision_id": "MTM017-READINESS-DECISION-002",
+      "recorded_at": "2026-09-30T04:00:34Z",
+      "kind": "operator_scoped_clean_build_cache_exception",
+      "scope": "two_clean_checkout_builds_for_the_exact_MTM-017_schema8_candidate_only",
+      "decision": "approved",
+      "candidate_version": "0.6.0-preview.2",
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "candidate_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+      "authorization": {
+        "source": "direct_operator_confirmation",
+        "user_message_id": "Sentinel_16bdd196ae308191b3ab1df026ba1e52",
+        "question_verbatim": "两次 clean build 还有一处需要你确认：仓库现有规则要求复用固定构建缓存，这不满足 clean-build 取证要求。是否允许为本次 MTM-017 取证增加一条例外，使用专用隔离缓存和私有依赖副本，并在保存每轮产物后仅清理脚本自己创建的临时目录？现有缓存、冻结候选和 production 都不会被清理",
+        "answer_verbatim": "可以"
+      },
+      "permitted": {
+        "runner": "scripts/mtm017-clean-build-provenance.sh",
+        "dedicated_session_parent": "target/mtm017-clean-build-provenance",
+        "rounds": 2,
+        "execution_order": "serial_same_disposable_checkout_and_build_cache_paths",
+        "dependency_inputs": "bounded_private_copies_of_crates_io_archives_and_sparse_index_without_shared_writable_links",
+        "cleanup": "only_script_created_marker_device_inode_verified_checkout_and_build-cache_children_after_retaining_each_artifact_and_receipt"
+      },
+      "constraints": [
+        "No use or cleanup of existing compiled operator/tool caches, frozen candidates or production paths.",
+        "No recursive cleanup of the target tree, evidence directories, private dependency copies or failed scratch.",
+        "The candidate, its SHA and historical receipts remain unchanged; two equal builds alone do not prove reproduction of that candidate.",
+        "Complete corpus work and independent pre-execution review before the explicit build entry.",
+        "The exception changes no ordinary Cargo ownership rule and grants no release or deployment authority."
+      ],
+      "policy_location": "AGENTS.md: MTM-017 two-clean-build qualification",
+      "plan": "docs/MTM-017-CLEAN-BUILD-PROVENANCE.md",
+      "build_executed_by_this_record": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "reversal": "Append a superseding operator decision; retain this authorization and any resulting evidence."
+    },
+    {
+      "decision_id": "MTM017-READINESS-DECISION-003",
+      "recorded_at": "2026-09-30T06:58:39Z",
+      "kind": "operator_scoped_clean_build_gate_override",
+      "gate": "clean_build_provenance",
+      "applicability": {
+        "milestone": "MTM-017",
+        "candidate_version": "0.6.0-preview.2",
+        "candidate_state_schema": 8,
+        "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+        "candidate_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+        "scope": "this_candidate_clean_build_provenance_gate_only"
+      },
+      "decision": "waived_by_operator",
+      "disposition": "accepted_with_operator_waiver",
+      "human_authorized_override": true,
+      "gate_allowed_by_governance": true,
+      "passed": false,
+      "technical_status": "not_reproduced",
+      "exact_candidate_reproduced": false,
+      "authorization": {
+        "source": "direct_operator_message",
+        "user_message_id": "Sentinel_c630877fa6388191b74664aee4f5bfdf",
+        "sent_at": "2026-09-30T06:55:41.860419+00:00",
+        "verbatim": "尽管无法重建当时环境，但是后续测试，完全可以说明问题，所以我们可以记录后通过gate 记录为人类授权"
+      },
+      "risk_acceptance": {
+        "judgment": "The operator accepts the unresolved original-build-environment and exact-candidate-reproduction gap for this single gate in light of existing test evidence.",
+        "operator_judgment_not_new_test_evidence": true,
+        "new_test_execution_claimed": false,
+        "technical_provenance_restored": false,
+        "reason_for_gate_release": "Explicit human risk acceptance; no claim that existing tests prove exact clean-build provenance."
+      },
+      "original_failure": {
+        "summary": {
+          "path": "records/evidence/MTM-017/clean-build-provenance-20260930.json",
+          "sha256": "a39bd0f181b5ce356b485376776d42ef98e51247226ce01a2589297eb884a84e"
+        },
+        "prior_gate": {
+          "path": "records/evidence/MTM-017/clean-build-gate-before-operator-override-20260930.json",
+          "sha256": "e98311c457905feee4d1a8f3f6c25a321f02d3144db693712265ab9df3f84b1e"
+        },
+        "comparison": {
+          "path": "records/evidence/MTM-017/clean-build-comparison-20260930.json",
+          "sha256": "81aa8d286317d5f6ec0378a442628458f31518f67c61c3c21f330ebab741fc16"
+        },
+        "runner_exit_code": 1,
+        "successful_clean_builds": 2,
+        "both_builds_equal": true,
+        "both_rebuilt_sha256": "b55dd460e8f2df80c149dcf659b8d29871d2fc9a0e505c51c915feaae8109147",
+        "both_match_selected_candidate": false,
+        "original_evidence_unchanged": true
+      },
+      "existing_test_context": [
+        {
+          "path": "records/evidence/MTM-017/preview2-qualification-snapshot.json",
+          "sha256": "5018c5b1050cefe6e0ef6c7db0bb0aeb15b03ed492ee8e75d6737097b535d55c",
+          "scope": "Existing exact-candidate machine qualifications only; schema-7/8/7 upgrade used generated state, not a genuine operator copy.",
+          "recorded_profiles_passed": [
+            "upgrade_schema8",
+            "protocol",
+            "native_commands",
+            "compiled_latex",
+            "resource",
+            "corpus_native",
+            "install_sigkill",
+            "retrieval"
+          ]
+        },
+        {
+          "path": "records/evidence/MTM-017/research-corpus-subset-accepted-20260930.json",
+          "sha256": "49fc407487fa7c9104c4a6b7aae92e2cde2b9fe4287bd5c73b0e0352abbaae6e",
+          "scope": "Existing accepted current-candidate U21-U25 fifteen-trial research subset only; not the complete corpus.",
+          "accepted_trials": 15
+        }
+      ],
+      "still_required": [
+        "A genuine stopped or consistently backed-up schema-7 operator-state copy, private-mode preparation on a disposable working copy, old-run continuation and exact bytes/modes/database rollback with the schema-7 baseline.",
+        "All other exact-artifact corpus and schema-8 release-input/readiness requirements, with technical success distinguishable from an explicit governance waiver.",
+        "Separate explicit deployment authorization before any production selector or state change."
+      ],
+      "readiness_consumption_contract": "Apply only to the exact candidate and clean_build_provenance gate above. Report governance waiver separately from technical passed=false and exact_candidate_reproduced=false; do not convert this record into a technical pass or complete release verdict.",
+      "other_engineering_tasks_remain_paused": true,
+      "operator_state_rehearsal_resumed": false,
+      "additional_build_authorized": false,
+      "new_candidate_selected": false,
+      "readiness_adapter_implemented_by_this_decision": false,
+      "full_release_input_created": false,
+      "frozen_mtm016_driver_changed": false,
+      "historical_evidence_deleted_or_relabelled": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "reversal": "Append a superseding human decision and update the current single-gate pointer; retain this override and all original failure evidence."
+    },
+    {
+      "recorded_at": "2026-09-30T10:15:06Z",
+      "kind": "operator_scoped_acceptance_contract_adjustment",
+      "decision": "approved_contract_pending_observations",
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "candidate_version": "0.6.0-preview.2",
+      "candidate_state_schema": 8,
+      "authorization": {
+        "source": "direct_operator_confirmation",
+        "user_message_id": "Sentinel_8f37e42fafd481919aa483b94b99ee50",
+        "question_verbatim": "另外请明确确认两项验收调整是否都同意：① U27/U28 改测兼容回复无副作用、dangerous 不越权；② baseline 副本先完成原始 bytes/modes 精确恢复校验，再做权限准备并验证同一旧 run 延续。这两项获准后可以继续推进",
+        "answer_verbatim": "确认"
+      },
+      "new_test_execution_claimed": false,
+      "accepted_delta": 0,
+      "corpus_count_incremented": false,
+      "existing_partial_corpus": {
+        "path": "records/governance/mtm017-partial-corpus.json",
+        "sha256": "0f2562453258f469a99a8f8b084cb4fb718ed089470dd185222da613ceb403c2"
+      },
+      "original_research_pointer": {
+        "path": "records/governance/mtm017-research-corpus.json",
+        "sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24"
+      },
+      "frozen_mtm016_driver": {
+        "path": "records/governance/mtm016-release-inputs.json",
+        "sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04"
+      },
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "reversal": "Append a superseding scoped decision; retain this authorization, original contracts and all failed observations.",
+      "decision_id": "MTM017-READINESS-DECISION-004",
+      "scope": "MTM017_U27_U28_current_candidate_compatibility_and_authority_boundaries_only",
+      "mapping": {
+        "U27": "request_permissions compatibility response without command, file, workflow, elicitation or grant-ledger effects",
+        "U28": "dangerous Native does not grant workflow/project authority, disabled-backend execution, path escape or private-vault access; same boundaries after reconnect and restart"
+      },
+      "required_observations": [
+        "Each task has three fresh exact-candidate runtime trials with distinct identities, times and sealed reports.",
+        "U27 covers exec and patch requests, once and session scopes, the fixed dangerous marker and null expiry.",
+        "U28 uses only isolated synthetic canaries and disposable runtime state.",
+        "Independent implementation/collector review before execution; separately reviewed import before adding any corpus cells."
+      ],
+      "human_consent_tested": false,
+      "public_tool_contract_changed": false,
+      "runtime_changed": false,
+      "state_schema_changed": false,
+      "workflow_protocol_changed": false,
+      "old_MTM016_mapping_changed": false,
+      "pending_cells_not_accepted": [
+        "U26",
+        "U27",
+        "U28",
+        "U29"
+      ]
+    },
+    {
+      "recorded_at": "2026-09-30T10:15:06Z",
+      "kind": "operator_scoped_acceptance_contract_adjustment",
+      "decision": "approved_contract_pending_observations",
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "candidate_version": "0.6.0-preview.2",
+      "candidate_state_schema": 8,
+      "authorization": {
+        "source": "direct_operator_confirmation",
+        "user_message_id": "Sentinel_8f37e42fafd481919aa483b94b99ee50",
+        "question_verbatim": "另外请明确确认两项验收调整是否都同意：① U27/U28 改测兼容回复无副作用、dangerous 不越权；② baseline 副本先完成原始 bytes/modes 精确恢复校验，再做权限准备并验证同一旧 run 延续。这两项获准后可以继续推进",
+        "answer_verbatim": "确认"
+      },
+      "new_test_execution_claimed": false,
+      "accepted_delta": 0,
+      "corpus_count_incremented": false,
+      "existing_partial_corpus": {
+        "path": "records/governance/mtm017-partial-corpus.json",
+        "sha256": "0f2562453258f469a99a8f8b084cb4fb718ed089470dd185222da613ceb403c2"
+      },
+      "original_research_pointer": {
+        "path": "records/governance/mtm017-research-corpus.json",
+        "sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24"
+      },
+      "frozen_mtm016_driver": {
+        "path": "records/governance/mtm016-release-inputs.json",
+        "sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04"
+      },
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "reversal": "Append a superseding scoped decision; retain this authorization, original contracts and all failed observations.",
+      "decision_id": "MTM017-READINESS-DECISION-005",
+      "scope": "MTM017_genuine_operator_copy_exact_restore_then_prepared_baseline_continuation_only",
+      "rollback_semantics": "exact_restore_then_prepared_continuation",
+      "compatible_schema7_baseline_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+      "exact_original_bytes_modes_database_restore_required": true,
+      "baseline_private_mode_preparation_after_exact_restore_only": true,
+      "same_existing_run_continuation_required": true,
+      "original_modes_baseline_continuation": false,
+      "new_operator_source_read_authorized": false,
+      "working_scope": "existing_authorized_archive_and_new_disposable_copies_only",
+      "required_observations": [
+        "Three fresh repeat observations from the existing captured archive with before/after seals.",
+        "Verify original bytes, modes and database restoration before any baseline permissions preparation.",
+        "Perform permission preparation only on the restored disposable working copy, then verify the same old run continues under the pinned schema-7 baseline.",
+        "Preserve strict original-modes failure and all diagnostics; independent review before acceptance."
+      ],
+      "original_strict_failure": {
+        "path": "records/evidence/MTM-017/operator-copy-real-rehearsal-attempt-1-failed-20260930.json",
+        "sha256": "2fbc819765e920a8ce89ad4f94317a26275b3701c785fe2fa9e2ffee4fbd67d0"
+      },
+      "original_failure_diagnostic": {
+        "path": "records/evidence/MTM-017/operator-copy-baseline-failure-diagnostic-20260930.json",
+        "sha256": "1f658753069848e9ba0954f173caa4bec41fb157b1c81ea7a5a6f5df6f89d960"
+      },
+      "new_U29_acceptance": false
+    },
+    {
+      "schema": "mtm017-scoped-operator-decision-clarification-v1",
+      "milestone": "MTM-017",
+      "decision_id": "MTM017-READINESS-DECISION-005-CLARIFICATION-001",
+      "recorded_at": "2026-09-30T10:21:44Z",
+      "clarifies": {
+        "path": "records/evidence/MTM-017/operator-copy-prepared-continuation-authorization-20260930.json",
+        "sha256": "953be5aa5bfa3632408f66264e129b184219ce09c8ecd5de91ee93e608ee0933"
+      },
+      "authorization": {
+        "source": "direct_operator_confirmation",
+        "user_message_id": "Sentinel_8f37e42fafd481919aa483b94b99ee50",
+        "question_verbatim": "另外请明确确认两项验收调整是否都同意：① U27/U28 改测兼容回复无副作用、dangerous 不越权；② baseline 副本先完成原始 bytes/modes 精确恢复校验，再做权限准备并验证同一旧 run 延续。这两项获准后可以继续推进",
+        "answer_verbatim": "确认"
+      },
+      "scope": "ordering_clarification_without_additional_authority",
+      "meaning": "Database restoration before preparation means exact restored database file bytes/modes, not opening SQLite before preparation. SQLite consistency/schema/same-run/owner/key checks occur after mode-only preparation, so WAL recovery cannot mutate the exact-restore proof before it is sealed.",
+      "required_order": [
+        "extract existing authorized archive into a fresh disposable copy",
+        "persist durable exact original bytes and modes verification",
+        "recheck the same exact restored hashes immediately before preparation",
+        "prepare only copied baseline filesystem modes without changing file content",
+        "open SQLite and verify schema7, original same run, owner and key binding",
+        "start the exact schema7 baseline and verify prepared continuation of that same old run"
+      ],
+      "exact_original_restore_required": true,
+      "permission_preparation_changes_content": false,
+      "original_modes_baseline_continuation": false,
+      "new_operator_source_read_authorized": false,
+      "accepted_delta": 0,
+      "corpus_count_incremented": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false,
+      "deployment_authorized": false
+    },
+    {
+      "schema": "mtm017-u26-human-waiver-v1",
+      "milestone": "MTM-017",
+      "recorded_at": "2026-09-30T12:15:34Z",
+      "decision_id": "MTM017-READINESS-DECISION-006",
+      "kind": "operator_scoped_U26_human_waiver",
+      "scope": "this_schema8_candidate_U26_three_cells_only",
+      "applicability": {
+        "candidate_version": "0.6.0-preview.2",
+        "candidate_state_schema": 8,
+        "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+        "candidate_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+        "task_id": "U26",
+        "repeats": [
+          1,
+          2,
+          3
+        ]
+      },
+      "authorization": {
+        "source": "direct_operator_message",
+        "user_message_id": "Sentinel_beb3f96c23948191bb5c3d688b490c58",
+        "sent_at": "2026-09-30T12:11:00Z",
+        "timestamp_precision": "minute",
+        "verbatim": "我授权通过 U26"
+      },
+      "decision": "waived_by_operator",
+      "disposition": "accepted_with_operator_waiver",
+      "human_authorized_override": true,
+      "gate_allowed_by_governance": true,
+      "passed": false,
+      "technical_status": "incomplete_real_client_trials",
+      "technical_accepted_trials": 87,
+      "technical_pending_trials": 3,
+      "total_corpus_cells": 90,
+      "human_waived_cells": 3,
+      "technical_accepted_delta": 0,
+      "accepted_delta": 0,
+      "corpus_count_incremented": false,
+      "full_technical_corpus": false,
+      "cells": [
+        {
+          "task_id": "U26",
+          "repeat": 1,
+          "technical_status": "pending",
+          "passed": false,
+          "governance_disposition": "waived_by_operator",
+          "new_technical_trial_claimed": false
+        },
+        {
+          "task_id": "U26",
+          "repeat": 2,
+          "technical_status": "pending",
+          "passed": false,
+          "governance_disposition": "waived_by_operator",
+          "new_technical_trial_claimed": false
+        },
+        {
+          "task_id": "U26",
+          "repeat": 3,
+          "technical_status": "pending",
+          "passed": false,
+          "governance_disposition": "waived_by_operator",
+          "new_technical_trial_claimed": false
+        }
+      ],
+      "original_partial_observation": {
+        "path": "records/evidence/MTM-017/u26-browser-r1-partial-observation-20260930.json",
+        "sha256": "8918f3b2ba3fd7941ee082e5a9aa7fc915d0e4b613ae09a395703f37174af4ac"
+      },
+      "original_87_acceptance": {
+        "path": "records/evidence/MTM-017/corpus-union-accepted-20260930.json",
+        "sha256": "1afff81a1ce804eb4fa88ef23012c37f2289f0f54d02fe73b0092e5cceba7523"
+      },
+      "original_87_pointer": {
+        "path": "records/governance/mtm017-corpus-union.json",
+        "sha256": "9e2d9de518a3ab1225134164828f1f83ddcb83d0f72c55399301ea53452c1393"
+      },
+      "frozen_mtm016_driver": {
+        "path": "records/governance/mtm016-release-inputs.json",
+        "sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04"
+      },
+      "preserved_observations": {
+        "operator_reported_real_browser_connection": true,
+        "same_owner_reconnect_read_continuity_observed": true,
+        "valid_normal_assessment_submission_completed": false,
+        "connector_oneOf_validation_rejected_before_server_dispatch": true,
+        "candidate_assessment_rejection_claimed": false,
+        "protected_resource_path_directly_observed": false,
+        "repeat_2_completed": false,
+        "repeat_3_completed": false,
+        "raw_oauth_or_capability_recorded": false
+      },
+      "risk_acceptance": {
+        "basis": "Explicit operator authorization waives the remaining U26 requirement for this candidate; no new technical evidence is produced.",
+        "normal_submission_path_unverified": true,
+        "connector_oneOf_root_cause": "undetermined",
+        "zero_server_rejections_not_a_submission_pass": true,
+        "partial_browser_evidence_not_three_completed_trials": true,
+        "existing_failure_and_partial_evidence_preserved": true
+      },
+      "readiness_consumption_contract": "Read this separate exact-candidate U26 waiver alongside the immutable 87-cell acceptance. Report 87 technically accepted cells plus 3 human-waived cells; retain technical pending=3, technical full corpus=false and passed=false for U26. This decision removes only the U26 governance requirement and grants no complete release or deployment verdict. The existing readiness draft is not modified or claimed to consume this record.",
+      "readiness_adapter_implemented_by_this_decision": false,
+      "new_test_execution_claimed": false,
+      "original_87_pointer_changed": false,
+      "runtime_or_dangerous_mode_changed": false,
+      "other_gates_waived_by_this_decision": false,
+      "implementation_complete": "unknown",
+      "research_accepted": true,
+      "research_acceptance_scope": "unchanged_original_fifteen_only",
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "recorded_by": "ctm-corpus-audit-session",
+      "reversal": "Append a superseding operator decision; preserve this waiver, original technical evidence and all prior corpus pointers."
+    },
+    {
+      "schema": "mtm017-source-risk-disposition-v1",
+      "milestone": "MTM-017",
+      "decision_id": "MTM017-READINESS-DECISION-007",
+      "finding_id": "MTM017-SOURCE-R3-NORMAL-ASSESSMENT",
+      "failed_evidence": {
+        "path": "records/evidence/MTM-017/authority-corpus-whole-source-r3-failed-20260930.json",
+        "sha256": "5214ea3ec16b5277e950ca110a94af554d335c94c9c2a8328cc97bab0e615fb7"
+      },
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "root_cause_status": "indeterminate",
+      "release_disposition": "accepted_by_operator",
+      "passed": false,
+      "runtime_fix_claimed": false,
+      "operator_authorization": {
+        "source": "direct_operator_confirmation",
+        "user_message_id": "Sentinel_f5253c199dc88191801cda29b306b984",
+        "question_verbatim": "这里需要你作一个单独决定：此前 500 轮测试有一次在提交成功后缺少下一任务，后续测试通过，但原失败原因仍未确定。刚完成的诊断只证明一种可恢复的碰撞机制，不能替代原失败归因\n\n你是否接受这项未归因风险，允许它以“已知风险、人类授权接受”进入 release-readiness？如果不接受，我会继续调查并保持阻断。这个决定不包含部署授权",
+        "answer_verbatim": "接受"
+      },
+      "diagnostic": {
+        "path": "records/evidence/MTM-017/authority-corpus-domain-collision-diagnostic-20260930.json",
+        "sha256": "8995c3db3585b43b984b9c234dbb7f6613ef135e16991540184a3a7db8a395fc"
+      },
+      "deployment_authorized": false
+    }
+  ]
+}

@@ -1,0 +1,349 @@
+{
+  "schema": "mtm017-release-readiness-accepted-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T14:43:53Z",
+  "decision": "accepted_for_scoped_release_readiness",
+  "qualification_basis": "technical_evidence_plus_scoped_operator_waivers",
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "baseline_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "product_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+  "product_build_source_sha256": "0adec4b02a8b54fd20fb30c796c9959ccc346cc0f9336517fc47eafcb6951e02",
+  "version": "0.6.0-preview.2",
+  "state_schema_version": 8,
+  "tool_contract": "mtm-tools-v10",
+  "workflow_protocol": 3,
+  "criteria_revision": "mtm017-release-readiness-contract-v1",
+  "criteria": {
+    "path": "docs/MTM-017-FORMAL-READINESS.md",
+    "sha256": "7b7b15436dbd7360f704c3b1dd01243301e724fa5342043834f6a8cff3b3002d"
+  },
+  "inputs": {
+    "path": "records/evidence/MTM-017/release-readiness-inputs-20260930.json",
+    "sha256": "c24e2e741f99451936b051e98d1c180ca612ad5fa20ec48318ee05e486c43c78"
+  },
+  "input_review": {
+    "path": "records/evidence/MTM-017/release-readiness-input-review-20260930.json",
+    "sha256": "e15276af01026c44d6cc4858c4facaf6a6ff7d1d9b11f1bb8df39fd087c8b51d"
+  },
+  "evaluation": {
+    "path": "records/evidence/MTM-017/release-readiness-evaluation-20260930.json",
+    "sha256": "2ba3ecc8a54987f0a63640f64cf418f4e8001b1e52e550f7f3d27d7480e1919e"
+  },
+  "result_review": {
+    "path": "records/evidence/MTM-017/release-readiness-result-review-20260930.json",
+    "sha256": "e55f71e772901585a0608b1df297f34b8cc929b1ba547d55c3e816de32f0185d"
+  },
+  "execution": {
+    "path": "records/evidence/MTM-017/release-readiness-execution-20260930.json",
+    "sha256": "d5826e82b698b2e67d78a4594a0eaa3a342a8ece69ca28b7528471fc65ea280e"
+  },
+  "implementation_validation": {
+    "path": "records/evidence/MTM-017/formal-readiness-implementation-validation-20260930.json",
+    "sha256": "0eda81b2204c0dd63dae1eda5812765da926aa74916c0148ff87ab2137fef7f6"
+  },
+  "whole_source_gate": {
+    "path": "records/evidence/MTM-017/formal-readiness-whole-source-20260930.json",
+    "sha256": "d1eaed722274b3af7057d1cf8ca426eda1bcf20a959955f28f5cce47a023676a"
+  },
+  "maintenance_source_sha256": "39f42266b1dafc323b525130ba00cb11aac6f06f6a4448a132cdad6ac2add8f0",
+  "maintenance_binary_sha256": "223459136ac5184572b9b5c338c77dd01347252c12f16191c616a69b04b14ff7",
+  "source_tests": {
+    "passed": 712,
+    "failed": 0,
+    "ignored": 1,
+    "ignored_test": "native_authority::tests::exec_candidate_real_dns_https_target"
+  },
+  "implementation_complete": "unknown",
+  "implementation_scope": "whole_project_not_inferred_from_readiness",
+  "adapter_implementation_scope_validated": true,
+  "research_accepted": true,
+  "research_acceptance_scope": "previously_accepted_U21-U25_x3_only",
+  "previously_accepted_research_trials": 15,
+  "newly_accepted_research_trials": 0,
+  "technical_accepted_trials": 87,
+  "technical_pending_trials": 3,
+  "human_waived_cells": 3,
+  "unique_corpus_cells": 90,
+  "governance_unaccounted_cells": 0,
+  "technical_qualification_complete": false,
+  "readiness_evaluation_passed": true,
+  "result_review_complete": true,
+  "release_qualified": true,
+  "deployment_authorized": false,
+  "scoped_waivers": [
+    {
+      "decision_id": "MTM017-READINESS-DECISION-001",
+      "scope": "missing_historical_0.5.0-preview.2_binary_only",
+      "technical_pass": false,
+      "current_schema7_baseline_still_required": true
+    },
+    {
+      "decision_id": "MTM017-READINESS-DECISION-003",
+      "scope": "exact_candidate_clean_build_provenance_only",
+      "technical_pass": false,
+      "exact_candidate_reproduced": false
+    },
+    {
+      "decision_id": "MTM017-READINESS-DECISION-006",
+      "scope": "exact_schema8_candidate_U26_repeats_1_2_3_only",
+      "technical_pass": false,
+      "cells": [
+        {
+          "task_id": "U26",
+          "repeat": 1
+        },
+        {
+          "task_id": "U26",
+          "repeat": 2
+        },
+        {
+          "task_id": "U26",
+          "repeat": 3
+        }
+      ],
+      "counted_once": true
+    }
+  ],
+  "decisions": {
+    "path": "records/governance/mtm017-readiness-decisions.json",
+    "sha256": "4fac40e7dfcb9de01d605227bed3d2c670f645a42a65590c53243f820b143cbe"
+  },
+  "known_finding": {
+    "applicability": "same_product_source_observation_not_exact_candidate_failure_claim",
+    "blocks_current_evaluation": false,
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "diagnostic": {
+      "path": "records/evidence/MTM-017/authority-corpus-domain-collision-diagnostic-20260930.json",
+      "sha256": "8995c3db3585b43b984b9c234dbb7f6613ef135e16991540184a3a7db8a395fc"
+    },
+    "disposition": {
+      "path": "records/evidence/MTM-017/source-risk-human-disposition-20260930.json",
+      "sha256": "a6132158e02e45dee166a214e0b8eadd7c72d55715e17b680aff9d7838496014"
+    },
+    "disposition_review": {
+      "path": "records/evidence/MTM-017/source-risk-disposition-review-20260930.json",
+      "sha256": "6a57d1a1792fd9078f9a057209ae936326d547d750ab9b2de691d1960c7f913c"
+    },
+    "failed_evidence": {
+      "path": "records/evidence/MTM-017/authority-corpus-whole-source-r3-failed-20260930.json",
+      "sha256": "5214ea3ec16b5277e950ca110a94af554d335c94c9c2a8328cc97bab0e615fb7"
+    },
+    "finding_id": "MTM017-SOURCE-R3-NORMAL-ASSESSMENT",
+    "historical_failure_passed": false,
+    "mechanism_reproduced": true,
+    "original_failure_cause_proven": false,
+    "release_disposition": "accepted_by_operator",
+    "root_cause_status": "indeterminate",
+    "runtime_fix_claimed": false,
+    "decision_id": "MTM017-READINESS-DECISION-007"
+  },
+  "corpus_acceptance": {
+    "path": "records/evidence/MTM-017/corpus-union-accepted-20260930.json",
+    "sha256": "1afff81a1ce804eb4fa88ef23012c37f2289f0f54d02fe73b0092e5cceba7523"
+  },
+  "operator_copy_review": {
+    "path": "records/evidence/MTM-017/operator-copy-prepared-rehearsal-review-20260930.json",
+    "sha256": "31e3129197014901f9824d6a48ac26b52b1db59aa4e158af9f98ceef06a8702c"
+  },
+  "gate_evaluation": [
+    {
+      "criterion_source": "docs/MTM-017-PREVIEW2-QUALIFICATION.md",
+      "evidence_scope": "Exact selected bytes and approved product/build lineage",
+      "governance_disposition": "technical_requirement_satisfied",
+      "id": "exact_artifact_identity",
+      "requirement_accounted": true,
+      "technical_pass": true,
+      "technical_status": "passed_for_stated_scope"
+    },
+    {
+      "criterion_source": "docs/ACCEPTANCE.md",
+      "evidence_scope": "Fresh stable complete source checks; not old counts",
+      "governance_disposition": "technical_requirement_satisfied",
+      "id": "current_source",
+      "requirement_accounted": true,
+      "technical_pass": true,
+      "technical_status": "passed_for_stated_scope"
+    },
+    {
+      "criterion_source": "docs/MTM-017-PREVIEW2-QUALIFICATION.md",
+      "evidence_scope": "Exact-candidate protocol/capability/lifecycle fixtures",
+      "governance_disposition": "technical_requirement_satisfied",
+      "id": "protocol",
+      "requirement_accounted": true,
+      "technical_pass": true,
+      "technical_status": "passed_for_stated_scope"
+    },
+    {
+      "criterion_source": "docs/MTM-017-SCHEMA8-UPGRADE.md",
+      "evidence_scope": "Generated-state 7/8/7 fixture only",
+      "governance_disposition": "technical_requirement_satisfied",
+      "id": "upgrade_schema8",
+      "requirement_accounted": true,
+      "technical_pass": true,
+      "technical_status": "passed_for_stated_scope"
+    },
+    {
+      "criterion_source": "docs/MTM-017-PREVIEW2-QUALIFICATION.md",
+      "evidence_scope": "Dangerous isolation, commands, TTY, cleanup and CAS",
+      "governance_disposition": "technical_requirement_satisfied",
+      "id": "native_commands",
+      "requirement_accounted": true,
+      "technical_pass": true,
+      "technical_status": "passed_for_stated_scope"
+    },
+    {
+      "criterion_source": "docs/MTM-017-PREVIEW2-QUALIFICATION.md",
+      "evidence_scope": "Required full/compact/repair fixture compilation",
+      "governance_disposition": "technical_requirement_satisfied",
+      "id": "compiled_latex",
+      "requirement_accounted": true,
+      "technical_pass": true,
+      "technical_status": "passed_for_stated_scope"
+    },
+    {
+      "criterion_source": "docs/ACCEPTANCE.md",
+      "evidence_scope": "Paired non-regression thresholds, no performance claim",
+      "governance_disposition": "technical_requirement_satisfied",
+      "id": "resource",
+      "requirement_accounted": true,
+      "technical_pass": true,
+      "technical_status": "passed_for_stated_scope"
+    },
+    {
+      "criterion_source": "docs/MTM-017-PARTIAL-CORPUS-AGGREGATE.md",
+      "evidence_scope": "Validated U16-U20 subset; counted only within union",
+      "governance_disposition": "technical_requirement_satisfied",
+      "id": "corpus_native",
+      "requirement_accounted": true,
+      "technical_pass": true,
+      "technical_status": "passed_for_stated_scope"
+    },
+    {
+      "criterion_source": "docs/MTM-017-PARTIAL-CORPUS-AGGREGATE.md",
+      "evidence_scope": "Process-SIGKILL and three U30 trials, not power-loss",
+      "governance_disposition": "technical_requirement_satisfied",
+      "id": "install_sigkill",
+      "requirement_accounted": true,
+      "technical_pass": true,
+      "technical_status": "passed_for_stated_scope"
+    },
+    {
+      "criterion_source": "docs/MTM-017-PREVIEW2-QUALIFICATION.md",
+      "evidence_scope": "Exact artifact external retrieval and redirect policy",
+      "governance_disposition": "technical_requirement_satisfied",
+      "id": "retrieval",
+      "requirement_accounted": true,
+      "technical_pass": true,
+      "technical_status": "passed_for_stated_scope"
+    },
+    {
+      "criterion_source": "docs/MTM-017-RESEARCH-CORPUS-IMPORT.md",
+      "evidence_scope": "Previously accepted fifteen public-chain rows, no new mathematics",
+      "governance_disposition": "technical_requirement_satisfied",
+      "id": "research_subset",
+      "requirement_accounted": true,
+      "technical_pass": true,
+      "technical_status": "passed_for_stated_scope"
+    },
+    {
+      "criterion_source": "MTM017-READINESS-DECISION-005",
+      "evidence_scope": "005 exact restore then prepared same-old-run continuation",
+      "governance_disposition": "technical_requirement_satisfied",
+      "id": "operator_state_copy",
+      "requirement_accounted": true,
+      "technical_pass": true,
+      "technical_status": "passed_for_stated_scope"
+    },
+    {
+      "criterion_source": "MTM017-READINESS-DECISION-006",
+      "evidence_scope": "006 waives exactly three U26 governance cells, not technical evidence",
+      "governance_disposition": "waived_by_operator",
+      "id": "browser_U26",
+      "requirement_accounted": true,
+      "technical_pass": false,
+      "technical_status": "incomplete_or_failed_preserved"
+    },
+    {
+      "criterion_source": "MTM017-READINESS-DECISION-004/005/006",
+      "evidence_scope": "87 technical and 3 waived; no technical promotion",
+      "governance_disposition": "accounted_with_scoped_operator_waiver",
+      "id": "current_corpus_accounting",
+      "requirement_accounted": true,
+      "technical_pass": false,
+      "technical_status": "incomplete_or_failed_preserved"
+    },
+    {
+      "criterion_source": "docs/CODE_STANDARD.md",
+      "evidence_scope": "Record, architecture, retirement and Rust-only provenance",
+      "governance_disposition": "technical_requirement_satisfied",
+      "id": "static_integrity",
+      "requirement_accounted": true,
+      "technical_pass": true,
+      "technical_status": "passed_for_stated_scope"
+    },
+    {
+      "criterion_source": "docs/MTM-017-FORMAL-READINESS.md",
+      "evidence_scope": "Machine consumption completeness, no extra real-world requirement",
+      "governance_disposition": "technical_requirement_satisfied",
+      "id": "criteria_and_adapter_integrity",
+      "requirement_accounted": true,
+      "technical_pass": true,
+      "technical_status": "passed_for_stated_scope"
+    },
+    {
+      "criterion_source": "MTM017-READINESS-DECISION-003",
+      "evidence_scope": "003 exact-candidate provenance waiver; technical not reproduced",
+      "governance_disposition": "waived_by_operator",
+      "id": "clean_build",
+      "requirement_accounted": true,
+      "technical_pass": false,
+      "technical_status": "incomplete_or_failed_preserved"
+    },
+    {
+      "criterion_source": "MTM017-READINESS-DECISION-001",
+      "evidence_scope": "001 old missing artifact waiver; current baseline still required",
+      "governance_disposition": "waived_by_operator",
+      "id": "historical_binary",
+      "requirement_accounted": true,
+      "technical_pass": false,
+      "technical_status": "incomplete_or_failed_preserved"
+    }
+  ],
+  "accepted_delta": 0,
+  "corpus_count_incremented": false,
+  "candidate_executed_by_acceptance": false,
+  "private_state_opened": false,
+  "private_math_review_reexecuted": false,
+  "target_archives_replayed": false,
+  "historical_harness_git_reconstructable_claimed_for_uncommitted_observations": false,
+  "input_and_result_review_cryptographically_authenticated": false,
+  "production_state_modified": false,
+  "production_selector_changed": false,
+  "commit_performed": false,
+  "push_performed": false,
+  "supersedes_historical_receipts": false,
+  "before_prefix_snapshots": [
+    {
+      "original_path": "records/governance/migration-graph.json",
+      "snapshot": {
+        "path": "target/mtm017-formal-readiness-20260930/migration-graph-before-readiness-acceptance.json",
+        "sha256": "2ee37fc37d0404c5728e63e5547d3717e4d9d11b568d302432ab83f7570aab46"
+      }
+    },
+    {
+      "original_path": "records/iterations/ITER-017.json",
+      "snapshot": {
+        "path": "target/mtm017-formal-readiness-20260930/ITER-017-before-readiness-acceptance.json",
+        "sha256": "9002c28aff32cac9d0319d93c50cf3740aee2ac65a5535be01e12d6e2569a966"
+      }
+    }
+  ],
+  "scope_limits": [
+    "Qualification is scoped governance acceptance of the exact candidate using technical evidence plus explicit operator waivers; it is not 90 technical passes.",
+    "The prior r3 failure remains failed and root-cause indeterminate; the synthetic collision mechanism is not original attribution or a runtime fix.",
+    "Original U29 strict failure is preserved; accepted repetitions prove exact restore before approved permissions preparation and same-old-run continuation.",
+    "Accepted evidence, historical pointers and the frozen MTM-016 driver are unchanged.",
+    "The evaluation remains immutable with release_qualified=false; this separate post-review governance acceptance is the only new qualified state.",
+    "Deployment, production selectors, installed artifacts and live state require separately authorized operation."
+  ]
+}

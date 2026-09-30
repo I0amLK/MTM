@@ -1,0 +1,217 @@
+{
+  "schema": "mtm017-portable-corpus-observation-v1",
+  "milestone": "MTM-017",
+  "scope": "fresh_exact_candidate_u01_u15_portable_execution_pending_independent_review_and_aggregation",
+  "recorded_at": "2026-09-30T08:46:38Z",
+  "candidate": {
+    "path": "target/mtm017-preview2/mtm-0.6.0-preview.2-13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4/mtm",
+    "sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "version": "0.6.0-preview.2",
+    "state_schema": 8,
+    "tool_contract": "mtm-tools-v10",
+    "workflow_protocol": 3,
+    "public_tools": 24,
+    "product_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+    "original_build_source_sha256": "0adec4b02a8b54fd20fb30c796c9959ccc346cc0f9336517fc47eafcb6951e02",
+    "source_binding": {
+      "path": "records/evidence/MTM-017/preview2-qualification-snapshot.json",
+      "sha256": "5018c5b1050cefe6e0ef6c7db0bb0aeb15b03ed492ee8e75d6737097b535d55c"
+    },
+    "product_lineage_check": {
+      "command": "git diff --exit-code 7b4afe2359e688263557f62154e4bc1e640c12c0 -- Cargo.toml Cargo.lock rust-toolchain.toml .cargo/config.toml crates",
+      "exit_code": 0,
+      "diff_bytes": 0,
+      "receipt_path": "target/mtm017-portable-corpus-20260930-13d7890-r1/product-source-lineage.diff",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harness_changes_do_not_rebuild_or_relabel_product": true
+    }
+  },
+  "harness_source_identity": {
+    "after_sha256": "10066ff837e2cee485fabe19809f172b1527141195a7fe29488f9fa201b248f0",
+    "before_sha256": "10066ff837e2cee485fabe19809f172b1527141195a7fe29488f9fa201b248f0",
+    "commit": "b8ca577521f5494c712cd52fb35a611588a32651",
+    "unchanged": true
+  },
+  "execution": {
+    "connector": "CTM",
+    "workdir_argument": ".",
+    "actual_checkout": "/home/lk/桌面/MTM2/MTM",
+    "ctm_command_id": "kl2uhWldOmCPt9JsMSCHVGD3",
+    "started_at": "2026-09-30T08:42:58Z",
+    "finished_at": "2026-09-30T08:44:19Z",
+    "command": "CARGO_TARGET_DIR=\"$PWD/target/mtm-tool\" ./target/mtm-tool/debug/mtm-xtask qualify --profile corpus --binary target/mtm017-preview2/mtm-0.6.0-preview.2-13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4/mtm --sha256 13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "record_flag": false,
+    "qualification_attempts": 1,
+    "qualifier_exit_code": 1,
+    "exit_classification": "expected_incomplete_corpus_coverage",
+    "unexpected_portable_failure": false,
+    "raw_passed_value": false,
+    "runner": {
+      "child_reaped": true,
+      "elapsed_ms": 76789,
+      "exit_code": 0,
+      "output_limit_exceeded": false,
+      "pipes_closed": true,
+      "raw_output_recorded": false,
+      "signal": null,
+      "stderr_bytes_retained": 548,
+      "stdout_bytes_retained": 9807,
+      "timed_out": false
+    },
+    "maintenance_binary": {
+      "path": "target/mtm-tool/debug/mtm-xtask",
+      "sha256": "284f53ef5149660c113a9036a465602e9dc6a4706777598292d037230ce3d17b"
+    },
+    "cargo_target_dir": "/home/lk/桌面/MTM2/MTM/target/mtm-tool",
+    "internal_cargo": "cargo test --locked --offline -p mtm-cli --test capability_runtime -- corpus_runtime::exact_candidate_three_repeat_usability_matrix --exact --nocapture --test-threads=1",
+    "warm_cache_serialized_after_source_gate": true,
+    "separate_clean_or_build_command": false,
+    "all_other_profile_flags_cleared": true,
+    "candidate_selected_only_by_explicit_profile_arguments": true,
+    "source_gate_handoff": {
+      "command_id": "o0Gx3pWaWVbOBHu4y4oJZdBx",
+      "exit_code": 0,
+      "passed_tests": 660,
+      "failed_tests": 0,
+      "existing_ignored_tests": 1,
+      "source_sha256": "10066ff837e2cee485fabe19809f172b1527141195a7fe29488f9fa201b248f0"
+    }
+  },
+  "corpus": {
+    "definition_path": "conformance/mtm016-usability-corpus.json",
+    "definition_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861",
+    "tasks": 30,
+    "repeats": 3,
+    "total_rows": 90,
+    "unique_task_repeat_rows": 90,
+    "executed_task_ids": [
+      "U01",
+      "U02",
+      "U03",
+      "U04",
+      "U05",
+      "U06",
+      "U07",
+      "U08",
+      "U09",
+      "U10",
+      "U11",
+      "U12",
+      "U13",
+      "U14",
+      "U15"
+    ],
+    "passed_trials": 45,
+    "failed_trials": 0,
+    "blocked_trials": 45,
+    "blocked_task_range": "U16-U30",
+    "passed": false,
+    "failed_stage": "corpus_coverage",
+    "accepted_delta": 0,
+    "aggregation_status": "pending_separate_reviewed_adapter_and_independent_review",
+    "full_90_trial_acceptance": false
+  },
+  "isolation": {
+    "verification_basis": "Bounded source review of the exact hash-bound harness plus completed runner and 90-row report; the existing runner does not publish per-trial TempDir, key or OAuth-owner identifiers.",
+    "fresh_per_task_repeat": true,
+    "mechanism": "Each portable task/repeat calls corpus_runtime::execute once. It constructs a new Server::start_workspace with tempfile::tempdir, a new child process, random operator password, empty private data directory and new OAuth DCR/login. U13 restarts only its own trial server to test keyed start recovery.",
+    "candidate_snapshot": "qualify copies and rehashes the exact candidate into a private TempDir executable with mode 0500; candidate::select and every Server::spawn check its bytes, and the qualifier rechecks both original and snapshot after execution.",
+    "server_environment": "env_clear; HOME, TMPDIR, MTM_WORKSPACE and all MTM data/private/debug roots point inside each disposable trial root; server listens only on loopback",
+    "native_backend": "disabled",
+    "latex_policy": "static_only",
+    "identities_before_after_unchanged": true,
+    "production_paths_opened": false,
+    "raw_oauth_credentials_or_capabilities_recorded": false
+  },
+  "raw_report": {
+    "path": "records/evidence/MTM-017/portable-corpus-20260930-13d7890-r1.json",
+    "sha256": "2eaf96aed03b24994c4cd9b7b4cd1363133de58ab50a06eb91a0028384b38096",
+    "size_bytes": 18611,
+    "archived_byte_for_byte": true,
+    "original_runner_milestone": "MTM-016",
+    "runner_label_unchanged": true
+  },
+  "archive": {
+    "directory": "target/mtm017-portable-corpus-20260930-13d7890-r1",
+    "owner_uid": 1000,
+    "directory_mode": "0700",
+    "original_file_modes": "0600",
+    "qualifier_stdout": {
+      "path": "target/mtm017-portable-corpus-20260930-13d7890-r1/qualify.stdout.json",
+      "sha256": "2eaf96aed03b24994c4cd9b7b4cd1363133de58ab50a06eb91a0028384b38096"
+    },
+    "qualifier_stderr": {
+      "path": "target/mtm017-portable-corpus-20260930-13d7890-r1/qualify.stderr.log",
+      "sha256": "8c159d24607a3c9e7d2d997c0f86cb2742d11a4daea84f322cacc80768fced25"
+    },
+    "qualifier_exit": {
+      "path": "target/mtm017-portable-corpus-20260930-13d7890-r1/exit-code.txt",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "command_receipt": {
+      "path": "target/mtm017-portable-corpus-20260930-13d7890-r1/command.txt",
+      "sha256": "fa2695ce34874df251a2316787f71bd94b2a114aa1a8dd9ff840113f3607efe5"
+    },
+    "input_manifest_before": {
+      "path": "target/mtm017-portable-corpus-20260930-13d7890-r1/input-sha256-before.txt",
+      "sha256": "8cc79206c747f8ee090e0566c90e098f5c02dee029c6f4e2df32735a6b374a7a"
+    },
+    "input_manifest_after": {
+      "path": "target/mtm017-portable-corpus-20260930-13d7890-r1/input-sha256-after.txt",
+      "sha256": "8cc79206c747f8ee090e0566c90e098f5c02dee029c6f4e2df32735a6b374a7a"
+    },
+    "executable_metadata_before": {
+      "path": "target/mtm017-portable-corpus-20260930-13d7890-r1/executable-metadata-before.txt",
+      "sha256": "c5ea2a8c2b0fced7c4d443738e77e612eb21366e79659c1c948e1ef7ead2a59e"
+    },
+    "executable_metadata_after": {
+      "path": "target/mtm017-portable-corpus-20260930-13d7890-r1/executable-metadata-after.txt",
+      "sha256": "c5ea2a8c2b0fced7c4d443738e77e612eb21366e79659c1c948e1ef7ead2a59e"
+    },
+    "inner_raw_output_archived": false,
+    "inner_output_policy": "Existing maintenance runner retains and hashes bounded sanitized test output but deliberately does not publish raw inner stdout/stderr; this execution did not modify that policy or capture server credentials.",
+    "inner_stdout_sha256": "c64e237af2ad089ab1b35fffe35f1c4048e67407267bc553fab47e1979dca268",
+    "inner_stderr_sha256": "801fa2633a33a8946dc47622c1e2cb559c21c23851372b854aceb7eab09dbc3a"
+  },
+  "layout_diagnostic": {
+    "initial_archive_path": "records/evidence/MTM-017/portable-corpus-20260930-13d7890-r1",
+    "failure_observed_by": "concurrent read-only records recheck from readiness worker",
+    "observed_exit_code": 1,
+    "diagnostic": "record namespace may contain only regular JSON files",
+    "cause": "Initial nested archive directory and non-JSON log/metadata files were incompatible with the existing flat regular-JSON evidence namespace.",
+    "repair": "After qualifier reached terminal state, the entire directory was moved without overwriting to the owner-private target archive; only the byte-identical raw JSON and this independent wrapper are published as flat MTM-017 evidence.",
+    "original_bytes_modes_uid_gid_device_inode_size_preserved": true,
+    "trial_rerun_performed": false,
+    "validator_modified": false,
+    "raw_original_locator_strings_rewritten": false,
+    "relocation_original_file_manifest": {
+      "path": "target/mtm017-portable-corpus-20260930-13d7890-r1/relocation-original-files.sha256",
+      "sha256": "faf7589d9426f2a8f49f9fce0923b1bf38de8ed3919522def8f3ae38070d8107"
+    },
+    "relocation_original_metadata": {
+      "path": "target/mtm017-portable-corpus-20260930-13d7890-r1/relocation-original-metadata.txt",
+      "sha256": "f6240a100765a8cf92446aab5d1536d2a1413eabed3fac2c8cbdc7af4b3142bf"
+    },
+    "records_after_relocation": {
+      "command": "./target/mtm-tool/debug/mtm-xtask records",
+      "exit_code": 0,
+      "ok": true,
+      "path": "target/mtm017-portable-corpus-20260930-13d7890-r1/records-after-relocation.stdout.json",
+      "sha256": "82e2b19d395251fd6923ad82a47115d9849b673b25100d69a5a11f2a62f3227b"
+    }
+  },
+  "boundaries": {
+    "release_qualified": false,
+    "release_ready": false,
+    "deployment_authorized": false,
+    "accepted_delta": 0,
+    "production_state_modified": false,
+    "production_selectors_changed": false,
+    "old_release_driver_or_manifest_modified": false,
+    "historical_candidate_validation_overwritten": false,
+    "commit_created": false,
+    "pushed": false,
+    "full_browser_native_research_or_operator_state_acceptance_claimed": false
+  }
+}
+

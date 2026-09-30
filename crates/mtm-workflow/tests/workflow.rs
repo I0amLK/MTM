@@ -1,9 +1,11 @@
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use mtm_contracts::{ErrorCategory, ReCtmError};
-use mtm_storage::{CapabilityAuthority, StateStore};
+use mtm_storage::{CapabilityAuthority, FactForPromotion, FindingForStorage, StateStore};
+use mtm_workflow::memory::compute_fact_id;
 use mtm_workflow::{
     LatexGate, LatexGateResult, PrivateVault, StartRequest, TaskCatalog, WorkflowEngine,
 };
@@ -372,6 +374,612 @@ fn compact_correct_flow_reaches_mechanical_finalization() -> Result<(), ReCtmErr
     assert_eq!(done["terminal"], true);
     let artifact = engine.get_artifact("owner", &run_id, "final_tex")?;
     assert_eq!(artifact["content"], proof);
+    Ok(())
+}
+
+#[test]
+fn verified_three_fact_manifest_reappears_in_next_run_memory() -> Result<(), ReCtmError> {
+    assert_three_fact_memory(false)
+}
+
+#[test]
+fn verified_revision_dependency_revocation_preserves_independent_lemmas() -> Result<(), ReCtmError>
+{
+    assert_three_fact_memory(true)
+}
+
+fn assert_three_fact_memory(with_dependency: bool) -> Result<(), ReCtmError> {
+    let temp =
+        tempfile::tempdir().map_err(|error| ReCtmError::new("TEST_IO", error.to_string()))?;
+    let store = StateStore::open(temp.path().join("state.sqlite3"))?;
+    store.create_project(
+        "owner",
+        "Memory",
+        Some("project-memory"),
+        &serde_json::json!({}),
+    )?;
+    let external_fact_id = compute_fact_id(
+        "project-memory",
+        &[],
+        &BTreeMap::new(),
+        "External lemma.",
+        "External proof.",
+    );
+    let dependency_revision_ids = if with_dependency {
+        store.create_claim(
+            "owner",
+            "project-memory",
+            "External",
+            Some("claim-external"),
+            &serde_json::json!({}),
+        )?;
+        let base = store.create_open_claim_revision(
+            "owner",
+            "claim-external",
+            "External lemma.",
+            &[],
+            None,
+        )?;
+        let snapshot = store.create_project_snapshot("project-memory", "owner")?;
+        store.create_run(
+            "run-external",
+            "external",
+            "owner",
+            "done",
+            &serde_json::json!({}),
+        )?;
+        store.link_run_to_project(
+            "run-external",
+            "owner",
+            "project-memory",
+            snapshot["snapshot_id"]
+                .as_str()
+                .ok_or_else(|| ReCtmError::new("TEST", "snapshot missing"))?,
+            Some("claim-external"),
+            base["revision_id"].as_str(),
+            "compact",
+            "compact",
+            true,
+        )?;
+        let promoted = store.promote_verified_run_with_facts(
+            "run-external",
+            "owner",
+            "External lemma.",
+            &format!("{:x}", Sha256::digest(b"External proof.")),
+            &[],
+            &serde_json::json!({"dependency_revision_ids":[]}),
+            &[FactForPromotion {
+                fact_id: external_fact_id.clone(),
+                statement_tex: "External lemma.".to_owned(),
+                proof_tex: "External proof.".to_owned(),
+                intuition: String::new(),
+                glossary_json: "{}".to_owned(),
+                predecessors: Vec::new(),
+            }],
+        )?;
+        assert_eq!(promoted["status"], "promoted");
+        vec![
+            promoted["revision"]["revision_id"]
+                .as_str()
+                .ok_or_else(|| ReCtmError::new("TEST", "dependency revision missing"))?
+                .to_owned(),
+        ]
+    } else {
+        Vec::new()
+    };
+    store.create_claim(
+        "owner",
+        "project-memory",
+        "Target",
+        Some("claim-memory"),
+        &serde_json::json!({}),
+    )?;
+    store.create_open_claim_revision("owner", "claim-memory", "Prove $1=1$.", &[], None)?;
+    let engine = engine(temp.path(), Arc::new(PassingLatex))?;
+    let started = engine.start(StartRequest {
+        owner_id: "owner",
+        problem_tex: "Prove $1=1$.",
+        problem_id: Some("memory-proof"),
+        references: &[],
+        native_mode: "dangerous",
+        workspace_export_path: None,
+        project_id: Some("project-memory"),
+        target_claim_id: Some("claim-memory"),
+        workflow_mode: "compact",
+        register_result: true,
+        workflow_protocol_version: 3,
+        trace_id: None,
+    })?;
+    let run_id = started["run_id"]
+        .as_str()
+        .ok_or_else(|| ReCtmError::new("TEST", "run id missing"))?;
+    let assess = engine.next_task("owner", run_id, None)?;
+    engine.write(
+        "owner",
+        capability(&assess)?,
+        "memory:generation:immediate_conclusions",
+        &serde_json::json!({"summary":"Reflexivity."}),
+        None,
+    )?;
+    engine.commit("owner", capability(&assess)?, "assessment_complete",
+        &serde_json::json!({"route":"compact","requires_external_retrieval":false,"requires_multiple_plans":false}), None)?;
+    let assembler = engine.next_task("owner", run_id, None)?;
+    let proof = r"\begin{proof}Lemma A. Step A. Lemma B. Step B. Prove $1=1$. Step C.\end{proof}";
+    engine.write(
+        "owner",
+        capability(&assembler)?,
+        "proof",
+        &Value::String(proof.to_owned()),
+        None,
+    )?;
+    engine.write("owner", capability(&assembler)?, "proof_manifest", &serde_json::json!({
+        "target_statement_tex":"Prove $1=1$.","dependency_revision_ids":dependency_revision_ids,"reference_ids":[],
+        "conditional_hypotheses":[],"computational_evidence":[],
+        "facts":[
+            {"key":"a","statement_tex":"Lemma A.","proof_tex":"Step A.","predecessors":[],"glossary_introduces":{}},
+            {"key":"b","statement_tex":"Lemma B.","proof_tex":"Step B.","predecessors":["a"],"glossary_introduces":{}},
+            {"key":"target","statement_tex":"Prove $1=1$.","proof_tex":"Step C.","predecessors":["b"],"glossary_introduces":{}}
+        ]
+    }), None)?;
+    engine.commit(
+        "owner",
+        capability(&assembler)?,
+        "proof_submitted",
+        &serde_json::json!({"outcome":"proof"}),
+        None,
+    )?;
+    let verifier = engine.next_task("owner", run_id, None)?;
+    assert!(verifier["context"].get("project_memory").is_none());
+    engine.write(
+        "owner",
+        capability(&verifier)?,
+        "memory:verifier:statement_checks",
+        &serde_json::json!({"location":"proof","status":"checked"}),
+        None,
+    )?;
+    engine.write(
+        "owner",
+        capability(&verifier)?,
+        "memory:verifier:events",
+        &serde_json::json!({"event_type":"verification_audit_complete"}),
+        None,
+    )?;
+    engine.write(
+        "owner",
+        capability(&verifier)?,
+        "verification_report",
+        &serde_json::json!({
+            "verification_report":{"summary":"Valid.","critical_errors":[],"gaps":[]},
+            "verdict":"correct","repair_hints":""
+        }),
+        None,
+    )?;
+    engine.commit(
+        "owner",
+        capability(&verifier)?,
+        "verification_submitted",
+        &serde_json::json!({}),
+        None,
+    )?;
+    let done = engine.next_task("owner", run_id, None)?;
+    assert_eq!(done["state"], "done");
+    let graph = store.project_fact_graph("project-memory", "owner")?;
+    let expected_nodes = if with_dependency { 4 } else { 3 };
+    let expected_edges = if with_dependency { 3 } else { 2 };
+    assert_eq!(
+        graph["graph"]["nodes"]
+            .as_object()
+            .map(serde_json::Map::len),
+        Some(expected_nodes)
+    );
+    assert_eq!(
+        graph["graph"]["edges"].as_array().map(Vec::len),
+        Some(expected_edges)
+    );
+    let a = compute_fact_id(
+        "project-memory",
+        &[],
+        &BTreeMap::new(),
+        "Lemma A.",
+        "Step A.",
+    );
+    let b = compute_fact_id(
+        "project-memory",
+        std::slice::from_ref(&a),
+        &BTreeMap::new(),
+        "Lemma B.",
+        "Step B.",
+    );
+    let mut target_predecessors = vec![b.clone()];
+    if with_dependency {
+        target_predecessors.push(external_fact_id.clone());
+    }
+    target_predecessors.sort();
+    let target_id = compute_fact_id(
+        "project-memory",
+        &target_predecessors,
+        &BTreeMap::new(),
+        "Prove $1=1$.",
+        "Step C.",
+    );
+    for id in [&a, &b, &target_id] {
+        assert!(graph["graph"]["nodes"].get(id).is_some());
+    }
+    assert!(
+        store
+            .memory_fact_predecessors("project-memory", &a)?
+            .is_empty()
+    );
+    assert_eq!(
+        store.memory_fact_predecessors("project-memory", &b)?,
+        vec![a.clone()]
+    );
+    assert_eq!(
+        store.memory_fact_predecessors("project-memory", &target_id)?,
+        target_predecessors
+    );
+    let revision = store
+        .current_claim_revision("claim-memory", "owner")?
+        .ok_or_else(|| ReCtmError::new("TEST", "promoted target revision missing"))?;
+    assert_eq!(revision["fact_id"], target_id);
+
+    let next = engine.start(StartRequest {
+        owner_id: "owner",
+        problem_tex: "Prove $1=1$.",
+        problem_id: Some("memory-next"),
+        references: &[],
+        native_mode: "dangerous",
+        workspace_export_path: None,
+        project_id: Some("project-memory"),
+        target_claim_id: None,
+        workflow_mode: "compact",
+        register_result: false,
+        workflow_protocol_version: 3,
+        trace_id: None,
+    })?;
+    let next_id = next["run_id"]
+        .as_str()
+        .ok_or_else(|| ReCtmError::new("TEST", "next run id missing"))?;
+    let task = engine.next_task("owner", next_id, None)?;
+    let memory = &task["context"]["mathematical_research_state"]["project_memory"];
+    assert_eq!(
+        memory["fact_graph"]["nodes"].as_array().map(Vec::len),
+        Some(expected_nodes)
+    );
+    assert_eq!(
+        memory["fact_graph"]["edges"].as_array().map(Vec::len),
+        Some(expected_edges)
+    );
+    assert_eq!(memory["advisory_only"], true);
+    assert_eq!(serde_json::to_vec(memory).ok(), serde_json::to_vec(&engine.next_task("owner", next_id, None)?["context"]["mathematical_research_state"]["project_memory"]).ok());
+    if with_dependency {
+        let revoked = store.revoke_project_fact(
+            &external_fact_id,
+            "operator",
+            "Regression fixture: invalid external premise",
+        )?;
+        let mut expected_revoked = vec![external_fact_id, target_id];
+        expected_revoked.sort();
+        assert_eq!(
+            revoked["revoked_fact_ids"],
+            serde_json::json!(expected_revoked)
+        );
+        assert_eq!(
+            store.active_project_fact_ids("project-memory", "owner")?,
+            BTreeSet::from([a, b])
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn project_memory_remains_bounded_with_long_fact_chains_and_many_findings() -> Result<(), ReCtmError>
+{
+    assert_bounded_project_memory(false)
+}
+
+#[test]
+fn project_memory_keeps_shared_predecessors_when_truncating() -> Result<(), ReCtmError> {
+    assert_bounded_project_memory(true)
+}
+
+fn assert_bounded_project_memory(shared_predecessors: bool) -> Result<(), ReCtmError> {
+    let temp =
+        tempfile::tempdir().map_err(|error| ReCtmError::new("TEST_IO", error.to_string()))?;
+    let store = StateStore::open(temp.path().join("state.sqlite3"))?;
+    store.create_project(
+        "owner",
+        "Large",
+        Some("project-large"),
+        &serde_json::json!({}),
+    )?;
+    store.create_claim(
+        "owner",
+        "project-large",
+        "Target",
+        Some("claim-large"),
+        &serde_json::json!({}),
+    )?;
+    let base = store.create_open_claim_revision("owner", "claim-large", "Target.", &[], None)?;
+    let snapshot = store.create_project_snapshot("project-large", "owner")?;
+    store.create_run(
+        "run-large",
+        "prior-proof",
+        "owner",
+        "done",
+        &serde_json::json!({}),
+    )?;
+    store.link_run_to_project(
+        "run-large",
+        "owner",
+        "project-large",
+        snapshot["snapshot_id"]
+            .as_str()
+            .ok_or_else(|| ReCtmError::new("TEST", "snapshot missing"))?,
+        Some("claim-large"),
+        base["revision_id"].as_str(),
+        "compact",
+        "compact",
+        true,
+    )?;
+    let facts = (0..16)
+        .map(|index| FactForPromotion {
+            fact_id: format!("{:016x}", index + 1),
+            statement_tex: if index == 15 {
+                "Target.".to_owned()
+            } else {
+                format!("Lemma {index}: {}", "x".repeat(500))
+            },
+            proof_tex: format!("Proof step {index}."),
+            intuition: String::new(),
+            glossary_json: "{}".to_owned(),
+            predecessors: if shared_predecessors {
+                (1..=index).map(|id| format!("{id:016x}")).collect()
+            } else if index == 0 {
+                Vec::new()
+            } else {
+                vec![format!("{index:016x}")]
+            },
+        })
+        .collect::<Vec<_>>();
+    store.promote_verified_run_with_facts(
+        "run-large",
+        "owner",
+        "Target.",
+        &"a".repeat(64),
+        &[],
+        &serde_json::json!({"dependency_revision_ids":[]}),
+        &facts,
+    )?;
+    let kinds = ["dead_end", "counterexample", "obstacle", "plan"];
+    let findings = (0..80)
+        .map(|index| FindingForStorage {
+            finding_id: format!("{index:064x}"),
+            kind: kinds[index % kinds.len()].to_owned(),
+            claim: format!("Finding {index}: {}", "c".repeat(1500)),
+            evidence: "e".repeat(1500),
+            verifiable: false,
+            links_json: "{}".to_owned(),
+        })
+        .collect::<Vec<_>>();
+    store.insert_project_findings("project-large", "run-large", "owner", &findings)?;
+
+    let engine = engine(temp.path(), Arc::new(PassingLatex))?;
+    let started = engine.start(StartRequest {
+        owner_id: "owner",
+        problem_tex: "Target.",
+        problem_id: Some("memory-large-next"),
+        references: &[],
+        native_mode: "dangerous",
+        workspace_export_path: None,
+        project_id: Some("project-large"),
+        target_claim_id: None,
+        workflow_mode: "compact",
+        register_result: false,
+        workflow_protocol_version: 3,
+        trace_id: None,
+    })?;
+    let run_id = started["run_id"]
+        .as_str()
+        .ok_or_else(|| ReCtmError::new("TEST", "run id missing"))?;
+    let task = engine.next_task("owner", run_id, None)?;
+    let view = &task["context"]["mathematical_research_state"];
+    let memory = &view["project_memory"];
+    assert!(
+        serde_json::to_vec(view)
+            .map_err(|error| ReCtmError::new("TEST", error.to_string()))?
+            .len()
+            <= mtm_workflow::research_state::MAX_RESEARCH_TASK_VIEW_BYTES
+    );
+    assert!(
+        memory["fact_graph"]["nodes"]
+            .as_array()
+            .is_some_and(|nodes| !nodes.is_empty() && nodes.len() <= 8)
+    );
+    assert_eq!(memory["fact_graph"]["truncated"], true);
+    let nodes = memory["fact_graph"]["nodes"]
+        .as_array()
+        .ok_or_else(|| ReCtmError::new("TEST", "missing memory nodes"))?;
+    let mut seen = BTreeSet::new();
+    let mut expected_edges = BTreeSet::new();
+    for node in nodes {
+        let id = node["fact_id"]
+            .as_str()
+            .ok_or_else(|| ReCtmError::new("TEST", "missing memory fact id"))?;
+        for predecessor in store.memory_fact_predecessors("project-large", id)? {
+            assert!(
+                seen.contains(&predecessor),
+                "predecessor omitted or out of order"
+            );
+            expected_edges.insert((id.to_owned(), predecessor));
+        }
+        assert!(seen.insert(id.to_owned()));
+    }
+    let edges = memory["fact_graph"]["edges"]
+        .as_array()
+        .ok_or_else(|| ReCtmError::new("TEST", "missing memory edges"))?;
+    let actual_edges = edges
+        .iter()
+        .map(|edge| {
+            Ok((
+                edge[0]
+                    .as_str()
+                    .ok_or_else(|| ReCtmError::new("TEST", "edge source"))?
+                    .to_owned(),
+                edge[1]
+                    .as_str()
+                    .ok_or_else(|| ReCtmError::new("TEST", "edge target"))?
+                    .to_owned(),
+            ))
+        })
+        .collect::<Result<BTreeSet<_>, ReCtmError>>()?;
+    assert_eq!(actual_edges, expected_edges);
+    let encoded = serde_json::to_vec(&memory["fact_graph"])
+        .map_err(|error| ReCtmError::new("TEST", error.to_string()))?;
+    assert_eq!(
+        memory["graph_digest"],
+        format!("sha256:{:x}", Sha256::digest(encoded))
+    );
+    let again = engine.next_task("owner", run_id, None)?;
+    assert_eq!(
+        memory,
+        &again["context"]["mathematical_research_state"]["project_memory"]
+    );
+    for group in [
+        "prior_dead_ends",
+        "prior_counterexamples",
+        "obstacles",
+        "other_findings",
+    ] {
+        assert!(memory[group].as_array().is_some_and(|rows| rows.len() <= 5));
+    }
+    Ok(())
+}
+
+#[test]
+fn legacy_revision_without_fact_cannot_enter_a_new_fact_proof() -> Result<(), ReCtmError> {
+    let temp =
+        tempfile::tempdir().map_err(|error| ReCtmError::new("TEST_IO", error.to_string()))?;
+    let store = StateStore::open(temp.path().join("state.sqlite3"))?;
+    store.create_project(
+        "owner",
+        "Legacy",
+        Some("project-legacy"),
+        &serde_json::json!({}),
+    )?;
+    store.create_claim(
+        "owner",
+        "project-legacy",
+        "Old",
+        Some("claim-old"),
+        &serde_json::json!({}),
+    )?;
+    let old_base =
+        store.create_open_claim_revision("owner", "claim-old", "Old lemma.", &[], None)?;
+    let old_snapshot = store.create_project_snapshot("project-legacy", "owner")?;
+    store.create_run(
+        "run-legacy",
+        "old-proof",
+        "owner",
+        "done",
+        &serde_json::json!({}),
+    )?;
+    store.link_run_to_project(
+        "run-legacy",
+        "owner",
+        "project-legacy",
+        old_snapshot["snapshot_id"]
+            .as_str()
+            .ok_or_else(|| ReCtmError::new("TEST", "snapshot missing"))?,
+        Some("claim-old"),
+        old_base["revision_id"].as_str(),
+        "compact",
+        "compact",
+        true,
+    )?;
+    let old = store.promote_verified_run(
+        "run-legacy",
+        "owner",
+        "Old lemma.",
+        &"a".repeat(64),
+        &[],
+        &serde_json::json!({"dependency_revision_ids":[]}),
+    )?;
+    assert!(old["revision"]["fact_id"].is_null());
+    store.create_claim(
+        "owner",
+        "project-legacy",
+        "Target",
+        Some("claim-new"),
+        &serde_json::json!({}),
+    )?;
+    store.create_open_claim_revision("owner", "claim-new", "Target.", &[], None)?;
+
+    let engine = engine(temp.path(), Arc::new(PassingLatex))?;
+    let started = engine.start(StartRequest {
+        owner_id: "owner",
+        problem_tex: "Target.",
+        problem_id: Some("legacy-dependency"),
+        references: &[],
+        native_mode: "dangerous",
+        workspace_export_path: None,
+        project_id: Some("project-legacy"),
+        target_claim_id: Some("claim-new"),
+        workflow_mode: "compact",
+        register_result: true,
+        workflow_protocol_version: 3,
+        trace_id: None,
+    })?;
+    let run_id = started["run_id"]
+        .as_str()
+        .ok_or_else(|| ReCtmError::new("TEST", "run id missing"))?;
+    let assess = engine.next_task("owner", run_id, None)?;
+    engine.write(
+        "owner",
+        capability(&assess)?,
+        "memory:generation:immediate_conclusions",
+        &serde_json::json!({"summary":"Old lemma is available."}),
+        None,
+    )?;
+    engine.commit("owner", capability(&assess)?, "assessment_complete",
+        &serde_json::json!({"route":"compact","requires_external_retrieval":false,"requires_multiple_plans":false}), None)?;
+    let assembler = engine.next_task("owner", run_id, None)?;
+    engine.write(
+        "owner",
+        capability(&assembler)?,
+        "proof",
+        &Value::String("Old lemma. Target.".to_owned()),
+        None,
+    )?;
+    engine.write(
+        "owner",
+        capability(&assembler)?,
+        "proof_manifest",
+        &serde_json::json!({
+            "target_statement_tex":"Target.",
+            "dependency_revision_ids":[old["revision"]["revision_id"]],
+            "reference_ids":[],"conditional_hypotheses":[],"computational_evidence":[]
+        }),
+        None,
+    )?;
+    let error = engine
+        .commit(
+            "owner",
+            capability(&assembler)?,
+            "proof_submitted",
+            &serde_json::json!({"outcome":"proof"}),
+            None,
+        )
+        .err()
+        .ok_or_else(|| ReCtmError::new("TEST", "legacy revision was accepted"))?;
+    assert_eq!(error.code, "INVALID_ARGUMENT");
+    assert!(error.message.contains("no verified fact"));
+    assert_eq!(engine.status("owner", run_id)?["state"], "assemble");
+    assert!(
+        store
+            .list_project_facts("project-legacy", "owner")?
+            .is_empty()
+    );
     Ok(())
 }
 

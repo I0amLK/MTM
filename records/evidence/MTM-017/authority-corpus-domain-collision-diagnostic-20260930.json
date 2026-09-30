@@ -1,0 +1,138 @@
+{
+  "schema": "mtm017-test-only-domain-collision-diagnostic-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T13:33:50Z",
+  "scope": "deterministic_in_process_runtime_mechanism_test_not_original_failure_attribution_or_release",
+  "checkpoint_commit": "9f8b9eb28b4aed1f4e81a4483a3433a9a30a8ac2",
+  "source_identity": {
+    "hash_scope": "mtm-rust-source-v1",
+    "sha256": "289d5a162a22f50b00c35a44bb956f8078eefea97a3fe3447b4bca3ec3b930c3",
+    "sampled_at": "2026-09-30T13:33:50Z",
+    "method": "existing_canonical_sorted_path_length_and_raw_SHA256_algorithm_recomputed_with_Bash_OpenSSL",
+    "scope": "checkpoint_plus_only_the_new_integration_test_before_any_later_readiness_adapter_changes",
+    "whole_source_gate_rerun": false
+  },
+  "test_source": {
+    "path": "crates/mtm-runtime/tests/domain_collision.rs",
+    "sha256": "dd644572c1a47028dcb28073e7c2af2d30d57097c82cfb6627f62787ee2b2c09"
+  },
+  "test_executable": {
+    "path": "target/mtm-tool/debug/deps/domain_collision-f26bdddb5d397fe5",
+    "sha256": "65101eb6d8cd17ed59b2581e6c3fa303a98416d38a2767deb311de3e927a5172"
+  },
+  "candidate_sha256_rechecked": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "exact_candidate_executed": false,
+  "original_failed_gate": {
+    "path": "records/evidence/MTM-017/authority-corpus-whole-source-r3-failed-20260930.json",
+    "sha256": "5214ea3ec16b5277e950ca110a94af554d335c94c9c2a8328cc97bab0e615fb7"
+  },
+  "original_followup": {
+    "path": "records/evidence/MTM-017/authority-corpus-source-regression-followup-20260930.json",
+    "sha256": "e5d4d5a4374f75abb113b0dd995f9a8a2e9118788d9ccba5a922232f5611fa45"
+  },
+  "validation": [
+    {
+      "command": "cargo test --locked --offline -p mtm-runtime --test domain_collision -- --nocapture",
+      "command_id": "VLn-d5IOsvj7HAmRgT8ZI0CY",
+      "exit_code": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "command": "cargo fmt --all -- --check",
+      "command_id": "izTZWSsltRWjeLh0NrOglej7",
+      "exit_code": 0
+    },
+    {
+      "command": "cargo clippy --locked --offline -p mtm-runtime --test domain_collision -- -D warnings",
+      "command_id": "cWktQbXWp1QrLW7JHSyLq-DL",
+      "exit_code": 0
+    },
+    {
+      "command": "git diff --check; tracked crates and Cargo input comparison with checkpoint",
+      "command_id": "U3oqgr_we0rH_Y0xF9ZZ9muA",
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "target/mtm017-domain-collision-20260930/focused-r1.stdout",
+      "sha256": "6a831e3492aeea1b04bca8ad4edffa7cc3c075c70482db9ef02c38d0759f6705"
+    },
+    {
+      "path": "target/mtm017-domain-collision-20260930/focused-r1.stderr",
+      "sha256": "76716b4b79b9142de28bfac974d0ae6c844e6e6b078a49800e3f46adf2df25cf"
+    },
+    {
+      "path": "target/mtm017-domain-collision-20260930/focused-r1.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "target/mtm017-domain-collision-20260930/fmt.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "target/mtm017-domain-collision-20260930/fmt.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "target/mtm017-domain-collision-20260930/fmt.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "target/mtm017-domain-collision-20260930/clippy.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "target/mtm017-domain-collision-20260930/clippy.stderr",
+      "sha256": "5d1950c53319ab43b41254297cc25f88d344fd8385378c7d400d54249a00f2b3"
+    },
+    {
+      "path": "target/mtm017-domain-collision-20260930/clippy.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    }
+  ],
+  "observed": {
+    "synthetic_only": true,
+    "distinct_runs": 2,
+    "forced_domain_collisions": 2,
+    "domain_primary_key_collision_confirmed": true,
+    "collision_error_code": "SQLITE_ERROR",
+    "committed_receipt_completed": true,
+    "next_task_missing": true,
+    "other_run_domain_unchanged": true,
+    "pending_submission_absent": true,
+    "state_reopened": true,
+    "receipt_replay_writes": 0,
+    "same_run_next_task_recovered": true,
+    "caller_memory_unchanged_on_replay_and_recovery": true
+  },
+  "mechanism": "The existing 3-byte domain suffix can collide for equal role/state/epoch across runs. A next-task domain INSERT fails after the submitted transition and receipt have committed. The runtime returns the completed historical receipt with task_required=true. Fetching the task separately with a fresh domain ID recovers without replaying caller writes.",
+  "original_r3_root_cause": "indeterminate",
+  "original_r3_cause_proven": false,
+  "original_failed_gate_remains_failed": true,
+  "no_spontaneous_failure_rate_measured": true,
+  "test_success_is_mechanism_confirmation_not_bug_fix": true,
+  "runtime_fix_claimed": false,
+  "production_runtime_source_modified": false,
+  "manifest_or_lock_modified": false,
+  "strict_500_round_assertions_modified": false,
+  "prior_evidence_modified": false,
+  "in_process_authenticated_dispatch_tested": true,
+  "external_socket_or_browser_tested": false,
+  "native_backend": "disabled",
+  "latex_policy": "static_only",
+  "cargo_target_dir": "target/mtm-tool",
+  "raw_oauth_or_capability_recorded": false,
+  "production_state_read": false,
+  "production_state_modified": false,
+  "production_selector_changed": false,
+  "full_workspace_gate_for_new_source_still_required": true,
+  "operator_risk_waiver_granted": false,
+  "accepted_delta": 0,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "commit_created": false,
+  "push_performed": false
+}

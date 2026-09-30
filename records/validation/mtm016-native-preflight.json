@@ -1,44 +1,57 @@
 {
   "bubblewrap_probe": {
     "binary_sha256": "52231e1caf55bcbc667b269f49c63599a6f7db4767ae6a039580d0ff853db712",
-    "diagnostic_hint": "namespace_limit_or_depth",
+    "diagnostic_hint": "none",
     "found": true,
-    "isolation_checks": null,
+    "isolation_checks": {
+      "capabilities_dropped": true,
+      "environment_cleared": true,
+      "further_user_namespace_denied": true,
+      "new_ipc_namespace": true,
+      "new_mnt_namespace": true,
+      "new_net_namespace": true,
+      "new_pid_namespace": true,
+      "new_user_namespace": true,
+      "new_uts_namespace": true,
+      "no_new_privileges": true,
+      "protocol_valid": true,
+      "workspace_not_mounted": true
+    },
     "process": {
       "child_reaped": true,
       "elapsed_ms": 5,
-      "exit_code": 1,
+      "exit_code": 0,
       "output_limit_exceeded": false,
       "pipes_closed": true,
       "raw_output_recorded": false,
       "signal": null,
-      "stderr_bytes_retained": 105,
-      "stdout_bytes_retained": 0,
+      "stderr_bytes_retained": 0,
+      "stdout_bytes_retained": 906,
       "timed_out": false
     }
   },
   "candidate_defect_attribution": "not_evaluated_by_preflight",
-  "classification": "namespace_limit_or_depth",
+  "classification": "ready_for_native_tests_not_qualified",
   "context": {
     "ancestor_limits_inspected": false,
-    "bounding_caps_zero": true,
+    "bounding_caps_zero": false,
     "effective_caps_zero": true,
-    "gid_map_shape": "restricted_mapping",
+    "gid_map_shape": "initial_like_not_host_proof",
     "host_context_proven": false,
     "namespace_occupancy_measured": false,
-    "no_new_privs": true,
+    "no_new_privs": false,
     "permitted_caps_zero": true,
-    "same_user_namespace_as_visible_pid1": true,
+    "same_user_namespace_as_visible_pid1": null,
     "seccomp_mode": 0,
-    "uid_map_shape": "restricted_mapping",
+    "uid_map_shape": "initial_like_not_host_proof",
     "visible_limits": {
       "apparmor_restrict_unprivileged_userns": null,
-      "max_ipc_namespaces": 2147483647,
-      "max_mnt_namespaces": 2147483647,
-      "max_net_namespaces": 2147483647,
-      "max_pid_namespaces": 2147483647,
-      "max_user_namespaces": 2147483647,
-      "max_uts_namespaces": 2147483647,
+      "max_ipc_namespaces": 55803,
+      "max_mnt_namespaces": 55803,
+      "max_net_namespaces": 55803,
+      "max_pid_namespaces": 55803,
+      "max_user_namespaces": 55803,
+      "max_uts_namespaces": 55803,
       "unprivileged_userns_clone": null
     }
   },
@@ -49,18 +62,18 @@
     "ENOSPC/EUSERS alone cannot distinguish a configured nesting prohibition from depth/quota exhaustion.",
     "Passing this probe is not full Native, TTY, external-tool, private-vault, workflow or release qualification."
   ],
-  "maintenance_binary_sha256": "29ca8680a08a7d728affc6aec45ab24eab9c643006a64d63f093d54f85744ab0",
+  "maintenance_binary_sha256": "a70629407af8fbcd262d8ee9f99d0dcc4952d3d954898d9599309580b018d2bb",
   "milestone": "MTM-016",
   "native_product_runtime_tested": false,
-  "passed": false,
+  "passed": true,
   "probe_identities_unchanged": true,
   "production_state_modified": false,
   "python_invoked": false,
   "raw_output_recorded": false,
-  "ready_for_native_tests": false,
-  "recorded_unix_seconds": 1789022250,
+  "ready_for_native_tests": true,
+  "recorded_unix_seconds": 1790404939,
   "recovery": {
-    "action": "run_the_same_checkout_tests_on_a_capable_native_host",
+    "action": "run_product_tests_in_this_environment",
     "automatic_retry": false,
     "do_not_disable_isolation_or_raise_sysctls_automatically": true
   },
@@ -71,11 +84,11 @@
   "supported": true,
   "tests_skipped_by_preflight": false,
   "user_namespace_probe": {
-    "classification": "namespace_limit_or_depth",
+    "classification": "available",
     "measurement": {
-      "created": false,
-      "errno": 28,
-      "errno_name": "ENOSPC",
+      "created": true,
+      "errno": null,
+      "errno_name": null,
       "operation": "unshare_user",
       "protocol": 1
     },
@@ -88,7 +101,7 @@
       "raw_output_recorded": false,
       "signal": null,
       "stderr_bytes_retained": 0,
-      "stdout_bytes_retained": 91,
+      "stdout_bytes_retained": 88,
       "timed_out": false
     }
   }

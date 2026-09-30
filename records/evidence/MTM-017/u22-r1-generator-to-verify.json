@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u22_r1_fresh_session_generator_to_verify",
+  "observed_at": "2026-09-29T03:01:04Z",
+  "session_marker": "U22-r1.6ZzLZrGN",
+  "trial_id": "650f2dfe8b33fa09813f22fc2056110a",
+  "run_id": "run-u22-r1-chinese-remainder-21c3b97f03f6",
+  "problem_id": "u22-r1-chinese-remainder",
+  "workflow_mode": "full",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": null,
+    "transition_sequence": 7,
+    "assembled_proof_sha256": "650b047d0e7a859d9dd9b498c9723f38726539a5b3b7955c92e4c1ae1018555c",
+    "proof_manifest_sha256": "35cd739474580a3d41e29837a7ec4a51ef0841c773030d5d211e3c4bdbc3832d"
+  },
+  "retrieval_route": {
+    "actual_rethlas_retrieve_used": true,
+    "reference_id": "ref-77a9edaca3a4dd1d",
+    "reference_arxiv_id": "2401.05286",
+    "reference_theorem_id": "Theorem 7.6",
+    "source_kind": "original",
+    "original_source_inspected": true,
+    "retrieval_observation_sha256": "b2cb0b9c03b6d067d06c06b6824b8a9cf5f17860374d83d8b3247e834eb647b3",
+    "source_observation_sha256": "a7f41cfcf2af74900d3af39a6f4177c49c4cd6800f88bbfffab08c24887ee303",
+    "proof_manifest_reference_nonempty": true,
+    "source_verified_reference_audit_pending": true
+  },
+  "generation_boundary": {
+    "verifier_report_submitted": false,
+    "reference_audit_submitted": false,
+    "finalizer_executed": false,
+    "independent_review_required": true
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}

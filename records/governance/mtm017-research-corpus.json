@@ -1,0 +1,42 @@
+{
+  "schema": "mtm017-research-corpus-state-v1",
+  "milestone": "MTM-017",
+  "updated_at": "2026-09-30T04:12:24Z",
+  "scope": "U21-U25_fifteen_trial_research_subset_only",
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "candidate_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+  "state_schema_version": 8,
+  "active_acceptance": {
+    "path": "records/evidence/MTM-017/research-corpus-subset-accepted-20260930.json",
+    "sha256": "49fc407487fa7c9104c4a6b7aae92e2cde2b9fe4287bd5c73b0e0352abbaae6e"
+  },
+  "inputs": {
+    "path": "records/evidence/MTM-017/corpus-import-inputs-20260930.json",
+    "sha256": "74592e4a94da281c15f05ee0710b7722326491743652be2b671d4b8664ed0750"
+  },
+  "input_review": {
+    "path": "records/evidence/MTM-017/corpus-import-input-review-20260930-r3.json",
+    "sha256": "e963cabe924ebf0be44d77ee53bf0c9562fa4a38f4872169cf65ac2bfa30fcfa"
+  },
+  "proposal": {
+    "path": "records/evidence/MTM-017/corpus-import-proposal-20260930-r3.json",
+    "sha256": "03ac34879a68c1a371a5b83b66cbe45103a5bd82ce029564f2b5ec5d1a326d2a"
+  },
+  "result_review": {
+    "path": "records/evidence/MTM-017/corpus-import-result-review-20260930-r3.json",
+    "sha256": "a6208dd66b9d59af24c28225af6735cf509fc83fa2dc3eda1b56903d12f8ee48"
+  },
+  "accepted_research_subset_trials": 15,
+  "expected_research_subset_trials": 15,
+  "complete_for_research_scope": true,
+  "complete_for_full_corpus": false,
+  "historical_counts_inherited": false,
+  "implementation_complete": "unknown",
+  "research_accepted": true,
+  "research_acceptance_scope": "only_current_mtm017_u21_u25_subset",
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "frozen_mtm016_driver_sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04"
+}

@@ -1,0 +1,43 @@
+{
+  "schema": "mtm017-release-result-review-v1",
+  "milestone": "MTM-017",
+  "decision": "approved_for_scoped_readiness_acceptance",
+  "reviewer_session": "review-schema8-importer",
+  "recorded_unix_seconds": 1790778777,
+  "evaluation": {
+    "path": "records/evidence/MTM-017/release-readiness-evaluation-20260930.json",
+    "sha256": "2ba3ecc8a54987f0a63640f64cf418f4e8001b1e52e550f7f3d27d7480e1919e"
+  },
+  "inputs": {
+    "path": "records/evidence/MTM-017/release-readiness-inputs-20260930.json",
+    "sha256": "c24e2e741f99451936b051e98d1c180ca612ad5fa20ec48318ee05e486c43c78"
+  },
+  "input_review": {
+    "path": "records/evidence/MTM-017/release-readiness-input-review-20260930.json",
+    "sha256": "e15276af01026c44d6cc4858c4facaf6a6ff7d1d9b11f1bb8df39fd087c8b51d"
+  },
+  "implementation_source_sha256": "39f42266b1dafc323b525130ba00cb11aac6f06f6a4448a132cdad6ac2add8f0",
+  "maintenance_binary_sha256": "223459136ac5184572b9b5c338c77dd01347252c12f16191c616a69b04b14ff7",
+  "qualification_basis": "technical_evidence_plus_scoped_operator_waivers",
+  "verified_inventory_files": 131,
+  "independent_read_only_repeat_byte_identical": true,
+  "checks": [
+    "exact_inputs_review_source_binary_and_stdout_bound",
+    "eighteen_scoped_requirements_and_public_chains_verified",
+    "eighty_seven_technical_and_three_U26_waivers_preserved",
+    "separate_source_risk_acceptance_and_failed_history_preserved",
+    "independent_read_only_repeat_matches_exact_evaluation",
+    "separate_governance_acceptance_and_no_deployment_required"
+  ],
+  "technical_accepted_trials": 87,
+  "technical_pending_trials": 3,
+  "human_waived_cells": 3,
+  "technical_qualification_complete": false,
+  "known_failure_root_cause": "indeterminate",
+  "known_failure_release_disposition": "accepted_by_operator",
+  "runtime_fix_claimed": false,
+  "accepted_delta": 0,
+  "corpus_count_incremented": false,
+  "release_qualified": false,
+  "deployment_authorized": false
+}

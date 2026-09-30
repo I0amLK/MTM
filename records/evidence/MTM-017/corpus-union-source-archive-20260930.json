@@ -1,0 +1,56 @@
+{
+  "schema": "mtm017-corpus-union-source-archive-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T12:17:33Z",
+  "scope": "byte_identical_version_control_archive_of_previously_reviewed_governance_implementation",
+  "mappings": [
+    {
+      "original_path": "target/mtm017-authority-corpus-20260930/union-validator.sh",
+      "archived_path": "scripts/mtm017-corpus-union/union-validator.sh",
+      "sha256": "ec2b517b557a29cbf291715e5837a7f5a590f76fec97694c09873f329a2e7afd",
+      "byte_identical": true
+    },
+    {
+      "original_path": "target/mtm017-authority-corpus-20260930/union-validator.sql",
+      "archived_path": "scripts/mtm017-corpus-union/union-validator.sql",
+      "sha256": "903f291317eec6ded7c166d79a5aef71c91c1451e55b27ec5058dbd40f364712",
+      "byte_identical": true
+    },
+    {
+      "original_path": "target/mtm017-authority-corpus-20260930/union-shapes.sql",
+      "archived_path": "scripts/mtm017-corpus-union/union-shapes.sql",
+      "sha256": "bf34c23df95ba0df5c8292e0308c9f2beda8beee81a8e287aac0747cde0ce373",
+      "byte_identical": true
+    },
+    {
+      "original_path": "target/mtm017-authority-corpus-20260930/union-negative-mutations.sql",
+      "archived_path": "scripts/mtm017-corpus-union/union-negative-mutations.sql",
+      "sha256": "0298e167b7ef6e671b3bc15c82e27745df322a9890e7b6a10ea5d6ac9bb6ca16",
+      "byte_identical": true
+    }
+  ],
+  "original_validation": {
+    "path": "records/evidence/MTM-017/corpus-union-validation-20260930.json",
+    "sha256": "7df1db2ec71ad9e968e27c07ec220e3fc05c62baa3a17dac52f3b849120ecf82"
+  },
+  "original_input_review": {
+    "path": "records/evidence/MTM-017/corpus-union-input-review-20260930.json",
+    "sha256": "847d8c20c06aeb1169694ced9f5f06168981ffd4cc90cec59498dc2f93267f9f"
+  },
+  "original_result_review": {
+    "path": "records/evidence/MTM-017/corpus-union-result-review-20260930.json",
+    "sha256": "c3af37b47ec37b84158b499b102ae37c0e024b3eb2ea37b7c2716f290d5807d2"
+  },
+  "execution_contract": "Run only from the repository root after restoring these exact bytes to the original target paths; the script's fixed path seals intentionally reject a different invocation path. Explicit SQLite and the complete original sealed public execution archive plus preserved maintenance executable are still required. Missing evidence fails closed. No private copy is reopened.",
+  "archive_only": true,
+  "original_sealed_references_changed": false,
+  "portable_source_available": true,
+  "complete_evidence_archive_in_git": false,
+  "new_test_execution_claimed": false,
+  "technical_accepted_delta": 0,
+  "corpus_count_incremented": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "production_selector_changed": false,
+  "production_state_modified": false
+}

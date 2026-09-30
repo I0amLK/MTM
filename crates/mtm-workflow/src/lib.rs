@@ -2,6 +2,7 @@
 
 pub mod engine;
 pub mod kernel;
+pub mod memory;
 pub mod methodology;
 pub mod research;
 pub mod research_state;

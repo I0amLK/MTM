@@ -1,0 +1,66 @@
+{
+  "schema": "mtm017-u30-independent-observation-review-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T09:00:18.100346+00:00",
+  "scope": "independent_read_only_review_of_three_u30_observations_not_corpus_acceptance",
+  "reviewer_session": "plan-remaining-candidate-corpus",
+  "recorded_by": "ctm-corpus-aggregate-preparation",
+  "recording_role": "scribe_only",
+  "review_received_from_separate_reviewer": true,
+  "coordinator_authorized_transcription": true,
+  "decision": "observations_approved_for_separate_aggregate_review",
+  "reviewed_artifacts": [
+    {
+      "path": "records/evidence/MTM-017/u30-install-sigkill-20260930-13d7890-r1.json",
+      "sha256": "76e0cc22e86bd292d94c1c96895a7470f95395ff6c87e8bdda78410428fd5397"
+    },
+    {
+      "path": "records/evidence/MTM-017/u30-install-sigkill-20260930-13d7890-r2.json",
+      "sha256": "820e728fdd6d895315a593dace4a03a1a529353e61de74c7d41e7bb13ba65bc0"
+    },
+    {
+      "path": "records/evidence/MTM-017/u30-install-sigkill-20260930-13d7890-r3.json",
+      "sha256": "01e87d752f7aa6ef493df599416d587d410b13d5c6ec7208d7eae2812c2ed64e"
+    },
+    {
+      "path": "records/evidence/MTM-017/u30-install-sigkill-observations-20260930.json",
+      "sha256": "3adf9eb83394994d31e60cdd55caa3d2c6ef9c822d9a5cd839946dfe78689137"
+    },
+    {
+      "path": "records/evidence/MTM-017/u30-install-sigkill-recording-validation-20260930.json",
+      "sha256": "eca023d2667a062675678d04745365c8c5ed920906d3a714b94479035f265e5e"
+    },
+    {
+      "path": "records/evidence/MTM-017/u30-install-sigkill-records-20260930.json",
+      "sha256": "82e2b19d395251fd6923ad82a47115d9849b673b25100d69a5a11f2a62f3227b"
+    }
+  ],
+  "independently_reported_checks": {
+    "references_rehashed": 32,
+    "prior_evidence_records_rehashed": 134,
+    "frozen_driver_seals_rehashed": 3,
+    "observations": 3,
+    "distinct_raw_paths_and_digests": true,
+    "distinct_recording_times": true,
+    "distinct_ctm_invocations": true,
+    "distinct_tmpdir_parents": true,
+    "serial_execution": true,
+    "all_qualifier_and_runner_exits_zero": true,
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "harness_source_sha256": "10066ff837e2cee485fabe19809f172b1527141195a7fe29488f9fa201b248f0"
+  },
+  "recorded_trial_unix_seconds": [
+    1790758161,
+    1790758204,
+    1790758239
+  ],
+  "identical_command_and_stderr_hashes_are_not_duplicate_trials": true,
+  "accepted_delta": 0,
+  "physical_power_loss_tested": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "trials_reexecuted_by_reviewer_or_scribe": false,
+  "future_aggregation_requires_separate_input_and_result_reviews": true
+}

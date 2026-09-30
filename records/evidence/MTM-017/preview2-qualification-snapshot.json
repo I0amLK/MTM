@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "versioned_candidate_source_and_machine_qualification_not_release",
+  "recorded_at": "2026-09-26T09:36:34Z",
+  "implementation_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+  "source_sha256": "0adec4b02a8b54fd20fb30c796c9959ccc346cc0f9336517fc47eafcb6951e02",
+  "candidate": {
+    "version": "0.6.0-preview.2",
+    "state_schema": 8,
+    "tool_contract": "mtm-tools-v10",
+    "workflow_protocol": 3,
+    "public_tools": 24,
+    "path": "target/mtm017-preview2/mtm-0.6.0-preview.2-13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4/mtm",
+    "sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "size_bytes": 13817960
+  },
+  "baseline": {
+    "version": "0.6.0-preview.1",
+    "state_schema": 7,
+    "path": "target/mtm017-baselines/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm",
+    "sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034"
+  },
+  "build": {
+    "command": "cargo build --release --locked --offline -p mtm-cli",
+    "exit_code": 0,
+    "toolchain": "1.98.0",
+    "cargo_target_dir": "target/mtm-tool",
+    "third_party_lock_entries_unchanged": true
+  },
+  "source_gate": {
+    "command": "cargo xtask check",
+    "exit_code": 0,
+    "counts_observed_from_streamed_summaries": {
+      "passed": 633,
+      "failed": 0,
+      "ignored": 1
+    },
+    "existing_ignored_test": "native_authority::tests::exec_candidate_real_dns_https_target",
+    "original_stdout_report_sha256": "98b86a4dbe23e9f8b0e20c84f4a14aebb5ca1895b2f4f0b725d05d2bc501daf0",
+    "entire_stdout_sha256": "7ada2bc9957b6f9682379a55282304e65a30e14b312a661053b14afbfcd1ff59",
+    "archive_encoding": "Full report JSON compacted only in whitespace; its two-space pretty encoding reproduces the original report SHA-256."
+  },
+  "profile_command": "cargo xtask qualify --profile NAME --binary CANDIDATE --sha256 CANDIDATE_SHA [--baseline BASELINE --baseline-sha256 BASELINE_SHA for paired profiles] --record",
+  "profiles_passed": [
+    "upgrade_schema8",
+    "protocol",
+    "native_commands",
+    "compiled_latex",
+    "resource",
+    "corpus_native",
+    "install_sigkill",
+    "retrieval"
+  ],
+  "qualification_reports_archived_byte_for_byte": true,
+  "report_seals": [
+    {
+      "path": "records/evidence/MTM-017/preview2-source-gate.json",
+      "sha256": "ed0552d6702e074a5daa16f82efb105845bc75883c294899dbc5af5907ac1207"
+    },
+    {
+      "path": "records/evidence/MTM-017/preview2-upgrade-schema8-13d7890.json",
+      "sha256": "c74120386df4f7f157dc0ab629678baaa1f6df67c14450cb912a846da87c99c7"
+    },
+    {
+      "path": "records/evidence/MTM-017/preview2-protocol-13d7890.json",
+      "sha256": "97c26171c2f8e5f3f525eb65082a49b81e416d041e0566c66d3ffe5ada18f748"
+    },
+    {
+      "path": "records/evidence/MTM-017/preview2-native-commands-13d7890.json",
+      "sha256": "7d47500caa29ad245809a3cafdae3910a6ea68fb71f1f5eefd2eaf274c1e6338"
+    },
+    {
+      "path": "records/evidence/MTM-017/preview2-compiled-latex-13d7890.json",
+      "sha256": "1eb252613871757ee1865f29baeeb9f388b6b4c01645565ead13cd9dd53dbf34"
+    },
+    {
+      "path": "records/evidence/MTM-017/preview2-resource-13d7890.json",
+      "sha256": "0013313c2d29fec4ab0b8064895be90569ee6adf1e307ab6d2300c7cd759e3a6"
+    },
+    {
+      "path": "records/evidence/MTM-017/preview2-corpus-native-13d7890.json",
+      "sha256": "e86e76d01504fbd2e7af78c884e35a433d8de97c81b370450f150b2b829ecfb7"
+    },
+    {
+      "path": "records/evidence/MTM-017/preview2-install-sigkill-13d7890.json",
+      "sha256": "e24a6e3995a1d5a2f27f47a66377246977c6ae532d6e59e12cb71d6dc08c9b3c"
+    },
+    {
+      "path": "records/evidence/MTM-017/preview2-retrieval-13d7890.json",
+      "sha256": "4b9c7229b57de2695f43dbc16e7aafd49708db2e2ac771c6414bfdf789a9f473"
+    }
+  ],
+  "upgrade": {
+    "baseline_schema": 7,
+    "candidate_schema": 8,
+    "restored_schema": 7,
+    "checks_passed": 21,
+    "snapshot_entries": 88,
+    "snapshot_bytes": 290321,
+    "snapshot_sha256": "8f33fc69305e246e6918b47987c1d1c181b412de1e80b15908957fb08c062ab9",
+    "restored_snapshot_sha256": "8f33fc69305e246e6918b47987c1d1c181b412de1e80b15908957fb08c062ab9",
+    "prepared_mode_entries": 16,
+    "private_modes_prepared": true,
+    "operator_state_copy_tested": false
+  },
+  "capability": {
+    "normal_roundtrips": 500,
+    "compact": 250,
+    "full": 250,
+    "normal_invalid": 0,
+    "normal_rejections": 0,
+    "adversarial_checks_passed": 8
+  },
+  "native_corpus": {
+    "passed": 15,
+    "failed": 0,
+    "complete_corpus": false
+  },
+  "retained_failed_observation": "records/evidence/MTM-017/preview2-version-fixture-failure.json",
+  "installed_selectors_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "deployment_manifest_sha256": "d8d3c959fc22ec48780f0a741bb38e640056b3b05436a6999950d275a56079a2",
+  "production_selectors_changed": false,
+  "production_state_modified": false,
+  "existing_sessions_restarted": false,
+  "performance_claim": false,
+  "release_qualified": false,
+  "remaining_acceptance": [
+    "Separately authorize and validate a stopped or consistently backed-up operator-state copy, including private-mode preparation, old-run resume and exact pre-upgrade restoration; the generated 7-to-8 fixture is not this evidence.",
+    "Complete current-artifact real-client and independent cross-run mathematical trials and all remaining corpus cases; Native coverage is 15/15, not a complete 90/90 corpus.",
+    "Complete reproducible clean-build provenance and the schema-8 release-input, readiness and explicitly authorized deployment path without repointing the frozen MTM-016 driver.",
+    "No production upgrade or selector change is authorized by the machine-profile passes; retain visibility of the separately missing historical 0.5.0-preview.2 rollback binary."
+  ]
+}

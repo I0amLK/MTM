@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u24_r2_branch_join_collection_and_precheck_closeout",
+  "recorded_at": "2026-09-30T01:01:51Z",
+  "session_marker": "U24-r2.BMrVKGwb",
+  "trial_id": "84df5d8199912a2965aa2f08b1cac1ab",
+  "run_id": "run-u24-r2-idempotent-decomposition-08d911767b9d",
+  "machine_final": {
+    "state": "done",
+    "status": "done",
+    "sealed": true,
+    "latex_passed": true,
+    "verdict": "correct",
+    "transition_sequence": 13,
+    "final_artifact_sha256": "345281af65838e9a6b7049eabfec61ae1c4880c215ed605a5ecc128332cb8926",
+    "verification_report_sha256": "20d2959644e38800d38486f9d1da5e07dfff0bd706450fcc13f6f094b1691e36"
+  },
+  "branch_route": {
+    "branch_count": 2,
+    "branch_ids": [
+      "branch-1-1-c24edc",
+      "branch-1-2-cd4d6d"
+    ],
+    "branch_result_sha256": [
+      "7415a20baa24e415913d3e5d8bd58b8713ae8ca0771351e864ff57bc7b74ac13",
+      "64d7278b8dc3987c264d361ca77a5bfd0015582f7719cc46343b229b00052fde"
+    ],
+    "sibling_private_read_denied": true,
+    "all_required_sealed_before_join": true,
+    "join_considered_exactly_all_branches": true,
+    "join_selected_branch_id": "branch-1-1-c24edc",
+    "join_result_sha256": "c37db931b682ab93b329a935330a65eaf6a09c72d23b3601586a5be82104e36c",
+    "branches_observation_sha256": "d1df17210b36ac0db3af9818ad401b0d33b40cc6a5a0f8b6c317d20a7a1d3c9d"
+  },
+  "independent_review": {
+    "statement_checks": 23,
+    "critical_errors": 0,
+    "gaps": 0,
+    "same_owner_continuity": true,
+    "review_observation_sha256": "52fbd5682fbd2e96bef0ea6ccb8d6000016d360485fc909db18a3eef51f77457",
+    "owner_fingerprint": "2492c8f8b53b8dde50ea85644ffae97c73c53171fe6055d279794ba7e1a753da",
+    "reviewed_final_bytes_match": true
+  },
+  "collection": {
+    "schema": "mtm-research-collection-v1",
+    "bundle_directory": "evidence-bundle.84df5d8199912a2965aa2f08b1cac1ab",
+    "bundle_sha256": "23b8965e523cb33add36a57469769d84352eb78f3a86f87509219e1a674a658c",
+    "required_material_present": true,
+    "precheck_consistent": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "explicit_precheck": {
+    "attempted": true,
+    "completed": true,
+    "exit_code": 0,
+    "artifact_count": 11,
+    "bundle_sha256": "23b8965e523cb33add36a57469769d84352eb78f3a86f87509219e1a674a658c",
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "required_material_present": true,
+    "existing_material_consistent": true,
+    "selected_candidate_bytes_checked": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}

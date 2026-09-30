@@ -6,7 +6,7 @@ use super::*;
 
 #[test]
 fn database_recovery_contract_preserves_legacy_unknown_and_no_authority() {
-    assert_eq!(TOOL_CONTRACT_VERSION, "mtm-tools-v9");
+    assert_eq!(TOOL_CONTRACT_VERSION, "mtm-tools-v10");
     for tool in [
         ToolId::RethlasStep,
         ToolId::RethlasInspect,

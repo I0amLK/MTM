@@ -10,7 +10,8 @@ use mtm_storage::schema::V1_WORKFLOW_SCHEMA_SQL;
 use rusqlite::Connection;
 use serde_json::{Map, Value, json};
 
-const PROBLEM: &str = r"\begin{proposition}For the integer $1$, prove $1=1$.\end{proposition}";
+pub(super) const PROBLEM: &str =
+    r"\begin{proposition}For the integer $1$, prove $1=1$.\end{proposition}";
 const PROOF: &str = r"\documentclass{article}
 \usepackage{amsthm}
 \begin{document}
@@ -377,8 +378,10 @@ fn candidate_persistence_and_complete_protocol_flows() -> Result {
         json!({"operation":"status","run_id":"legacy-run"}),
     )?;
     require(
-        migrated_info["research_workspace"]["state_schema_version"] == 7
-            && legacy["ok"] == true
+        matches!(
+            migrated_info["research_workspace"]["state_schema_version"].as_i64(),
+            Some(7 | 8)
+        ) && legacy["ok"] == true
             && legacy["problem_id"] == "legacy-problem"
             && legacy["state"] == "assess",
         "candidate did not migrate and preserve copied v1 state",

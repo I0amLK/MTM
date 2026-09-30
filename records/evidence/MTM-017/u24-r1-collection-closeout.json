@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u24_r1_branch_join_collection_and_precheck_closeout",
+  "recorded_at": "2026-09-29T16:12:32Z",
+  "session_marker": "U24-r1.AfvycbfR",
+  "trial_id": "1bcc7ddfda220add09b372c2f9c92d17",
+  "run_id": "run-u24-r1-geometric-series-70660dfce96a",
+  "machine_final": {
+    "state": "done",
+    "status": "done",
+    "sealed": true,
+    "latex_passed": true,
+    "verdict": "correct",
+    "transition_sequence": 13,
+    "final_artifact_sha256": "43cc652d52e94e27269aae095a1a3231e70fa7ef7dc4cc537109a54668126abd",
+    "verification_report_sha256": "74cc223ff8856d30253704f113c2047be7ebc736d8c67672d54ab19b8a5d1917"
+  },
+  "branch_route": {
+    "branch_count": 2,
+    "branch_ids": [
+      "branch-1-1-57548c",
+      "branch-1-2-14f255"
+    ],
+    "branch_result_sha256": [
+      "12852b69bf3e7e405add0070c584093c9c01a684f2a230340c9edb56aed2513b",
+      "a7aad6eead955155db5bdf0efbfc4579a6ed0339614e828a3d2660b004078617"
+    ],
+    "sibling_private_read_denied": true,
+    "all_required_sealed_before_join": true,
+    "join_considered_exactly_all_branches": true,
+    "join_selected_branch_id": "branch-1-2-14f255",
+    "join_result_sha256": "2a0a0d5e5e7bdabc805ced3363f5c3dbfc11b51f248161cb8df3fb3c2e4564ef",
+    "branches_observation_sha256": "adb954b701b31cf3638363220acaea7e937d0f3ff67ebebdc87f26d973592517"
+  },
+  "independent_review": {
+    "statement_checks": 21,
+    "critical_errors": 0,
+    "gaps": 0,
+    "same_owner_continuity": true,
+    "review_observation_sha256": "62faeb5809ebe7b0a3672048a2ea4dc467bd2443d9d5e380d927bd06728e2222",
+    "owner_fingerprint": "84a849a81296057b0356b2b8228a093b58c4519c54b2140f3eb3ac4296a318d1",
+    "reviewed_final_bytes_match": true
+  },
+  "collection": {
+    "schema": "mtm-research-collection-v1",
+    "bundle_directory": "evidence-bundle.1bcc7ddfda220add09b372c2f9c92d17",
+    "bundle_sha256": "7efb77ee9917d4999d189aa0660a6cd4f18a7340c53287b037bf45bed91c2e3f",
+    "required_material_present": true,
+    "precheck_consistent": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "explicit_precheck": {
+    "attempted": true,
+    "completed": true,
+    "exit_code": 0,
+    "artifact_count": 11,
+    "bundle_sha256": "7efb77ee9917d4999d189aa0660a6cd4f18a7340c53287b037bf45bed91c2e3f",
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "required_material_present": true,
+    "existing_material_consistent": true,
+    "selected_candidate_bytes_checked": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}

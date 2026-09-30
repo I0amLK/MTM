@@ -1,75 +1,39 @@
 use std::collections::BTreeSet;
 use std::sync::Arc;
 
-use mtm_contracts::{ErrorCategory, NativePermissionKind, NativePermissionTool, ReCtmError};
+use mtm_contracts::{ErrorCategory, ReCtmError};
 use mtm_core::{
     EffectiveNativePolicy, NativeInvocation, PatchInvocation, classify_patch_permissions,
 };
 use serde_json::{Map, Value};
 
-use crate::{NativePermissionGrantAuthority, NativeToolRuntime, NativeWorkspace};
+use crate::{NativeToolRuntime, NativeWorkspace};
 
-/// Production Native permission-authority execution seam for MTM-014 D5B.
+/// Production Native execution seam.
 ///
 /// The type remains crate-private so the public MCP backend is the only production
-/// caller. It consumes an authenticated owner identity plus already-validated public
-/// tool arguments, then enforces exact grants before any command start or patch
-/// mutation.
+/// caller. Since MTM-017 the dangerous profile is the only Native mode and it
+/// implicitly grants every permission kind, so no grant ledger is consulted. Risk
+/// classification, executable revalidation and protected-path facts still run
+/// before any command start or patch mutation, and an incomplete profile fails
+/// closed.
 pub(crate) struct NativeAuthorityExecutor {
     native: Arc<NativeToolRuntime>,
     workspace: Arc<NativeWorkspace>,
-    grants: Arc<NativePermissionGrantAuthority>,
 }
 
 impl NativeAuthorityExecutor {
-    pub(crate) fn new(
-        native: Arc<NativeToolRuntime>,
-        workspace: Arc<NativeWorkspace>,
-        grants: Arc<NativePermissionGrantAuthority>,
-    ) -> Self {
-        Self {
-            native,
-            workspace,
-            grants,
-        }
+    pub(crate) fn new(native: Arc<NativeToolRuntime>, workspace: Arc<NativeWorkspace>) -> Self {
+        Self { native, workspace }
     }
 
-    pub(crate) fn exec_command(
-        &self,
-        owner_id: &str,
-        arguments: &Map<String, Value>,
-    ) -> Result<Value, ReCtmError> {
-        self.exec_command_candidate(owner_id, arguments)
-    }
-
-    pub(crate) fn apply_patch(
-        &self,
-        owner_id: &str,
-        arguments: &Map<String, Value>,
-    ) -> Result<Value, ReCtmError> {
-        self.apply_patch_candidate(owner_id, arguments)
-    }
-
-    pub(crate) fn exec_command_candidate(
-        &self,
-        owner_id: &str,
-        arguments: &Map<String, Value>,
-    ) -> Result<Value, ReCtmError> {
+    pub(crate) fn exec_command(&self, arguments: &Map<String, Value>) -> Result<Value, ReCtmError> {
         let prepared = self.native.prepare_authority_exec(arguments)?;
         let revalidated = self.native.revalidate_authority_exec(prepared)?;
-        let permit = self.grants.authorize_invocation(
-            owner_id,
-            &self.workspace.root().display().to_string(),
-            revalidated.policy(),
-        )?;
-        self.native.start_authority_exec(revalidated, permit)
+        self.native.start_authority_exec(revalidated)
     }
 
-    pub(crate) fn apply_patch_candidate(
-        &self,
-        owner_id: &str,
-        arguments: &Map<String, Value>,
-    ) -> Result<Value, ReCtmError> {
+    pub(crate) fn apply_patch(&self, arguments: &Map<String, Value>) -> Result<Value, ReCtmError> {
         let invocation = PatchInvocation::parse(arguments)?;
         let prepared = self.workspace.prepare_patch(&invocation)?;
         let path_facts = prepared
@@ -83,46 +47,19 @@ impl NativeAuthorityExecutor {
             &required,
             &BTreeSet::new(),
         )?;
-        let workspace = self.workspace.root().display().to_string();
-        let expected_explicit = policy
-            .required()
-            .iter()
-            .copied()
-            .filter(|kind| !policy.implicitly_granted().contains(kind))
-            .collect::<Vec<_>>();
-        let expected_digest = invocation.arguments_sha256().to_owned();
         self.workspace
             .commit_prepared_patch_with_authorization(prepared, || {
-                let permit = self
-                    .grants
-                    .authorize_invocation(owner_id, &workspace, &policy)?;
-                validate_permit(
-                    &permit,
-                    NativePermissionTool::ApplyPatch,
-                    &expected_digest,
-                    &expected_explicit,
-                )
+                if policy.missing().is_empty() {
+                    Ok(())
+                } else {
+                    Err(ReCtmError::new(
+                        "NATIVE_PERMISSION_PROFILE_INCOMPLETE",
+                        "The Native mode profile does not cover every permission this patch requires.",
+                    )
+                    .with_category(ErrorCategory::Security))
+                }
             })
     }
-}
-
-fn validate_permit(
-    permit: &crate::NativeInvocationPermissionPermit,
-    tool: NativePermissionTool,
-    arguments_sha256: &str,
-    expected_permissions: &[NativePermissionKind],
-) -> Result<(), ReCtmError> {
-    if permit.tool() != tool
-        || permit.arguments_sha256() != arguments_sha256
-        || permit.permissions() != expected_permissions
-    {
-        return Err(ReCtmError::new(
-            "NATIVE_PERMISSION_PERMIT_MISMATCH",
-            "Native invocation permit does not match the authorized operation.",
-        )
-        .with_category(ErrorCategory::Security));
-    }
-    Ok(())
 }
 
 fn internal(message: &str) -> ReCtmError {
@@ -133,17 +70,18 @@ fn internal(message: &str) -> ReCtmError {
 #[cfg(test)]
 mod tests {
     use std::fs;
+    #[cfg(target_os = "linux")]
     use std::io::{Read, Write};
+    #[cfg(target_os = "linux")]
     use std::net::TcpListener;
     #[cfg(target_os = "linux")]
     use std::os::unix::fs::PermissionsExt;
+    #[cfg(target_os = "linux")]
     use std::thread;
 
-    use mtm_contracts::{NativeMode, NativePermissionScope};
-    use mtm_core::NativePermissionRequest;
-    use mtm_storage::StoreRuntime;
-
-    use crate::{NativePermissionConsentAuthority, NativePermissionConsentOutcome};
+    use mtm_contracts::NativeMode;
+    #[cfg(target_os = "linux")]
+    use mtm_contracts::NativePermissionKind;
 
     use super::*;
 
@@ -159,101 +97,10 @@ mod tests {
         .unwrap_or_default()
     }
 
-    fn issue_patch_grant(
-        grants: &NativePermissionGrantAuthority,
-        consents: &NativePermissionConsentAuthority,
-        owner: &str,
-        workspace: &str,
-        arguments: &Map<String, Value>,
-    ) -> Result<(), ReCtmError> {
-        let request = NativePermissionRequest::parse(
-            serde_json::json!({
-                "tool_name":"apply_patch",
-                "permission":"write_generated_or_ignored",
-                "reason":"candidate patch test",
-                "arguments":arguments,
-                "scope":NativePermissionScope::Once.as_str(),
-                "ttl_seconds":300
-            })
-            .as_object()
-            .ok_or_else(|| internal("test permission request must be an object"))?,
-        )?;
-        let prompt = consents.begin(owner, workspace, request.clone())?;
-        let outcome = consents.complete(
-            prompt.request_state(),
-            owner,
-            workspace,
-            &request,
-            &serde_json::json!({"action":"accept","content":{"approved":true}}),
-        )?;
-        let NativePermissionConsentOutcome::Accepted(consent) = outcome else {
-            return Err(internal("test consent was not accepted"));
-        };
-        grants.issue_verified(consent)?;
-        Ok(())
-    }
-
-    fn issue_exec_grant(
-        grants: &NativePermissionGrantAuthority,
-        consents: &NativePermissionConsentAuthority,
-        owner: &str,
-        workspace: &str,
-        kind: NativePermissionKind,
-        arguments: &Map<String, Value>,
-    ) -> Result<(), ReCtmError> {
-        issue_exec_grant_with_scope(
-            grants,
-            consents,
-            owner,
-            workspace,
-            kind,
-            NativePermissionScope::Once,
-            arguments,
-        )
-    }
-
-    fn issue_exec_grant_with_scope(
-        grants: &NativePermissionGrantAuthority,
-        consents: &NativePermissionConsentAuthority,
-        owner: &str,
-        workspace: &str,
-        kind: NativePermissionKind,
-        scope: NativePermissionScope,
-        arguments: &Map<String, Value>,
-    ) -> Result<(), ReCtmError> {
-        let request = NativePermissionRequest::parse(
-            serde_json::json!({
-                "tool_name":"exec_command",
-                "permission":kind.as_str(),
-                "reason":"candidate exec matrix test",
-                "arguments":arguments,
-                "scope":scope.as_str(),
-                "ttl_seconds":300
-            })
-            .as_object()
-            .ok_or_else(|| internal("test permission request must be an object"))?,
-        )?;
-        let prompt = consents.begin(owner, workspace, request.clone())?;
-        let outcome = consents.complete(
-            prompt.request_state(),
-            owner,
-            workspace,
-            &request,
-            &serde_json::json!({"action":"accept","content":{"approved":true}}),
-        )?;
-        let NativePermissionConsentOutcome::Accepted(consent) = outcome else {
-            return Err(internal("test consent was not accepted"));
-        };
-        grants.issue_verified(consent)?;
-        Ok(())
-    }
-
     struct CandidateFixture {
         _root: tempfile::TempDir,
         workspace: Arc<NativeWorkspace>,
         native: Arc<NativeToolRuntime>,
-        grants: Arc<NativePermissionGrantAuthority>,
-        consents: NativePermissionConsentAuthority,
         executor: NativeAuthorityExecutor,
     }
 
@@ -266,25 +113,16 @@ mod tests {
         let workspace = Arc::new(NativeWorkspace::new(&workspace_root, &private)?);
         let native = Arc::new(NativeToolRuntime::new(
             Arc::clone(&workspace),
-            NativeMode::Safe,
+            NativeMode::Dangerous,
             "disabled",
             &[],
             std::slice::from_ref(&private),
         )?);
-        let runtime = StoreRuntime::default();
-        let grants = Arc::new(NativePermissionGrantAuthority::new(runtime.clone()));
-        let consents = NativePermissionConsentAuthority::new(runtime);
-        let executor = NativeAuthorityExecutor::new(
-            Arc::clone(&native),
-            Arc::clone(&workspace),
-            Arc::clone(&grants),
-        );
+        let executor = NativeAuthorityExecutor::new(Arc::clone(&native), Arc::clone(&workspace));
         Ok(CandidateFixture {
             _root: root,
             workspace,
             native,
-            grants,
-            consents,
             executor,
         })
     }
@@ -302,20 +140,11 @@ mod tests {
             mode,
             std::slice::from_ref(&private),
         )?);
-        let runtime = StoreRuntime::default();
-        let grants = Arc::new(NativePermissionGrantAuthority::new(runtime.clone()));
-        let consents = NativePermissionConsentAuthority::new(runtime);
-        let executor = NativeAuthorityExecutor::new(
-            Arc::clone(&native),
-            Arc::clone(&workspace),
-            Arc::clone(&grants),
-        );
+        let executor = NativeAuthorityExecutor::new(Arc::clone(&native), Arc::clone(&workspace));
         Ok(CandidateFixture {
             _root: root,
             workspace,
             native,
-            grants,
-            consents,
             executor,
         })
     }
@@ -328,39 +157,19 @@ mod tests {
             .is_ok_and(|status| status.success())
     }
 
+    /// Run a command whose risk the classifier must still record, with no grant.
     #[cfg(target_os = "linux")]
-    fn run_exact_once_exec(
+    fn run_classified_exec(
         fixture: &CandidateFixture,
         kind: NativePermissionKind,
         arguments: &Map<String, Value>,
     ) -> Result<Value, ReCtmError> {
-        let owner = "owner-a";
-        let workspace = fixture.workspace.root().display().to_string();
-        assert_eq!(
-            fixture
-                .executor
-                .exec_command_candidate(owner, arguments)
-                .map_err(|error| error.code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
-        );
-        issue_exec_grant(
-            &fixture.grants,
-            &fixture.consents,
-            owner,
-            &workspace,
-            kind,
-            arguments,
-        )?;
-        let result = fixture.executor.exec_command_candidate(owner, arguments)?;
+        let prepared = fixture.native.prepare_authority_exec(arguments)?;
+        assert!(prepared.policy().required().contains(&kind));
+        assert!(prepared.policy().missing().is_empty());
+        let result = fixture.executor.exec_command(arguments)?;
         assert_eq!(result["status"], "exited");
         assert_eq!(result["exit_code"], 0);
-        assert_eq!(
-            fixture
-                .executor
-                .exec_command_candidate(owner, arguments)
-                .map_err(|error| error.code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
-        );
         Ok(result)
     }
 
@@ -369,9 +178,7 @@ mod tests {
         fixture: &CandidateFixture,
         arguments: &Map<String, Value>,
     ) -> Result<Value, ReCtmError> {
-        let result = fixture
-            .executor
-            .exec_command_candidate("owner-a", arguments)?;
+        let result = fixture.executor.exec_command(arguments)?;
         if result["status"] != "exited" || result["exit_code"] != 0 {
             return Err(ReCtmError::new(
                 "TEST_TOOLCHAIN_EXECUTION_FAILED",
@@ -399,53 +206,17 @@ mod tests {
     }
 
     #[test]
-    fn generated_patch_requires_exact_once_grant_and_consumes_it() -> Result<(), ReCtmError> {
+    fn generated_patch_is_classified_and_applied_without_grant() -> Result<(), ReCtmError> {
         let fixture = candidate_fixture()?;
         fs::create_dir_all(fixture.workspace.root().join("build"))
             .map_err(|error| internal(&error.to_string()))?;
-        let owner = "owner-a";
-        let workspace_text = fixture.workspace.root().display().to_string();
         let arguments = patch_arguments("build/generated.txt", "approved", false);
-
-        let denied = fixture.executor.apply_patch_candidate(owner, &arguments);
-        assert_eq!(
-            denied.map_err(|error| error.code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
-        );
-        assert!(
-            !fixture
-                .workspace
-                .root()
-                .join("build/generated.txt")
-                .exists()
-        );
-
-        issue_patch_grant(
-            &fixture.grants,
-            &fixture.consents,
-            owner,
-            &workspace_text,
-            &arguments,
-        )?;
-        let result = fixture.executor.apply_patch_candidate(owner, &arguments)?;
+        let result = fixture.executor.apply_patch(&arguments)?;
         assert_eq!(result["dry_run"], false);
         assert_eq!(
             fs::read_to_string(fixture.workspace.root().join("build/generated.txt"))
                 .map_err(|error| internal(&error.to_string()))?,
             "approved\n"
-        );
-        assert_eq!(
-            fixture
-                .grants
-                .authorize_matching_grants(
-                    owner,
-                    &workspace_text,
-                    NativePermissionTool::ApplyPatch,
-                    &[NativePermissionKind::WriteGeneratedOrIgnored],
-                    &arguments,
-                )
-                .map_err(|error| error.code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
         );
         Ok(())
     }
@@ -457,12 +228,12 @@ mod tests {
             .map_err(|error| internal(&error.to_string()))?;
 
         let dry = patch_arguments("build/dry.txt", "dry", true);
-        let dry_result = fixture.executor.apply_patch_candidate("owner-a", &dry)?;
+        let dry_result = fixture.executor.apply_patch(&dry)?;
         assert_eq!(dry_result["dry_run"], true);
         assert!(!fixture.workspace.root().join("build/dry.txt").exists());
 
         let normal = patch_arguments("normal.txt", "normal", false);
-        let result = fixture.executor.apply_patch_candidate("owner-a", &normal)?;
+        let result = fixture.executor.apply_patch(&normal)?;
         assert_eq!(result["dry_run"], false);
         assert_eq!(
             fs::read_to_string(fixture.workspace.root().join("normal.txt"))
@@ -472,52 +243,13 @@ mod tests {
         Ok(())
     }
 
-    #[test]
-    fn patch_argument_mutation_cannot_reuse_grant() -> Result<(), ReCtmError> {
-        let fixture = candidate_fixture()?;
-        fs::create_dir_all(fixture.workspace.root().join("build"))
-            .map_err(|error| internal(&error.to_string()))?;
-        let owner = "owner-a";
-        let workspace_text = fixture.workspace.root().display().to_string();
-        let original = patch_arguments("build/original.txt", "one", false);
-        let mutated = patch_arguments("build/mutated.txt", "two", false);
-        issue_patch_grant(
-            &fixture.grants,
-            &fixture.consents,
-            owner,
-            &workspace_text,
-            &original,
-        )?;
-
-        assert_eq!(
-            fixture
-                .executor
-                .apply_patch_candidate(owner, &mutated)
-                .map_err(|error| error.code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
-        );
-        assert!(!fixture.workspace.root().join("build/original.txt").exists());
-        assert!(!fixture.workspace.root().join("build/mutated.txt").exists());
-
-        fixture.executor.apply_patch_candidate(owner, &original)?;
-        assert!(
-            fixture
-                .workspace
-                .root()
-                .join("build/original.txt")
-                .is_file()
-        );
-        Ok(())
-    }
-
     #[cfg(target_os = "linux")]
     #[test]
-    fn exec_candidate_covers_all_seven_permission_kinds_on_real_bubblewrap()
-    -> Result<(), ReCtmError> {
+    fn exec_candidate_runs_all_seven_permission_kinds_without_grants() -> Result<(), ReCtmError> {
         if !command_exists("bwrap") || !command_exists("curl") {
             return Ok(());
         }
-        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
+        let fixture = bubblewrap_candidate_fixture(NativeMode::Dangerous)?;
 
         let inline = Map::from_iter([
             (
@@ -527,7 +259,7 @@ mod tests {
             ("yield_time_ms".to_owned(), Value::from(30_000)),
         ]);
         assert_eq!(
-            run_exact_once_exec(&fixture, NativePermissionKind::InlineScript, &inline)?["stdout"],
+            run_classified_exec(&fixture, NativePermissionKind::InlineScript, &inline)?["stdout"],
             "inline"
         );
 
@@ -536,7 +268,7 @@ mod tests {
             ("yield_time_ms".to_owned(), Value::from(30_000)),
         ]);
         assert!(
-            run_exact_once_exec(
+            run_classified_exec(
                 &fixture,
                 NativePermissionKind::ShellExpansion,
                 &shell_expansion,
@@ -554,7 +286,7 @@ mod tests {
             ("yield_time_ms".to_owned(), Value::from(30_000)),
         ]);
         assert!(
-            run_exact_once_exec(
+            run_classified_exec(
                 &fixture,
                 NativePermissionKind::SensitiveEnv,
                 &sensitive_env,
@@ -572,7 +304,7 @@ mod tests {
             ("yield_time_ms".to_owned(), Value::from(30_000)),
         ]);
         assert_eq!(
-            run_exact_once_exec(&fixture, NativePermissionKind::LongTimeout, &long_timeout)?["stdout"],
+            run_classified_exec(&fixture, NativePermissionKind::LongTimeout, &long_timeout)?["stdout"],
             "long-timeout"
         );
 
@@ -587,7 +319,7 @@ mod tests {
             ),
             ("yield_time_ms".to_owned(), Value::from(30_000)),
         ]);
-        run_exact_once_exec(
+        run_classified_exec(
             &fixture,
             NativePermissionKind::DestructiveCommand,
             &destructive,
@@ -604,7 +336,7 @@ mod tests {
             ("yield_time_ms".to_owned(), Value::from(30_000)),
         ]);
         assert_eq!(
-            run_exact_once_exec(
+            run_classified_exec(
                 &fixture,
                 NativePermissionKind::PrivilegedExecutable,
                 &privileged,
@@ -653,7 +385,7 @@ mod tests {
             ("yield_time_ms".to_owned(), Value::from(30_000)),
         ]);
         assert_eq!(
-            run_exact_once_exec(&fixture, NativePermissionKind::Network, &network)?["stdout"],
+            run_classified_exec(&fixture, NativePermissionKind::Network, &network)?["stdout"],
             "network-ok"
         );
         server
@@ -793,7 +525,7 @@ mod tests {
                 ("timeout_ms".to_owned(), Value::from(30_000)),
                 ("yield_time_ms".to_owned(), Value::from(30_000)),
             ]);
-            let result = fixture.executor.exec_command_candidate("owner-a", &magma)?;
+            let result = fixture.executor.exec_command(&magma)?;
             match magma_probe_outcome(&result) {
                 Some(MagmaProbeOutcome::Functional) => {}
                 Some(MagmaProbeOutcome::HostLicenseUnavailable) => {
@@ -817,9 +549,7 @@ mod tests {
         if !command_exists("bwrap") {
             return Ok(());
         }
-        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
-        let owner = "owner-a";
-        let workspace = fixture.workspace.root().display().to_string();
+        let fixture = bubblewrap_candidate_fixture(NativeMode::Dangerous)?;
 
         let tty = Map::from_iter([
             (
@@ -829,21 +559,10 @@ mod tests {
             ("tty".to_owned(), Value::Bool(true)),
             ("yield_time_ms".to_owned(), Value::from(30_000)),
         ]);
-        issue_exec_grant(
-            &fixture.grants,
-            &fixture.consents,
-            owner,
-            &workspace,
-            NativePermissionKind::InlineScript,
-            &tty,
-        )?;
-        let tty_result = fixture
-            .executor
-            .exec_command_candidate(owner, &tty)
-            .map_err(|mut error| {
-                error.message = format!("tty: {}", error.message);
-                error
-            })?;
+        let tty_result = fixture.executor.exec_command(&tty).map_err(|mut error| {
+            error.message = format!("tty: {}", error.message);
+            error
+        })?;
         assert_eq!(tty_result["status"], "exited");
         assert_eq!(tty_result["exit_code"], 0);
         assert!(
@@ -859,7 +578,7 @@ mod tests {
         ]);
         let timeout_result = fixture
             .executor
-            .exec_command_candidate(owner, &timeout)
+            .exec_command(&timeout)
             .map_err(|mut error| {
                 error.message = format!("timeout: {}", error.message);
                 error
@@ -873,7 +592,7 @@ mod tests {
         ]);
         let running_result = fixture
             .executor
-            .exec_command_candidate(owner, &running)
+            .exec_command(&running)
             .map_err(|mut error| {
                 error.message = format!("running: {}", error.message);
                 error
@@ -901,7 +620,7 @@ mod tests {
         if !command_exists("bwrap") || !command_exists("cat") {
             return Ok(());
         }
-        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
+        let fixture = bubblewrap_candidate_fixture(NativeMode::Dangerous)?;
 
         let tty = Map::from_iter([
             ("argv".to_owned(), serde_json::json!(["cat"])),
@@ -909,7 +628,7 @@ mod tests {
             ("yield_time_ms".to_owned(), Value::from(0)),
             ("timeout_ms".to_owned(), Value::from(10_000)),
         ]);
-        let started = fixture.executor.exec_command_candidate("owner-a", &tty)?;
+        let started = fixture.executor.exec_command(&tty)?;
         assert_eq!(started["status"], "running");
         let command_id = started["command_id"]
             .as_str()
@@ -950,9 +669,7 @@ mod tests {
             ("yield_time_ms".to_owned(), Value::from(100)),
             ("timeout_ms".to_owned(), Value::from(10_000)),
         ]);
-        let running = fixture
-            .executor
-            .exec_command_candidate("owner-a", &descendant)?;
+        let running = fixture.executor.exec_command(&descendant)?;
         assert_eq!(running["status"], "running");
         assert!(
             running["stdout"]
@@ -985,232 +702,24 @@ mod tests {
 
     #[cfg(target_os = "linux")]
     #[test]
-    fn exec_candidate_session_grant_reuses_in_process_and_restart_invalidates()
-    -> Result<(), ReCtmError> {
-        if !command_exists("bwrap") || !command_exists("curl") {
-            return Ok(());
-        }
-        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
-        let owner = "owner-a";
-        let workspace = fixture.workspace.root().display().to_string();
-        let listener =
-            TcpListener::bind("127.0.0.1:0").map_err(|error| internal(&error.to_string()))?;
-        listener
-            .set_nonblocking(true)
-            .map_err(|error| internal(&error.to_string()))?;
-        let address = listener
-            .local_addr()
-            .map_err(|error| internal(&error.to_string()))?;
-        let server = thread::spawn(move || -> std::io::Result<()> {
-            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
-            let mut accepted = 0_u8;
-            while accepted < 2 {
-                match listener.accept() {
-                    Ok((mut stream, _)) => {
-                        let mut buffer = [0_u8; 4096];
-                        let _ = stream.read(&mut buffer)?;
-                        stream.write_all(
-                            b"HTTP/1.1 200 OK\r\nContent-Length: 10\r\nConnection: close\r\n\r\nsession-ok",
-                        )?;
-                        accepted += 1;
-                    }
-                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
-                        if std::time::Instant::now() >= deadline {
-                            return Err(std::io::Error::new(
-                                std::io::ErrorKind::TimedOut,
-                                "session candidate did not make two network requests",
-                            ));
-                        }
-                        thread::sleep(std::time::Duration::from_millis(10));
-                    }
-                    Err(error) => return Err(error),
-                }
-            }
-            Ok(())
-        });
-        let arguments = Map::from_iter([
-            (
-                "argv".to_owned(),
-                serde_json::json!(["curl", "--fail", "--silent", format!("http://{address}")]),
-            ),
-            ("yield_time_ms".to_owned(), Value::from(30_000)),
-        ]);
-        issue_exec_grant_with_scope(
-            &fixture.grants,
-            &fixture.consents,
-            owner,
-            &workspace,
-            NativePermissionKind::Network,
-            NativePermissionScope::Session,
-            &arguments,
-        )?;
-        for _ in 0..2 {
-            let result = fixture.executor.exec_command_candidate(owner, &arguments)?;
-            assert_eq!(result["status"], "exited");
-            assert_eq!(result["stdout"], "session-ok");
-        }
-        server
-            .join()
-            .map_err(|_| internal("session network test server panicked"))?
-            .map_err(|error| internal(&error.to_string()))?;
-
-        let restarted_grants =
-            Arc::new(NativePermissionGrantAuthority::new(StoreRuntime::default()));
-        let restarted = NativeAuthorityExecutor::new(
-            Arc::clone(&fixture.native),
-            Arc::clone(&fixture.workspace),
-            restarted_grants,
-        );
-        assert_eq!(
-            restarted
-                .exec_command_candidate(owner, &arguments)
-                .map_err(|error| error.code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
-        );
-        fixture.native.close()?;
-        Ok(())
-    }
-
-    #[cfg(target_os = "linux")]
-    #[test]
-    fn exec_candidate_cross_owner_and_workspace_fail_without_consuming_grant()
-    -> Result<(), ReCtmError> {
+    fn exec_candidate_classifies_timeout_boundary_and_sensitive_env() -> Result<(), ReCtmError> {
         if !command_exists("bwrap") {
             return Ok(());
         }
-        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
-        let owner = "owner-a";
-        let workspace = fixture.workspace.root().display().to_string();
-        let arguments = Map::from_iter([
-            (
-                "argv".to_owned(),
-                serde_json::json!(["sh", "-c", "printf binding-ok"]),
-            ),
-            ("yield_time_ms".to_owned(), Value::from(30_000)),
-        ]);
-        issue_exec_grant(
-            &fixture.grants,
-            &fixture.consents,
-            owner,
-            &workspace,
-            NativePermissionKind::InlineScript,
-            &arguments,
-        )?;
-        assert_eq!(
-            fixture
-                .executor
-                .exec_command_candidate("owner-b", &arguments)
-                .map_err(|error| error.code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
-        );
-
-        let second_root = fixture._root.path().join("workspace-second");
-        let second_private = fixture._root.path().join("private-second");
-        fs::create_dir_all(&second_root).map_err(|error| internal(&error.to_string()))?;
-        fs::create_dir_all(&second_private).map_err(|error| internal(&error.to_string()))?;
-        let second_workspace = Arc::new(NativeWorkspace::new(&second_root, &second_private)?);
-        let second_native = Arc::new(NativeToolRuntime::test_attested_bubblewrap(
-            Arc::clone(&second_workspace),
-            NativeMode::Safe,
-            std::slice::from_ref(&second_private),
-        )?);
-        let second_executor = NativeAuthorityExecutor::new(
-            Arc::clone(&second_native),
-            second_workspace,
-            Arc::clone(&fixture.grants),
-        );
-        assert_eq!(
-            second_executor
-                .exec_command_candidate(owner, &arguments)
-                .map_err(|error| error.code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
-        );
-        second_native.close()?;
-
-        let result = fixture.executor.exec_command_candidate(owner, &arguments)?;
-        assert_eq!(result["stdout"], "binding-ok");
-        fixture.native.close()?;
-        Ok(())
-    }
-
-    #[cfg(target_os = "linux")]
-    #[test]
-    fn exec_candidate_preserves_trusted_and_dangerous_profiles() -> Result<(), ReCtmError> {
-        if !command_exists("bwrap") {
-            return Ok(());
-        }
-        let trusted = bubblewrap_candidate_fixture(NativeMode::Trusted)?;
-        let implicit_inline = Map::from_iter([(
-            "argv".to_owned(),
-            serde_json::json!(["sh", "-c", "printf trusted-inline"]),
-        )]);
-        assert_eq!(
-            trusted
-                .executor
-                .exec_command_candidate("owner-a", &implicit_inline)?["stdout"],
-            "trusted-inline"
-        );
-        let sensitive = Map::from_iter([
-            ("argv".to_owned(), serde_json::json!(["env"])),
-            (
-                "env".to_owned(),
-                serde_json::json!({"API_TOKEN":"trusted-secret"}),
-            ),
-        ]);
-        assert_eq!(
-            trusted
-                .executor
-                .exec_command_candidate("owner-a", &sensitive)
-                .map_err(|error| error.code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
-        );
-        trusted.native.close()?;
-
-        let dangerous = bubblewrap_candidate_fixture(NativeMode::Dangerous)?;
-        let all_implicit = Map::from_iter([
-            (
-                "argv".to_owned(),
-                serde_json::json!(["sh", "-c", "printf \"$API_TOKEN\""]),
-            ),
-            (
-                "env".to_owned(),
-                serde_json::json!({"API_TOKEN":"dangerous-value"}),
-            ),
-            ("timeout_ms".to_owned(), Value::from(30_001)),
-            ("yield_time_ms".to_owned(), Value::from(30_000)),
-        ]);
-        let result = dangerous
-            .executor
-            .exec_command_candidate("owner-a", &all_implicit)?;
-        assert_eq!(result["stdout"], "dangerous-value");
-        assert_eq!(
-            dangerous.native.server_info()["workflow_authority_inherited"],
-            false
-        );
-        assert_eq!(
-            dangerous.native.server_info()["private_vault_visible"],
-            false
-        );
-        dangerous.native.close()?;
-        Ok(())
-    }
-
-    #[cfg(target_os = "linux")]
-    #[test]
-    fn exec_candidate_enforces_timeout_boundary_and_sensitive_env_binding() -> Result<(), ReCtmError>
-    {
-        if !command_exists("bwrap") {
-            return Ok(());
-        }
-        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
-        let owner = "owner-a";
-        let workspace = fixture.workspace.root().display().to_string();
+        let fixture = bubblewrap_candidate_fixture(NativeMode::Dangerous)?;
         let boundary = Map::from_iter([
             ("argv".to_owned(), serde_json::json!(["printf", "boundary"])),
             ("timeout_ms".to_owned(), Value::from(30_000)),
         ]);
+        let prepared = fixture.native.prepare_authority_exec(&boundary)?;
+        assert!(
+            !prepared
+                .policy()
+                .required()
+                .contains(&NativePermissionKind::LongTimeout)
+        );
         assert_eq!(
-            fixture.executor.exec_command_candidate(owner, &boundary)?["stdout"],
+            fixture.executor.exec_command(&boundary)?["stdout"],
             "boundary"
         );
         let over = Map::from_iter([
@@ -1218,56 +727,18 @@ mod tests {
             ("timeout_ms".to_owned(), Value::from(30_001)),
         ]);
         assert_eq!(
-            fixture
-                .executor
-                .exec_command_candidate(owner, &over)
-                .map_err(|error| error.code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
-        );
-        issue_exec_grant(
-            &fixture.grants,
-            &fixture.consents,
-            owner,
-            &workspace,
-            NativePermissionKind::LongTimeout,
-            &over,
-        )?;
-        assert_eq!(
-            fixture.executor.exec_command_candidate(owner, &over)?["stdout"],
+            run_classified_exec(&fixture, NativePermissionKind::LongTimeout, &over)?["stdout"],
             "over"
         );
-
-        let original = Map::from_iter([
+        let sensitive = Map::from_iter([
             ("argv".to_owned(), serde_json::json!(["env"])),
             (
                 "env".to_owned(),
                 serde_json::json!({"API_TOKEN":"exact-one"}),
             ),
         ]);
-        let mutated = Map::from_iter([
-            ("argv".to_owned(), serde_json::json!(["env"])),
-            (
-                "env".to_owned(),
-                serde_json::json!({"API_TOKEN":"exact-two"}),
-            ),
-        ]);
-        issue_exec_grant(
-            &fixture.grants,
-            &fixture.consents,
-            owner,
-            &workspace,
-            NativePermissionKind::SensitiveEnv,
-            &original,
-        )?;
-        assert_eq!(
-            fixture
-                .executor
-                .exec_command_candidate(owner, &mutated)
-                .map_err(|error| error.code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
-        );
         assert!(
-            fixture.executor.exec_command_candidate(owner, &original)?["stdout"]
+            run_classified_exec(&fixture, NativePermissionKind::SensitiveEnv, &sensitive)?["stdout"]
                 .as_str()
                 .is_some_and(|value| value.contains("API_TOKEN=exact-one"))
         );
@@ -1277,116 +748,7 @@ mod tests {
 
     #[cfg(target_os = "linux")]
     #[test]
-    fn exec_candidate_multi_risk_is_atomic_and_has_one_concurrent_winner() -> Result<(), ReCtmError>
-    {
-        if !command_exists("bwrap") {
-            return Ok(());
-        }
-        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
-        let owner = "owner-a";
-        let workspace = fixture.workspace.root().display().to_string();
-
-        let all_or_none = Map::from_iter([
-            (
-                "argv".to_owned(),
-                serde_json::json!(["sh", "-c", "printf multi-ok"]),
-            ),
-            ("timeout_ms".to_owned(), Value::from(30_001)),
-            ("yield_time_ms".to_owned(), Value::from(30_000)),
-        ]);
-        issue_exec_grant(
-            &fixture.grants,
-            &fixture.consents,
-            owner,
-            &workspace,
-            NativePermissionKind::InlineScript,
-            &all_or_none,
-        )?;
-        assert_eq!(
-            fixture
-                .executor
-                .exec_command_candidate(owner, &all_or_none)
-                .map_err(|error| error.code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
-        );
-        issue_exec_grant(
-            &fixture.grants,
-            &fixture.consents,
-            owner,
-            &workspace,
-            NativePermissionKind::LongTimeout,
-            &all_or_none,
-        )?;
-        assert_eq!(
-            fixture
-                .executor
-                .exec_command_candidate(owner, &all_or_none)?["stdout"],
-            "multi-ok"
-        );
-
-        let concurrent = Map::from_iter([
-            (
-                "argv".to_owned(),
-                serde_json::json!(["sh", "-c", "printf concurrent-ok"]),
-            ),
-            ("timeout_ms".to_owned(), Value::from(30_002)),
-            ("yield_time_ms".to_owned(), Value::from(30_000)),
-        ]);
-        for kind in [
-            NativePermissionKind::InlineScript,
-            NativePermissionKind::LongTimeout,
-        ] {
-            issue_exec_grant(
-                &fixture.grants,
-                &fixture.consents,
-                owner,
-                &workspace,
-                kind,
-                &concurrent,
-            )?;
-        }
-        let barrier = Arc::new(std::sync::Barrier::new(2));
-        let handles = (0..2)
-            .map(|_| {
-                let executor = NativeAuthorityExecutor::new(
-                    Arc::clone(&fixture.native),
-                    Arc::clone(&fixture.workspace),
-                    Arc::clone(&fixture.grants),
-                );
-                let barrier = Arc::clone(&barrier);
-                let arguments = concurrent.clone();
-                thread::spawn(move || {
-                    barrier.wait();
-                    executor.exec_command_candidate("owner-a", &arguments)
-                })
-            })
-            .collect::<Vec<_>>();
-        let mut winners = 0_u8;
-        let mut losers = 0_u8;
-        for handle in handles {
-            match handle
-                .join()
-                .map_err(|_| internal("candidate multi-risk worker panicked"))?
-            {
-                Ok(result) => {
-                    winners += 1;
-                    assert_eq!(result["stdout"], "concurrent-ok");
-                }
-                Err(error) => {
-                    losers += 1;
-                    assert_eq!(error.code, "NATIVE_PERMISSION_GRANT_SET_INCOMPLETE");
-                }
-            }
-        }
-        assert_eq!(winners, 1);
-        assert_eq!(losers, 1);
-        fixture.native.close()?;
-        Ok(())
-    }
-
-    #[cfg(target_os = "linux")]
-    #[test]
-    fn patch_candidate_git_ignored_path_requires_exact_once_grant() -> Result<(), ReCtmError> {
+    fn patch_candidate_git_ignored_path_is_applied_without_grant() -> Result<(), ReCtmError> {
         if !command_exists("git") {
             return Ok(());
         }
@@ -1401,24 +763,8 @@ mod tests {
         }
         fs::write(fixture.workspace.root().join(".gitignore"), "ignored.txt\n")
             .map_err(|error| internal(&error.to_string()))?;
-        let owner = "owner-a";
         let arguments = patch_arguments("ignored.txt", "approved-ignored", false);
-        assert_eq!(
-            fixture
-                .executor
-                .apply_patch_candidate(owner, &arguments)
-                .map_err(|error| error.code),
-            Err("NATIVE_PERMISSION_GRANT_SET_INCOMPLETE".to_owned())
-        );
-        assert!(!fixture.workspace.root().join("ignored.txt").exists());
-        issue_patch_grant(
-            &fixture.grants,
-            &fixture.consents,
-            owner,
-            &workspace_text,
-            &arguments,
-        )?;
-        let result = fixture.executor.apply_patch_candidate(owner, &arguments)?;
+        let result = fixture.executor.apply_patch(&arguments)?;
         assert_eq!(result["dry_run"], false);
         assert_eq!(
             fs::read_to_string(fixture.workspace.root().join("ignored.txt"))
@@ -1439,9 +785,7 @@ mod tests {
                 )));
             }
         }
-        let fixture = bubblewrap_candidate_fixture(NativeMode::Safe)?;
-        let owner = "owner-a";
-        let workspace = fixture.workspace.root().display().to_string();
+        let fixture = bubblewrap_candidate_fixture(NativeMode::Dangerous)?;
         let arguments = Map::from_iter([
             (
                 "argv".to_owned(),
@@ -1457,17 +801,7 @@ mod tests {
             ),
             ("yield_time_ms".to_owned(), Value::from(30_000)),
         ]);
-        issue_exec_grant(
-            &fixture.grants,
-            &fixture.consents,
-            owner,
-            &workspace,
-            NativePermissionKind::Network,
-            &arguments,
-        )?;
-        let result = fixture.executor.exec_command_candidate(owner, &arguments)?;
-        assert_eq!(result["status"], "exited");
-        assert_eq!(result["exit_code"], 0);
+        let result = run_classified_exec(&fixture, NativePermissionKind::Network, &arguments)?;
         assert!(
             result["stdout"]
                 .as_str()

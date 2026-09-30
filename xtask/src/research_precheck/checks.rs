@@ -5,8 +5,8 @@ use serde::Deserialize;
 use serde_json::Value;
 
 use super::{
-    Bundle, CANDIDATE_SHA, CANDIDATE_SOURCE, CORPUS_SHA, Case, Kind, REGISTRY_SHA, decode, hash,
-    hex, require, research_policy,
+    Bundle, CORPUS_SHA, Case, Kind, REGISTRY_SHA, ResearchIdentity, decode, hash, hex, require,
+    research_policy_for,
 };
 use crate::{Result, evidence_json};
 
@@ -40,22 +40,22 @@ fn matches_file(value: &Value, key: &str, material: &Material, kind: Kind) -> Re
     Ok(())
 }
 
-fn session(value: &Value, bundle: &Bundle, case: &Case) -> Result<()> {
-    let policy = research_policy(&bundle.task_id)?;
+fn session(value: &Value, bundle: &Bundle, case: &Case, identity: ResearchIdentity) -> Result<()> {
+    let policy = research_policy_for(identity.milestone, &bundle.task_id)?;
     require(
         value.as_object().is_some_and(|fields| fields.len() == 20),
         "preparation schema mismatch",
     )?;
     require(
         value["schema"] == policy.session_schema
-            && value["milestone"] == "MTM-016"
+            && value["milestone"] == identity.milestone
             && value["task_id"] == bundle.task_id
             && value["repeat"] == bundle.repeat
             && value["case_id"] == case.id
             && value["workflow_mode"] == case.mode
             && value["trial_id"] == bundle.trial_id
-            && value["candidate_sha256"] == CANDIDATE_SHA
-            && value["candidate_source_commit"] == CANDIDATE_SOURCE
+            && value["candidate_sha256"] == identity.candidate_sha256
+            && value["candidate_source_commit"] == identity.candidate_source_commit
             && value["case_registry_sha256"] == REGISTRY_SHA
             && value["corpus_sha256"] == CORPUS_SHA
             && value["native_mode"] == policy.native_mode
@@ -630,9 +630,14 @@ fn cas_route(bundle: &Bundle, material: &Material) -> Result<()> {
     )
 }
 
-pub(super) fn validate(bundle: &Bundle, case: &Case, material: &Material) -> Result<()> {
+pub(super) fn validate(
+    bundle: &Bundle,
+    case: &Case,
+    material: &Material,
+    identity: ResearchIdentity,
+) -> Result<()> {
     if let Some(value) = object(material, Kind::Session)? {
-        session(&value, bundle, case)?;
+        session(&value, bundle, case, identity)?;
     }
     let status_value = object(material, Kind::Status)?;
     if let Some(value) = &status_value {

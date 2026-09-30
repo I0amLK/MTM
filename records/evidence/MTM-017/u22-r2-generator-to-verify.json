@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u22_r2_fresh_session_generator_to_verify",
+  "observed_at": "2026-09-29T07:21:11Z",
+  "session_marker": "U22-r2.FAmyEFLP",
+  "trial_id": "cba26cd45925117e6db72a096667d164",
+  "run_id": "run-u22-r2-finite-polynomial-roots-6c59fdefe1a1",
+  "problem_id": "u22-r2-finite-polynomial-roots",
+  "workflow_mode": "full",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": null,
+    "transition_sequence": 7,
+    "assembled_proof_sha256": "f9e036c963347a0064ec7891699fe53f9c500dbd15ed063a75e333850a78f193",
+    "proof_manifest_sha256": "2a4771ccc379a728d7d500b0a172bbd63362134efbf5077bbc1e7964418792ba"
+  },
+  "retrieval_route": {
+    "actual_rethlas_retrieve_used": true,
+    "reference_id": "ref-eabd6e9c74cf2764",
+    "reference_arxiv_id": "1804.04657",
+    "reference_theorem_id": "Theorem 2.1",
+    "source_kind": "original",
+    "original_source_inspected": true,
+    "retrieval_observation_sha256": "bbc39f9402705c538c437afcc380281863d939202aaf738f364d98dbcf6ff8e0",
+    "source_observation_sha256": "494985a73f59c3ce8b9983baf5519311e91ea0b1d2459f459b2e3cf3ed4ed27d",
+    "proof_manifest_reference_nonempty": true,
+    "source_verified_reference_audit_pending": true
+  },
+  "generation_boundary": {
+    "verifier_report_submitted": false,
+    "reference_audit_submitted": false,
+    "finalizer_executed": false,
+    "independent_review_required": true
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}

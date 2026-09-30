@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "schema": "mtm017-u30-install-sigkill-recording-validation-v1",
+  "recorded_at": "2026-09-30T08:53:01.373032Z",
+  "scope": "recording_integrity_not_corpus_acceptance",
+  "observations": {
+    "path": "records/evidence/MTM-017/u30-install-sigkill-observations-20260930.json",
+    "sha256": "3adf9eb83394994d31e60cdd55caa3d2c6ef9c822d9a5cd839946dfe78689137"
+  },
+  "records": {
+    "path": "records/evidence/MTM-017/u30-install-sigkill-records-20260930.json",
+    "sha256": "82e2b19d395251fd6923ad82a47115d9849b673b25100d69a5a11f2a62f3227b"
+  },
+  "records_command_id": "NhagHmmgzGvR2UmfRqhS_Klf",
+  "records_exit_code": 0,
+  "records_ok": true,
+  "diff_check_exit_code": 0,
+  "diff_stdout": {
+    "path": "target/mtm017-u30-sigkill-20260930T084800Z/diff-check.stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "diff_stderr": {
+    "path": "target/mtm017-u30-sigkill-20260930T084800Z/diff-check.stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "prior_mtm017_records_unchanged": true,
+  "prior_mtm017_check": {
+    "path": "target/mtm017-u30-sigkill-20260930T084800Z/prior-mtm017-check.txt",
+    "sha256": "ad59a42c37b8b854e915d0ccc7f603535ddc76ceb1769a43f82e9e7fce7c07d9"
+  },
+  "old_release_driver_and_manifest_unchanged": true,
+  "old_driver_check": {
+    "path": "target/mtm017-u30-sigkill-20260930T084800Z/old-driver-and-manifest-check.txt",
+    "sha256": "92b2ab9823950798f368508584e34bbf0b89a3d95de709e777009759d8651248"
+  },
+  "records_evidence_mtm017_only_flat_regular_json": true,
+  "accepted_delta": 0,
+  "release_qualified": false,
+  "pending": "independent schema-8 result review and importer"
+}

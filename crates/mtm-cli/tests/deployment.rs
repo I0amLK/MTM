@@ -57,7 +57,7 @@ fn fixture(root: &Path) -> Result<(String, Vec<String>), Box<dyn Error>> {
         "--sha256".into(),
         digest.clone(),
         "--version".into(),
-        "0.6.0-preview.1".into(),
+        env!("CARGO_PKG_VERSION").into(),
         "--state-root".into(),
         state.to_string_lossy().into_owned(),
         "--selector".into(),
@@ -81,7 +81,7 @@ fn sigkill_fixture(root: &Path, selector_count: usize) -> Result<SigkillFixture,
         "--sha256".into(),
         digest.clone(),
         "--version".into(),
-        "0.6.0-preview.1".into(),
+        env!("CARGO_PKG_VERSION").into(),
         "--state-root".into(),
         state.to_string_lossy().into_owned(),
     ];
@@ -125,6 +125,7 @@ fn install_status_and_rollback_preserve_both_previous_selectors() -> Result<(), 
     let report: Value = serde_json::from_slice(&installed.stdout)?;
     assert_eq!(report["state"], "active");
     assert_eq!(report["sha256"], digest);
+    assert_eq!(report["version"], env!("CARGO_PKG_VERSION"));
     assert_eq!(report["release_qualified"], false);
     assert_eq!(report["installed_selector_checked"], true);
     assert_eq!(first.canonicalize()?, second.canonicalize()?);
@@ -261,9 +262,11 @@ fn ancestor_symlinks_and_selectors_inside_the_release_root_are_rejected()
 fn install_checks_its_own_artifact_and_version_before_writing() -> Result<(), Box<dyn Error>> {
     let root = tempfile::tempdir()?;
     let (_, mut args) = fixture(root.path())?;
-    args[6] = "unverified-version".into();
-    assert_eq!(run(&args)?.status.code(), Some(2));
-    assert!(!root.path().join("state").exists());
+    for version in ["unverified-version", "0.6.0-preview.1"] {
+        args[6] = version.into();
+        assert_eq!(run(&args)?.status.code(), Some(2));
+        assert!(!root.path().join("state").exists());
+    }
     args[6] = env!("CARGO_PKG_VERSION").into();
     fs::write(root.path().join("candidate"), b"not an MTM runtime")?;
     args[4] = sha(&root.path().join("candidate"))?;
@@ -324,7 +327,8 @@ fn public_commands_recover_persisted_interrupted_prefixes() -> Result<(), Box<dy
     let deployment = retry_state.join("deployment");
     fs::create_dir_all(&deployment)?;
     let release = retry_state
-        .join("releases/0.6.0-preview.1")
+        .join("releases")
+        .join(env!("CARGO_PKG_VERSION"))
         .join(&digest)
         .join("mtm");
     fs::create_dir_all(release.parent().ok_or("release parent")?)?;
@@ -333,7 +337,7 @@ fn public_commands_recover_persisted_interrupted_prefixes() -> Result<(), Box<dy
     let first = retry.path().join("bin-a/mtm");
     let second = retry.path().join("bin-b/mtm");
     let active = serde_json::json!({
-        "schema":"mtm-install-v2","state":"active","version":"0.6.0-preview.1",
+        "schema":"mtm-install-v2","state":"active","version":env!("CARGO_PKG_VERSION"),
         "sha256":digest,"release_path":release,
         "selectors":[
             {"path":first,"previous":{"kind":"missing"}},

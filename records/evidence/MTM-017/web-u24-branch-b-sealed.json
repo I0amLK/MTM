@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "real_web_u24_branch_b_isolation_and_barrier_complete",
+  "observed_at": "2026-09-26T23:50:59Z",
+  "run_id": "run-u24-r1-geometric-series-6fe7b6e47b06",
+  "branch_id": "branch-1-2-3c850f",
+  "domain_id": "branch-domain-branch-1-2-3c850f",
+  "plan_id": "plan-r1-2",
+  "route": "algebraic_cancellation",
+  "operator_reported": {
+    "join_only_read_attempted_once": true,
+    "join_only_read_denied": true,
+    "denial_code": "ROLE_ACCESS_DENIED",
+    "tool_category": "INVALID_ARGUMENT",
+    "branch_status": "solved",
+    "branch_a_private_content_read": false,
+    "join_executed": false
+  },
+  "machine_observed": {
+    "run_state": "branch_join",
+    "run_status": "active",
+    "transition_sequence": 8,
+    "branch_a_status": "sealed",
+    "branch_b_status": "sealed",
+    "branch_b_result_sha256": "ff1e4833b5bf2a5754a67ae73c8307009d0ad4151bab0627cd77b58a7267b13e",
+    "branch_b_result_mode": "0400",
+    "branch_b_private_memory_file_count": 1,
+    "sealed_branch_count": 2,
+    "join_result_present": false,
+    "last_transition_reason": "branch_sealed_barrier_complete"
+  },
+  "credentials_recorded": false,
+  "capabilities_recorded": false,
+  "branch_private_memory_recorded": false,
+  "release_qualified": false
+}

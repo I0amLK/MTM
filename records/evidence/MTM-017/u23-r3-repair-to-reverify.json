@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u23_r3_seeded_repair_second_verifier_pending",
+  "observed_at": "2026-09-29T14:44:19Z",
+  "session_marker": "U23-r3.SPhLiS9y",
+  "trial_id": "b2d220a6228dc91a8374f2ce425c70cf",
+  "run_id": "run-u23-r3-matrix-inverse-gap-cbcd9ef528c4",
+  "problem_id": "u23-r3-matrix-inverse-gap",
+  "workflow_mode": "compact",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": "wrong",
+    "transition_sequence": 7,
+    "seeded_draft_sha256": "c29b38382ca87dd5e274cfd62c579eacaa1defc19d756a463773f1dff16c7328",
+    "first_findings_sha256": "dfc0eb0e77cf5b0775213a0ef223722d8bf86abf9c37bb8698e993981f970f57",
+    "repaired_draft_sha256": "527a51387db2666f981af86d060a7b18039b3f5c002efd3120e77496f4f2e1e7",
+    "proof_manifest_sha256": "1597410e0a9025f3d8cd4fda4190f6ed7b01e84816a0dd21257b7d43f1c9b6fc"
+  },
+  "seeded_repair": {
+    "seeded_challenge": true,
+    "first_verifier_statement_checks": 10,
+    "first_verifier_gaps": 0,
+    "first_verifier_critical_errors": 1,
+    "first_verifier_identified_circular_inverse_use": true,
+    "mathematical_repair_started": true,
+    "mathematical_repair_submitted": true,
+    "repaired_draft_differs_from_seeded_draft": true,
+    "repair_strategy": "Use AB=I to prove A is surjective on F^n, finite-dimensionality to prove A is injective, then infer BA=I from A(BAx-x)=0 without assuming A inverse exists."
+  },
+  "generation_boundary": {
+    "second_independent_verifier_required": true,
+    "second_verifier_findings_pending": true,
+    "finalizer_executed": false,
+    "repair_history_present": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}

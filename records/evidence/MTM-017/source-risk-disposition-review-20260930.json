@@ -1,0 +1,12 @@
+{
+  "schema": "mtm017-source-risk-disposition-review-v1",
+  "finding_id": "MTM017-SOURCE-R3-NORMAL-ASSESSMENT",
+  "disposition": {
+    "path": "records/evidence/MTM-017/source-risk-human-disposition-20260930.json",
+    "sha256": "a6132158e02e45dee166a214e0b8eadd7c72d55715e17b680aff9d7838496014"
+  },
+  "decision": "approved_for_scoped_readiness",
+  "reviewer_session": "review-schema8-importer",
+  "original_failure_preserved": true,
+  "deployment_authorized": false
+}

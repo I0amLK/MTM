@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "milestone": "MTM-016",
   "title": "Rust-native maintenance and usable tools",
-  "status": "in_progress",
+  "status": "completed",
   "started_at": "2026-09-07T14:54:38Z",
   "base_commit": "b3ab147b72d72aa546c9c41bdbe71924aa5ebb97",
   "branch": "work/mtm016-native-usability",
@@ -13,26 +13,26 @@
     "before": "rust",
     "after": "rust",
     "native_does_not_grant_workflow_authority": true,
-    "production_selector_changed": false,
+    "production_selector_changed": true,
     "production_state_rewritten": false,
     "production_keys_changed": false
   },
   "approved_maintenance_crates": ["xtask"],
   "stages": [
-    {"id": "A", "status": "in_progress", "goal": "Inventory and retirement ownership"},
-    {"id": "B", "status": "in_progress", "goal": "Native/Workspace/Git usability regressions"},
-    {"id": "C", "status": "in_progress", "goal": "MTM-owned contracts and alias retirement"},
-    {"id": "D", "status": "in_progress", "goal": "Rust-only maintenance and independent evidence validation"},
-    {"id": "E", "status": "in_progress", "goal": "Task-domain lifecycle and workflow idempotency"},
-    {"id": "F", "status": "pending", "goal": "Python-free complete qualification and new release"}
+    {"id": "A", "status": "completed", "goal": "Inventory and retirement ownership"},
+    {"id": "B", "status": "completed", "goal": "Native/Workspace/Git usability regressions"},
+    {"id": "C", "status": "completed", "goal": "MTM-owned contracts and alias retirement"},
+    {"id": "D", "status": "completed", "goal": "Rust-only maintenance and independent evidence validation"},
+    {"id": "E", "status": "completed", "goal": "Task-domain lifecycle and workflow idempotency"},
+    {"id": "F", "status": "completed", "goal": "Python-free complete qualification and new release"}
   ],
-  "open_observations": [
+  "initial_observations": [
     "Adjacent shell control operators are not tokenized correctly by executable fact collection.",
     "search_text delegates to directory-only list_files and rejects a regular-file target.",
     "The MTM-015 signature_mismatch sample remains unexplained; later clean samples do not close attribution.",
     "The old Python unified gate depends on sibling Re-CTM sources and host deployment artifacts; it is not a portable source gate."
   ],
-  "inventory": {
+  "initial_inventory": {
     "report": "records/validation/mtm016-inventory.json",
     "python_files_observed": 127,
     "python_files_deleted": 11,
@@ -4776,12 +4776,118 @@
       "selector_changed": false,
       "git_push_performed": false,
       "release_qualified": false
+    },
+    {
+      "receipt_id": "MREC-016",
+      "milestone_id": "MTM-016",
+      "started_at": "2026-09-07T14:54:38Z",
+      "completed_at": "2026-09-26T08:39:36Z",
+      "release_performed_at": "2026-09-15T07:01:38Z",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "docs(governance): reconcile the sealed MTM-016 release [MTM-016]",
+      "files_changed": [
+        "records/iterations/ITER-016.json",
+        "records/governance/migration-graph.json",
+        "records/governance/project-progress.json",
+        "records/evidence/MTM-016/lifecycle-reconciliation-20260926.json",
+        "docs/MTM-016-LIFECYCLE-RECONCILIATION.md"
+      ],
+      "commands": [
+        {
+          "command": "read-only verification of sealed release, Git source lineage, evidence hashes, installed selectors and --version",
+          "exit_code": 0,
+          "result": "The September 15 release and all 14 manifest evidence hashes match; both installed selectors match the exact released artifact. The previous rollback binary is missing and remains an explicit operational risk."
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "scope": "historical exact 0.6.0-preview.1 release only",
+          "evidence": [
+            "records/evidence/MTM-016/source-check-f7-host-339a5cb.json"
+          ]
+        },
+        "A1": {
+          "passed": true,
+          "scope": "historical exact 0.6.0-preview.1 release only",
+          "evidence": [
+            "records/evidence/MTM-016/preview-release.json"
+          ]
+        },
+        "A3": {
+          "passed": true,
+          "scope": "historical exact 0.6.0-preview.1 release only",
+          "evidence": [
+            "records/evidence/MTM-016/preview-release.json"
+          ]
+        },
+        "A4": {
+          "passed": true,
+          "scope": "historical exact 0.6.0-preview.1 release only",
+          "evidence": [
+            "records/evidence/MTM-016/preview-release.json"
+          ]
+        },
+        "A5": {
+          "passed": true,
+          "scope": "historical exact 0.6.0-preview.1 release only",
+          "evidence": [
+            "records/evidence/MTM-016/preview-release.json"
+          ]
+        }
+      },
+      "behavior_before": "The preview release had been sealed in commit 54a11f2, but lifecycle summaries still described the preceding unexecuted release driver.",
+      "behavior_after": "Lifecycle summaries acknowledge the already qualified schema-7 preview release and separate schema-8 development from future release qualification.",
+      "risk_review": "No historical receipt is altered or new cutover attempted. Current missing rollback bytes are not hidden by the historical successful rollback drill.",
+      "rollback": "For this records-only reconciliation append a correcting event/receipt rather than deleting sealed evidence. Do not attempt live release rollback until the exact recorded previous artifact has been recovered and verified.",
+      "manual_pending": [
+        "Recover and verify the recorded 0.5.0-preview.2 binary before claiming that historical rollback target is currently available.",
+        "Qualify schema-8 artifacts independently; this historical closure supplies no MTM-017 release permission."
+      ],
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-016/preview-release.json",
+          "sha256": "cc248a1f0e83c10992a0c23bd2de4fd86913b829d16b48803ed5353498b4a288"
+        },
+        {
+          "path": "records/evidence/MTM-016/source-check-f7-host-339a5cb.json",
+          "sha256": "9bf75b63f7c19c6d5982ce812c17ebda367cc81a75523f1cc7f8e4249d00e89b"
+        },
+        {
+          "path": "records/evidence/MTM-016/lifecycle-reconciliation-20260926.json",
+          "sha256": "9988d973770cbd5a95c15f4dc4a715d2ed772dcf4be77485c937de9d24401efd"
+        }
+      ],
+      "release_qualified": true,
+      "qualified_version": "0.6.0-preview.1",
+      "candidate_binary_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+      "current_rollback_ready": false,
+      "production_selector_changed_this_reconciliation": false,
+      "production_state_modified": false,
+      "decision": "completed_preview_release_governance_reconciled_with_rollback_gap"
     }
   ],
-  "remaining_acceptance": [
+  "remaining_acceptance": [],
+  "prior_remaining_acceptance": [
     "Commit and source-qualify the Rust release-cutover driver, then refresh the source release input and re-run all seventeen read-only readiness gates.",
     "Only after that refreshed readiness pass, execute the explicit MTM-016 release-cutover command, require the real rollback/recutover drill, and seal the dedicated release receipt.",
     "Preserve visibility of 83 compatibility-name references and defer four informational Rust shadow binaries to a future candidate cleanup; neither is first-party Python runtime authority."
   ],
-  "decision": "release_readiness_validated_not_authorized"
+  "decision": "completed_preview_release_governance_reconciled_with_rollback_gap",
+  "completed_at": "2026-09-26T08:39:36Z",
+  "release_performed_at": "2026-09-15T07:01:38Z",
+  "current_release": {
+    "version": "0.6.0-preview.1",
+    "sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+    "receipt": "records/evidence/MTM-016/preview-release.json"
+  },
+  "operational_follow_up": [
+    "Recover and verify the recorded 0.5.0-preview.2 binary before claiming that historical rollback target is currently available.",
+    "Qualify schema-8 artifacts independently; this historical closure supplies no MTM-017 release permission."
+  ],
+  "current_rollback_ready": false,
+  "reconciliation": "records/evidence/MTM-016/lifecycle-reconciliation-20260926.json"
 }

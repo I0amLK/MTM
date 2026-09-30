@@ -1,0 +1,89 @@
+{
+  "accepted_delta": 0,
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "corpus_count_incremented": false,
+  "deployment_authorized": false,
+  "full_corpus_accepted": false,
+  "harness_source_sha256": "e23c984936c6d2945b82db5a0fc26f3ab1ebf4629d7d1bbe14078cca0953620f",
+  "human_consent_tested": false,
+  "implementation_complete": "unknown",
+  "inputs": {
+    "path": "records/evidence/MTM-017/authority-corpus-inputs-20260930.json",
+    "sha256": "cb710ff1d7639ef1404358863497ede19c390101e3e05baaa392e112b4005c8a"
+  },
+  "milestone": "MTM-017",
+  "observed_trials": 6,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "research_accepted": false,
+  "rows": [
+    {
+      "accepted": false,
+      "raw": {
+        "path": "records/evidence/MTM-017/authority-u27-r1-20260930.json",
+        "sha256": "b778b3ec514a08ba317251719cba7c075d6476b754d21d17db853dbe4fafc576"
+      },
+      "repeat": 1,
+      "state": "observed_pass",
+      "task_id": "U27",
+      "trial_id": "mtm017-u27-r1-20260930-reviewed"
+    },
+    {
+      "accepted": false,
+      "raw": {
+        "path": "records/evidence/MTM-017/authority-u27-r2-20260930.json",
+        "sha256": "7cd0bb3754b82f75d7e104f4e788ca6ed632ef096da4a22a9b766c371622e701"
+      },
+      "repeat": 2,
+      "state": "observed_pass",
+      "task_id": "U27",
+      "trial_id": "mtm017-u27-r2-20260930-reviewed"
+    },
+    {
+      "accepted": false,
+      "raw": {
+        "path": "records/evidence/MTM-017/authority-u27-r3-20260930.json",
+        "sha256": "30e99fe6537cb895e64bde4d9a88f4c7a0341fd00cc6e20cd2114116c439b4ff"
+      },
+      "repeat": 3,
+      "state": "observed_pass",
+      "task_id": "U27",
+      "trial_id": "mtm017-u27-r3-20260930-reviewed"
+    },
+    {
+      "accepted": false,
+      "raw": {
+        "path": "records/evidence/MTM-017/authority-u28-r1-20260930.json",
+        "sha256": "2ed22f996759537974638031dac80d19003db0770c4d833d436b78af5b67dd02"
+      },
+      "repeat": 1,
+      "state": "observed_pass",
+      "task_id": "U28",
+      "trial_id": "mtm017-u28-r1-20260930-reviewed"
+    },
+    {
+      "accepted": false,
+      "raw": {
+        "path": "records/evidence/MTM-017/authority-u28-r2-20260930.json",
+        "sha256": "5e167aa2b22802011742c5d0b957a3740ef6d71c1cf1d4dcb7687713c9ca56d2"
+      },
+      "repeat": 2,
+      "state": "observed_pass",
+      "task_id": "U28",
+      "trial_id": "mtm017-u28-r2-20260930-reviewed"
+    },
+    {
+      "accepted": false,
+      "raw": {
+        "path": "records/evidence/MTM-017/authority-u28-r3-20260930.json",
+        "sha256": "f619fa47a01b4129e396e5b545588532eb50763fec31d57f02e348cc5bddd2b0"
+      },
+      "repeat": 3,
+      "state": "observed_pass",
+      "task_id": "U28",
+      "trial_id": "mtm017-u28-r3-20260930-reviewed"
+    }
+  ],
+  "schema": "mtm017-authority-observation-collection-v1"
+}

@@ -385,7 +385,7 @@ fn schema7_migration_preserves_unenrolled_work_and_failed_migration_rolls_back()
         assert_eq!(store.is_ok(), !collision);
         assert_eq!(
             db.query_row("PRAGMA user_version", [], |r| r.get::<_, i64>(0))?,
-            if collision { 6 } else { 7 }
+            if collision { 6 } else { 8 }
         );
         assert_eq!(
             db.query_row(

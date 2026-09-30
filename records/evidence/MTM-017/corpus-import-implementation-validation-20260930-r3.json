@@ -1,0 +1,112 @@
+{
+  "schema": "mtm017-research-import-implementation-validation-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T04:04:03.977448+00:00",
+  "scope": "maintenance_import_proposal_implementation_only",
+  "implementation_source_sha256": "7a986e059516efb8b90ef7abca84b6940667b4a3ce6b8e935b48eac489a6e4d0",
+  "maintenance_binary_sha256": "55d5616e96f2b951dc70498c15229cb71812710c691db9df2b701f0e3c4ae187",
+  "source_files": [
+    {
+      "path": "xtask/src/main.rs",
+      "sha256": "43b755b3f935aec9217d1c13f4c8ab2fea66224964ecd547ee27ca622e2e4036"
+    },
+    {
+      "path": "xtask/src/research_import_check/mod.rs",
+      "sha256": "e9907a527adedb9559c88b71e621f357f0f0c7ae026f4c49faf57b1bd0267602"
+    },
+    {
+      "path": "xtask/src/research_import_check/files.rs",
+      "sha256": "5cdecbbd88175288b59aecc99e858508e0447a92d31d67160ca9841787283ba2"
+    },
+    {
+      "path": "xtask/src/research_import_check/tests.rs",
+      "sha256": "e3fd2e504ad82a5620bc483a870416f42e4f9502de0c9fdcb30ae749323ec1e8"
+    },
+    {
+      "path": "xtask/tests/research_import_check_cli.rs",
+      "sha256": "3a3463a83563defc67bbf8dd33693456c99dbcccc92b6f1bc65dbcc51f202d6f"
+    }
+  ],
+  "documentation": {
+    "path": "docs/MTM-017-RESEARCH-CORPUS-IMPORT.md",
+    "sha256": "42752b1639ad4ffeec9d626f098813cea1e864815a6c0358895af800a79d3bb7"
+  },
+  "tests": {
+    "cargo_test_mtm_xtask": {
+      "exit_code": 0,
+      "unit_passed": 143,
+      "integration_passed": 21,
+      "new_import_unit_tests": 11,
+      "new_import_cli_tests": 2,
+      "stdout_sha256": "037a92d567c210ef9ce77beb4b400c840f7cb034bdab43575cf69b0286ffb5d7",
+      "stderr_sha256": "384019ee22687befc2c06215db0edcb117dd153abf9781cf5f0ba04f9f50eed7"
+    },
+    "cargo_clippy_mtm_xtask_all_targets": {
+      "exit_code": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "5b6eeb0ff7ec553781777f18f57ae272bfdefd14a148672a80827bccb7f2c732"
+    },
+    "cargo_fmt_check": {
+      "exit_code": 0
+    },
+    "git_diff_check": {
+      "exit_code": 0
+    },
+    "cargo_xtask_records": {
+      "exit_code": 0,
+      "ok": true,
+      "report_sha256": "36e2a3fe5e79bf4451f92b8165579f968d7f08badeeb6f48e538f7e03d9ac8b8"
+    },
+    "actual_cli_rejects_superseded_r2_review": {
+      "exit_code": 1,
+      "expected_rejection": true,
+      "stdout_empty": true,
+      "error": "xtask: separate input review does not bind this input and implementation",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "5d8e49e1d0bef7585ecdcfbebc89c566706b8e99cf04086924cf148f6ece6a81"
+    }
+  },
+  "prior_diagnostics": [
+    {
+      "stage": "first_focused_import_unit_run",
+      "passed": 6,
+      "failed": 1,
+      "failed_test": "safe_files_reject_escape_links_hardlinks_writable_and_oversize",
+      "cause": "Synthetic good-file setup inherited group-writable default mode and correctly failed the strict input reader.",
+      "repair": "Set only the synthetic good fixture to mode 0600 before asserting successful read; production file checks unchanged.",
+      "superseded_by_successful_focused_run": true
+    }
+  ],
+  "fresh_whole_source_gate_performed": false,
+  "input_review_pending": true,
+  "proposal_created": false,
+  "result_review_pending": true,
+  "accepted_trials_delta": 0,
+  "corpus_count_incremented": false,
+  "frozen_mtm016_driver_sha256_before": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+  "frozen_mtm016_driver_sha256_after": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "production_boundary_basis": "Only new maintenance source/docs/evidence and the dedicated tool build cache were written; no product state or installation command was invoked.",
+  "previous_validation": {
+    "path": "records/evidence/MTM-017/corpus-import-implementation-validation-20260930-r2.json",
+    "sha256": "19f4396c24a67e0c5eda4321692bc20836d9a5d52782e9285831c2714a934d08",
+    "reason_superseded": "Actual r2 proposal failed at frozen JSON driver hashing. r3 fixes only that driver-specific non-executable data reader; r2 input review is historical and unusable for r3."
+  },
+  "implementation_complete": "unknown",
+  "implementation_scope": "whole_project_requires_separate_evidence",
+  "research_accepted": false,
+  "deployment_authorized": false,
+  "failed_actual_proposal": {
+    "path": "records/evidence/MTM-017/corpus-import-proposal-failed-20260930-r2.json",
+    "sha256": "971fd19d3523dc52bd1cf555d0c5b530b2722d5b58a6ede17da1c3d27a02a3cb"
+  },
+  "original_evidence_modes_observed": {
+    "frozen_driver": "0o664",
+    "standalone_receipts": [
+      "0o644"
+    ],
+    "original_receipts_or_driver_chmodded": false
+  }
+}

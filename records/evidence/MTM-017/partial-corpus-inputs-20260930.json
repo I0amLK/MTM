@@ -1,0 +1,75 @@
+{
+  "schema": "mtm017-partial-corpus-inputs-v1",
+  "milestone": "MTM-017",
+  "state_schema_version": 8,
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "candidate_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+  "corpus_sha256": "9227aa6e199887860d88091467aa53fe45eee55cd337eac0587059f8ec434861",
+  "prepared_by": "ctm-corpus-aggregate-preparation",
+  "portable": {
+    "raw": {
+      "path": "records/evidence/MTM-017/portable-corpus-20260930-13d7890-r1.json",
+      "sha256": "2eaf96aed03b24994c4cd9b7b4cd1363133de58ab50a06eb91a0028384b38096"
+    },
+    "observation": {
+      "path": "records/evidence/MTM-017/portable-corpus-observation-20260930-13d7890-r1.json",
+      "sha256": "dd78df9247ea44f5883368d7ad2fe7772e57dd04c0e63f54802317bebb49de59"
+    },
+    "review": {
+      "path": "records/evidence/MTM-017/portable-corpus-independent-review-20260930-13d7890-r1.json",
+      "sha256": "ae3d0bf73d0f2630bd9a153a7509118f6b0a83e723df10cc387d93161fb4d0bc"
+    }
+  },
+  "native": {
+    "raw": {
+      "path": "records/evidence/MTM-017/preview2-corpus-native-13d7890.json",
+      "sha256": "e86e76d01504fbd2e7af78c884e35a433d8de97c81b370450f150b2b829ecfb7"
+    },
+    "snapshot": {
+      "path": "records/evidence/MTM-017/preview2-qualification-snapshot.json",
+      "sha256": "5018c5b1050cefe6e0ef6c7db0bb0aeb15b03ed492ee8e75d6737097b535d55c"
+    }
+  },
+  "research": {
+    "path": "records/governance/mtm017-research-corpus.json",
+    "sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24"
+  },
+  "u30": {
+    "observation": {
+      "path": "records/evidence/MTM-017/u30-install-sigkill-observations-20260930.json",
+      "sha256": "3adf9eb83394994d31e60cdd55caa3d2c6ef9c822d9a5cd839946dfe78689137"
+    },
+    "review": {
+      "path": "records/evidence/MTM-017/u30-install-sigkill-independent-review-20260930.json",
+      "sha256": "1151b2bdd4a6296deed7d98159c8f428b3207e140c0adf8f154b4ab9e22e78fc"
+    },
+    "trials": [
+      {
+        "repeat": 1,
+        "raw": {
+          "path": "records/evidence/MTM-017/u30-install-sigkill-20260930-13d7890-r1.json",
+          "sha256": "76e0cc22e86bd292d94c1c96895a7470f95395ff6c87e8bdda78410428fd5397"
+        }
+      },
+      {
+        "repeat": 2,
+        "raw": {
+          "path": "records/evidence/MTM-017/u30-install-sigkill-20260930-13d7890-r2.json",
+          "sha256": "820e728fdd6d895315a593dace4a03a1a529353e61de74c7d41e7bb13ba65bc0"
+        }
+      },
+      {
+        "repeat": 3,
+        "raw": {
+          "path": "records/evidence/MTM-017/u30-install-sigkill-20260930-13d7890-r3.json",
+          "sha256": "01e87d752f7aa6ef493df599416d587d410b13d5c6ec7208d7eae2812c2ed64e"
+        }
+      }
+    ]
+  },
+  "corpus_count_incremented": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "release_qualified": false,
+  "deployment_authorized": false
+}

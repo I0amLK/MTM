@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u24_r1_branch_join_to_independent_verifier",
+  "observed_at": "2026-09-29T15:46:19Z",
+  "session_marker": "U24-r1.AfvycbfR",
+  "trial_id": "1bcc7ddfda220add09b372c2f9c92d17",
+  "run_id": "run-u24-r1-geometric-series-70660dfce96a",
+  "problem_id": "u24-r1-geometric-series",
+  "workflow_mode": "full",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": null,
+    "transition_sequence": 11,
+    "draft_sha256": "43cc652d52e94e27269aae095a1a3231e70fa7ef7dc4cc537109a54668126abd",
+    "proof_manifest_sha256": "20ea5e2c467ad3f357ee6b6c711aed4f85938039f1dc043bc6b8cad79bdf465a",
+    "branches_observation_sha256": "adb954b701b31cf3638363220acaea7e937d0f3ff67ebebdc87f26d973592517"
+  },
+  "branch_route": {
+    "branch_count": 2,
+    "branches": [
+      {
+        "branch_id": "branch-1-1-57548c",
+        "domain_id": "branch-domain-branch-1-1-57548c",
+        "plan": "induction",
+        "status": "sealed",
+        "result_sha256": "12852b69bf3e7e405add0070c584093c9c01a684f2a230340c9edb56aed2513b"
+      },
+      {
+        "branch_id": "branch-1-2-14f255",
+        "domain_id": "branch-domain-branch-1-2-14f255",
+        "plan": "algebraic-cancellation",
+        "status": "sealed",
+        "result_sha256": "a7aad6eead955155db5bdf0efbfc4579a6ed0339614e828a3d2660b004078617"
+      }
+    ],
+    "sibling_private_read_attempted": true,
+    "sibling_private_read_result": "ROLE_ACCESS_DENIED",
+    "all_required_sealed_before_join": true,
+    "join_considered_branch_ids": [
+      "branch-1-1-57548c",
+      "branch-1-2-14f255"
+    ],
+    "join_selected_branch_id": "branch-1-2-14f255",
+    "join_result_sha256": "2a0a0d5e5e7bdabc805ced3363f5c3dbfc11b51f248161cb8df3fb3c2e4564ef"
+  },
+  "generation_boundary": {
+    "independent_verifier_required": true,
+    "review_pending": true,
+    "finalizer_executed": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}

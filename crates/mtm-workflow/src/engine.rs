@@ -5,7 +5,8 @@ use std::sync::Arc;
 use mtm_contracts::{ErrorCategory, ReCtmError, WorkflowRole, WorkflowState};
 use mtm_storage::{
     BranchPreparation, CapabilityAuthority, CapabilityClaims, CreationIdentity, CreationSlot,
-    PreparedBranch, StateStore, TransitionRun, default_permissions, role_for_state,
+    FactForPromotion, FindingForStorage, PreparedBranch, StateStore, TransitionRun,
+    default_permissions, role_for_state,
 };
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -14,6 +15,9 @@ use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
 
 use crate::kernel::{TransitionDecision, TransitionRequest};
+use crate::memory::{
+    FactGraph, bm25_rank, prepare_verified_facts, project_findings, validate_manifest_facts,
+};
 use crate::methodology::{TaskCatalog, state_name};
 use crate::research::{DisabledResearchProvider, ResearchProvider, ResearchRequest};
 use crate::research_state::protocol::{
@@ -346,6 +350,7 @@ impl WorkflowEngine {
         run = self.advance_mechanical(run, &trace)?;
         let state = workflow_state(text(&run, "state")?)?;
         if state.terminal() {
+            self.persist_project_findings_after_transition(&run, &trace);
             return Ok(serde_json::json!({
                 "ok": true,
                 "run_id": run_id,
@@ -515,9 +520,268 @@ impl WorkflowEngine {
         let normalized = self.normalized_research_state(run, include_verification_reports)?;
         let state = ResearchStateProjector::analyze(normalized.snapshot())
             .map_err(protocol3_state_error)?;
-        ResearchTaskView::build(&state, normalized.warnings())
+        self.persist_project_findings(run, &state)?;
+        let mut view = ResearchTaskView::build(&state, normalized.warnings())
             .and_then(|view| view.to_value())
-            .map_err(protocol3_state_error)
+            .map_err(protocol3_state_error)?;
+        if let Some(project_memory) = self.project_memory_view(run, &state)? {
+            view["project_memory"] = project_memory;
+        }
+        if serde_json::to_vec(&view)
+            .map_err(|error| internal(&error.to_string()))?
+            .len()
+            > crate::research_state::MAX_RESEARCH_TASK_VIEW_BYTES
+        {
+            return Err(internal(
+                "project memory exceeded the research task view budget",
+            ));
+        }
+        Ok(view)
+    }
+
+    fn project_memory_view(
+        &self,
+        run: &Value,
+        state: &crate::research_state::ResearchState,
+    ) -> Result<Option<Value>, ReCtmError> {
+        let run_id = text(run, "run_id")?;
+        let owner_id = text(run, "owner_id")?;
+        let Some(project_run) = self.store.get_project_run(run_id, Some(owner_id))? else {
+            return Ok(None);
+        };
+        let project_id = text(&project_run, "project_id")?;
+        let target = state
+            .nodes()
+            .get(state.target_node_id())
+            .ok_or_else(|| internal("research target is missing"))?;
+        let blocker = state
+            .critical_blockers()
+            .first()
+            .and_then(|id| state.nodes().get(id))
+            .map(|node| node.statement())
+            .unwrap_or("");
+        let query = format!("{} {blocker}", target.statement());
+        let candidates = self.store.memory_fact_candidates(project_id, owner_id)?;
+        let documents = candidates
+            .iter()
+            .map(|row| {
+                format!(
+                    "{} {}",
+                    row["statement_tex"].as_str().unwrap_or_default(),
+                    row["intuition"].as_str().unwrap_or_default()
+                )
+            })
+            .collect::<Vec<_>>();
+        let mut summaries = candidates
+            .iter()
+            .filter_map(|row| {
+                row["fact_id"]
+                    .as_str()
+                    .map(|id| (id.to_owned(), row.clone()))
+            })
+            .collect::<BTreeMap<_, _>>();
+        let mut selected = BTreeSet::new();
+        let mut predecessor_cache: BTreeMap<String, Vec<String>> = BTreeMap::new();
+        for index in bm25_rank(&query, &documents) {
+            if selected.len() >= 8 {
+                break;
+            }
+            let id = candidates[index]["fact_id"]
+                .as_str()
+                .ok_or_else(|| internal("fact candidate has no ID"))?;
+            let mut closure = BTreeSet::new();
+            let mut pending = vec![id.to_owned()];
+            while let Some(next) = pending.pop() {
+                if !closure.insert(next.clone()) {
+                    continue;
+                }
+                if closure.len() > 8 {
+                    break;
+                }
+                let predecessors = if let Some(cached) = predecessor_cache.get(&next) {
+                    cached.clone()
+                } else {
+                    let values = self.store.memory_fact_predecessors(project_id, &next)?;
+                    predecessor_cache.insert(next.clone(), values.clone());
+                    values
+                };
+                for predecessor in predecessors {
+                    if !summaries.contains_key(&predecessor) {
+                        summaries.insert(
+                            predecessor.clone(),
+                            self.store.memory_fact_summary(project_id, &predecessor)?,
+                        );
+                    }
+                    pending.push(predecessor);
+                }
+            }
+            if selected.union(&closure).count() <= 8 {
+                selected.extend(closure);
+            }
+        }
+        let mut dependencies = BTreeMap::new();
+        for id in &selected {
+            let predecessors = if let Some(cached) = predecessor_cache.get(id) {
+                cached.clone()
+            } else {
+                self.store.memory_fact_predecessors(project_id, id)?
+            };
+            dependencies.insert(
+                id.clone(),
+                predecessors.into_iter().collect::<BTreeSet<_>>(),
+            );
+        }
+        let graph = FactGraph::new(dependencies, &BTreeSet::new())?;
+        let nodes = graph.topological_order().iter().map(|id| {
+            let summary = summaries.get(id).ok_or_else(|| internal("selected fact summary is missing"))?;
+            Ok(serde_json::json!({"fact_id":id,"statement":bounded_memory_text(summary["statement_tex"].as_str().unwrap_or_default(),192)}))
+        }).collect::<Result<Vec<Value>, ReCtmError>>()?;
+        let mut edges = Vec::new();
+        for (id, predecessors) in graph.predecessors() {
+            for predecessor in predecessors {
+                edges.push(serde_json::json!([id, predecessor]));
+            }
+        }
+        let findings = self.store.list_project_findings(project_id, owner_id)?;
+        let mut groups = BTreeMap::new();
+        for (name, kinds) in [
+            ("prior_dead_ends", &["dead_end"][..]),
+            ("prior_counterexamples", &["counterexample"][..]),
+            ("obstacles", &["obstacle"][..]),
+            (
+                "other_findings",
+                &[
+                    "conclusion",
+                    "example",
+                    "proof_attempt",
+                    "plan",
+                    "direction",
+                ][..],
+            ),
+        ] {
+            let rows = findings
+                .iter()
+                .filter(|row| {
+                    row["run_id"] != run_id
+                        && kinds.contains(&row["kind"].as_str().unwrap_or_default())
+                })
+                .collect::<Vec<_>>();
+            let documents = rows
+                .iter()
+                .map(|row| {
+                    format!(
+                        "{} {}",
+                        row["claim"].as_str().unwrap_or_default(),
+                        row["evidence"].as_str().unwrap_or_default()
+                    )
+                })
+                .collect::<Vec<_>>();
+            let selected_rows = bm25_rank(&query, &documents)
+                .into_iter()
+                .take(5)
+                .map(|index| {
+                    let row = rows[index];
+                    serde_json::json!({"finding_id":row["finding_id"],"kind":row["kind"],
+                    "claim":bounded_memory_text(row["claim"].as_str().unwrap_or_default(),96),
+                    "evidence":bounded_memory_text(row["evidence"].as_str().unwrap_or_default(),96),
+                    "verifiable":row["verifiable"],"status":row["status"]})
+                })
+                .collect::<Vec<_>>();
+            groups.insert(name.to_owned(), Value::Array(selected_rows));
+        }
+        let mut view = serde_json::json!({
+            "advisory_only":true,
+            "fact_graph":{"nodes":nodes,"edges":edges,"truncated":candidates.len()>selected.len()},
+            "prior_dead_ends":groups.remove("prior_dead_ends").unwrap_or_default(),
+            "prior_counterexamples":groups.remove("prior_counterexamples").unwrap_or_default(),
+            "obstacles":groups.remove("obstacles").unwrap_or_default(),
+            "other_findings":groups.remove("other_findings").unwrap_or_default(),
+            "graph_digest":"", "truncated":findings.len()>=1024
+        });
+        for field in [
+            "other_findings",
+            "obstacles",
+            "prior_counterexamples",
+            "prior_dead_ends",
+        ] {
+            while serde_json::to_vec(&view)
+                .map_err(|error| internal(&error.to_string()))?
+                .len()
+                > 6_000
+            {
+                let Some(array) = view[field].as_array_mut() else {
+                    break;
+                };
+                if array.pop().is_none() {
+                    break;
+                }
+                view["truncated"] = Value::Bool(true);
+            }
+        }
+        let digest = sha256_text(
+            &serde_json::to_string(&view["fact_graph"])
+                .map_err(|error| internal(&error.to_string()))?,
+        );
+        view["graph_digest"] = Value::String(format!("sha256:{digest}"));
+        Ok(Some(view))
+    }
+
+    fn persist_project_findings(
+        &self,
+        run: &Value,
+        state: &crate::research_state::ResearchState,
+    ) -> Result<(), ReCtmError> {
+        let run_id = text(run, "run_id")?;
+        let owner_id = text(run, "owner_id")?;
+        let Some(project_run) = self.store.get_project_run(run_id, Some(owner_id))? else {
+            return Ok(());
+        };
+        let project_id = text(&project_run, "project_id")?;
+        let findings = project_findings(project_id, run_id, state)
+            .into_iter()
+            .map(|finding| FindingForStorage {
+                finding_id: finding.finding_id,
+                kind: finding.kind.to_owned(),
+                claim: finding.claim,
+                evidence: finding.evidence,
+                verifiable: finding.verifiable,
+                links_json: finding.links_json,
+            })
+            .collect::<Vec<_>>();
+        self.store
+            .insert_project_findings(project_id, run_id, owner_id, &findings)
+    }
+
+    fn persist_project_findings_after_transition(&self, run: &Value, trace_id: &str) {
+        let projected = (|| {
+            let run_id = text(run, "run_id")?;
+            let owner_id = text(run, "owner_id")?;
+            if self
+                .store
+                .get_project_run(run_id, Some(owner_id))?
+                .is_none()
+            {
+                return Ok(());
+            }
+            let normalized = self.normalized_research_state(run, false)?;
+            let state = ResearchStateProjector::analyze(normalized.snapshot())
+                .map_err(protocol3_state_error)?;
+            self.persist_project_findings(run, &state)
+        })();
+        if let Err(error) = projected {
+            self.emit(WorkflowEvent {
+                event_type: "workflow.memory_projection_failed".to_owned(),
+                trace_id: trace_id.to_owned(),
+                run_id: run.get("run_id").and_then(Value::as_str).map(str::to_owned),
+                actor_role: None,
+                domain_id: None,
+                before_state: None,
+                after_state: None,
+                decision: "deferred".to_owned(),
+                reason: error.code,
+                details: serde_json::json!({"replay":"next_task_view"}),
+            });
+        }
     }
 
     pub fn write(
@@ -1603,6 +1867,7 @@ impl WorkflowEngine {
                 },
             )?,
         };
+        self.persist_project_findings_after_transition(&result, input.trace_id);
         self.emit(WorkflowEvent {
             event_type: "workflow.transition".to_owned(),
             trace_id: input.trace_id.to_owned(),
@@ -2048,7 +2313,11 @@ impl WorkflowEngine {
                 serde_json::json!({"invalid_reference_ids":invalid_references}),
             ));
         }
-        Ok(serde_json::json!({
+        let facts = object
+            .get("facts")
+            .map(|value| validate_manifest_facts(value, statement))
+            .transpose()?;
+        let mut normalized = serde_json::json!({
             "target_statement_tex":statement,
             "dependency_revision_ids":dependencies,
             "reference_ids":references,
@@ -2056,7 +2325,11 @@ impl WorkflowEngine {
             "computational_evidence":computational,
             "project_snapshot_id":project_run.as_ref().and_then(|value|value.get("project_snapshot_id")),
             "workflow_protocol_version":metadata_i64(&self.store.get_run(claims.run_id())?, "workflow_protocol_version", 1)
-        }))
+        });
+        if let Some(facts) = facts {
+            normalized["facts"] = facts;
+        }
+        Ok(normalized)
     }
 
     fn write_reference_audit(
@@ -3186,7 +3459,15 @@ impl WorkflowEngine {
         }
         let proof = self.vault.read_proof(claims.run_id())?;
         if protocol >= 2 {
-            self.store.read_proof_manifest(claims.run_id())?;
+            let manifest = self.store.read_proof_manifest(claims.run_id())?["manifest"].clone();
+            if let Some(project_run) = self
+                .store
+                .get_project_run(claims.run_id(), Some(claims.owner_id()))?
+                && project_run["register_result"] == true
+                && project_run["target_claim_id"].is_string()
+            {
+                self.prepare_promotion_facts(&project_run, claims.owner_id(), &manifest, &proof)?;
+            }
         }
         self.seal_atomic_transition(
             run,
@@ -3386,7 +3667,15 @@ impl WorkflowEngine {
     ) -> Result<String, ReCtmError> {
         let proof = self.vault.read_proof(claims.run_id())?;
         if metadata_i64(run, "workflow_protocol_version", 1) >= 2 {
-            self.store.read_proof_manifest(claims.run_id())?;
+            let manifest = self.store.read_proof_manifest(claims.run_id())?["manifest"].clone();
+            if let Some(project_run) = self
+                .store
+                .get_project_run(claims.run_id(), Some(claims.owner_id()))?
+                && project_run["register_result"] == true
+                && project_run["target_claim_id"].is_string()
+            {
+                self.prepare_promotion_facts(&project_run, claims.owner_id(), &manifest, &proof)?;
+            }
         }
         let proof_sha256 = sha256_text(&proof);
         let prior = metadata_text(run, "last_verified_proof_sha256");
@@ -3640,6 +3929,68 @@ impl WorkflowEngine {
         Ok(result)
     }
 
+    fn prepare_promotion_facts(
+        &self,
+        project_run: &Value,
+        owner_id: &str,
+        manifest: &Value,
+        proof: &str,
+    ) -> Result<Vec<FactForPromotion>, ReCtmError> {
+        let project_id = text(project_run, "project_id")?;
+        let known_fact_ids = self.store.active_project_fact_ids(project_id, owner_id)?;
+        let dependency_revisions = manifest
+            .get("dependency_revision_ids")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .map(|revision_id| self.store.get_claim_revision(revision_id, Some(owner_id)))
+            .collect::<Result<Vec<_>, _>>()?;
+        if dependency_revisions
+            .iter()
+            .any(|revision| revision["fact_id"].as_str().is_none())
+        {
+            return Err(invalid(
+                "A legacy dependency revision has no verified fact; promote it through a new verified run before using it as a fact dependency",
+            ));
+        }
+        let dependency_fact_ids = dependency_revisions
+            .iter()
+            .filter_map(|revision| revision["fact_id"].as_str().map(str::to_owned))
+            .collect::<Vec<_>>();
+        if dependency_fact_ids
+            .iter()
+            .any(|id| !known_fact_ids.contains(id))
+        {
+            return Err(invalid("Proof manifest depends on a revoked fact"));
+        }
+        let target_statement = manifest
+            .get("target_statement_tex")
+            .and_then(Value::as_str)
+            .ok_or_else(|| internal("proof manifest target statement is missing"))?;
+        prepare_verified_facts(
+            project_id,
+            target_statement,
+            proof,
+            manifest,
+            &dependency_fact_ids,
+            &known_fact_ids,
+        )?
+        .into_iter()
+        .map(|fact| {
+            Ok(FactForPromotion {
+                fact_id: fact.fact_id,
+                statement_tex: fact.statement_tex,
+                proof_tex: fact.proof_tex,
+                intuition: fact.intuition,
+                glossary_json: serde_json::to_string(&fact.glossary_introduces)
+                    .map_err(|error| internal(&error.to_string()))?,
+                predecessors: fact.predecessors,
+            })
+        })
+        .collect()
+    }
+
     fn retry_pending_registry_promotion(&self, run: &Value) -> Result<Value, ReCtmError> {
         if workflow_state(text(run, "state")?)? != WorkflowState::Done
             || metadata_i64(run, "workflow_protocol_version", 1) < 2
@@ -3694,17 +4045,21 @@ impl WorkflowEngine {
                 }
             }
             let final_proof = self.vault.read_final_proof(run_id)?;
+            let target_statement = manifest
+                .get("target_statement_tex")
+                .and_then(Value::as_str)
+                .ok_or_else(|| internal("proof manifest target statement is missing"))?;
+            let facts =
+                self.prepare_promotion_facts(&project_run, owner_id, &manifest, &final_proof)?;
             let effective_conditions = conditions.into_iter().collect::<Vec<_>>();
-            let promotion = self.store.promote_verified_run(
+            let promotion = self.store.promote_verified_run_with_facts(
                 run_id,
                 owner_id,
-                manifest
-                    .get("target_statement_tex")
-                    .and_then(Value::as_str)
-                    .ok_or_else(|| internal("proof manifest target statement is missing"))?,
+                target_statement,
                 &sha256_text(&final_proof),
                 &effective_conditions,
                 &manifest,
+                &facts,
             )?;
             self.update_metadata(
                 run_id,
@@ -4465,4 +4820,17 @@ fn sha256_text(value: &str) -> String {
     let mut digest = Sha256::new();
     digest.update(value.as_bytes());
     format!("{:x}", digest.finalize())
+}
+
+fn bounded_memory_text(value: &str, maximum_bytes: usize) -> String {
+    if value.len() <= maximum_bytes {
+        return value.to_owned();
+    }
+    let end = value
+        .char_indices()
+        .map(|(index, _)| index)
+        .take_while(|index| *index <= maximum_bytes.saturating_sub(3))
+        .last()
+        .unwrap_or(0);
+    format!("{}...", &value[..end])
 }

@@ -1,0 +1,101 @@
+# MTM-017 real-web project-memory test
+
+Use the same already registered preview.2 OAuth connection. Do not delete or
+re-add it, copy capabilities between conversations, or retroactively attach the
+completed non-project run to a project.
+
+## Stage A: verifier-gated project promotion
+
+Current operator run: \`run-web-memory-odd-sum-04d914f855b0\`, with base
+revision \`web-memory-odd-sum-r1\`. Generation has reached \`verify\` after a real
+LaTeX repair cycle. Do not create a replacement run. The private workspace
+\`PROJECT-VERIFIER-HANDOFF.md\` is the next review locator.
+
+Stage A is now complete. The independent verifier returned no gap, the server
+computed \`correct\`, and finalization promoted:
+
+- verified revision: \`web-memory-odd-sum-r2\`
+- fact locator: \`c4ec50b45b618aa0\`
+
+The original \`r1\` is now \`OPEN/SUPERSEDED\`; \`r2\` is
+\`VERIFIED/ACTIVE\` and points to the completed source run. The base fact has no
+predecessor. Continue with the private \`PROJECT-MEMORY-STAGE-B.md\` card before
+submitting any work in the next run.
+
+Create project \`web-memory-integer-identities\`. Create claim
+\`web-memory-odd-sum\` with statement:
+
+\[
+\sum_{k=1}^{n}(2k-1)=n^2,\qquad n\ge1.
+\]
+
+Start a new compact run with \`register_result:true\`,
+\`project_id:web-memory-integer-identities\`, and
+\`target_claim_id:web-memory-odd-sum\`. Generate a genuine proof. At \`verify\`,
+hand the same run to a separate reviewer on the same OAuth client. Do not prewrite
+a correct report. If a real gap exists, exercise repair.
+
+After \`done\`, fetch the project manifest and record the promoted revision whose
+\`source_run_id\` is this run. It must be a new verified revision. The revision ID
+or fact ID is a locator, not mathematical evidence.
+
+## Stage B: later-run project memory
+
+Create claim \`web-memory-shifted-odd-sum\` with statement:
+
+\[
+\sum_{k=1}^{n}(2k+1)=n(n+2),\qquad n\ge1.
+\]
+
+Start its project-linked run with \`register_result:true\`. On the first
+\`rethlas_step\` response, before any submission, inspect
+\`context.mathematical_research_state.project_memory\`.
+
+Require \`advisory_only=true\`, require the verified base odd-sum fact to appear,
+and require the earlier non-project run not to appear as a promoted fact. Record
+visible fact node/edge counts and the base fact locator.
+
+## Stage C: real dependency edge
+
+Prove the shifted identity by using the verified base identity:
+
+\[
+\sum_{k=1}^{n}(2k+1)
+=\sum_{k=1}^{n}(2k-1)+2n
+=n^2+2n
+=n(n+2).
+\]
+
+Put the promoted base revision ID from Stage A in the second run's
+\`dependency_revision_ids\`. This is a genuine mathematical dependency. Again use
+a separate independent reviewer at \`verify\`.
+
+After finalization, start one third lightweight run in the same project with
+\`register_result:false\` and no target claim. Inspect its initial
+\`project_memory\`; it should expose both active facts and a predecessor edge from
+the shifted-sum target fact to the base fact. Stop/cancel this third run after the
+memory observation; it need not produce a proof.
+
+Report run IDs, independent-review results, promoted revision IDs, final artifact
+locators, project-memory node/edge counts, and observed errors/repairs. Never
+report OAuth passwords, bearer tokens, capabilities, tunnel URLs, or raw private
+logs. Operator fact revocation is outside this web-model test.
+
+## Completed real-web result
+
+The isolated preview.2 web sequence completed successfully:
+
+- Stage A promoted base fact `c4ec50b45b618aa0` only after independent
+  verification and finalization.
+- Stage B exposed that fact in a later generator's advisory project memory before
+  any submission.
+- Stage C promoted shifted fact `02c10dd59da7e163` with exactly one
+  predecessor, the base fact, while the base fact remained predecessor-free.
+- A third fresh run observed exactly two active nodes and one edge,
+  `02c10dd59da7e163 -> c4ec50b45b618aa0`, then cancelled with zero workflow
+  submissions.
+
+No revoked, non-project, typed-finding, or verifier-private material appeared in
+the final generator view. This closes the project-memory real-web path, but not
+the separate full/retrieval/repair/CAS, corpus, operator-state-copy, or release
+qualification work.

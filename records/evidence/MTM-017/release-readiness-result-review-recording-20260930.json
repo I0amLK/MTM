@@ -1,0 +1,17 @@
+{
+  "schema": "mtm017-release-result-review-recording-v1",
+  "milestone": "MTM-017",
+  "recorded_by": "formal-readiness-implementation-session",
+  "recording_role": "scribe_only",
+  "reviewer_session": "review-schema8-importer",
+  "review_record": "records/evidence/MTM-017/release-readiness-result-review-20260930.json",
+  "independent_recheck_command_id": "uK-Gq5uICJY4tRvL0Reaj9rv",
+  "independent_recheck_exit_code": 0,
+  "independent_recheck_stderr_empty": true,
+  "independent_recheck_stdout_bytes": 45039,
+  "independent_recheck_stdout_sha256": "2ba3ecc8a54987f0a63640f64cf418f4e8001b1e52e550f7f3d27d7480e1919e",
+  "basis": "The independent reviewer supplied the exact closed review object after independently rehashing all 131 inventory files, comparing original stdout and published evaluation, and obtaining a byte-identical result from a separate read-only replay using the preserved reviewed binary. The implementation session only transcribed that conclusion.",
+  "separate_governance_acceptance_still_required": true,
+  "release_qualified": false,
+  "deployment_authorized": false
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "real_web_u24_replacement_owner_continuity_interruption_before_join",
+  "observed_at": "2026-09-27T14:08:00Z",
+  "run_id": "run-u24-r1-geometric-series-retry-d56e3a367e60",
+  "problem_id": "u24-r1-geometric-series-retry",
+  "machine_observed": {
+    "state": "branch_join",
+    "status": "active",
+    "transition_sequence": 8,
+    "sealed_branch_count": 2,
+    "join_result_present": false,
+    "old_owner_fingerprint_sha256": "a5aacf7b8928843dfb27461046cbeb9abec5b08406ce14624273c43086cf6691",
+    "current_owner_fingerprint_sha256": "2f3d5e4347acd5088d7d10eb86a1ebcd24ccbc56774e7e014538379b1f8a99f3",
+    "owner_identity_changed": true,
+    "old_oauth_registration_still_present": true
+  },
+  "operator_observed": {
+    "transport_failures_before_reconnect": true,
+    "new_connection_registered_as_distinct_oauth_client": true,
+    "run_owner_mismatch_on_new_connection": true
+  },
+  "classification": "external_owner_continuity_interruption_not_branch_or_mathematical_failure",
+  "old_run_preserved_unchanged": true,
+  "replacement_trial_required": true,
+  "credentials_recorded": false,
+  "raw_client_ids_recorded": false,
+  "capabilities_recorded": false,
+  "release_qualified": false
+}

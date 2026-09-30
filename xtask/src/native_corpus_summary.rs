@@ -49,6 +49,13 @@ const TASKS: [(&str, &str, &[&str]); 5] = [
         ],
     ),
 ];
+/// MTM-017 dangerous-only U20 checks. Sealed MTM-016 rows keep the legacy
+/// safe/trusted/grant list in `TASKS`; both are accepted, never mixed.
+const U20_DANGEROUS_CHECKS: [&str; 3] = [
+    "dangerous_network",
+    "repeated_without_grant",
+    "network_shared_vault_hidden",
+];
 const COMMON: [&str; 4] = [
     "hard_isolation",
     "private_vault_hidden",
@@ -153,7 +160,19 @@ pub(super) fn validate(stdout: &[u8], candidate: &str) -> Result<Value> {
             .chain(checks.iter().copied())
             .collect();
         match row.status.as_str() {
-            "passed" if row.reason == "checks_passed" && row.checks == expected => passed += 1,
+            "passed"
+                if row.reason == "checks_passed"
+                    && (row.checks == expected
+                        || (row.task_id == "U20"
+                            && row.checks
+                                == COMMON
+                                    .iter()
+                                    .copied()
+                                    .chain(U20_DANGEROUS_CHECKS)
+                                    .collect::<Vec<_>>())) =>
+            {
+                passed += 1
+            }
             "failed" if row.reason == "scenario_check_failed" && row.checks.is_empty() => {}
             _ => return Err("Native corpus row status or checks inconsistent".into()),
         }
@@ -243,6 +262,30 @@ mod tests {
             assert!(!accepted(&bad));
         }
         Ok(())
+    }
+
+    #[test]
+    fn u20_accepts_sealed_or_dangerous_only_checks_but_never_a_mix() {
+        let good = fixture(&"a".repeat(64));
+        let dangerous: Vec<&str> = COMMON
+            .iter()
+            .chain(U20_DANGEROUS_CHECKS.iter())
+            .copied()
+            .collect();
+        let mut revised = good.clone();
+        for index in 12..15 {
+            assert_eq!(revised["rows"][index]["task_id"], "U20");
+            revised["rows"][index]["checks"] = json!(dangerous);
+        }
+        assert!(accepted(&revised));
+        let mut mixed = revised.clone();
+        if let Some(checks) = mixed["rows"][12]["checks"].as_array_mut() {
+            checks.push(json!("safe_denial"));
+        }
+        assert!(!accepted(&mixed));
+        let mut other_task = good;
+        other_task["rows"][0]["checks"] = json!(dangerous);
+        assert!(!accepted(&other_task));
     }
 
     #[test]

@@ -55,7 +55,9 @@ pub struct NativeHelperRequest {
     pub workspace: String,
     #[serde(default)]
     pub forbidden_paths: Vec<String>,
-    pub mode: NativeMode,
+    /// Explicit sandbox network namespace. Before MTM-017 this was implied by the
+    /// retired `safe` Native mode; fixed adapters still request `isolated`.
+    pub network: NetworkNamespacePlan,
     #[serde(default)]
     pub argv: Vec<String>,
     #[serde(default = "default_workdir")]
@@ -89,7 +91,8 @@ pub struct SandboxProbe {
     pub toolchain_write_succeeded: Vec<String>,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum NetworkNamespacePlan {
     Isolated,
     Shared,
@@ -227,8 +230,7 @@ pub struct SandboxPlanInput<'a> {
 #[must_use]
 pub const fn network_namespace_for_mode(mode: NativeMode) -> NetworkNamespacePlan {
     match mode {
-        NativeMode::Safe => NetworkNamespacePlan::Isolated,
-        NativeMode::Trusted | NativeMode::Dangerous => NetworkNamespacePlan::Shared,
+        NativeMode::Dangerous => NetworkNamespacePlan::Shared,
     }
 }
 
@@ -618,7 +620,7 @@ fn attest(request: &NativeHelperRequest) -> Result<BTreeMap<String, Value>, ReCt
     let plan = plan_sandbox(&SandboxPlanInput {
         workspace: &workspace,
         workdir: ".",
-        network: network_namespace_for_mode(request.mode),
+        network: request.network,
         argv: &argv,
         environment: &BTreeMap::new(),
         sandbox_path: nonempty(&request.host_path),
@@ -708,7 +710,7 @@ fn execute(request: &NativeHelperRequest) -> Result<BTreeMap<String, Value>, ReC
     let plan = plan_sandbox(&SandboxPlanInput {
         workspace: &workspace,
         workdir: &workdir,
-        network: network_namespace_for_mode(request.mode),
+        network: request.network,
         argv: &request.argv,
         environment: &BTreeMap::new(),
         sandbox_path: nonempty(&request.host_path),
@@ -1541,13 +1543,10 @@ mod tests {
         let forbidden_paths = vec![private.clone()];
         let argv = vec!["/bin/printf".to_owned(), "secret-command-value".to_owned()];
 
-        for (mode, expected) in [
-            (NativeMode::Safe, NetworkNamespacePlan::Isolated),
-            (NativeMode::Trusted, NetworkNamespacePlan::Shared),
-            (NativeMode::Dangerous, NetworkNamespacePlan::Shared),
-        ] {
-            assert_eq!(network_namespace_for_mode(mode), expected);
-        }
+        assert_eq!(
+            network_namespace_for_mode(NativeMode::Dangerous),
+            NetworkNamespacePlan::Shared
+        );
 
         let isolated = test_plan_with_resolver(
             &workspace,
@@ -1562,7 +1561,7 @@ mod tests {
         let trusted = test_plan_with_resolver(
             &workspace,
             "proofs",
-            network_namespace_for_mode(NativeMode::Trusted),
+            NetworkNamespacePlan::Shared,
             &argv,
             &environment,
             &read_only_roots,

@@ -1,0 +1,295 @@
+{
+  "schema_version": "1.0.0",
+  "schema": "mtm017-u30-install-sigkill-observation-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T08:51:52.999378Z",
+  "scope": "three_independent_current_candidate_process_sigkill_observations_not_corpus_acceptance",
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "candidate_version": "0.6.0-preview.2",
+  "state_schema": 8,
+  "runner_milestone_label_preserved": "MTM-016",
+  "profile": "install_sigkill",
+  "observation_count": 3,
+  "observed_successful_trials": 3,
+  "failed_trials": 0,
+  "accepted_delta": 0,
+  "acceptance_status": "pending_independent_schema8_importer_review",
+  "historical_single_trial_not_reused": true,
+  "prior_mtm017_records_unchanged": true,
+  "prior_mtm017_inventory": {
+    "path": "target/mtm017-u30-sigkill-20260930T084800Z/prior-mtm017-sha256.txt",
+    "sha256": "e9186df0db30f9e5dacc2af329f21278d5c47b1423b6fed415139fbca943d2f3"
+  },
+  "old_driver_and_manifest_unchanged": true,
+  "old_driver_and_manifest_inventory": {
+    "path": "target/mtm017-u30-sigkill-20260930T084800Z/old-driver-and-manifest-before.sha256",
+    "sha256": "ecc01dcf46e2fe4bd538a3b150e67fb3ee21fe8c780a41f9d76c0b0b613c55d8"
+  },
+  "serial_shared_cargo_cache": "target/mtm-tool",
+  "cargo_clean_performed": false,
+  "new_full_build_cache_created": false,
+  "all_auxiliary_logs_and_workdirs_under": "target/mtm017-u30-sigkill-20260930T084800Z",
+  "records_layout": "only_new_flat_regular_json_in_records/evidence/MTM-017",
+  "physical_power_loss_tested": false,
+  "shared_filesystem_tested": false,
+  "production_selectors_changed": false,
+  "production_state_modified": false,
+  "live_capture_performed": false,
+  "non_test_processes_signalled": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "commit_or_push_performed": false,
+  "internal_test_stdout_stderr": "retained only as hashes in unchanged qualifier report; wrapper does not claim archived internal raw streams",
+  "trials": [
+    {
+      "task_id": "U30",
+      "trial": 1,
+      "observation_id": "MTM017-U30-SIGKILL-20260930-R1",
+      "ctm_terminal": {
+        "trial": 1,
+        "command_id": "jXrFbHafW0b9pt6DufgRk0qa",
+        "status": "exited",
+        "exit_code": 0,
+        "timed_out": false,
+        "signal": null
+      },
+      "started_at": "2026-09-30T08:48:58Z",
+      "finished_at": "2026-09-30T08:49:21Z",
+      "recorded_unix_seconds": 1790758161,
+      "raw_report": {
+        "path": "records/evidence/MTM-017/u30-install-sigkill-20260930-13d7890-r1.json",
+        "sha256": "76e0cc22e86bd292d94c1c96895a7470f95395ff6c87e8bdda78410428fd5397"
+      },
+      "raw_report_source": {
+        "path": "target/mtm017-u30-sigkill-20260930T084800Z/trial-1/qualify.stdout.json",
+        "sha256": "76e0cc22e86bd292d94c1c96895a7470f95395ff6c87e8bdda78410428fd5397"
+      },
+      "qualify_stderr": {
+        "path": "target/mtm017-u30-sigkill-20260930T084800Z/trial-1/qualify.stderr.log",
+        "sha256": "5b71a2ea1df67562fee319bc38429c121b4db0317973d73e739fb4a9706baac8"
+      },
+      "command": {
+        "path": "target/mtm017-u30-sigkill-20260930T084800Z/trial-1/command.txt",
+        "sha256": "210f4ea56e859a34dfd95d0a1f03b53b23a2808bf43a5ebd706a6d66cfa50577"
+      },
+      "environment": {
+        "path": "target/mtm017-u30-sigkill-20260930T084800Z/trial-1/environment-scope.txt",
+        "sha256": "60afd223774f0a34514696c5f2dc59bf9f19bb7271cb63b6b8fde21905d3c637"
+      },
+      "input_sha256_before": {
+        "target/mtm017-preview2/mtm-0.6.0-preview.2-13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4/mtm": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+        "target/mtm017-baselines/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+        "records/governance/mtm016-release-inputs.json": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+        "xtask/src/release_check.rs": "4a5ca80835ed8d566ca7e9cefeadbf5364d30d381bb45171cc95c4d1fca76dff",
+        "xtask/src/release_cutover.rs": "4daa50a5b2b7c30d2e2c96bfa371907198cf50252fa8d84f7ae026a2811bcd65",
+        "xtask/src/qualify.rs": "27f8b3beac9397300c3ce18cb2590236dcaa6eb474d21e8d539353470cd24862",
+        "crates/mtm-cli/tests/deployment.rs": "4b637f9d041f87c655a1b9cf54fcd46b890ddd2cade96e1bdc2e928b9bf875cc",
+        "Cargo.lock": "cd7c8da83a0750ebfca58512470bd35ee4a6c66c3b68404662d822cf5bc42a8c",
+        "target/mtm-tool/debug/mtm-xtask": "284f53ef5149660c113a9036a465602e9dc6a4706777598292d037230ce3d17b"
+      },
+      "input_sha256_after": {
+        "target/mtm017-preview2/mtm-0.6.0-preview.2-13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4/mtm": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+        "target/mtm017-baselines/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+        "records/governance/mtm016-release-inputs.json": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+        "xtask/src/release_check.rs": "4a5ca80835ed8d566ca7e9cefeadbf5364d30d381bb45171cc95c4d1fca76dff",
+        "xtask/src/release_cutover.rs": "4daa50a5b2b7c30d2e2c96bfa371907198cf50252fa8d84f7ae026a2811bcd65",
+        "xtask/src/qualify.rs": "27f8b3beac9397300c3ce18cb2590236dcaa6eb474d21e8d539353470cd24862",
+        "crates/mtm-cli/tests/deployment.rs": "4b637f9d041f87c655a1b9cf54fcd46b890ddd2cade96e1bdc2e928b9bf875cc",
+        "Cargo.lock": "cd7c8da83a0750ebfca58512470bd35ee4a6c66c3b68404662d822cf5bc42a8c",
+        "target/mtm-tool/debug/mtm-xtask": "284f53ef5149660c113a9036a465602e9dc6a4706777598292d037230ce3d17b"
+      },
+      "input_hashes_unchanged": true,
+      "candidate_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+      "product_source_lineage_diff": {
+        "path": "target/mtm017-u30-sigkill-20260930T084800Z/trial-1/product-source-lineage.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "product_source_lineage_exact": true,
+      "harness_source_identity": {
+        "after_sha256": "10066ff837e2cee485fabe19809f172b1527141195a7fe29488f9fa201b248f0",
+        "before_sha256": "10066ff837e2cee485fabe19809f172b1527141195a7fe29488f9fa201b248f0",
+        "commit": "b8ca577521f5494c712cd52fb35a611588a32651",
+        "unchanged": true
+      },
+      "unique_tmpdir": "/home/lk/桌面/MTM2/MTM/target/mtm017-u30-sigkill-20260930T084800Z/trial-1/tmp",
+      "fresh_qualifier_snapshot": true,
+      "fresh_test_tempdir": true,
+      "fresh_tempdir_basis": [
+        "xtask/src/qualify.rs Snapshot::prepare_artifact creates tempfile::tempdir per invocation",
+        "crates/mtm-cli/tests/deployment.rs external_sigkill_during_real_rollback_recovers_exact_candidate creates tempfile::tempdir per test invocation",
+        "separate sequential CTM commands with distinct TMPDIR parents"
+      ],
+      "baseline_not_launched": true,
+      "accepted_delta": 0
+    },
+    {
+      "task_id": "U30",
+      "trial": 2,
+      "observation_id": "MTM017-U30-SIGKILL-20260930-R2",
+      "ctm_terminal": {
+        "trial": 2,
+        "command_id": "r1tdwu2PID7mW9LgXiWold4h",
+        "status": "exited",
+        "exit_code": 0,
+        "timed_out": false,
+        "signal": null
+      },
+      "started_at": "2026-09-30T08:49:42Z",
+      "finished_at": "2026-09-30T08:50:04Z",
+      "recorded_unix_seconds": 1790758204,
+      "raw_report": {
+        "path": "records/evidence/MTM-017/u30-install-sigkill-20260930-13d7890-r2.json",
+        "sha256": "820e728fdd6d895315a593dace4a03a1a529353e61de74c7d41e7bb13ba65bc0"
+      },
+      "raw_report_source": {
+        "path": "target/mtm017-u30-sigkill-20260930T084800Z/trial-2/qualify.stdout.json",
+        "sha256": "820e728fdd6d895315a593dace4a03a1a529353e61de74c7d41e7bb13ba65bc0"
+      },
+      "qualify_stderr": {
+        "path": "target/mtm017-u30-sigkill-20260930T084800Z/trial-2/qualify.stderr.log",
+        "sha256": "5b71a2ea1df67562fee319bc38429c121b4db0317973d73e739fb4a9706baac8"
+      },
+      "command": {
+        "path": "target/mtm017-u30-sigkill-20260930T084800Z/trial-2/command.txt",
+        "sha256": "210f4ea56e859a34dfd95d0a1f03b53b23a2808bf43a5ebd706a6d66cfa50577"
+      },
+      "environment": {
+        "path": "target/mtm017-u30-sigkill-20260930T084800Z/trial-2/environment-scope.txt",
+        "sha256": "268a7c1a0a4dce20fc2f9c5c39c19ddd26accc39009e97a52fe928f262f6512a"
+      },
+      "input_sha256_before": {
+        "target/mtm017-preview2/mtm-0.6.0-preview.2-13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4/mtm": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+        "target/mtm017-baselines/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+        "records/governance/mtm016-release-inputs.json": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+        "xtask/src/release_check.rs": "4a5ca80835ed8d566ca7e9cefeadbf5364d30d381bb45171cc95c4d1fca76dff",
+        "xtask/src/release_cutover.rs": "4daa50a5b2b7c30d2e2c96bfa371907198cf50252fa8d84f7ae026a2811bcd65",
+        "xtask/src/qualify.rs": "27f8b3beac9397300c3ce18cb2590236dcaa6eb474d21e8d539353470cd24862",
+        "crates/mtm-cli/tests/deployment.rs": "4b637f9d041f87c655a1b9cf54fcd46b890ddd2cade96e1bdc2e928b9bf875cc",
+        "Cargo.lock": "cd7c8da83a0750ebfca58512470bd35ee4a6c66c3b68404662d822cf5bc42a8c",
+        "target/mtm-tool/debug/mtm-xtask": "284f53ef5149660c113a9036a465602e9dc6a4706777598292d037230ce3d17b"
+      },
+      "input_sha256_after": {
+        "target/mtm017-preview2/mtm-0.6.0-preview.2-13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4/mtm": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+        "target/mtm017-baselines/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+        "records/governance/mtm016-release-inputs.json": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+        "xtask/src/release_check.rs": "4a5ca80835ed8d566ca7e9cefeadbf5364d30d381bb45171cc95c4d1fca76dff",
+        "xtask/src/release_cutover.rs": "4daa50a5b2b7c30d2e2c96bfa371907198cf50252fa8d84f7ae026a2811bcd65",
+        "xtask/src/qualify.rs": "27f8b3beac9397300c3ce18cb2590236dcaa6eb474d21e8d539353470cd24862",
+        "crates/mtm-cli/tests/deployment.rs": "4b637f9d041f87c655a1b9cf54fcd46b890ddd2cade96e1bdc2e928b9bf875cc",
+        "Cargo.lock": "cd7c8da83a0750ebfca58512470bd35ee4a6c66c3b68404662d822cf5bc42a8c",
+        "target/mtm-tool/debug/mtm-xtask": "284f53ef5149660c113a9036a465602e9dc6a4706777598292d037230ce3d17b"
+      },
+      "input_hashes_unchanged": true,
+      "candidate_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+      "product_source_lineage_diff": {
+        "path": "target/mtm017-u30-sigkill-20260930T084800Z/trial-2/product-source-lineage.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "product_source_lineage_exact": true,
+      "harness_source_identity": {
+        "after_sha256": "10066ff837e2cee485fabe19809f172b1527141195a7fe29488f9fa201b248f0",
+        "before_sha256": "10066ff837e2cee485fabe19809f172b1527141195a7fe29488f9fa201b248f0",
+        "commit": "b8ca577521f5494c712cd52fb35a611588a32651",
+        "unchanged": true
+      },
+      "unique_tmpdir": "/home/lk/桌面/MTM2/MTM/target/mtm017-u30-sigkill-20260930T084800Z/trial-2/tmp",
+      "fresh_qualifier_snapshot": true,
+      "fresh_test_tempdir": true,
+      "fresh_tempdir_basis": [
+        "xtask/src/qualify.rs Snapshot::prepare_artifact creates tempfile::tempdir per invocation",
+        "crates/mtm-cli/tests/deployment.rs external_sigkill_during_real_rollback_recovers_exact_candidate creates tempfile::tempdir per test invocation",
+        "separate sequential CTM commands with distinct TMPDIR parents"
+      ],
+      "baseline_not_launched": true,
+      "accepted_delta": 0
+    },
+    {
+      "task_id": "U30",
+      "trial": 3,
+      "observation_id": "MTM017-U30-SIGKILL-20260930-R3",
+      "ctm_terminal": {
+        "trial": 3,
+        "command_id": "9UIj0YZfHX2ptaePFisZJnj7",
+        "status": "exited",
+        "exit_code": 0,
+        "timed_out": false,
+        "signal": null
+      },
+      "started_at": "2026-09-30T08:50:16Z",
+      "finished_at": "2026-09-30T08:50:39Z",
+      "recorded_unix_seconds": 1790758239,
+      "raw_report": {
+        "path": "records/evidence/MTM-017/u30-install-sigkill-20260930-13d7890-r3.json",
+        "sha256": "01e87d752f7aa6ef493df599416d587d410b13d5c6ec7208d7eae2812c2ed64e"
+      },
+      "raw_report_source": {
+        "path": "target/mtm017-u30-sigkill-20260930T084800Z/trial-3/qualify.stdout.json",
+        "sha256": "01e87d752f7aa6ef493df599416d587d410b13d5c6ec7208d7eae2812c2ed64e"
+      },
+      "qualify_stderr": {
+        "path": "target/mtm017-u30-sigkill-20260930T084800Z/trial-3/qualify.stderr.log",
+        "sha256": "5b71a2ea1df67562fee319bc38429c121b4db0317973d73e739fb4a9706baac8"
+      },
+      "command": {
+        "path": "target/mtm017-u30-sigkill-20260930T084800Z/trial-3/command.txt",
+        "sha256": "210f4ea56e859a34dfd95d0a1f03b53b23a2808bf43a5ebd706a6d66cfa50577"
+      },
+      "environment": {
+        "path": "target/mtm017-u30-sigkill-20260930T084800Z/trial-3/environment-scope.txt",
+        "sha256": "062bc8c2d559115c071632b3f79351d3124dd85b406df61798a5f5a66109fd92"
+      },
+      "input_sha256_before": {
+        "target/mtm017-preview2/mtm-0.6.0-preview.2-13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4/mtm": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+        "target/mtm017-baselines/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+        "records/governance/mtm016-release-inputs.json": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+        "xtask/src/release_check.rs": "4a5ca80835ed8d566ca7e9cefeadbf5364d30d381bb45171cc95c4d1fca76dff",
+        "xtask/src/release_cutover.rs": "4daa50a5b2b7c30d2e2c96bfa371907198cf50252fa8d84f7ae026a2811bcd65",
+        "xtask/src/qualify.rs": "27f8b3beac9397300c3ce18cb2590236dcaa6eb474d21e8d539353470cd24862",
+        "crates/mtm-cli/tests/deployment.rs": "4b637f9d041f87c655a1b9cf54fcd46b890ddd2cade96e1bdc2e928b9bf875cc",
+        "Cargo.lock": "cd7c8da83a0750ebfca58512470bd35ee4a6c66c3b68404662d822cf5bc42a8c",
+        "target/mtm-tool/debug/mtm-xtask": "284f53ef5149660c113a9036a465602e9dc6a4706777598292d037230ce3d17b"
+      },
+      "input_sha256_after": {
+        "target/mtm017-preview2/mtm-0.6.0-preview.2-13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4/mtm": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+        "target/mtm017-baselines/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+        "records/governance/mtm016-release-inputs.json": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04",
+        "xtask/src/release_check.rs": "4a5ca80835ed8d566ca7e9cefeadbf5364d30d381bb45171cc95c4d1fca76dff",
+        "xtask/src/release_cutover.rs": "4daa50a5b2b7c30d2e2c96bfa371907198cf50252fa8d84f7ae026a2811bcd65",
+        "xtask/src/qualify.rs": "27f8b3beac9397300c3ce18cb2590236dcaa6eb474d21e8d539353470cd24862",
+        "crates/mtm-cli/tests/deployment.rs": "4b637f9d041f87c655a1b9cf54fcd46b890ddd2cade96e1bdc2e928b9bf875cc",
+        "Cargo.lock": "cd7c8da83a0750ebfca58512470bd35ee4a6c66c3b68404662d822cf5bc42a8c",
+        "target/mtm-tool/debug/mtm-xtask": "284f53ef5149660c113a9036a465602e9dc6a4706777598292d037230ce3d17b"
+      },
+      "input_hashes_unchanged": true,
+      "candidate_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+      "product_source_lineage_diff": {
+        "path": "target/mtm017-u30-sigkill-20260930T084800Z/trial-3/product-source-lineage.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "product_source_lineage_exact": true,
+      "harness_source_identity": {
+        "after_sha256": "10066ff837e2cee485fabe19809f172b1527141195a7fe29488f9fa201b248f0",
+        "before_sha256": "10066ff837e2cee485fabe19809f172b1527141195a7fe29488f9fa201b248f0",
+        "commit": "b8ca577521f5494c712cd52fb35a611588a32651",
+        "unchanged": true
+      },
+      "unique_tmpdir": "/home/lk/桌面/MTM2/MTM/target/mtm017-u30-sigkill-20260930T084800Z/trial-3/tmp",
+      "fresh_qualifier_snapshot": true,
+      "fresh_test_tempdir": true,
+      "fresh_tempdir_basis": [
+        "xtask/src/qualify.rs Snapshot::prepare_artifact creates tempfile::tempdir per invocation",
+        "crates/mtm-cli/tests/deployment.rs external_sigkill_during_real_rollback_recovers_exact_candidate creates tempfile::tempdir per test invocation",
+        "separate sequential CTM commands with distinct TMPDIR parents"
+      ],
+      "baseline_not_launched": true,
+      "accepted_delta": 0
+    }
+  ],
+  "pending": [
+    "independent result review",
+    "independent schema-8 corpus importer validation and acceptance",
+    "physical power-loss/device-cache durability",
+    "shared-filesystem durability",
+    "remaining release gates"
+  ]
+}

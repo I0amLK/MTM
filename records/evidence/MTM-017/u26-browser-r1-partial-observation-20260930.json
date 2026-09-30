@@ -1,0 +1,517 @@
+{
+  "schema": "mtm017-u26-browser-partial-observation-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T10:09:08.221595+00:00",
+  "trial_id": "MTM017-U26-R1-web-euqxHzfJ-20260930",
+  "task_id": "U26",
+  "repeat": 1,
+  "status": "incomplete_blocked_at_connector_submission_validation",
+  "passed": false,
+  "accepted_delta": 0,
+  "release_qualified": false,
+  "release_ready": false,
+  "deployment_authorized": false,
+  "scope": "One operator-connected real-client attempt against the isolated exact-candidate session, including initial OAuth events and same-owner reconnect read continuity. The required valid normal assessment submission did not reach the candidate.",
+  "candidate": {
+    "sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "version": "0.6.0-preview.2",
+    "state_schema": 8,
+    "tool_contract": "mtm-tools-v10",
+    "workflow_protocol": 3,
+    "public_tools": 24,
+    "product_source_commit": "7b4afe2359e688263557f62154e4bc1e640c12c0",
+    "original_build_source_sha256": "0adec4b02a8b54fd20fb30c796c9959ccc346cc0f9336517fc47eafcb6951e02"
+  },
+  "session": {
+    "path": "/home/lk/桌面/MTM2/MTM/target/mtm017-web-sessions/web-euqxHzfJ",
+    "workspace": "/home/lk/桌面/MTM2/MTM/target/mtm017-web-sessions/web-euqxHzfJ/workspace",
+    "fresh_state": true,
+    "production_state_copied": false,
+    "native_mode": "dangerous",
+    "latex_policy": "required",
+    "live_processes": [
+      {
+        "exe_path": "/home/lk/桌面/MTM2/MTM/target/mtm017-web-sessions/web-euqxHzfJ/candidate",
+        "exe_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+        "uid": 1000,
+        "expected_tui_arguments_match": true
+      }
+    ],
+    "session_metadata_sha256": "363bb0424b4b5dc14a4665fe9d0f182cd4269c5e7fd0a5706a8a12fc4e4e21f7",
+    "input_manifest_sha256": "371a6ce712f31d1cd875a27b414c683de4560aaac28731f6f8bd2ea9dcc9c32e",
+    "input_count": 42,
+    "all_input_hashes_match": true,
+    "inspection_connector": "CTM",
+    "inspection_workdir": ".",
+    "inspection_command_id_sha256": "902cdcdc3b800b8270e616594656c11f7f9841f35ad46fbe01d6c7862ee55cb2"
+  },
+  "browser_witness": {
+    "initial_connection": {
+      "operator_statement": "MTM 连接了",
+      "source": "Operator conversation statement relayed by the coordinating observer",
+      "message_id_sha256": "8db626db9beef14624853d6b429e56b163835e1ecb0a11fe2bfeb96c1dcd2758"
+    },
+    "reconnect": {
+      "operator_statement": "rebooted",
+      "message_time_utc": "2026-09-30T10:07:36Z",
+      "context": "Reply to instructions to close the conversation page and reopen the same conversation from history while retaining the same connection",
+      "actual_os_reboot_claimed": false,
+      "message_id_sha256": "81070bb6ebbb8625e01f3e61c691ac205cdf8d21c130be77801c40109fec4cf0"
+    },
+    "browser_interaction_directly_screen_observed": false,
+    "no_new_registration_requested_for_reconnect": true
+  },
+  "client_continuity": {
+    "fingerprint_algorithm": "SHA-256 of exact OAuth client ID UTF-8 bytes",
+    "raw_client_id_recorded": false,
+    "fingerprint_source": "Coordinating observer compared the two successful MTM server_info responses and computed SHA-256 in memory after a standard abc test-vector self-check",
+    "before": {
+      "client_id_sha256": "455ae66c44270afcffc6395542bf01d7d1c2d32d359f53e247374926e92141ca",
+      "approximate_tool_observation_time_utc": "2026-09-30T10:03:27Z",
+      "server_info_trace_sha256": "33bf824fca7ebd82f7bec8ba686fb4b50c5193ee1dcbaea9fff6a8cdbe6b937d"
+    },
+    "after": {
+      "client_id_sha256": "455ae66c44270afcffc6395542bf01d7d1c2d32d359f53e247374926e92141ca",
+      "approximate_tool_observation_time_utc": "2026-09-30T10:07:44Z",
+      "server_info_trace_sha256": "77c70f12417cd86a02a714b279e7f8f6fd5bb405505b5e73e0632a036bb21d36"
+    },
+    "same_client": true,
+    "same_workspace": true,
+    "same_owner_run_read_succeeded": true,
+    "times_are_server_timestamps": false
+  },
+  "run": {
+    "problem_summary": "Temporary compact assessment smoke test of n+n=2n",
+    "register_result": false,
+    "workflow_mode": "compact",
+    "before_status": {
+      "approximate_tool_observation_time_utc": "2026-09-30T10:05:43Z",
+      "state": "assess",
+      "status": "active",
+      "seq": 1,
+      "pending_submission": null
+    },
+    "after_status": {
+      "approximate_tool_observation_time_utc": "2026-09-30T10:07:46Z",
+      "state": "assess",
+      "status": "active",
+      "seq": 1,
+      "pending_submission": null
+    },
+    "status_responses_contain_trace": false,
+    "current_task_or_capability_recorded": false,
+    "successful_normal_assessment_submissions": 0,
+    "cleanup_status": "Retained active pending further authorized diagnosis; no cancellation in this observation",
+    "mathematical_or_research_acceptance_claimed": false,
+    "run_id_sha256": "1018e44ca734cfda68641eb865eee54c2536c7e9788e2c81455fc55e050a3277",
+    "creation_trace_sha256": "bd4649d98df7459e866ec4309a3fccac6f5897ec10cbb240336b415af277eabe",
+    "get_task_trace_sha256": "bac951e464a3fbe820719d56ff066df079e00d755d7df5b5027d5a5c68ad8131",
+    "matching_console_status_trace_sha256": [
+      "aefd041d2d45304b8063f2d6ec53ba9ad539873555e3f37fb393c47509efe01e",
+      "e2b7c486ee756a5a78a0efadb192917f235c0d108ddaf3ada31cab9360fbab60"
+    ]
+  },
+  "oauth_observation": {
+    "initial_dcr_events": 1,
+    "authorization_code_issued_events": 1,
+    "access_token_issued_events": 1,
+    "s256_basis": "The observed authorization_password_and_pkce_request_valid and authorization_code_and_pkce_valid events are emitted by product-source-matching OAuth code. oauth.rs:490 requires code_challenge_method=S256; lines 686-716 require matching client, redirect, resource and verified PKCE before token issuance.",
+    "event_to_client_binding": "The captured operator log omits client fingerprint and per-event timestamps. One initial DCR/PKCE sequence exists in this isolated session and successful authenticated server_info observations establish owner continuity; the log itself does not directly bind those initial events to a printed client fingerprint.",
+    "protected_resource_path_directly_observed": false,
+    "protected_resource_path_status": "Exact /mcp protected-resource metadata/request path is not retained in the whitelisted event output; no direct observation is claimed.",
+    "new_dcr_during_observed_reconnect": false,
+    "oauth_database_read": false,
+    "dcr_trace_sha256": "3d2deb4ceaa31d20c7a83f48c6c72f33b66bd1fce30177c86ddb728ac725182d",
+    "authorization_code_trace_sha256": "54c797de99ac919bdb6916f2b9385a3491885fd9d97db2fdec03a7bb7fbb2075",
+    "access_token_trace_sha256": "55b66656f78376f356660142e716a14565d8ef05f61b36f8448fa2e05728559b"
+  },
+  "connector_blockers": {
+    "submission": {
+      "tool": "MTM.rethlas_step",
+      "stage": "Connector schema validation before server dispatch",
+      "diagnostic": "Parameters failed connector schema validation: $ [oneOf]: Value matches multiple schemas (does not match constraints configured by your ChatGPT workspace admin...)",
+      "diagnostic_source": "Coordinating observer's direct MTM connector result; no candidate submission response",
+      "candidate_received_submission_observed": false,
+      "candidate_assessment_rejection_claimed": false,
+      "current_run_remains_assess": true,
+      "replayed_or_bypassed_via_http_or_ctm": false,
+      "origin": "Undetermined. The source schema is closed and disjoint; the actual connector-side validation schema was not available for inspection."
+    },
+    "worker_routing": {
+      "tool": "MTM.server_info",
+      "error_code": -32001,
+      "diagnostic": "Unknown tool({\"name\":\"mtm.server_info\"})",
+      "scope": "Separate observer-worker routing failure. The coordinating observer's MTM route remained usable.",
+      "candidate_failure_claimed": false,
+      "run_created_by_routing_failed_observer": false
+    }
+  },
+  "schema_analysis": {
+    "source_files": [
+      {
+        "path": "crates/mtm-gateway/src/catalog/workflow_schema.rs",
+        "sha256": "7539ce0e879491d530fe427b7f2192376e86c4d52b4446674c0e1ce678c3af08",
+        "matches_product_source_commit": true
+      },
+      {
+        "path": "crates/mtm-gateway/src/catalog/schema.rs",
+        "sha256": "3eb796d3a30db22a18a02237e4d6b9405d03d84ea8c1fd1934ca5992c0aa70b1",
+        "matches_product_source_commit": true
+      },
+      {
+        "path": "crates/mtm-gateway/src/oauth.rs",
+        "sha256": "db91945f929f04c6589f20ccb395bfe04dab23a4a69f6fd2fe2265ea3e70d7a7",
+        "matches_product_source_commit": true
+      },
+      {
+        "path": "crates/mtm-runtime/src/operator.rs",
+        "sha256": "73942f56f9b0a51602854d873e767351acde2cb56ad1906a42eeafc39506146d",
+        "matches_product_source_commit": true
+      }
+    ],
+    "step_location": "crates/mtm-gateway/src/catalog/workflow_schema.rs:66-82",
+    "object_builder_location": "crates/mtm-gateway/src/catalog/schema.rs:6-8",
+    "source_oneof_branches_closed": true,
+    "source_read_branch_properties": [
+      "run_id"
+    ],
+    "source_read_branch_required": [
+      "run_id"
+    ],
+    "source_submit_branch_properties": [
+      "run_id",
+      "capability",
+      "recover_only",
+      "action",
+      "payload",
+      "writes"
+    ],
+    "source_submit_branch_required": [
+      "run_id",
+      "capability",
+      "action"
+    ],
+    "source_both_branches_additional_properties": false,
+    "minimal_sanitized_diagnostic": {
+      "source_expected_matching_branch_count": 1,
+      "explanation": "Any action or capability property excludes the closed run_id-only branch. A hypothetical projection that drops that branch's additionalProperties:false can make a submission match both branches; this is an illustrative hypothesis, not an observation of the actual connector transformation.",
+      "test_executed": false,
+      "real_task_replayed": false,
+      "schema_projection": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string"
+          },
+          "capability": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "additionalProperties": false,
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "run_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "run_id"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "run_id": {
+                "type": "string"
+              },
+              "capability": {
+                "type": "string"
+              },
+              "action": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "run_id",
+              "capability",
+              "action"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "input_property_sets": [
+        {
+          "keys": [
+            "run_id"
+          ],
+          "expected_matching_branches": [
+            0
+          ]
+        },
+        {
+          "keys": [
+            "run_id",
+            "capability",
+            "action"
+          ],
+          "expected_matching_branches": [
+            1
+          ]
+        }
+      ],
+      "projection_scope": "Structural no-secret illustration of branch closure only, not the full exact schema and not a candidate or connector execution. All present values would need to satisfy the actual source schema."
+    },
+    "connector_exposure": {
+      "observed_surface": "Tool metadata rendered TypeScript signature",
+      "signature": "{ run_id: string } | { action: string; capability: string; payload?: object; recover_only?: boolean; run_id: string; writes?: Array<{ content: unknown; resource: string }> }",
+      "raw_effective_connector_json_schema_available": false,
+      "limitations": "The rendered signature omits JSON Schema additionalProperties constraints. It cannot establish which transformation or validation layer caused the observed oneOf overlap. No current permitted CTM/MTM tool exposes the connector's effective validation schema."
+    }
+  },
+  "sanitized_event_capture": {
+    "source_path": "target/mtm017-web-sessions/web-euqxHzfJ/logs/console.abzFx5eR.log",
+    "captured_bytes": 2722,
+    "captured_prefix_sha256": "69c6b01a08539790a5563928e919ad84ea15c57bcdc39b6d2c68b06429ac5d34",
+    "safe_events": [
+      {
+        "line": 8,
+        "decision": "observe",
+        "event_type": "oauth.client_registered",
+        "reason": "valid_dynamic_client_registration",
+        "trace_id_sha256": "3d2deb4ceaa31d20c7a83f48c6c72f33b66bd1fce30177c86ddb728ac725182d"
+      },
+      {
+        "line": 9,
+        "decision": "observe",
+        "event_type": "oauth.authorization_code_issued",
+        "reason": "authorization_password_and_pkce_request_valid",
+        "trace_id_sha256": "54c797de99ac919bdb6916f2b9385a3491885fd9d97db2fdec03a7bb7fbb2075"
+      },
+      {
+        "line": 10,
+        "decision": "observe",
+        "event_type": "oauth.access_token_issued",
+        "reason": "authorization_code_and_pkce_valid",
+        "trace_id_sha256": "55b66656f78376f356660142e716a14565d8ef05f61b36f8448fa2e05728559b"
+      },
+      {
+        "line": 11,
+        "decision": "observe",
+        "event_type": "oauth.access_token_accepted",
+        "reason": "signed_access_token_valid",
+        "trace_id_sha256": "c82edcf5f8b98e5e72db6779e933bc08961d06566f6d528d10162cc492bef777"
+      },
+      {
+        "line": 12,
+        "decision": "observe",
+        "event_type": "oauth.access_token_accepted",
+        "reason": "signed_access_token_valid",
+        "trace_id_sha256": "0bae8e5d19e47ace6cafc2f9bd68f562e2d7c0fa8ed38a522337ba02b184e4f3"
+      },
+      {
+        "line": 13,
+        "decision": "observe",
+        "event_type": "oauth.access_token_accepted",
+        "reason": "signed_access_token_valid",
+        "trace_id_sha256": "33bf824fca7ebd82f7bec8ba686fb4b50c5193ee1dcbaea9fff6a8cdbe6b937d"
+      },
+      {
+        "line": 14,
+        "event_type": "tool:start",
+        "tool": "server_info",
+        "argument_keys": [],
+        "trace_id_sha256": "33bf824fca7ebd82f7bec8ba686fb4b50c5193ee1dcbaea9fff6a8cdbe6b937d"
+      },
+      {
+        "line": 15,
+        "event_type": "tool:done",
+        "tool": "server_info",
+        "argument_keys": [],
+        "trace_id_sha256": "33bf824fca7ebd82f7bec8ba686fb4b50c5193ee1dcbaea9fff6a8cdbe6b937d"
+      },
+      {
+        "line": 16,
+        "decision": "observe",
+        "event_type": "oauth.access_token_accepted",
+        "reason": "signed_access_token_valid",
+        "trace_id_sha256": "bd4649d98df7459e866ec4309a3fccac6f5897ec10cbb240336b415af277eabe"
+      },
+      {
+        "line": 17,
+        "event_type": "tool:start",
+        "tool": "rethlas_start",
+        "argument_keys": [
+          "creation_key",
+          "problem_id",
+          "problem_tex",
+          "register_result",
+          "workflow_mode"
+        ],
+        "trace_id_sha256": "bd4649d98df7459e866ec4309a3fccac6f5897ec10cbb240336b415af277eabe"
+      },
+      {
+        "line": 19,
+        "event_type": "tool:done",
+        "tool": "rethlas_start",
+        "argument_keys": [],
+        "trace_id_sha256": "bd4649d98df7459e866ec4309a3fccac6f5897ec10cbb240336b415af277eabe"
+      },
+      {
+        "line": 20,
+        "decision": "observe",
+        "event_type": "oauth.access_token_accepted",
+        "reason": "signed_access_token_valid",
+        "trace_id_sha256": "bac951e464a3fbe820719d56ff066df079e00d755d7df5b5027d5a5c68ad8131"
+      },
+      {
+        "line": 21,
+        "event_type": "tool:start",
+        "tool": "rethlas_step",
+        "argument_keys": [
+          "run_id"
+        ],
+        "trace_id_sha256": "bac951e464a3fbe820719d56ff066df079e00d755d7df5b5027d5a5c68ad8131"
+      },
+      {
+        "line": 26,
+        "event_type": "tool:done",
+        "tool": "rethlas_step",
+        "argument_keys": [],
+        "trace_id_sha256": "bac951e464a3fbe820719d56ff066df079e00d755d7df5b5027d5a5c68ad8131"
+      },
+      {
+        "line": 27,
+        "decision": "observe",
+        "event_type": "oauth.access_token_accepted",
+        "reason": "signed_access_token_valid",
+        "trace_id_sha256": "aefd041d2d45304b8063f2d6ec53ba9ad539873555e3f37fb393c47509efe01e"
+      },
+      {
+        "line": 28,
+        "event_type": "tool:start",
+        "tool": "rethlas_inspect",
+        "argument_keys": [
+          "operation",
+          "run_id"
+        ],
+        "trace_id_sha256": "aefd041d2d45304b8063f2d6ec53ba9ad539873555e3f37fb393c47509efe01e"
+      },
+      {
+        "line": 29,
+        "event_type": "tool:done",
+        "tool": "rethlas_inspect",
+        "argument_keys": [],
+        "trace_id_sha256": "aefd041d2d45304b8063f2d6ec53ba9ad539873555e3f37fb393c47509efe01e"
+      },
+      {
+        "line": 30,
+        "decision": "observe",
+        "event_type": "oauth.access_token_accepted",
+        "reason": "signed_access_token_valid",
+        "trace_id_sha256": "77c70f12417cd86a02a714b279e7f8f6fd5bb405505b5e73e0632a036bb21d36"
+      },
+      {
+        "line": 31,
+        "event_type": "tool:start",
+        "tool": "server_info",
+        "argument_keys": [],
+        "trace_id_sha256": "77c70f12417cd86a02a714b279e7f8f6fd5bb405505b5e73e0632a036bb21d36"
+      },
+      {
+        "line": 32,
+        "event_type": "tool:done",
+        "tool": "server_info",
+        "argument_keys": [],
+        "trace_id_sha256": "77c70f12417cd86a02a714b279e7f8f6fd5bb405505b5e73e0632a036bb21d36"
+      },
+      {
+        "line": 33,
+        "decision": "observe",
+        "event_type": "oauth.access_token_accepted",
+        "reason": "signed_access_token_valid",
+        "trace_id_sha256": "e2b7c486ee756a5a78a0efadb192917f235c0d108ddaf3ada31cab9360fbab60"
+      },
+      {
+        "line": 34,
+        "event_type": "tool:start",
+        "tool": "rethlas_inspect",
+        "argument_keys": [
+          "operation",
+          "run_id"
+        ],
+        "trace_id_sha256": "e2b7c486ee756a5a78a0efadb192917f235c0d108ddaf3ada31cab9360fbab60"
+      },
+      {
+        "line": 35,
+        "event_type": "tool:done",
+        "tool": "rethlas_inspect",
+        "argument_keys": [],
+        "trace_id_sha256": "e2b7c486ee756a5a78a0efadb192917f235c0d108ddaf3ada31cab9360fbab60"
+      }
+    ],
+    "event_counts": {
+      "capability.denied": 0,
+      "oauth.access_token_accepted": 8,
+      "oauth.access_token_denied": 0,
+      "oauth.access_token_issued": 1,
+      "oauth.authorization_code_issued": 1,
+      "oauth.authorization_denied": 0,
+      "oauth.client_registered": 1,
+      "tool.call_submission_rejected": 0
+    },
+    "omitted_other_lines": 12,
+    "source_log_is_live": true,
+    "prefix_hash_binds_only_captured_bytes": true,
+    "filter": "Whitelist OAuth lifecycle event names/reasons/traces and selected tool lifecycle names/argument keys/traces; omit all other line bodies, capability diagnostics, URL and credential material; public evidence additionally hashes trace IDs and omits run creation keys",
+    "per_event_timestamps_available": false,
+    "client_fingerprint_in_log_available": false,
+    "raw_log_contents_recorded": false
+  },
+  "coverage": {
+    "exact_candidate_live_process_confirmed": true,
+    "operator_reported_real_browser_connection": true,
+    "session_dcr_and_s256_pkce_success_observed": true,
+    "same_owner_reconnect_read_continuity_observed": true,
+    "valid_normal_assessment_submission_completed": false,
+    "candidate_capability_denied_events": 0,
+    "candidate_submission_rejected_events": 0,
+    "connector_submission_validation_failures": 1,
+    "zero_server_errors_do_not_imply_valid_submission_pass": true,
+    "u26_complete": false,
+    "accepted_delta": 0,
+    "pending_requirements": [
+      "Successful valid normal assessment submission through the intended real client",
+      "Direct protected-resource path observation and final independent corpus review",
+      "R2 and R3 distinct approved real-client trials"
+    ],
+    "historical_or_other_corpus_trials_reused": false
+  },
+  "boundaries": {
+    "production_state_opened": false,
+    "production_state_modified": false,
+    "source_or_connector_configuration_changed": false,
+    "old_release_driver_or_manifest_modified": false,
+    "credential_secret_token_or_raw_client_id_recorded": false,
+    "raw_task_or_capability_recorded": false,
+    "new_oauth_owner_created_by_assistant": false,
+    "new_oauth_registration_for_reconnect": false,
+    "accepted_delta": 0
+  },
+  "redaction": {
+    "creation_key_omitted": true,
+    "raw_run_id_omitted": true,
+    "run_id_trace_ids_and_message_ids_replaced_with_sha256": true,
+    "raw_process_id_omitted": true,
+    "hash_algorithm_self_test_passed": true
+  }
+}

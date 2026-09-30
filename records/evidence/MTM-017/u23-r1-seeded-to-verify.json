@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u23_r1_seeded_draft_first_verifier_pending",
+  "observed_at": "2026-09-29T09:52:05Z",
+  "session_marker": "U23-r1.GAjRDQCU",
+  "trial_id": "01bb5b7858e9b45f7ffbaecd180af003",
+  "run_id": "run-u23-r1-uniform-continuity-gap-d84ef823136f",
+  "problem_id": "u23-r1-uniform-continuity-gap",
+  "workflow_mode": "compact",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "verdict": null,
+    "transition_sequence": 6,
+    "seeded_draft_sha256": "0fda3eaab1a263021edb4e3f35c79463776a9f361f796d37511fcd9b0f2a23f2",
+    "verifier_draft_sha256": "0fda3eaab1a263021edb4e3f35c79463776a9f361f796d37511fcd9b0f2a23f2",
+    "seeded_draft_matches_verifier_bytes": true
+  },
+  "seeded_challenge": {
+    "intentional": true,
+    "target_gap": "The draft passes from pointwise continuity deltas delta_x directly to a single positive common delta, without a valid compactness finite-subcover/Lebesgue-number argument.",
+    "mechanical_latex_repair_before_first_verifier": true,
+    "mathematical_gap_repaired_before_first_verifier": false,
+    "first_verifier_findings_pending": true,
+    "first_findings_present": false,
+    "repair_history_present": false
+  },
+  "generation_boundary": {
+    "independent_first_verifier_required": true,
+    "repair_not_started": true,
+    "finalizer_executed": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}

@@ -1,7 +1,7 @@
 #![forbid(unsafe_code)]
 
 use std::env;
-use std::io::{self, Read};
+use std::io::{self, Read, Write};
 use std::net::TcpListener;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -12,6 +12,7 @@ use mtm_runtime::{
     TOOL_CONTRACT_VERSION, attest_native, evaluate_request, generate_operator_password,
     materialize_secrets, serve_bound,
 };
+use mtm_storage::StateStore;
 use serde_json::Value;
 
 const MAX_EVALUATION_INPUT_BYTES: u64 = 1_048_576;
@@ -55,6 +56,7 @@ fn main() {
         Some("evaluate") => evaluate_from_stdin(false),
         Some("evaluate-batch") => evaluate_from_stdin(true),
         Some("check-config") => exit_on_error(check_config(&args[1..])),
+        Some("fact-graph") => exit_on_error(fact_graph_command(&args[1..])),
         Some("attest-native") => exit_on_error(attest_native_command(&args[1..])),
         Some("serve") => exit_on_error(serve(&args[1..], false)),
         Some("tui") => exit_on_error(serve(&args[1..], true)),
@@ -118,6 +120,8 @@ fn print_help() {
         "  mtm install --binary ABSOLUTE_PATH --sha256 SHA256 --version VERSION --state-root ABSOLUTE_PATH --selector ABSOLUTE_PATH [--selector ABSOLUTE_PATH]\n",
         "  mtm rollback --state-root ABSOLUTE_PATH\n",
         "  mtm check-config [--workspace PATH] [--native-mode MODE]\n",
+        "  mtm fact-graph export --project ID [--out FILE] [--state-db ABSOLUTE_PATH]\n",
+        "  mtm fact-graph revoke FACT_ID --reason TEXT [--state-db ABSOLUTE_PATH]\n",
         "  mtm attest-native [--workspace PATH] [--native-mode MODE]\n",
         "  mtm serve [--host HOST] [--port PORT] [--workspace PATH] [--native-mode MODE]\n",
         "  mtm tui [--quick-tunnel] [--verbose] [--host HOST] [--port PORT] [--workspace PATH] [--native-mode MODE]\n",
@@ -125,6 +129,106 @@ fn print_help() {
         "  printf '%s' '<json-array>' | mtm evaluate-batch\n"
     );
     println!("{HELP}");
+}
+
+fn fact_graph_command(arguments: &[String]) -> Result<(), ReCtmError> {
+    let operation = arguments
+        .first()
+        .map(String::as_str)
+        .ok_or_else(|| fact_argument("fact-graph requires export or revoke"))?;
+    let mut project = None;
+    let mut reason = None;
+    let mut output = None;
+    let mut state_db = None;
+    let mut fact_id = None;
+    let mut index = 1;
+    while index < arguments.len() {
+        let key = arguments[index].as_str();
+        if key == "revoke" || !key.starts_with("--") {
+            if operation != "revoke" || fact_id.replace(key.to_owned()).is_some() {
+                return Err(fact_argument("Unexpected fact-graph argument"));
+            }
+            index += 1;
+            continue;
+        }
+        let value = arguments
+            .get(index + 1)
+            .ok_or_else(|| fact_argument("fact-graph option requires a value"))?;
+        match key {
+            "--project" if project.replace(value.clone()).is_none() => {}
+            "--reason" if reason.replace(value.clone()).is_none() => {}
+            "--out" if output.replace(PathBuf::from(value)).is_none() => {}
+            "--state-db" if state_db.replace(PathBuf::from(value)).is_none() => {}
+            _ => return Err(fact_argument("Unknown or repeated fact-graph option")),
+        }
+        index += 2;
+    }
+    let state_db = state_db.unwrap_or_else(default_fact_state_db);
+    if !state_db.is_absolute() {
+        return Err(fact_argument(
+            "fact-graph state database path must be absolute",
+        ));
+    }
+    match operation {
+        "export" => {
+            if fact_id.is_some() || reason.is_some() {
+                return Err(fact_argument("export accepts --project and optional --out"));
+            }
+            let project = project.ok_or_else(|| fact_argument("export requires --project"))?;
+            let store = StateStore::open_read_only(&state_db)?;
+            let graph = store.project_fact_graph_operator(&project)?;
+            let bytes =
+                serde_json::to_vec(&graph).map_err(|error| fact_argument(&error.to_string()))?;
+            if let Some(output) = output {
+                let parent = output
+                    .parent()
+                    .ok_or_else(|| fact_argument("output file must have a parent directory"))?;
+                let mut file = tempfile::NamedTempFile::new_in(parent).map_err(fact_io)?;
+                file.write_all(&bytes).map_err(fact_io)?;
+                file.write_all(b"\n").map_err(fact_io)?;
+                file.as_file().sync_all().map_err(fact_io)?;
+                file.persist_noclobber(&output)
+                    .map_err(|error| fact_io(error.error))?;
+            } else {
+                println!("{graph}");
+            }
+        }
+        "revoke" => {
+            if project.is_some() || output.is_some() {
+                return Err(fact_argument("revoke accepts FACT_ID and --reason"));
+            }
+            let fact_id = fact_id.ok_or_else(|| fact_argument("revoke requires FACT_ID"))?;
+            let reason = reason.ok_or_else(|| fact_argument("revoke requires --reason"))?;
+            if !state_db.is_file() {
+                return Err(fact_argument("fact-graph state database does not exist"));
+            }
+            let store = StateStore::open(&state_db)?;
+            println!(
+                "{}",
+                store.revoke_project_fact(&fact_id, "operator", &reason)?
+            );
+        }
+        _ => return Err(fact_argument("fact-graph requires export or revoke")),
+    }
+    Ok(())
+}
+
+fn default_fact_state_db() -> PathBuf {
+    if let Some(root) = env::var_os("MTM_PRIVATE_ROOT") {
+        return PathBuf::from(root).join("state.sqlite3");
+    }
+    if let Some(root) = env::var_os("MTM_DATA_ROOT") {
+        return PathBuf::from(root).join("private/state.sqlite3");
+    }
+    PathBuf::from(env::var_os("HOME").unwrap_or_default()).join(".mtm/private/state.sqlite3")
+}
+
+fn fact_argument(message: &str) -> ReCtmError {
+    ReCtmError::new("INVALID_ARGUMENT", message).with_category(ErrorCategory::Validation)
+}
+
+fn fact_io(error: io::Error) -> ReCtmError {
+    ReCtmError::new("FACT_GRAPH_IO_ERROR", error.to_string()).with_category(ErrorCategory::Internal)
 }
 
 fn embedded_assets() -> Result<RuntimeAssets, ReCtmError> {
@@ -159,18 +263,10 @@ fn settings_with_overrides(
                 })?;
             }
             "--native-mode" => {
-                settings.native_mode = match value.as_str() {
-                    "safe" => NativeMode::Safe,
-                    "trusted" => NativeMode::Trusted,
-                    "dangerous" => NativeMode::Dangerous,
-                    _ => {
-                        return Err(ReCtmError::new(
-                            "INVALID_ARGUMENT",
-                            "--native-mode must be safe, trusted, or dangerous",
-                        )
-                        .with_category(ErrorCategory::Validation));
-                    }
-                };
+                settings.native_mode = NativeMode::parse(value).map_err(|message| {
+                    ReCtmError::new("INVALID_ARGUMENT", format!("--native-mode: {message}"))
+                        .with_category(ErrorCategory::Validation)
+                })?;
             }
             "--latex-policy" => {
                 settings.latex_policy = match value.as_str() {

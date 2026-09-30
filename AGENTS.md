@@ -279,3 +279,50 @@ immutable private/workspace proof files, never OAuth storage, operator keys/logs
 or production data, and publishes a private bundle only after the internal
 precheck succeeds without granting acceptance. Do not add a direct maintenance
 SQLite dependency if it changes the frozen Cargo.lock identity.
+
+## MTM-017 development boundary
+
+Read `docs/MTM-017-DANGEROUS-ONLY-AND-FACT-MEMORY.md` and
+`records/iterations/ITER-017.json`. Native accepts only `dangerous`; the public
+`request_permissions` tool retains its fixed response but no consent/grant ledger
+can authorize commands. Bubblewrap, executable revalidation and workflow/project
+authority boundaries remain separate. Schema 8 adds project findings and a fact
+graph; only the existing finalizer's verified final proof may feed fact promotion.
+The optional proof-manifest fact breakdown and bounded `rethlas_step` project
+memory advance the model-facing contract to `mtm-tools-v10` without adding a
+public tool or changing workflow protocol 3. Local `mtm fact-graph` export/revoke
+is operator-only and must never be routed through a model tool. Legacy schema-7
+revisions are not backfilled. Restore an untouched pre-upgrade copy for rollback;
+no installed selector or production state is changed by development checks.
+
+The MTM-017 closing review is `docs/MTM-017-FACT-MEMORY-REVIEW.md`. Its development
+receipt must bind the exact current Rust source to both the source gate and the
+500-assessment capability report. Keep prior failed diagnostics immutable, and
+never interpret development completion as exact-artifact release qualification.
+
+The versioned schema-8 candidate is `0.6.0-preview.2`. Read
+`docs/MTM-017-SCHEMA8-UPGRADE.md` for the explicit `upgrade_schema8` profile.
+Keep its pinned schema-7 baseline, separate report marker, exact 7/8/7 transition
+and all legacy-revision/receipt/snapshot checks. Ordinary source and capability
+gates clear `MTM_TEST_SCHEMA8_UPGRADE_PROFILE`; no profile opens operator state.
+The old `upgrade` receipt contract and frozen MTM-016 release driver are not
+relabelled as schema-8 acceptance.
+
+## MTM-017 two-clean-build qualification
+
+The operator explicitly approved the narrow cache exception recorded as
+`MTM017-READINESS-DECISION-002` in
+`records/governance/mtm017-readiness-decisions.json`. For the requested two clean
+checkout/build observations of the exact schema-8 preview.2 candidate, only
+`scripts/mtm017-clean-build-provenance.sh` may use a new owner-private, marker-bound
+session under `target/mtm017-clean-build-provenance/`. Its two rounds reuse one
+dedicated disposable checkout/build-cache path serially. Cargo dependency inputs
+must be bounded private copies, never writable links into existing caches.
+Cleanup is restricted to the script-created, marker/device/inode-verified scratch
+children after preserving each round's artifact and receipt. Do not use or clean
+`target/debug`, `target/release`, `target/mtm-tool`, frozen candidates or operator
+caches. This exception applies only to this explicitly requested MTM-017
+qualification; all ordinary Cargo ownership rules remain unchanged. Read
+`docs/MTM-017-CLEAN-BUILD-PROVENANCE.md`. Complete the corpus phase and independent
+pre-execution review before the explicit build entry. Neither preparation nor
+clean-build evidence grants release or deployment authority.

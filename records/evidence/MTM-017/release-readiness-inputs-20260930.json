@@ -1,0 +1,86 @@
+{
+  "schema": "mtm017-release-inputs-v1",
+  "milestone": "MTM-017",
+  "criteria_revision": "mtm017-release-readiness-contract-v1",
+  "criteria": {
+    "path": "docs/MTM-017-FORMAL-READINESS.md",
+    "sha256": "7b7b15436dbd7360f704c3b1dd01243301e724fa5342043834f6a8cff3b3002d"
+  },
+  "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+  "baseline_sha256": "f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034",
+  "prepared_by": "formal-readiness-implementation-session",
+  "source_gate": {
+    "path": "records/evidence/MTM-017/formal-readiness-whole-source-20260930.json",
+    "sha256": "d1eaed722274b3af7057d1cf8ca426eda1bcf20a959955f28f5cce47a023676a"
+  },
+  "snapshot": {
+    "path": "records/evidence/MTM-017/preview2-qualification-snapshot.json",
+    "sha256": "5018c5b1050cefe6e0ef6c7db0bb0aeb15b03ed492ee8e75d6737097b535d55c"
+  },
+  "corpus_state": {
+    "path": "records/governance/mtm017-corpus-union.json",
+    "sha256": "9e2d9de518a3ab1225134164828f1f83ddcb83d0f72c55399301ea53452c1393"
+  },
+  "corpus_acceptance": {
+    "path": "records/evidence/MTM-017/corpus-union-accepted-20260930.json",
+    "sha256": "1afff81a1ce804eb4fa88ef23012c37f2289f0f54d02fe73b0092e5cceba7523"
+  },
+  "research_state": {
+    "path": "records/governance/mtm017-research-corpus.json",
+    "sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24"
+  },
+  "decisions": {
+    "path": "records/governance/mtm017-readiness-decisions.json",
+    "sha256": "4fac40e7dfcb9de01d605227bed3d2c670f645a42a65590c53243f820b143cbe"
+  },
+  "clean_build_state": {
+    "path": "records/governance/mtm017-clean-build-status.json",
+    "sha256": "3d40b58e1c55222960644aed8703e8afe058ee5f1899cff9307906c7785e9769"
+  },
+  "u26_state": {
+    "path": "records/governance/mtm017-u26-waiver.json",
+    "sha256": "4bcf208c6e68d490b835fd895b6879a4dd694f5cbb698a6fc3fcf6248ee5219c"
+  },
+  "operator_copy": {
+    "path": "records/evidence/MTM-017/operator-copy-prepared-rehearsal-aggregate-20260930.json",
+    "sha256": "95190cfb08f3a5efc71d913a272ba8db2dd2779465e5c2b4c77ece09ae30731f"
+  },
+  "operator_copy_review": {
+    "path": "records/evidence/MTM-017/operator-copy-prepared-rehearsal-review-20260930.json",
+    "sha256": "31e3129197014901f9824d6a48ac26b52b1db59aa4e158af9f98ceef06a8702c"
+  },
+  "known_failure": {
+    "path": "records/evidence/MTM-017/authority-corpus-whole-source-r3-failed-20260930.json",
+    "sha256": "5214ea3ec16b5277e950ca110a94af554d335c94c9c2a8328cc97bab0e615fb7"
+  },
+  "known_failure_followup": {
+    "path": "records/evidence/MTM-017/authority-corpus-source-regression-followup-20260930.json",
+    "sha256": "e5d4d5a4374f75abb113b0dd995f9a8a2e9118788d9ccba5a922232f5611fa45"
+  },
+  "mechanism_diagnostic": {
+    "path": "records/evidence/MTM-017/authority-corpus-domain-collision-diagnostic-20260930.json",
+    "sha256": "8995c3db3585b43b984b9c234dbb7f6613ef135e16991540184a3a7db8a395fc"
+  },
+  "risk_disposition": {
+    "path": "records/evidence/MTM-017/source-risk-human-disposition-20260930.json",
+    "sha256": "a6132158e02e45dee166a214e0b8eadd7c72d55715e17b680aff9d7838496014"
+  },
+  "risk_disposition_review": {
+    "path": "records/evidence/MTM-017/source-risk-disposition-review-20260930.json",
+    "sha256": "6a57d1a1792fd9078f9a057209ae936326d547d750ab9b2de691d1960c7f913c"
+  },
+  "test_only_sources": [
+    {
+      "path": "crates/mtm-cli/tests/support/loopback.rs",
+      "sha256": "27a878be8f4d19ac68359136b47d365d0cc9ffb4c0ea60dbafebea1c4dbfbbff"
+    },
+    {
+      "path": "crates/mtm-cli/tests/schema8_authority_corpus.rs",
+      "sha256": "1206a108181d7c0c4b1ad049e1cc48bf755fa08610e638df099ffe35c142509d"
+    },
+    {
+      "path": "crates/mtm-runtime/tests/domain_collision.rs",
+      "sha256": "dd644572c1a47028dcb28073e7c2af2d30d57097c82cfb6627f62787ee2b2c09"
+    }
+  ]
+}

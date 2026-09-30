@@ -1,0 +1,15 @@
+{
+  "schema": "mtm017-source-risk-review-recording-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T14:08:00Z",
+  "recorded_by": "formal-readiness-implementation-session",
+  "recording_role": "scribe_only",
+  "reviewer_session": "review-schema8-importer",
+  "review_record": "records/evidence/MTM-017/source-risk-disposition-review-20260930.json",
+  "basis": "The separate reviewer supplied this exact closed review object after independently checking the risk disposition, original failed evidence, mechanism diagnostic, unique ledger entry and authorization transcript. The implementation session only transcribed it.",
+  "original_failure_still_failed": true,
+  "root_cause_status": "indeterminate",
+  "runtime_fix_claimed": false,
+  "release_qualified": false,
+  "deployment_authorized": false
+}

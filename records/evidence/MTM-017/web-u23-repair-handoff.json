@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "real_web_u23_mathematical_repair_to_second_independent_verifier",
+  "observed_at": "2026-09-26T16:15:13Z",
+  "run_id": "run-u23-r1-uniform-continuity-gap-6bc910895a74",
+  "problem_id": "u23-r1-uniform-continuity-gap",
+  "seeded_challenge": true,
+  "initial_draft_sha256": "a770eed4b0f65095eb4defaf4c791bcd9c604b333969e503267872c31e95326f",
+  "repaired_draft_sha256": "f9fbdc7fc215897af48e10cf6528b31c756099429efe375da3f74ab7ffacd928",
+  "proof_manifest_sha256": "fb9e260cd9ffb89e6420c92e56be476b9f46915ad5341f9f25e7dc916a283f6f",
+  "machine_observed": {
+    "state": "verify",
+    "status": "active",
+    "latex_passed": true,
+    "sealed": false,
+    "transition_sequence": 11,
+    "previous_server_verdict": "wrong",
+    "compact_verifier_failures": 1,
+    "last_verified_proof_sha256": "a770eed4b0f65095eb4defaf4c791bcd9c604b333969e503267872c31e95326f",
+    "repaired_proof_differs_from_initial": true,
+    "mathematical_repair_transition_observed": true,
+    "final_verified_artifact_present": false
+  },
+  "operator_reported": {
+    "complete_replacement_proof_submitted": true,
+    "compactness_finite_subcover_argument_added": true,
+    "references_empty": true,
+    "dependencies_empty": true,
+    "unexpected_errors": false,
+    "second_verifier_not_started": true
+  },
+  "credentials_recorded": false,
+  "capabilities_recorded": false,
+  "proof_body_recorded": false,
+  "raw_private_logs_recorded": false,
+  "release_qualified": false
+}

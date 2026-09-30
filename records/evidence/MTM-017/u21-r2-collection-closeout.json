@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u21_r2_independent_review_collection_and_precheck_closeout",
+  "recorded_at": "2026-09-28T15:03:55Z",
+  "session_marker": "U21-r2.FLYdNgYY",
+  "trial_id": "19a138d5c919c330a9f101347ec89f71",
+  "run_id": "run-u21-r2-cauchy-schwarz-fc9b5133f46c",
+  "machine_final": {
+    "state": "done",
+    "status": "done",
+    "sealed": true,
+    "latex_passed": true,
+    "verdict": "correct",
+    "transition_sequence": 6,
+    "final_artifact_sha256": "1e5b66db13ea034dd3beccee8729bd29a93db6ec66442685c9a00ae62a3a59d5",
+    "verification_report_sha256": "f118d9318ce7333c22742ab2d9cd7826a86a2b9173d47e70775b9e73d8a2d0c2"
+  },
+  "independent_review": {
+    "statement_checks": 11,
+    "critical_errors": 0,
+    "gaps": 0,
+    "same_owner_continuity": true,
+    "review_observation_sha256": "fd70020346b2ee5ff5fa594288edbce2680a4a9b6880d874108dfc7fe207c926",
+    "owner_fingerprint": "21e29710cc3b45d3c8c413c292cfdb229c4ffd58880bb9607f9227da7d7de253"
+  },
+  "collection": {
+    "schema": "mtm-research-collection-v1",
+    "bundle_directory": "evidence-bundle.19a138d5c919c330a9f101347ec89f71",
+    "bundle_sha256": "30dc421a1ab71432a1aca978ec3715af9d577437074cd6c38877c7fde9a4bfcc",
+    "required_material_present": true,
+    "precheck_consistent": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "current_collection_attempt": {
+    "attempted": true,
+    "completed": false,
+    "disposition": "existing_bundle_not_overwritten",
+    "error": "research evidence bundle already exists; never overwrite it",
+    "bundle_not_deleted_or_rewritten": true
+  },
+  "explicit_precheck": {
+    "attempted": true,
+    "completed": true,
+    "exit_code": 0,
+    "artifact_count": 10,
+    "bundle_sha256": "30dc421a1ab71432a1aca978ec3715af9d577437074cd6c38877c7fde9a4bfcc",
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "required_material_present": true,
+    "existing_material_consistent": true,
+    "selected_candidate_bytes_checked": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}

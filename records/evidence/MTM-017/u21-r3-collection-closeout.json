@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u21_r3_independent_review_collection_and_precheck_closeout",
+  "recorded_at": "2026-09-29T02:11:34Z",
+  "session_marker": "U21-r3.GI5mBweH",
+  "trial_id": "edfd352d6262dc5c12c25e30623aaa61",
+  "run_id": "run-u21-r3-monotone-limit-b1e17dbd1b50",
+  "machine_final": {
+    "state": "done",
+    "status": "done",
+    "sealed": true,
+    "latex_passed": true,
+    "verdict": "correct",
+    "transition_sequence": 6,
+    "final_artifact_sha256": "720be5afea9d6e153a61991b763839b074758974a1f588863bc6abd8d746d800",
+    "verification_report_sha256": "3de742578d90d85707e972d818f9f2aad5741bd2fbc9b2cd511fdb0229a68bb9"
+  },
+  "independent_review": {
+    "statement_checks": 10,
+    "critical_errors": 0,
+    "gaps": 0,
+    "same_owner_continuity": true,
+    "review_observation_sha256": "61b50eda2813086b519a25b19ada513396008321c2acb04d31e9ccee5c86458b",
+    "owner_fingerprint": "3bf2f4058182c58e0f69ea1100e7495682d016f29135ceac93c372d01733507b"
+  },
+  "collection": {
+    "schema": "mtm-research-collection-v1",
+    "bundle_directory": "evidence-bundle.edfd352d6262dc5c12c25e30623aaa61",
+    "bundle_sha256": "72c575804bbef8a3f9ad15de6f431c9418aed9e3091afee837f38dae2861d708",
+    "required_material_present": true,
+    "precheck_consistent": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "explicit_precheck": {
+    "attempted": true,
+    "completed": true,
+    "exit_code": 0,
+    "artifact_count": 10,
+    "bundle_sha256": "72c575804bbef8a3f9ad15de6f431c9418aed9e3091afee837f38dae2861d708",
+    "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+    "required_material_present": true,
+    "existing_material_consistent": true,
+    "selected_candidate_bytes_checked": true,
+    "workflow_mutations": 0,
+    "accepted_trials_delta": 0,
+    "research_trial_passed": false,
+    "production_state_modified": false
+  },
+  "collection_repairs": "records/evidence/MTM-017/u21-r3-collection-repairs.json",
+  "corpus_count_incremented": false,
+  "production_changed": false,
+  "release_qualified": false
+}
