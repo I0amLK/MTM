@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-017",
+  "scope": "u24_r3_branch_join_to_independent_verifier",
+  "observed_at": "2026-09-30T02:36:11Z",
+  "trial_id": "1979479333b1fe2611ef16326366ed3e",
+  "run_id": "run-u24-r3-sum-of-squares-b2baec162327",
+  "state": "verify",
+  "latex_passed": true,
+  "transition_sequence": 11,
+  "branch_ids": ["branch-1-1-40a73a", "branch-1-2-cec7b9"],
+  "branch_result_sha256": ["53cfe94579243ec9f64584953332cc506a977ea0b1c370c0e9ea53ad47f005f6", "5669ed012bbfe19fd70ea2106d7b4f5a4c41e1cacc0e331f58c65574a9b61676"],
+  "sibling_private_read_result": "ROLE_ACCESS_DENIED",
+  "join_considered_all_sealed_branches": true,
+  "join_selected_branch_id": "branch-1-2-cec7b9",
+  "join_result_sha256": "7e20a7aa0b76e7b2bd063f999cf7d0055578ca5cfe2784d92bf62a8cec18be43",
+  "draft_sha256": "bf5b577a88ff681eb034f173e8a83df7bb26e0a4f0ce31c901fce7e82c7f4796",
+  "proof_manifest_sha256": "1217541da63a800b33abab58179e616e9096a976419fa1660e2465b5e7cdb819",
+  "branches_observation_sha256": "81e049ab8a75604754ed2f58f8ecf1a1b2e85671a9dbbadae6848dff49a329cb",
+  "finalizer_executed": false,
+  "release_qualified": false
+}
