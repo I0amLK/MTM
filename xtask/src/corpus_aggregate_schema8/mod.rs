@@ -452,6 +452,85 @@ fn finish_rows(mut rows: BTreeMap<(String, u64), Row>) -> Result<Vec<Row>> {
     )?;
     Ok(rows.into_values().collect())
 }
+/// Revalidate the already accepted public batch receipts without pretending the
+/// old mutable build/archive paths are this implementation. This does not run
+/// the original proposal entry, accept rows, or relax its live-source review.
+pub(crate) fn archived_public_rows(
+    inputs: &Value,
+    documents: &BTreeMap<String, Value>,
+    research: &Value,
+) -> Result<Value> {
+    let i: Inputs = serde_json::from_value(inputs.clone())?;
+    input_shape(&i)?;
+    let get = |r: &Reference| -> Result<&Value> {
+        documents
+            .get(&r.path)
+            .ok_or_else(|| "archived public batch missing".into())
+    };
+    let portable = batches::portable(
+        get(&i.portable.raw)?,
+        get(&i.portable.observation)?,
+        get(&i.portable.review)?,
+        &i.portable,
+    )?;
+    let native = batches::native(get(&i.native.raw)?, get(&i.native.snapshot)?, &i.native)?;
+    let raw = i
+        .u30
+        .trials
+        .iter()
+        .map(|t| Ok((t.repeat, t.raw.clone(), get(&t.raw)?.clone())))
+        .collect::<Result<Vec<_>>>()?;
+    let u30 = batches::u30(get(&i.u30.observation)?, get(&i.u30.review)?, &raw, &i.u30)?;
+    let mut rows = BTreeMap::new();
+    for v in portable {
+        add(
+            &mut rows,
+            v["task_id"].as_str().ok_or("portable task")?,
+            v["repeat"].as_u64().ok_or("portable repeat")?,
+            "portable",
+            "observed_pass",
+            &i.portable.raw,
+            None,
+        )?;
+    }
+    for v in native {
+        add(
+            &mut rows,
+            v["task_id"].as_str().ok_or("native task")?,
+            v["repeat"].as_u64().ok_or("native repeat")?,
+            "native",
+            "observed_pass",
+            &i.native.raw,
+            v["trial_id"].as_str().map(str::to_owned),
+        )?;
+    }
+    let accepted: Reference =
+        serde_json::from_value(research["state"]["active_acceptance"].clone())?;
+    for v in array(&research["accepted"]["trials"])? {
+        add(
+            &mut rows,
+            v["task_id"].as_str().ok_or("research task")?,
+            v["repeat"].as_u64().ok_or("research repeat")?,
+            "research",
+            "previously_accepted",
+            &accepted,
+            v["trial_id"].as_str().map(str::to_owned),
+        )?;
+    }
+    for (repeat, seal, id) in u30 {
+        add(
+            &mut rows,
+            "U30",
+            repeat,
+            "u30",
+            "observed_pass",
+            &seal,
+            Some(id),
+        )?;
+    }
+    Ok(serde_json::to_value(finish_rows(rows)?)?)
+}
+
 pub(crate) fn run(root: &Path, options: &Options) -> Result<Value> {
     let source = capability::source_hash(root)?;
     let binary = qualify::digest(&std::env::current_exe()?)?;

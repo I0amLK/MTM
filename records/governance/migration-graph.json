@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-30T12:18:33Z",
+  "updated_at": "2026-09-30T14:43:53Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -1724,6 +1724,48 @@
       "deployment_authorized": false,
       "production_selector_changed": false,
       "production_state_modified": false
+    },
+    {
+      "event_id": "MEVT-127",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-30T14:01:18Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Recorded explicit operator acceptance of the separate prior r3 source next-task failure risk as DECISION-007. The original failure remains failed and root-cause indeterminate; the new synthetic collision test confirms a recoverable mechanism, not original attribution or a runtime fix. Existing 87 technical corpus cells and three U26 waivers are unchanged. Formal readiness and deployment remain separate.",
+      "evidence": {
+        "path": "records/evidence/MTM-017/source-risk-human-disposition-20260930.json",
+        "sha256": "a6132158e02e45dee166a214e0b8eadd7c72d55715e17b680aff9d7838496014"
+      },
+      "known_finding_id": "MTM017-SOURCE-R3-NORMAL-ASSESSMENT",
+      "technical_passed": false,
+      "root_cause_status": "indeterminate",
+      "release_disposition": "accepted_by_operator",
+      "runtime_fix_claimed": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_state_modified": false,
+      "production_selector_changed": false
+    },
+    {
+      "event_id": "MEVT-128",
+      "milestone_id": "MTM-017",
+      "at": "2026-09-30T14:43:53Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "summary": "Accepted exact schema8 candidate release readiness after the reviewed readonly adapter, final current-source gate (712/0/1), separate input review, successful evaluation and independent byte-identical result review. Corpus remains 87 technical and three U26 operator-waived cells; scoped historical-binary and clean-build waivers plus separate indeterminate-source-risk acceptance remain explicit. No deployment or production change.",
+      "evidence": {
+        "path": "records/evidence/MTM-017/release-readiness-accepted-20260930.json",
+        "sha256": "87535ae751060e6a43043c0b6225fbfa951b57ec2b8b0f9f3d1c9ac3fecd4240"
+      },
+      "governance_pointer": {
+        "path": "records/governance/mtm017-release-inputs.json",
+        "sha256": "690a34b02013cf2edf9622a17642cb104f21b1118b3bd531e5daed85cfdea312"
+      },
+      "release_qualified": true,
+      "technical_qualification_complete": false,
+      "deployment_authorized": false,
+      "production_state_modified": false,
+      "production_selector_changed": false
     }
   ],
   "receipt_contract": {
@@ -4324,6 +4366,168 @@
       "research_accepted": true,
       "research_acceptance_scope": "unchanged_original_fifteen_only",
       "decision": "U26_waived_by_operator_technical_evidence_incomplete"
+    },
+    {
+      "receipt_id": "MREC-017-SOURCE-RISK-DISPOSITION-20260930",
+      "milestone_id": "MTM-017",
+      "started_at": "2026-09-30T13:47:58Z",
+      "completed_at": "2026-09-30T14:01:18Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "chore(governance): retain independently accepted source risk [MTM-017]",
+      "commit_performed": false,
+      "files_changed": [
+        "records/evidence/MTM-017/source-risk-human-disposition-20260930.json",
+        "records/governance/mtm017-readiness-decisions.json",
+        "records/governance/migration-graph.json",
+        "records/iterations/ITER-017.json"
+      ],
+      "commands": [
+        {
+          "command": "sha256sum records/evidence/MTM-017/source-risk-human-disposition-20260930.json",
+          "exit_code": 0,
+          "result": "a6132158e02e45dee166a214e0b8eadd7c72d55715e17b680aff9d7838496014"
+        }
+      ],
+      "acceptance": {
+        "known_r3_source_failure": {
+          "passed": false,
+          "root_cause_status": "indeterminate",
+          "release_disposition": "accepted_by_operator",
+          "runtime_fix_claimed": false
+        }
+      },
+      "behavior_before": "The prior source-run next-task failure remained an unresolved readiness finding despite later successful tests.",
+      "behavior_after": "A separate explicit operator decision accepts this exact known risk for candidate 13d7890; no technical pass, runtime repair, full release or deployment decision is inferred.",
+      "risk_review": "The deterministic collision diagnosis proves one recoverable mechanism but does not establish the cause of the original r3 failure. That failure remains failed and its root cause remains indeterminate. Formal adapter consumption still requires independent disposition/input/result review.",
+      "rollback": "Append a superseding risk decision; retain this decision and all failed observations. No runtime or production rollback is performed.",
+      "manual_pending": [
+        "Complete and review the new formal readonly readiness adapter on final source.",
+        "Independent result review and separate accepted-readiness governance.",
+        "Deployment requires separate explicit authorization."
+      ],
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/source-risk-human-disposition-20260930.json",
+          "sha256": "a6132158e02e45dee166a214e0b8eadd7c72d55715e17b680aff9d7838496014"
+        },
+        {
+          "path": "records/evidence/MTM-017/authority-corpus-domain-collision-diagnostic-20260930.json",
+          "sha256": "8995c3db3585b43b984b9c234dbb7f6613ef135e16991540184a3a7db8a395fc"
+        }
+      ],
+      "accepted_delta": 0,
+      "corpus_count_incremented": false,
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_selector_changed": false,
+      "production_state_modified": false
+    },
+    {
+      "receipt_id": "MREC-017-FORMAL-READINESS-20260930",
+      "milestone_id": "MTM-017",
+      "started_at": "2026-09-30T13:33:50Z",
+      "completed_at": "2026-09-30T14:43:53Z",
+      "status_before": "completed",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "feat(readiness): accept scoped schema8 release readiness [MTM-017]",
+      "commit_performed": false,
+      "files_changed": [
+        "xtask/src/release_check_schema8/",
+        "xtask/tests/release_check_schema8_cli.rs",
+        "xtask/src/main.rs",
+        "xtask/src/corpus_aggregate_schema8/mod.rs",
+        "xtask/src/authority_corpus_schema8/mod.rs",
+        "docs/MTM-017-FORMAL-READINESS.md",
+        "records/evidence/MTM-017/release-readiness-accepted-20260930.json",
+        "records/governance/mtm017-release-inputs.json",
+        "records/governance/migration-graph.json",
+        "records/iterations/ITER-017.json"
+      ],
+      "commands": [
+        {
+          "command": "cargo xtask check (final frozen source; retained CTM CQZkNON1WzcNAAvUvcte3TWR)",
+          "exit_code": 0,
+          "result": "712 passed, 0 failed, 1 existing ignored; fmt/clippy/tests/diff all zero; current source 39f42266b1dafc323b525130ba00cb11aac6f06f6a4448a132cdad6ac2add8f0"
+        },
+        {
+          "command": "reviewed maintenance binary release-check-schema8 --inputs records/evidence/MTM-017/release-readiness-inputs-20260930.json --input-review records/evidence/MTM-017/release-readiness-input-review-20260930.json",
+          "exit_code": 0,
+          "ctm_command_id": "XHb70Z-bXgb7Fo87CySLr1Od",
+          "result": "Readiness evaluation passed; no direct release or deployment activation."
+        },
+        {
+          "command": "independent readonly repeat of exact reviewed evaluation command",
+          "exit_code": 0,
+          "ctm_command_id": "uK-Gq5uICJY4tRvL0Reaj9rv",
+          "result": "Byte-identical evaluation; separate result review approved scoped readiness acceptance."
+        }
+      ],
+      "acceptance": {
+        "implementation_complete": "unknown",
+        "adapter_implementation_scope_validated": true,
+        "research_previously_accepted_subset": 15,
+        "technical_accepted_trials": 87,
+        "technical_pending_trials": 3,
+        "human_waived_cells": 3,
+        "source_tests_passed": 712,
+        "source_tests_failed": 0,
+        "source_tests_ignored": 1,
+        "technical_qualification_complete": false,
+        "qualification_basis": "technical_evidence_plus_scoped_operator_waivers",
+        "known_failure_root_cause": "indeterminate",
+        "known_failure_release_disposition": "accepted_by_operator",
+        "runtime_fix_claimed": false
+      },
+      "behavior_before": "All technical observations and individual human dispositions existed, but formal schema8 readonly evaluation and separate accepted-readiness governance had not closed.",
+      "behavior_after": "The versioned independent adapter validates the exact public evidence chain and current source; separate input and result reviews now support explicit scoped readiness acceptance.",
+      "risk_review": "DECISION-001 only covers the historical missing binary; 003 only exact-candidate clean-build provenance; 006 only U26 x3; separate 007 accepts the prior indeterminate source finding. None is converted to technical pass, and all original failures remain unchanged.",
+      "rollback": "Append a superseding readiness governance event and point active_acceptance to the resulting disposition; retain all accepted and failed evidence. No production rollback is performed.",
+      "manual_pending": [
+        "Deployment requires separate explicit authorization and an operation-specific plan.",
+        "Waived technical gaps and the indeterminate historical source failure remain documented accepted risks; this acceptance is not a claim they were technically solved."
+      ],
+      "decision": "release_readiness_accepted_with_scoped_operator_waivers",
+      "sealed_reports": [
+        {
+          "path": "records/evidence/MTM-017/release-readiness-accepted-20260930.json",
+          "sha256": "87535ae751060e6a43043c0b6225fbfa951b57ec2b8b0f9f3d1c9ac3fecd4240"
+        },
+        {
+          "path": "records/evidence/MTM-017/release-readiness-inputs-20260930.json",
+          "sha256": "c24e2e741f99451936b051e98d1c180ca612ad5fa20ec48318ee05e486c43c78"
+        },
+        {
+          "path": "records/evidence/MTM-017/release-readiness-input-review-20260930.json",
+          "sha256": "e15276af01026c44d6cc4858c4facaf6a6ff7d1d9b11f1bb8df39fd087c8b51d"
+        },
+        {
+          "path": "records/evidence/MTM-017/release-readiness-evaluation-20260930.json",
+          "sha256": "2ba3ecc8a54987f0a63640f64cf418f4e8001b1e52e550f7f3d27d7480e1919e"
+        },
+        {
+          "path": "records/evidence/MTM-017/release-readiness-result-review-20260930.json",
+          "sha256": "e55f71e772901585a0608b1df297f34b8cc929b1ba547d55c3e816de32f0185d"
+        },
+        {
+          "path": "records/evidence/MTM-017/formal-readiness-implementation-validation-20260930.json",
+          "sha256": "0eda81b2204c0dd63dae1eda5812765da926aa74916c0148ff87ab2137fef7f6"
+        },
+        {
+          "path": "records/evidence/MTM-017/formal-readiness-whole-source-20260930.json",
+          "sha256": "d1eaed722274b3af7057d1cf8ca426eda1bcf20a959955f28f5cce47a023676a"
+        }
+      ],
+      "accepted_delta": 0,
+      "corpus_count_incremented": false,
+      "release_qualified": true,
+      "deployment_authorized": false,
+      "production_state_modified": false,
+      "production_selector_changed": false
     }
   ]
 }

@@ -1,0 +1,115 @@
+{
+  "schema": "mtm017-release-readiness-activation-validation-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T14:46:03+00:00",
+  "scope": "post_review_governance_public_integrity_only",
+  "active_acceptance": {
+    "path": "records/evidence/MTM-017/release-readiness-accepted-20260930.json",
+    "sha256": "87535ae751060e6a43043c0b6225fbfa951b57ec2b8b0f9f3d1c9ac3fecd4240"
+  },
+  "active_pointer": {
+    "path": "records/governance/mtm017-release-inputs.json",
+    "sha256": "690a34b02013cf2edf9622a17642cb104f21b1118b3bd531e5daed85cfdea312"
+  },
+  "migration_graph": {
+    "path": "records/governance/migration-graph.json",
+    "sha256": "d685ef05343e97a73a82c07df426a5ca747d5eb90d5095d581f3407fecd71855"
+  },
+  "iteration": {
+    "path": "records/iterations/ITER-017.json",
+    "sha256": "11179b9fdadc112653d100f5dad907f608331efd5f83c240a85f470ba1494ec1"
+  },
+  "handoff": {
+    "path": "docs/MTM-017-RELEASE-HANDOFF.md",
+    "sha256": "bf55ba3afae426d213aa0d10077c9d9bef5eb8d1723dd81433077c3988bf5348"
+  },
+  "before_prefix_snapshots": [
+    {
+      "original_path": "records/governance/migration-graph.json",
+      "snapshot": {
+        "path": "target/mtm017-formal-readiness-20260930/migration-graph-before-readiness-acceptance.json",
+        "sha256": "2ee37fc37d0404c5728e63e5547d3717e4d9d11b568d302432ab83f7570aab46"
+      }
+    },
+    {
+      "original_path": "records/iterations/ITER-017.json",
+      "snapshot": {
+        "path": "target/mtm017-formal-readiness-20260930/ITER-017-before-readiness-acceptance.json",
+        "sha256": "9002c28aff32cac9d0319d93c50cf3740aee2ac65a5535be01e12d6e2569a966"
+      }
+    }
+  ],
+  "unchanged_public_pointers": [
+    {
+      "path": "records/governance/mtm016-release-inputs.json",
+      "sha256": "e55f2c5624e6f94f4805bed38dd968626808f7df00d95bff9168cf86eb8cda04"
+    },
+    {
+      "path": "records/governance/mtm017-research-corpus.json",
+      "sha256": "27aff327aba433e907e3ee639bad5ce0cee1512ba61359bfc2f988c42626eb24"
+    },
+    {
+      "path": "records/governance/mtm017-corpus-union.json",
+      "sha256": "9e2d9de518a3ab1225134164828f1f83ddcb83d0f72c55399301ea53452c1393"
+    },
+    {
+      "path": "records/governance/mtm017-u26-waiver.json",
+      "sha256": "4bcf208c6e68d490b835fd895b6879a4dd694f5cbb698a6fc3fcf6248ee5219c"
+    },
+    {
+      "path": "records/governance/mtm017-readiness-decisions.json",
+      "sha256": "4fac40e7dfcb9de01d605227bed3d2c670f645a42a65590c53243f820b143cbe"
+    },
+    {
+      "path": "records/governance/mtm017-clean-build-status.json",
+      "sha256": "3d40b58e1c55222960644aed8703e8afe058ee5f1899cff9307906c7785e9769"
+    }
+  ],
+  "graph_events_exact_prefix_preserved": true,
+  "graph_receipts_exact_prefix_preserved": true,
+  "iteration_receipts_exact_prefix_preserved": true,
+  "unrelated_graph_fields_unchanged": true,
+  "unrelated_iteration_fields_unchanged": true,
+  "new_graph_iteration_receipts_equal": true,
+  "new_event_id": "MEVT-128",
+  "new_receipt_id": "MREC-017-FORMAL-READINESS-20260930",
+  "verified_inventory_files": 131,
+  "verified_inventory_hashes_unchanged": true,
+  "source_hash_scope": "mtm-rust-source-v1",
+  "source_file_count": 235,
+  "current_source_sha256": "39f42266b1dafc323b525130ba00cb11aac6f06f6a4448a132cdad6ac2add8f0",
+  "source_unchanged_since_final_whole_gate": true,
+  "maintenance_binary": {
+    "path": "target/mtm017-formal-readiness-20260930/mtm-xtask-223459136ac5184572b9b5c338c77dd01347252c12f16191c616a69b04b14ff7",
+    "sha256": "223459136ac5184572b9b5c338c77dd01347252c12f16191c616a69b04b14ff7"
+  },
+  "current_binary_matches_reviews": true,
+  "records_command_id": "fJbVuP9KamNfNhO44dseczC5",
+  "records_exit_code": 0,
+  "records_stdout": {
+    "path": "target/mtm017-formal-readiness-20260930/acceptance-records.stdout",
+    "sha256": "38fc653d172db87286a95be603791e96654d413342c95f4a21d82afaec2c61f8"
+  },
+  "records_stderr": {
+    "path": "target/mtm017-formal-readiness-20260930/acceptance-records.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "diff_check_exit_code": 0,
+  "whole_source_reexecuted_after_records_only_activation": false,
+  "original_evaluation_and_reviews_unchanged": true,
+  "original_evaluation_release_qualified": false,
+  "governance_acceptance_release_qualified": true,
+  "technical_accepted_trials": 87,
+  "technical_pending_trials": 3,
+  "human_waived_cells": 3,
+  "technical_qualification_complete": false,
+  "known_failure_root_cause": "indeterminate",
+  "known_failure_release_disposition": "accepted_by_operator",
+  "runtime_fix_claimed": false,
+  "corpus_count_incremented": false,
+  "deployment_authorized": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "commit_performed": false,
+  "push_performed": false
+}

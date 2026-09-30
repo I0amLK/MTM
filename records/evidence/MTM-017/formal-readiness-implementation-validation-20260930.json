@@ -1,0 +1,131 @@
+{
+  "schema": "mtm017-formal-readiness-implementation-validation-v1",
+  "milestone": "MTM-017",
+  "recorded_at": "2026-09-30T14:24:07Z",
+  "scope": "final_readonly_adapter_source_validation_not_release_acceptance",
+  "source_sha256": "39f42266b1dafc323b525130ba00cb11aac6f06f6a4448a132cdad6ac2add8f0",
+  "source_after_sha256": "39f42266b1dafc323b525130ba00cb11aac6f06f6a4448a132cdad6ac2add8f0",
+  "source_report": {
+    "path": "records/evidence/MTM-017/formal-readiness-whole-source-20260930.json",
+    "sha256": "d1eaed722274b3af7057d1cf8ca426eda1bcf20a959955f28f5cce47a023676a"
+  },
+  "source_gate_command_id": "CQZkNON1WzcNAAvUvcte3TWR",
+  "source_gate_exit_code": 0,
+  "source_gate_tests": {
+    "passed": 712,
+    "failed": 0,
+    "ignored": 1
+  },
+  "source_stdout_sha256": "8bd25ff4e406e57e2998aad602b025f002ac8dde9eedca0f5b5eba460fddfffa",
+  "source_stderr_sha256": "f61b381aa4e6091bd37360a91132c5db9c91874a7f1cb47efde97dabe00457bd",
+  "inherited_ignored_test": "native_authority::tests::exec_candidate_real_dns_https_target",
+  "maintenance_binary": {
+    "path": "target/mtm017-formal-readiness-20260930/mtm-xtask-223459136ac5184572b9b5c338c77dd01347252c12f16191c616a69b04b14ff7",
+    "sha256": "223459136ac5184572b9b5c338c77dd01347252c12f16191c616a69b04b14ff7",
+    "size_bytes": 41348480,
+    "mode": "0500",
+    "preserved_byte_identical": true
+  },
+  "source_files": [
+    {
+      "path": "xtask/src/main.rs",
+      "sha256": "88d1c2b42c76e72a962103c9d8ae1dbd8b2aa177ad799ddf229a55f41b7802eb"
+    },
+    {
+      "path": "xtask/src/corpus_aggregate_schema8/mod.rs",
+      "sha256": "4e5d84ad9cc69b13df418621755c50acf793bf7a58617cf240e28036a5f39961"
+    },
+    {
+      "path": "xtask/src/authority_corpus_schema8/mod.rs",
+      "sha256": "680a0aed52a64b4a1d05eac59eb303d5072626fb4563e5409b0f8077bc42d462"
+    },
+    {
+      "path": "xtask/tests/release_check_schema8_cli.rs",
+      "sha256": "492cb7aee7162488d9e449d19eff6334de560023064a453a38656550f424f866"
+    },
+    {
+      "path": "docs/MTM-017-FORMAL-READINESS.md",
+      "sha256": "7b7b15436dbd7360f704c3b1dd01243301e724fa5342043834f6a8cff3b3002d"
+    },
+    {
+      "path": "crates/mtm-runtime/tests/domain_collision.rs",
+      "sha256": "dd644572c1a47028dcb28073e7c2af2d30d57097c82cfb6627f62787ee2b2c09"
+    },
+    {
+      "path": "xtask/src/release_check_schema8/corpus.rs",
+      "sha256": "7328d2113e5d36326ed6343e2969915934419ae9be36e8148510bfb16435c54e"
+    },
+    {
+      "path": "xtask/src/release_check_schema8/files.rs",
+      "sha256": "d831e5a64c499ea416b382d357d90e3eb0fc3a5be8554c3eb2df8afc37d26074"
+    },
+    {
+      "path": "xtask/src/release_check_schema8/mod.rs",
+      "sha256": "01ef34d410f806cb728e5a14ec03aca7ae231623be252f3ea72434e0e1b923cf"
+    },
+    {
+      "path": "xtask/src/release_check_schema8/operator_copy.rs",
+      "sha256": "630a7a63ec04d04263c4e57a953b856e2028e359298054e86b956103968edd22"
+    },
+    {
+      "path": "xtask/src/release_check_schema8/policy.rs",
+      "sha256": "429f0f787b75378ce77d8ce3682f813e1659128d6f53e3ac64b45adad9c329a8"
+    },
+    {
+      "path": "xtask/src/release_check_schema8/tests.rs",
+      "sha256": "969231e27dc17bdbda6388a04b31d803a628072b514372a193cd6aa19f4a5f6c"
+    }
+  ],
+  "inputs": {
+    "path": "records/evidence/MTM-017/release-readiness-inputs-20260930.json",
+    "sha256": "c24e2e741f99451936b051e98d1c180ca612ad5fa20ec48318ee05e486c43c78"
+  },
+  "new_focused_tests": {
+    "passed": 11,
+    "failed": 0,
+    "command_id": "ViOsc30yRShJZW1ElCUcyRc3"
+  },
+  "new_cli_boundary_tests": 2,
+  "final_source_includes_all_maintenance_tests": true,
+  "current_static_checks": {
+    "records": true,
+    "architecture": true,
+    "retirement": true,
+    "rust_only_strict_audit": true,
+    "git_diff": true
+  },
+  "static_command_id": "pw3sGAYfmo1UsdXhcpoUhc_c",
+  "independent_code_review": "review-schema8-importer reported final semantic and reader issues resolved before final source gate",
+  "initial_compile_diagnostic": {
+    "command_id": "xOVgitXdKSbB53ySHGgTBfWZ",
+    "exit_code": 101,
+    "stage": "compile_only",
+    "error": "recursion limit reached while expanding json_internal for one oversized output macro",
+    "repair": "Split report construction into two bounded JSON objects; no crate recursion-limit or runtime limit increased.",
+    "tests_executed_on_failed_compile": false,
+    "preserved_as_diagnostic_not_promoted_to_pass": true
+  },
+  "review_fixes": [
+    "Pin immutable diagnosis/followup/operator-risk/review records and verify actual synthetic/recovery observations.",
+    "Reject self-review and the wrong or declined risk answer; preserve exact candidate/finding scope.",
+    "Use valid-mode positive/negative size controls, executable group-write negatives and explicit product/build-input drift allowlist tests.",
+    "Close dynamic source receipt top/identity/check fields and recompute its evaluation; require equal full commit IDs and positive recording time."
+  ],
+  "formal_evaluation_executed": false,
+  "independent_input_review_pending": true,
+  "independent_result_review_pending": true,
+  "implementation_complete": "unknown",
+  "research_accepted": true,
+  "research_acceptance_scope": "unchanged_original_fifteen_only",
+  "technical_accepted_trials": 87,
+  "technical_pending_trials": 3,
+  "human_waived_cells": 3,
+  "root_cause_status": "indeterminate",
+  "runtime_fix_claimed": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "production_selector_changed": false,
+  "production_state_modified": false,
+  "commit_created": false,
+  "push_performed": false
+}

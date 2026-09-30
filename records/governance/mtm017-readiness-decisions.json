@@ -455,6 +455,32 @@
       "production_state_modified": false,
       "recorded_by": "ctm-corpus-audit-session",
       "reversal": "Append a superseding operator decision; preserve this waiver, original technical evidence and all prior corpus pointers."
+    },
+    {
+      "schema": "mtm017-source-risk-disposition-v1",
+      "milestone": "MTM-017",
+      "decision_id": "MTM017-READINESS-DECISION-007",
+      "finding_id": "MTM017-SOURCE-R3-NORMAL-ASSESSMENT",
+      "failed_evidence": {
+        "path": "records/evidence/MTM-017/authority-corpus-whole-source-r3-failed-20260930.json",
+        "sha256": "5214ea3ec16b5277e950ca110a94af554d335c94c9c2a8328cc97bab0e615fb7"
+      },
+      "candidate_sha256": "13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4",
+      "root_cause_status": "indeterminate",
+      "release_disposition": "accepted_by_operator",
+      "passed": false,
+      "runtime_fix_claimed": false,
+      "operator_authorization": {
+        "source": "direct_operator_confirmation",
+        "user_message_id": "Sentinel_f5253c199dc88191801cda29b306b984",
+        "question_verbatim": "这里需要你作一个单独决定：此前 500 轮测试有一次在提交成功后缺少下一任务，后续测试通过，但原失败原因仍未确定。刚完成的诊断只证明一种可恢复的碰撞机制，不能替代原失败归因\n\n你是否接受这项未归因风险，允许它以“已知风险、人类授权接受”进入 release-readiness？如果不接受，我会继续调查并保持阻断。这个决定不包含部署授权",
+        "answer_verbatim": "接受"
+      },
+      "diagnostic": {
+        "path": "records/evidence/MTM-017/authority-corpus-domain-collision-diagnostic-20260930.json",
+        "sha256": "8995c3db3585b43b984b9c234dbb7f6613ef135e16991540184a3a7db8a395fc"
+      },
+      "deployment_authorized": false
     }
   ]
 }

@@ -27,6 +27,8 @@ mod records;
 #[cfg(target_os = "linux")]
 mod release_check;
 #[cfg(target_os = "linux")]
+mod release_check_schema8;
+#[cfg(target_os = "linux")]
 mod release_cutover;
 #[cfg(target_os = "linux")]
 mod release_readiness_schema8;
@@ -97,6 +99,19 @@ fn run() -> Result<()> {
             "{}",
             serde_json::to_string_pretty(&research_import_check::run(&root, &options)?)?
         );
+        return Ok(());
+    }
+    #[cfg(target_os = "linux")]
+    if name == "release-check-schema8" {
+        let options = release_check_schema8::Options::parse(options)?;
+        let report = release_check_schema8::run(&root, &options)?;
+        println!("{}", serde_json::to_string_pretty(&report)?);
+        if report["readiness_evaluation_passed"] != true {
+            return Err(
+                "schema-8 readiness evaluation unresolved; no release or deployment acceptance"
+                    .into(),
+            );
+        }
         return Ok(());
     }
     #[cfg(target_os = "linux")]
@@ -298,6 +313,9 @@ fn run() -> Result<()> {
             }
         }
         "help" | "--help" | "-h" => {
+            println!(
+                "cargo xtask release-check-schema8 --inputs <flat-MTM017-JSON> --input-review <flat-MTM017-JSON>\n  Read-only formal evaluation; independent result review and separate acceptance remain required, never deployment."
+            );
             println!(
                 "cargo xtask release-readiness-schema8\n  Fixed reviewed-inventory, read-only schema-8 draft; always blocked, not final release inputs or deployment authority.\ncargo xtask corpus-aggregate-check --inputs <repo-relative-json> --input-review <repo-relative-json>\n  Read-only MTM-017 partial-corpus proposal; zero accepted delta, no release or deployment authority."
             );

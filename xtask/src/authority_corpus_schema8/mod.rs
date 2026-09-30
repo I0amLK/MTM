@@ -288,6 +288,38 @@ fn collection(items: &[(&Reference, Observation)], source: &str) -> Result<()> {
     }
     Ok(())
 }
+/// Historical public receipt validation only. The source in the sealed inputs
+/// is an observed harness identity, not the current source or a Git-tree claim.
+pub(crate) fn archived_public_rows(
+    value: &Value,
+    documents: &std::collections::BTreeMap<String, Value>,
+) -> Result<Vec<Value>> {
+    let inputs: Inputs = serde_json::from_value(value.clone())?;
+    check(
+        inputs.schema == "mtm017-authority-inputs-v1"
+            && inputs.milestone == "MTM-017"
+            && inputs.candidate_sha256 == CANDIDATE
+            && inputs.authorization.path == AUTH.0
+            && inputs.authorization.sha256 == AUTH.1
+            && hash(&inputs.harness_source_sha256)
+            && inputs.trials.len() == 6,
+    )?;
+    let mut observations = Vec::new();
+    let mut rows = Vec::new();
+    for r in &inputs.trials {
+        check(path(&r.path) && hash(&r.sha256))?;
+        let value = documents
+            .get(&r.path)
+            .ok_or("archived authority receipt missing")?;
+        let o: Observation = serde_json::from_value(value.clone())?;
+        validate(&o, &inputs.harness_source_sha256)?;
+        rows.push(json!({"task_id":o.task_id,"repeat":o.repeat,"trial_id":o.trial_id,"raw":{"path":r.path,"sha256":r.sha256}}));
+        observations.push((r, o));
+    }
+    collection(&observations, &inputs.harness_source_sha256)?;
+    Ok(rows)
+}
+
 pub(crate) fn run(root: &Path, args: &[String]) -> Result<Value> {
     check(args.len() == 2 && args[0] == "--inputs" && path(&args[1]))?;
     let input = files::read(root, &args[1], 1024 * 1024, false)?;
