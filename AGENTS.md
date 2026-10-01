@@ -1,5 +1,15 @@
 # MTM-reboot engineering rules
 
+## MTM-018 approved Native foundation update
+
+Read `docs/MTM-018-CTM-050-INTEGRATION.md` and `records/iterations/ITER-018.json`.
+The operator approved `apply_changes`, 25 public tools (19 Native plus 6 workflow)
+and `mtm-tools-v11`, with the bounded old-tool adaptations in the delta matrix.
+This supersedes the earlier 24-tool freeze only for this milestone. Preserve
+dangerous-only Native, OAuth, private-vault/Bubblewrap isolation, workflow capability,
+role/state and finalizer authority, state schema 8 and workflow protocol 3.
+Do not relabel MTM-017 exact-artifact evidence or deploy from a development gate.
+
 Read `docs/CODE_STANDARD.md`, `docs/COMMIT_STANDARD.md`,
 `docs/ACCEPTANCE.md`, and `records/governance/migration-graph.json` before changing code.
 

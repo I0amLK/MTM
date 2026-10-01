@@ -6,7 +6,7 @@ use super::*;
 
 #[test]
 fn database_recovery_contract_preserves_legacy_unknown_and_no_authority() {
-    assert_eq!(TOOL_CONTRACT_VERSION, "mtm-tools-v10");
+    assert_eq!(TOOL_CONTRACT_VERSION, "mtm-tools-v11");
     for tool in [
         ToolId::RethlasStep,
         ToolId::RethlasInspect,
@@ -167,6 +167,10 @@ fn native_and_start_cases() -> Vec<(ToolId, Value)> {
         (T::ListFiles, json!({"patterns":["*.rs"]})),
         (T::SearchText, json!({"path":"a.txt","query":"数学"})),
         (T::ApplyPatch, json!({"patch":"fixture","dry_run":true})),
+        (
+            T::ApplyChanges,
+            json!({"changes":[{"action":"create","path":"a","content":"x"}]}),
+        ),
         (T::ExecCommand, json!({"argv":["printf","%s",""]})),
         (T::WriteStdin, json!({"command_id":"cmd-fixture"})),
         (
@@ -302,11 +306,11 @@ fn validate(id: ToolId, arguments: &Value) -> Result<(), ReCtmError> {
 #[test]
 fn registry_is_complete_unique_deterministic_and_mtm_owned() -> Result<(), ReCtmError> {
     let catalog = ToolCatalog::new();
-    assert_eq!(ToolId::ALL.len(), 24);
-    assert_eq!(catalog.list_public().len(), 24);
+    assert_eq!(ToolId::ALL.len(), 25);
+    assert_eq!(catalog.list_public().len(), 25);
     assert_eq!(
         PUBLIC_TOOL_NAMES.into_iter().collect::<BTreeSet<_>>().len(),
-        24
+        25
     );
     assert_eq!(catalog.fingerprint()?, ToolCatalog::new().fingerprint()?);
     assert_eq!(catalog.fingerprint()?.len(), 64);
@@ -480,4 +484,99 @@ fn retired_aliases_have_no_registered_identity_definition_or_schema() {
         assert!(catalog.definition(name).is_none());
         assert!(catalog.input_schema(name).is_none());
     }
+}
+
+#[test]
+fn every_native_output_schema_accepts_results_and_errors_and_rejects_wrong_types()
+-> Result<(), ReCtmError> {
+    use ToolId as T;
+    let cases = vec![
+        (
+            T::ServerInfo,
+            json!({"server":"mtm","version":"fixture","tool_count":25,"tools":[]}),
+        ),
+        (
+            T::CheckExecEnvironment,
+            json!({"native_mode":"dangerous","private_vault_visible":false}),
+        ),
+        (
+            T::ReadFile,
+            json!({"content":"x","revision":"a".repeat(64),"total_lines":1,"next_action":null,"next_start_line":null}),
+        ),
+        (T::ListDir, json!({"entries":[],"truncated":false})),
+        (T::ListFiles, json!({"files":[],"truncated":false})),
+        (T::SearchText, json!({"matches":[],"total_matches":0})),
+        (
+            T::ApplyPatch,
+            json!({"affected_files":[],"additions":0,"removals":0,"already_applied":true}),
+        ),
+        (
+            T::ApplyChanges,
+            json!({"affected_files":[],"idempotent_replay":true,"revision_algorithm":"sha256"}),
+        ),
+        (
+            T::ExecCommand,
+            json!({"command_id":"fixture","operation_outcome":"exited_nonzero","exit_code":7,"signal":null}),
+        ),
+        (
+            T::WriteStdin,
+            json!({"command_id":"fixture","operation_outcome":"running","exit_code":null}),
+        ),
+        (
+            T::KillCommand,
+            json!({"command_id":"fixture","operation_outcome":"signal","signal":"SIGTERM"}),
+        ),
+        (
+            T::ReadOutput,
+            json!({"command_id":"fixture","content":"x","next_offset":null,"evicted_gap_bytes":0}),
+        ),
+        (
+            T::GitStatus,
+            json!({"is_repo":true,"branch":null,"entries":[]}),
+        ),
+        (T::GitDiff, json!({"diff":"","files":[],"truncated":false})),
+        (T::GitLog, json!({"commits":[],"truncated":false})),
+        (T::GitShow, json!({"content":"","files":[]})),
+        (T::GitBlame, json!({"lines":[],"next_action":null})),
+        (
+            T::RequestPermissions,
+            json!({"status":"granted","expires_at":null,"constraints":{}}),
+        ),
+        (
+            T::ViewImage,
+            json!({"mime_type":"image/png","width":null,"height":null,"original":{}}),
+        ),
+    ];
+    assert_eq!(cases.len(), NATIVE_TOOL_COUNT);
+    for (id, mut payload) in cases {
+        payload["ok"] = json!(true);
+        let schema = schema::output(id);
+        validate_schema_value(&payload, &schema, "result")?;
+        validate_schema_value(
+            &json!({"ok":false,"error":{"code":"DENIED","message":"fixture","category":"security","retryable":false,"details":{}}}),
+            &schema,
+            "result",
+        )?;
+        let field = payload
+            .as_object()
+            .and_then(|m| m.keys().find(|k| k.as_str() != "ok"))
+            .cloned()
+            .ok_or_else(|| ReCtmError::new("TEST", "sample field"))?;
+        let bad = if payload[&field].is_object() {
+            json!("wrong object type")
+        } else {
+            json!({"not":"the expected type"})
+        };
+        let mut wrong = payload;
+        wrong[&field] = bad;
+        assert!(
+            validate_schema_value(&wrong, &schema, "result").is_err(),
+            "{id:?} {field}"
+        );
+        assert!(
+            validate_schema_value(&json!({"ok":false,"error":{"code":123}}), &schema, "result")
+                .is_err()
+        );
+    }
+    Ok(())
 }

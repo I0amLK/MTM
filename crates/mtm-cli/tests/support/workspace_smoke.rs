@@ -174,3 +174,48 @@ fn public_read_paging_and_git_selection_reach_the_real_runtime() -> Result {
     println!("MTM_WORKSPACE_SMOKE {summary}");
     Ok(())
 }
+
+#[test]
+fn public_structured_changes_replay_is_authenticated_and_client_scoped() -> Result {
+    let candidate = crate::support::candidate::select()?;
+    let mut server = Server::start_workspace(&candidate.path)?;
+    let owner = server.login()?;
+    let other = server.login()?;
+    let request = json!({"changes":[{"action":"create","path":"structured.txt","content":"one\n"}],"idempotency_key":"native-replay-fixture"});
+    let first = server.call(&owner, "apply_changes", request.clone())?;
+    require(first["ok"] == true, "structured create failed")?;
+    let body=serde_json::to_vec(&json!({"jsonrpc":"2.0","id":"replay","method":"tools/call","params":{"name":"apply_changes","arguments":request}})).map_err(|_|"serialize")?;
+    require(
+        server
+            .request("POST", "/mcp", "application/json", &body, None)?
+            .status
+            == 401,
+        "unauthenticated replay leaked a cached result",
+    )?;
+    let replay = server.call(&owner, "apply_changes", request.clone())?;
+    require(
+        replay["idempotent_replay"] == true,
+        "owner replay did not reuse result",
+    )?;
+    let cross = server.call(&other, "apply_changes", request.clone())?;
+    require(
+        cross["ok"] == false && cross["idempotent_replay"].is_null(),
+        "different OAuth client received another client's replay",
+    )?;
+    let mut changed = request.clone();
+    changed["changes"][0]["content"] = json!("different");
+    require(
+        server.call(&owner, "apply_changes", changed)?["error"]["code"] == "IDEMPOTENCY_KEY_REUSED",
+        "changed input did not conflict",
+    )?;
+    let read = server.call(&owner, "read_file", json!({"path":"structured.txt"}))?;
+    let edited=server.call(&owner,"apply_changes",json!({"changes":[{"action":"edit","path":"structured.txt","revision":read["revision"],"edits":[{"op":"replace","start_line":1,"content":"two"}]}]}))?;
+    require(edited["ok"] == true, "revision-bound public edit failed")?;
+    server.call(&owner, "apply_changes", request)?;
+    require(
+        fs::read_to_string(server.workspace_path().join("structured.txt")).map_err(|_| "read")?
+            == "two\n",
+        "historical replay rewrote current contents",
+    )?;
+    server.stop()
+}

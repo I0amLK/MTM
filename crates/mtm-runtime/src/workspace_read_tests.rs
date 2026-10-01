@@ -26,6 +26,9 @@ fn long_utf8_line_continuations_are_lossless_and_byte_bounded() -> Result<(), Re
     let mut joined = String::new();
     for _ in 0..32 {
         let result = workspace.read_file(&request)?;
+        assert_eq!(result["revision"], result["sha256"]);
+        assert_eq!(result["revision"], sha256_bytes(input.as_bytes()));
+        assert_eq!(result["revision_algorithm"], "sha256");
         let content = result["content"]
             .as_str()
             .ok_or_else(|| internal("missing content"))?;

@@ -84,6 +84,61 @@ fn effect() -> FileEffectEvidence {
 }
 
 #[test]
+fn role_denial_summary_cannot_clear_uncertain_effects_or_miscount_a_prefix() -> Result {
+    for marker in ["opaque", "file", "count", "corrupt"] {
+        let f = Fixture::new(1)?;
+        let missing = f
+            .store
+            .read_proof_manifest("run")
+            .err()
+            .ok_or("missing manifest unexpectedly exists")?;
+        assert_eq!(missing.code, "PROOF_MANIFEST_NOT_FOUND");
+        assert_eq!(missing.category, mtm_contracts::ErrorCategory::NotFound);
+        match marker {
+            "opaque" => f.store.begin_submission_write(&f.execution, 0, None)?,
+            "file" => f
+                .store
+                .begin_submission_write(&f.execution, 0, Some(&effect()))?,
+            "count" => {
+                f.store
+                    .begin_submission_write(&f.execution, 0, Some(&effect()))?;
+                f.store.checkpoint_submission_write(&f.execution, 1)?;
+            }
+            _ => {
+                Connection::open(f.store.path())?
+                    .execute("UPDATE step_write_journals SET marker_json='{}'", [])?;
+            }
+        }
+        let summary = mtm_storage::SubmissionResult {
+            disposition: mtm_storage::SubmissionDisposition::CorrectionRequired,
+            state: mtm_contracts::WorkflowState::Assess,
+            writes_applied: 0,
+            complete: false,
+            error_code: Some("ROLE_ACCESS_DENIED".into()),
+        };
+        assert!(
+            f.store
+                .record_submission_outcome(&f.reservation, &summary)
+                .is_err()
+        );
+        assert!(f.receipt()?.result().is_none());
+        if marker == "count" {
+            let exact = mtm_storage::SubmissionResult {
+                writes_applied: 1,
+                ..summary
+            };
+            assert_eq!(
+                f.store
+                    .record_submission_outcome(&f.reservation, &exact)?
+                    .result(),
+                Some(&exact)
+            );
+        }
+    }
+    Ok(())
+}
+
+#[test]
 fn file_evidence_cannot_borrow_another_role_and_corrupt_ack_rolls_back() -> Result {
     let f = Fixture::new(1)?;
     for relative in [

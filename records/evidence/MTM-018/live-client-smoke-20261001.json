@@ -1,0 +1,117 @@
+{
+  "schema": "mtm018-live-client-smoke-v1",
+  "milestone": "MTM-018",
+  "recorded_at": "2026-10-01T04:51:30Z",
+  "status": "passed_with_scope_limits",
+  "source": {
+    "hash_scope": "mtm-rust-source-v1",
+    "sha256": "9b7dbe7ab33d85a455f17198e9340cbe4f88c5cf082b2485a56fc43a3aeea07d",
+    "base_commit": "afa207e68eefd8cb9e6ab20aaafe497f9616e341",
+    "unchanged_since_full_gate": true,
+    "full_gate_evidence": "records/evidence/MTM-018/ctm050-integration-20261001.json"
+  },
+  "running_artifact": {
+    "sha256": "1dfbc1c86a5dbed845aa79e0a944aa8f2ebb2e05619e36c8d020212f62696ae5",
+    "process_executable_hash_independently_verified": true,
+    "verification_method": "Read-only process executable identity and SHA-256; no command arguments, environment or credentials collected"
+  },
+  "connection": {
+    "transport": "connected authenticated MCP client",
+    "server_version": "0.6.0-preview.2",
+    "public_tools": 25,
+    "tool_contract": "mtm-tools-v11",
+    "state_schema": 8,
+    "workflow_protocol": 3,
+    "auth_enabled": true
+  },
+  "native_structured_write": {
+    "create": "passed",
+    "same_key_create_replay": "passed",
+    "idempotent_replay": true,
+    "revision_bound_edit": "passed",
+    "lossless_read_after_edit": "passed",
+    "initial_revision": "2892fc11842453ef38ec97f3a2a3912193c021a2c7832ffa7f13a80039d65044",
+    "edited_revision": "8216c2020139dd9b6cf1c6228d7c63a8ef77799012a10447240c7ad2f96c222e"
+  },
+  "normal_workflow": {
+    "fixture": "new nonregistered compact arithmetic smoke",
+    "assessment": {
+      "receipt_status": "completed",
+      "outcome": "applied",
+      "writes_applied": 2,
+      "next_state": "assemble"
+    },
+    "proof_and_manifest": {
+      "receipt_status": "completed",
+      "outcome": "applied",
+      "writes_applied": 2,
+      "next_state": "verify"
+    },
+    "verification": {
+      "writes_applied": 3,
+      "next_state": "done",
+      "terminal": true,
+      "reported_verdict": "correct"
+    }
+  },
+  "correction_workflow": {
+    "fixture": "separate new nonregistered compact arithmetic smoke",
+    "assessment": {
+      "writes_applied": 2,
+      "next_state": "assemble"
+    },
+    "proof_without_manifest": {
+      "mcp_envelope_ok": true,
+      "submission_ok": false,
+      "recoverable": true,
+      "error_category": "validation",
+      "error_code": "PROOF_MANIFEST_NOT_FOUND",
+      "receipt_status": "completed",
+      "outcome": "correction_required",
+      "writes_applied": 1,
+      "retained_write_prefix": 1,
+      "next_state": "assemble"
+    },
+    "manifest_only_correction": {
+      "fresh_returned_capability_used": true,
+      "earlier_proof_write_not_resubmitted": true,
+      "receipt_status": "completed",
+      "outcome": "applied",
+      "writes_applied": 1,
+      "next_state": "verify"
+    },
+    "verification": {
+      "writes_applied": 3,
+      "next_state": "done",
+      "terminal": true,
+      "reported_verdict": "correct"
+    }
+  },
+  "final_artifacts": {
+    "both_exist": true,
+    "both_bytes": 308,
+    "both_sha256": "b290d7bee6660730fd63edf78dbe64f1bd716ea9f347d40b62b9e974ea695c1f"
+  },
+  "publication_scope": {
+    "authorized_at": "2026-10-01T04:48:36Z",
+    "user_request": "Continue fixing within the tested scope and push",
+    "destination": "origin/work/mtm017-dangerous-fact-memory",
+    "includes_preserved_schema_and_submission_corrections": true,
+    "no_force_push": true
+  },
+  "redaction": {
+    "raw_tool_payloads_stored": false,
+    "credentials_or_capability_handles_stored": false,
+    "private_problem_or_proof_bodies_stored": false,
+    "private_state_paths_stored": false
+  },
+  "limits": [
+    "This records connected-client smoke behavior, not proof that every possible input or deployment is error-free.",
+    "The correct verdict is the workflow's reported smoke result, not independent mathematical verification.",
+    "No fresh browser OAuth/DCR/PKCE, CAS, required compiled-LaTeX, resource, install or rollback qualification is claimed.",
+    "Only new smoke runs were exercised; old pending runs were neither inspected nor reconciled.",
+    "Earlier accepted evidence remains immutable; this supplements rather than relabels the development gate."
+  ],
+  "release_qualified": false,
+  "installation_performed": false
+}

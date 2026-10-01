@@ -36,6 +36,22 @@ impl NativeAuthorityExecutor {
     pub(crate) fn apply_patch(&self, arguments: &Map<String, Value>) -> Result<Value, ReCtmError> {
         let invocation = PatchInvocation::parse(arguments)?;
         let prepared = self.workspace.prepare_patch(&invocation)?;
+        self.commit_patch(prepared, invocation)
+    }
+
+    pub(crate) fn apply_changes(
+        &self,
+        arguments: &Map<String, Value>,
+    ) -> Result<Value, ReCtmError> {
+        let (prepared, invocation) = self.workspace.prepare_changes(arguments)?;
+        self.commit_patch(prepared, invocation)
+    }
+
+    fn commit_patch(
+        &self,
+        prepared: crate::workspace::PreparedPatch,
+        invocation: PatchInvocation,
+    ) -> Result<Value, ReCtmError> {
         let path_facts = prepared
             .path_facts()
             .ok_or_else(|| internal("authority patch preparation omitted path facts"))?;

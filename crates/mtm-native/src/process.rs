@@ -20,6 +20,10 @@ const MAX_RETAINED_COMMANDS: usize = 32;
 const COMPLETED_COMMAND_TTL: Duration = Duration::from_secs(300);
 static COMMAND_COUNTER: AtomicU64 = AtomicU64::new(1);
 
+#[cfg(test)]
+#[path = "process_outcome_tests.rs"]
+mod outcome_tests;
+
 #[derive(Clone, Debug)]
 pub struct CommandManagerConfig {
     pub buffer_bytes: usize,
@@ -122,6 +126,7 @@ struct CommandRun {
 
 #[derive(Clone, Debug, Default)]
 struct RunStatus {
+    terminal_observed: bool,
     completed_at: Option<Instant>,
     exit_code: Option<i32>,
     signal_name: Option<String>,
@@ -476,8 +481,11 @@ impl CommandManager {
         } else {
             lock(&run.stderr)?.dropped_bytes
         };
+        let (_, operation_outcome, first_terminal) = observe_outcome(&run)?;
         Ok(serde_json::json!({
             "ok": true,
+            "command_id":run.command_id,"operation_outcome":operation_outcome,
+            "_native_first_terminal":first_terminal,
             "output_ref": output_ref,
             "stream_output_ref": format!("command:{}:{selected}", run.command_id),
             "stream": selected,
@@ -804,6 +812,28 @@ fn refresh_status(run: &Arc<CommandRun>) -> Result<(), ReCtmError> {
     Ok(())
 }
 
+fn observe_outcome(run: &Arc<CommandRun>) -> Result<(RunStatus, &'static str, bool), ReCtmError> {
+    refresh_status(run)?;
+    let mut status = lock(&run.status)?;
+    let terminal = status.completed_at.is_some();
+    let outcome = if !terminal {
+        "running"
+    } else if status.timed_out {
+        "timeout"
+    } else if status.signal_name.is_some() {
+        "signal"
+    } else if status.exit_code == Some(0) {
+        "exited_0"
+    } else {
+        "exited_nonzero"
+    };
+    let first = terminal && !status.terminal_observed;
+    if terminal {
+        status.terminal_observed = true;
+    }
+    Ok((status.clone(), outcome, first))
+}
+
 fn snapshot(run: &Arc<CommandRun>, max_output_bytes: usize) -> Result<Value, ReCtmError> {
     refresh_status(run)?;
     let stdout_snapshot = lock(&run.stdout)?.take_since_cursor();
@@ -812,7 +842,7 @@ fn snapshot(run: &Arc<CommandRun>, max_output_bytes: usize) -> Result<Value, ReC
     let (stderr, stderr_truncated) = tail_text(&stderr_snapshot.bytes, max_output_bytes);
     let stdout_dropped = lock(&run.stdout)?.dropped_bytes;
     let stderr_dropped = lock(&run.stderr)?.dropped_bytes;
-    let status = lock(&run.status)?.clone();
+    let (status, operation_outcome, first_terminal) = observe_outcome(run)?;
     let running = status.completed_at.is_none();
     let status_label = if status.timed_out {
         "timeout"
@@ -833,6 +863,8 @@ fn snapshot(run: &Arc<CommandRun>, max_output_bytes: usize) -> Result<Value, ReC
     let mut payload = serde_json::json!({
         "ok": true,
         "command_id": run.command_id,
+        "operation_outcome":operation_outcome,
+        "_native_first_terminal":first_terminal,
         "status": status_label,
         "exit_code": status.exit_code,
         "signal": status.signal_name,
@@ -1074,7 +1106,7 @@ fn is_empty_string(value: &Value) -> bool {
 }
 
 const fn default_timeout_ms() -> u64 {
-    30_000
+    300_000
 }
 
 const fn default_yield_ms() -> u64 {

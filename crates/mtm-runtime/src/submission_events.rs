@@ -3,6 +3,15 @@
 use serde_json::Value;
 
 pub(crate) fn completion_event(tool: &str, trace: &str, payload: &Value) -> Value {
+    if matches!(
+        tool,
+        "exec_command" | "write_stdin" | "kill_command" | "read_output"
+    ) && payload.get("operation_outcome").is_some()
+    {
+        return serde_json::json!({"event_type":"tool.call_finished","trace_id":trace,
+            "decision":"allow","reason":"command_observation_completed",
+            "details":{"tool":tool,"operation_outcome":payload["operation_outcome"]}});
+    }
     if payload.get("ok").and_then(Value::as_bool) == Some(false)
         && payload.get("error").is_some_and(Value::is_object)
     {

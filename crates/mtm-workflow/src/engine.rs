@@ -3459,7 +3459,18 @@ impl WorkflowEngine {
         }
         let proof = self.vault.read_proof(claims.run_id())?;
         if protocol >= 2 {
-            let manifest = self.store.read_proof_manifest(claims.run_id())?["manifest"].clone();
+            // This required input is read before the atomic transition has any
+            // effects. A missing manifest is a correctable submission mistake,
+            // not an unknown action result. Keep ordinary reads and all other
+            // storage failures unchanged; receipt completion still proves the
+            // durable journal and retained caller-write count in the runtime.
+            let manifest = self.store.read_proof_manifest(claims.run_id()).map_err(|mut error| {
+                if error.category == ErrorCategory::NotFound && error.code == "PROOF_MANIFEST_NOT_FOUND" {
+                    error.category = ErrorCategory::Validation;
+                    error.message = "Write a valid proof_manifest using the current task write_contract before proof_submitted. Preserve any already retained proof write.".into();
+                }
+                error
+            })?["manifest"].clone();
             if let Some(project_run) = self
                 .store
                 .get_project_run(claims.run_id(), Some(claims.owner_id()))?

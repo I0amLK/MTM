@@ -31,7 +31,18 @@ pub(super) fn choice(values: &[&str]) -> Value {
     json!({"type":"string","enum":values})
 }
 
-pub(super) fn output() -> Value {
+pub(super) fn output(id: ToolId) -> Value {
+    let mut schema = output_base();
+    if let Some(properties) = schema["properties"].as_object_mut() {
+        properties.extend(native_output::properties(id));
+    }
+    schema
+}
+
+#[path = "native_output.rs"]
+mod native_output;
+
+fn output_base() -> Value {
     json!({"type":"object","required":["ok"],"additionalProperties":true,
     "properties":{"ok":{"type":"boolean"},"error":{
         "type":"object","additionalProperties":true,
@@ -95,8 +106,24 @@ pub(super) fn input(id: ToolId) -> Value {
             &["query"],
         ),
         T::ApplyPatch => object(
-            json!({"patch":nonempty(),"dry_run":boolean(false)}),
+            json!({"patch":nonempty(),"dry_run":boolean(false),"idempotency_key":{"type":"string","minLength":1,"maxLength":128}}),
             &["patch"],
+        ),
+        T::ApplyChanges => object(
+            json!({
+                "changes":{"type":"array","minItems":1,"maxItems":100,"items":object(json!({
+                    "action":choice(&["create","write","edit","delete","move","copy"]),
+                    "path":nonempty(),"content":text(),"destination":nonempty(),
+                    "revision":{"type":"string","pattern":"^[0-9a-fA-F]{64}$"},
+                    "edits":{"type":"array","minItems":1,"maxItems":200,"items":object(json!({
+                        "op":choice(&["replace","delete","insert_after","insert_before"]),
+                        "start_line":{"type":"integer","minimum":1},"end_line":{"type":"integer","minimum":1},
+                        "line":{"type":"integer","minimum":0},"content":text()
+                    }), &["op"])}
+                }), &["action","path"])},
+                "dry_run":boolean(false),"idempotency_key":{"type":"string","minLength":1,"maxLength":128}
+            }),
+            &["changes"],
         ),
         T::ExecCommand => {
             let properties = output_options(Map::from_iter([
@@ -113,7 +140,7 @@ pub(super) fn input(id: ToolId) -> Value {
                 ),
                 ("stdin".to_owned(), json!({"type":"string","default":""})),
                 ("tty".to_owned(), boolean(false)),
-                ("timeout_ms".to_owned(), integer(1, 600_000, 30_000)),
+                ("timeout_ms".to_owned(), integer(1, 600_000, 300_000)),
                 ("yield_time_ms".to_owned(), integer(0, 30_000, 10_000)),
             ]));
             let mut schema = object(properties, &[]);
@@ -161,7 +188,7 @@ pub(super) fn input(id: ToolId) -> Value {
         T::GitDiff => object(
             json!({
                 "repo_path":nonempty(),
-                "path":text(),"paths":strings(),"staged":boolean(false),"unstaged":boolean(true),
+                "path":text(),"paths":strings(),"staged":boolean(false),"unstaged":boolean(true),"include_untracked":boolean(true),
                 "context_lines":integer(0,20,3),"max_bytes":integer(1,1_048_576,262_144)
             }),
             &[],

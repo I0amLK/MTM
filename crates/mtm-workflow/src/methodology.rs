@@ -540,10 +540,15 @@ fn overlay_proof_manifest(
                 "reference_ids":{"type":"array","items":{"type":"string","minLength":1}},
                 "conditional_hypotheses":{"type":"array","items":{"type":"string","minLength":1}},
                 "computational_evidence":{"type":"array","items":{"type":"object","additionalProperties":true}},
-                "facts":{"type":"array","minItems":1,"maxItems":32,"items":{"type":"object","required":["key","statement_tex","proof_tex","predecessors","glossary_introduces"],"additionalProperties":false,"properties":{
-                    "key":{"type":"string","minLength":1},"statement_tex":{"type":"string","minLength":1},"proof_tex":{"type":"string","minLength":1},
-                    "predecessors":{"type":"array","items":{"type":"string","minLength":1}},
-                    "glossary_introduces":{"type":"object"},"intuition":{"type":"string"}
+                "facts":{"type":"array","minItems":1,"maxItems":32,
+                    "description":"Optional explicit fact breakdown. Keys must be unique. The last statement_tex must equal target_statement_tex after whitespace normalization. Every declared statement_tex and proof_tex must occur verbatim in the final verified proof. Omit facts to use the whole verified proof as one target fact; never invent intermediate facts.",
+                    "items":{"type":"object","required":["key","statement_tex","proof_tex","predecessors","glossary_introduces"],"additionalProperties":false,"properties":{
+                    "key":{"type":"string","minLength":1,"maxLength":128,"pattern":"^[A-Za-z0-9_.-]+$","description":"Unique ASCII identifier within this manifest."},
+                    "statement_tex":{"type":"string","minLength":1,"description":"Non-whitespace LaTeX, at most 65536 UTF-8 bytes."},
+                    "proof_tex":{"type":"string","minLength":1,"description":"Non-whitespace LaTeX, at most 65536 UTF-8 bytes."},
+                    "predecessors":{"type":"array","maxItems":64,"items":{"type":"string","minLength":1},"description":"Each entry names an earlier fact key in this ordered array or an existing verified project fact ID. The final target also inherits revision dependencies; the merged predecessor set must contain at most 64 facts."},
+                    "glossary_introduces":{"type":"object","maxProperties":64,"additionalProperties":{"type":"string"},"description":"At most 64 entries; each key is at most 256 UTF-8 bytes and each string value at most 4096 UTF-8 bytes."},
+                    "intuition":{"type":"string","description":"Optional, at most 4096 UTF-8 bytes."}
                 }}}
             }
         },

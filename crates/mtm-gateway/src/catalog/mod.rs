@@ -9,8 +9,8 @@ use sha2::{Digest, Sha256};
 mod schema;
 mod workflow_schema;
 
-pub const TOOL_CONTRACT_VERSION: &str = "mtm-tools-v10";
-pub const NATIVE_TOOL_COUNT: usize = 18;
+pub const TOOL_CONTRACT_VERSION: &str = "mtm-tools-v11";
+pub const NATIVE_TOOL_COUNT: usize = mtm_contracts::CURRENT_NATIVE_TOOL_COUNT as usize;
 
 const DATABASE_WRITE_RECOVERY: &str = "New proof_manifest and reference_audit caller writes commit with their accepted-write checkpoint in one database transaction. A failed transaction retains neither the new record nor its count; committed writes can be included in the retained prefix. Historical opaque database journals remain unknown. Recovery never executes the action or grants verifier/finalizer authority. These database records are bounded to 1 MiB.";
 
@@ -31,10 +31,10 @@ macro_rules! define_tools {
         #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
         pub enum ToolId { $($id),+ }
 
-        pub const PUBLIC_TOOL_NAMES: [&str; 24] = [$($name),+];
+        pub const PUBLIC_TOOL_NAMES: [&str; 25] = [$($name),+];
 
         impl ToolId {
-            pub const ALL: [Self; 24] = [$(Self::$id),+];
+            pub const ALL: [Self; 25] = [$(Self::$id),+];
 
             #[must_use]
             pub const fn as_str(self) -> &'static str {
@@ -59,7 +59,7 @@ macro_rules! define_tools {
                 };
                 json!({
                     "name":self.as_str(), "title":title, "description":description,
-                    "inputSchema":schema::input(self), "outputSchema":schema::output(),
+                    "inputSchema":schema::input(self), "outputSchema":schema::output(self),
                     "annotations":{
                         "title":title, "readOnlyHint":read, "destructiveHint":destructive,
                         "openWorldHint":open, "idempotentHint":idempotent
@@ -78,6 +78,7 @@ define_tools! {
     ListFiles => ("list_files", "List files", "List files under a workspace directory with optional glob filters. path is a directory; patterns are relative to it. For a single known file use search_text or read_file.", true, false, false, true),
     SearchText => ("search_text", "Search text", "Search UTF-8 text in a workspace file or directory. An explicit file target searches only that file, never its siblings. glob/include_globs and exclude_globs restrict the selection. Results and context are bounded.", true, false, false, true),
     ApplyPatch => ("apply_patch", "Apply patch", "Validate and apply a workspace patch envelope. Use *** Begin Patch, file operations and *** End Patch. dry_run validates without writing and does not grant permission. On a stale baseline read the affected files before preparing a new patch.", false, true, false, false),
+    ApplyChanges => ("apply_changes", "Apply structured changes", "Atomically apply revision-bound create/write/edit/delete/move/copy changes. Read revision from read_file; existing sources require that exact revision. create and move/copy destinations require absence. Each resolved path appears once. Line edits address original one-based LF-delimited lines, matching read_file; bare CR is content. Replacement content contains whole lines. dry_run writes nothing. Optional idempotency_key is bounded, caller-scoped and in-memory only; replay support is limited to this server lifetime and retained results. An unknown outcome never permits blind retry.", false, true, false, false),
     ExecCommand => ("exec_command", "Execute command", "Run a bounded Native command. Supply exactly one of argv (literal program and arguments) or cmd (non-login /bin/sh -c, no profile-based PATH reset). Prefer argv for a single program. Set workdir and any env.PATH explicitly; executable checks use that same PATH. Poll command_id with write_stdin and page output_ref with read_output; never restart just to obtain output. A transport failure has unknown outcome. For unresolved executables inspect check_exec_environment and correct the request, not permissions.", false, true, true, false),
     WriteStdin => ("write_stdin", "Poll or write stdin", "Poll an existing command_id or send stdin. Empty chars only polls; nonempty chars sends input and is not safe to replay after an uncertain transport failure. Use the returned command_id, never a guessed process identifier.", false, false, false, false),
     KillCommand => ("kill_command", "Terminate command", "Terminate a server-managed command_id using TERM, INT or KILL. This affects the command and its managed descendants, not arbitrary host processes. Check the returned lifecycle outcome.", false, true, false, false),
@@ -87,7 +88,7 @@ define_tools! {
     GitLog => ("git_log", "Git log", "Read bounded commit history. repo_path selects the repository directory relative to the workspace (default .); path is a literal file/directory filter relative to that repository, including deleted files. The result reports the actual repo_path.", true, false, false, true),
     GitShow => ("git_show", "Git show", "Read a revision and optional file diffs. repo_path selects a repository relative to the workspace (default .); path/paths are literal file filters relative to it. External diff and text conversion helpers are disabled.", true, false, false, true),
     GitBlame => ("git_blame", "Git blame", "Read paged blame metadata. repo_path selects a repository relative to the workspace (default .); path names a file relative to that repository. Lines start at one. Use next_action to preserve the repository, revision and requested range on subsequent pages.", true, false, false, true),
-    RequestPermissions => ("request_permissions", "Request Native permissions", "Request permission for the exact exec_command/apply_patch arguments. The client-owned consent flow, not model-generated approval text, authorizes explicit grants. Follow input_required in a capable client. A request alone grants nothing; the result states whether a grant exists. Native permission never grants Rethlas authority.", false, false, false, false),
+    RequestPermissions => ("request_permissions", "Native permission compatibility", "Report the fixed dangerous-mode compatibility response. This does not create a consent request or grant ledger, change policy, execute an operation, or grant workflow/project authority. Legacy request fields remain accepted for compatibility.", false, false, false, false),
     ViewImage => ("view_image", "View image", "Return a bounded workspace image as MCP image content. Use the actual workspace path; this tool does not fetch external images.", true, false, false, true),
     RethlasStart => ("rethlas_start", "Start mathematical workflow", "Start a private Rethlas run for a concrete mathematical proof, derivation, repair or rigorous verification unless the user requests an informal answer. Supply a unique creation_key for each intended run and preserve that key and all input on a retry after response loss. Different keys intentionally create independent runs for the same problem. A completed creation replay returns the original run ID without a task or authority; fetch its current task separately. A conflicting key or CREATION_RESULT_UNKNOWN must not be bypassed by changing the key. Unkeyed starts are not deduplicated. Continue using rethlas_step and its task contract through mechanical finalization.", false, false, false, false),
     RethlasStep => ("rethlas_step", "Advance Rethlas workflow", "With only run_id, obtain the current task. To submit, use its exact run_id/capability, commit_action, write_contract and commit_payload_schema; each memory write is one record unless the task says otherwise. Incomplete screening may remain in place with missing item IDs. Only done plus the mechanical finalizer produces proof_verified.tex; report workspace_export_path.", false, true, false, false),
@@ -177,3 +178,6 @@ impl ToolCatalog {
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod step_compatibility_tests;

@@ -1,0 +1,124 @@
+{
+  "schema": "mtm018-ctm050-source-integration-v1",
+  "milestone": "MTM-018",
+  "recorded_at": "2026-10-01T03:50:31Z",
+  "status": "development_complete",
+  "upstream": {
+    "tag": "v0.5.0",
+    "commit": "aa1cbf3832e0c85994600f2249d9544fbae2f49e",
+    "archive_sha256": "411cfc2a8a4121857787870af631155295cf5e94a7c419c13c1fa9555e969460"
+  },
+  "source": {
+    "hash_scope": "mtm-rust-source-v1",
+    "sha256": "9b7dbe7ab33d85a455f17198e9340cbe4f88c5cf082b2485a56fc43a3aeea07d",
+    "head": "afa207e68eefd8cb9e6ab20aaafe497f9616e341",
+    "unchanged_during_final_gate": true,
+    "working_tree_committed": false
+  },
+  "gate": {
+    "command": "cargo xtask check",
+    "exit_code": 0,
+    "passed": true,
+    "format": true,
+    "clippy_warnings_denied": true,
+    "workspace_tests": {
+      "passed": 749,
+      "failed": 0,
+      "ignored": 1
+    },
+    "native_preflight": true,
+    "records": true,
+    "architecture": true,
+    "retirement": true,
+    "diff_check": true,
+    "log": "target/ctm-v050-integration.L0ZLCK/full-gate-r2.log",
+    "log_sha256": "51c7d5d1b05be9655866dd8b8cf99c85e2ca1135315b2bdc20e5b821c0c0f99e"
+  },
+  "build": {
+    "command": "cargo build --locked --offline --release -p mtm-cli",
+    "exit_code": 0,
+    "log_sha256": "6f2b31e8311d4b34f598ca6d7345044a547d5f6a4ef2a4c62c22327005d280ab",
+    "incremental_build": true,
+    "reproducible_clean_build_claimed": false
+  },
+  "artifact": {
+    "path": "target/mtm018-artifacts/mtm-ctm050-1dfbc1c86a5d",
+    "absolute_path": "/home/lk/桌面/MTM2/MTM/target/mtm018-artifacts/mtm-ctm050-1dfbc1c86a5d",
+    "sha256": "1dfbc1c86a5dbed845aa79e0a944aa8f2ebb2e05619e36c8d020212f62696ae5",
+    "bytes": 14148352,
+    "nlink": 1,
+    "mode": "0500",
+    "public_tools": 25,
+    "tool_contract": "mtm-tools-v11",
+    "state_schema": 8,
+    "workflow_protocol": 3,
+    "version": "0.6.0-preview.2",
+    "installed": false
+  },
+  "prior_artifact": {
+    "path": "target/ctm-v050-integration.L0ZLCK/prior-release-mtm",
+    "sha256": "1144b249d9621e762d5142a63816290f3b5132ecc52924f88c3e1b94f8a2610e",
+    "preserved": true
+  },
+  "independent_review": {
+    "blocking_findings": 0,
+    "prior_tracked_patch_reverse_check": true,
+    "prior_four_untracked_hashes_match": true
+  },
+  "protected_baseline": {
+    "patch_sha256": "325ff0b0b34aed6a86079cf23cc91a24bc22ab6e4cd583e9887eca3a6e8725c0",
+    "existing_uncommitted_fixes_preserved": true
+  },
+  "scope": {
+    "oauth_workflow_and_private_vault_boundaries_preserved": true,
+    "all_18_old_tools_reviewed": true,
+    "new_apply_changes": true,
+    "delta_matrix": "docs/MTM-018-CTM-050-INTEGRATION.md",
+    "native_replay_durable": false,
+    "broad_filesystem_failure_breaker": "deferred_due_external_mutation_staleness",
+    "landlock_or_upstream_oauth_imported": false
+  },
+  "earlier_full_gate": {
+    "passed": false,
+    "tests": {
+      "passed": 745,
+      "failed": 2,
+      "ignored": 1
+    },
+    "source_sha256": "648eb1ad11de800fc96e62ac5ee0e35b31637184abd38eaf7514f56932aab7e5",
+    "reason": "Historical pure-policy patch serialization changed; fixed by keeping frozen read-only compatibility functions separate from current Native parser/matcher",
+    "log_sha256": "2d0859194d643e79037b4a838260f2738559599c32f0a5133e365226439ce3b9"
+  },
+  "logs": {
+    "partial-core-tests.log": "82112bae4bf38f404fd5bcf7b6367f9148db315f3a8beeeb278b87aab3e32b2e",
+    "final-core-r1.log": "7c5b6aeb3decb7b2cded8671d5e91eabdefb48ca109132834f4130893c1e0fdf",
+    "full-gate-r1.log": "2d0859194d643e79037b4a838260f2738559599c32f0a5133e365226439ce3b9",
+    "policy-compat-r1.log": "f73eaf11f8204718441bc0fef64b809a2a46d337c85f90acc5b422eaf8de6bc7",
+    "partial-result-tests.log": "e97eb0332ab5a5c8e73cfeedaf9070dcd941b84a57483252c14206de3265d07e",
+    "foundation-libs-r3.log": "fe4d53bceed53b61197be8b8d168a3facbbfeaede2a2c88a8bfb1f900a869f3b",
+    "foundation-libs-r1.log": "b3f468a3d5f84c6b0dbe60ab3f5989965c564ebd7f3e1005b6158d707fcf0896",
+    "partial-core-tests-r2.log": "dbe0246ed1ba289cd12fe59fd9e5d51489b1f42db4cbb67f8f14d4d5a2352da5",
+    "http-structured-r1.log": "a7bc4f40e0db282b2f8414d1ca392b0389aa37d91abc715d4264ba22c2211912",
+    "foundation-libs-r2.log": "aefe58173cb2b024ce29b240ec4557b15b4a9a88cd0d7ac5811758b3fa2e80b3",
+    "partial-read-tests-r2.log": "ce59f1187bedd8323eae008a5d74b4bed19706c76cf91872247d602a2d9bb3c6",
+    "release-build.log": "6f2b31e8311d4b34f598ca6d7345044a547d5f6a4ef2a4c62c22327005d280ab",
+    "replay-tests-r1.log": "e070add773b85fe5f70d2dcdd969be7ebea0802e284d1f7d97279c5744273ad7",
+    "partial-core-tests-host-cache.log": "afc83c82bbef5ca35a317c0bed9f85975609b323b66891b35e5ceea469f274a5",
+    "full-gate-r2.log": "51c7d5d1b05be9655866dd8b8cf99c85e2ca1135315b2bdc20e5b821c0c0f99e",
+    "structured-tests-r1.log": "f18d12bf3ca3e7d68cec03e42a870a498f29fe1b139d4156d671d96b50c24f0f",
+    "partial-fmt-check.log": "72169ab8e6c65132389afa490a894e6338202ac6d508e79901beb8f091c1d851",
+    "partial-read-tests.log": "a9d85fbe2f647cc034cc313cb851b4878fb43cd3e0d6258a52959633283087ea"
+  },
+  "environment": {
+    "cargo_target": "/home/lk/桌面/MTM2/MTM/target/mtm-tool",
+    "cargo_home": "/home/lk/.cargo",
+    "rustup_home": "/home/lk/.rustup",
+    "toolchain": "repository-pinned 1.98.0",
+    "incidental_setup": "Initial rustup invocation auto-installed the pinned toolchain under isolated CTM HOME; later checks disabled auto-install and reused verified host caches offline"
+  },
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "production_state_modified": false,
+  "production_selector_changed": false,
+  "live_service_restarted": false
+}

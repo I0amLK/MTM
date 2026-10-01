@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-09-30T14:43:53Z",
+  "updated_at": "2026-10-01T03:50:31Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -608,6 +608,38 @@
       ],
       "rollback": "Revert the dedicated MTM-017 branch commits; a schema-8 state database requires restoring an untouched pre-upgrade copy.",
       "dependencies": ["MTM-016"]
+    },
+    {
+      "id": "MTM-018",
+      "title": "Coding Tools MCP v0.5 foundation integration",
+      "status": "completed",
+      "priority": "P1",
+      "production_authority_before": "rust",
+      "production_authority_after": "rust",
+      "functional_goal": "Integrate revision-bound Native editing and bounded old-tool reliability updates without changing MTM trust domains",
+      "scope": [
+        "25 public tools and mtm-tools-v11",
+        "Revision-bound atomic Native changes and caller-scoped replay",
+        "Old-tool patch, Git, output schemas and process outcomes"
+      ],
+      "non_goals": [
+        "No deployment or live data",
+        "No workflow/state/authority changes",
+        "No historical receipt relabeling"
+      ],
+      "acceptance_levels": [
+        "A0",
+        "A1",
+        "A3"
+      ],
+      "validation_commands": [
+        "cargo xtask check",
+        "cargo xtask records"
+      ],
+      "rollback": "Revert only MTM-018 hunks, retain preexisting uncommitted fixes; no state migration.",
+      "dependencies": [
+        "MTM-017"
+      ]
     }
   ],
   "edges": [
@@ -633,7 +665,12 @@
     {"source": "MTM-014", "target": "MTM-013"},
     {"source": "MTM-015", "target": "MTM-014"},
     {"source": "MTM-016", "target": "MTM-015"},
-    {"source": "MTM-017", "target": "MTM-016"}
+    {"source": "MTM-017", "target": "MTM-016"},
+    {
+      "source": "MTM-018",
+      "target": "MTM-017",
+      "relation": "depends_on"
+    }
   ],
   "todo": [],
   "events": [
@@ -1763,6 +1800,37 @@
       },
       "release_qualified": true,
       "technical_qualification_complete": false,
+      "deployment_authorized": false,
+      "production_state_modified": false,
+      "production_selector_changed": false
+    },
+    {
+      "event_id": "MTM018-CTM050-DEVELOPMENT-START-20261001",
+      "milestone_id": "MTM-018",
+      "at": "2026-10-01T02:21:16Z",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Operator approved 25 tools/v11, narrow transaction/replay patches and old-tool integration.",
+      "evidence": [
+        "docs/MTM-018-CTM-050-INTEGRATION.md",
+        "records/iterations/ITER-018.json"
+      ],
+      "production_state_modified": false,
+      "production_selector_changed": false,
+      "deployment_authorized": false
+    },
+    {
+      "event_id": "MTM018-CTM050-DEVELOPMENT-COMPLETE-20261001",
+      "milestone_id": "MTM-018",
+      "at": "2026-10-01T03:50:31Z",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "summary": "Bounded Native foundation integration accepted at development source level: 749/0/1 full gate, independent review and optimized artifact; no deployment.",
+      "evidence": [
+        "records/evidence/MTM-018/ctm050-integration-20261001.json"
+      ],
+      "source_sha256": "9b7dbe7ab33d85a455f17198e9340cbe4f88c5cf082b2485a56fc43a3aeea07d",
+      "release_qualified": false,
       "deployment_authorized": false,
       "production_state_modified": false,
       "production_selector_changed": false
@@ -4525,6 +4593,102 @@
       "accepted_delta": 0,
       "corpus_count_incremented": false,
       "release_qualified": true,
+      "deployment_authorized": false,
+      "production_state_modified": false,
+      "production_selector_changed": false
+    },
+    {
+      "receipt_id": "MREC-018-CTM050-20261001",
+      "milestone_id": "MTM-018",
+      "started_at": "2026-10-01T01:39:21Z",
+      "completed_at": "2026-10-01T03:50:31Z",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "feat(native): integrate bounded CTM 0.5 foundation [MTM-018]",
+      "commit_performed": false,
+      "files_changed": [
+        "AGENTS.md",
+        "README.md",
+        "crates/mtm-cli/tests/identity.rs",
+        "crates/mtm-cli/tests/support/workspace_smoke.rs",
+        "crates/mtm-contracts/src/lib.rs",
+        "crates/mtm-core/src/lib.rs",
+        "crates/mtm-core/src/native_permission.rs",
+        "crates/mtm-core/src/patch.rs",
+        "crates/mtm-core/src/patch_legacy.rs",
+        "crates/mtm-core/src/patch_update.rs",
+        "crates/mtm-gateway/src/bin/server.rs",
+        "crates/mtm-gateway/src/catalog/mod.rs",
+        "crates/mtm-gateway/src/catalog/native_output.rs",
+        "crates/mtm-gateway/src/catalog/schema.rs",
+        "crates/mtm-gateway/src/catalog/tests.rs",
+        "crates/mtm-native/src/process.rs",
+        "crates/mtm-native/src/process_outcome_tests.rs",
+        "crates/mtm-runtime/src/native_authority.rs",
+        "crates/mtm-runtime/src/native_permission.rs",
+        "crates/mtm-runtime/src/native_replay.rs",
+        "crates/mtm-runtime/src/native_tools.rs",
+        "crates/mtm-runtime/src/submission_events.rs",
+        "crates/mtm-runtime/src/tool_backend.rs",
+        "crates/mtm-runtime/src/tool_result_tests.rs",
+        "crates/mtm-runtime/src/workspace.rs",
+        "crates/mtm-runtime/src/workspace_changes.rs",
+        "crates/mtm-runtime/src/workspace_changes_tests.rs",
+        "crates/mtm-runtime/src/workspace_git_tests.rs",
+        "crates/mtm-runtime/src/workspace_read.rs",
+        "crates/mtm-runtime/src/workspace_read_tests.rs",
+        "crates/mtm-runtime/src/workspace_untracked.rs",
+        "docs/MTM-018-CTM-050-INTEGRATION.md",
+        "records/governance/migration-graph.json",
+        "records/iterations/ITER-018.json",
+        "records/evidence/MTM-018/ctm050-integration-20261001.json"
+      ],
+      "commands": [
+        {
+          "command": "cargo xtask check",
+          "exit_code": 0,
+          "result": "749 passed, 0 failed, 1 inherited ignored; source frozen at 9b7dbe7ab33d85a455f17198e9340cbe4f88c5cf082b2485a56fc43a3aeea07d"
+        },
+        {
+          "command": "cargo build --locked --offline --release -p mtm-cli",
+          "exit_code": 0,
+          "result": "Stable single-link readonly artifact verified as 1dfbc1c86a5dbed845aa79e0a944aa8f2ebb2e05619e36c8d020212f62696ae5"
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "evidence": [
+            "records/evidence/MTM-018/ctm050-integration-20261001.json"
+          ]
+        },
+        "A1": {
+          "passed": true,
+          "evidence": [
+            "All19 Native output schemas, current25/v11 identity, lossless read and frozen135-case pure-policy corpus"
+          ]
+        },
+        "A3": {
+          "passed": true,
+          "evidence": [
+            "Real authenticated/client-scoped Native replay, revision/path/rollback/concurrency/command-outcome regressions; inherited workflow authority tests"
+          ]
+        }
+      },
+      "behavior_before": "24 tools/v10; no revision-bound structured editor; old Native patch/read/Git/process-result behavior.",
+      "behavior_after": "25 tools/v11 with bounded apply_changes, caller-scoped in-memory replay and reviewed old18-tool changes/deviations.",
+      "risk_review": "Independent code review has no blockers. OAuth/private-vault/Bubblewrap/workflow/state boundaries and prior dirty fixes preserved. Broad stale filesystem breaker and unsafe upstream chaining deliberately excluded.",
+      "rollback": "Revert only MTM-018 source hunks while retaining preexisting uncommitted corrections. Prior build1144b249 preserved; no state migration performed.",
+      "manual_pending": [
+        "Operator live-client/TUI test of this exact artifact",
+        "Separate release/deployment authorization and exact-artifact target acceptance if requested"
+      ],
+      "decision": "accepted_development_source_only",
+      "source_sha256": "9b7dbe7ab33d85a455f17198e9340cbe4f88c5cf082b2485a56fc43a3aeea07d",
+      "evidence": "records/evidence/MTM-018/ctm050-integration-20261001.json",
+      "release_qualified": false,
       "deployment_authorized": false,
       "production_state_modified": false,
       "production_selector_changed": false

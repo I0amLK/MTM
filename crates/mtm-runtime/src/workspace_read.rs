@@ -166,6 +166,7 @@ pub(super) fn read(
     Ok(json!({
         "path":resolved.display,"content":selected,"start_line":request.start,"end_line":last_line,
         "line_byte_offset":request.offset,"total_lines":total,"total_bytes":text.len(),"sha256":digest,
+        "revision":digest,"revision_algorithm":"sha256",
         "truncated":truncated,"next_start_line":next_line,"next_line_byte_offset":next_offset,
         "next_action":next_action
     }))
