@@ -4,6 +4,7 @@ mod command_policy;
 mod evaluator;
 mod native_permission;
 mod patch;
+mod patch_update;
 mod path_policy;
 mod redaction;
 mod schema;
@@ -28,6 +29,7 @@ pub use native_permission::{
     native_mode_implicitly_grants,
 };
 pub use patch::{PatchOperation, apply_update_hunks, parse_patch};
+pub use patch_update::{PatchChangedRange, PatchUpdate, apply_update_hunks_detailed};
 pub use path_policy::validate_workspace_path;
 pub use redaction::{redact_bytes, redact_json, token_fingerprint};
 pub use schema::validate_schema_value;

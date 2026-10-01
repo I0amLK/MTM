@@ -3,7 +3,7 @@ use std::fmt;
 use std::path::{Component, Path, PathBuf};
 
 use crate::command_policy::classify_command_permissions;
-use crate::patch::{PatchOperation, parse_patch};
+use crate::patch::{PatchOperation, parse_patch_current};
 use crate::path_policy::validate_workspace_path;
 use mtm_contracts::{
     NativeMode, NativePermissionKind, NativePermissionScope, NativePermissionTool, ReCtmError,
@@ -16,7 +16,7 @@ pub const DEFAULT_PERMISSION_TTL_SECONDS: u64 = 300;
 pub const MAX_PERMISSION_TTL_SECONDS: u64 = 3_600;
 
 /// Public `exec_command` timeout defaults and bounds.
-pub const DEFAULT_EXEC_TIMEOUT_MS: u64 = 30_000;
+pub const DEFAULT_EXEC_TIMEOUT_MS: u64 = 300_000;
 pub const MAX_EXEC_TIMEOUT_MS: u64 = 600_000;
 pub const DEFAULT_EXEC_YIELD_TIME_MS: u64 = 10_000;
 pub const MAX_EXEC_YIELD_TIME_MS: u64 = 30_000;
@@ -502,10 +502,51 @@ impl fmt::Debug for PatchInvocation {
 }
 
 impl PatchInvocation {
+    /// An authority-neutral path scope for validated structured changes.
+    /// Runtime path facts and policy evaluation still precede every commit.
+    pub fn structured_scope(
+        paths: &[String],
+        dry_run: bool,
+        arguments_sha256: String,
+    ) -> Result<Self, ReCtmError> {
+        if paths.is_empty()
+            || arguments_sha256.len() != 64
+            || !arguments_sha256.bytes().all(|b| b.is_ascii_hexdigit())
+        {
+            return Err(invalid_argument("Invalid structured change scope"));
+        }
+        let mut operations = Vec::new();
+        for path in paths {
+            validate_workspace_path(path)?;
+            operations.push(PatchOperation {
+                kind: "update".into(),
+                path: path.clone(),
+                add_content: None,
+                hunks: Vec::new(),
+                move_to: None,
+            });
+        }
+        Ok(Self {
+            operations,
+            dry_run,
+            arguments_sha256,
+        })
+    }
+
     /// Parse and validate the public `apply_patch` argument object.
     pub fn parse(input: &Map<String, Value>) -> Result<Self, ReCtmError> {
-        const ALLOWED: [&str; 2] = ["patch", "dry_run"];
+        const ALLOWED: [&str; 3] = ["patch", "dry_run", "idempotency_key"];
         reject_unknown_keys(input, &ALLOWED)?;
+        if let Some(key) = input.get("idempotency_key") {
+            if key
+                .as_str()
+                .is_none_or(|s| s.is_empty() || s.len() > 128 || s.contains('\0'))
+            {
+                return Err(invalid_argument(
+                    "idempotency_key must be a nonempty string of at most 128 bytes without NUL",
+                ));
+            }
+        }
         let patch = input
             .get("patch")
             .and_then(Value::as_str)
@@ -514,7 +555,13 @@ impl PatchInvocation {
         if patch.contains('\0') {
             return Err(invalid_argument("patch contains a NUL byte"));
         }
-        let operations = parse_patch(patch)?;
+        if patch.len() > 1024 * 1024 {
+            return Err(invalid_argument("patch exceeds 1 MiB"));
+        }
+        let operations = parse_patch_current(patch)?;
+        if operations.len() > 100 {
+            return Err(invalid_argument("patch exceeds 100 operations"));
+        }
         if operations.is_empty() {
             return Err(invalid_argument(
                 "patch must contain at least one operation",
@@ -1582,6 +1629,7 @@ mod tests {
 
     #[test]
     fn typed_exec_invocation_defaults_and_forms_are_distinct() -> Result<(), ReCtmError> {
+        assert_eq!(DEFAULT_EXEC_TIMEOUT_MS, 300_000);
         let command = exec(serde_json::json!({
             "cmd":"printf secret",
             "workdir":"./src",
@@ -1701,13 +1749,20 @@ mod tests {
 
     #[test]
     fn intrinsic_classifier_handles_timeout_boundaries() -> Result<(), ReCtmError> {
+        let defaulted = exec(serde_json::json!({"cmd":"true"}))?;
+        assert_eq!(defaulted.timeout_ms(), 300_000);
+        assert!(
+            classify_exec_permissions(&defaulted, &facts_for(&defaulted, None)?)?
+                .contains(&NativePermissionKind::LongTimeout)
+        );
         for (timeout, expected) in [(1, false), (30_000, false), (30_001, true), (600_000, true)] {
             let invocation = exec(serde_json::json!({"cmd":"true","timeout_ms":timeout}))?;
             let facts = facts_for(&invocation, None)?;
             let needs = classify_exec_permissions(&invocation, &facts)?;
             assert_eq!(needs.contains(&NativePermissionKind::LongTimeout), expected);
         }
-        let yield_only = exec(serde_json::json!({"cmd":"true","yield_time_ms":30_000}))?;
+        let yield_only =
+            exec(serde_json::json!({"cmd":"true","yield_time_ms":30_000,"timeout_ms":30_000}))?;
         let yield_facts = facts_for(&yield_only, None)?;
         assert!(
             !classify_exec_permissions(&yield_only, &yield_facts)?
@@ -1778,7 +1833,7 @@ mod tests {
 
     #[test]
     fn setgid_metadata_requires_privileged_executable() -> Result<(), ReCtmError> {
-        let invocation = exec(serde_json::json!({"argv":["fixture"]}))?;
+        let invocation = exec(serde_json::json!({"argv":["fixture"],"timeout_ms":30_000}))?;
         let fact = ResolvedExecutableFact::new(
             "fixture",
             PathBuf::from("/sandbox/fixture"),
@@ -1955,6 +2010,43 @@ mod tests {
         )?;
         let patch_debug = format!("{patch:?}");
         assert!(!patch_debug.contains("VERY_SECRET_PATCH"));
+        Ok(())
+    }
+
+    #[test]
+    fn current_patch_invocation_preserves_anchors_eof_and_bounds() -> Result<(), ReCtmError> {
+        let patch = "*** Begin Patch\n*** Update File: a\n@@ anchor\n-old\n+new\n*** End of File\n*** End Patch\n";
+        let request = serde_json::json!({"patch":patch})
+            .as_object()
+            .cloned()
+            .unwrap_or_default();
+        let invocation = PatchInvocation::parse(&request)?;
+        assert_eq!(invocation.operations()[0].hunks[0][0], "@@ anchor");
+        assert_eq!(
+            invocation.operations()[0].hunks[0]
+                .last()
+                .map(String::as_str),
+            Some("*** End of File")
+        );
+        for patch in [
+            "x".repeat(1024 * 1024 + 1),
+            format!(
+                "*** Begin Patch\n{}*** End Patch\n",
+                (0..101)
+                    .map(|n| format!("*** Add File: f{n}\n+x\n"))
+                    .collect::<String>()
+            ),
+        ] {
+            assert!(
+                PatchInvocation::parse(
+                    &serde_json::json!({"patch":patch})
+                        .as_object()
+                        .cloned()
+                        .unwrap_or_default()
+                )
+                .is_err()
+            );
+        }
         Ok(())
     }
 }

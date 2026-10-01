@@ -6,6 +6,9 @@ use crate::support::{Result, require, submission, text};
 use rusqlite::{Connection, OpenFlags};
 use serde_json::{Value, json};
 
+#[path = "submission_denials.rs"]
+mod submission_denials;
+
 fn status(server: &Server, owner: &Client, task: &Value) -> Result<Value> {
     server.call(
         owner,
@@ -248,12 +251,13 @@ fn partial_nonrecoverable_failure_stays_unknown_across_restart_and_fresh_tokens(
     let owner = server.login()?;
     let task = super::start(&server, &owner, "compact")?;
     let alternate = server.call(&owner, "rethlas_step", json!({"run_id":task["run_id"]}))?;
-    let mut request = submission(&task)?;
-    request["writes"]
-        .as_array_mut()
-        .ok_or("writes")?
-        .push(json!({
-        "resource":"memory:verifier:events","content":{"summary":"must be rejected by role ACL"}}));
+    let request = submission(&task)?;
+    // A published-file/failed-checkpoint ambiguity must remain unknown. A role
+    // denial between writes is no longer a proxy for such uncertainty.
+    let db = Connection::open(server.private_state_path()).map_err(|_| "fixture DB")?;
+    db.execute_batch("CREATE TRIGGER block_write_ack BEFORE UPDATE ON step_checkpoints WHEN NEW.accepted_writes=1 AND OLD.accepted_writes<>NEW.accepted_writes BEGIN SELECT RAISE(ABORT,'fixture checkpoint failure'); END;")
+        .map_err(|_| "fixture checkpoint trigger")?;
+    drop(db);
     let unknown = server.call(&owner, "rethlas_step", request.clone())?;
     require(
         error_code(&unknown) == "RESULT_UNKNOWN" && unknown["ok"] == false,

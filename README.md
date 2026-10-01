@@ -27,12 +27,16 @@ one inherited ignore) and all eight explicit machine profiles, including 21 upgr
 checks and 500/500 assessments. See `docs/MTM-017-PREVIEW2-QUALIFICATION.md` for the
 exact identities, retained failed attempt and remaining release conditions.
 
-The current development contract uses **schema 8**, **`mtm-tools-v10`** and
+The current development contract uses **schema 8**, **`mtm-tools-v11`** and
 dangerous-only Native execution. Bubblewrap and workflow/finalizer authority
 remain separate. Verified final proofs can promote immutable project facts;
-typed findings and a bounded predecessor-closed graph reach `rethlas_step`
-without adding a public tool. The operator-only `mtm fact-graph` CLI exports
-graphs and cascades explicit revocations.
+typed findings and a bounded predecessor-closed graph reach `rethlas_step`.
+MTM-018 adds revision-bound `apply_changes` and bounded CTM v0.5 Native reliability
+updates, for 25 public tools (19 Native plus 6 workflow). See
+`docs/MTM-018-CTM-050-INTEGRATION.md` for the full existing-tool delta matrix,
+intentional safety differences and current development evidence. Earlier MTM-017
+qualification below remains bound to its original artifact, not this changed build.
+The operator-only `mtm fact-graph` CLI exports graphs and cascades explicit revocations.
 
 The implementation and its closing review are recorded in
 `docs/MTM-017-DANGEROUS-ONLY-AND-FACT-MEMORY.md`,
@@ -201,7 +205,7 @@ and is not counted as a pass when the host installation rejects its license.
 ## Highlights
 
 - Single Rust executable: `mtm`.
-- 24 public MCP tools; this development branch removes the 11 historical hidden aliases.
+- 25 public MCP tools; this development branch removes the 11 historical hidden aliases.
 - OAuth DCR, PKCE, bearer-token validation, legacy/modern MCP, and HTTP gateway.
 - Capability-gated Rethlas workflow with private vault, verifier, repair, and
   mechanical finalizer.

@@ -25,7 +25,7 @@ fn current_identity_does_not_publish_the_migration_baseline() -> Result<(), Box<
     let status = read("status")?;
     assert_eq!(info["version"], env!("CARGO_PKG_VERSION"));
     assert_eq!(info["version"], "0.6.0-preview.2");
-    assert_eq!(info["public_tool_count"], 24);
+    assert_eq!(info["public_tool_count"], 25);
     assert_eq!(info["hidden_alias_count"], 0);
     assert_eq!(info["workflow_protocol_version"], 3);
     assert_eq!(info["state_schema_version"], 8);
@@ -49,8 +49,8 @@ fn cli_catalog_is_complete_and_exposes_real_argument_properties() -> Result<(), 
         .as_object()
         .ok_or("missing definitions")?;
     let names = catalog["public_names"].as_array().ok_or("missing names")?;
-    assert_eq!(definitions.len(), 24);
-    assert_eq!(names.len(), 24);
+    assert_eq!(definitions.len(), 25);
+    assert_eq!(names.len(), 25);
     assert_eq!(
         catalog["tool_contract_version"],
         info["tool_contract_version"]

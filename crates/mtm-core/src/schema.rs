@@ -150,6 +150,23 @@ fn validate_object(
             }
         }
     }
+    // JSON Schema dependentRequired is based on presence, including null, and
+    // does not insert defaults or recursively evaluate another dependency.
+    if let Some(dependencies) = schema.get("dependentRequired").and_then(Value::as_object) {
+        for (trigger, required) in dependencies {
+            if object.contains_key(trigger)
+                && let Some(required) = required.as_array()
+            {
+                for key in required.iter().filter_map(Value::as_str) {
+                    if !object.contains_key(key) {
+                        return Err(invalid_argument(format!(
+                            "{path}.{key} is required when {path}.{trigger} is present"
+                        )));
+                    }
+                }
+            }
+        }
+    }
     let properties = schema.get("properties").and_then(Value::as_object);
     let additional = schema.get("additionalProperties");
     for (key, item) in object {
@@ -295,6 +312,33 @@ mod tests {
             "arguments.extra is not a recognized argument"
         );
         Ok(())
+    }
+
+    #[test]
+    fn dependent_required_checks_presence_without_mutation_or_recursion() {
+        let schema = serde_json::json!({"dependentRequired":{
+            "a":["b"],"b":["a"],"payload":["a","b"],"empty":[]
+        }});
+        for valid in [
+            serde_json::json!({}),
+            serde_json::json!({"a":null,"b":false}),
+            serde_json::json!({"a":1,"b":2,"payload":{}}),
+            serde_json::json!({"empty":true}),
+            serde_json::json!(["a"]),
+            serde_json::json!(null),
+        ] {
+            let before = valid.clone();
+            assert!(validate_schema_value(&valid, &schema, "arguments").is_ok());
+            assert_eq!(valid, before);
+        }
+        for invalid in [
+            serde_json::json!({"a":null}),
+            serde_json::json!({"b":false}),
+            serde_json::json!({"payload":{}}),
+            serde_json::json!({"payload":{},"a":1}),
+        ] {
+            assert!(validate_schema_value(&invalid, &schema, "arguments").is_err());
+        }
     }
 
     #[test]

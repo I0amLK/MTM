@@ -218,3 +218,98 @@ fn literal_glob_filename_does_not_select_siblings() -> Result<(), ReCtmError> {
     assert!(!diff.contains("sibling-not-selected"));
     Ok(())
 }
+
+#[test]
+fn untracked_diff_honors_filters_bounds_and_ignored_files() -> Result<(), ReCtmError> {
+    let (root, _private, w) = fixture()?;
+    fs::write(root.path().join("fresh.txt"), "new\n").map_err(io_error)?;
+    fs::write(root.path().join(".gitignore"), "ignored.txt\n").map_err(io_error)?;
+    fs::write(root.path().join("ignored.txt"), "SHOULD_NOT_BE_DIFFED").map_err(io_error)?;
+    let result = w.git_diff(&args(json!({"path":"fresh.txt"}))?)?;
+    assert!(result["diff"].as_str().unwrap_or_default().contains("+new"));
+    assert_eq!(
+        w.git_diff(&args(
+            json!({"path":"fresh.txt","include_untracked":false})
+        )?)?["diff"],
+        ""
+    );
+    assert_eq!(
+        w.git_diff(&args(
+            json!({"path":"fresh.txt","unstaged":false,"staged":true})
+        )?)?["diff"],
+        ""
+    );
+    assert_eq!(
+        w.git_diff(&args(json!({"path":"ignored.txt"}))?)?["diff"],
+        ""
+    );
+    let short = w.git_diff(&args(json!({"path":"fresh.txt","max_bytes":10}))?)?;
+    assert!(short["diff"].as_str().unwrap_or_default().len() <= 10);
+    assert_eq!(short["truncated"], true);
+    Ok(())
+}
+#[test]
+fn untracked_diff_refuses_private_hardlink_and_symlink_aliases() -> Result<(), ReCtmError> {
+    use std::os::unix::fs::symlink;
+    let (root, private, w) = fixture()?;
+    fs::write(private.path().join("secret"), "private").map_err(io_error)?;
+    fs::hard_link(private.path().join("secret"), root.path().join("hard")).map_err(io_error)?;
+    symlink(private.path().join("secret"), root.path().join("sym")).map_err(io_error)?;
+    for path in ["hard", "sym"] {
+        assert!(w.git_diff(&args(json!({"path":path}))?).is_err());
+    }
+    Ok(())
+}
+
+#[test]
+fn untracked_names_remain_exact_and_listing_truncation_fails_closed() -> Result<(), ReCtmError> {
+    let (root, _private, w) = fixture()?;
+    for name in ["a b.txt", "quote\".txt", "line\nbreak.txt", "unicode中.txt"] {
+        fs::write(root.path().join("nested").join(name), "中🙂\n").map_err(io_error)?;
+        let result = w.git_diff(&args(json!({"repo_path":"nested","path":name}))?)?;
+        assert!(
+            result["files"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .any(|v| v == name)
+        );
+        let mut valid = result.clone();
+        valid["ok"] = json!(true);
+        let catalog = mtm_gateway::ToolCatalog::new();
+        mtm_core::validate_schema_value(
+            &valid,
+            &catalog
+                .definition("git_diff")
+                .ok_or_else(|| internal("schema"))?["outputSchema"],
+            "result",
+        )?;
+        for budget in [1, 2, 3, 100] {
+            let tiny = w.git_diff(&args(
+                json!({"repo_path":"nested","path":name,"max_bytes":budget}),
+            )?)?;
+            assert!(tiny["diff"].as_str().unwrap_or_default().len() <= budget as usize);
+            assert!(
+                !tiny["diff"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .contains('\u{fffd}')
+            );
+        }
+    }
+    for i in 0..1200 {
+        fs::write(
+            root.path()
+                .join("nested")
+                .join(format!("{i:04}-{}", "x".repeat(230))),
+            "x",
+        )
+        .map_err(io_error)?;
+    }
+    assert_eq!(
+        w.git_diff(&args(json!({"repo_path":"nested"}))?)
+            .map_err(|e| e.code),
+        Err("GIT_OUTPUT_TRUNCATED".into())
+    );
+    Ok(())
+}

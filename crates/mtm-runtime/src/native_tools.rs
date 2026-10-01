@@ -188,7 +188,7 @@ impl NativeToolRuntime {
                 ||serde_json::json!({"policy":"unavailable","resolved_read_only_root_count":0}),
                 |plan|plan.summary(false)
             ),
-            "ctm_native_tool_compatibility":"18_of_18_surface",
+            "ctm_native_tool_compatibility":"19_tool_surface_with_documented_mtm_boundaries",
             "command_lifecycle":{"max_active_commands":16,"write_stdin":true,"read_output":true,"kill_command":true}
         })
     }
@@ -327,7 +327,7 @@ impl NativeToolRuntime {
         self.command_manager.start(CommandRequest {
             argv: command,
             env: BTreeMap::new(),
-            timeout_ms: integer(arguments, "timeout_ms", 30_000)?,
+            timeout_ms: integer(arguments, "timeout_ms", 300_000)?,
             yield_time_ms: integer(arguments, "yield_time_ms", 10_000)?,
             max_output_bytes: usize_value(arguments, "max_output_bytes", 65_536)?,
             stdin: arguments

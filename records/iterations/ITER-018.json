@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-018",
+  "title": "Coding Tools MCP v0.5 foundation integration",
+  "status": "completed",
+  "started_at": "2026-10-01T02:21:16Z",
+  "base_commit": "afa207e68eefd8cb9e6ab20aaafe497f9616e341",
+  "plan": "docs/MTM-018-CTM-050-INTEGRATION.md",
+  "authority": {
+    "before": "rust",
+    "after": "rust",
+    "native_does_not_grant_workflow_authority": true,
+    "production_selector_changed": false,
+    "production_state_rewritten": false
+  },
+  "tool_contract_before": "mtm-tools-v10",
+  "tool_contract_after": "mtm-tools-v11",
+  "public_tools_before": 24,
+  "public_tools_after": 25,
+  "upstream": {
+    "repository": "https://github.com/xyTom/coding-tools-mcp",
+    "tag": "v0.5.0",
+    "commit": "aa1cbf3832e0c85994600f2249d9544fbae2f49e",
+    "archive_sha256": "411cfc2a8a4121857787870af631155295cf5e94a7c419c13c1fa9555e969460"
+  },
+  "validation": {
+    "full_source_gate": "passed",
+    "workspace_tests": {
+      "passed": 749,
+      "failed": 0,
+      "ignored": 1
+    },
+    "source_sha256": "9b7dbe7ab33d85a455f17198e9340cbe4f88c5cf082b2485a56fc43a3aeea07d",
+    "independent_review": "no_blockers",
+    "release_build": "passed",
+    "stable_artifact": {
+      "path": "target/mtm018-artifacts/mtm-ctm050-1dfbc1c86a5d",
+      "absolute_path": "/home/lk/桌面/MTM2/MTM/target/mtm018-artifacts/mtm-ctm050-1dfbc1c86a5d",
+      "sha256": "1dfbc1c86a5dbed845aa79e0a944aa8f2ebb2e05619e36c8d020212f62696ae5",
+      "bytes": 14148352,
+      "nlink": 1,
+      "mode": "0500",
+      "public_tools": 25,
+      "tool_contract": "mtm-tools-v11",
+      "state_schema": 8,
+      "workflow_protocol": 3,
+      "version": "0.6.0-preview.2",
+      "installed": false
+    },
+    "release_qualified": false,
+    "deployment_authorized": false
+  },
+  "receipts": [
+    {
+      "receipt_id": "MREC-018-CTM050-20261001",
+      "milestone_id": "MTM-018",
+      "started_at": "2026-10-01T01:39:21Z",
+      "completed_at": "2026-10-01T03:50:31Z",
+      "status_before": "in_progress",
+      "status_after": "completed",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "feat(native): integrate bounded CTM 0.5 foundation [MTM-018]",
+      "commit_performed": false,
+      "files_changed": [
+        "AGENTS.md",
+        "README.md",
+        "crates/mtm-cli/tests/identity.rs",
+        "crates/mtm-cli/tests/support/workspace_smoke.rs",
+        "crates/mtm-contracts/src/lib.rs",
+        "crates/mtm-core/src/lib.rs",
+        "crates/mtm-core/src/native_permission.rs",
+        "crates/mtm-core/src/patch.rs",
+        "crates/mtm-core/src/patch_legacy.rs",
+        "crates/mtm-core/src/patch_update.rs",
+        "crates/mtm-gateway/src/bin/server.rs",
+        "crates/mtm-gateway/src/catalog/mod.rs",
+        "crates/mtm-gateway/src/catalog/native_output.rs",
+        "crates/mtm-gateway/src/catalog/schema.rs",
+        "crates/mtm-gateway/src/catalog/tests.rs",
+        "crates/mtm-native/src/process.rs",
+        "crates/mtm-native/src/process_outcome_tests.rs",
+        "crates/mtm-runtime/src/native_authority.rs",
+        "crates/mtm-runtime/src/native_permission.rs",
+        "crates/mtm-runtime/src/native_replay.rs",
+        "crates/mtm-runtime/src/native_tools.rs",
+        "crates/mtm-runtime/src/submission_events.rs",
+        "crates/mtm-runtime/src/tool_backend.rs",
+        "crates/mtm-runtime/src/tool_result_tests.rs",
+        "crates/mtm-runtime/src/workspace.rs",
+        "crates/mtm-runtime/src/workspace_changes.rs",
+        "crates/mtm-runtime/src/workspace_changes_tests.rs",
+        "crates/mtm-runtime/src/workspace_git_tests.rs",
+        "crates/mtm-runtime/src/workspace_read.rs",
+        "crates/mtm-runtime/src/workspace_read_tests.rs",
+        "crates/mtm-runtime/src/workspace_untracked.rs",
+        "docs/MTM-018-CTM-050-INTEGRATION.md",
+        "records/governance/migration-graph.json",
+        "records/iterations/ITER-018.json",
+        "records/evidence/MTM-018/ctm050-integration-20261001.json"
+      ],
+      "commands": [
+        {
+          "command": "cargo xtask check",
+          "exit_code": 0,
+          "result": "749 passed, 0 failed, 1 inherited ignored; source frozen at 9b7dbe7ab33d85a455f17198e9340cbe4f88c5cf082b2485a56fc43a3aeea07d"
+        },
+        {
+          "command": "cargo build --locked --offline --release -p mtm-cli",
+          "exit_code": 0,
+          "result": "Stable single-link readonly artifact verified as 1dfbc1c86a5dbed845aa79e0a944aa8f2ebb2e05619e36c8d020212f62696ae5"
+        }
+      ],
+      "acceptance": {
+        "A0": {
+          "passed": true,
+          "evidence": [
+            "records/evidence/MTM-018/ctm050-integration-20261001.json"
+          ]
+        },
+        "A1": {
+          "passed": true,
+          "evidence": [
+            "All19 Native output schemas, current25/v11 identity, lossless read and frozen135-case pure-policy corpus"
+          ]
+        },
+        "A3": {
+          "passed": true,
+          "evidence": [
+            "Real authenticated/client-scoped Native replay, revision/path/rollback/concurrency/command-outcome regressions; inherited workflow authority tests"
+          ]
+        }
+      },
+      "behavior_before": "24 tools/v10; no revision-bound structured editor; old Native patch/read/Git/process-result behavior.",
+      "behavior_after": "25 tools/v11 with bounded apply_changes, caller-scoped in-memory replay and reviewed old18-tool changes/deviations.",
+      "risk_review": "Independent code review has no blockers. OAuth/private-vault/Bubblewrap/workflow/state boundaries and prior dirty fixes preserved. Broad stale filesystem breaker and unsafe upstream chaining deliberately excluded.",
+      "rollback": "Revert only MTM-018 source hunks while retaining preexisting uncommitted corrections. Prior build1144b249 preserved; no state migration performed.",
+      "manual_pending": [
+        "Operator live-client/TUI test of this exact artifact",
+        "Separate release/deployment authorization and exact-artifact target acceptance if requested"
+      ],
+      "decision": "accepted_development_source_only",
+      "source_sha256": "9b7dbe7ab33d85a455f17198e9340cbe4f88c5cf082b2485a56fc43a3aeea07d",
+      "evidence": "records/evidence/MTM-018/ctm050-integration-20261001.json",
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_state_modified": false,
+      "production_selector_changed": false
+    }
+  ],
+  "completed_at": "2026-10-01T03:50:31Z",
+  "follow_up": {
+    "live_client_smoke": "records/evidence/MTM-018/live-client-smoke-20261001.json",
+    "scope": "Authenticated Native create/replay/edit/read and two new normal/correction workflows reached done",
+    "publication_authorized_at": "2026-10-01T04:48:36Z",
+    "publication_branch": "work/mtm017-dangerous-fact-memory",
+    "prior_receipt_remains_historical": true,
+    "release_qualified": false
+  }
+}

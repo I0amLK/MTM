@@ -118,7 +118,7 @@ async fn run() -> Result<(), ReCtmError> {
             "service": "mtm-gateway",
             "address": local.to_string(),
             "oauth_only": true,
-            "tool_count": 24,
+            "tool_count": mtm_gateway::PUBLIC_TOOL_NAMES.len(),
         })
     );
     axum::serve(

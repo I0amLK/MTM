@@ -100,7 +100,8 @@ fn receipt_response(receipt: &SubmissionReceipt, replayed: bool) -> Result<Value
         submission["retained_write_prefix_len"] = json!(result.writes_applied);
         submission["error"] = json!({"code":result.error_code,
             "message":"The recorded submission requires correction. Do not reapply retained writes; fetch the current task separately.",
-            "category":"validation","retryable":false,"details":{}});
+            "category":if result.error_code.as_deref() == Some("ROLE_ACCESS_DENIED") { "permission" } else { "validation" },
+            "retryable":false,"details":{}});
     }
     let mut summary = receipt.summary();
     summary["replayed"] = json!(replayed);
@@ -208,6 +209,28 @@ mod tests {
         assert!(!error.retryable);
         assert!(error.details["writes_applied"].is_null());
         assert!(!error.to_payload().to_string().contains("private text"));
+    }
+
+    #[test]
+    fn only_caller_write_role_denial_is_a_permission_correction_candidate() {
+        let denied = ReCtmError::new("ROLE_ACCESS_DENIED", "fixture")
+            .with_category(ErrorCategory::Permission);
+        assert!(recoverable_caller_write_error(&denied));
+        assert!(!recoverable_error(&denied));
+        for code in [
+            "CAPABILITY_INVALID",
+            "CAPABILITY_EXPIRED",
+            "CAPABILITY_OWNER_MISMATCH",
+            "SUBMISSION_AUTHORITY_CHANGED",
+            "CAPABILITY_REVOKED",
+        ] {
+            let error = ReCtmError::new(code, "fixture").with_category(ErrorCategory::Permission);
+            assert!(!recoverable_caller_write_error(&error));
+        }
+        assert!(!recoverable_caller_write_error(
+            &ReCtmError::new("ROLE_ACCESS_DENIED", "fixture")
+                .with_category(ErrorCategory::Internal)
+        ));
     }
 
     #[test]

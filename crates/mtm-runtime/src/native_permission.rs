@@ -351,7 +351,7 @@ mod tests {
         fs::write(&executable, "fixture").map_err(|error| internal(&error.to_string()))?;
         fs::set_permissions(&executable, fs::Permissions::from_mode(0o4755))
             .map_err(|error| internal(&error.to_string()))?;
-        let args = serde_json::json!({"argv":["fixture"],"workdir":"."})
+        let args = serde_json::json!({"argv":["fixture"],"workdir":".","timeout_ms":30_000})
             .as_object()
             .cloned()
             .unwrap_or_default();

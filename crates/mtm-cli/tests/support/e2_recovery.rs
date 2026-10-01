@@ -137,26 +137,51 @@ fn recovery_only_never_executes_missing_work_and_reconciles_completed_prefix() -
         state["state"] == "assess" && state["pending_submission"].is_null(),
         "missing recovery reserved or advanced",
     )?;
+    let initial_sequence = state["transition_seq"].clone();
     request
         .as_object_mut()
         .ok_or("fixture request")?
         .remove("recover_only");
+    // Pick one valid server-issued record; the default template may include
+    // multiple independent records and is not this interruption fixture's size.
+    let first = request["writes"]
+        .as_array()
+        .ok_or("fixture writes")?
+        .iter()
+        .find(|write| write["resource"] == "memory:generation:immediate_conclusions")
+        .cloned()
+        .ok_or("fixture first record")?;
+    request["writes"] = json!([first]);
+    let retained = request["writes"].as_array().ok_or("fixture writes")?.len();
+    require(retained == 1, "fixture must retain exactly its first write")?;
     request["writes"].as_array_mut().ok_or("fixture writes")?.push(json!({
-        "resource":"memory:verifier:events","content":{"summary":"denied after earlier caller writes"}}));
+        "resource":"memory:generation:immediate_conclusions","content":{"summary":"second record must remain unexecuted"}}));
+    // Interrupt the next legal write before its file effect is enrolled. The
+    // transaction rolls back to Between with the earlier prefix acknowledged.
+    // A role denial is now a completed correction, not an interruption fixture.
+    let db = Connection::open(server.private_state_path()).map_err(|_| "fixture database")?;
+    db.execute_batch(&format!("CREATE TRIGGER e2_block_write_begin BEFORE UPDATE ON step_write_journals WHEN json_extract(NEW.marker_json,'$.kind')='file' AND (SELECT accepted_writes FROM step_checkpoints WHERE capability_sha256=NEW.capability_sha256)={retained} BEGIN SELECT RAISE(ABORT,'fixture next write interruption'); END;"))
+        .map_err(|_| "fixture write interruption")?;
     let unknown = server.call(&owner, "rethlas_step", request.clone())?;
     require(
         error_code(&unknown) == "RESULT_UNKNOWN",
         "partial failure lost uncertainty",
     )?;
+    let before_memory = server.call(&owner, "rethlas_inspect", json!({"operation":"read","capability":task["capability"],"resource":"memory:generation:immediate_conclusions"}))?;
+    require(
+        before_memory["ok"] == true,
+        "fixture prefix observation failed",
+    )?;
+    db.execute_batch("DROP TRIGGER e2_block_write_begin")
+        .map_err(|_| "fixture trigger cleanup")?;
+    drop(db);
     request["recover_only"] = json!(true);
     let recovered = server.call(&owner, "rethlas_step", request)?;
     require(
         recovered["writes_applied"] == 0
             && recovered["submission"]["ok"] == false
             && recovered["submission_receipt"]["result"]["error_code"] == "SUBMISSION_INTERRUPTED"
-            && recovered["submission_receipt"]["result"]["writes_applied"]
-                .as_u64()
-                .is_some_and(|n| n > 0),
+            && recovered["submission_receipt"]["result"]["writes_applied"] == retained,
         "recovery did not preserve the exact accepted prefix as a correction",
     )?;
     let state = server.call(
@@ -165,8 +190,19 @@ fn recovery_only_never_executes_missing_work_and_reconciles_completed_prefix() -
         json!({"operation":"status","run_id":task["run_id"]}),
     )?;
     require(
-        state["pending_submission"].is_null() && state["state"] == "assess",
+        state["pending_submission"].is_null()
+            && state["state"] == "assess"
+            && state["transition_seq"] == initial_sequence,
         "prefix recovery advanced workflow or retained a false pending blocker",
+    )?;
+    let memory = server.call(&owner, "rethlas_inspect", json!({"operation":"read","capability":task["capability"],"resource":"memory:generation:immediate_conclusions"}))?;
+    require(
+        memory["ok"] == true
+            && memory["content"] == before_memory["content"]
+            && !memory["content"]
+                .to_string()
+                .contains("second record must remain unexecuted"),
+        "recovery executed the missing caller write",
     )?;
     super::cancel(&server, &owner, &task)?;
     server.stop()?;

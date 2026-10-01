@@ -50,14 +50,14 @@ impl ToolBackend for CountingBackend {
     fn call(
         &self,
         name: &str,
-        _arguments: &Map<String, Value>,
+        arguments: &Map<String, Value>,
         _principal: &OAuthPrincipal,
         _trace_id: &str,
         _context: &ToolCallContext,
     ) -> std::result::Result<ToolBackendResult, ReCtmError> {
         self.0.fetch_add(1, Ordering::SeqCst);
         Ok(ToolBackendResult::Complete(json!({
-            "content":[],"structuredContent":{"ok":true,"tool":name},"isError":false
+            "content":[],"structuredContent":{"ok":true,"tool":name,"arguments":arguments},"isError":false
         })))
     }
 }
@@ -336,6 +336,67 @@ async fn every_retired_alias_and_invalid_request_is_rejected_before_backend() ->
         assert_eq!(reply.json()?["result"]["isError"], false);
     }
     assert_eq!(fixture.backend.0.load(Ordering::SeqCst), 2);
+    Ok(())
+}
+
+#[tokio::test]
+async fn step_dependencies_reject_partial_calls_and_preserve_submission_arguments() -> Result {
+    let fixture = Fixture::new("")?;
+    let (auth, _) = fixture.authorize().await?;
+    let complete = json!({
+        "run_id":"run-fixture", "capability":format!("{}.{}", "a".repeat(60), "b".repeat(30)),
+        "action":"assessment_complete", "payload":{"route":"compact","text":"数学\nvalue"},
+        "writes":[{"resource":"memory","content":{"first":1}},
+            {"resource":"memory","content":{"second":2}}], "recover_only":false
+    });
+    let mut calls = 0;
+    for modern in [false, true] {
+        for arguments in [json!({"run_id":"run-fixture"}), complete.clone()] {
+            let mut params = json!({"name":"rethlas_step","arguments":arguments});
+            let mut headers = vec![("Authorization", auth.as_str())];
+            if modern {
+                params["_meta"] = json!({
+                    "io.modelcontextprotocol/protocolVersion":"2026-07-28",
+                    "io.modelcontextprotocol/clientCapabilities":{}
+                });
+                headers.extend([
+                    ("MCP-Protocol-Version", "2026-07-28"),
+                    ("Mcp-Method", "tools/call"),
+                    ("Mcp-Name", "rethlas_step"),
+                ]);
+            } else {
+                params["_meta"] = json!({"progressToken":"fixture-progress"});
+            }
+            let reply = fixture
+                .json("/mcp", rpc("tools/call", params), &headers)
+                .await?;
+            assert_eq!(reply.status, StatusCode::OK);
+            let result = reply.json()?;
+            assert_eq!(result["result"]["isError"], false);
+            let received = &result["result"]["structuredContent"]["arguments"];
+            assert_eq!(received, &arguments);
+            assert_eq!(
+                serde_json::to_vec(received)?,
+                serde_json::to_vec(&arguments)?
+            );
+            calls += 1;
+        }
+    }
+    assert_eq!(fixture.backend.0.load(Ordering::SeqCst), calls);
+    for field in ["capability", "action", "payload", "writes", "recover_only"] {
+        let mut partial = json!({"run_id":"run-fixture"});
+        partial[field] = complete[field].clone();
+        let reply = fixture.call(&auth, "rethlas_step", partial).await?;
+        assert_eq!(reply.json()?["error"]["code"], -32602);
+        assert_eq!(reply.json()?["error"]["data"]["code"], "INVALID_ARGUMENT");
+    }
+    for field in ["_meta", "unexpected"] {
+        let mut unknown = complete.clone();
+        unknown[field] = json!({});
+        let reply = fixture.call(&auth, "rethlas_step", unknown).await?;
+        assert_eq!(reply.json()?["error"]["code"], -32602);
+    }
+    assert_eq!(fixture.backend.0.load(Ordering::SeqCst), calls);
     Ok(())
 }
 

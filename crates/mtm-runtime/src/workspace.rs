@@ -10,7 +10,7 @@ use std::time::UNIX_EPOCH;
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 use mtm_contracts::{ErrorCategory, ReCtmError};
-use mtm_core::{PatchInvocation, PatchOperation, PatchPathFact, apply_update_hunks};
+use mtm_core::{PatchInvocation, PatchOperation, PatchPathFact, apply_update_hunks_detailed};
 #[cfg(test)]
 use mtm_core::{canonical_arguments_sha256, parse_patch};
 use mtm_native::{CommandManager, CommandManagerConfig, CommandRequest, PollRequest};
@@ -40,6 +40,12 @@ mod text_read;
 
 #[path = "workspace_git.rs"]
 mod git_scope;
+
+#[path = "workspace_changes.rs"]
+mod structured_changes;
+
+#[path = "workspace_untracked.rs"]
+mod untracked;
 
 #[derive(Clone, Debug)]
 pub struct ResolvedPath {
@@ -136,6 +142,12 @@ pub(crate) struct PreparedPatch {
     arguments_sha256: String,
     dry_run: bool,
     changes: Vec<PreparedPathChange>,
+    // Read-only dependencies (copy sources and no-op revision assertions).
+    dependencies: Vec<PreparedPathChange>,
+    strict_dependency_links: bool,
+    #[cfg(test)]
+    legacy_result: bool,
+    evidence: BTreeMap<String, Value>,
     authority: PatchAuthoritySnapshot,
     summary: Vec<String>,
     additions: usize,
@@ -201,6 +213,12 @@ impl PreparedPatch {
     }
 
     fn result(&self, warnings: Vec<String>) -> Value {
+        #[cfg(test)]
+        if self.legacy_result {
+            return serde_json::json!({"clean":true,"dry_run":self.dry_run,"summary":self.summary.join("\n"),
+                "additions":self.additions,"removals":self.removals,
+                "affected_files":self.affected_files.iter().map(|a|serde_json::json!({"operation":a.operation,"path":a.path})).collect::<Vec<_>>(),"warnings":warnings});
+        }
         serde_json::json!({
             "clean":true,
             "dry_run":self.dry_run,
@@ -210,7 +228,14 @@ impl PreparedPatch {
             "affected_files":self.affected_files.iter().map(|affected|serde_json::json!({
                 "operation":affected.operation,
                 "path":affected.path,
-            })).collect::<Vec<_>>(),
+            })).map(|mut item| {
+                if let Some(extra) = item["path"].as_str().and_then(|path| self.evidence.get(path)).and_then(Value::as_object) {
+                    if let Some(object) = item.as_object_mut() { object.extend(extra.clone()); }
+                }
+                item
+            }).collect::<Vec<_>>(),
+            "already_applied":self.changes.is_empty(),
+            "revision_algorithm":"sha256",
             "warnings":warnings,
         })
     }
@@ -693,6 +718,13 @@ impl NativeWorkspace {
         )
     }
 
+    pub(crate) fn prepare_changes(
+        &self,
+        arguments: &Map<String, Value>,
+    ) -> Result<(PreparedPatch, PatchInvocation), ReCtmError> {
+        structured_changes::prepare(self, arguments)
+    }
+
     fn prepare_patch_operations(
         &self,
         operations: &[PatchOperation],
@@ -708,10 +740,27 @@ impl NativeWorkspace {
         let mut removals = 0_usize;
         let mut summary = Vec::new();
         let mut affected_files = Vec::new();
+        let mut evidence = BTreeMap::new();
+        let mut dependencies = Vec::new();
+        let mut primary_paths = BTreeSet::new();
+        let mut claimed_paths = BTreeSet::new();
 
         for operation in operations {
             if matches!(semantics, PatchPreparationSemantics::Authority) {
                 self.deny_patch_symlink_components(&operation.path)?;
+                let primary = self.resolve_for_write(&operation.path)?.display;
+                if !primary_paths.insert(primary) {
+                    return Err(validation(
+                        "Patch primary paths must be unique after resolution",
+                    ));
+                }
+                for path in std::iter::once(&operation.path).chain(operation.move_to.as_ref()) {
+                    if !claimed_paths.insert(self.resolve_for_write(path)?.display) {
+                        return Err(validation(
+                            "MTM patches reject interacting source/destination paths; use separate revision-bound calls",
+                        ));
+                    }
+                }
                 if let Some(destination) = &operation.move_to {
                     self.deny_patch_symlink_components(destination)?;
                 }
@@ -726,6 +775,7 @@ impl NativeWorkspace {
                         );
                     }
                     let content = operation.add_content.clone().unwrap_or_default();
+                    evidence.insert(target.display.clone(), serde_json::json!({"revision":sha256_bytes(content.as_bytes()),"total_lines":content.split_inclusive('\n').count(),"match_quality":"exact","changed_ranges":[{"start_line":1,"end_line":content.split_inclusive('\n').count(),"added_lines":content.split_inclusive('\n').count(),"removed_lines":0}]}));
                     additions += content.lines().count();
                     summary.push(format!("A {}", operation.path));
                     affected_files.push(PreparedAffectedFile {
@@ -778,13 +828,63 @@ impl NativeWorkspace {
                         }
                         PatchBaseline::Missing => None,
                     };
-                    let updated = apply_update_hunks(&old, &operation.hunks, &operation.path)?;
-                    additions += updated.lines().count().saturating_sub(old.lines().count());
-                    removals += old.lines().count().saturating_sub(updated.lines().count());
+                    let outcome =
+                        apply_update_hunks_detailed(&old, &operation.hunks, &operation.path)?;
+                    let detail = serde_json::json!({"revision":sha256_bytes(outcome.content.as_bytes()),"total_lines":outcome.content.split_inclusive('\n').count(),"changed_ranges":outcome.changed_ranges,"match_quality":outcome.match_quality});
+                    additions += outcome.additions;
+                    removals += outcome.removals;
+                    #[cfg(test)]
+                    if matches!(
+                        semantics,
+                        PatchPreparationSemantics::ProductionCompatibility
+                    ) {
+                        additions = additions - outcome.additions
+                            + outcome
+                                .content
+                                .lines()
+                                .count()
+                                .saturating_sub(old.lines().count());
+                        removals = removals - outcome.removals
+                            + old
+                                .lines()
+                                .count()
+                                .saturating_sub(outcome.content.lines().count());
+                    }
+                    let updated = outcome.content;
                     affected_paths.insert(operation.path.clone());
+                    if old == updated && operation.move_to.is_none() {
+                        evidence.insert(source.display.clone(), detail);
+                        summary.push(format!("= {}", source.display));
+                        affected_files.push(PreparedAffectedFile {
+                            operation: "unchanged".into(),
+                            path: source.display.clone(),
+                        });
+                        dependencies.push(PreparedPathChange {
+                            relative_path: operation.path.clone(),
+                            resolution: patch_source_resolution(semantics),
+                            resolved: source,
+                            baseline,
+                            final_content: None,
+                            final_mode: None,
+                        });
+                        continue;
+                    }
                     if let Some(destination) = &operation.move_to {
                         let (target, target_baseline) =
                             self.capture_patch_destination(destination)?;
+                        if target.path == source.path {
+                            return Err(validation("Move source and destination must differ"));
+                        }
+                        evidence.insert(target.display.clone(), detail);
+                        if let Some(detail) = evidence.get_mut(&target.display) {
+                            detail["old_path"] = serde_json::json!(source.display);
+                        }
+                        if matches!(semantics, PatchPreparationSemantics::Authority) {
+                            affected_files.push(PreparedAffectedFile {
+                                operation: "delete".into(),
+                                path: source.display.clone(),
+                            });
+                        }
                         summary.push(format!("R {} -> {destination}", operation.path));
                         affected_files.push(PreparedAffectedFile {
                             operation: "update".to_owned(),
@@ -820,6 +920,7 @@ impl NativeWorkspace {
                             },
                         )?;
                     } else {
+                        evidence.insert(source.display.clone(), detail);
                         summary.push(format!("M {}", operation.path));
                         affected_files.push(PreparedAffectedFile {
                             operation: "update".to_owned(),
@@ -868,6 +969,14 @@ impl NativeWorkspace {
             arguments_sha256: arguments_sha256.to_owned(),
             dry_run,
             changes: changes.into_values().collect(),
+            dependencies,
+            strict_dependency_links: false,
+            #[cfg(test)]
+            legacy_result: matches!(
+                semantics,
+                PatchPreparationSemantics::ProductionCompatibility
+            ),
+            evidence,
             authority,
             summary,
             additions,
@@ -1401,7 +1510,10 @@ impl NativeWorkspace {
         if let Some(git_metadata) = prepared.git_metadata() {
             git_metadata.revalidate()?;
         }
-        for change in &prepared.changes {
+        for change in prepared.changes.iter().chain(&prepared.dependencies) {
+            if matches!(change.resolution, PatchPathResolution::ForWrite) {
+                self.deny_patch_symlink_components(&change.relative_path)?;
+            }
             let current = match change.resolution {
                 #[cfg(test)]
                 PatchPathResolution::ExistingCompatibility => {
@@ -1587,6 +1699,15 @@ impl NativeWorkspace {
                     .to_owned(),
             );
         }
+        let mut untracked_files = Vec::new();
+        if bool_or(arguments, "unstaged", true) && bool_or(arguments, "include_untracked", true) {
+            let used = chunks.iter().map(String::len).sum::<usize>();
+            let (extra, limited, names) =
+                untracked::diff(self, &repo, &filters, max_bytes.saturating_sub(used))?;
+            untracked_files = names;
+            output_truncated |= limited;
+            chunks.push(extra);
+        }
         let mut text = chunks
             .into_iter()
             .filter(|v| !v.is_empty())
@@ -1597,8 +1718,10 @@ impl NativeWorkspace {
         }
         let (text, truncated) = truncate_string_bytes(&text, max_bytes);
         let truncated = truncated || output_truncated;
+        let mut files = parse_diff_files(&text).into_iter().collect::<BTreeSet<_>>();
+        files.extend(untracked_files);
         Ok(
-            serde_json::json!({"repo_path":repo.display,"diff":text,"files":parse_diff_files(&text),"truncated":truncated,"warnings":if truncated{vec!["diff truncated"]}else{Vec::<&str>::new()}}),
+            serde_json::json!({"repo_path":repo.display,"diff":text,"files":files,"truncated":truncated,"warnings":if truncated{vec!["diff truncated"]}else{Vec::<&str>::new()}}),
         )
     }
 
@@ -2065,7 +2188,16 @@ fn read_stable_regular_file(path: &Path) -> Result<(Vec<u8>, FileFingerprint), R
             continue;
         }
         let mut content = Vec::new();
-        file.read_to_end(&mut content).map_err(io_error)?;
+        Read::by_ref(&mut file)
+            .take(64 * 1024 * 1024 + 1)
+            .read_to_end(&mut content)
+            .map_err(io_error)?;
+        if content.len() > 64 * 1024 * 1024 {
+            return Err(validation_code(
+                "FILE_TOO_LARGE",
+                "Patch sources are bounded to 64 MiB.",
+            ));
+        }
         let read_identity = file
             .metadata()
             .map(|metadata| file_identity(&metadata))
@@ -2251,6 +2383,7 @@ where
 {
     revalidate_workspace_identity(prepared)?;
     let mut cleanup = PatchTransactionCleanup::new();
+    revalidate_patch_dependencies(prepared)?;
     let mut staged = Vec::with_capacity(prepared.changes.len());
     for (index, change) in prepared.changes.iter().enumerate() {
         revalidate_patch_target(&change.resolved.path, &change.baseline)?;
@@ -2326,6 +2459,10 @@ where
             rollback_patch_changes(&staged, &committed, &mut cleanup)?;
             return Err(error);
         }
+        if let Err(error) = revalidate_patch_dependencies(prepared) {
+            rollback_patch_changes(&staged, &committed, &mut cleanup)?;
+            return Err(error);
+        }
         let result = if let Some(stage) = &change.stage {
             if change.baseline_existed {
                 fs::rename(stage, &change.target)
@@ -2373,6 +2510,23 @@ fn revalidate_patch_target(target: &Path, baseline: &PatchBaseline) -> Result<()
     }
 }
 
+fn revalidate_patch_dependencies(prepared: &PreparedPatch) -> Result<(), ReCtmError> {
+    for dependency in &prepared.dependencies {
+        revalidate_patch_target(&dependency.resolved.path, &dependency.baseline)?;
+        if prepared.strict_dependency_links
+            && fs::symlink_metadata(&dependency.resolved.path)
+                .map_err(io_error)?
+                .nlink()
+                != 1
+        {
+            return Err(patch_authority_facts_changed(
+                "A structured-change source gained a hardlink.",
+            ));
+        }
+    }
+    Ok(())
+}
+
 fn revalidate_staged_patch_target(change: &StagedPatchChange) -> Result<(), ReCtmError> {
     match &change.expected_fingerprint {
         Some(expected) => {
@@ -2410,7 +2564,16 @@ fn rollback_patch_changes(
         let result = if change.baseline_existed {
             change.backup.as_ref().map_or_else(
                 || Err(std::io::Error::other("patch rollback backup is missing")),
-                |backup| fs::rename(backup, &change.target),
+                |backup| {
+                    if change.expected_fingerprint.as_ref().is_none_or(|expected| {
+                        read_stable_regular_file(backup)
+                            .map(|(_, actual)| actual != *expected)
+                            .unwrap_or(true)
+                    }) {
+                        return Err(std::io::Error::other("patch rollback backup changed"));
+                    }
+                    fs::rename(backup, &change.target)
+                },
             )
         } else {
             match fs::remove_file(&change.target) {
@@ -2825,16 +2988,17 @@ fn truncate_utf8_bytes(value: &str, max: usize) -> String {
     if value.len() <= max {
         return value.to_owned();
     }
-    String::from_utf8_lossy(&value.as_bytes()[..max]).into_owned()
+    let mut end = max;
+    while !value.is_char_boundary(end) {
+        end -= 1;
+    }
+    value[..end].to_owned()
 }
 fn truncate_string_bytes(value: &str, max: usize) -> (String, bool) {
     if value.len() <= max {
         (value.to_owned(), false)
     } else {
-        (
-            String::from_utf8_lossy(&value.as_bytes()[..max]).into_owned(),
-            true,
-        )
+        (truncate_utf8_bytes(value, max), true)
     }
 }
 fn text_or<'a>(map: &'a Map<String, Value>, key: &str, default: &'a str) -> &'a str {
@@ -3072,7 +3236,7 @@ mod tests {
         })?;
         assert_eq!(authorized.get(), 1);
         assert_eq!(result["dry_run"], false);
-        assert_eq!(result["affected_files"].as_array().map(Vec::len), Some(4));
+        assert_eq!(result["affected_files"].as_array().map(Vec::len), Some(5));
         assert_eq!(
             fs::read_to_string(temp.path().join("nested/added.txt")).map_err(io_error)?,
             "secret-added-content\n"

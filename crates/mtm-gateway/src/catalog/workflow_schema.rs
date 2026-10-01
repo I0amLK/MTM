@@ -66,18 +66,24 @@ pub(super) fn start() -> Value {
 pub(super) fn step() -> Value {
     let properties = json!({
         "run_id":nonempty(),"capability":capability(),
-        "recover_only":{"type":"boolean","default":false,"description":"Only reconcile this exact original submission. Never executes writes or the action. A proven retained prefix or explicitly enrolled atomic action is returned as SUBMISSION_INTERRUPTED; fetch the current task separately and omit retained writes. Opaque, conflicting, unenrolled action and legacy unknown outcomes remain blocked."},
+        "recover_only":{"type":"boolean","description":"Omit for ordinary submission (server default false). Only reconcile this exact original submission. Never executes writes or the action. A proven retained prefix or explicitly enrolled atomic action is returned as SUBMISSION_INTERRUPTED; fetch the current task separately and omit retained writes. Opaque, conflicting, unenrolled action and legacy unknown outcomes remain blocked."},
         "action":{"type":"string","minLength":1,"description":"Exact current task.commit_action."},
         "payload":{"type":"object","description":"Match the current task.commit_payload_schema."},
         "writes":{"type":"array","items":object(json!({
             "resource":nonempty(),"content":{"description":"One record matching the current task.write_contract."}
         }), &["resource","content"])}
     });
-    let mut schema = object(properties.clone(), &["run_id"]);
-    schema["oneOf"] = json!([
-        object(json!({"run_id":nonempty()}), &["run_id"]),
-        object(properties, &["run_id", "capability", "action"])
-    ]);
+    let mut schema = object(properties, &["run_id"]);
+    // One closed object preserves all fields in clients that normalize unions.
+    // Presence dependencies express the same run-only/submission language as the
+    // former two disjoint closed oneOf branches, without branch-local pruning.
+    schema["dependentRequired"] = json!({
+        "capability":["action"],
+        "action":["capability"],
+        "payload":["capability", "action"],
+        "writes":["capability", "action"],
+        "recover_only":["capability", "action"]
+    });
     schema
 }
 

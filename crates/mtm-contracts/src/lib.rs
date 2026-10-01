@@ -14,6 +14,9 @@ pub use error::{ErrorCategory, ReCtmError, invalid_argument, permission_denied};
 /// Number of public CTM-compatible native tools in the source contract.
 pub const NATIVE_TOOL_COUNT: u16 = 18;
 
+/// Current MTM Native surface; the bootstrap source count above stays frozen.
+pub const CURRENT_NATIVE_TOOL_COUNT: u16 = 19;
+
 /// Number of public Rethlas façade tools in the source contract.
 pub const RETHLAS_TOOL_COUNT: u16 = 6;
 
@@ -84,7 +87,7 @@ impl ContractSnapshot {
     #[must_use]
     pub const fn current() -> Self {
         Self {
-            native_tools: NATIVE_TOOL_COUNT,
+            native_tools: CURRENT_NATIVE_TOOL_COUNT,
             rethlas_tools: RETHLAS_TOOL_COUNT,
             hidden_aliases: 0,
             state_schema: STATE_SCHEMA_VERSION,

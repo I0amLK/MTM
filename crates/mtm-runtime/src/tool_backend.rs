@@ -3,8 +3,8 @@ use std::sync::Arc;
 
 use mtm_contracts::{ErrorCategory, PRODUCTION_WORKFLOW_PROTOCOL_VERSION, ReCtmError};
 use mtm_gateway::{
-    OAuthPrincipal, PUBLIC_TOOL_NAMES, SUPPORTED_PROTOCOL_VERSIONS, TOOL_CONTRACT_VERSION,
-    ToolBackend, ToolBackendResult, ToolCallContext, ToolId,
+    NATIVE_TOOL_COUNT, OAuthPrincipal, PUBLIC_TOOL_NAMES, SUPPORTED_PROTOCOL_VERSIONS,
+    TOOL_CONTRACT_VERSION, ToolBackend, ToolBackendResult, ToolCallContext, ToolId,
 };
 use mtm_storage::{CapabilityAuthority, StateStore};
 use mtm_workflow::WorkflowEngine;
@@ -37,6 +37,9 @@ const PROJECT_ARTIFACTS: [&str; 2] = ["project_manifest", "project_summary_tex"]
 #[path = "submission_receipts.rs"]
 mod submission_receipts;
 
+#[path = "native_replay.rs"]
+mod native_replay;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct RuntimeBackendFacts {
     pub workflow_protocol_version: i64,
@@ -44,6 +47,7 @@ pub struct RuntimeBackendFacts {
 }
 
 pub struct RuntimeToolBackend {
+    native_replay: native_replay::NativeReplay,
     native: Arc<NativeToolRuntime>,
     workspace: Arc<NativeWorkspace>,
     workflow: Arc<WorkflowEngine>,
@@ -111,6 +115,7 @@ impl RuntimeToolBackend {
         let native_authority =
             NativeAuthorityExecutor::new(Arc::clone(&native), Arc::clone(&workspace));
         Self {
+            native_replay: native_replay::NativeReplay::default(),
             native,
             workspace,
             workflow,
@@ -136,6 +141,18 @@ impl RuntimeToolBackend {
         principal: &OAuthPrincipal,
         trace_id: &str,
     ) -> Result<Value, ReCtmError> {
+        self.native_replay.execute(principal, name, arguments, || {
+            self.dispatch_once(name, arguments, principal, trace_id)
+        })
+    }
+
+    fn dispatch_once(
+        &self,
+        name: &str,
+        arguments: &Map<String, Value>,
+        principal: &OAuthPrincipal,
+        trace_id: &str,
+    ) -> Result<Value, ReCtmError> {
         let tool = ToolId::parse(name)
             .ok_or_else(|| validation_details("unknown tool", serde_json::json!({"tool":name})))?;
         match tool {
@@ -146,6 +163,7 @@ impl RuntimeToolBackend {
             ToolId::ListFiles => self.workspace.list_files(arguments),
             ToolId::SearchText => self.workspace.search_text(arguments),
             ToolId::ApplyPatch => self.native_authority.apply_patch(arguments),
+            ToolId::ApplyChanges => self.native_authority.apply_changes(arguments),
             ToolId::ExecCommand => self.native_authority.exec_command(arguments),
             ToolId::WriteStdin => self.native.write_stdin(arguments),
             ToolId::KillCommand => self.native.kill_command(arguments),
@@ -205,7 +223,8 @@ impl RuntimeToolBackend {
             "shell_env_inherit":"none",
             "shell_env_include_only":Vec::<String>::new(),
             "shell_env_exclude":Vec::<String>::new(),
-            "output_retention":{"buffer_bytes_per_stream":524288,"head_bytes_per_stream":65536},
+            "output_retention":{"buffer_bytes_per_stream":524288,"head_bytes_per_stream":65536,"completed_command_ttl_seconds":300,"max_retained_completed_commands":32},
+            "workspace_mutation_policy":{"mode":"unrestricted","enforced_by":replacement.unwrap_or("none"),"structured_only_supported":false,"structured_write_tools":["apply_patch","apply_changes"]},
             "endpoint_path":"/mcp",
         });
         let Some(object) = payload.as_object_mut() else {
@@ -221,10 +240,10 @@ impl RuntimeToolBackend {
             "oauth_client_id":principal.client_id,
             "tool_count":PUBLIC_TOOL_NAMES.len(),
             "tools":PUBLIC_TOOL_NAMES,
-            "native_tool_count":18,
+            "native_tool_count":NATIVE_TOOL_COUNT,
             "rethlas_tool_count":6,
-            "native_tools":&PUBLIC_TOOL_NAMES[..18],
-            "rethlas_tools":&PUBLIC_TOOL_NAMES[18..],
+            "native_tools":&PUBLIC_TOOL_NAMES[..NATIVE_TOOL_COUNT],
+            "rethlas_tools":&PUBLIC_TOOL_NAMES[NATIVE_TOOL_COUNT..],
             "hidden_alias_count":0,
             "tool_contract_version":TOOL_CONTRACT_VERSION,
             "tool_catalog_stable":true,
@@ -522,7 +541,7 @@ impl RuntimeToolBackend {
                 Ok(value) => {
                     write_results.push(value);
                 }
-                Err(error) if recoverable_error(&error) => {
+                Err(error) if recoverable_caller_write_error(&error) => {
                     return self.recoverable_step(
                         principal,
                         run_id,
@@ -616,6 +635,7 @@ impl RuntimeToolBackend {
         let mut submission = serde_json::json!({
             "ok":false,"complete":false,"recoverable":true,"retryable":true,"error":error.to_payload(),
             "writes_retained":!writes.is_empty(),
+            "retained_write_prefix_len":writes.len(),
             "correction":"Use the fresh capability in this response and follow the returned task write_contract and commit_payload_schema. Do not replay retained writes unless a genuinely new logical record is needed."
         });
         if let Some(failed) = failed_write {
@@ -1189,7 +1209,18 @@ impl ToolBackend for RuntimeToolBackend {
                 Ok(ToolBackendResult::InputRequired(required))
             }
             Ok(ToolBackendResult::Complete(value)) => {
-                let payload = ensure_ok(value);
+                let mut payload = ensure_ok(value);
+                let first_terminal = payload
+                    .as_object_mut()
+                    .and_then(|object| object.remove("_native_first_terminal"))
+                    .and_then(|value| value.as_bool())
+                    == Some(true);
+                if first_terminal {
+                    let outcome = payload["operation_outcome"].as_str().unwrap_or("unknown");
+                    self.emit(serde_json::json!({"event_type":"tool.command_finished","trace_id":trace_id,
+                        "decision":if outcome=="exited_0" {"allow"} else {"error"},"reason":outcome,
+                        "details":{"tool":name,"command_id":payload["command_id"],"operation_outcome":outcome}}));
+                }
                 self.emit(crate::submission_events::completion_event(
                     name, trace_id, &payload,
                 ));
@@ -1227,6 +1258,7 @@ fn tool_result(name: &str, mut payload: Value, is_error: bool) -> Value {
         });
     };
     let image = object.remove("_mcp_image_data");
+    object.remove("_native_first_terminal");
     let text = if is_error {
         let error = object.get("error").and_then(Value::as_object);
         format!(
@@ -1259,6 +1291,25 @@ fn tool_result(name: &str, mut payload: Value, is_error: bool) -> Value {
     Value::Object(envelope)
 }
 fn render_summary(name: &str, payload: &Map<String, Value>) -> String {
+    if name == "read_file" {
+        let continuation = if payload.get("truncated").and_then(Value::as_bool) == Some(true) {
+            format!(
+                "\nPartial page; continue with next_action verbatim: {}",
+                payload.get("next_action").unwrap_or(&Value::Null)
+            )
+        } else {
+            String::new()
+        };
+        return format!(
+            "[Showing lines {}-{} of {} revision={} line_byte_offset={}]\n{}{continuation}",
+            payload.get("start_line").unwrap_or(&Value::Null),
+            payload.get("end_line").unwrap_or(&Value::Null),
+            payload.get("total_lines").unwrap_or(&Value::Null),
+            json_text(payload, "revision"),
+            payload.get("line_byte_offset").unwrap_or(&Value::Null),
+            json_text(payload, "content")
+        );
+    }
     if name == "rethlas_start" {
         if payload
             .get("creation_receipt")
@@ -1486,6 +1537,15 @@ fn recoverable_error(error: &ReCtmError) -> bool {
         error.category,
         ErrorCategory::Validation | ErrorCategory::Conflict
     )
+}
+
+fn recoverable_caller_write_error(error: &ReCtmError) -> bool {
+    // write_submission checks this ACL before beginning the denied write. This
+    // is only a candidate for correction: record_submission_outcome must still
+    // prove a Between journal and an exact durable accepted-write prefix. Never
+    // apply this exception to commit errors or other capability failures.
+    recoverable_error(error)
+        || (error.category == ErrorCategory::Permission && error.code == "ROLE_ACCESS_DENIED")
 }
 
 fn invalid_capability_error(error: &ReCtmError) -> bool {
