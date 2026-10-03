@@ -116,3 +116,44 @@ fn default_shell_is_non_login_and_preserves_the_declared_path() -> Result<(), Re
     assert_eq!(output.stdout, b"fixture-explicit-path");
     Ok(())
 }
+
+#[test]
+fn loop_query_resolves_only_executed_files_and_revalidates_them() -> Result<(), ReCtmError> {
+    let root = tempfile::tempdir().map_err(|_| internal("test root"))?;
+    let program = file(root.path(), "bin/program", 0o755)?;
+    let request =
+        invocation(json!({"cmd":"for c in absent; do command -v \"$c\"; done; program"}))?;
+    let path = "/workspace/bin";
+    let facts = collect_exec_permission_facts(&request, root.path(), path, &[])?;
+    assert!(facts.unresolved_executables().is_empty());
+    assert_eq!(facts.resolved_executables().len(), 1);
+    assert_eq!(facts.resolved_executables()[0].resolved_path(), program);
+    mtm_core::classify_exec_permissions(&request, &facts)?;
+    revalidate_exec_permission_facts(&request, &facts, root.path(), path, &[])?;
+    fs::set_permissions(&program, fs::Permissions::from_mode(0o4755))
+        .map_err(|_| internal("test mode change"))?;
+    assert_eq!(
+        revalidate_exec_permission_facts(&request, &facts, root.path(), path, &[])
+            .map_err(|e| e.code),
+        Err("NATIVE_EXECUTABLE_CHANGED".to_owned())
+    );
+    Ok(())
+}
+
+#[test]
+fn missing_or_dynamic_executed_loop_target_is_not_treated_as_a_query() -> Result<(), ReCtmError> {
+    let root = tempfile::tempdir().map_err(|_| internal("test root"))?;
+    for command in [
+        "for c in absent; do command -v \"$c\"; missing; done",
+        "for c in absent; do \"$c\"; done",
+    ] {
+        let request = invocation(json!({"cmd":command}))?;
+        let facts = collect_exec_permission_facts(&request, root.path(), "/workspace/bin", &[])?;
+        assert_eq!(facts.unresolved_executables().len(), 1);
+        assert_eq!(
+            mtm_core::classify_exec_permissions(&request, &facts).map_err(|e| e.code),
+            Err("NATIVE_EXECUTABLE_UNRESOLVED".to_owned())
+        );
+    }
+    Ok(())
+}
