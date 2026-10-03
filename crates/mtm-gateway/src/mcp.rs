@@ -471,7 +471,7 @@ pub fn server_identity() -> Value {
 #[must_use]
 pub fn server_instructions() -> String {
     format!(
-        "Use MTM native tools for ordinary workspace operations under configured Native authority. Prefer literal argv for a single program and set workdir explicitly. search_text accepts files and directories. Only the tools returned by tools/list are supported; removed legacy aliases have no authority. For every concrete mathematical proof, derivation, repair or rigorous verification, start with rethlas_start and follow rethlas_step task contracts to done unless the user requests an informal answer. Do not bypass branch, join, verifier, LaTeX or finalizer gates. Report workspace_export_path only after mechanical completion. {}",
+        "Use MTM native tools for ordinary workspace operations under configured Native authority. Filesystem path, repo_path, workdir and cwd inputs are workspace-relative unless a tool explicitly says otherwise; use . for the workspace root and do not copy the absolute host path from server_info.workspace into Native arguments. Prefer literal argv for a single program and set workdir explicitly. search_text accepts files and directories. Only the tools returned by tools/list are supported; removed legacy aliases have no authority. For every concrete mathematical proof, derivation, repair or rigorous verification, start with rethlas_start and follow rethlas_step task contracts to done unless the user requests an informal answer. Do not bypass branch, join, verifier, LaTeX or finalizer gates. Report workspace_export_path only after mechanical completion. {}",
         crate::catalog::CAPABILITY_LIFECYCLE
     )
 }
@@ -828,6 +828,14 @@ mod tests {
         assert_eq!(identity["name"], "mtm");
         assert_eq!(identity["title"], "MTM");
         assert_eq!(identity["version"], env!("CARGO_PKG_VERSION"));
+    }
+
+    #[test]
+    fn server_instructions_explain_workspace_relative_native_paths() {
+        let instructions = server_instructions();
+        assert!(instructions.contains("workspace-relative"));
+        assert!(instructions.contains("use . for the workspace root"));
+        assert!(instructions.contains("server_info.workspace"));
     }
 
     fn modern_meta() -> Value {

@@ -68,7 +68,7 @@ pub(super) fn input(id: ToolId) -> Value {
         T::ServerInfo | T::CheckExecEnvironment => object(json!({}), &[]),
         T::ReadFile => object(
             json!({
-                "path":nonempty(), "encoding":{"type":"string","enum":["utf-8"],"default":"utf-8"},
+                "path":{"type":"string","minLength":1,"description":"Workspace-relative file path, for example README.md or nested/file.txt. Absolute host paths, including paths formed from server_info.workspace, are rejected."}, "encoding":{"type":"string","enum":["utf-8"],"default":"utf-8"},
                 "start_line":{"type":"integer","minimum":1,"default":1},
                 "end_line":{"type":"integer","minimum":1},"max_lines":{"type":"integer","minimum":1},
                 "line_byte_offset":integer(0,67_108_864,0),
@@ -132,8 +132,14 @@ pub(super) fn input(id: ToolId) -> Value {
                     "argv".to_owned(),
                     json!({"type":"array","minItems":1,"items":nonempty(),"description":"Literal executable and arguments, without a shell. Arguments may be empty except argv[0], which the runtime validates."}),
                 ),
-                ("workdir".to_owned(), json!({"type":"string","default":"."})),
-                ("cwd".to_owned(), text()),
+                (
+                    "workdir".to_owned(),
+                    json!({"type":"string","default":".","description":"Workspace-relative working directory. Use . for the workspace root. Do not pass the absolute host path reported by server_info.workspace."}),
+                ),
+                (
+                    "cwd".to_owned(),
+                    json!({"type":"string","description":"Legacy alias for workdir; when supplied it is also workspace-relative. Use . for the workspace root, never an absolute host path."}),
+                ),
                 (
                     "env".to_owned(),
                     json!({"type":"object","additionalProperties":{"type":"string"},"default":{}}),

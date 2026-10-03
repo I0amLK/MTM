@@ -9,6 +9,17 @@ const MAX_SEGMENTS: usize = 1024;
 const MAX_SOURCE_BYTES: usize = 1_048_576;
 
 pub(crate) fn literal_command_segments(command: &str) -> Result<Option<Vec<&str>>, ReCtmError> {
+    command_segments(command, false)
+}
+
+/// Executable collection can retain scalar parameter words as opaque arguments.
+/// This does NOT make dynamic executable names statically resolvable, nor does it
+/// change the stricter literal-only risk-classification path above.
+pub(crate) fn executable_command_segments(command: &str) -> Result<Option<Vec<&str>>, ReCtmError> {
+    command_segments(command, true)
+}
+
+fn command_segments(command: &str, parameters: bool) -> Result<Option<Vec<&str>>, ReCtmError> {
     if command.len() > MAX_SOURCE_BYTES {
         return Err(parse_error("NATIVE_EXECUTABLE_PARSE_LIMIT"));
     }
@@ -34,7 +45,7 @@ pub(crate) fn literal_command_segments(command: &str) -> Result<Option<Vec<&str>
             escaped = true;
             continue;
         }
-        if matches!(ch, '$' | '`') {
+        if ch == '`' || ch == '$' && (!parameters || !scalar_parameter_after(command, index)) {
             return Ok(None);
         }
         if let Some(delimiter) = quote {
@@ -45,6 +56,15 @@ pub(crate) fn literal_command_segments(command: &str) -> Result<Option<Vec<&str>
         }
         match ch {
             '\'' | '"' => quote = Some(ch),
+            '\n' | '\r' if parameters => {
+                if !command[start..index].trim().is_empty() {
+                    segments.push(&command[start..index]);
+                    if segments.len() > MAX_SEGMENTS {
+                        return Err(parse_error("NATIVE_EXECUTABLE_PARSE_LIMIT"));
+                    }
+                }
+                start = index + 1;
+            }
             '\n' | '\r' | '<' | '>' | '(' | ')' | '{' | '}' | '#' => return Ok(None),
             ';' | '|' | '&' => {
                 let segment = &command[start..index];
@@ -69,6 +89,13 @@ pub(crate) fn literal_command_segments(command: &str) -> Result<Option<Vec<&str>
         segments.push(&command[start..]);
     }
     Ok(Some(segments))
+}
+
+fn scalar_parameter_after(command: &str, index: usize) -> bool {
+    command.as_bytes().get(index + 1).is_some_and(|byte| {
+        byte.is_ascii_alphanumeric()
+            || matches!(byte, b'_' | b'@' | b'*' | b'#' | b'?' | b'-' | b'$' | b'!')
+    })
 }
 
 fn parse_error(code: &str) -> ReCtmError {

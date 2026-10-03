@@ -5,6 +5,50 @@ use mtm_core::validate_schema_value;
 use super::*;
 
 #[test]
+fn workspace_path_contract_is_explicit_in_model_visible_tools() {
+    let server = ToolId::ServerInfo.definition();
+    let server_description = server["description"].as_str().unwrap_or_default();
+    assert!(server_description.contains("informational host path"));
+    assert!(server_description.contains("workspace-relative"));
+
+    let read = ToolId::ReadFile.definition();
+    let read_description = read["description"].as_str().unwrap_or_default();
+    let read_path = &read["inputSchema"]["properties"]["path"]["description"];
+    assert!(read_description.contains("path must be workspace-relative"));
+    assert!(read_description.contains("server_info.workspace"));
+    assert!(
+        read_path
+            .as_str()
+            .unwrap_or_default()
+            .contains("Workspace-relative")
+    );
+    assert!(
+        read_path
+            .as_str()
+            .unwrap_or_default()
+            .contains("Absolute host paths")
+    );
+
+    let exec = ToolId::ExecCommand.definition();
+    let exec_description = exec["description"].as_str().unwrap_or_default();
+    let workdir = &exec["inputSchema"]["properties"]["workdir"]["description"];
+    let cwd = &exec["inputSchema"]["properties"]["cwd"]["description"];
+    assert!(exec_description.contains("workdir/cwd must be workspace-relative"));
+    assert!(exec_description.contains("server_info.workspace"));
+    assert!(
+        workdir
+            .as_str()
+            .unwrap_or_default()
+            .contains("Use . for the workspace root")
+    );
+    assert!(
+        cwd.as_str()
+            .unwrap_or_default()
+            .contains("workspace-relative")
+    );
+}
+
+#[test]
 fn database_recovery_contract_preserves_legacy_unknown_and_no_authority() {
     assert_eq!(TOOL_CONTRACT_VERSION, "mtm-tools-v11");
     for tool in [

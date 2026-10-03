@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "MTM-018",
+  "scope": "source_bugfix_follow_up_only",
+  "date": "2026-10-02",
+  "base_commit": "a3ab170cbe6e46b3685a7be40ca923c92a5dae16",
+  "baseline_worktree_clean": true,
+  "input": {
+    "filename": "mtm-error-summary(1).json",
+    "sha256": "385c937c0b449e3e7bb41eec23160266c538166f6b0bf133a3b976527d9e6649",
+    "issue_id_namespace": "Uploaded report issue IDs, not repository milestone IDs",
+    "complete_call_log": false
+  },
+  "dispositions": {
+    "MTM-001": "Authentication cause remains unknown; no OAuth change",
+    "MTM-002": "Tool self-description/usability defect: the runtime relative-path boundary is correct, but model-visible path/workdir documentation was insufficient and server_info.workspace could be mistaken for a reusable Native argument; boundary retained",
+    "MTM-003": "Correct exact paper-identifier rejection; unchanged",
+    "MTM-004": "Confirmed by failing regression, then fixed: literal source appendix was scanned as active LaTeX",
+    "MTM-005": "Confirmed by failing regression, then fixed: fallback produced pwd; and true; candidates and omitted subsequent programs",
+    "MTM-006": "Correct exact source-snapshot validation with retained-write correction; unchanged",
+    "ENV-001": "Missing execution-environment capabilities; no TeX engine/font/package installation"
+  },
+  "additional_source_finding": {
+    "description": "LaTeX operation regex word boundaries missed numeric-adjacent control words such as openout1 and openin1",
+    "observed_historical_incident": false,
+    "regression_confirmed": true,
+    "fixed": true
+  },
+  "validation": {
+    "full_source_gate": {
+      "command": "cargo xtask check",
+      "exit_code": 0,
+      "passed": true,
+      "tests": {"passed": 769, "failed": 0, "ignored": 1},
+      "added_regression_tests": 20,
+      "inherited_ignored_test": "native_authority::tests::exec_candidate_real_dns_https_target (MTM-014 A4 target-only real DNS/HTTPS check)",
+      "tests_skipped_by_preflight": false,
+      "format_exit_code": 0,
+      "clippy_warnings_denied_exit_code": 0,
+      "rust_tests_exit_code": 0,
+      "diff_check_exit_code": 0,
+      "record_integrity_passed": true,
+      "architecture_passed": true,
+      "retirement_integrity_passed": true,
+      "source_hash_scope": "mtm-rust-source-v1",
+      "source_before_sha256": "ece8d6b89c47718fdf9f1d14cb2095ef2abcadef30fe28fc39474a4ef553dd3e",
+      "source_after_sha256": "ece8d6b89c47718fdf9f1d14cb2095ef2abcadef30fe28fc39474a4ef553dd3e",
+      "source_unchanged": true,
+      "log": "target/mtm-tool/error-review-20261002/full-source-gate-final.log",
+      "log_sha256": "71b6246cab967b88ffaac9dfaecccabc35cc04346cbaeacede11165e1bd41fcc"
+    },
+    "targeted": {
+      "core_unit_tests_passed": 54,
+      "latex_unit_tests_passed": 12,
+      "resolver_tests_passed": 8,
+      "note": "These tests are included in the full-gate total, not additional to it"
+    },
+    "host_compiler_sanity": {
+      "fixture": "crates/mtm-runtime/tests/fixtures/verbatim-appendix.tex",
+      "fixture_sha256": "9faa3459a45dae79ba0c85b4fa31a2c2f2bb18e16f278d0f9783eb810cf8696c",
+      "compiler": "pdflatex",
+      "shell_escape_enabled": false,
+      "halt_on_error": true,
+      "exit_code": 0,
+      "pdf_pages": 1,
+      "pdf_bytes": 47379,
+      "pdf_sha256": "8804a186d23a67897e32c378a00ffeac5d460e62391b2176f3e5a24e5bf01b7b",
+      "log": "target/mtm-tool/error-review-20261002/latex-compile.log",
+      "log_sha256": "8dc927b2b816a732a9e2185e71c88d38cb0636d5ab0189cbb21bb5bdd7150640",
+      "exact_artifact_workflow_qualification": false
+    }
+  },
+  "retained_nonpassing_evidence": [
+    {
+      "log": "target/mtm-tool/error-review-20261002/baseline-shell.log",
+      "exit_code": 101,
+      "tests_failed": 1,
+      "observed_candidates": ["pwd;", "true;"],
+      "sha256": "6fe82aa8a4f64103dff7eb9aa1268c9546b3975188627677e98b28eaa325cac4"
+    },
+    {
+      "log": "target/mtm-tool/error-review-20261002/baseline-latex.log",
+      "exit_code": 101,
+      "tests_passed": 1,
+      "tests_failed": 1,
+      "signature": "duplicate begin/end document and forbidden bibliography_file inside Verbatim",
+      "sha256": "563c00be22243799933db022427be3b49eb3944b6b4a50cb8e4673d39c91d89b"
+    },
+    {
+      "log": "target/mtm-tool/error-review-20261002/expanded-latex.log",
+      "exit_code": 101,
+      "tests_passed": 8,
+      "tests_failed": 1,
+      "signature": "numeric-adjacent active file operation omitted by the preexisting regex boundary",
+      "sha256": "0a6b0b254eda9fab2dde410bbf9d049d729380a78b82df418423f56a78792e29"
+    },
+    {
+      "log": "target/mtm-tool/error-review-20261002/expanded-resolver.log",
+      "tests_run": 0,
+      "accepted_as_pass": false,
+      "correction": "native_permission::resolver_tests executed all 8 tests successfully; resolver-executed.log"
+    },
+    {
+      "log": "target/mtm-tool/error-review-20261002/full-source-gate-r1.log",
+      "outcome": "Terminated with SIGTERM after final-review source changes; superseded by the frozen final gate",
+      "exit_code": -15,
+      "accepted_as_pass": false
+    }
+  ],
+  "changed_source_files": [
+    "crates/mtm-core/src/native_permission.rs",
+    "crates/mtm-core/src/shell_segments.rs",
+    "crates/mtm-core/src/shell_candidates.rs",
+    "crates/mtm-core/src/shell_candidates_tests.rs",
+    "crates/mtm-runtime/src/latex.rs",
+    "crates/mtm-runtime/src/latex_scan.rs",
+    "crates/mtm-runtime/src/latex_tests.rs",
+    "crates/mtm-runtime/src/native_resolver_tests.rs",
+    "crates/mtm-runtime/tests/fixtures/verbatim-appendix.tex"
+  ],
+  "review_and_rollback": "docs/MTM-018-ERROR-REVIEW-20261002.md",
+  "review_type": "Implementation self-review and automated regression; not independent release review",
+  "environment_note": "A preliminary version probe auto-installed the pinned Rust compiler in the CTM session private home. Subsequent validation used explicit existing host Cargo/Rustup homes and RUSTUP_AUTO_INSTALL=0; repository toolchain configuration and operator build caches were not changed or cleaned.",
+  "authority_before": "rust",
+  "authority_after": "rust",
+  "tool_contract_changed": false,
+  "workflow_or_state_schema_changed": false,
+  "production_state_modified": false,
+  "production_selector_changed": false,
+  "historical_runs_replayed": false,
+  "historical_acceptance_rewritten": false,
+  "commit_performed": false,
+  "push_performed": false,
+  "service_restarted": false,
+  "deployment_authorized": false,
+  "release_qualified": false,
+  "manual_pending": [
+    "Separately authorized rebuild/deployment and real-client validation of the exact resulting service artifact",
+    "Arbitrary TeX macro/package expansion and unsupported complex shell grammars are outside this bounded fix"
+  ]
+}

@@ -9,6 +9,9 @@ use regex::Regex;
 
 use crate::NativeToolRuntime;
 
+#[path = "latex_scan.rs"]
+mod scan;
+
 pub struct RuntimeLatexGate {
     policy: LatexPolicy,
     native: Arc<NativeToolRuntime>,
@@ -163,9 +166,12 @@ pub fn static_latex_errors(content: &str) -> Result<Vec<String>, ReCtmError> {
     }
     let mut errors = Vec::new();
     if content.len() > 2 * 1024 * 1024 {
-        errors.push("proof.tex exceeds the 2 MiB source limit".to_owned());
+        return Ok(vec!["proof.tex exceeds the 2 MiB source limit".to_owned()]);
     }
-    let stripped = strip_comments(content);
+    let stripped = match scan::active_source(content) {
+        Ok(source) => source,
+        Err(error) => return Ok(vec![error]),
+    };
     if !Regex::new(r"\\documentclass(?:\[[^\]]*\])?\{[^}]+\}")
         .map_err(regex_error)?
         .is_match(&stripped)
@@ -190,20 +196,24 @@ pub fn static_latex_errors(content: &str) -> Result<Vec<String>, ReCtmError> {
     }
     let forbidden = [
         ("shell_escape", r"\\(?:immediate\s*)?write18\b"),
-        ("input", r"\\(?:input|include|includeonly)\b"),
-        ("file_write", r"\\(?:openout|write|read)\b"),
-        ("file_read", r"\\(?:openin|newread|readline)\b"),
+        // TeX control words end before a digit; regex word boundaries do not.
+        ("input", r"\\(?:input|include|includeonly)(?:[^a-zA-Z]|$)"),
+        ("file_write", r"\\(?:openout|write|read)(?:[^a-zA-Z]|$)"),
+        ("file_read", r"\\(?:openin|newread|readline)(?:[^a-zA-Z]|$)"),
         (
             "shellesc_package",
             r"\\usepackage(?:\[[^\]]*\])?\{shellesc\}",
         ),
-        ("bibliography_file", r"\\(?:bibliography|addbibresource)\b"),
-        ("external_graphic", r"\\includegraphics\b"),
+        (
+            "bibliography_file",
+            r"\\(?:bibliography|addbibresource)(?:[^a-zA-Z]|$)",
+        ),
+        ("external_graphic", r"\\includegraphics(?:[^a-zA-Z]|$)"),
         (
             "external_listing",
-            r"\\(?:lstinputlisting|verbatiminput|includepdf)\b",
+            r"\\(?:lstinputlisting|verbatiminput|includepdf)(?:[^a-zA-Z]|$)",
         ),
-        ("external_auxiliary", r"\\externaldocument\b"),
+        ("external_auxiliary", r"\\externaldocument(?:[^a-zA-Z]|$)"),
     ];
     for (name, pattern) in forbidden {
         if Regex::new(&format!("(?i){pattern}"))
@@ -214,26 +224,6 @@ pub fn static_latex_errors(content: &str) -> Result<Vec<String>, ReCtmError> {
         }
     }
     Ok(errors)
-}
-
-fn strip_comments(content: &str) -> String {
-    content
-        .lines()
-        .map(|line| {
-            let mut escaped = false;
-            for (index, character) in line.char_indices() {
-                if character == '%' && !escaped {
-                    return &line[..index];
-                }
-                escaped = character == '\\' && !escaped;
-                if character != '\\' {
-                    escaped = false;
-                }
-            }
-            line
-        })
-        .collect::<Vec<_>>()
-        .join("\n")
 }
 
 fn balanced_braces(content: &str) -> bool {
@@ -311,3 +301,7 @@ fn internal(message: &str) -> ReCtmError {
 fn io_error(error: std::io::Error) -> ReCtmError {
     ReCtmError::new("LATEX_IO_ERROR", error.to_string()).with_category(ErrorCategory::Runtime)
 }
+
+#[cfg(test)]
+#[path = "latex_tests.rs"]
+mod tests;

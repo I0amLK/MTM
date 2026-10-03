@@ -1305,6 +1305,9 @@ fn parse_verbosity(value: Option<&Value>) -> Result<Option<String>, ReCtmError> 
     }
 }
 
+#[path = "shell_candidates.rs"]
+mod shell_candidates;
+
 fn shell_executable_candidates(command: &str, depth: usize) -> Result<Vec<String>, ReCtmError> {
     if depth > 4 {
         return Err(ReCtmError::new(
@@ -1312,6 +1315,9 @@ fn shell_executable_candidates(command: &str, depth: usize) -> Result<Vec<String
             "Nested shell command parsing exceeded its fixed bound.",
         )
         .with_category(mtm_contracts::ErrorCategory::Security));
+    }
+    if let Some(candidates) = shell_candidates::simple_candidates(command, depth)? {
+        return Ok(candidates);
     }
     if let Some(segments) = crate::shell_segments::literal_command_segments(command)? {
         let mut candidates = Vec::new();
@@ -1828,6 +1834,27 @@ mod tests {
             "cmd":"cat <<'EOF'\n/opt/not-command --payload\nEOF",
         }))?;
         assert_eq!(heredoc.executable_candidates()?, vec!["cat"]);
+        Ok(())
+    }
+
+    #[test]
+    fn reported_shell_probe_does_not_resolve_loop_variables_or_query_flags()
+    -> Result<(), ReCtmError> {
+        let invocation = exec(serde_json::json!({
+            "cmd":"pwd; for c in pdflatex xelatex lualatex latexmk bibtex pdftoppm fc-match kpsewhich; do command -v \"$c\" || true; done; fc-match 'Noto Serif CJK SC'; kpsewhich xeCJK.sty; kpsewhich CJKutf8.sty; kpsewhich ulem.sty; sha256sum 'source backup.tex'",
+        }))?;
+        assert_eq!(
+            invocation.executable_candidates()?,
+            vec![
+                "pwd",
+                "true",
+                "fc-match",
+                "kpsewhich",
+                "kpsewhich",
+                "kpsewhich",
+                "sha256sum"
+            ]
+        );
         Ok(())
     }
 

@@ -1,0 +1,13 @@
+\documentclass{article}
+\usepackage{fancyvrb}
+\begin{document}
+A literal source appendix must not become another active document.
+\begin{Verbatim}[fontsize=\small,numbers=left,frame=single]
+\documentclass{article}
+\begin{document}
+\bibliography{references}
+% A literal unmatched brace: {
+\end{document}
+\end{Verbatim}
+Inline example: \verb|\input{literal}|.
+\end{document}
