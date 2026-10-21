@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "project_id": "mtm-reboot",
   "title": "MTM migration and native-product development graph",
-  "updated_at": "2026-10-01T03:50:31Z",
+  "updated_at": "2026-10-21T07:29:54Z",
   "priority_order": [
     "functionality_compatibility_security",
     "recorded_tested_reversible_implementation",
@@ -640,6 +640,39 @@
       "dependencies": [
         "MTM-017"
       ]
+    },
+    {
+      "id": "MTM-019",
+      "title": "Fixed terminal header with temporary endpoint and OAuth key",
+      "status": "in_progress",
+      "priority": "P1",
+      "production_authority_before": "rust",
+      "production_authority_after": "rust",
+      "functional_goal": "Keep connection details and OAuth operator password visible above bounded event logs in interactive terminals.",
+      "scope": [
+        "Interactive fixed header and compact/verbose event area",
+        "Temporary tunnel status and terminal resize/cleanup",
+        "Disposable PTY/OAuth regression and redirection fallback"
+      ],
+      "non_goals": [
+        "No deployment, selector mutation, live restart or production-state access",
+        "No OAuth, public tool, workflow, state schema or finalizer changes",
+        "No fixed domain, real external tunnel qualification or performance claim"
+      ],
+      "acceptance_levels": [
+        "A0",
+        "A1",
+        "A3"
+      ],
+      "validation_commands": [
+        "cargo xtask check",
+        "cargo xtask records",
+        "cargo test -p mtm-cli --test tui_terminal"
+      ],
+      "rollback": "Remove only MTM-019 presentation/signal/dependency/test hunks; no database migration or installed-selector change.",
+      "dependencies": [
+        "MTM-018"
+      ]
     }
   ],
   "edges": [
@@ -669,6 +702,11 @@
     {
       "source": "MTM-018",
       "target": "MTM-017",
+      "relation": "depends_on"
+    },
+    {
+      "source": "MTM-019",
+      "target": "MTM-018",
       "relation": "depends_on"
     }
   ],
@@ -1831,6 +1869,46 @@
       ],
       "source_sha256": "9b7dbe7ab33d85a455f17198e9340cbe4f88c5cf082b2485a56fc43a3aeea07d",
       "release_qualified": false,
+      "deployment_authorized": false,
+      "production_state_modified": false,
+      "production_selector_changed": false
+    },
+    {
+      "event_id": "MTM019-TUI-APPROVED-20261021",
+      "milestone_id": "MTM-019",
+      "at": "2026-10-21T05:48:03Z",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "Operator requests fixed TUI header including current OAuth password and temporary tunnel address.",
+      "evidence": [
+        "docs/MTM-019-FIXED-TUI-HEADER.md"
+      ],
+      "production_selector_changed": false,
+      "production_state_modified": false
+    },
+    {
+      "event_id": "MTM019-TUI-STARTED-20261021",
+      "milestone_id": "MTM-019",
+      "at": "2026-10-21T05:48:03Z",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Implement CLI-only terminal presentation with disposable PTY/OAuth regression; no installation or production-state changes.",
+      "evidence": [
+        "docs/MTM-019-FIXED-TUI-HEADER.md"
+      ],
+      "production_selector_changed": false,
+      "production_state_modified": false
+    },
+    {
+      "event_id": "MTM019-TUI-PUBLICATION-AUTHORIZED-20261021",
+      "milestone_id": "MTM-019",
+      "at": "2026-10-21T07:29:54Z",
+      "status_before": "in_progress",
+      "status_after": "in_progress",
+      "summary": "Publish fixed operator header source; explicit operator authorization, separate commit, original full-gate failures retained. No live install or restart.",
+      "evidence": [
+        "records/evidence/MTM-019/fixed-header-validation-20261021.json"
+      ],
       "deployment_authorized": false,
       "production_state_modified": false,
       "production_selector_changed": false

@@ -19,6 +19,7 @@ const MAX_EVALUATION_INPUT_BYTES: u64 = 1_048_576;
 
 #[cfg(unix)]
 mod deployment;
+mod terminal;
 
 fn main() {
     let args = env::args().skip(1).collect::<Vec<_>>();
@@ -383,11 +384,36 @@ fn serve(arguments: &[String], tui: bool) -> Result<(), ReCtmError> {
     })?;
 
     let assets = embedded_assets()?;
+    let mut terminal = tui
+        .then(|| {
+            terminal::TerminalSession::new(terminal::Header {
+                identity: format!(
+                    "MTM {} | P{} | {}{}",
+                    env!("CARGO_PKG_VERSION"),
+                    settings.workflow_protocol_version,
+                    settings.native_mode.as_str(),
+                    if verbose_tui_requested {
+                        " | verbose"
+                    } else {
+                        ""
+                    }
+                ),
+                local_mcp: format!("http://{host}:{}/mcp", bound.port()),
+                oauth_key: settings.oauth_password.clone(),
+                quick_tunnel: quick_tunnel_requested,
+            })
+        })
+        .flatten();
     let operator = tui.then(|| {
-        if verbose_tui_requested {
+        let operator = if verbose_tui_requested {
             OperatorSession::verbose()
         } else {
             OperatorSession::compact()
+        };
+        if let Some(terminal) = &terminal {
+            terminal.operator(operator)
+        } else {
+            operator
         }
     });
     let observer = operator.as_ref().map(OperatorSession::event_sink);
@@ -399,7 +425,12 @@ fn serve(arguments: &[String], tui: bool) -> Result<(), ReCtmError> {
         true,
         observer,
     )?);
-    if tui && !verbose_tui_requested {
+    if let Some(terminal) = terminal.as_mut() {
+        terminal.start().map_err(|error| {
+            ReCtmError::new("TUI_TERMINAL_ERROR", error.to_string())
+                .with_category(ErrorCategory::Runtime)
+        })?;
+    } else if tui && !verbose_tui_requested {
         eprintln!(
             "MTM {} | P{} | {}",
             env!("CARGO_PKG_VERSION"),
@@ -440,7 +471,7 @@ fn serve(arguments: &[String], tui: bool) -> Result<(), ReCtmError> {
         match tunnel.start(&address) {
             Ok(_) => Some(tunnel),
             Err(error) => {
-                if verbose_tui_requested {
+                if verbose_tui_requested && terminal.is_none() {
                     eprintln!("Quick Tunnel unavailable: {}", error.code);
                 }
                 let _ = tunnel.close();

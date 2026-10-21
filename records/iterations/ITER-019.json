@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0.0",
+  "iteration_id": "ITER-019",
+  "milestone_id": "MTM-019",
+  "title": "Fixed TUI connection/credential header",
+  "started_at": "2026-10-21T05:48:03Z",
+  "status": "in_progress",
+  "authority": {
+    "component_scope": "CLI operator terminal presentation and graceful terminal cleanup",
+    "before": "rust",
+    "target_after_acceptance": "rust",
+    "workflow_transition_authority_changed": false,
+    "finalizer_authority_changed": false,
+    "native_authority_changed": false
+  },
+  "approval": {
+    "source": "Explicit operator request on 2026-10-21",
+    "oauth_password_pinned": true,
+    "temporary_tunnel_retained": true,
+    "deployment_authorized": false
+  },
+  "implementation_document": "docs/MTM-019-FIXED-TUI-HEADER.md",
+  "receipts": [
+    {
+      "receipt_id": "MREC-019-SOURCE-PUBLICATION-20261021",
+      "milestone_id": "MTM-019",
+      "started_at": "2026-10-21T05:48:03Z",
+      "completed_at": "2026-10-21T07:29:54Z",
+      "status_before": "in_progress",
+      "status_after": "in_progress",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "feat(tui): pin connection details and OAuth key [MTM-019]",
+      "files_changed": [
+        "Cargo.lock",
+        "README.md",
+        "crates/mtm-cli/Cargo.toml",
+        "crates/mtm-cli/src/main.rs",
+        "crates/mtm-cli/src/terminal.rs",
+        "crates/mtm-cli/src/terminal_tests.rs",
+        "crates/mtm-cli/tests/tui_terminal.rs",
+        "crates/mtm-runtime/src/operator.rs",
+        "crates/mtm-runtime/src/server.rs",
+        "docs/MTM-019-FIXED-TUI-HEADER.md",
+        "records/iterations/ITER-019.json",
+        "records/evidence/MTM-019/fixed-header-validation-20261021.json",
+        "records/governance/migration-graph.json"
+      ],
+      "acceptance": {
+        "focused_tests_passed": 10,
+        "full_source_gate_passed": false,
+        "manual_visual_acceptance_passed": false
+      },
+      "evidence": "records/evidence/MTM-019/fixed-header-validation-20261021.json",
+      "decision": "Source publication authorized; milestone not marked completed and full acceptance not claimed.",
+      "rollback": "Revert only MTM-019 terminal presentation, output callbacks and terminal cleanup hunks; no state rollback.",
+      "manual_pending": [
+        "Human terminal visual check and real external tunnel",
+        "Full A0 remains incomplete; no release or deployment authorization"
+      ],
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_state_modified": false,
+      "production_selector_changed": false
+    }
+  ],
+  "manual_pending": [
+    "Human visual check in the desired terminal",
+    "Real external Quick Tunnel and separate release/deployment authorization"
+  ],
+  "publication": {
+    "authorized_at": "2026-10-21T07:29:54Z",
+    "source": "Explicit operator request: continue push",
+    "remote": "origin",
+    "branch": "main",
+    "authorization_is_not_deployment": true
+  },
+  "validation": {
+    "evidence": "records/evidence/MTM-019/fixed-header-validation-20261021.json",
+    "focused_tests_passed": 10,
+    "full_source_gate_passed": false
+  }
+}

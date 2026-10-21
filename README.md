@@ -331,7 +331,21 @@ mtm tui --quick-tunnel --native-mode dangerous
 This starts the operator TUI, enables the validated Bubblewrap-backed Native path,
 shows each tool once when it starts, reports failures, suppresses routine successful
 completion/trace/argument-key noise, and attempts to create an owned Cloudflare Quick
-Tunnel. If `cloudflared` is not available, start locally without the tunnel:
+Tunnel. In an interactive terminal, a fixed header keeps the version/mode, local
+and temporary public MCP addresses, and the current OAuth operator password visible
+while the log area shows the latest events. This includes an externally configured
+`MTM_OAUTH_PASSWORD`: keep the terminal private when sharing your screen. Credentials
+are rendered only in the header, not copied into runtime events or debug logs.
+
+The header updates when the tunnel connects or disconnects, and reflows when the
+terminal is resized. The log view retains up to 256 bounded event lines in memory.
+An undersized terminal shows an enlargement hint instead of a misleading partial
+credential. Ctrl+C restores the previous terminal screen. Redirected output,
+`TERM=dumb`, and terminals without a detectable size retain the plain line format;
+externally configured passwords are not printed in that fallback. No fixed domain
+or change to temporary-tunnel generation is required.
+
+If `cloudflared` is not available, start locally without the tunnel:
 
 ```bash
 mtm tui --native-mode dangerous

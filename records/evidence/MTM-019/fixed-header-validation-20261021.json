@@ -1,0 +1,65 @@
+{
+  "schema": "mtm019-fixed-header-validation-v1",
+  "milestone": "MTM-019",
+  "recorded_at": "2026-10-21T07:29:54Z",
+  "status": "source_implemented_full_acceptance_incomplete",
+  "scope": "CLI terminal presentation; no installed or live-state changes",
+  "focused_tests": {
+    "rendering_tests_passed": 6,
+    "pty_integration_tests_passed": 4,
+    "pty_log_sha256": "e48adb6d711f81ee9f5c5c0a4c48cd72e7c3627a376236b720f42a37274c1e71",
+    "synthetic_tunnel_only": true,
+    "real_loopback_oauth_tested": true,
+    "terminal_resize_tested": true,
+    "sigint_sigterm_restoration_tested": true,
+    "configured_and_generated_key_visibility_tested": true,
+    "redirected_and_dumb_fallback_tested": true
+  },
+  "initial_full_gate": {
+    "passed": false,
+    "tests_passed": 779,
+    "tests_failed": 2,
+    "tests_ignored": 1,
+    "source_identity": {
+      "after_sha256": "909e633e5006b070d8c232afc45ce251b5cfae18dc06d67994aad06788e2d748",
+      "before_sha256": "909e633e5006b070d8c232afc45ce251b5cfae18dc06d67994aad06788e2d748",
+      "commit_after": "b5dbd2577869d2aaf7b0933373df6671d104581c",
+      "commit_before": "b5dbd2577869d2aaf7b0933373df6671d104581c",
+      "hash_scope": "mtm-rust-source-v1",
+      "unchanged": true
+    },
+    "output_sha256": "5e2960905da7b3104cc75f25ca02f5ac41cfd5f7b5575b6370968a8b720d9c1c",
+    "failures": [
+      "current_binary_capability_regression: new run did not issue assessment",
+      "release_check_schema8::tests::profile_and_current_source_mutations_fail_semantics: formal readiness directory unavailable or linked"
+    ]
+  },
+  "combined_final_gate": {
+    "source_identity": {
+      "after_sha256": "e61153048345f073fe4347203e82808b85cecd9c495556d3b9ee122742d24bb1",
+      "before_sha256": "e61153048345f073fe4347203e82808b85cecd9c495556d3b9ee122742d24bb1",
+      "commit_after": "b5dbd2577869d2aaf7b0933373df6671d104581c",
+      "commit_before": "b5dbd2577869d2aaf7b0933373df6671d104581c",
+      "hash_scope": "mtm-rust-source-v1",
+      "unchanged": true
+    },
+    "passed": false,
+    "workspace_tests_passed": 782,
+    "workspace_tests_failed": 1,
+    "workspace_tests_ignored": 1,
+    "tui_tests_passed": true,
+    "full_gate_includes_separate_domain_entropy_patch": true,
+    "remaining_failure": "Unavailable historical candidate/baseline artifacts in unchanged readiness test"
+  },
+  "full_acceptance_claimed": false,
+  "release_qualified": false,
+  "deployment_authorized": false,
+  "production_state_modified": false,
+  "production_selector_changed": false,
+  "raw_credential_recorded": false,
+  "manual_pending": [
+    "Human visual acceptance in the intended terminal",
+    "Real external temporary tunnel",
+    "Restore exact historical artifacts before claiming full A0 acceptance"
+  ]
+}

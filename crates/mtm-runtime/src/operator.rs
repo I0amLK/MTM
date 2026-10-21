@@ -4,29 +4,57 @@ use mtm_native::{TunnelEvent, TunnelState};
 use serde_json::Value;
 
 pub type RuntimeEventSink = Arc<dyn Fn(Value) + Send + Sync + 'static>;
+pub type OperatorLineSink = Arc<dyn Fn(&str) + Send + Sync + 'static>;
+pub type OperatorTunnelSink = Arc<dyn Fn(&TunnelEvent) + Send + Sync + 'static>;
 
 #[derive(Clone, Default)]
 pub struct OperatorSession {
     verbose: bool,
+    line_sink: Option<OperatorLineSink>,
+    tunnel_observer: Option<OperatorTunnelSink>,
 }
 
 impl OperatorSession {
     #[must_use]
     pub const fn compact() -> Self {
-        Self { verbose: false }
+        Self {
+            verbose: false,
+            line_sink: None,
+            tunnel_observer: None,
+        }
     }
 
     #[must_use]
     pub const fn verbose() -> Self {
-        Self { verbose: true }
+        Self {
+            verbose: true,
+            line_sink: None,
+            tunnel_observer: None,
+        }
+    }
+
+    #[must_use]
+    pub fn with_output(
+        mut self,
+        line_sink: OperatorLineSink,
+        tunnel_observer: OperatorTunnelSink,
+    ) -> Self {
+        self.line_sink = Some(line_sink);
+        self.tunnel_observer = Some(tunnel_observer);
+        self
     }
 
     #[must_use]
     pub fn event_sink(&self) -> RuntimeEventSink {
         let verbose = self.verbose;
+        let sink = self.line_sink.clone();
         Arc::new(move |event| {
             if let Some(line) = format_event_line(&event, verbose) {
-                eprintln!("{line}");
+                if let Some(sink) = &sink {
+                    sink(&line);
+                } else {
+                    eprintln!("{line}");
+                }
             }
         })
     }
@@ -34,9 +62,18 @@ impl OperatorSession {
     #[must_use]
     pub fn tunnel_sink(&self) -> Arc<dyn Fn(TunnelEvent) + Send + Sync + 'static> {
         let verbose = self.verbose;
+        let sink = self.line_sink.clone();
+        let observer = self.tunnel_observer.clone();
         Arc::new(move |event| {
+            if let Some(observer) = &observer {
+                observer(&event);
+            }
             if let Some(line) = format_tunnel_line(&event, verbose) {
-                eprintln!("{line}");
+                if let Some(sink) = &sink {
+                    sink(&line);
+                } else {
+                    eprintln!("{line}");
+                }
             }
         })
     }
