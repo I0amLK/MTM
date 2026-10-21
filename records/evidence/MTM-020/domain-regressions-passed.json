@@ -1,0 +1,8 @@
+{
+  "schema": "mtm020-test-output-v1",
+  "source_log": "target/mtm020-validation/domain-tests-r2.log",
+  "output_sha256": "39214e5ef43cf37bab22d9f95b67a13c1d3ef615a023c791924969fa643d6b15",
+  "output": "   Compiling mtm-runtime v0.6.0-preview.2 (/home/lk/\u684c\u9762/MTM/crates/mtm-runtime)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.49s\n     Running tests/domain_collision.rs (target/mtm-tool/debug/deps/domain_collision-f26bdddb5d397fe5)\n\nrunning 3 tests\ntest long_domain_ids_avoid_a_shared_short_suffix_on_initial_assessment ... ok\ntest existing_short_domain_and_capability_resume_after_reopen ... ok\ntest deterministic_domain_collision_preserves_committed_receipt_and_recovers ... ok\n\ntest result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s\n\n",
+  "raw_credentials_recorded": false,
+  "production_state_modified": false
+}

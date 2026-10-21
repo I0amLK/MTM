@@ -1549,7 +1549,7 @@ impl WorkflowEngine {
             "{}-{}-{epoch}-{}",
             role_name(role),
             state_name(state),
-            self.store.runtime().ids.token_hex(3)?
+            self.store.runtime().ids.token_hex(16)?
         );
         let domain = self.store.create_domain(
             &domain_id,

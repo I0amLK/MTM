@@ -673,6 +673,40 @@
       "dependencies": [
         "MTM-018"
       ]
+    },
+    {
+      "id": "MTM-020",
+      "title": "Minimal domain ID entropy repair",
+      "status": "in_progress",
+      "priority": "P0",
+      "production_authority_before": "rust",
+      "production_authority_after": "rust",
+      "functional_goal": "Mitigate random domain ID collisions with one production-line entropy change, after deterministic reproduction.",
+      "scope": [
+        "Widen domain random suffix from 3 to 16 bytes",
+        "Preserve old-domain and capability compatibility and forced-collision safety",
+        "Deterministic before/after, 500-round capability and full source validation"
+      ],
+      "non_goals": [
+        "No retries, run prefix, schema, authority or public-tool changes",
+        "No unrelated TUI or historical readiness repairs",
+        "No install, live restart or production-state access"
+      ],
+      "acceptance_levels": [
+        "A0",
+        "A1",
+        "A3"
+      ],
+      "validation_commands": [
+        "cargo test -p mtm-runtime --test domain_collision",
+        "cargo test -p mtm-cli --test capability_runtime current_binary_capability_regression -- --exact --nocapture",
+        "cargo xtask check",
+        "cargo xtask records"
+      ],
+      "rollback": "Restore token_hex(3) and related test hunks; retain observations, no database rollback.",
+      "dependencies": [
+        "MTM-018"
+      ]
     }
   ],
   "edges": [
@@ -706,6 +740,11 @@
     },
     {
       "source": "MTM-019",
+      "target": "MTM-018",
+      "relation": "depends_on"
+    },
+    {
+      "source": "MTM-020",
       "target": "MTM-018",
       "relation": "depends_on"
     }
@@ -1900,6 +1939,46 @@
       "production_state_modified": false
     },
     {
+      "event_id": "MTM020-ENTROPY-APPROVED-20261021",
+      "milestone_id": "MTM-020",
+      "at": "2026-10-21T07:01:45Z",
+      "status_before": "proposed",
+      "status_after": "approved",
+      "summary": "Operator approves verification followed by only the 3-to-16-byte domain suffix patch.",
+      "evidence": [
+        "docs/MTM-020-DOMAIN-ID-ENTROPY.md"
+      ],
+      "production_selector_changed": false,
+      "production_state_modified": false
+    },
+    {
+      "event_id": "MTM020-ENTROPY-STARTED-20261021",
+      "milestone_id": "MTM-020",
+      "at": "2026-10-21T07:01:45Z",
+      "status_before": "approved",
+      "status_after": "in_progress",
+      "summary": "Old code deterministically reproduces initial-assessment SQLITE_ERROR on duplicate domain ID; patched compatibility and 500-round checks underway.",
+      "evidence": [
+        "docs/MTM-020-DOMAIN-ID-ENTROPY.md"
+      ],
+      "production_selector_changed": false,
+      "production_state_modified": false
+    },
+    {
+      "event_id": "MTM020-ENTROPY-VALIDATED-20261021",
+      "milestone_id": "MTM-020",
+      "at": "2026-10-21T07:10:14Z",
+      "status_before": "in_progress",
+      "status_after": "in_progress",
+      "summary": "One-line entropy patch verified: old code deterministically failed initial assessment; patched 3/3 regression and standalone plus workspace 500-round capability pass. Full workspace 782/1/1 retains missing historical-artifact readiness failure; no completion/release/deployment claim.",
+      "evidence": [
+        "records/evidence/MTM-020/domain-entropy-validation-20261021.json"
+      ],
+      "production_selector_changed": false,
+      "production_state_modified": false,
+      "release_qualified": false
+    },
+    {
       "event_id": "MTM019-TUI-PUBLICATION-AUTHORIZED-20261021",
       "milestone_id": "MTM-019",
       "at": "2026-10-21T07:29:54Z",
@@ -1908,6 +1987,20 @@
       "summary": "Publish fixed operator header source; explicit operator authorization, separate commit, original full-gate failures retained. No live install or restart.",
       "evidence": [
         "records/evidence/MTM-019/fixed-header-validation-20261021.json"
+      ],
+      "deployment_authorized": false,
+      "production_state_modified": false,
+      "production_selector_changed": false
+    },
+    {
+      "event_id": "MTM020-ENTROPY-PUBLICATION-AUTHORIZED-20261021",
+      "milestone_id": "MTM-020",
+      "at": "2026-10-21T07:29:54Z",
+      "status_before": "in_progress",
+      "status_after": "in_progress",
+      "summary": "Publish verified one-line entropy patch source; explicit operator authorization, separate commit, original full-gate failures retained. No live install or restart.",
+      "evidence": [
+        "records/evidence/MTM-020/domain-entropy-validation-20261021.json"
       ],
       "deployment_authorized": false,
       "production_state_modified": false,

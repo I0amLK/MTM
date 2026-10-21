@@ -1,0 +1,110 @@
+{
+  "schema": "mtm020-domain-entropy-validation-v1",
+  "milestone": "MTM-020",
+  "recorded_at": "2026-10-21T07:10:14Z",
+  "status": "minimal_patch_verified_full_gate_incomplete",
+  "production_patch": {
+    "path": "crates/mtm-workflow/src/engine.rs",
+    "line": 1552,
+    "before": "token_hex(3)",
+    "after": "token_hex(16)",
+    "production_lines_changed": 1,
+    "automatic_retry_added": false,
+    "schema_changed": false
+  },
+  "deterministic_before_after": {
+    "old_code_exit_code": 101,
+    "old_code_error": "initial assessment failed: SQLITE_ERROR, duplicate domain_id",
+    "patched_tests_passed": 3,
+    "patched_tests_failed": 0,
+    "legacy_short_domain_capability_and_zero_write_replay_verified": true,
+    "forced_full_width_collision_guard_preserved": true
+  },
+  "capability_gate": {
+    "command": "cargo test --locked --offline -p mtm-cli --test capability_runtime current_binary_capability_regression -- --exact --nocapture",
+    "exit_code": 0,
+    "summary": {
+      "adversarial_checks": {
+        "cross_owner_refresh_denied": true,
+        "cross_run_denied": true,
+        "fresh_submission_advances": true,
+        "invalid_inspect_and_retrieve_denied": true,
+        "invalid_submission_zero_memory_changes": true,
+        "mutated_and_truncated_signature": true,
+        "revoked_inspect_and_retrieve_denied": true,
+        "used_capability_revoked": true
+      },
+      "binary_sha256": "cc6bdc7d4a13cdb65309df9ddd4216e00684fd2b83d37ad3252593ed613ceab1",
+      "binary_unchanged": true,
+      "bounded_clean_shutdown": true,
+      "child_path_policy": "curl_only_no_python",
+      "external_retrieval_tested": false,
+      "independent_normal_runs": 500,
+      "kind": "rust_current_binary_loopback_capability_regression",
+      "latex_policy": "static_only",
+      "lost_outcome_no_automatic_replay": true,
+      "native_backend": "disabled",
+      "normal_invalid": 0,
+      "normal_modes": {
+        "compact": 250,
+        "full": 250
+      },
+      "normal_rejections": 0,
+      "normal_roundtrips": 500,
+      "ok": true,
+      "production_state_modified": false,
+      "raw_capability_recorded": false,
+      "raw_oauth_token_recorded": false,
+      "release_qualified": false,
+      "same_identity_and_capability_survive_restart": true,
+      "samples_requested": 500,
+      "schema_version": "1.0.0",
+      "version": "0.6.0-preview.2",
+      "web_client_tested": false
+    },
+    "also_passed_in_full_workspace_gate": true
+  },
+  "source": {
+    "after_sha256": "e61153048345f073fe4347203e82808b85cecd9c495556d3b9ee122742d24bb1",
+    "before_sha256": "e61153048345f073fe4347203e82808b85cecd9c495556d3b9ee122742d24bb1",
+    "commit_after": "b5dbd2577869d2aaf7b0933373df6671d104581c",
+    "commit_before": "b5dbd2577869d2aaf7b0933373df6671d104581c",
+    "hash_scope": "mtm-rust-source-v1",
+    "unchanged": true
+  },
+  "full_gate": {
+    "passed": false,
+    "exit_code": 1,
+    "tests_passed": 782,
+    "tests_failed": 1,
+    "tests_ignored": 1,
+    "format_passed": true,
+    "clippy_warnings_denied_passed": true,
+    "native_preflight_passed": true,
+    "record_integrity_passed": true,
+    "architecture_passed": true,
+    "diff_check_passed": true,
+    "remaining_failure": {
+      "test": "release_check_schema8::tests::profile_and_current_source_mutations_fail_semantics",
+      "error": "formal readiness directory unavailable or linked",
+      "also_observed_before_entropy_patch": true,
+      "missing_historical_artifacts": [
+        "target/mtm017-preview2/mtm-0.6.0-preview.2-13d7890c5c763199ed39295e134ff6cc735ceaa04eaddf6c556431a7a56254f4/mtm",
+        "target/mtm017-baselines/mtm-0.6.0-preview.1-f59cbddaebb8b9944d1365d6d4f1c072e2cc78e76dbbce8d870308c470c88034/mtm"
+      ],
+      "historical_artifacts_fabricated": false,
+      "test_skipped_or_weakened": false
+    }
+  },
+  "prior_uncaptured_223_round_failure_cause_proven": false,
+  "deployment_authorized": false,
+  "production_state_modified": false,
+  "production_selector_changed": false,
+  "release_qualified": false,
+  "commit_created": false,
+  "installed_binary_unchanged_sha256": "643643d19f447157f2c4e2b0109871fb8d868f893ea9dfa61a6490579eddab7d",
+  "pending": [
+    "Full A0 remains incomplete until required exact historical artifacts are available; no acceptance evidence is relabeled.",
+    "Live-client, release and deployment authorization remain separate."
+  ]
+}

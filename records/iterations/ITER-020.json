@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0.0",
+  "iteration_id": "ITER-020",
+  "milestone_id": "MTM-020",
+  "title": "Minimal domain ID entropy repair",
+  "started_at": "2026-10-21T07:01:45Z",
+  "status": "in_progress",
+  "authority": {
+    "component_scope": "Workflow domain random suffix width only",
+    "before": "rust",
+    "target_after_acceptance": "rust",
+    "workflow_transition_authority_changed": false,
+    "finalizer_authority_changed": false,
+    "native_authority_changed": false
+  },
+  "approval": {
+    "source": "Operator requests verification then minimal patch",
+    "production_change": "token_hex(3) -> token_hex(16)",
+    "deployment_authorized": false
+  },
+  "implementation_document": "docs/MTM-020-DOMAIN-ID-ENTROPY.md",
+  "receipts": [
+    {
+      "receipt_id": "MREC-020-SOURCE-PUBLICATION-20261021",
+      "milestone_id": "MTM-020",
+      "started_at": "2026-10-21T07:01:45Z",
+      "completed_at": "2026-10-21T07:29:54Z",
+      "status_before": "in_progress",
+      "status_after": "in_progress",
+      "authority_before": "rust",
+      "authority_after": "rust",
+      "commit_subject": "fix(workflow): widen random domain identifiers [MTM-020]",
+      "files_changed": [
+        "crates/mtm-workflow/src/engine.rs",
+        "crates/mtm-runtime/tests/domain_collision.rs",
+        "docs/MTM-020-DOMAIN-ID-ENTROPY.md",
+        "records/iterations/ITER-020.json",
+        "records/evidence/MTM-020/",
+        "records/governance/migration-graph.json"
+      ],
+      "acceptance": {
+        "focused_domain_tests_passed": 3,
+        "normal_roundtrips": 500,
+        "full_source_gate_passed": false,
+        "workspace_tests_passed": 782,
+        "workspace_tests_failed": 1,
+        "workspace_tests_ignored": 1
+      },
+      "evidence": "records/evidence/MTM-020/domain-entropy-validation-20261021.json",
+      "decision": "Source publication authorized; milestone not marked completed and full acceptance not claimed.",
+      "rollback": "Restore only token_hex(3) and related test hunks; retain failed/passing evidence; no state rollback.",
+      "manual_pending": [
+        "Exact historical artifacts needed by readiness test remain unavailable",
+        "Independent live-client and release/deployment authority remain separate"
+      ],
+      "release_qualified": false,
+      "deployment_authorized": false,
+      "production_state_modified": false,
+      "production_selector_changed": false
+    }
+  ],
+  "manual_pending": [
+    "Full source gate must retain any remaining unrelated historical-artifact failure",
+    "Independent actual client and release/deployment authorization remain separate"
+  ],
+  "source_implementation": "minimal_patch_verified",
+  "validation": {
+    "evidence": "records/evidence/MTM-020/domain-entropy-validation-20261021.json",
+    "focused_domain_tests_passed": 3,
+    "capability_roundtrips": 500,
+    "full_source_gate_passed": false,
+    "workspace_tests": {
+      "passed": 782,
+      "failed": 1,
+      "ignored": 1
+    },
+    "remaining_failure": "Missing historical candidate/baseline artifacts required by unchanged formal-readiness profile test."
+  },
+  "publication": {
+    "authorized_at": "2026-10-21T07:29:54Z",
+    "source": "Explicit operator request: continue push",
+    "remote": "origin",
+    "branch": "main",
+    "authorization_is_not_deployment": true
+  }
+}

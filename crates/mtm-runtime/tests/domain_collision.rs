@@ -42,10 +42,10 @@ struct CollisionIds {
 impl CollisionIds {
     fn new() -> Self {
         Self {
-            // assess A, assemble A, assess B, assemble B collision, repeated
-            // collision for the explicit diagnostic, then a fresh recovery ID.
+            // Domain IDs and step execution IDs now both request 16 bytes.
+            // Force full-width domain collisions, with distinct execution IDs.
             domains: Mutex::new(VecDeque::from([
-                "010101", "abcdef", "020202", "abcdef", "abcdef", "030303",
+                "010101", "111111", "abcdef", "020202", "222222", "abcdef", "abcdef", "030303",
             ])),
             other: AtomicU64::new(1),
         }
@@ -54,13 +54,13 @@ impl CollisionIds {
 
 impl IdSource for CollisionIds {
     fn token_hex(&self, bytes: usize) -> std::result::Result<String, ReCtmError> {
-        if bytes == 3 {
+        if bytes == 16 {
             return self
                 .domains
                 .lock()
                 .map_err(|_| ReCtmError::new("TEST_IDS", "fixture ID lock failed"))?
                 .pop_front()
-                .map(str::to_owned)
+                .map(|value| format!("{value:0>32}"))
                 .ok_or_else(|| ReCtmError::new("TEST_IDS", "fixture domain IDs exhausted"));
         }
         Ok(format!(
@@ -157,7 +157,7 @@ struct Fixture {
 }
 
 impl Fixture {
-    fn open(root: &Path, ids: Arc<CollisionIds>) -> Result<Self> {
+    fn open<I: IdSource + 'static>(root: &Path, ids: Arc<I>) -> Result<Self> {
         let private = root.join("private");
         let workspace_path = root.join("workspace");
         std::fs::create_dir_all(&workspace_path).map_err(|_| "fixture workspace")?;
@@ -454,5 +454,136 @@ fn deterministic_domain_collision_preserves_committed_receipt_and_recovers() -> 
         "raw_oauth_or_capability_recorded":false,"production_state_modified":false,
         "release_qualified":false,"deployment_authorized":false})
     );
+    Ok(())
+}
+
+struct SharedShortSuffixIds(AtomicU64);
+
+impl IdSource for SharedShortSuffixIds {
+    fn token_hex(&self, bytes: usize) -> std::result::Result<String, ReCtmError> {
+        let counter = self.0.fetch_add(1, Ordering::SeqCst);
+        if bytes == 3 {
+            return Ok("abcdef".to_owned());
+        }
+        Ok(format!(
+            "{counter:0width$x}abcdef",
+            width = bytes.saturating_sub(3) * 2
+        ))
+    }
+
+    fn token_urlsafe(&self, bytes: usize) -> std::result::Result<String, ReCtmError> {
+        self.token_hex(bytes)
+    }
+}
+
+#[test]
+fn long_domain_ids_avoid_a_shared_short_suffix_on_initial_assessment() -> Result {
+    let root = tempfile::tempdir().map_err(|_| "fixture temporary root")?;
+    let principal = authenticate(root.path())?;
+    let ids = Arc::new(SharedShortSuffixIds(AtomicU64::new(1)));
+    let fixture = Fixture::open(root.path(), ids)?;
+    let first = fixture.start(&principal)?;
+    let started = fixture.call(
+        &principal,
+        "rethlas_start",
+        json!({"problem_tex":"Synthetic fixture: prove 1=1.",
+            "problem_id":"collision-fixture","workflow_mode":"compact",
+            "register_result":false}),
+    )?;
+    let second = fixture
+        .workflow
+        .next_task(
+            &principal.client_id,
+            text(&started, "run_id")?,
+            Some("fixture-initial"),
+        )
+        .map_err(|error| {
+            if error.code == "SQLITE_ERROR"
+                && error
+                    .message
+                    .contains("UNIQUE constraint failed: domains.domain_id")
+            {
+                "initial assessment failed: SQLITE_ERROR, duplicate domain_id"
+            } else {
+                "initial assessment failed: unexpected error"
+            }
+        })?;
+    require(
+        first["state"] == "assess" && second["state"] == "assess",
+        "assessment missing",
+    )?;
+    let first_id = text(&first, "domain_id")?;
+    let second_id = text(&second, "domain_id")?;
+    require(first_id != second_id, "domain IDs must differ")?;
+    for id in [first_id, second_id] {
+        let suffix = id.rsplit('-').next().ok_or("missing domain suffix")?;
+        require(
+            suffix.len() == 32 && suffix.ends_with("abcdef"),
+            "expected 128-bit domain suffix",
+        )?;
+    }
+    submission(&first)?;
+    submission(&second)?;
+    fixture.native.close().map_err(|_| "fixture close")?;
+    Ok(())
+}
+
+#[test]
+fn existing_short_domain_and_capability_resume_after_reopen() -> Result {
+    let root = tempfile::tempdir().map_err(|_| "fixture temporary root")?;
+    let principal = authenticate(root.path())?;
+    let ids = Arc::new(SharedShortSuffixIds(AtomicU64::new(1)));
+    let fixture = Fixture::open(root.path(), Arc::clone(&ids))?;
+    let started = fixture.call(
+        &principal,
+        "rethlas_start",
+        json!({"problem_tex":"Synthetic fixture: prove 1=1.",
+            "problem_id":"legacy-domain","workflow_mode":"compact",
+            "register_result":false}),
+    )?;
+    let run_id = text(&started, "run_id")?;
+    let legacy_id = "generator-assess-0-123456";
+    fixture
+        .store
+        .create_domain(
+            legacy_id,
+            run_id,
+            "generator",
+            None,
+            None,
+            &json!({"state":"assess"}),
+        )
+        .map_err(|_| "legacy domain setup")?;
+    let task = fixture.call(&principal, "rethlas_step", json!({"run_id":run_id}))?;
+    require(task["domain_id"] == legacy_id, "legacy domain was replaced")?;
+    let request = submission(&task)?;
+    fixture.native.close().map_err(|_| "fixture close")?;
+    drop(fixture);
+
+    let reopened = Fixture::open(root.path(), ids)?;
+    let next = reopened.call(&principal, "rethlas_step", request.clone())?;
+    require(
+        next["state"] == "assemble" && next["submission"]["ok"] == true,
+        "legacy capability did not advance",
+    )?;
+    let new_id = text(&next, "domain_id")?;
+    require(
+        new_id.rsplit('-').next().ok_or("missing suffix")?.len() == 32,
+        "new domain did not use 128 bits",
+    )?;
+    let replay = reopened.call(&principal, "rethlas_step", request)?;
+    require(
+        replay["submission_receipt"]["replayed"] == true && replay["writes_applied"] == 0,
+        "legacy receipt replay repeated writes",
+    )?;
+    let original = reopened
+        .store
+        .get_domain(legacy_id)
+        .map_err(|_| "legacy domain missing")?;
+    require(
+        original["status"] == "sealed",
+        "legacy domain was not preserved and sealed",
+    )?;
+    reopened.native.close().map_err(|_| "fixture close")?;
     Ok(())
 }

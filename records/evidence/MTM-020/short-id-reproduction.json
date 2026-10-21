@@ -1,0 +1,8 @@
+{
+  "schema": "mtm020-test-output-v1",
+  "source_log": "target/mtm020-validation/short-id-reproduction.log",
+  "output_sha256": "768fbf6ba6d3ae5bc9c62d00cf5e50f2ded263ed27e04271b92f5d28e05360a2",
+  "output": "   Compiling mtm-runtime v0.6.0-preview.2 (/home/lk/\u684c\u9762/MTM/crates/mtm-runtime)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.61s\n     Running tests/domain_collision.rs (target/mtm-tool/debug/deps/domain_collision-f26bdddb5d397fe5)\n\nrunning 1 test\ntest long_domain_ids_avoid_a_shared_short_suffix_on_initial_assessment ... FAILED\n\nfailures:\n\n---- long_domain_ids_avoid_a_shared_short_suffix_on_initial_assessment stdout ----\nError: \"initial assessment failed: SQLITE_ERROR, duplicate domain_id\"\n\n\nfailures:\n    long_domain_ids_avoid_a_shared_short_suffix_on_initial_assessment\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.07s\n\nerror: test failed, to rerun pass `-p mtm-runtime --test domain_collision`\n",
+  "raw_credentials_recorded": false,
+  "production_state_modified": false
+}

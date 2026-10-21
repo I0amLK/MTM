@@ -1,0 +1,8 @@
+{
+  "schema": "mtm020-test-output-v1",
+  "source_log": "target/mtm020-validation/domain-tests.log",
+  "output_sha256": "b8fa71a3d34a46c7ef5269345a0343309eece53f0677cdd460c6f76af41360cf",
+  "output": "   Compiling mtm-workflow v0.6.0-preview.2 (/home/lk/\u684c\u9762/MTM/crates/mtm-workflow)\n   Compiling mtm-runtime v0.6.0-preview.2 (/home/lk/\u684c\u9762/MTM/crates/mtm-runtime)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.07s\n     Running tests/domain_collision.rs (target/mtm-tool/debug/deps/domain_collision-f26bdddb5d397fe5)\n\nrunning 3 tests\ntest existing_short_domain_and_capability_resume_after_reopen ... FAILED\ntest long_domain_ids_avoid_a_shared_short_suffix_on_initial_assessment ... ok\ntest deterministic_domain_collision_preserves_committed_receipt_and_recovers ... ok\n\nfailures:\n\n---- existing_short_domain_and_capability_resume_after_reopen stdout ----\nError: \"legacy domain was replaced\"\n\n\nfailures:\n    existing_short_domain_and_capability_resume_after_reopen\n\ntest result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s\n\nerror: test failed, to rerun pass `-p mtm-runtime --test domain_collision`\n",
+  "raw_credentials_recorded": false,
+  "production_state_modified": false
+}
